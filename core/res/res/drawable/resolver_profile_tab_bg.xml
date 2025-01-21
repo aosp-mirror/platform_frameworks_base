@@ -29,14 +29,14 @@
             <item android:state_selected="false">
                 <shape android:shape="rectangle">
                     <corners android:radius="12dp" />
-                    <solid android:color="?androidprv:attr/colorSurface" />
+                    <solid android:color="@color/materialColorSurfaceBright" />
                 </shape>
             </item>
 
             <item android:state_selected="true">
                 <shape android:shape="rectangle">
                     <corners android:radius="12dp" />
-                    <solid android:color="@color/resolver_profile_tab_selected_bg" />
+                    <solid android:color="@android:color/materialColorPrimary" />
                 </shape>
             </item>
         </selector>
