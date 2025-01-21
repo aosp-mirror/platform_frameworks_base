@@ -26,7 +26,6 @@ import com.android.systemui.scene.ui.composable.transitions.lockscreenToGoneTran
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToQuickSettingsTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToSplitShadeTransition
-import com.android.systemui.scene.ui.composable.transitions.notificationsShadeToQuickSettingsShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.shadeToQuickSettingsTransition
 import com.android.systemui.scene.ui.composable.transitions.toNotificationsShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.toQuickSettingsShadeTransition
@@ -170,13 +169,6 @@ val SceneContainerTransitions = transitions {
     }
     to(Overlays.QuickSettingsShade, cuj = Cuj.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE) {
         toQuickSettingsShadeTransition()
-    }
-    from(
-        Overlays.NotificationsShade,
-        to = Overlays.QuickSettingsShade,
-        cuj = Cuj.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE,
-    ) {
-        notificationsShadeToQuickSettingsShadeTransition()
     }
     from(
         Scenes.Gone,
