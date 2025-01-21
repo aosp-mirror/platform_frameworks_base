@@ -17,6 +17,7 @@
 package com.android.compose.animation.scene
 
 import androidx.annotation.FloatRange
+import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.OverscrollEffect
 import androidx.compose.foundation.OverscrollFactory
@@ -747,6 +748,7 @@ internal fun SceneTransitionLayoutForTesting(
     val layoutDirection = LocalLayoutDirection.current
     val defaultEffectFactory = checkNotNull(LocalOverscrollFactory.current)
     val animationScope = rememberCoroutineScope()
+    val decayAnimationSpec = rememberSplineBasedDecay<Float>()
     val layoutImpl = remember {
         SceneTransitionLayoutImpl(
                 state = state as MutableSceneTransitionLayoutStateImpl,
@@ -762,6 +764,7 @@ internal fun SceneTransitionLayoutForTesting(
                 lookaheadScope = lookaheadScope,
                 directionChangeSlop = directionChangeSlop,
                 defaultEffectFactory = defaultEffectFactory,
+                decayAnimationSpec = decayAnimationSpec,
             )
             .also { onLayoutImpl?.invoke(it) }
     }
@@ -801,6 +804,7 @@ internal fun SceneTransitionLayoutForTesting(
         layoutImpl.swipeSourceDetector = swipeSourceDetector
         layoutImpl.swipeDetector = swipeDetector
         layoutImpl.transitionInterceptionThreshold = transitionInterceptionThreshold
+        layoutImpl.decayAnimationSpec = decayAnimationSpec
     }
 
     layoutImpl.Content(modifier)
