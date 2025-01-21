@@ -23,8 +23,6 @@ import com.android.app.tracing.coroutines.launchTraced
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.display.data.repository.DisplayRepository
-import com.android.systemui.keyguard.data.repository.KeyguardRepository
-import com.android.systemui.shade.ShadeOnDefaultDisplayWhenLocked
 import com.android.systemui.shade.domain.interactor.NotificationShadeElement
 import com.android.systemui.shade.domain.interactor.QSShadeElement
 import com.android.systemui.shade.domain.interactor.ShadeExpandedStateInteractor.ShadeElement
@@ -38,13 +36,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 
 /**
  * Moves the shade on the last display that received a status bar touch.
@@ -57,9 +52,7 @@ class StatusBarTouchShadeDisplayPolicy
 @Inject
 constructor(
     displayRepository: DisplayRepository,
-    keyguardRepository: KeyguardRepository,
     @Background private val backgroundScope: CoroutineScope,
-    @ShadeOnDefaultDisplayWhenLocked private val shadeOnDefaultDisplayWhenLocked: Boolean,
     private val shadeInteractor: Lazy<ShadeInteractor>,
     private val qsShadeElement: Lazy<QSShadeElement>,
     private val notificationElement: Lazy<NotificationShadeElement>,
@@ -72,20 +65,7 @@ constructor(
     private var latestIntent = AtomicReference<ShadeElement?>()
     private var timeoutJob: Job? = null
 
-    override val displayId: StateFlow<Int> =
-        if (shadeOnDefaultDisplayWhenLocked) {
-            keyguardRepository.isKeyguardShowing
-                .combine(currentDisplayId) { isKeyguardShowing, currentDisplayId ->
-                    if (isKeyguardShowing) {
-                        Display.DEFAULT_DISPLAY
-                    } else {
-                        currentDisplayId
-                    }
-                }
-                .stateIn(backgroundScope, SharingStarted.WhileSubscribed(), currentDisplayId.value)
-        } else {
-            currentDisplayId
-        }
+    override val displayId: StateFlow<Int> = currentDisplayId
 
     private var removalListener: Job? = null
 

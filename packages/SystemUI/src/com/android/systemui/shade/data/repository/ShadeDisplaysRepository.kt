@@ -20,14 +20,18 @@ import android.provider.Settings.Global.DEVELOPMENT_SHADE_DISPLAY_AWARENESS
 import android.view.Display
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.keyguard.data.repository.KeyguardRepository
+import com.android.systemui.shade.ShadeOnDefaultDisplayWhenLocked
 import com.android.systemui.shade.display.ShadeDisplayPolicy
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -38,12 +42,8 @@ import kotlinx.coroutines.flow.stateIn
 interface ShadeDisplaysRepository {
     /** ID of the display which currently hosts the shade */
     val displayId: StateFlow<Int>
-}
-
-/** Allows to change the policy that determines in which display the Shade window is visible. */
-interface MutableShadeDisplaysRepository : ShadeDisplaysRepository {
-    /** Updates the policy to select where the shade is visible. */
-    val policy: StateFlow<ShadeDisplayPolicy>
+    /** The current policy set. */
+    val currentPolicy: ShadeDisplayPolicy
 }
 
 /** Keeps the policy and propagates the display id for the shade from it. */
@@ -56,9 +56,11 @@ constructor(
     defaultPolicy: ShadeDisplayPolicy,
     @Background bgScope: CoroutineScope,
     policies: Set<@JvmSuppressWildcards ShadeDisplayPolicy>,
-) : MutableShadeDisplaysRepository {
+    @ShadeOnDefaultDisplayWhenLocked private val shadeOnDefaultDisplayWhenLocked: Boolean,
+    keyguardRepository: KeyguardRepository,
+) : ShadeDisplaysRepository {
 
-    override val policy: StateFlow<ShadeDisplayPolicy> =
+    private val policy: StateFlow<ShadeDisplayPolicy> =
         globalSettings
             .observerFlow(DEVELOPMENT_SHADE_DISPLAY_AWARENESS)
             .onStart { emit(Unit) }
@@ -71,10 +73,32 @@ constructor(
                 return@map defaultPolicy
             }
             .distinctUntilChanged()
-            .stateIn(bgScope, SharingStarted.WhileSubscribed(), defaultPolicy)
+            .stateIn(bgScope, SharingStarted.Eagerly, defaultPolicy)
+
+    private val displayIdFromPolicy: Flow<Int> = policy.flatMapLatest { it.displayId }
+
+    private val keyguardAwareDisplayPolicy: Flow<Int> =
+        if (!shadeOnDefaultDisplayWhenLocked) {
+            displayIdFromPolicy
+        } else {
+            keyguardRepository.isKeyguardShowing.combine(displayIdFromPolicy) {
+                isKeyguardShowing,
+                currentDisplayId ->
+                if (isKeyguardShowing) {
+                    Display.DEFAULT_DISPLAY
+                } else {
+                    currentDisplayId
+                }
+            }
+        }
+
+    override val currentPolicy: ShadeDisplayPolicy
+        get() = policy.value
 
     override val displayId: StateFlow<Int> =
-        policy
-            .flatMapLatest { it.displayId }
-            .stateIn(bgScope, SharingStarted.WhileSubscribed(), Display.DEFAULT_DISPLAY)
+        keyguardAwareDisplayPolicy.stateIn(
+            bgScope,
+            SharingStarted.WhileSubscribed(),
+            Display.DEFAULT_DISPLAY,
+        )
 }
