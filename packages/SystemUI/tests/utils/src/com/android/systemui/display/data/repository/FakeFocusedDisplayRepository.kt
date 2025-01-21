@@ -33,7 +33,7 @@ class FakeFocusedDisplayRepository @Inject constructor() : FocusedDisplayReposit
     override val focusedDisplayId: StateFlow<Int>
         get() = flow.asStateFlow()
 
-    suspend fun emit(focusedDisplay: Int) = flow.emit(focusedDisplay)
+    suspend fun setDisplayId(focusedDisplay: Int) = flow.emit(focusedDisplay)
 }
 
 @Module
