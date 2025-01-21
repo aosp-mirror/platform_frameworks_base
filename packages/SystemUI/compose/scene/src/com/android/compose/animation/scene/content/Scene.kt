@@ -18,7 +18,7 @@ package com.android.compose.animation.scene.content
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import com.android.compose.animation.scene.ContentScope
+import com.android.compose.animation.scene.InternalContentScope
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.UserAction
@@ -29,10 +29,11 @@ import com.android.compose.animation.scene.UserActionResult
 internal class Scene(
     override val key: SceneKey,
     layoutImpl: SceneTransitionLayoutImpl,
-    content: @Composable ContentScope.() -> Unit,
+    content: @Composable InternalContentScope.() -> Unit,
     actions: Map<UserAction.Resolved, UserActionResult>,
     zIndex: Float,
-) : Content(key, layoutImpl, content, actions, zIndex) {
+    globalZIndex: Long,
+) : Content(key, layoutImpl, content, actions, zIndex, globalZIndex) {
     override fun toString(): String {
         return "Scene(key=$key)"
     }

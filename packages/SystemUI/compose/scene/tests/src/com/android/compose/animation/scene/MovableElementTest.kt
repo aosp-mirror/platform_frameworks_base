@@ -166,14 +166,14 @@ class MovableElementTest {
                         override fun contentDuringTransition(
                             element: ElementKey,
                             transition: TransitionState.Transition,
-                            fromContentZIndex: Float,
-                            toContentZIndex: Float,
+                            fromContentZIndex: Long,
+                            toContentZIndex: Long,
                         ): ContentKey {
                             transition as TransitionState.Transition.ChangeScene
                             assertThat(transition).hasFromScene(SceneA)
                             assertThat(transition).hasToScene(SceneB)
-                            assertThat(fromContentZIndex).isEqualTo(0)
-                            assertThat(toContentZIndex).isEqualTo(1)
+                            assertThat(fromContentZIndex).isEqualTo(1_000_000_000_000_000)
+                            assertThat(toContentZIndex).isEqualTo(2_000_000_000_000_000)
 
                             // Compose Foo in Scene A if progress < 0.65f, otherwise compose it
                             // in Scene B.
@@ -362,8 +362,8 @@ class MovableElementTest {
                         override fun contentDuringTransition(
                             element: ElementKey,
                             transition: TransitionState.Transition,
-                            fromContentZIndex: Float,
-                            toContentZIndex: Float,
+                            fromContentZIndex: Long,
+                            toContentZIndex: Long,
                         ): ContentKey {
                             return SceneA
                         }

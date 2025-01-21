@@ -60,7 +60,6 @@ import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.TransformationWithRange
 import com.android.compose.modifiers.thenIf
 import com.android.compose.ui.graphics.drawInContainer
-import com.android.compose.ui.util.IntIndexedMap
 import com.android.compose.ui.util.lerp
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
@@ -72,14 +71,6 @@ internal class Element(val key: ElementKey) {
     // TODO(b/316901148): Make this a normal map instead once we can make sure that new transitions
     // are first seen by composition then layout/drawing code. See b/316901148#comment2 for details.
     val stateByContent = SnapshotStateMap<ContentKey, State>()
-
-    /**
-     * A sorted map of nesting depth (key) to content key (value). For shared elements it is used to
-     * determine which content this element should be rendered by. The nesting depth refers to the
-     * number of STLs nested within each other, starting at 0 for the parent STL and increasing by
-     * one for each nested [NestedSceneTransitionLayout].
-     */
-    val renderAuthority = IntIndexedMap<ContentKey>()
 
     /**
      * The last transition that was used when computing the state (size, position and alpha) of this
@@ -285,7 +276,6 @@ internal class ElementNode(
         val element =
             layoutImpl.elements[key] ?: Element(key).also { layoutImpl.elements[key] = it }
         _element = element
-        addToRenderAuthority(element)
         if (!element.stateByContent.contains(content.key)) {
             val contents = buildList {
                 layoutImpl.ancestors.fastForEach { add(it.inContent) }
@@ -318,20 +308,7 @@ internal class ElementNode(
         removeNodeFromContentState()
         maybePruneMaps(layoutImpl, element, stateInContent)
 
-        removeFromRenderAuthority()
         _element = null
-    }
-
-    private fun addToRenderAuthority(element: Element) {
-        val nestingDepth = layoutImpl.ancestors.size
-        element.renderAuthority[nestingDepth] = content.key
-    }
-
-    private fun removeFromRenderAuthority() {
-        val nestingDepth = layoutImpl.ancestors.size
-        if (element.renderAuthority[nestingDepth] == content.key) {
-            element.renderAuthority.remove(nestingDepth)
-        }
     }
 
     private fun removeNodeFromContentState() {
@@ -677,12 +654,8 @@ internal inline fun elementState(
             // Check if any ancestor runs a transition that has a transformation for the element
             states.fastForEachReversed { state ->
                 if (
-                    state is TransitionState.Transition &&
-                        (state.transformationSpec.hasTransformation(
-                            elementKey,
-                            state.fromContent,
-                        ) ||
-                            state.transformationSpec.hasTransformation(elementKey, state.toContent))
+                    isSharedElement(state, isInContent) ||
+                        hasTransformationForElement(state, elementKey)
                 ) {
                     return state
                 }
@@ -708,6 +681,21 @@ internal inline fun elementState(
     // may still be rendered as e.g. it can be part of a idle scene where two overlays are currently
     // transitioning above it.
     return null
+}
+
+private inline fun isSharedElement(
+    state: TransitionState,
+    isInContent: (ContentKey) -> Boolean,
+): Boolean {
+    return state is TransitionState.Transition &&
+        isInContent(state.fromContent) &&
+        isInContent(state.toContent)
+}
+
+private fun hasTransformationForElement(state: TransitionState, elementKey: ElementKey): Boolean {
+    return state is TransitionState.Transition &&
+        (state.transformationSpec.hasTransformation(elementKey, state.fromContent) ||
+            state.transformationSpec.hasTransformation(elementKey, state.toContent))
 }
 
 internal inline fun elementContentWhenIdle(
@@ -964,13 +952,12 @@ private fun shouldPlaceElement(
     val transition =
         when (elementState) {
             is TransitionState.Idle -> {
-                return element.shouldBeRenderedBy(content) &&
-                    content ==
-                        elementContentWhenIdle(
-                            layoutImpl,
-                            elementState,
-                            isInContent = { it in element.stateByContent },
-                        )
+                return content ==
+                    elementContentWhenIdle(
+                        layoutImpl,
+                        elementState,
+                        isInContent = { it in element.stateByContent },
+                    )
             }
             is TransitionState.Transition -> elementState
         }

@@ -33,8 +33,8 @@ class MovableElementContentPickerTest {
                 picker.contentDuringTransition(
                     TestElements.Foo,
                     transition(from = TestScenes.SceneA, to = TestScenes.SceneB),
-                    fromContentZIndex = 0f,
-                    toContentZIndex = 1f,
+                    fromContentZIndex = 0,
+                    toContentZIndex = 1,
                 )
             )
             .isEqualTo(TestScenes.SceneB)
@@ -47,8 +47,8 @@ class MovableElementContentPickerTest {
                 picker.contentDuringTransition(
                     TestElements.Foo,
                     transition(from = TestScenes.SceneA, to = TestScenes.SceneB),
-                    fromContentZIndex = 0f,
-                    toContentZIndex = 1f,
+                    fromContentZIndex = 0,
+                    toContentZIndex = 1,
                 )
             )
             .isEqualTo(TestScenes.SceneA)
@@ -61,8 +61,8 @@ class MovableElementContentPickerTest {
             picker.contentDuringTransition(
                 TestElements.Foo,
                 transition(from = TestScenes.SceneA, to = TestScenes.SceneB),
-                fromContentZIndex = 0f,
-                toContentZIndex = 1f,
+                fromContentZIndex = 0,
+                toContentZIndex = 1,
             )
         }
     }

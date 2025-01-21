@@ -85,7 +85,7 @@ class DraggableHandlerTest {
                 layoutImpl.updateContents(scenesBuilder, layoutDirection)
             }
 
-        private val scenesBuilder: SceneTransitionLayoutScope.() -> Unit = {
+        private val scenesBuilder: SceneTransitionLayoutScope<ContentScope>.() -> Unit = {
             scene(key = SceneA, userActions = mutableUserActionsA) { Text("SceneA") }
             scene(key = SceneB, userActions = mutableUserActionsB) { Text("SceneB") }
             scene(
