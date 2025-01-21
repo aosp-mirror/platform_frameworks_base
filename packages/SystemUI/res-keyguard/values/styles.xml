@@ -128,7 +128,7 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:colorBackground">@*android:color/background_material_dark</item>
+        <item name="android:colorBackground">@android:color/transparent</item>
     </style>
 
     <style name="TextAppearance.Keyguard">

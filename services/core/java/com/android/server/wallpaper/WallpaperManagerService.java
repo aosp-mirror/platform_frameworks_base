@@ -20,6 +20,7 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.READ_WALLPAPER_INTERNAL;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+import static android.app.Flags.enableConnectedDisplaysWallpaper;
 import static android.app.Flags.fixWallpaperChanged;
 import static android.app.Flags.liveWallpaperContentHandling;
 import static android.app.Flags.removeNextWallpaperComponent;
@@ -89,6 +90,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManager.DisplayListener;
 import android.multiuser.Flags;
 import android.os.Binder;
 import android.os.Bundle;
@@ -655,8 +657,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     private final MyPackageMonitor mMonitor;
     private final AppOpsManager mAppOpsManager;
 
-    private final DisplayManager.DisplayListener mDisplayListener =
-            new DisplayManager.DisplayListener() {
+    private final DisplayListener mDisplayListener = new DisplayListener() {
 
         @Override
         public void onDisplayAdded(int displayId) {
@@ -665,24 +666,64 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         @Override
         public void onDisplayRemoved(int displayId) {
             synchronized (mLock) {
-                if (mLastWallpaper != null) {
-                    WallpaperData targetWallpaper = null;
-                    if (mLastWallpaper.connection != null &&
-                            mLastWallpaper.connection.containsDisplay(displayId)) {
-                        targetWallpaper = mLastWallpaper;
-                    } else if (mFallbackWallpaper != null &&
-                            mFallbackWallpaper.connection != null &&
-                            mFallbackWallpaper.connection.containsDisplay(displayId)) {
-                        targetWallpaper = mFallbackWallpaper;
+                if (enableConnectedDisplaysWallpaper()) {
+                    // There could be at most 2 wallpaper connections per display:
+                    // 1. system & lock are the same: mLastWallpaper
+                    // 2. system, lock are different: mLastWallpaper, mLastLockWallpaper
+                    // 3. fallback used as both system & lock wallpaper: mFallbackWallpaper
+                    // 4. fallback used as lock only wallpaper: mFallbackWallpaper,
+                    //    mLastWallpaper
+                    // 5. fallback used as system only wallpaper: mFallbackWallpaper,
+                    //    mLastLockWallpaper
+                    List<WallpaperData> pendingDisconnectWallpapers = new ArrayList<>();
+                    if (mLastWallpaper != null && mLastWallpaper.connection != null
+                            && mLastWallpaper.connection.containsDisplay(displayId)) {
+                        pendingDisconnectWallpapers.add(mLastWallpaper);
                     }
-                    if (targetWallpaper == null) return;
-                    DisplayConnector connector =
-                            targetWallpaper.connection.getDisplayConnectorOrCreate(displayId);
-                    if (connector == null) return;
-                    connector.disconnectLocked(targetWallpaper.connection);
-                    targetWallpaper.connection.removeDisplayConnector(displayId);
-                    mWallpaperDisplayHelper.removeDisplayData(displayId);
+                    if (mLastLockWallpaper != null && mLastLockWallpaper.connection != null
+                            && mLastLockWallpaper.connection.containsDisplay(displayId)) {
+                        pendingDisconnectWallpapers.add(mLastLockWallpaper);
+                    }
+                    if (mFallbackWallpaper != null && mFallbackWallpaper.connection != null
+                            && mFallbackWallpaper.connection.containsDisplay(displayId)) {
+                        pendingDisconnectWallpapers.add(mFallbackWallpaper);
+                    }
+                    for (int i = 0; i < pendingDisconnectWallpapers.size(); i++) {
+                        WallpaperData wallpaper = pendingDisconnectWallpapers.get(i);
+                        DisplayConnector displayConnector =
+                                wallpaper.connection.getDisplayConnectorOrCreate(displayId);
+                        if (displayConnector == null) {
+                            Slog.w(TAG,
+                                    "Fail to disconnect wallpaper upon display removal");
+                            return;
+                        }
+                        displayConnector.disconnectLocked(wallpaper.connection);
+                        wallpaper.connection.removeDisplayConnector(displayId);
+                    }
+                } else {
+                    if (mLastWallpaper != null) {
+                        WallpaperData targetWallpaper = null;
+                        if (mLastWallpaper.connection != null
+                                && mLastWallpaper.connection.containsDisplay(displayId)) {
+                            targetWallpaper = mLastWallpaper;
+                        } else if (mFallbackWallpaper != null
+                                && mFallbackWallpaper.connection != null
+                                && mFallbackWallpaper.connection.containsDisplay(
+                                displayId)) {
+                            targetWallpaper = mFallbackWallpaper;
+                        }
+                        if (targetWallpaper == null) return;
+                        DisplayConnector connector =
+                                targetWallpaper.connection.getDisplayConnectorOrCreate(
+                                        displayId);
+                        if (connector == null) return;
+                        connector.disconnectLocked(targetWallpaper.connection);
+                        targetWallpaper.connection.removeDisplayConnector(displayId);
+                    }
                 }
+
+                mWallpaperDisplayHelper.removeDisplayData(displayId);
+
                 for (int i = mColorsChangedListeners.size() - 1; i >= 0; i--) {
                     final SparseArray<RemoteCallbackList<IWallpaperManagerCallback>> callbacks =
                             mColorsChangedListeners.valueAt(i);
@@ -1627,6 +1668,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         public void onScreenTurnedOn(int displayId) {
             notifyScreenTurnedOn(displayId);
         }
+
         @Override
         public void onScreenTurningOn(int displayId) {
             notifyScreenTurningOn(displayId);
@@ -3707,6 +3749,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
         if (newWallpaper.mWhich == (FLAG_SYSTEM | FLAG_LOCK)) {
             mLastWallpaper = newWallpaper;
+            mLastLockWallpaper = null;
         } else if (newWallpaper.mWhich == FLAG_SYSTEM) {
             mLastWallpaper = newWallpaper;
         } else if (newWallpaper.mWhich == FLAG_LOCK) {
@@ -3916,13 +3959,49 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             if (mLastWallpaper == null) {
                 return;
             }
-            if (supportsMultiDisplay(mLastWallpaper.connection)) {
-                final DisplayConnector connector =
-                        mLastWallpaper.connection.getDisplayConnectorOrCreate(displayId);
-                if (connector == null) return;
-                connector.connectLocked(mLastWallpaper.connection, mLastWallpaper);
-                return;
+            if (enableConnectedDisplaysWallpaper()) {
+                int useFallbackWallpaperWhich = 0;
+                List<WallpaperData> wallpapers = new ArrayList<>();
+                wallpapers.add(mLastWallpaper);
+                // If the system and the lock wallpapers are not the same, we should also
+                // establish a display connector to the lock wallpaper for this display.
+                if (mLastLockWallpaper != null && mLastWallpaper != mLastLockWallpaper) {
+                    wallpapers.add(mLastLockWallpaper);
+                }
+
+                for (int i = 0; i < wallpapers.size(); i++) {
+                    WallpaperData wallpaper = wallpapers.get(i);
+                    if (supportsMultiDisplay(wallpaper.connection)) {
+                        final DisplayConnector connector =
+                                wallpaper.connection.getDisplayConnectorOrCreate(displayId);
+                        if (connector != null) {
+                            connector.connectLocked(wallpaper.connection, wallpaper);
+                        } else {
+                            Slog.w(TAG, "Fail to connect to wallpaper for display id " + displayId
+                                    + " due to null connector. Use fallback wallpaper.");
+                            useFallbackWallpaperWhich |= wallpaper.mWhich;
+                        }
+                    } else {
+                        useFallbackWallpaperWhich |= wallpaper.mWhich;
+                    }
+                }
+
+                if (useFallbackWallpaperWhich == 0
+                        || mFallbackWallpaper == null
+                        || mFallbackWallpaper.connection == null) {
+                    return;
+                }
+                mFallbackWallpaper.mWhich = useFallbackWallpaperWhich;
+            } else {
+                if (supportsMultiDisplay(mLastWallpaper.connection)) {
+                    final DisplayConnector connector =
+                            mLastWallpaper.connection.getDisplayConnectorOrCreate(displayId);
+                    if (connector == null) return;
+                    connector.connectLocked(mLastWallpaper.connection, mLastWallpaper);
+                    return;
+                }
             }
+
             // System wallpaper does not support multiple displays, attach this display to
             // the fallback wallpaper.
             if (mFallbackWallpaper != null && mFallbackWallpaper
