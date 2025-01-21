@@ -9,7 +9,6 @@ import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.settings.brightness.ui.BrightnessWarningToast
 import com.android.systemui.util.mockito.mock
 import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -73,7 +72,6 @@ fun <T> Kosmos.collectValues(flow: Flow<T>): FlowValue<List<T>> = testScope.coll
  * If you want to assert on a [Flow] that is not a [StateFlow], please use
  * [TestScope.collectLastValue], to make sure that the desired value is captured when emitted.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 fun <T> TestScope.currentValue(stateFlow: StateFlow<T>): T {
     val values = mutableListOf<T>()
     val job = backgroundScope.launch { stateFlow.collect(values::add) }
@@ -90,7 +88,6 @@ fun <T> Kosmos.currentValue(fn: () -> T) = testScope.currentValue(fn)
  * Retrieve the result of [fn] after running all pending tasks. Do not use to retrieve the value of
  * a flow directly; for that, use either `currentValue(StateFlow)` or [collectLastValue]
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 fun <T> TestScope.currentValue(fn: () -> T): T {
     runCurrent()
     return fn()
@@ -102,7 +99,6 @@ fun <T> Kosmos.currentValue(stateFlow: StateFlow<T>): T {
 }
 
 /** Safely verify that a mock has been called after the test scope has caught up */
-@OptIn(ExperimentalCoroutinesApi::class)
 fun <T> TestScope.verifyCurrent(mock: T): T {
     runCurrent()
     return verify(mock)

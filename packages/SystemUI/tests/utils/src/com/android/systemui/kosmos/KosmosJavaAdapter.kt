@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.kosmos
 
 import android.content.applicationContext
@@ -92,7 +90,6 @@ import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisionin
 import com.android.systemui.statusbar.ui.viewmodel.keyguardStatusBarViewModel
 import com.android.systemui.util.time.systemClock
 import com.android.systemui.volume.domain.interactor.volumeDialogInteractor
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * Helper for using [Kosmos] from Java.

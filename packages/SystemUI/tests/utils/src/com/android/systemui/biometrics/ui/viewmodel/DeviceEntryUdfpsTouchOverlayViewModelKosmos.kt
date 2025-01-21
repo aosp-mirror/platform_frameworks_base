@@ -23,9 +23,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.statusbar.phone.systemUIDialogManager
 import com.android.systemui.util.mockito.mock
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 val Kosmos.deviceEntryUdfpsTouchOverlayViewModel by Fixture {
     DeviceEntryUdfpsTouchOverlayViewModel(
         deviceEntryIconViewModel = deviceEntryIconViewModel,

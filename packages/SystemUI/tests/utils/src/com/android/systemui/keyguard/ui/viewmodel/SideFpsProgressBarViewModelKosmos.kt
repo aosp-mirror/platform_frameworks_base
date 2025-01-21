@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.applicationContext
@@ -29,7 +27,6 @@ import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.statusbar.phone.dozeServiceHost
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.sideFpsProgressBarViewModel by
     Kosmos.Fixture {

@@ -51,7 +51,6 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -148,7 +147,6 @@ interface SysUITestComponent<out T> {
     val underTest: T
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 fun <T : SysUITestComponent<*>> T.runTest(block: suspend T.() -> Unit): Unit =
     testScope.runTest {
         // Access underTest immediately to force Dagger to instantiate it prior to the test running
@@ -157,7 +155,6 @@ fun <T : SysUITestComponent<*>> T.runTest(block: suspend T.() -> Unit): Unit =
         block()
     }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 fun SysUITestComponent<*>.runCurrent() = testScope.runCurrent()
 
 fun <T> SysUITestComponent<*>.collectLastValue(

@@ -39,9 +39,7 @@ import com.android.systemui.shade.largeScreenHeaderHelper
 import com.android.systemui.shade.transition.largeScreenShadeInterpolator
 import com.android.systemui.statusbar.disableflags.domain.interactor.disableFlagsInteractor
 import com.android.systemui.statusbar.sysuiStatusBarStateController
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@OptIn(ExperimentalCoroutinesApi::class)
 val Kosmos.qsFragmentComposeViewModelFactory by
     Kosmos.Fixture {
         object : QSFragmentComposeViewModel.Factory {

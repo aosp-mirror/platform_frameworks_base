@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.deviceentry.domain.interactor
 
 import android.content.res.mainResources
 import com.android.systemui.keyguard.data.repository.deviceEntryFaceAuthRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.deviceEntryFaceAuthStatusInteractor by
     Kosmos.Fixture {

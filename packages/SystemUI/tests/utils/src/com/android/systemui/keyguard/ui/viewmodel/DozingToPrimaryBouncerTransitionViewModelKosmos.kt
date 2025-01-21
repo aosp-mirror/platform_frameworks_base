@@ -20,9 +20,7 @@ import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.blurConfig
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 val Kosmos.dozingToPrimaryBouncerTransitionViewModel by Fixture {
     DozingToPrimaryBouncerTransitionViewModel(
         animationFlow = keyguardTransitionAnimationFlow,

@@ -47,9 +47,7 @@ import com.android.systemui.statusbar.notificationShadeWindowController
 import com.android.systemui.statusbar.policy.keyguardStateController
 import com.android.systemui.wmshell.bubblesManager
 import java.util.Optional
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@OptIn(ExperimentalCoroutinesApi::class)
 val Kosmos.statusBarNotificationActivityStarter by
     Kosmos.Fixture {
         StatusBarNotificationActivityStarter(
