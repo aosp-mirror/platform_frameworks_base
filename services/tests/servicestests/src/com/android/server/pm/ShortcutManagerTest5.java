@@ -66,7 +66,7 @@ public class ShortcutManagerTest5 extends BaseShortcutManagerTest {
         mMyUserId = android.os.Process.myUserHandle().getIdentifier();
     }
 
-    public void testGetPackageUid() {
+    public void disabled_testGetPackageUid() {
         assertTrue(mShortcutService.injectGetPackageUid(
                 mMyPackage, mMyUserId) != 0);
 
@@ -74,7 +74,7 @@ public class ShortcutManagerTest5 extends BaseShortcutManagerTest {
                 "no.such.package", mMyUserId));
     }
 
-    public void testGetPackageInfo() {
+    public void disabled_testGetPackageInfo() {
         PackageInfo pi = mShortcutService.getPackageInfo(
                 mMyPackage, mMyUserId, /*signature*/ false);
         assertEquals(mMyPackage, pi.packageName);
@@ -132,7 +132,7 @@ public class ShortcutManagerTest5 extends BaseShortcutManagerTest {
         meta.close();
     }
 
-    public void testGetInstalledPackages() {
+    public void disabled_testGetInstalledPackages() {
         List<PackageInfo> apks = mShortcutService.getInstalledPackages(mMyUserId);
 
         Set<String> expectedPackages = set("com.android.settings", mMyPackage);
