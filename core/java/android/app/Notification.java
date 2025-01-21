@@ -4393,6 +4393,9 @@ public class Notification implements Parcelable
      */
     @Nullable
     public Pair<RemoteInput, Action> findRemoteInputActionPair(boolean requiresFreeform) {
+        if (isPromotedOngoing()) {
+            return null;
+        }
         if (actions == null) {
             return null;
         }
@@ -6454,6 +6457,11 @@ public class Notification implements Parcelable
             if (mActions == null) return Collections.emptyList();
             List<Notification.Action> standardActions = new ArrayList<>();
             for (Notification.Action action : mActions) {
+                // Actions with RemoteInput are ignored for RONs.
+                if (mN.isPromotedOngoing()
+                        && hasValidRemoteInput(action)) {
+                    continue;
+                }
                 if (!action.isContextual()) {
                     standardActions.add(action);
                 }
