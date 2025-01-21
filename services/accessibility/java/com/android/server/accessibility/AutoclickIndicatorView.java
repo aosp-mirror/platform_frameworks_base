@@ -16,15 +16,19 @@
 
 package com.android.server.accessibility;
 
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.accessibility.AccessibilityManager.AUTOCLICK_CURSOR_AREA_SIZE_DEFAULT;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.RectF;
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.LinearInterpolator;
 
@@ -79,6 +83,26 @@ public class AutoclickIndicatorView extends View {
                 });
 
         mRingRect = new RectF();
+    }
+
+    /**
+     * Retrieves the layout params for AutoclickIndicatorView, used when it's added to the Window
+     * Manager.
+     */
+    public final WindowManager.LayoutParams getLayoutParams() {
+        final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+        layoutParams.type = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
+        layoutParams.flags =
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+        layoutParams.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
+        layoutParams.setFitInsetsTypes(WindowInsets.Type.statusBars());
+        layoutParams.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        layoutParams.format = PixelFormat.TRANSLUCENT;
+        layoutParams.setTitle(AutoclickIndicatorView.class.getSimpleName());
+        layoutParams.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
+        return layoutParams;
     }
 
     @Override
