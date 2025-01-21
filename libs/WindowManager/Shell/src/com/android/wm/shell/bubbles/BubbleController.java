@@ -477,24 +477,23 @@ public class BubbleController implements ConfigurationChangeListener,
             @Override
             public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
                     boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
-                for (Bubble b : mBubbleData.getBubbles()) {
-                    if (task.taskId == b.getTaskId()) {
-                        ProtoLog.d(WM_SHELL_BUBBLES,
-                                "onActivityRestartAttempt - taskId=%d selecting matching bubble=%s",
-                                task.taskId, b.getKey());
-                        mBubbleData.setSelectedBubbleAndExpandStack(b);
-                        return;
-                    }
+                final int taskId = task.taskId;
+                Bubble bubble = mBubbleData.getBubbleInStackWithTaskId(taskId);
+                if (bubble != null) {
+                    ProtoLog.d(WM_SHELL_BUBBLES,
+                            "onActivityRestartAttempt - taskId=%d selecting matching bubble=%s",
+                            taskId, bubble.getKey());
+                    mBubbleData.setSelectedBubbleAndExpandStack(bubble);
+                    return;
                 }
-                for (Bubble b : mBubbleData.getOverflowBubbles()) {
-                    if (task.taskId == b.getTaskId()) {
-                        ProtoLog.d(WM_SHELL_BUBBLES, "onActivityRestartAttempt - taskId=%d "
-                                        + "selecting matching overflow bubble=%s",
-                                task.taskId, b.getKey());
-                        promoteBubbleFromOverflow(b);
-                        mBubbleData.setExpanded(true);
-                        return;
-                    }
+
+                bubble = mBubbleData.getOverflowBubbleWithTaskId(taskId);
+                if (bubble != null) {
+                    ProtoLog.d(WM_SHELL_BUBBLES, "onActivityRestartAttempt - taskId=%d "
+                                    + "selecting matching overflow bubble=%s",
+                            taskId, bubble.getKey());
+                    promoteBubbleFromOverflow(bubble);
+                    mBubbleData.setExpanded(true);
                 }
             }
         });
@@ -1296,8 +1295,8 @@ public class BubbleController implements ConfigurationChangeListener,
      * @param timestamp the timestamp of the removal
      */
     public void dragBubbleToDismiss(String bubbleKey, long timestamp) {
-        String selectedBubbleKey = mBubbleData.getSelectedBubbleKey();
-        Bubble bubbleToDismiss = mBubbleData.getAnyBubbleWithkey(bubbleKey);
+        final String selectedBubbleKey = mBubbleData.getSelectedBubbleKey();
+        final Bubble bubbleToDismiss = mBubbleData.getAnyBubbleWithKey(bubbleKey);
         if (bubbleToDismiss != null) {
             mBubbleData.dismissBubbleWithKey(
                     bubbleKey, Bubbles.DISMISS_USER_GESTURE_FROM_LAUNCHER, timestamp);
@@ -1330,11 +1329,11 @@ public class BubbleController implements ConfigurationChangeListener,
 
     @VisibleForTesting
     public boolean isBubbleNotificationSuppressedFromShade(String key, String groupKey) {
-        boolean isSuppressedBubble = (mBubbleData.hasAnyBubbleWithKey(key)
-                && !mBubbleData.getAnyBubbleWithkey(key).showInShade());
+        final boolean isSuppressedBubble = (mBubbleData.hasAnyBubbleWithKey(key)
+                && !mBubbleData.getAnyBubbleWithKey(key).showInShade());
 
-        boolean isSuppressedSummary = mBubbleData.isSummarySuppressed(groupKey);
-        boolean isSummary = key.equals(mBubbleData.getSummaryKey(groupKey));
+        final boolean isSuppressedSummary = mBubbleData.isSummarySuppressed(groupKey);
+        final boolean isSummary = key.equals(mBubbleData.getSummaryKey(groupKey));
         return (isSummary && isSuppressedSummary) || isSuppressedBubble;
     }
 
@@ -1362,8 +1361,6 @@ public class BubbleController implements ConfigurationChangeListener,
     public void expandStackAndSelectBubbleFromLauncher(String key, int topOnScreen) {
         mBubblePositioner.setBubbleBarTopOnScreen(topOnScreen);
 
-        boolean wasExpanded = (mLayerView != null && mLayerView.isExpanded());
-
         if (BubbleOverflow.KEY.equals(key)) {
             mBubbleData.setSelectedBubbleFromLauncher(mBubbleData.getOverflow());
             mLayerView.showExpandedView(mBubbleData.getOverflow());
@@ -1371,10 +1368,11 @@ public class BubbleController implements ConfigurationChangeListener,
             return;
         }
 
-        Bubble b = mBubbleData.getAnyBubbleWithkey(key);
+        final Bubble b = mBubbleData.getAnyBubbleWithKey(key);
         if (b == null) {
             return;
         }
+        final boolean wasExpanded = (mLayerView != null && mLayerView.isExpanded());
         if (mBubbleData.hasBubbleInStackWithKey(b.getKey())) {
             // already in the stack
             mBubbleData.setSelectedBubbleFromLauncher(b);
@@ -1748,31 +1746,32 @@ public class BubbleController implements ConfigurationChangeListener,
     public void updateBubble(BubbleEntry notif, boolean suppressFlyout, boolean showInShade) {
         // If this is an interruptive notif, mark that it's interrupted
         mSysuiProxy.setNotificationInterruption(notif.getKey());
-        boolean isNonInterruptiveNotExpanding = !notif.getRanking().isTextChanged()
+        final boolean isNonInterruptiveNotExpanding = !notif.getRanking().isTextChanged()
                 && (notif.getBubbleMetadata() != null
                 && !notif.getBubbleMetadata().getAutoExpandBubble());
+        final Bubble bubble;
         if (isNonInterruptiveNotExpanding
                 && mBubbleData.hasOverflowBubbleWithKey(notif.getKey())) {
             // Update the bubble but don't promote it out of overflow
-            Bubble b = mBubbleData.getOverflowBubbleWithKey(notif.getKey());
+            bubble = mBubbleData.getOverflowBubbleWithKey(notif.getKey());
             if (notif.isBubble()) {
                 notif.setFlagBubble(false);
             }
-            updateNotNotifyingEntry(b, notif, showInShade);
+            updateNotNotifyingEntry(bubble, notif, showInShade);
         } else if (mBubbleData.hasAnyBubbleWithKey(notif.getKey())
                 && isNonInterruptiveNotExpanding) {
-            Bubble b = mBubbleData.getAnyBubbleWithkey(notif.getKey());
-            if (b != null) {
-                updateNotNotifyingEntry(b, notif, showInShade);
+            bubble = mBubbleData.getAnyBubbleWithKey(notif.getKey());
+            if (bubble != null) {
+                updateNotNotifyingEntry(bubble, notif, showInShade);
             }
         } else if (mBubbleData.isSuppressedWithLocusId(notif.getLocusId())) {
             // Update the bubble but don't promote it out of overflow
-            Bubble b = mBubbleData.getSuppressedBubbleWithKey(notif.getKey());
-            if (b != null) {
-                updateNotNotifyingEntry(b, notif, showInShade);
+            bubble = mBubbleData.getSuppressedBubbleWithKey(notif.getKey());
+            if (bubble != null) {
+                updateNotNotifyingEntry(bubble, notif, showInShade);
             }
         } else {
-            Bubble bubble = mBubbleData.getOrCreateBubble(notif, null /* persistedBubble */);
+            bubble = mBubbleData.getOrCreateBubble(notif, null /* persistedBubble */);
             if (notif.shouldSuppressNotificationList()) {
                 // If we're suppressing notifs for DND, we don't want the bubbles to randomly
                 // expand when DND turns off so flip the flag.
@@ -2323,12 +2322,12 @@ public class BubbleController implements ConfigurationChangeListener,
             BubbleEntry summary, @Nullable List<BubbleEntry> children, IntConsumer removeCallback) {
         if (children != null) {
             for (int i = 0; i < children.size(); i++) {
-                BubbleEntry child = children.get(i);
+                final BubbleEntry child = children.get(i);
                 if (mBubbleData.hasAnyBubbleWithKey(child.getKey())) {
                     // Suppress the bubbled child
                     // As far as group manager is concerned, once a child is no longer shown
                     // in the shade, it is essentially removed.
-                    Bubble bubbleChild = mBubbleData.getAnyBubbleWithkey(child.getKey());
+                    final Bubble bubbleChild = mBubbleData.getAnyBubbleWithKey(child.getKey());
                     if (bubbleChild != null) {
                         bubbleChild.setSuppressNotification(true);
                         bubbleChild.setShowDot(false /* show */);

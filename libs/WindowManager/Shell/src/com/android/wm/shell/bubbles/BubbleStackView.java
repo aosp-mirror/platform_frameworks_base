@@ -497,7 +497,7 @@ public class BubbleStackView extends FrameLayout
                                 view /* bubble */,
                                 mDismissView.getHeight() /* translationYBy */,
                                 () -> dismissBubbleIfExists(
-                                        mBubbleData.getBubbleWithView(view)) /* after */);
+                                        mBubbleData.getBubbleInStackWithView(view)) /* after */);
                     }
 
                     mDismissView.hide();
@@ -558,7 +558,7 @@ public class BubbleStackView extends FrameLayout
                 return;
             }
 
-            final Bubble clickedBubble = mBubbleData.getBubbleWithView(view);
+            final Bubble clickedBubble = mBubbleData.getBubbleInStackWithView(view);
 
             // If the bubble has since left us, ignore the click.
             if (clickedBubble == null) {
