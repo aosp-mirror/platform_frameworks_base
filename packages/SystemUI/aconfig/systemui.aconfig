@@ -1774,6 +1774,13 @@ flag {
 }
 
 flag {
+    name: "bouncer_ui_revamp_2"
+    namespace: "systemui"
+    description: "Updates to button animations and font changes for bouncer, bouncer_ui_revamp will cover only the blur changes."
+    bug: "376491880"
+}
+
+flag {
     name: "notification_shade_blur"
     namespace: "systemui"
     description: "Enables the new blur effect on the Notification Shade."
