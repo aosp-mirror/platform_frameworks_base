@@ -289,7 +289,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         DisplayLayout layout = new DisplayLayout(info,
                 mContext.getResources(), true, true);
         mPipDisplayLayoutState.setDisplayLayout(layout);
-        doReturn(PipAnimationController.ANIM_TYPE_ALPHA).when(mMockPipAnimationController)
+        doReturn(PipTransitionController.ANIM_TYPE_ALPHA).when(mMockPipAnimationController)
                 .takeOneShotEnterAnimationType();
         mPipTaskOrganizer.setSurfaceControlTransactionFactory(
                 MockSurfaceControlHelper::createMockSurfaceControlTransaction);

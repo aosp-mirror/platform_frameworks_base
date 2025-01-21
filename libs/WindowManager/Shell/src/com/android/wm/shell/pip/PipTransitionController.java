@@ -23,6 +23,7 @@ import static android.view.WindowManager.TRANSIT_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_REMOVE_STACK;
 import static com.android.wm.shell.pip.PipAnimationController.isInPipDirection;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.app.Flags;
@@ -55,6 +56,8 @@ import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -72,6 +75,17 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     private final Map<PipTransitionCallback, Executor> mPipTransitionCallbacks = new HashMap<>();
     protected PipTaskOrganizer mPipOrganizer;
     protected DefaultMixedHandler mMixedHandler;
+
+    public static final int ANIM_TYPE_BOUNDS = 0;
+    public static final int ANIM_TYPE_ALPHA = 1;
+
+    @IntDef(prefix = { "ANIM_TYPE_" }, value = {
+            ANIM_TYPE_BOUNDS,
+            ANIM_TYPE_ALPHA
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AnimationType {}
+
 
     protected final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
             new PipAnimationController.PipAnimationCallback() {
@@ -357,7 +371,7 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     }
 
     /** Sets the type of animation when a PiP task appears. */
-    public void setEnterAnimationType(@PipAnimationController.AnimationType int type) {
+    public void setEnterAnimationType(@AnimationType int type) {
     }
 
     /** Play a transition animation for entering PiP on a specific PiP change. */

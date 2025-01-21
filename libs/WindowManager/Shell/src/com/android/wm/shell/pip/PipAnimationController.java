@@ -21,6 +21,9 @@ import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
+import static com.android.wm.shell.pip.PipTransitionController.ANIM_TYPE_ALPHA;
+import static com.android.wm.shell.pip.PipTransitionController.ANIM_TYPE_BOUNDS;
+
 import android.animation.AnimationHandler;
 import android.animation.Animator;
 import android.animation.RectEvaluator;
@@ -58,16 +61,6 @@ import java.util.Objects;
 public class PipAnimationController {
     static final float FRACTION_START = 0f;
     static final float FRACTION_END = 1f;
-
-    public static final int ANIM_TYPE_BOUNDS = 0;
-    public static final int ANIM_TYPE_ALPHA = 1;
-
-    @IntDef(prefix = { "ANIM_TYPE_" }, value = {
-            ANIM_TYPE_BOUNDS,
-            ANIM_TYPE_ALPHA
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface AnimationType {}
 
     /**
      * The alpha type is set for swiping to home. But the swiped task may not enter PiP. And if
@@ -125,7 +118,7 @@ public class PipAnimationController {
             });
 
     private PipTransitionAnimator mCurrentAnimator;
-    @AnimationType
+    @PipTransitionController.AnimationType
     private int mOneShotAnimationType = ANIM_TYPE_BOUNDS;
     private long mLastOneShotAlphaAnimationTime;
 
@@ -157,9 +150,9 @@ public class PipAnimationController {
     /**
      * Construct and return an animator that animates from the {@param startBounds} to the
      * {@param endBounds} with the given {@param direction}. If {@param direction} is type
-     * {@link ANIM_TYPE_BOUNDS}, then {@param sourceHintRect} will be used to animate
-     * in a better, more smooth manner. If the original bound was rotated and a reset needs to
-     * happen, pass in {@param startingAngle}.
+     * {@link PipTransitionController#ANIM_TYPE_BOUNDS}, then {@param sourceHintRect} will be used
+     * to animate in a better, more smooth manner. If the original bound was rotated and a reset
+     * needs to happen, pass in {@param startingAngle}.
      *
      * In the case where one wants to start animation during an intermediate animation (for example,
      * if the user is currently doing a pinch-resize, and upon letting go now PiP needs to animate
@@ -244,12 +237,13 @@ public class PipAnimationController {
 
     /**
      * Sets the preferred enter animation type for one time. This is typically used to set the
-     * animation type to {@link PipAnimationController#ANIM_TYPE_ALPHA}.
+     * animation type to {@link PipTransitionController#ANIM_TYPE_ALPHA}.
      * <p>
      * For example, gesture navigation would first fade out the PiP activity, and the transition
      * should be responsible to animate in (such as fade in) the PiP.
      */
-    public void setOneShotEnterAnimationType(@AnimationType int animationType) {
+    public void setOneShotEnterAnimationType(
+            @PipTransitionController.AnimationType int animationType) {
         mOneShotAnimationType = animationType;
         if (animationType == ANIM_TYPE_ALPHA) {
             mLastOneShotAlphaAnimationTime = SystemClock.uptimeMillis();
@@ -257,7 +251,7 @@ public class PipAnimationController {
     }
 
     /** Returns the preferred animation type and consumes the one-shot type if needed. */
-    @AnimationType
+    @PipTransitionController.AnimationType
     public int takeOneShotEnterAnimationType() {
         final int type = mOneShotAnimationType;
         if (type == ANIM_TYPE_ALPHA) {
@@ -321,7 +315,7 @@ public class PipAnimationController {
             ValueAnimator.AnimatorListener {
         private final TaskInfo mTaskInfo;
         private final SurfaceControl mLeash;
-        private final @AnimationType int mAnimationType;
+        private final @PipTransitionController.AnimationType int mAnimationType;
         private final Rect mDestinationBounds = new Rect();
 
         private final Point mLeashOffset = new Point();
@@ -341,16 +335,17 @@ public class PipAnimationController {
         private boolean mHasRequestedEnd;
 
         private PipTransitionAnimator(@NonNull TaskInfo taskInfo, @NonNull SurfaceControl leash,
-                @AnimationType int animationType, @NonNull Rect destinationBounds,
-                @NonNull T baseValue, @NonNull T startValue, @NonNull T endValue) {
+                @PipTransitionController.AnimationType int animationType,
+                @NonNull Rect destinationBounds, @NonNull T baseValue, @NonNull T startValue,
+                @NonNull T endValue) {
             this(taskInfo, leash, animationType, destinationBounds, new Point(), baseValue,
                     startValue, endValue);
         }
 
         private PipTransitionAnimator(@NonNull TaskInfo taskInfo, @NonNull SurfaceControl leash,
-                @AnimationType int animationType, @NonNull Rect destinationBounds,
-                @NonNull Point leashOffset, @NonNull T baseValue, @NonNull T startValue,
-                @NonNull T endValue) {
+                @PipTransitionController.AnimationType int animationType,
+                @NonNull Rect destinationBounds, @NonNull Point leashOffset,
+                @NonNull T baseValue, @NonNull T startValue, @NonNull T endValue) {
             mTaskInfo = taskInfo;
             mLeash = leash;
             mAnimationType = animationType;
@@ -408,7 +403,8 @@ public class PipAnimationController {
         @Override public void onAnimationRepeat(Animator animation) {}
 
         @VisibleForTesting
-        @AnimationType public int getAnimationType() {
+        @PipTransitionController.AnimationType
+        public int getAnimationType() {
             return mAnimationType;
         }
 
