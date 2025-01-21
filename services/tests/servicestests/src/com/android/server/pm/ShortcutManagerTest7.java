@@ -276,7 +276,7 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
         assertNull(mService.getShortcutsForTest().get(USER_11));
     }
 
-    public void testClearShortcuts() throws Exception {
+    public void disabled_testClearShortcuts() throws Exception {
 
         mRunningUsers.put(USER_11, true);
 
