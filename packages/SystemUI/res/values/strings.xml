@@ -3779,6 +3779,11 @@
          that shows the user which keyboard shortcuts they can use. The "Split screen" shortcuts are
          for example "Move current app to left split". [CHAR LIMIT=NONE] -->
     <string name="shortcutHelper_category_split_screen">Split screen</string>
+    <!-- Title of the keyboard shortcut helper category "Accessibility". This category contains shortcuts
+         for android accessibility and disability inclusion features such as screen readers, voice control,
+         switch access, talkback, etc. The helper is a component that shows the user which keyboard
+         shortcuts they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcutHelper_category_accessibility">Accessibility</string>
     <!-- Title of the keyboard shortcut helper category "Input". The helper is a component
          that shows the user which keyboard shortcuts they can use. The "Input" shortcuts are
          the ones provided by the keyboard. Examples are "Access emoji" or "Switch to next language"
