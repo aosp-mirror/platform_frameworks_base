@@ -25,9 +25,8 @@ import kotlin.time.Duration.Companion.milliseconds
 
 fun TransitionBuilder.toQuickSettingsShadeTransition(durationScale: Double = 1.0) {
     spec = tween(durationMillis = (DefaultDuration * durationScale).inWholeMilliseconds.toInt())
-    distance = UserActionDistance { fromContent, _, _ ->
-        val fromContentSize = checkNotNull(fromContent.targetSize())
-        fromContentSize.height.toFloat() * 2 / 3f
+    distance = UserActionDistance { _, shadeContentKey, _ ->
+        calculateShadePanelTargetPositionY(shadeContentKey)
     }
 
     translate(OverlayShade.Elements.Panel, Edge.Top)
