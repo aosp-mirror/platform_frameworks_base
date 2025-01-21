@@ -25,6 +25,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
+import android.os.Process.INVALID_UID
 import android.text.TextUtils
 import android.util.Log
 import android.view.Gravity
@@ -47,6 +48,7 @@ import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.utils.SafeIconLoader
 import java.text.Collator
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -57,6 +59,8 @@ constructor(
     @Main private val executor: Executor,
     private val controller: ControlsControllerImpl,
     private val userTracker: UserTracker,
+    private val safeIconLoaderFactory: SafeIconLoader.Factory,
+    private val controlsListingController: ControlsListingController,
 ) : ComponentActivity(), ControlsManagementActivity {
 
     companion object {
@@ -196,9 +200,20 @@ constructor(
                         listOfStructures = listOf(listOfStructures[structureIndex])
                     }
 
+                    val uid =
+                        controlsListingController
+                            .getCurrentServices()
+                            .firstOrNull { it.componentName == componentName }
+                            ?.serviceInfo
+                            ?.applicationInfo
+                            ?.uid ?: INVALID_UID
+                    val packageName = componentName.packageName
+                    val safeIconLoader =
+                        safeIconLoaderFactory.create(uid, packageName, userTracker.userId)
+
                     executor.execute {
                         structurePager.adapter =
-                            StructureAdapter(listOfStructures, userTracker.userId)
+                            StructureAdapter(listOfStructures, userTracker.userId, safeIconLoader)
                         structurePager.setCurrentItem(structureIndex)
                         if (error) {
                             statusText.text =
@@ -260,8 +275,18 @@ constructor(
     private fun setUpPager() {
         structurePager.alpha = 0.0f
         pageIndicator.alpha = 0.0f
+        val uid =
+            controlsListingController
+                .getCurrentServices()
+                .firstOrNull { it.componentName == component }
+                ?.serviceInfo
+                ?.applicationInfo
+                ?.uid ?: INVALID_UID
+        val packageName = componentName?.packageName ?: ""
+        val safeIconLoader = safeIconLoaderFactory.create(uid, packageName, userTracker.userId)
+
         structurePager.apply {
-            adapter = StructureAdapter(emptyList(), userTracker.userId)
+            adapter = StructureAdapter(emptyList(), userTracker.userId, safeIconLoader)
             registerOnPageChangeCallback(
                 object : ViewPager2.OnPageChangeCallback() {
                     override fun onPageSelected(position: Int) {

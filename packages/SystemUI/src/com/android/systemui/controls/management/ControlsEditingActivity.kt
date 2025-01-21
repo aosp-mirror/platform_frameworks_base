@@ -22,6 +22,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Process
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -42,6 +43,7 @@ import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.utils.SafeIconLoader
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -53,6 +55,8 @@ constructor(
     private val controller: ControlsControllerImpl,
     private val userTracker: UserTracker,
     private val customIconCache: CustomIconCache,
+    private val controlsListingController: ControlsListingController,
+    private val safeIconLoaderFactory: SafeIconLoader.Factory,
 ) : ComponentActivity(), ControlsManagementActivity {
 
     companion object {
@@ -258,8 +262,18 @@ constructor(
         val elevation = resources.getFloat(R.dimen.control_card_elevation)
         val recyclerView = requireViewById<RecyclerView>(R.id.list)
         recyclerView.alpha = 0.0f
+        val uid =
+            controlsListingController
+                .getCurrentServices()
+                .firstOrNull { it.componentName == component }
+                ?.serviceInfo
+                ?.applicationInfo
+                ?.uid ?: Process.INVALID_UID
+        val packageName = component.packageName
+        val safeIconLoader = safeIconLoaderFactory.create(uid, packageName, userTracker.userId)
+
         val adapter =
-            ControlAdapter(elevation, userTracker.userId).apply {
+            ControlAdapter(elevation, userTracker.userId, safeIconLoader).apply {
                 registerAdapterDataObserver(
                     object : RecyclerView.AdapterDataObserver() {
                         var hasAnimated = false
