@@ -18,14 +18,10 @@
     android:layout_height="match_parent"
     android:maxHeight="@dimen/volume_dialog_slider_height">
 
-    <com.google.android.material.slider.Slider
+    <androidx.compose.ui.platform.ComposeView
         android:id="@+id/volume_dialog_slider"
-        style="@style/SystemUI.Material3.Slider.Volume"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:layout_marginTop="-20dp"
-        android:layout_marginBottom="-20dp"
-        android:orientation="vertical"
-        android:theme="@style/Theme.Material3.DayNight" />
+        android:orientation="vertical" />
 </FrameLayout>
