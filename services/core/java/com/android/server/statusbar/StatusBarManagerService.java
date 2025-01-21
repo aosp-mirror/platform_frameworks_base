@@ -1542,10 +1542,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             getUiState(displayId).setImeWindowState(vis, backDisposition, showImeSwitcher);
 
             mHandler.post(() -> {
-                if (mBar == null) return;
-                try {
-                    mBar.setImeWindowStatus(displayId, vis, backDisposition, showImeSwitcher);
-                } catch (RemoteException ex) { }
+                IStatusBar bar = mBar;
+                if (bar != null) {
+                    try {
+                        bar.setImeWindowStatus(displayId, vis, backDisposition, showImeSwitcher);
+                    } catch (RemoteException ex) {
+                    }
+                }
             });
         }
     }
