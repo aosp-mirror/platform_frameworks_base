@@ -52,6 +52,7 @@ import com.android.wm.shell.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.shared.TransitionUtil;
+import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
@@ -571,7 +572,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler, TaskV
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        PendingTransition pending = findPending(transition);
+        final PendingTransition pending = findPending(transition);
         if (pending != null) {
             mPending.remove(pending);
         }
@@ -586,10 +587,11 @@ public class TaskViewTransitions implements Transitions.TransitionHandler, TaskV
         WindowContainerTransaction wct = null;
         for (int i = 0; i < info.getChanges().size(); ++i) {
             final TransitionInfo.Change chg = info.getChanges().get(i);
-            if (chg.getTaskInfo() == null) continue;
+            final ActivityManager.RunningTaskInfo taskInfo = chg.getTaskInfo();
+            if (taskInfo == null) continue;
             if (TransitionUtil.isClosingType(chg.getMode())) {
                 final boolean isHide = chg.getMode() == TRANSIT_TO_BACK;
-                TaskViewTaskController tv = findTaskView(chg.getTaskInfo());
+                TaskViewTaskController tv = findTaskView(taskInfo);
                 if (tv == null && !isHide) {
                     // TaskView can be null when closing
                     changesHandled++;
@@ -599,7 +601,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler, TaskV
                     if (pending != null) {
                         Slog.w(TAG, "Found a non-TaskView task in a TaskView Transition. This "
                                 + "shouldn't happen, so there may be a visual artifact: "
-                                + chg.getTaskInfo().taskId);
+                                + taskInfo.taskId);
                     }
                     continue;
                 }
@@ -615,40 +617,51 @@ public class TaskViewTransitions implements Transitions.TransitionHandler, TaskV
                 }
                 changesHandled++;
             } else if (TransitionUtil.isOpeningType(chg.getMode())) {
-                final boolean taskIsNew = chg.getMode() == TRANSIT_OPEN;
-                final TaskViewTaskController tv;
-                if (taskIsNew) {
-                    if (pending == null
-                            || !chg.getTaskInfo().containsLaunchCookie(pending.mLaunchCookie)) {
+                boolean isNewInTaskView = false;
+                TaskViewTaskController tv;
+                if (chg.getMode() == TRANSIT_OPEN) {
+                    isNewInTaskView = true;
+                    if (pending == null || !taskInfo.containsLaunchCookie(pending.mLaunchCookie)) {
                         Slog.e(TAG, "Found a launching TaskView in the wrong transition. All "
                                 + "TaskView launches should be initiated by shell and in their "
-                                + "own transition: " + chg.getTaskInfo().taskId);
+                                + "own transition: " + taskInfo.taskId);
                         continue;
                     }
                     stillNeedsMatchingLaunch = false;
                     tv = pending.mTaskView;
                 } else {
-                    tv = findTaskView(chg.getTaskInfo());
-                    if (tv == null) {
-                        if (pending != null) {
-                            Slog.w(TAG, "Found a non-TaskView task in a TaskView Transition. This "
-                                    + "shouldn't happen, so there may be a visual artifact: "
-                                    + chg.getTaskInfo().taskId);
+                    tv = findTaskView(taskInfo);
+                    if (tv == null && pending != null) {
+                        if (BubbleAnythingFlagHelper.enableCreateAnyBubble()
+                                && chg.getMode() == TRANSIT_TO_FRONT
+                                && pending.mTaskView.getPendingInfo() != null
+                                && pending.mTaskView.getPendingInfo().taskId == taskInfo.taskId) {
+                            // In this case an existing task, not currently in TaskView, is
+                            // brought to the front to be moved into TaskView. This is still
+                            // "new" from TaskView's perspective. (e.g. task being moved into a
+                            // bubble)
+                            isNewInTaskView = true;
+                            stillNeedsMatchingLaunch = false;
+                            tv = pending.mTaskView;
+                        } else {
+                            Slog.w(TAG, "Found a non-TaskView task in a TaskView Transition. "
+                                    + "This shouldn't happen, so there may be a visual "
+                                    + "artifact: " + taskInfo.taskId);
                         }
-                        continue;
                     }
+                    if (tv == null) continue;
                 }
                 if (wct == null) wct = new WindowContainerTransaction();
-                prepareOpenAnimation(tv, taskIsNew, startTransaction, finishTransaction,
-                        chg.getTaskInfo(), chg.getLeash(), wct);
+                prepareOpenAnimation(tv, isNewInTaskView, startTransaction, finishTransaction,
+                        taskInfo, chg.getLeash(), wct);
                 changesHandled++;
             } else if (chg.getMode() == TRANSIT_CHANGE) {
-                TaskViewTaskController tv = findTaskView(chg.getTaskInfo());
+                TaskViewTaskController tv = findTaskView(taskInfo);
                 if (tv == null) {
                     if (pending != null) {
                         Slog.w(TAG, "Found a non-TaskView task in a TaskView Transition. This "
                                 + "shouldn't happen, so there may be a visual artifact: "
-                                + chg.getTaskInfo().taskId);
+                                + taskInfo.taskId);
                     }
                     continue;
                 }
