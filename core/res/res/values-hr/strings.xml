@@ -72,9 +72,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Zadana postavka ID-a pozivatelja ima ograničenje. Sljedeći poziv: Nije ograničen"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Zadana postavka ID-a pozivatelja nema ograničenje. Sljedeći poziv: Ograničen"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Zadana postavka ID-a pozivatelja nema ograničenje. Sljedeći poziv: Nije ograničen"</string>
-    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Ova aplikacija nije kompatibilna s veličinom stranice od 16 KB. Provjera poravnanja APK-a nije uspjela. Ova će se aplikacija pokrenuti pomoću načina kompatibilnog s veličinom stranice. Za najbolju kompatibilnost ponovo kompilirajte aplikaciju s podrškom od 16 KB. Više informacija potražite na stranici &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
-    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Ova aplikacija nije kompatibilna s veličinom stranice od 16 KB. Provjera poravnanja ELF-a nije uspjela. Ova će se aplikacija pokrenuti pomoću načina kompatibilnog s veličinom stranice. Za najbolju kompatibilnost ponovo kompilirajte aplikaciju s podrškom od 16 KB. Više informacija potražite na stranici &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
-    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Ova aplikacija nije kompatibilna s veličinom stranice od 16 KB. Provjere poravnanja APK-a i ELF-a nisu uspjele. Ova će se aplikacija pokrenuti pomoću načina kompatibilnog s veličinom stranice. Za najbolju kompatibilnost ponovo kompilirajte aplikaciju s podrškom od 16 KB. Više informacija potražite na stranici &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Ova aplikacija nije kompatibilna sa 16 KB stranicama. Provjera usklađenosti APK-a nije uspjela. Aplikacija će se pokrenuti u načinu kompatibilnom s formatom stranice. Da biste postigli kompatibilnost, ponovo kompilirajte aplikaciju s podrškom za 16 KB stranice. Više informacija potražite na stranici &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Ova aplikacija nije kompatibilna sa 16 KB stranicama. Provjera usklađenosti ELF-a nije uspjela. Aplikacija će se pokrenuti u načinu kompatibilnom s formatom stranice. Da biste postigli kompatibilnost, ponovo kompilirajte aplikaciju s podrškom za 16 KB stranice. Više informacija potražite na stranici &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Ova aplikacija nije kompatibilna sa 16 KB stranicama. Provjere usklađenosti APK-a i ELF-a nisu uspjele. Aplikacija će se pokrenuti u načinu kompatibilnom s formatom stranice. Da biste postigli kompatibilnost, ponovo kompilirajte aplikaciju s podrškom za 16 KB stranice. Više informacija potražite na stranici &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Usluga nije rezervirana."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Ne možete promijeniti postavku ID-a pozivatelja."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Podaci su prebačeni na <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -1159,38 +1159,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"za <xliff:g id="COUNT">%d</xliff:g> h"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"za <xliff:g id="COUNT">%d</xliff:g> d"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"za <xliff:g id="COUNT">%d</xliff:g> g."</string>
-    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
-    <skip />
-    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
-    <skip />
-    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
-    <skip />
-    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
-    <skip />
-    <!-- no translation found for duration_days_medium (5994225628248661388) -->
-    <skip />
-    <!-- no translation found for duration_years_medium (734023884353592526) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
-    <skip />
-    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
-    <skip />
-    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
-    <skip />
-    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
-    <skip />
-    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
-    <skip />
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"prije <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"prije <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"prije <xliff:g id="COUNT">%d</xliff:g> dana"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"prije <xliff:g id="COUNT">%d</xliff:g> god."</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> d"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> god."</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"za <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"za <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"za <xliff:g id="COUNT">%d</xliff:g> d"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"za <xliff:g id="COUNT">%d</xliff:g> god."</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"prije <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"prije <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"prije <xliff:g id="COUNT">%d</xliff:g> dana"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"prije <xliff:g id="COUNT">%d</xliff:g> god."</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Prije # min}one{Prije # min}few{Prije # min}other{Prije # min}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Prije # h}one{Prije # h}few{Prije # h}other{Prije # h}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Prije # dan}one{Prije # dan}few{Prije # dana}other{Prije # dana}}"</string>

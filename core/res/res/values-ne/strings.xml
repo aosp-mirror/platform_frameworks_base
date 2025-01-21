@@ -1019,7 +1019,7 @@
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"तपाईंको SIM कार्ड सदाका लागि डिएक्टिभेट गरिएको छ।\n आफ्नो वायरलेस सेवा प्रदायकलाई सम्पर्क गरी अर्को SIM कार्ड प्राप्त गर्नुहोस्।"</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"अघिल्लो ट्रयाक"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"अर्को ट्रयाक"</string>
-    <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"रोक्नुहोस्"</string>
+    <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"पज गर्नुहोस्"</string>
     <string name="lockscreen_transport_play_description" msgid="106868788691652733">"चलाउनुहोस्"</string>
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"रोक्नुहोस्"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"दोहोर्याउनुहोस्"</string>
@@ -1158,38 +1158,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> घण्टाभित्र"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> दिनभित्र"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> वर्षभित्र"</string>
-    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
-    <skip />
-    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
-    <skip />
-    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
-    <skip />
-    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
-    <skip />
-    <!-- no translation found for duration_days_medium (5994225628248661388) -->
-    <skip />
-    <!-- no translation found for duration_years_medium (734023884353592526) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
-    <skip />
-    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
-    <skip />
-    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
-    <skip />
-    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
-    <skip />
-    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
-    <skip />
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> मिनेटअघि"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> घण्टाअघि"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> दिनअघि"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> वर्षअघि"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> मिनेट"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> घण्टा"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> दिन"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> वर्ष"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"<xliff:g id="COUNT">%d</xliff:g> मिनेटपछि"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"<xliff:g id="COUNT">%d</xliff:g> घण्टापछि"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"<xliff:g id="COUNT">%d</xliff:g> दिनपछि"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"<xliff:g id="COUNT">%d</xliff:g> वर्षपछि"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> मिनेटअघि"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> घण्टाअघि"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> दिनअघि"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> वर्षअघि"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# मिनेटअघि}other{# मिनेटअघि}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# घण्टाअघि}other{# घण्टाअघि}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# दिनअघि}other{# दिनअघि}}"</string>

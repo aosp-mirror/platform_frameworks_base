@@ -168,7 +168,7 @@
     <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"درحال‌حاضر تماس‌ها، پیام‌ها، و داده‌ها هنگام استفاده از سیم‌کارت <xliff:g id="NETWORK_NAME">%1$s</xliff:g> آسیب‌پذیرتر هستند.\n\nوقتی اتصال شما دوباره رمزگذاری شود، اعلان دیگری دریافت خواهید کرد."</string>
     <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"تنظیمات امنیت شبکه تلفن همراه"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"بیشتر بدانید"</string>
-    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"متوجه‌ام"</string>
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"متوجهم"</string>
     <string name="fcComplete" msgid="1080909484660507044">"کد ویژگی کامل شد."</string>
     <string name="fcError" msgid="5325116502080221346">"مشکل در اتصال یا کد ویژگی نامعتبر."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"تأیید"</string>
@@ -1158,38 +1158,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"تا <xliff:g id="COUNT">%d</xliff:g> ساعت دیگر"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"تا <xliff:g id="COUNT">%d</xliff:g> روز دیگر"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"تا <xliff:g id="COUNT">%d</xliff:g> سال دیگر"</string>
-    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
-    <skip />
-    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
-    <skip />
-    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
-    <skip />
-    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
-    <skip />
-    <!-- no translation found for duration_days_medium (5994225628248661388) -->
-    <skip />
-    <!-- no translation found for duration_years_medium (734023884353592526) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
-    <skip />
-    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
-    <skip />
-    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
-    <skip />
-    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
-    <skip />
-    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
-    <skip />
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"‫<xliff:g id="COUNT">%d</xliff:g> دقیقه پیش"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"‫<xliff:g id="COUNT">%d</xliff:g> ساعت پیش"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"‫<xliff:g id="COUNT">%d</xliff:g> روز پیش"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"‫<xliff:g id="COUNT">%d</xliff:g> سال پیش"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"‫<xliff:g id="COUNT">%d</xliff:g> دقیقه"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"‫<xliff:g id="COUNT">%d</xliff:g> ساعت"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"‫<xliff:g id="COUNT">%d</xliff:g> روز"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"‫<xliff:g id="COUNT">%d</xliff:g> سال"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"‫<xliff:g id="COUNT">%d</xliff:g> دقیقه دیگر"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"‫<xliff:g id="COUNT">%d</xliff:g> ساعت دیگر"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"‫<xliff:g id="COUNT">%d</xliff:g> روز دیگر"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"‫<xliff:g id="COUNT">%d</xliff:g> سال دیگر"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"‫<xliff:g id="COUNT">%d</xliff:g> دقیقه پیش"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"‫<xliff:g id="COUNT">%d</xliff:g> ساعت پیش"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"‫<xliff:g id="COUNT">%d</xliff:g> روز پیش"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"‫<xliff:g id="COUNT">%d</xliff:g> سال پیش"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# دقیقه قبل}one{# دقیقه قبل}other{# دقیقه قبل}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ساعت قبل}one{# ساعت قبل}other{# ساعت قبل}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# روز قبل}one{# روز قبل}other{# روز قبل}}"</string>
@@ -1229,7 +1213,7 @@
     <string name="editTextMenuTitle" msgid="857666911134482176">"کنش‌های متنی"</string>
     <string name="error_handwriting_unsupported" msgid="7809438534946014050">"در این فیلد از دست‌نویسی پشتیبانی نمی‌شود"</string>
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"در فیلدهای گذرواژه از دست‌نویسی پشتیبانی نمی‌شود"</string>
-    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"برگشت"</string>
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"برگشتن"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"تغییر روش ورودی"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"باز کردن انتخابگر روش ورودی"</string>
     <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"تنظیمات"</string>
@@ -2035,7 +2019,7 @@
     <string name="search_language_hint" msgid="7004225294308793583">"نام زبان را تایپ کنید"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"پیشنهادی"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"پیشنهادی"</string>
-    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"زبان‌های پیشنهادی"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"زبان‌های پیشنهادشده"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"مناطق پیشنهادی"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"همه زبان‌ها"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"همه منطقه‌ها"</string>
