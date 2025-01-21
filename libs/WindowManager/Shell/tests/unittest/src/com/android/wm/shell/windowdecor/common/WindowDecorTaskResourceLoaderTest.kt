@@ -33,6 +33,7 @@ import com.android.launcher3.icons.IconProvider
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestRunningTaskInfoBuilder
 import com.android.wm.shell.TestShellExecutor
+import com.android.wm.shell.common.UserProfileContexts
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.sysui.UserChangeListener
@@ -69,6 +70,7 @@ class WindowDecorTaskResourceLoaderTest : ShellTestCase() {
     private val mockIconProvider = mock<IconProvider>()
     private val mockHeaderIconFactory = mock<BaseIconFactory>()
     private val mockVeilIconFactory = mock<BaseIconFactory>()
+    private val mMockUserProfileContexts = mock<UserProfileContexts>()
 
     private lateinit var spyContext: TestableContext
     private lateinit var loader: WindowDecorTaskResourceLoader
@@ -83,12 +85,13 @@ class WindowDecorTaskResourceLoaderTest : ShellTestCase() {
         spyContext = spy(mContext)
         spyContext.setMockPackageManager(mockPackageManager)
         doReturn(spyContext).whenever(spyContext).createContextAsUser(any(), anyInt())
+        doReturn(spyContext).whenever(mMockUserProfileContexts)[anyInt()]
         loader =
             WindowDecorTaskResourceLoader(
-                context = spyContext,
                 shellInit = shellInit,
                 shellController = mockShellController,
                 shellCommandHandler = mock(),
+                userProfilesContexts = mMockUserProfileContexts,
                 iconProvider = mockIconProvider,
                 headerIconFactory = mockHeaderIconFactory,
                 veilIconFactory = mockVeilIconFactory,
@@ -167,16 +170,6 @@ class WindowDecorTaskResourceLoaderTest : ShellTestCase() {
         loader.getVeilIcon(task)
 
         verifyZeroInteractions(mockPackageManager, mockIconProvider, mockVeilIconFactory)
-    }
-
-    @Test
-    fun testUserChange_updatesContext() {
-        val newUser = 5000
-        val newContext = mock<Context>()
-
-        userChangeListener.onUserChanged(newUser, newContext)
-
-        assertThat(loader.currentUserContext).isEqualTo(newContext)
     }
 
     @Test

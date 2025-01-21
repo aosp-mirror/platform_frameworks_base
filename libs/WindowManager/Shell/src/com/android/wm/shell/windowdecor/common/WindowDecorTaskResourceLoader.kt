@@ -16,7 +16,6 @@
 package com.android.wm.shell.windowdecor.common
 
 import android.annotation.DimenRes
-import android.app.ActivityManager
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
 import android.content.pm.ActivityInfo
@@ -29,6 +28,7 @@ import com.android.launcher3.icons.BaseIconFactory
 import com.android.launcher3.icons.BaseIconFactory.MODE_DEFAULT
 import com.android.launcher3.icons.IconProvider
 import com.android.wm.shell.R
+import com.android.wm.shell.common.UserProfileContexts
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
@@ -41,10 +41,10 @@ import java.util.concurrent.ConcurrentHashMap
  * A utility and cache for window decoration UI resources.
  */
 class WindowDecorTaskResourceLoader(
-    private val context: Context,
     shellInit: ShellInit,
     private val shellController: ShellController,
     private val shellCommandHandler: ShellCommandHandler,
+    private val userProfilesContexts: UserProfileContexts,
     private val iconProvider: IconProvider,
     private val headerIconFactory: BaseIconFactory,
     private val veilIconFactory: BaseIconFactory,
@@ -54,11 +54,12 @@ class WindowDecorTaskResourceLoader(
         shellInit: ShellInit,
         shellController: ShellController,
         shellCommandHandler: ShellCommandHandler,
+        userProfileContexts: UserProfileContexts,
     ) : this(
-        context,
         shellInit,
         shellController,
         shellCommandHandler,
+        userProfileContexts,
         IconProvider(context),
         headerIconFactory = context.createIconFactory(R.dimen.desktop_mode_caption_icon_radius),
         veilIconFactory = context.createIconFactory(R.dimen.desktop_mode_resize_veil_icon_size),
@@ -79,9 +80,6 @@ class WindowDecorTaskResourceLoader(
      */
     private val existingTasks = mutableSetOf<Int>()
 
-    @VisibleForTesting
-    lateinit var currentUserContext: Context
-
     init {
         shellInit.addInitCallback(this::onInit, this)
     }
@@ -90,14 +88,10 @@ class WindowDecorTaskResourceLoader(
         shellCommandHandler.addDumpCallback(this::dump, this)
         shellController.addUserChangeListener(object : UserChangeListener {
             override fun onUserChanged(newUserId: Int, userContext: Context) {
-                currentUserContext = userContext
                 // No need to hold on to resources for tasks of another profile.
                 taskToResourceCache.clear()
             }
         })
-        currentUserContext = context.createContextAsUser(
-            UserHandle.of(ActivityManager.getCurrentUser()), /* flags= */ 0
-        )
     }
 
     /** Returns the user readable name for this task. */
@@ -158,15 +152,20 @@ class WindowDecorTaskResourceLoader(
 
     private fun loadAppResources(taskInfo: RunningTaskInfo): AppResources {
         Trace.beginSection("$TAG#loadAppResources")
-        val pm = currentUserContext.packageManager
-        val activityInfo = getActivityInfo(taskInfo, pm)
-        val appName = pm.getApplicationLabel(activityInfo.applicationInfo)
-        val appIconDrawable = iconProvider.getIcon(activityInfo)
-        val badgedAppIconDrawable = pm.getUserBadgedIcon(appIconDrawable, taskInfo.userHandle())
-        val appIcon = headerIconFactory.createIconBitmap(badgedAppIconDrawable, /* scale= */ 1f)
-        val veilIcon = veilIconFactory.createScaledBitmap(appIconDrawable, MODE_DEFAULT)
-        Trace.endSection()
-        return AppResources(appName = appName, appIcon = appIcon, veilIcon = veilIcon)
+        try {
+            val pm = checkNotNull(userProfilesContexts[taskInfo.userId]?.packageManager) {
+                "Could not get context for user ${taskInfo.userId}"
+            }
+            val activityInfo = getActivityInfo(taskInfo, pm)
+            val appName = pm.getApplicationLabel(activityInfo.applicationInfo)
+            val appIconDrawable = iconProvider.getIcon(activityInfo)
+            val badgedAppIconDrawable = pm.getUserBadgedIcon(appIconDrawable, taskInfo.userHandle())
+            val appIcon = headerIconFactory.createIconBitmap(badgedAppIconDrawable, /* scale= */ 1f)
+            val veilIcon = veilIconFactory.createScaledBitmap(appIconDrawable, MODE_DEFAULT)
+            return AppResources(appName = appName, appIcon = appIcon, veilIcon = veilIcon)
+        } finally {
+            Trace.endSection()
+        }
     }
 
     private fun getActivityInfo(taskInfo: RunningTaskInfo, pm: PackageManager): ActivityInfo {
