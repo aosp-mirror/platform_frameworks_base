@@ -24,8 +24,8 @@
     <string name="installing" msgid="4921993079741206516">"Installeer tans …"</string>
     <string name="installing_app" msgid="1165095864863849422">"Installeer tans <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> …"</string>
     <string name="install_done" msgid="5987363587661783896">"App geïnstalleer."</string>
-    <string name="install_confirm_question" msgid="7663733664476363311">"Wil jy hierdie program installeer?"</string>
-    <string name="install_confirm_question_update" msgid="3348888852318388584">"Wil jy hierdie program opdateer?"</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"Wil jy hierdie app installeer?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Wil jy hierdie app opdateer?"</string>
     <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Dateer hierdie app op vanaf &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Hierdie app ontvang gewoonlik opdaterings vanaf &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. As jy vanaf ’n ander bron opdateer, kan jy in die toekoms dalk opdaterings vanaf enige bron op jou tablet kry. Appfunksies kan verander.&lt;/p&gt;"</string>
     <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Dateer hierdie app op vanaf &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Hierdie app ontvang gewoonlik opdaterings vanaf &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. As jy vanaf ’n ander bron opdateer, kan jy in die toekoms dalk opdaterings vanaf enige bron op jou TV kry. Appfunksies kan verander.&lt;/p&gt;"</string>
     <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Dateer hierdie app op vanaf &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Hierdie app ontvang gewoonlik opdaterings vanaf &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. As jy vanaf ’n ander bron opdateer, kan jy in die toekoms dalk opdaterings vanaf enige bron op jou foon kry. Appfunksies kan verander.&lt;/p&gt;"</string>
@@ -66,9 +66,9 @@
     <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Wil jy hierdie app wat in jou privaat ruimte is, argiveer? Jou persoonlike data sal gestoor word"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Wil jy hierdie app vir "<b>"alle"</b>" gebruikers deïnstalleer? Die app en sy data sal van "<b>"alle"</b>" gebruikers op hierdie toestel verwyder word."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Wil jy hierdie app vir die gebruiker <xliff:g id="USERNAME">%1$s</xliff:g> deïnstalleer?"</string>
-    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Wil jy hierdie program op jou werkprofiel deïnstalleer?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Wil jy hierdie app op jou werkprofiel deïnstalleer?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Vervang hierdie app met die fabriekweergawe? Alle data sal verwyder word."</string>
-    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Vervang hierdie program met die fabriekweergawe? Alle data sal verwyder word. Dit beïnvloed alle gebruikers van hierdie toestel, insluitend dié met werkprofiele."</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Vervang hierdie app met die fabriekweergawe? Alle data sal verwyder word. Dit beïnvloed alle gebruikers van hierdie toestel, insluitend dié met werkprofiele."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Hou <xliff:g id="SIZE">%1$s</xliff:g> se programdata."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Wil jy hierdie app uitvee?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Wil jy hierdie app deïnstalleer? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-kloon sal ook uitgevee word."</string>
