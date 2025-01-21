@@ -114,7 +114,6 @@ interface INotificationManager
     NotificationChannel getNotificationChannelForPackage(String pkg, int uid, String channelId, String conversationId, boolean includeDeleted);
     void deleteNotificationChannel(String pkg, String channelId);
     ParceledListSlice getNotificationChannels(String callingPkg, String targetPkg, int userId);
-    ParceledListSlice getOrCreateNotificationChannels(String callingPkg, String targetPkg, int userId, boolean createPrefsIfNeeded);
     ParceledListSlice getNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted);
     int getNumNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted);
     int getDeletedChannelCount(String pkg, int uid);
