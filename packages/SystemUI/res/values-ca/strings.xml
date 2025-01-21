@@ -531,6 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widgets"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Per afegir la drecera Widgets, assegura\'t que l\'opció Mostra els widgets a la pantalla de bloqueig estigui activada a la configuració."</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Configuració"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Botó Mostra l\'estalvi de pantalla"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Canvia d\'usuari"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menú desplegable"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Totes les aplicacions i les dades d\'aquesta sessió se suprimiran."</string>
@@ -591,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Notificacions"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Converses"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Esborra totes les notificacions silencioses"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"Obre la configuració de notificacions"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificacions pausades pel mode No molestis"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{No hi ha cap notificació}=1{{mode} ha posat en pausa les notificacions}=2{{mode} i un altre mode han posat en pausa les notificacions}many{{mode} i # de modes més han posat en pausa les notificacions}other{{mode} i # modes més han posat en pausa les notificacions}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Comença ara"</string>
@@ -707,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Seguiment del cap"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Toca per canviar el mode de timbre"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"mode de timbre"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>; toca per canviar el mode de timbre."</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"silenciar"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"deixar de silenciar"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrar"</string>
@@ -873,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Bloqueja la pantalla"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Crea una nota"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitasca"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Utilitza la pantalla dividida amb l\'aplicació actual a la dreta"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Utilitza la pantalla dividida amb l\'aplicació actual a l\'esquerra"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Canvia de pantalla dividida a pantalla completa"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Utilitzar la pantalla dividida amb l\'aplicació a la dreta"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Utilitzar la pantalla dividida amb l\'aplicació a l\'esquerra"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Canviar a pantalla completa"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Canvia a l\'aplicació de la dreta o de sota amb la pantalla dividida"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Canvia a l\'aplicació de l\'esquerra o de dalt amb la pantalla dividida"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Durant el mode de pantalla dividida: substitueix una app per una altra"</string>
@@ -1438,8 +1437,7 @@
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Icona de la tecla d\'acció o Meta"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Icona del signe més"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Personalitza"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"Restableix"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Fet"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Desplega la icona"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"o"</string>
@@ -1481,8 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Prem la tecla d\'acció al teclat"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Enhorabona!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Has completat el gest per veure totes les aplicacions"</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Animació del tutorial; fes clic per posar en pausa i reprendre la reproducció."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Retroil·luminació del teclat"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nivell %1$d de %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Controls de la llar"</string>

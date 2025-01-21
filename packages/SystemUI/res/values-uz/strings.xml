@@ -531,6 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Vidjetlar"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"“Vidjetlar” yorligʻini qoʻshish uchun sozlamalarda “Vidjetlarni ekran qulfida chiqarish” yoqilganini tekshiring."</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Sozlamalar"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Ekran lavhasi tugmasini chiqarish"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Foydalanuvchini almashtirish"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"tortib tushiriladigan menyu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Ushbu seansdagi barcha ilovalar va ma’lumotlar o‘chirib tashlanadi."</string>
@@ -591,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Bildirishnomalar"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Suhbatlar"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Barcha sokin bildirishnomalarni tozalash"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"Bildirishnoma sozlamalarini ochish"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Bezovta qilinmasin rejimida bildirishnomalar pauza qilinadi"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Bildirishnomalar yoʻq}=1{{mode} rejimi bildirishnomalarni pauza qilgan}=2{{mode} va yana bitta boshqa rejim bildirishnomalarni pauza qilgan}other{{mode} va # ta boshqa rejim bildirishnomalarni pauza qilgan}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Boshlash"</string>
@@ -858,12 +858,12 @@
     <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"Kirish bilan bogʻliq tezkor tugmalarni koʻrsatiladi"</string>
     <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"Ilovalarni ochuvchi tezkor tugmalar koʻrsatiladi"</string>
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Joriy ilova uchun tezkor tugmalar koʻrsatiladi"</string>
-    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Bildirishnomalarni ochish"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Bildirishnomalarni koʻrish"</string>
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"Skrinshot olish"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Yorliqlarni ochish"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Orqaga"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Bosh ekranni ochish"</string>
-    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Oxirgi ilovalarni ochish"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Oxirgi ilovalarni koʻrish"</string>
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Oxirgi ilovalarni oldinga varaqlash"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Oxirgi ilovalarni orqaga varaqlash"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Ilovalar roʻyxatini ochish"</string>
@@ -872,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Ekran qulfi"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Qayd yaratish"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multi-vazifalilik"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Ekranni ajratib, joriy ilovani oʻngga joylash"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Ekranni ajratib, joriy ilovani chapga joylash"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Ajratilgan ekran rejimidan butun ekranga almashtirish"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Ekranni ajratib, joriy ilovani oʻngga joylash"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Ekranni ajratib, joriy ilovani chapga joylash"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Butun ekran rejimiga kirish"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Ajratilgan ekranda oʻngdagi yoki pastdagi ilovaga almashish"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Ajratilgan ekranda chapdagi yoki yuqoridagi ilovaga almashish"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Ajratilgan rejimda ilovalarni oʻzaro almashtirish"</string>

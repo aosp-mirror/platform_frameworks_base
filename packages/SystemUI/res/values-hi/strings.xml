@@ -450,7 +450,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"हो गया"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"सेटिंग"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"चालू है"</string>
-    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"<xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g> • पर"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"चालू है • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"बंद है"</string>
     <string name="zen_mode_set_up" msgid="8231201163894922821">"सेट नहीं है"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"सेटिंग में जाकर मैनेज करें"</string>
@@ -529,10 +529,9 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"किसी विजेट से कोई ऐप्लिकेशन खोलने के लिए, आपको अपनी पहचान की पुष्टि करनी होगी. ध्यान रखें कि आपके टैबलेट के लॉक होने पर भी, कोई व्यक्ति विजेट देख सकता है. ऐसा हो सकता है कि कुछ विजेट, लॉक स्क्रीन पर दिखाने के लिए न बने हों. इन्हें लॉक स्क्रीन पर जोड़ना असुरक्षित हो सकता है."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"ठीक है"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"विजेट"</string>
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
-    <skip />
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
-    <skip />
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\"विजेट\" शॉर्टकट जोड़ने के लिए, पक्का करें कि सेटिंग में \"लॉक स्क्रीन पर विजेट दिखाएं\" चालू हो."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"सेटिंग"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"स्क्रीन सेवर दिखाने का बटन"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"उपयोगकर्ता बदलें"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"पुलडाउन मेन्यू"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"इस सेशन के सभी ऐप्लिकेशन और डेटा को हटा दिया जाएगा."</string>
@@ -593,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"सूचनाएं"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"बातचीत"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"बिना आवाज़ की सभी सूचनाएं हटाएं"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"सूचना सेटिंग खोलें"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'परेशान न करें\' सुविधा के ज़रिए कुछ समय के लिए सूचनाएं दिखाना रोक दिया गया है"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{कोई सूचना नहीं है}=1{{mode} की वजह से सूचना नहीं दिख रही है}=2{{mode} और एक अन्य मोड की वजह से सूचना नहीं दिख रही है}one{{mode} और # अन्य मोड की वजह से सूचना नहीं दिख रही है}other{{mode} और # अन्य मोड के की वजह से सूचनाएं नहीं दिख रही है}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"अभी शुरू करें"</string>
@@ -709,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"हेड ट्रैकिंग चालू है"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"रिंगर मोड बदलने के लिए टैप करें"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"रिंगर मोड"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>, रिंगर मोड बदलने के लिए टैप करें"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"म्यूट करें"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"अनम्यूट करें"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"वाइब्रेशन की सुविधा चालू करें"</string>
@@ -875,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"स्क्रीन लॉक करने के लिए"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"नोट बनाने के लिए"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"मल्टीटास्किंग (एक साथ कई काम करना)"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"स्प्लिट स्क्रीन में मौजूदा ऐप्लिकेशन को दाईं ओर दिखाने के लिए"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"स्प्लिट स्क्रीन में मौजूदा ऐप्लिकेशन को बाईं ओर दिखाने के लिए"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"स्प्लिट स्क्रीन से फ़ुल स्क्रीन मोड पर स्विच करने के लिए"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"स्प्लिट स्क्रीन की सुविधा चालू करें और इस ऐप्लिकेशन को दाईं ओर दिखाएं"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"स्प्लिट स्क्रीन की सुविधा चालू करें और इस ऐप्लिकेशन को बाईं ओर दिखाएं"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"फ़ुल स्क्रीन पर स्विच करें"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"स्प्लिट स्क्रीन पर, दाईं ओर या नीचे के ऐप पर स्विच करने के लिए"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"स्प्लिट स्क्रीन पर, बाईं ओर या ऊपर के ऐप पर स्विच करने के लिए"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"स्प्लिट स्क्रीन के दौरान: एक ऐप्लिकेशन को दूसरे ऐप्लिकेशन से बदलें"</string>
@@ -1430,20 +1427,17 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"कीबोर्ड शॉर्टकट"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"कीबोर्ड शॉर्टकट को पसंद के मुताबिक बनाएं"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"क्या आपको शॉर्टकट हटाना है?"</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"क्या आपको फिर से डिफ़ॉल्ट सेटिंग चालू करनी है?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"शॉर्टकट असाइन करने के लिए बटन दबाएं"</string>
-    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"ऐसा करने से, आपका कस्टम शॉर्टकट हमेशा के लिए मिट जाएगा."</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
-    <skip />
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"ऐसा करने पर, पसंद के मुताबिक बनाया गया आपका शॉर्टकट हमेशा के लिए मिट जाएगा."</string>
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"ऐसा करने पर, पसंद के मुताबिक बनाए गए आपके सभी शॉर्टकट हमेशा के लिए मिट जाएंगे."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"शॉर्टकट खोजें"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"खोज का कोई नतीजा नहीं मिला"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"छोटा करने का आइकॉन"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"ऐक्शन या मेटा बटन का आइकॉन"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"प्लस का आइकॉन"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"पसंद के मुताबिक बनाएं"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"रीसेट करें"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"हो गया"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"बड़ा करने का आइकॉन"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"या"</string>
@@ -1453,8 +1447,7 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"कीबोर्ड सेटिंग"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"शॉर्टकट सेट करें"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"हटाएं"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"हां, रीसेट करें"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"रद्द करें"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"बटन दबाएं"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"बटन का यह कॉम्बिनेशन पहले से इस्तेमाल किया जा रहा है. कोई दूसरा कॉम्बिनेशन आज़माएं."</string>
@@ -1486,8 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"अपने कीबोर्ड पर ऐक्शन बटन दबाएं"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"बहुत खूब!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"अब आपको हाथ के जेस्चर का इस्तेमाल करके, सभी ऐप्लिकेशन देखने का तरीका पता चल गया है"</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"ट्यूटोरियल ऐनिमेशन को रोकने और इन्हें फिर से चलाने के लिए क्लिक करें."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"कीबोर्ड की बैकलाइट"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d में से %1$d लेवल"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"होम कंट्रोल"</string>

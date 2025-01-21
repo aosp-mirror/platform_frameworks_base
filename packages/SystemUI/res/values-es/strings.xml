@@ -531,6 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widgets"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Para añadir el acceso directo Widgets, asegúrate de que la opción Mostrar widgets en la pantalla de bloqueo esté habilitada en los ajustes."</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Ajustes"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Botón para mostrar el salvapantallas"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Cambiar de usuario"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menú desplegable"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Se eliminarán todas las aplicaciones y datos de esta sesión."</string>
@@ -591,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Notificaciones"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversaciones"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Borrar todas las notificaciones silenciosas"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"Abrir los ajustes de notificaciones"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificaciones pausadas por el modo No molestar"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{No hay notificaciones}=1{Notificaciones pausadas por {mode}}=2{Notificaciones pausadas por {mode} y un modo más}many{Notificaciones pausadas por {mode} y # modos más}other{Notificaciones pausadas por {mode} y # modos más}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Empezar ahora"</string>
@@ -707,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Seguimiento de cabeza"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Toca para cambiar el modo de timbre"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"modo de timbre"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>, toca para cambiar el modo de timbre"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"silenciar"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"dejar de silenciar"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrar"</string>
@@ -873,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Pantalla de bloqueo"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Escribir una nota"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitarea"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Usar la pantalla dividida con la aplicación actual a la derecha"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Usar la pantalla dividida con la aplicación actual a la izquierda"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Cambiar de pantalla dividida a pantalla completa"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Usar la pantalla dividida con la aplicación a la derecha"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Usar la pantalla dividida con la aplicación a la izquierda"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Cambiar a pantalla completa"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Cambiar a la aplicación de la derecha o de abajo en pantalla dividida"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Cambiar a la app de la izquierda o de arriba en pantalla dividida"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Con pantalla dividida: reemplazar una aplicación por otra"</string>
@@ -1432,14 +1431,13 @@
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Pulsa una tecla para asignar una combinación de teclas"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Se eliminará tu combinación de teclas personalizada de forma permanente."</string>
     <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Se eliminarán todos tus accesos directos personalizados de forma permanente."</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Atajos de búsqueda"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Buscar accesos directos"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"No hay resultados de búsqueda"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Icono de contraer"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Icono de la tecla de acción o de la tecla Meta"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Icono de más"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Personalizar"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"Restablecer"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Hecho"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Icono de desplegar"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"o"</string>
@@ -1481,8 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Pulsa la tecla de acción de tu teclado"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"¡Muy bien!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Has completado el gesto para ver todas las aplicaciones"</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Animación del tutorial, haz clic para pausar y reanudar la reproducción."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Retroiluminación del teclado"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nivel %1$d de %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Controles de la casa"</string>
@@ -1503,7 +1500,7 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"Desliza hacia arriba con tres dedos y mantén pulsado. Toca para aprender a usar más gestos."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Usa el teclado para ver todas las aplicaciones"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Pulsa la tecla de acción en cualquier momento. Toca para aprender a usar más gestos."</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"La atenuación extra ahora forma parte del control deslizante de brillo"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"La atenuación extra ahora forma parte del control deslizante de brillo"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Ahora puedes atenuar aún más tu pantalla reduciendo el nivel de brillo.\n\nComo esta función ahora forma parte del control deslizante de brillo, se van a quitar los accesos directos de atenuación extra."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"Eliminar accesos directos de atenuación extra"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"Accesos directos de atenuación extra eliminados"</string>

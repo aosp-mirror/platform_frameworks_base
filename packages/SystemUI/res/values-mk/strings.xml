@@ -529,10 +529,9 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"За да отворите апликација со помош на виџет, ќе треба да потврдите дека сте вие. Покрај тоа, имајте предвид дека секој може да ги гледа виџетите, дури и кога вашиот таблет е заклучен. Некои виџети можеби не се наменети за вашиот заклучен екран, па можеби не е безбедно да се додадат овде."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Сфатив"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Виџети"</string>
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
-    <skip />
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
-    <skip />
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"За да ја додадете кратенката „Виџети“, погрижете се да биде овозможен „Прикажување виџети на заклучен екран“ во „Поставки“."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Поставки"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Копче за прикажување на штедачот на екран"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Промени го корисникот"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"паѓачко мени"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Сите апликации и податоци во сесијава ќе се избришат."</string>
@@ -593,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Известувања"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Разговори"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Избриши ги сите бесчујни известувања"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"Отвори ги поставките за известувања"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Известувањата се паузирани од „Не вознемирувај“"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Нема известувања}=1{Известувањата ги паузираше {mode}}=2{Известувањата ги паузираа {mode} и уште еден режим}one{Известувањата ги паузираа {mode} и уште # режим}other{Известувањата ги паузираа {mode} и уште # режими}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Започни сега"</string>
@@ -709,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Следење на главата"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Допрете за да го промените режимот на ѕвончето"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"режим на ѕвонче"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>, допрете за да го промените режимот на ѕвончето"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"исклучен звук"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"вклучен звук"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"вибрации"</string>
@@ -875,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Заклучете го екранот"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Фатете белешка"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Мултитаскинг"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Користете поделен екран со тековната апликација оддесно"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Користете поделен екран со тековната апликација одлево"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Префрлете се од поделен екран на цел екран"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Користете поделен екран со апликацијата оддесно"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Користете поделен екран со апликацијата одлево"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Префрлете се на цел екран"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Префрлете се на апликацијата десно или долу при користењето поделен екран"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Префрлете се на апликацијата лево или горе при користењето поделен екран"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"При поделен екран: префрлете ги аплик. од едната на другата страна"</string>
@@ -887,8 +884,8 @@
     <string name="system_desktop_mode_toggle_maximize_window" msgid="4084100093691768239">"Максимизирај го прозорецот"</string>
     <string name="system_desktop_mode_minimize_window" msgid="1248714536732927092">"Минимизирај го прозорецот"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Внесување"</string>
-    <string name="input_switch_input_language_next" msgid="3782155659868227855">"Префрлете на следниот јазик"</string>
-    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Префрлете на претходниот јазик"</string>
+    <string name="input_switch_input_language_next" msgid="3782155659868227855">"Префрлете се на следниот јазик"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Префрлете се на претходниот јазик"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Пристапете до емоџијата"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Пристапете до гласовното пишување"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Апликации"</string>
@@ -1430,20 +1427,17 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Кратенки од тастатура"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Приспособете ги кратенките од тастатурата"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Да се отстрани кратенката?"</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
-    <skip />
-    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Притиснете го копчето за да доделите кратенка"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Да се ресетира на стандардните поставки?"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Притиснете копче за да доделите кратенка"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Ова ќе ја избрише вашата приспособена кратенка трајно."</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Ова ќе ги избрише трајно сите ваши приспособени кратенки."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Пребарувајте кратенки"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Нема резултати од пребарување"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Икона за собирање"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Икона за дејство или копче за дејство"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Икона плус"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Приспособете"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"Ресетирај"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Готово"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Икона за проширување"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"или"</string>
@@ -1451,12 +1445,11 @@
     <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"коса црта"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Рачка за влечење"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Поставки за тастатурата"</string>
-    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Поставете кратенка"</string>
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Постави"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Отстрани"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Да, ресетирај"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Откажи"</string>
-    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Притиснете го копчето"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Притиснете копче"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Комбинацијата на копчиња веќе се користи. Обидете се со друго копче."</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Кратенката не може да се постави."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
@@ -1486,8 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Притиснете го копчето за дејство на тастатурата"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Браво!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Го завршивте движењето за прегледување на сите апликации"</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Анимација за упатство, кликнете за да го паузирате и да го продолжите пуштањето."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Осветлување на тастатура"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Ниво %1$d од %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Контроли за домот"</string>

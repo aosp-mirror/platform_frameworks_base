@@ -531,6 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"ធាតុ​ក្រាហ្វិក"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"ដើម្បីបញ្ចូលផ្លូវកាត់ \"ធាតុ​ក្រាហ្វិក\" ត្រូវប្រាកដថា \"បង្ហាញធាតុ​ក្រាហ្វិកនៅលើអេក្រង់ចាក់សោ\" ត្រូវបានបើកនៅក្នុងការកំណត់។"</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"ការកំណត់"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"បង្ហាញប៊ូតុងធាតុ​រក្សា​អេក្រង់"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ប្ដូរ​អ្នក​ប្រើ"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ម៉ឺនុយ​ទាញចុះ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"កម្មវិធី និងទិន្នន័យ​ទាំងអស់​ក្នុង​វគ្គ​នេះ​នឹង​ត្រូវ​លុប។"</string>
@@ -591,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"ការជូនដំណឹង"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ការសន្ទនា"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"សម្អាត​ការជូនដំណឹង​ស្ងាត់ទាំងអស់"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"បើកការកំណត់ការជូនដំណឹង"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"ការជូនដំណឹង​បានផ្អាក​ដោយ​មុខងារកុំរំខាន"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{គ្មាន​ការជូន​ដំណឹង}=1{ការជូនដំណឹង​ត្រូវបាន​ផ្អាកដោយ {mode}}=2{ការជូនដំណឹង​ត្រូវបាន​ផ្អាកដោយ {mode} និង​មុខងារមួយ​ផ្សេងទៀត}other{ការជូនដំណឹង​ត្រូវបាន​ផ្អាកដោយ {mode} និង​មុខងារ # ផ្សេងទៀត}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ចាប់ផ្ដើម​ឥឡូវ"</string>
@@ -707,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"រេតាមក្បាល"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"ចុច​ដើម្បីប្ដូរ​មុខងារ​រោទ៍"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"មុខងារកម្មវិធី​រោទ៍"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g> ចុចដើម្បីប្ដូរមុខងារកម្មវិធី​រោទ៍"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"បិទ​សំឡេង"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"បើក​សំឡេង"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"ញ័រ"</string>
@@ -873,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ចាក់​សោ​អេក្រង់"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"កត់​ចំណាំ"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"ការដំណើរការបានច្រើន"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"ប្រើមុខងារបំបែកអេក្រង់ជាមួយកម្មវិធីបច្ចុប្បន្ននៅខាងស្ដាំ"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"ប្រើមុខងារបំបែកអេក្រង់ជាមួយកម្មវិធីបច្ចុប្បន្ននៅខាងឆ្វេង"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"ប្ដូរពីមុខងារ​បំបែកអេក្រង់ទៅជាអេក្រង់ពេញ"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"ប្រើមុខងារបំបែកអេក្រង់ជាមួយកម្មវិធីនៅខាងស្ដាំ"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"ប្រើមុខងារបំបែកអេក្រង់ជាមួយកម្មវិធីនៅខាងឆ្វេង"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"ប្ដូរទៅ​អេក្រង់ពេញ"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"ប្ដូរទៅកម្មវិធីនៅខាងស្ដាំ ឬខាងក្រោម ពេលកំពុងប្រើមុខងារ​បំបែកអេក្រង់"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"ប្ដូរទៅកម្មវិធីនៅខាងឆ្វេង ឬខាងលើ ពេលកំពុងប្រើមុខងារ​បំបែកអេក្រង់"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"ក្នុងអំឡុងពេលប្រើមុខងារបំបែកអេក្រង់៖ ជំនួសកម្មវិធីពីមួយទៅមួយទៀត"</string>
@@ -1421,7 +1420,7 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"កម្មវិធី​ប្រព័ន្ធ"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"ការធ្វើកិច្ចការច្រើន"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"មុខងារ​បំបែកអេក្រង់"</string>
-    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ធាតុចូល"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"វិធីបញ្ចូល"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"ផ្លូវកាត់​កម្មវិធី"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"កម្មវិធីបច្ចុប្បន្ន"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ភាពងាយស្រួល"</string>
@@ -1438,8 +1437,7 @@
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"រូបគ្រាប់ចុចសកម្មភាព ឬមេតា"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"រូបសញ្ញាបូក"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"ប្ដូរ​តាម​បំណង"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"កំណត់​ឡើងវិញ"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"រួចរាល់"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"រូបតំណាង \"ពង្រីក\""</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ឬ"</string>
@@ -1452,7 +1450,7 @@
     <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"បាទ/ចាស កំណត់ឡើងវិញ"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"បោះបង់"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"ចុចគ្រាប់ចុច"</string>
-    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"កំពុងប្រើបន្សំគ្រាប់ចុចស្រាប់ហើយ។ សាកល្បងប្រើគ្រាប់ចុចផ្សេង។"</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"បន្សំគ្រាប់ចុចនេះត្រូវបានប្រើប្រាស់ហើយ។ សាកល្បងគ្រាប់ចុចផ្សេង។"</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"មិនអាចកំណត់ផ្លូវកាត់បានទេ។"</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"រុករកដោយប្រើក្ដារចុចរបស់អ្នក"</string>
@@ -1481,8 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"ចុចគ្រាប់ចុចសកម្មភាពលើក្ដារចុចរបស់អ្នក"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"ធ្វើបាន​ល្អ!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"អ្នកបានបញ្ចប់ចលនាមើលកម្មវិធីទាំងអស់ហើយ"</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"រូបមានចលនាក្នុងអំឡុងមេរៀន ចុចដើម្បីផ្អាក រួចបន្តការចាក់ឡើងវិញ។"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ពន្លឺក្រោយក្ដារចុច"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"កម្រិតទី %1$d នៃ %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ការគ្រប់គ្រង​ផ្ទះ"</string>
