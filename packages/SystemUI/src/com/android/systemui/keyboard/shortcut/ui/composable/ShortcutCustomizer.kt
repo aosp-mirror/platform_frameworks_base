@@ -107,16 +107,13 @@ private fun AddShortcutDialog(
     onCancel: () -> Unit,
     onConfirmSetShortcut: () -> Unit,
 ) {
-    Column(modifier = modifier) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Title(uiState.shortcutLabel)
         Description(
             text = stringResource(id = R.string.shortcut_customize_mode_add_shortcut_description)
         )
         PromptShortcutModifier(
-            modifier =
-                Modifier.padding(top = 24.dp, start = 116.5.dp, end = 116.5.dp)
-                    .width(131.dp)
-                    .height(48.dp),
+            modifier = Modifier.padding(top = 24.dp).sizeIn(minWidth = 131.dp, minHeight = 48.dp),
             defaultModifierKey = uiState.defaultCustomShortcutModifierKey,
         )
         SelectedKeyCombinationContainer(
@@ -216,14 +213,14 @@ private fun DialogButtons(
             modifier = Modifier.heightIn(40.dp),
             contentColor = MaterialTheme.colorScheme.primary,
             text = stringResource(R.string.shortcut_helper_customize_dialog_cancel_button_label),
-            border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
+            border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant),
         )
         Spacer(modifier = Modifier.width(8.dp))
         ShortcutHelperButton(
-            modifier = Modifier
-                .heightIn(40.dp)
-                .focusRequester(focusRequester)
-                .focusProperties { canFocus = true }, // enable focus on touch/click mode
+            modifier =
+                Modifier.heightIn(40.dp).focusRequester(focusRequester).focusProperties {
+                    canFocus = true
+                }, // enable focus on touch/click mode
             onClick = onConfirm,
             color = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -236,7 +233,10 @@ private fun DialogButtons(
 @Composable
 private fun ErrorMessageContainer(errorMessage: String) {
     if (errorMessage.isNotEmpty()) {
-        Box(modifier = Modifier.padding(horizontal = 16.dp).width(332.dp).height(40.dp)) {
+        Box(
+            modifier =
+                Modifier.padding(horizontal = 16.dp).sizeIn(minWidth = 332.dp, minHeight = 40.dp)
+        ) {
             Text(
                 text = errorMessage,
                 style = MaterialTheme.typography.bodyMedium,
@@ -405,7 +405,11 @@ private fun PromptShortcutModifier(
     modifier: Modifier,
     defaultModifierKey: ShortcutKey.Icon.ResIdIcon,
 ) {
-    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         ActionKeyContainer(defaultModifierKey)
         PlusIconContainer()
     }
@@ -422,6 +426,7 @@ private fun ActionKeyContainer(defaultModifierKey: ShortcutKey.Icon.ResIdIcon) {
                 )
                 .padding(all = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         ActionKeyIcon(defaultModifierKey)
         ActionKeyText()
