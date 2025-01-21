@@ -370,7 +370,8 @@ class SplashscreenWindowCreator extends AbsSplashWindowCreator {
 
     private void removeWindowInner(@NonNull View decorView, boolean hideView) {
         requestTopUi(false);
-        if (!decorView.isAttachedToWindow()) {
+        if (decorView.getParent() == null) {
+            Slog.w(TAG, "This root view has no parent, never been added to a ViewRootImpl?");
             return;
         }
         if (hideView) {
