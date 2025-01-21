@@ -607,8 +607,24 @@ sealed class UserActionResult(
         val overlay: OverlayKey,
         override val transitionKey: TransitionKey? = null,
         override val requiresFullDistanceSwipe: Boolean = false,
+
+        /** Specify which overlays (if any) should be hidden when this user action is started. */
+        val hideCurrentOverlays: HideCurrentOverlays = HideCurrentOverlays.None,
     ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
         override fun toContent(currentScene: SceneKey): ContentKey = overlay
+
+        sealed class HideCurrentOverlays {
+            /** Hide none of the current overlays. */
+            object None : HideCurrentOverlays()
+
+            /** Hide all current overlays. */
+            object All : HideCurrentOverlays()
+
+            /** Hide [overlays], for those in that set that are currently shown. */
+            class Some(val overlays: Set<OverlayKey>) : HideCurrentOverlays() {
+                constructor(vararg overlays: OverlayKey) : this(overlays.toSet())
+            }
+        }
     }
 
     /** A [UserActionResult] that hides [overlay]. */
