@@ -55,6 +55,7 @@ import com.android.wm.shell.common.DisplayInsetsController
 import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.compatui.DesktopModeCompatPolicy
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler
 import com.android.wm.shell.desktopmode.DesktopImmersiveController
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger
@@ -161,6 +162,7 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
     val display = mock<Display>()
     protected lateinit var spyContext: TestableContext
     private lateinit var desktopModeEventLogger: DesktopModeEventLogger
+    private lateinit var desktopModeCompatPolicy: DesktopModeCompatPolicy
 
     private val transactionFactory = Supplier<SurfaceControl.Transaction> {
         SurfaceControl.Transaction()
@@ -188,6 +190,7 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
         whenever(mockDisplayController.getDisplay(any())).thenReturn(display)
         whenever(mockDesktopUserRepositories.getProfile(anyInt()))
             .thenReturn(mockDesktopRepository)
+        desktopModeCompatPolicy = DesktopModeCompatPolicy(context)
         desktopModeWindowDecorViewModel = DesktopModeWindowDecorViewModel(
             spyContext,
             testShellExecutor,
@@ -230,6 +233,7 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
             mock<DesktopModeUiEventLogger>(),
             mock<WindowDecorTaskResourceLoader>(),
             mockRecentsTransitionHandler,
+            desktopModeCompatPolicy,
         )
         desktopModeWindowDecorViewModel.setSplitScreenController(mockSplitScreenController)
         whenever(mockDisplayController.getDisplayLayout(any())).thenReturn(mockDisplayLayout)

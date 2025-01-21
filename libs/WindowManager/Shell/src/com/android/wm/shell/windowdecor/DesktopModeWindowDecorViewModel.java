@@ -32,7 +32,6 @@ import static android.view.WindowInsets.Type.statusBars;
 
 import static com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU;
 import static com.android.window.flags.Flags.enableDisplayFocusInShellTransitions;
-import static com.android.wm.shell.compatui.AppCompatUtils.isTopActivityExemptFromDesktopWindowing;
 import static com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod;
 import static com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason;
 import static com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger;
@@ -109,6 +108,7 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIController;
+import com.android.wm.shell.compatui.DesktopModeCompatPolicy;
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler;
 import com.android.wm.shell.desktopmode.DesktopImmersiveController;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
@@ -254,6 +254,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
     private final DesktopModeUiEventLogger mDesktopModeUiEventLogger;
     private final WindowDecorTaskResourceLoader mTaskResourceLoader;
     private final RecentsTransitionHandler mRecentsTransitionHandler;
+    private final DesktopModeCompatPolicy mDesktopModeCompatPolicy;
 
     public DesktopModeWindowDecorViewModel(
             Context context,
@@ -290,7 +291,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             DesktopModeEventLogger desktopModeEventLogger,
             DesktopModeUiEventLogger desktopModeUiEventLogger,
             WindowDecorTaskResourceLoader taskResourceLoader,
-            RecentsTransitionHandler recentsTransitionHandler) {
+            RecentsTransitionHandler recentsTransitionHandler,
+            DesktopModeCompatPolicy desktopModeCompatPolicy) {
         this(
                 context,
                 shellExecutor,
@@ -332,7 +334,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 desktopModeEventLogger,
                 desktopModeUiEventLogger,
                 taskResourceLoader,
-                recentsTransitionHandler);
+                recentsTransitionHandler,
+                desktopModeCompatPolicy);
     }
 
     @VisibleForTesting
@@ -377,7 +380,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             DesktopModeEventLogger desktopModeEventLogger,
             DesktopModeUiEventLogger desktopModeUiEventLogger,
             WindowDecorTaskResourceLoader taskResourceLoader,
-            RecentsTransitionHandler recentsTransitionHandler) {
+            RecentsTransitionHandler recentsTransitionHandler,
+            DesktopModeCompatPolicy desktopModeCompatPolicy) {
         mContext = context;
         mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
@@ -447,6 +451,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         mDesktopModeUiEventLogger = desktopModeUiEventLogger;
         mTaskResourceLoader = taskResourceLoader;
         mRecentsTransitionHandler = recentsTransitionHandler;
+        mDesktopModeCompatPolicy = desktopModeCompatPolicy;
 
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -1653,7 +1658,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             return false;
         }
         if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODALS_POLICY.isTrue()
-                && isTopActivityExemptFromDesktopWindowing(mContext, taskInfo)) {
+                && mDesktopModeCompatPolicy.isTopActivityExemptFromDesktopWindowing(taskInfo)) {
             return false;
         }
         if (isPartOfDefaultHomePackage(taskInfo)) {
