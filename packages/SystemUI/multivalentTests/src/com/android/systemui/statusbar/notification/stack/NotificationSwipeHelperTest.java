@@ -405,7 +405,7 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
         doNothing().when(mSwipeHelper).superSnapChild(mNotificationRow, 0, 0);
         mSwipeHelper.snapChild(mNotificationRow, 0, 0);
 
-        verify(mCallback, times(1)).onDragCancelled(mNotificationRow);
+        verify(mCallback, times(1)).onDragCancelledWithVelocity(mNotificationRow, 0);
         verify(mSwipeHelper, times(1)).superSnapChild(mNotificationRow, 0, 0);
         verify(mSwipeHelper, times(1)).handleMenuCoveredOrDismissed();
     }
@@ -416,7 +416,7 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
         doNothing().when(mSwipeHelper).superSnapChild(mNotificationRow, 10, 0);
         mSwipeHelper.snapChild(mNotificationRow, 10, 0);
 
-        verify(mCallback, times(1)).onDragCancelled(mNotificationRow);
+        verify(mCallback, times(1)).onDragCancelledWithVelocity(mNotificationRow, 0);
         verify(mSwipeHelper, times(1)).superSnapChild(mNotificationRow, 10, 0);
         verify(mSwipeHelper, times(0)).handleMenuCoveredOrDismissed();
     }
@@ -426,7 +426,7 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
         doNothing().when(mSwipeHelper).superSnapChild(mView, 10, 0);
         mSwipeHelper.snapChild(mView, 10, 0);
 
-        verify(mCallback).onDragCancelled(mView);
+        verify(mCallback).onDragCancelledWithVelocity(mView, 0);
         verify(mSwipeHelper, never()).superSnapChild(mView, 10, 0);
     }
 

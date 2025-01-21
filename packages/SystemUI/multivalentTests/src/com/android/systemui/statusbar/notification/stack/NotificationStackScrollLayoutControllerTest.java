@@ -165,6 +165,8 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock
     private SensitiveNotificationProtectionController mSensitiveNotificationProtectionController;
     @Mock private ExpandHelper mExpandHelper;
+    @Mock private MagneticNotificationRowManager mMagneticNotificationRowManager;
+    @Mock private NotificationSectionsManager mSectionsManager;
 
     @Captor
     private ArgumentCaptor<Runnable> mSensitiveStateListenerArgumentCaptor;
@@ -798,7 +800,9 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mActivityStarter,
                 new ResourcesSplitShadeStateController(),
                 mSensitiveNotificationProtectionController,
-                mWallpaperInteractor);
+                mWallpaperInteractor,
+                mMagneticNotificationRowManager,
+                mSectionsManager);
     }
 
     static class LogMatcher implements ArgumentMatcher<LogMaker> {

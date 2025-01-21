@@ -188,6 +188,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     private final NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     private final StackStateLogger mStackStateLogger;
     private final NotificationStackScrollLogger mLogger;
+    private final MagneticNotificationRowManager mMagneticNotificationRowManager;
+    private final NotificationSectionsManager mSectionsManager;
 
     private final GroupExpansionManager mGroupExpansionManager;
     private NotificationStackScrollLayout mView;
@@ -465,6 +467,28 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                 }
 
                 @Override
+                public void onDensityScaleChange(float density) {
+                    mMagneticNotificationRowManager.setSwipeThresholdPx(
+                            density * MagneticNotificationRowManager.MAGNETIC_DETACH_THRESHOLD_DP
+                    );
+                }
+
+                @Override
+                public boolean handleSwipeableViewTranslation(SwipeableView view, float translate) {
+                    if (view instanceof ExpandableNotificationRow row) {
+                        return mMagneticNotificationRowManager
+                                .setMagneticRowTranslation(row, translate);
+                    } else {
+                        return false;
+                    }
+                }
+
+                @Override
+                public void resetMagneticStates() {
+                    mMagneticNotificationRowManager.reset();
+                }
+
+                @Override
                 public void onSnooze(StatusBarNotification sbn,
                         NotificationSwipeActionHelper.SnoozeOption snoozeOption) {
                     mNotificationsController.setNotificationSnoozed(sbn, snoozeOption);
@@ -477,6 +501,14 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
                 @Override
                 public void onDragCancelled(View v) {
+                }
+
+                @Override
+                public void onDragCancelledWithVelocity(View v, float finalVelocity) {
+                    if (v instanceof ExpandableNotificationRow row) {
+                        mMagneticNotificationRowManager.onMagneticInteractionEnd(
+                                row, finalVelocity);
+                    }
                 }
 
                 /**
@@ -506,6 +538,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                  */
 
                 public void handleChildViewDismissed(View view) {
+                    if (view instanceof ExpandableNotificationRow row) {
+                        mMagneticNotificationRowManager.onMagneticInteractionEnd(
+                                row, null /* velocity */);
+                    }
                     // The View needs to clean up the Swipe states, e.g. roundness.
                     mView.onSwipeEnd();
                     if (mView.getClearAllInProgress()) {
@@ -577,6 +613,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
                 @Override
                 public void onBeginDrag(View v) {
+                    if (v instanceof ExpandableNotificationRow row) {
+                        mMagneticNotificationRowManager.setMagneticAndRoundableTargets(
+                                row, mView, mSectionsManager);
+                    }
                     mView.onSwipeBegin(v);
                 }
 
@@ -691,7 +731,9 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             ActivityStarter activityStarter,
             SplitShadeStateController splitShadeStateController,
             SensitiveNotificationProtectionController sensitiveNotificationProtectionController,
-            WallpaperInteractor wallpaperInteractor) {
+            WallpaperInteractor wallpaperInteractor,
+            MagneticNotificationRowManager magneticNotificationRowManager,
+            NotificationSectionsManager sectionsManager) {
         mView = view;
         mViewBinder = viewBinder;
         mStackStateLogger = stackLogger;
@@ -742,6 +784,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         mSensitiveNotificationProtectionController = sensitiveNotificationProtectionController;
         mWallpaperInteractor = wallpaperInteractor;
         mView.passSplitShadeStateController(splitShadeStateController);
+        mMagneticNotificationRowManager = magneticNotificationRowManager;
+        mSectionsManager = sectionsManager;
         if (SceneContainerFlag.isEnabled()) {
             mWakeUpCoordinator.setStackScroller(this);
         }
