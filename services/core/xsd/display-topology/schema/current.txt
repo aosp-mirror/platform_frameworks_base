@@ -1,0 +1,64 @@
+// Signature format: 2.0
+package com.android.server.display.topology {
+
+  public class Children {
+    ctor public Children();
+    method public java.util.List<com.android.server.display.topology.Display> getDisplay();
+  }
+
+  public class Display {
+    ctor public Display();
+    method public com.android.server.display.topology.Children getChildren();
+    method public String getId();
+    method public float getOffset();
+    method public com.android.server.display.topology.Position getPosition();
+    method public boolean getPrimary();
+    method public void setChildren(com.android.server.display.topology.Children);
+    method public void setId(String);
+    method public void setOffset(float);
+    method public void setPosition(com.android.server.display.topology.Position);
+    method public void setPrimary(boolean);
+  }
+
+  public class DisplayTopologyState {
+    ctor public DisplayTopologyState();
+    method public java.util.List<com.android.server.display.topology.Topology> getTopology();
+    method public int getVersion();
+    method public void setVersion(int);
+  }
+
+  public enum Position {
+    method public String getRawName();
+    enum_constant public static final com.android.server.display.topology.Position bottom;
+    enum_constant public static final com.android.server.display.topology.Position left;
+    enum_constant public static final com.android.server.display.topology.Position right;
+    enum_constant public static final com.android.server.display.topology.Position top;
+  }
+
+  public class Topology {
+    ctor public Topology();
+    method public com.android.server.display.topology.Display getDisplay();
+    method public String getId();
+    method public boolean getImmutable();
+    method public int getOrder();
+    method public void setDisplay(com.android.server.display.topology.Display);
+    method public void setId(String);
+    method public void setImmutable(boolean);
+    method public void setOrder(int);
+  }
+
+  public class XmlParser {
+    ctor public XmlParser();
+    method public static com.android.server.display.topology.DisplayTopologyState read(java.io.InputStream) throws javax.xml.datatype.DatatypeConfigurationException, java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static String readText(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static void skip(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+  }
+
+  public class XmlWriter implements java.io.Closeable {
+    ctor public XmlWriter(java.io.PrintWriter);
+    method public void close();
+    method public static void write(com.android.server.display.topology.XmlWriter, com.android.server.display.topology.DisplayTopologyState) throws java.io.IOException;
+  }
+
+}
+
