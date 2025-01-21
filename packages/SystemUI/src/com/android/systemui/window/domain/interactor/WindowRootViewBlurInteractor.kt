@@ -17,13 +17,23 @@
 package com.android.systemui.window.domain.interactor
 
 import android.util.Log
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.window.data.repository.WindowRootViewBlurRepository
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 /**
  * Interactor that provides the blur state for the window root view
@@ -33,9 +43,21 @@ import kotlinx.coroutines.flow.asStateFlow
 class WindowRootViewBlurInteractor
 @Inject
 constructor(
+    @Application private val applicationScope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val repository: WindowRootViewBlurRepository,
 ) {
+    private var isBouncerTransitionInProgress: StateFlow<Boolean> =
+        if (Flags.bouncerUiRevamp()) {
+            keyguardTransitionInteractor
+                .transitionValue(PRIMARY_BOUNCER)
+                .map { it > 0f }
+                .distinctUntilChanged()
+                .stateIn(applicationScope, SharingStarted.Eagerly, false)
+        } else {
+            MutableStateFlow(false)
+        }
 
     /**
      * Invoked by the view after blur of [appliedBlurRadius] was successfully applied on the window
@@ -57,8 +79,7 @@ constructor(
     val onBlurAppliedEvent: Flow<Int> = repository.onBlurApplied
 
     /**
-     * Request to apply blur while on bouncer, this takes precedence over other blurs (from
-     * shade).
+     * Request to apply blur while on bouncer, this takes precedence over other blurs (from shade).
      */
     fun requestBlurForBouncer(blurRadius: Int) {
         repository.isBlurOpaque.value = false
@@ -76,7 +97,10 @@ constructor(
      * @return whether the request for blur was processed or not.
      */
     fun requestBlurForShade(blurRadius: Int, opaque: Boolean): Boolean {
-        if (keyguardInteractor.primaryBouncerShowing.value) {
+        // We need to check either of these because they are two different sources of truth,
+        // primaryBouncerShowing changes early to true/false, but blur is
+        // coordinated by transition value.
+        if (keyguardInteractor.primaryBouncerShowing.value || isBouncerTransitionInProgress.value) {
             return false
         }
         Log.d(TAG, "requestingBlurForShade for $blurRadius $opaque")
