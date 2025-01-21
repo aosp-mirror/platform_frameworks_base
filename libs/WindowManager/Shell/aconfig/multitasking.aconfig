@@ -5,12 +5,6 @@
 package: "com.android.wm.shell"
 container: "system"
 
-flag {
-    name: "enable_app_pairs"
-    namespace: "multitasking"
-    description: "Enables the ability to create and save app pairs to the Home screen"
-    bug: "274835596"
-}
 
 flag {
     name: "enable_taskbar_navbar_unification"
