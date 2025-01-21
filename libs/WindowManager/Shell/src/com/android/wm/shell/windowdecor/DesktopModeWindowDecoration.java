@@ -423,6 +423,15 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     @Override
+    void onExclusionRegionChanged(@NonNull Region exclusionRegion) {
+        if (Flags.appHandleNoRelayoutOnExclusionChange() && isAppHandle(mWindowDecorViewHolder)) {
+            // Avoid unnecessary relayouts for app handle. See b/383672263
+            return;
+        }
+        relayout(mTaskInfo, mHasGlobalFocus, exclusionRegion);
+    }
+
+    @Override
     void relayout(ActivityManager.RunningTaskInfo taskInfo, boolean hasGlobalFocus,
             @NonNull Region displayExclusionRegion) {
         final SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
