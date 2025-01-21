@@ -33,7 +33,6 @@ import static android.os.UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY;
 import static android.os.UserManager.USER_OPERATION_ERROR_UNKNOWN;
 import static android.os.UserManager.USER_OPERATION_ERROR_USER_RESTRICTED;
 import static android.os.UserManager.USER_TYPE_PROFILE_PRIVATE;
-import static android.os.UserManager.supportsMultipleUsers;
 import static android.provider.Settings.Secure.HIDE_PRIVATESPACE_ENTRY_POINT;
 
 import static com.android.internal.app.SetScreenLockDialogActivity.EXTRA_ORIGIN_USER_ID;
@@ -60,7 +59,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SpecialUsers.CanBeALL;
 import android.annotation.SpecialUsers.CanBeCURRENT;
 import android.annotation.SpecialUsers.CanBeNULL;
-import android.annotation.SpecialUsers.CannotBeSpecialUser;
 import android.annotation.StringRes;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -1161,7 +1159,7 @@ public class UserManagerService extends IUserManager.Stub {
 
         showHsumNotificationIfNeeded();
 
-        if (shouldShowNotificationForBackgroundUserSounds()) {
+        if (UserManagerInternal.shouldShowNotificationForBackgroundUserSounds()) {
             new BackgroundUserSoundNotifier(mContext);
         }
     }
@@ -8496,16 +8494,6 @@ public class UserManagerService extends IUserManager.Stub {
     public boolean canSwitchToHeadlessSystemUser() {
         return Resources.getSystem()
                 .getBoolean(R.bool.config_canSwitchToHeadlessSystemUser);
-    }
-
-    /**
-     * Checks whether to show a notification for sounds (e.g., alarms, timers, etc.) from
-     * background users.
-     */
-    public static boolean shouldShowNotificationForBackgroundUserSounds() {
-        return Flags.addUiForSoundsFromBackgroundUsers() && Resources.getSystem().getBoolean(
-                com.android.internal.R.bool.config_showNotificationForBackgroundUserAlarms)
-                && supportsMultipleUsers();
     }
 
     /**

@@ -141,6 +141,7 @@ public final class UserManagerServiceTest {
             .spyStatic(ActivityManager.class)
             .mockStatic(Settings.Global.class)
             .mockStatic(Settings.Secure.class)
+            .mockStatic(Resources.class)
             .build();
 
     @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(
@@ -202,6 +203,7 @@ public final class UserManagerServiceTest {
         doReturn(0)
                 .when(mSpyResources)
                 .getInteger(com.android.internal.R.integer.config_hsumBootStrategy);
+        doReturn(mSpyResources).when(() -> Resources.getSystem());
 
         // Must construct UserManagerService in the UiThread
         mTestDir = new File(mRealContext.getDataDir(), "umstest");
