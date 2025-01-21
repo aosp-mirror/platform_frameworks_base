@@ -21,6 +21,8 @@ import android.content.Context
 import android.content.pm.PackageManager.NameNotFoundException
 import android.util.Log
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Accessibility
+import androidx.compose.material.icons.filled.AccessibilityNew
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Keyboard
@@ -41,6 +43,7 @@ import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCategoryUi
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,7 +54,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 class ShortcutHelperViewModel
 @Inject
@@ -89,8 +91,9 @@ constructor(
                         searchQuery = query,
                         shortcutCategories = shortcutCategoriesUi,
                         defaultSelectedCategory = getDefaultSelectedCategory(filteredCategories),
-                        isShortcutCustomizerFlagEnabled = keyboardShortcutHelperShortcutCustomizer(),
-                        shouldShowResetButton = shouldShowResetButton(shortcutCategoriesUi)
+                        isShortcutCustomizerFlagEnabled =
+                            keyboardShortcutHelperShortcutCustomizer(),
+                        shouldShowResetButton = shouldShowResetButton(shortcutCategoriesUi),
                     )
                 }
             }
@@ -137,6 +140,9 @@ constructor(
                     IconSource(imageVector = Icons.Default.Android)
                 }
             }
+
+            ShortcutCategoryType.Accessibility ->
+                IconSource(imageVector = Icons.Default.AccessibilityNew)
         }
     }
 
@@ -151,6 +157,8 @@ constructor(
             ShortcutCategoryType.AppCategories ->
                 context.getString(R.string.shortcut_helper_category_app_shortcuts)
             is CurrentApp -> getApplicationLabelForCurrentApp(type)
+            ShortcutCategoryType.Accessibility ->
+                context.getString(R.string.shortcutHelper_category_accessibility)
         }
 
     private fun getApplicationLabelForCurrentApp(type: CurrentApp): String {
@@ -245,7 +253,7 @@ constructor(
         searchQuery.value = query
     }
 
-    private fun resetSearchQuery(){
+    private fun resetSearchQuery() {
         searchQuery.value = ""
     }
 }

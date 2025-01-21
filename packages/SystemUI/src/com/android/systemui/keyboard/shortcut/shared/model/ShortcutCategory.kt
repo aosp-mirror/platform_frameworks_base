@@ -40,6 +40,11 @@ sealed interface ShortcutCategoryType {
         override val includeInCustomization: Boolean = true
     }
 
+    data object Accessibility : ShortcutCategoryType {
+        override val isTrusted: Boolean = false
+        override val includeInCustomization: Boolean = true
+    }
+
     data class CurrentApp(val packageName: String) : ShortcutCategoryType {
         override val isTrusted: Boolean = false
         override val includeInCustomization: Boolean = false
