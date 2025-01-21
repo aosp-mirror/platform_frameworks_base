@@ -125,6 +125,7 @@ constructor(
      * the power button is pressed quickly, we may need to go directly from DREAMING to
      * GLANCEABLE_HUB as the transition to DOZING has not occurred yet.
      */
+    @OptIn(FlowPreview::class)
     @SuppressLint("MissingPermission")
     private fun listenForDreamingToGlanceableHubFromPowerButton() {
         if (!communalSettingsInteractor.isCommunalFlagEnabled()) return

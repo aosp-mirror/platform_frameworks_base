@@ -56,6 +56,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -203,6 +204,7 @@ constructor(
      * examining the value of this flow, to let other consumers have enough time to also see that
      * same new value.
      */
+    @OptIn(FlowPreview::class)
     val isAbleToDream: Flow<Boolean> =
         dozeTransitionModel
             .flatMapLatest { dozeTransitionModel ->
