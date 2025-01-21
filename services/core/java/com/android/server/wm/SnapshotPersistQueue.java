@@ -319,7 +319,13 @@ class SnapshotPersistQueue {
         @Override
         void onQueuedLocked() {
             // Remove duplicate request.
-            mStoreQueueItems.remove(this);
+            mStoreQueueItems.removeIf(item -> {
+                if (item.equals(this) && item.mSnapshot != mSnapshot) {
+                    item.mSnapshot.removeReference(TaskSnapshot.REFERENCE_PERSIST);
+                    return true;
+                }
+                return false;
+            });
             mStoreQueueItems.offer(this);
         }
 
