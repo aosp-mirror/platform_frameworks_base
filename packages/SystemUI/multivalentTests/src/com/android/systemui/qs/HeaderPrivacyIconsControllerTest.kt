@@ -21,8 +21,10 @@ import com.android.systemui.privacy.PrivacyDialogController
 import com.android.systemui.privacy.PrivacyDialogControllerV2
 import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.privacy.logging.PrivacyLogger
+import com.android.systemui.shade.data.repository.shadeDialogContextInteractor
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -49,6 +51,7 @@ private fun <T> any(): T = Mockito.any<T>()
 @RunWith(AndroidJUnit4::class)
 class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
 
+    private val kosmos = testKosmos()
     @Mock
     private lateinit var privacyItemController: PrivacyItemController
     @Mock
@@ -113,7 +116,8 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
                 broadcastDispatcher,
                 safetyCenterManager,
                 deviceProvisionedController,
-                featureFlags
+                featureFlags,
+                kosmos.shadeDialogContextInteractor,
         )
 
         backgroundExecutor.runAllReady()
