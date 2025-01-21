@@ -275,7 +275,7 @@ public final class DisplayTopology implements Parcelable {
 
                     float offset;
                     int pos;
-                    if (Math.abs(xOverlap) > Math.abs(yOverlap)) {
+                    if (xOverlap > yOverlap) {
                         // Deviation in each dimension is a penalty in the potential parenting. To
                         // get the X deviation, overlap is subtracted from the lesser width so that
                         // a maximum overlap results in a deviation of zero.
