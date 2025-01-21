@@ -16,7 +16,7 @@
 
 package com.android.server.accessibility.magnification;
 
-import static com.android.hardware.input.Flags.FLAG_ENABLE_TALKBACK_AND_MAGNIFIER_KEY_GESTURES;
+import static com.android.server.accessibility.Flags.FLAG_ENABLE_MAGNIFICATION_KEYBOARD_CONTROL;
 import static com.android.server.accessibility.magnification.MagnificationController.PAN_DIRECTION_DOWN;
 import static com.android.server.accessibility.magnification.MagnificationController.PAN_DIRECTION_LEFT;
 import static com.android.server.accessibility.magnification.MagnificationController.PAN_DIRECTION_RIGHT;
@@ -50,7 +50,7 @@ import org.mockito.MockitoAnnotations;
  * Tests for {@link MagnificationKeyHandler}.
  */
 @RunWith(AndroidJUnit4.class)
-@RequiresFlagsEnabled(FLAG_ENABLE_TALKBACK_AND_MAGNIFIER_KEY_GESTURES)
+@RequiresFlagsEnabled(FLAG_ENABLE_MAGNIFICATION_KEYBOARD_CONTROL)
 public class MagnificationKeyHandlerTest {
 
     @Rule

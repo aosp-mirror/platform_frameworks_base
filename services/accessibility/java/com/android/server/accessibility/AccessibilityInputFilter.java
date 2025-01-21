@@ -21,8 +21,6 @@ import static android.view.MotionEvent.ACTION_SCROLL;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 
-import static com.android.hardware.input.Flags.enableTalkbackAndMagnifierKeyGestures;
-
 import android.accessibilityservice.AccessibilityTrace;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -758,7 +756,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             addFirstEventHandler(Display.DEFAULT_DISPLAY, mMouseKeysInterceptor);
         }
 
-        if (enableTalkbackAndMagnifierKeyGestures() && isAnyMagnificationEnabled()) {
+        if (Flags.enableMagnificationKeyboardControl() && isAnyMagnificationEnabled()) {
             mMagnificationKeyHandler = new MagnificationKeyHandler(
                     mAms.getMagnificationController());
             addFirstEventHandler(Display.DEFAULT_DISPLAY, mMagnificationKeyHandler);
