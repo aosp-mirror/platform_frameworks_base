@@ -820,33 +820,10 @@ public final class MessageQueue {
      */
     boolean isBlockedOnSyncBarrier() {
         throwIfNotTest();
-        Message msg = mMessages;
-        if (msg != null && msg.target == null) {
-            Message iter = msg;
-            /* Look for a deliverable async node */
-            do {
-                iter = iter.next;
-            } while (iter != null && !iter.isAsynchronous());
-
-            long now = SystemClock.uptimeMillis();
-            if (iter != null && now >= iter.when) {
-                return false;
-            }
-            /*
-                * Look for a deliverable sync node. In this case, if one exists we are blocked
-                * since the barrier prevents delivery of the Message.
-                */
-            iter = msg;
-            do {
-                iter = iter.next;
-            } while (iter != null && (iter.target == null || iter.isAsynchronous()));
-
-            if (iter != null && now >= iter.when) {
-                return true;
-            }
-            return false;
+        synchronized (this) {
+            Message msg = mMessages;
+            return msg != null && msg.target == null;
         }
-        return false;
     }
 
     boolean hasMessages(Handler h, int what, Object object) {

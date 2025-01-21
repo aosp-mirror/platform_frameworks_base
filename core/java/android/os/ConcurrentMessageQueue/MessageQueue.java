@@ -16,7 +16,6 @@
 
 package android.os;
 
-import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1122,27 +1121,7 @@ public final class MessageQueue {
         Iterator<MessageNode> queueIter = mPriorityQueue.iterator();
         MessageNode queueNode = iterateNext(queueIter);
 
-        if (queueNode != null && queueNode.isBarrier()) {
-            long now = SystemClock.uptimeMillis();
-
-            /* Look for a deliverable async node. If one exists we are not blocked. */
-            Iterator<MessageNode> asyncQueueIter = mAsyncPriorityQueue.iterator();
-            MessageNode asyncNode = iterateNext(asyncQueueIter);
-            if (asyncNode != null && now >= asyncNode.getWhen()) {
-                return false;
-            }
-            /*
-             * Look for a deliverable sync node. In this case, if one exists we are blocked
-             * since the barrier prevents delivery of the Message.
-             */
-            while (queueNode != null && queueNode.isBarrier()) {
-                queueNode = iterateNext(queueIter);
-            }
-            if (queueNode != null && now >= queueNode.getWhen()) {
-                return true;
-            }
-        }
-        return false;
+        return queueNode != null && queueNode.isBarrier();
     }
 
     private StateNode getStateNode(StackNode node) {
