@@ -772,6 +772,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     private final ComponentName mImageWallpaper;
 
     /**
+     * Name of the component that is used when the user-selected wallpaper is incompatible with the
+     * display's resolution or aspect ratio.
+     */
+    @Nullable private final ComponentName mFallbackWallpaperComponent;
+
+    /**
      * Default image wallpaper shall never changed after system service started, caching it when we
      * first read the image file.
      */
@@ -1601,6 +1607,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         mShuttingDown = false;
         mImageWallpaper = ComponentName.unflattenFromString(
                 context.getResources().getString(R.string.image_wallpaper_component));
+        if (enableConnectedDisplaysWallpaper()) {
+            mFallbackWallpaperComponent = ComponentName.unflattenFromString(
+                    context.getResources().getString(R.string.fallback_wallpaper_component));
+        } else {
+            mFallbackWallpaperComponent = null;
+        }
         ComponentName defaultComponent = WallpaperManager.getCmfDefaultWallpaperComponent(context);
         mDefaultWallpaperComponent = defaultComponent == null ? mImageWallpaper : defaultComponent;
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
@@ -3613,6 +3625,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             if (componentName != null && !componentName.equals(mImageWallpaper)) {
                 // The requested component is not the static wallpaper service, so make sure it's
                 // actually a wallpaper service.
+                if (mFallbackWallpaperComponent != null
+                        && componentName.equals(mFallbackWallpaperComponent)) {
+                    // The fallback wallpaper does not declare WallpaperService.SERVICE_INTERFACE
+                    // action in its intent filter to prevent it from being listed in the wallpaper
+                    // picker. And thus, use explicit intent to query the metadata.
+                    intent = new Intent().setComponent(mFallbackWallpaperComponent);
+                }
                 List<ResolveInfo> ris =
                         mIPackageManager.queryIntentServices(intent,
                                 intent.resolveTypeIfNeeded(mContext.getContentResolver()),
@@ -4100,8 +4119,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             mFallbackWallpaper.allowBackup = false;
             mFallbackWallpaper.wallpaperId = makeWallpaperIdLocked();
             mFallbackWallpaper.mBindSource = BindSource.INITIALIZE_FALLBACK;
-            bindWallpaperComponentLocked(mDefaultWallpaperComponent, true, false,
-                    mFallbackWallpaper, null);
+            if (mFallbackWallpaperComponent == null) {
+                bindWallpaperComponentLocked(mDefaultWallpaperComponent, true, false,
+                        mFallbackWallpaper, null);
+            } else {
+                mFallbackWallpaper.mWhich = FLAG_SYSTEM | FLAG_LOCK;
+                bindWallpaperComponentLocked(mFallbackWallpaperComponent, true, false,
+                        mFallbackWallpaper, null);
+            }
         }
     }
 

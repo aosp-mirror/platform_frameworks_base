@@ -550,7 +550,11 @@
         <service android:name=".wallpapers.GradientColorWallpaper"
             android:singleUser="true"
             android:permission="android.permission.BIND_WALLPAPER"
-            android:exported="true" />
+            android:exported="true">
+            <meta-data android:name="android.service.wallpaper"
+                android:resource="@xml/gradient_color_wallpaper">
+            </meta-data>
+        </service>
 
         <activity android:name=".tuner.TunerActivity"
                   android:enabled="false"
