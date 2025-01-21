@@ -1210,7 +1210,8 @@ public abstract class WMShellModule {
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             IWindowManager windowManager,
             Optional<DesktopUserRepositories> desktopUserRepositories,
-            Optional<DesktopTasksController> desktopTasksController
+            Optional<DesktopTasksController> desktopTasksController,
+            ShellTaskOrganizer shellTaskOrganizer
     ) {
         if (!DesktopModeStatus.canEnterDesktopMode(context)) {
             return Optional.empty();
@@ -1224,7 +1225,8 @@ public abstract class WMShellModule {
                         rootTaskDisplayAreaOrganizer,
                         windowManager,
                         desktopUserRepositories.get(),
-                        desktopTasksController.get()));
+                        desktopTasksController.get(),
+                        shellTaskOrganizer));
     }
 
     @WMSingleton
