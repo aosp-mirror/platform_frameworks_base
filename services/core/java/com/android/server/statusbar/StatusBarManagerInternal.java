@@ -275,7 +275,13 @@ public interface StatusBarManagerInternal {
      */
     void moveFocusedTaskToDesktop(int displayId);
 
-
     /** Passes through the given shell commands to SystemUI */
     void passThroughShellCommand(String[] args, FileDescriptor fd);
+
+    /**
+     * Set whether the display should have a navigation bar.
+     *
+     * TODO(b/390591772): Refactor this method
+     */
+    void setHasNavigationBar(int displayId, boolean hasNavigationBar);
 }
