@@ -529,11 +529,7 @@ java_library {
         ],
     },
     jarjar_prefix: "com.android.internal.hidden_from_bootclasspath",
-
-    jarjar_shards: select(release_flag("RELEASE_USE_SHARDED_JARJAR_ON_FRAMEWORK_MINUS_APEX"), {
-        true: "10",
-        default: "1",
-    }),
+    jarjar_shards: "10",
 }
 
 java_library {
