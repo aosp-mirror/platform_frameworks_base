@@ -45,6 +45,7 @@ import com.android.systemui.keyguard.ui.composable.section.StatusBarSection
 import com.android.systemui.keyguard.ui.composable.section.TopAreaSection
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUiAod
 import java.util.Optional
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -128,11 +129,14 @@ constructor(
                         with(notificationSection) {
                             if (!isShadeLayoutWide && !isBypassEnabled) {
                                 Box(modifier = Modifier.weight(weight = 1f)) {
-                                    AodNotificationIcons(
-                                        modifier =
-                                            Modifier.align(alignment = Alignment.TopStart)
-                                                .padding(start = aodIconPadding)
-                                    )
+                                    Column(Modifier.align(alignment = Alignment.TopStart)) {
+                                        if (PromotedNotificationUiAod.isEnabled) {
+                                            AodPromotedNotification()
+                                        }
+                                        AodNotificationIcons(
+                                            modifier = Modifier.padding(start = aodIconPadding)
+                                        )
+                                    }
                                     Notifications(
                                         areNotificationsVisible = areNotificationsVisible,
                                         isShadeLayoutWide = false,
@@ -140,9 +144,14 @@ constructor(
                                     )
                                 }
                             } else {
-                                AodNotificationIcons(
-                                    modifier = Modifier.padding(start = aodIconPadding)
-                                )
+                                Column {
+                                    if (PromotedNotificationUiAod.isEnabled) {
+                                        AodPromotedNotification()
+                                    }
+                                    AodNotificationIcons(
+                                        modifier = Modifier.padding(start = aodIconPadding)
+                                    )
+                                }
                             }
                         }
                         if (!isUdfpsVisible && ambientIndicationSectionOptional.isPresent) {

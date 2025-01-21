@@ -68,6 +68,7 @@ val Kosmos.defaultKeyguardBlueprint by
             keyguardSliceViewSection = mock(),
             udfpsAccessibilityOverlaySection = mock(),
             accessibilityActionsSection = mock(),
+            aodPromotedNotificationSection = mock(),
         )
     }
 

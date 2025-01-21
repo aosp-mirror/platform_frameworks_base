@@ -16,31 +16,32 @@
 
 package com.android.systemui.statusbar.notification.promoted.ui.viewmodel
 
-import com.android.systemui.dagger.SysUISingleton
+import androidx.compose.runtime.getValue
+import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.statusbar.notification.promoted.domain.interactor.AODPromotedNotificationInteractor
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
-import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.Identity
-import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
-@SysUISingleton
 class AODPromotedNotificationViewModel
-@Inject
-constructor(interactor: AODPromotedNotificationInteractor) {
-    private val content: Flow<PromotedNotificationContentModel?> = interactor.content
-    private val identity: Flow<Identity?> = content.mapNonNullsKeepingNulls { it.identity }
+@AssistedInject
+constructor(interactor: AODPromotedNotificationInteractor) : ExclusiveActivatable() {
+    private val hydrator = Hydrator("AODPromotedNotificationViewModel.hydrator")
 
-    val notification: Flow<PromotedNotificationViewModel?> =
-        identity.distinctUntilChanged().mapNonNullsKeepingNulls { identity ->
-            val updates = interactor.content.filterNotNull().filter { it.identity == identity }
-            PromotedNotificationViewModel(identity, updates)
-        }
-}
+    val content: PromotedNotificationContentModel? by
+        hydrator.hydratedStateOf(
+            traceName = "content",
+            initialValue = null,
+            source = interactor.content,
+        )
 
-private fun <T, R> Flow<T?>.mapNonNullsKeepingNulls(block: (T) -> R): Flow<R?> = map {
-    it?.let(block)
+    override suspend fun onActivated(): Nothing {
+        hydrator.activate()
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): AODPromotedNotificationViewModel
+    }
 }

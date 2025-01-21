@@ -218,6 +218,7 @@
     <item type="id" name="accessibility_actions_view" />
     <item type="id" name="ambient_indication_container" />
     <item type="id" name="aod_notification_icon_container" />
+    <item type="id" name="aod_promoted_notification_frame" />
     <item type="id" name="burn_in_layer" />
     <item type="id" name="burn_in_layer_empty_view" />
     <item type="id" name="communal_tutorial_indicator" />
@@ -291,4 +292,5 @@
 
     <item type="id" name="brightness_dialog_slider" />
 
+    <item type="id" name="aod_promoted_notification_view_updater_tag" />
 </resources>
