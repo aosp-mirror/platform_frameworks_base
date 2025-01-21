@@ -26,6 +26,14 @@ message PreferenceScreenProto {
   optional PreferenceGroupProto root = 2;
   // If the preference screen provides complete hierarchy by source code.
   optional bool complete_hierarchy = 3;
+  // Parameterized screens (not recursive, provided on the top level only)
+  repeated ParameterizedPreferenceScreenProto parameterized_screens = 4;
+}
+
+// Proto of parameterized preference screen
+message ParameterizedPreferenceScreenProto {
+  optional BundleProto args = 1;
+  optional PreferenceScreenProto screen = 2;
 }
 
 // Proto of PreferenceGroup.

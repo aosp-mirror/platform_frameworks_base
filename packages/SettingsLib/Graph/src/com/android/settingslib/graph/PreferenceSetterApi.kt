@@ -40,11 +40,12 @@ import com.android.settingslib.metadata.SensitivityLevel.Companion.HIGH_SENSITIV
 import com.android.settingslib.metadata.SensitivityLevel.Companion.UNKNOWN_SENSITIVITY
 
 /** Request to set preference value. */
-data class PreferenceSetterRequest(
-    val screenKey: String,
-    val key: String,
+class PreferenceSetterRequest(
+    screenKey: String,
+    args: Bundle?,
+    key: String,
     val value: PreferenceValueProto,
-)
+) : PreferenceCoordinate(screenKey, args, key)
 
 /** Result of preference setter request. */
 @IntDef(
@@ -121,7 +122,7 @@ class PreferenceSetterApiHandler(
             metricsLogger?.logSetterApi(
                 application,
                 callingUid,
-                PreferenceCoordinate(request.screenKey, request.key),
+                request,
                 null,
                 null,
                 PreferenceSetterResult.UNSUPPORTED,
@@ -130,7 +131,7 @@ class PreferenceSetterApiHandler(
             return PreferenceSetterResult.UNSUPPORTED
         }
         val screenMetadata =
-            PreferenceScreenRegistry.create(application, request.screenKey) ?: return notFound()
+            PreferenceScreenRegistry.create(application, request) ?: return notFound()
         val key = request.key
         val metadata =
             screenMetadata.getPreferenceHierarchy(application).find(key) ?: return notFound()
@@ -199,7 +200,7 @@ class PreferenceSetterApiHandler(
         metricsLogger?.logSetterApi(
             application,
             callingUid,
-            PreferenceCoordinate(request.screenKey, request.key),
+            request,
             screenMetadata,
             metadata,
             result,
@@ -235,6 +236,7 @@ object PreferenceSetterRequestCodec : MessageCodec<PreferenceSetterRequest> {
     override fun encode(data: PreferenceSetterRequest) =
         Bundle(3).apply {
             putString(SCREEN_KEY, data.screenKey)
+            putBundle(ARGS, data.args)
             putString(KEY, data.key)
             putByteArray(null, data.value.toByteArray())
         }
@@ -242,10 +244,12 @@ object PreferenceSetterRequestCodec : MessageCodec<PreferenceSetterRequest> {
     override fun decode(data: Bundle) =
         PreferenceSetterRequest(
             data.getString(SCREEN_KEY)!!,
+            data.getBundle(ARGS),
             data.getString(KEY)!!,
             PreferenceValueProto.parseFrom(data.getByteArray(null)!!),
         )
 
     private const val SCREEN_KEY = "s"
     private const val KEY = "k"
+    private const val ARGS = "a"
 }

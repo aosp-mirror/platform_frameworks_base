@@ -26,6 +26,7 @@ import com.android.settingslib.ipc.ApiPermissionChecker
 import com.android.settingslib.metadata.PreferenceCoordinate
 import com.android.settingslib.metadata.PreferenceHierarchyNode
 import com.android.settingslib.metadata.PreferenceRemoteOpMetricsLogger
+import com.android.settingslib.metadata.PreferenceScreenCoordinate
 import com.android.settingslib.metadata.PreferenceScreenRegistry
 
 /**
@@ -105,8 +106,10 @@ class PreferenceGetterApiHandler(
         val errors = mutableMapOf<PreferenceCoordinate, Int>()
         val preferences = mutableMapOf<PreferenceCoordinate, PreferenceProto>()
         val flags = request.flags
-        for ((screenKey, coordinates) in request.preferences.groupBy { it.screenKey }) {
-            val screenMetadata = PreferenceScreenRegistry.create(application, screenKey)
+        val groups =
+            request.preferences.groupBy { PreferenceScreenCoordinate(it.screenKey, it.args) }
+        for ((screen, coordinates) in groups) {
+            val screenMetadata = PreferenceScreenRegistry.create(application, screen)
             if (screenMetadata == null) {
                 val latencyMs = SystemClock.elapsedRealtime() - elapsedRealtime
                 for (coordinate in coordinates) {

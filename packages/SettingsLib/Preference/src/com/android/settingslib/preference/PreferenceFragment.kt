@@ -23,6 +23,7 @@ import android.util.Log
 import androidx.annotation.XmlRes
 import androidx.lifecycle.Lifecycle
 import androidx.preference.PreferenceScreen
+import com.android.settingslib.metadata.EXTRA_BINDING_SCREEN_ARGS
 import com.android.settingslib.metadata.EXTRA_BINDING_SCREEN_KEY
 import com.android.settingslib.metadata.PreferenceScreenBindingKeyProvider
 import com.android.settingslib.metadata.PreferenceScreenRegistry
@@ -89,12 +90,18 @@ open class PreferenceFragment :
     @XmlRes protected open fun getPreferenceScreenResId(context: Context): Int = 0
 
     protected fun getPreferenceScreenCreator(context: Context): PreferenceScreenCreator? =
-        (PreferenceScreenRegistry.create(context, getPreferenceScreenBindingKey(context))
-                as? PreferenceScreenCreator)
+        (PreferenceScreenRegistry.create(
+                context,
+                getPreferenceScreenBindingKey(context),
+                getPreferenceScreenBindingArgs(context),
+            ) as? PreferenceScreenCreator)
             ?.run { if (isFlagEnabled(context)) this else null }
 
     override fun getPreferenceScreenBindingKey(context: Context): String? =
         arguments?.getString(EXTRA_BINDING_SCREEN_KEY)
+
+    override fun getPreferenceScreenBindingArgs(context: Context): Bundle? =
+        arguments?.getBundle(EXTRA_BINDING_SCREEN_ARGS)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
