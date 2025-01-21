@@ -499,57 +499,6 @@ public class MainContentCaptureSessionTest {
         assertThat(session.mEventProcessQueue).hasSize(1);
     }
 
-    @Test
-    public void notifyContentCaptureEvents_beforeSessionPerformStart() throws RemoteException {
-        ContentCaptureOptions options =
-                createOptions(
-                        /* enableContentCaptureReceiver= */ true,
-                        /* enableContentProtectionReceiver= */ true);
-        MainContentCaptureSession session = createSession(options);
-        session.mContentCaptureHandler = null;
-        session.mDirectServiceInterface = null;
-
-        notifyContentCaptureEvents(session);
-        mTestableLooper.processAllMessages();
-
-        assertThat(session.mEvents).isNull();
-        assertThat(session.mEventProcessQueue).hasSize(7); // 5 view events + 2 view tree events
-    }
-
-    @Test
-    public void notifyViewAppeared_beforeSessionPerformStart() throws RemoteException {
-        ContentCaptureOptions options =
-                createOptions(
-                        /* enableContentCaptureReceiver= */ true,
-                        /* enableContentProtectionReceiver= */ true);
-        MainContentCaptureSession session = createSession(options);
-        session.mContentCaptureHandler = null;
-        session.mDirectServiceInterface = null;
-
-        View view = prepareView(session);
-        session.notifyViewAppeared(session.newViewStructure(view));
-
-        assertThat(session.mEvents).isNull();
-        assertThat(session.mEventProcessQueue).hasSize(1);
-    }
-
-    @Test
-    public void flush_beforeSessionPerformStart() throws Exception {
-        ContentCaptureOptions options =
-                createOptions(
-                        /* enableContentCaptureReceiver= */ true,
-                        /* enableContentProtectionReceiver= */ true);
-        MainContentCaptureSession session = createSession(options);
-        session.mEvents = new ArrayList<>(Arrays.asList(EVENT));
-        session.mContentCaptureHandler = null;
-        session.mDirectServiceInterface = null;
-
-        session.flush(REASON);
-
-        assertThat(session.mEvents).hasSize(1);
-        assertThat(session.mEventProcessQueue).isEmpty();
-    }
-
     /** Simulates the regular content capture events sequence. */
     private void notifyContentCaptureEvents(final MainContentCaptureSession session) {
         final ArrayList<Object> events = new ArrayList<>(
@@ -612,8 +561,8 @@ public class MainContentCaptureSessionTest {
                         sStrippedContext,
                         manager,
                         testHandler,
+                        testHandler,
                         mMockSystemServerInterface);
-        session.mContentCaptureHandler = testHandler;
         session.mComponentName = COMPONENT_NAME;
         return session;
     }

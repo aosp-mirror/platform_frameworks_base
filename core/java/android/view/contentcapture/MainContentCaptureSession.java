@@ -57,12 +57,10 @@ import android.view.View;
 import android.view.ViewStructure;
 import android.view.autofill.AutofillId;
 import android.view.contentcapture.ViewNode.ViewStructureImpl;
-import android.view.contentcapture.flags.Flags;
 import android.view.contentprotection.ContentProtectionEventProcessor;
 import android.view.inputmethod.BaseInputConnection;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.IResultReceiver;
 import com.android.modules.expresslog.Counter;
 
@@ -109,10 +107,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     @NonNull
     private final Handler mUiHandler;
 
-    /** @hide */
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    @Nullable
-    public Handler mContentCaptureHandler;
+    @NonNull
+    private final Handler mContentCaptureHandler;
 
     /**
      * Interface to the system_server binder object - it's only used to start the session (and
@@ -191,12 +187,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     @Nullable
     public ContentProtectionEventProcessor mContentProtectionEventProcessor;
 
-    /**
-     * A runnable object to perform the start of this session.
-     */
-    @Nullable
-    private Runnable mStartRunnable = null;
-
     private static class SessionStateReceiver extends IResultReceiver.Stub {
         private final WeakReference<MainContentCaptureSession> mMainSession;
 
@@ -208,7 +198,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         public void send(int resultCode, Bundle resultData) {
             final MainContentCaptureSession mainSession = mMainSession.get();
             if (mainSession == null) {
-                Log.w(TAG, "received result after main session released");
+                Log.w(TAG, "received result after mina session released");
                 return;
             }
             final IBinder binder;
@@ -223,8 +213,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                 binder = resultData.getBinder(EXTRA_BINDER);
                 if (binder == null) {
                     Log.wtf(TAG, "No " + EXTRA_BINDER + " extra result");
-                    // explicitly init the bg thread
-                    mainSession.mContentCaptureHandler = mainSession.prepareContentCaptureHandler();
                     mainSession.runOnContentCaptureThread(() -> mainSession.resetSession(
                             STATE_DISABLED | STATE_INTERNAL_ERROR));
                     return;
@@ -232,33 +220,9 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             } else {
                 binder = null;
             }
-            // explicitly init the bg thread
-            mainSession.mContentCaptureHandler = mainSession.prepareContentCaptureHandler();
             mainSession.runOnContentCaptureThread(() ->
                     mainSession.onSessionStarted(resultCode, binder));
         }
-    }
-
-    /**
-     * Prepares the content capture handler(i.e. the background thread).
-     *
-     * This is expected to be called from the {@link SessionStateReceiver#send} callback, after the
-     * session {@link performStart}. This is expected to be executed in a binder thread, instead
-     * of the UI thread.
-     */
-    @NonNull
-    private Handler prepareContentCaptureHandler() {
-        if (mContentCaptureHandler == null) {
-            try {
-                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
-                    Trace.traceBegin(Trace.TRACE_TAG_VIEW, "prepareContentCaptureHandler");
-                }
-                mContentCaptureHandler = BackgroundThread.getHandler();
-            } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-            }
-        }
-        return mContentCaptureHandler;
     }
 
     /** @hide */
@@ -267,10 +231,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             @NonNull ContentCaptureManager.StrippedContext context,
             @NonNull ContentCaptureManager manager,
             @NonNull Handler uiHandler,
+            @NonNull Handler contentCaptureHandler,
             @NonNull IContentCaptureManager systemServerInterface) {
         mContext = context;
         mManager = manager;
         mUiHandler = uiHandler;
+        mContentCaptureHandler = contentCaptureHandler;
         mSystemServerInterface = systemServerInterface;
 
         final int logHistorySize = mManager.mOptions.logHistorySize;
@@ -294,49 +260,18 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     /**
-     * Performs the start of the session.
-     *
-     * This is expected to be called from the UI thread, when the activity finishes its first frame.
-     * This is a no-op if the session has already been started.
-     *
-     * See {@link #start(IBinder, IBinder, ComponentName, int)} for more details.
-     *
-     * @hide */
-    @Override
-    public void performStart() {
-        if (!hasStarted() && mStartRunnable != null) {
-            mStartRunnable.run();
-        }
-    }
-
-    /**
-     * Creates a runnable to start this session.
-     *
-     * For performance reasons, it is better to only create a task to start the session
-     * during the creation of the activity and perform the actual start when the activity
-     * finishes it's first frame.
+     * Starts this session.
      */
     @Override
     void start(@NonNull IBinder token, @NonNull IBinder shareableActivityToken,
             @NonNull ComponentName component, int flags) {
-        if (Flags.postCreateAndroidBgThread()) {
-            mStartRunnable = () -> {
-                try {
-                    if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
-                        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "cc session startImpl");
-                    }
-                    startImpl(token, shareableActivityToken, component, flags);
-                } finally {
-                    Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-                }
-            };
-        } else {
-            startImpl(token, shareableActivityToken, component, flags);
-        }
+        runOnContentCaptureThread(
+                () -> startImpl(token, shareableActivityToken, component, flags));
     }
 
     private void startImpl(@NonNull IBinder token, @NonNull IBinder shareableActivityToken,
                @NonNull ComponentName component, int flags) {
+        checkOnContentCaptureThread();
         if (!isContentCaptureEnabled()) return;
 
         if (sVerbose) {
@@ -370,7 +305,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             Log.w(TAG, "Error starting session for " + component.flattenToShortString() + ": " + e);
         }
     }
-
     @Override
     void onDestroy() {
         clearAndRunOnContentCaptureThread(() -> {
@@ -627,6 +561,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     private boolean hasStarted() {
+        checkOnContentCaptureThread();
         return mState != UNKNOWN_STATE;
     }
 
@@ -638,11 +573,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
         if (!hasStarted()) {
             if (sVerbose) Log.v(TAG, "handleScheduleFlush(): session not started yet");
-            return;
-        }
-        if (mContentCaptureHandler == null) {
-            Log.w(TAG, "handleScheduleFlush(" + getDebugState(reason) + "): content capture "
-                    + "thread not ready");
             return;
         }
 
@@ -715,11 +645,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
 
         if (!isContentCaptureReceiverEnabled()) {
-            return;
-        }
-        if (mContentCaptureHandler == null) {
-            Log.w(TAG, "handleForceFlush(" + getDebugState(reason) + "): content capture thread"
-                    + "not ready");
             return;
         }
 
@@ -838,9 +763,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
         mDirectServiceInterface = null;
         mContentProtectionEventProcessor = null;
-        if (mContentCaptureHandler != null) {
-            mContentCaptureHandler.removeMessages(MSG_FLUSH);
-        }
+        mContentCaptureHandler.removeMessages(MSG_FLUSH);
     }
 
     @Override
@@ -994,10 +917,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
      * clear the buffer events then starting sending out current event.
      */
     private void enqueueEvent(@NonNull final ContentCaptureEvent event, boolean forceFlush) {
-        if (mContentCaptureHandler == null) {
-            mEventProcessQueue.offer(event);
-            return;
-        }
         if (forceFlush || mEventProcessQueue.size() >= mManager.mOptions.maxBufferSize - 1) {
             // The buffer events are cleared in the same thread first to prevent new events
             // being added during the time of context switch. This would disrupt the sequence
@@ -1200,10 +1119,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
      * always delegate to the assigned thread from {@code mHandler} for synchronization.</p>
      */
     private void checkOnContentCaptureThread() {
-        if (mContentCaptureHandler == null) {
-            Log.e(TAG, "content capture thread is not initiallized!");
-            return;
-        }
         final boolean onContentCaptureThread = mContentCaptureHandler.getLooper().isCurrentThread();
         if (!onContentCaptureThread) {
             mWrongThreadCount.incrementAndGet();
@@ -1224,12 +1139,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
      * </p>
      */
     private void runOnContentCaptureThread(@NonNull Runnable r) {
-        if (mContentCaptureHandler == null) {
-            Log.e(TAG, "content capture thread is not initiallized!");
-            // fall back to UI thread
-            runOnUiThread(r);
-            return;
-        }
         if (!mContentCaptureHandler.getLooper().isCurrentThread()) {
             mContentCaptureHandler.post(r);
         } else {
@@ -1238,12 +1147,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     private void clearAndRunOnContentCaptureThread(@NonNull Runnable r, int what) {
-        if (mContentCaptureHandler == null) {
-            Log.e(TAG, "content capture thread is not initiallized!");
-            // fall back to UI thread
-            runOnUiThread(r);
-            return;
-        }
         if (!mContentCaptureHandler.getLooper().isCurrentThread()) {
             mContentCaptureHandler.removeMessages(what);
             mContentCaptureHandler.post(r);
