@@ -661,7 +661,9 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                         if (android.view.inputmethod.Flags.refactorInsetsController()) {
                             setVisibleDirectly(false /* visible */, statsToken);
                         }
-                        ImeTracker.forLogging().onHidden(mStatsToken);
+                        if (!android.view.inputmethod.Flags.refactorInsetsController()) {
+                            ImeTracker.forLogging().onHidden(mStatsToken);
+                        }
                     } else if (mAnimationDirection == DIRECTION_SHOW && !mCancelled) {
                         ImeTracker.forLogging().onShown(mStatsToken);
                     } else if (mCancelled) {
