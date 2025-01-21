@@ -1947,3 +1947,13 @@ flag {
     description: "Show a rich ongoing notification on the always-on display (depends on ui_rich_ongoing)"
     bug: "369151941"
 }
+
+flag {
+    name: "stabilize_heads_up_group_v2"
+    namespace: "systemui"
+    description: "Stabilize heads up groups in VisualStabilityCoordinator"
+    bug: "357753857"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
