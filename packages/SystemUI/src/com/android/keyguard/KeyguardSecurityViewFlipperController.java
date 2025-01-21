@@ -23,7 +23,6 @@ import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
 import android.util.Log;
 import android.view.LayoutInflater;
 
-import androidx.annotation.Nullable;
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -35,7 +34,9 @@ import com.android.systemui.res.R;
 import com.android.systemui.util.ViewController;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -56,6 +57,8 @@ public class KeyguardSecurityViewFlipperController
     private final EmergencyButtonController.Factory mEmergencyButtonControllerFactory;
     private final Factory mKeyguardSecurityViewControllerFactory;
     private final FeatureFlags mFeatureFlags;
+    private final List<OnViewInflatedCallback> mOnViewInflatedListeners = new ArrayList<>();
+    private final Set<SecurityMode> mSecurityModeInProgress = new HashSet<>();
 
     @Inject
     protected KeyguardSecurityViewFlipperController(KeyguardSecurityViewFlipper view,
@@ -106,7 +109,13 @@ public class KeyguardSecurityViewFlipperController
             }
         }
 
-        asynchronouslyInflateView(securityMode, keyguardSecurityCallback, onViewInflatedCallback);
+        // Prevent multiple inflations for the same security mode. Instead, add callback to a list
+        // and then notify each in order when the view is inflated.
+        mOnViewInflatedListeners.add(onViewInflatedCallback);
+        if (!mSecurityModeInProgress.contains(securityMode)) {
+            mSecurityModeInProgress.add(securityMode);
+            asynchronouslyInflateView(securityMode, keyguardSecurityCallback);
+        }
     }
 
     /**
@@ -117,9 +126,8 @@ public class KeyguardSecurityViewFlipperController
      * @param securityMode
      * @param keyguardSecurityCallback
      */
-    public void asynchronouslyInflateView(SecurityMode securityMode,
-            KeyguardSecurityCallback keyguardSecurityCallback,
-            @Nullable OnViewInflatedCallback onViewInflatedListener) {
+    private void asynchronouslyInflateView(SecurityMode securityMode,
+            KeyguardSecurityCallback keyguardSecurityCallback) {
         int layoutId = mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE)
                 ? getLayoutIdFor(securityMode) : getLegacyLayoutIdFor(securityMode);
         if (layoutId != 0) {
@@ -129,24 +137,26 @@ public class KeyguardSecurityViewFlipperController
             mAsyncLayoutInflater.inflate(layoutId, mView,
                     (view, resId, parent) -> {
                         mView.addView(view);
+                        mSecurityModeInProgress.remove(securityMode);
                         KeyguardInputViewController<KeyguardInputView> childController =
                                 mKeyguardSecurityViewControllerFactory.create(
                                         (KeyguardInputView) view,
                                         securityMode, keyguardSecurityCallback);
                         childController.init();
                         mChildren.add(childController);
-                        if (onViewInflatedListener != null) {
-                            onViewInflatedListener.onViewInflated(childController);
 
-                            // Single bouncer constrains are default
-                            if (mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE)) {
-                                boolean useSplitBouncer =
-                                        getResources().getBoolean(R.bool.update_bouncer_constraints)
+                        for (OnViewInflatedCallback callback : mOnViewInflatedListeners) {
+                            callback.onViewInflated(childController);
+                        }
+                        mOnViewInflatedListeners.clear();
+
+                        // Single bouncer constrains are default
+                        if (mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE)) {
+                            boolean useSplitBouncer =
+                                    getResources().getBoolean(R.bool.update_bouncer_constraints)
                                         && getResources().getConfiguration().orientation
-                                                == ORIENTATION_LANDSCAPE;
-
-                                updateConstraints(useSplitBouncer);
-                            }
+                                            == ORIENTATION_LANDSCAPE;
+                            updateConstraints(useSplitBouncer);
                         }
                     });
         }
