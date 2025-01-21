@@ -173,11 +173,10 @@ flag {
     bug: "281072508"
 }
 
-
 flag {
-    name: "enable_singleton_audio_manager_route_controller"
+    name: "enable_use_of_singleton_audio_manager_route_controller"
     is_exported: true
-    namespace: "media_solutions"
+    namespace: "media_better_together"
     description: "Use singleton AudioManagerRouteController shared across all users."
     bug: "372868909"
     metadata {
