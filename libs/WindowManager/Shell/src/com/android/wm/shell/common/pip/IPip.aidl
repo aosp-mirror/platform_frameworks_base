@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.common.pip;
 
-import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.PictureInPictureParams;
 import android.view.SurfaceControl;
 import android.content.ComponentName;
@@ -42,7 +42,7 @@ interface IPip {
               bounds
      * @return destination bounds the PiP window should land into
      */
-    Rect startSwipePipToHome(in ActivityManager.RunningTaskInfo taskInfo, int launcherRotation,
+    Rect startSwipePipToHome(in RunningTaskInfo taskInfo, int launcherRotation,
             in Rect hotseatKeepClearArea) = 1;
 
     /**
