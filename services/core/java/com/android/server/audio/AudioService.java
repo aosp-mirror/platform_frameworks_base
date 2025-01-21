@@ -68,6 +68,7 @@ import static com.android.media.audio.Flags.alarmMinVolumeZero;
 import static com.android.media.audio.Flags.asDeviceConnectionFailure;
 import static com.android.media.audio.Flags.audioserverPermissions;
 import static com.android.media.audio.Flags.disablePrescaleAbsoluteVolume;
+import static com.android.media.audio.Flags.deferWearPermissionUpdates;
 import static com.android.media.audio.Flags.equalScoLeaVcIndexRange;
 import static com.android.media.audio.Flags.replaceStreamBtSco;
 import static com.android.media.audio.Flags.ringMyCar;
@@ -513,6 +514,15 @@ public class AudioService extends IAudioService.Stub
 
     // check playback or record activity every 6 seconds for UIDs owning mode IN_COMMUNICATION
     private static final int CHECK_MODE_FOR_UID_PERIOD_MS = 6000;
+
+    // Roughly chosen to be long enough to suppress the autocork behavior of the permission
+    // cache (50ms), while not introducing visible permission leaks - since the app needs to
+    // restart, and trigger an action which requires permissions from audioserver before this
+    // delay. For RECORD_AUDIO, we are additionally protected by appops.
+    private static final int SCHEDULED_PERMISSION_UPDATE_DELAY_MS = 60;
+
+    // Increased delay to not interefere with low core app launch latency
+    private static final int SCHEDULED_PERMISSION_UPDATE_LONG_DELAY_MS = 500;
 
     /** @see AudioSystemThread */
     private AudioSystemThread mAudioSystemThread;
@@ -10975,12 +10985,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     /* Listen to permission invalidations for the PermissionProvider */
-    private void setupPermissionListener() {
-        // Roughly chosen to be long enough to suppress the autocork behavior of the permission
-        // cache (50ms), while not introducing visible permission leaks - since the app needs to
-        // restart, and trigger an action which requires permissions from audioserver before this
-        // delay. For RECORD_AUDIO, we are additionally protected by appops.
-        final long UPDATE_DELAY_MS = 60;
+    private void setupPermissionListener()  {
         // instanceof to simplify the construction requirements of AudioService for testing: no
         // delayed execution during unit tests.
         if (mAudioServerLifecycleExecutor instanceof ScheduledExecutorService exec) {
@@ -11022,7 +11027,7 @@ public class AudioService extends IAudioService.Stub
                             Thread.getDefaultUncaughtExceptionHandler()
                                     .uncaughtException(Thread.currentThread(), e);
                         }
-                    }, UPDATE_DELAY_MS, TimeUnit.MILLISECONDS));
+                    }, getAudioPermissionsDelay(), TimeUnit.MILLISECONDS));
                 }
             };
             mSysPropListenerNativeHandle = mAudioSystem.listenForSystemPropertyChange(
@@ -15511,6 +15516,18 @@ public class AudioService extends IAudioService.Stub
         synchronized (mAbsoluteVolumeDeviceInfoMapLock) {
             return mAbsoluteVolumeDeviceInfoMap.remove(audioSystemDeviceOut);
         }
+    }
+
+    private long getAudioPermissionsDelay() {
+        return isAudioPermissionUpdatesAddtionallyDelayed()
+                ? SCHEDULED_PERMISSION_UPDATE_LONG_DELAY_MS
+                : SCHEDULED_PERMISSION_UPDATE_DELAY_MS;
+    }
+
+    private boolean isAudioPermissionUpdatesAddtionallyDelayed() {
+        //  Additional delays on low core devices in order to optimize app launch latencies
+        return deferWearPermissionUpdates()
+            && mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
     }
 
     //====================
