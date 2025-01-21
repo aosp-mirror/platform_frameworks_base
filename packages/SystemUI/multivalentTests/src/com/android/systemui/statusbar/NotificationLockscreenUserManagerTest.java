@@ -225,6 +225,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
         Notification notifWithPrivateVisibility = new Notification();
         notifWithPrivateVisibility.visibility = VISIBILITY_PRIVATE;
+        notifWithPrivateVisibility.when = System.currentTimeMillis();
         mCurrentUserNotif = new NotificationEntryBuilder()
                 .setNotification(notifWithPrivateVisibility)
                 .setUser(new UserHandle(mCurrentUser.id))
@@ -260,7 +261,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                 .setChannel(channel)
                 .setSensitiveContent(true)
                 .setVisibilityOverride(VISIBILITY_NO_OVERRIDE).build());
-        mSensitiveNotifPostTime = mSensitiveContentNotif.getSbn().getPostTime();
+        mSensitiveNotifPostTime = mSensitiveContentNotif.getSbn().getNotification().getWhen();
         when(mNotifCollection.getEntry(mWorkProfileNotif.getKey())).thenReturn(mWorkProfileNotif);
         when(mKeyguardInteractorLazy.get()).thenReturn(mKeyguardInteractor);
         when(mKeyguardInteractor.isKeyguardDismissible())

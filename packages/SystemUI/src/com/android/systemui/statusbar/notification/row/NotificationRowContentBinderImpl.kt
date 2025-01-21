@@ -799,6 +799,7 @@ constructor(
             }
             redacted.setLargeIcon(original.getLargeIcon())
             redacted.setSmallIcon(original.smallIcon)
+            redacted.setWhen(original.getWhen())
             return redacted
         }
 
