@@ -63,7 +63,7 @@ class CastDeviceTest : SysuiTestCase() {
             doAnswer {
                     // See Utils.isHeadlessRemoteDisplayProvider
                     if ((it.arguments[0] as Intent).`package` == HEADLESS_REMOTE_PACKAGE) {
-                        emptyList()
+                        emptyList<ResolveInfo>()
                     } else {
                         listOf(mock<ResolveInfo>())
                     }
