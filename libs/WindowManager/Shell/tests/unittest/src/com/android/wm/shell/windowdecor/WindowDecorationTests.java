@@ -831,6 +831,54 @@ public class WindowDecorationTests extends ShellTestCase {
     }
 
     @Test
+    public void testRelayout_setAppBoundsIfNeeded() {
+        final Display defaultDisplay = mock(Display.class);
+        doReturn(defaultDisplay).when(mMockDisplayController).getDisplay(Display.DEFAULT_DISPLAY);
+        final WindowContainerToken token = TestRunningTaskInfoBuilder.createMockWCToken();
+        final TestRunningTaskInfoBuilder builder = new TestRunningTaskInfoBuilder()
+                .setDisplayId(Display.DEFAULT_DISPLAY)
+                .setVisible(true);
+
+        final ActivityManager.RunningTaskInfo taskInfo =
+                builder.setToken(token).setBounds(TASK_BOUNDS).build();
+        final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
+        mRelayoutParams.mIsCaptionVisible = true;
+        mRelayoutParams.mShouldSetAppBounds = true;
+
+        windowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
+        final Rect appBounds = new Rect(TASK_BOUNDS);
+        appBounds.top += WindowDecoration.loadDimensionPixelSize(
+                windowDecor.mDecorWindowContext.getResources(), mRelayoutParams.mCaptionHeightId);
+        verify(mMockWindowContainerTransaction).setAppBounds(eq(token), eq(appBounds));
+    }
+
+    @Test
+    public void testRelayout_setAppBoundsIfNeeded_reset() {
+        final Display defaultDisplay = mock(Display.class);
+        doReturn(defaultDisplay).when(mMockDisplayController).getDisplay(Display.DEFAULT_DISPLAY);
+        final WindowContainerToken token = TestRunningTaskInfoBuilder.createMockWCToken();
+        final TestRunningTaskInfoBuilder builder = new TestRunningTaskInfoBuilder()
+                .setDisplayId(Display.DEFAULT_DISPLAY)
+                .setVisible(true);
+
+        final ActivityManager.RunningTaskInfo taskInfo =
+                builder.setToken(token).setBounds(TASK_BOUNDS).build();
+        final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
+
+        mRelayoutParams.mIsCaptionVisible = true;
+        mRelayoutParams.mIsInsetSource = true;
+        mRelayoutParams.mShouldSetAppBounds = true;
+        windowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
+
+        mRelayoutParams.mIsCaptionVisible = true;
+        mRelayoutParams.mIsInsetSource = false;
+        mRelayoutParams.mShouldSetAppBounds = false;
+        windowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
+
+        verify(mMockWindowContainerTransaction).setAppBounds(eq(token), eq(new Rect()));
+    }
+
+    @Test
     public void testTaskPositionAndCropNotSetWhenFalse() {
         final Display defaultDisplay = mock(Display.class);
         doReturn(defaultDisplay).when(mMockDisplayController)

@@ -228,10 +228,11 @@ class AppCompatSizeCompatModePolicy {
         int rotation = newParentConfiguration.windowConfiguration.getRotation();
         final boolean isFixedToUserRotation = mActivityRecord.mDisplayContent == null
                 || mActivityRecord.mDisplayContent.getDisplayRotation().isFixedToUserRotation();
+        final boolean tasksAreFloating =
+                newParentConfiguration.windowConfiguration.tasksAreFloating();
         // Ignore parent rotation for floating tasks as window rotation is independent of its parent
         // and thus will remain, and so should be reconfigured, in its original rotation.
-        if (!isFixedToUserRotation
-                && !newParentConfiguration.windowConfiguration.tasksAreFloating()) {
+        if (!isFixedToUserRotation && !tasksAreFloating) {
             // Use parent rotation because the original display can be rotated.
             resolvedConfig.windowConfiguration.setRotation(rotation);
         } else {
@@ -297,7 +298,9 @@ class AppCompatSizeCompatModePolicy {
         final float lastSizeCompatScale = mSizeCompatScale;
         updateSizeCompatScale(resolvedAppBounds, containerAppBounds, newParentConfiguration);
 
-        final int containerTopInset = containerAppBounds.top - containerBounds.top;
+        // Container top inset when floating is not included in height of bounds.
+        final int containerTopInset = tasksAreFloating ? 0
+                : containerAppBounds.top - containerBounds.top;
         final boolean topNotAligned =
                 containerTopInset != resolvedAppBounds.top - resolvedBounds.top;
         if (mSizeCompatScale != 1f || topNotAligned) {

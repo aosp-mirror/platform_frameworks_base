@@ -1711,7 +1711,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                         mWindowDecorViewHostSupplier,
                         mMultiInstanceHelper,
                         mWindowDecorCaptionHandleRepository,
-                        mDesktopModeEventLogger);
+                        mDesktopModeEventLogger,
+                        mDesktopModeCompatPolicy);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
         final TaskPositioner taskPositioner = mTaskPositionerFactory.create(
