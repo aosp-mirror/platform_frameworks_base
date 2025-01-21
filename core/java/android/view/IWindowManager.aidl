@@ -1145,4 +1145,9 @@ interface IWindowManager
      * @param deviceId The id of the {@link InputDevice} that will handle the shortcut.
      */
     KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId);
+
+    /**
+     * Returns whether the display with {@code displayId} ignores orientation request.
+     */
+    boolean getIgnoreOrientationRequest(int displayId);
 }

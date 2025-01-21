@@ -4309,7 +4309,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    boolean getIgnoreOrientationRequest(int displayId) {
+    @Override
+    public boolean getIgnoreOrientationRequest(int displayId) {
         synchronized (mGlobalLock) {
             final DisplayContent display = mRoot.getDisplayContent(displayId);
             if (display == null) {

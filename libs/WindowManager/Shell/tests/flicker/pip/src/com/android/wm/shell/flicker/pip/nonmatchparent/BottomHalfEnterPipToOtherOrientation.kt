@@ -26,10 +26,7 @@ import com.android.server.wm.flicker.helpers.BottomHalfPipAppHelper
 import com.android.server.wm.flicker.helpers.PipAppHelper
 import com.android.wm.shell.Flags
 import com.android.wm.shell.flicker.pip.EnterPipToOtherOrientation
-import org.junit.Assume.assumeFalse
-import org.junit.Assume.assumeTrue
 import org.junit.FixMethodOrder
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -71,19 +68,14 @@ class BottomHalfEnterPipToOtherOrientation(flicker: LegacyFlickerTest) :
     @Test
     override fun pipAppLayerCoversFullScreenOnStart() {
         // Test app and pip app should covers the entire screen on start.
-        assumeFalse(tapl.isTablet)
         flicker.assertLayersStart {
-            visibleRegion(pipApp.or(testApp)).coversExactly(startingBounds)
-        }
-    }
-
-    @Ignore("TODO(b/356277166): enable the tablet test")
-    @Test
-    override fun pipAppLayerPlusLetterboxCoversFullScreenOnStartTablet() {
-        // Test app and pip app should covers the entire screen on start.
-        assumeTrue(tapl.isTablet)
-        flicker.assertLayersStart {
-            visibleRegion(pipApp.or(ComponentNameMatcher.LETTERBOX)).coversExactly(startingBounds)
+            visibleRegion(
+                if (ignoreOrientationRequest) {
+                    pipApp.or(testApp).or(ComponentNameMatcher.LETTERBOX)
+                } else {
+                    pipApp.or(testApp)
+                }
+            ).coversExactly(startingBounds)
         }
     }
 
