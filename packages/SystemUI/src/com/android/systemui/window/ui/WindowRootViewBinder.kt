@@ -49,7 +49,6 @@ object WindowRootViewBinder {
         view.repeatWhenAttached {
             Log.d(TAG, "Binding root view")
             var frameCallbackPendingExecution: FrameCallback? = null
-            val viewRootImpl = view.rootView.viewRootImpl
             view.viewModel(
                 minWindowLifecycleState = WindowLifecycleState.ATTACHED,
                 factory = { viewModelFactory.create() },
@@ -64,13 +63,13 @@ object WindowRootViewBinder {
                                 val newFrameCallback = FrameCallback {
                                     frameCallbackPendingExecution = null
                                     blurUtils.applyBlur(
-                                        viewRootImpl,
+                                        view.rootView?.viewRootImpl,
                                         blurState.radius,
                                         blurState.isOpaque,
                                     )
                                     viewModel.onBlurApplied(blurState.radius)
                                 }
-                                blurUtils.prepareBlur(viewRootImpl, blurState.radius)
+                                blurUtils.prepareBlur(view.rootView?.viewRootImpl, blurState.radius)
                                 if (frameCallbackPendingExecution != null) {
                                     choreographer.removeFrameCallback(frameCallbackPendingExecution)
                                 }
