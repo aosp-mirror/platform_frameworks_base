@@ -72,6 +72,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.input.InputManager;
+import android.hardware.location.ContextHubManager;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
@@ -234,6 +235,13 @@ public class FrameworkServicesModule {
     @Singleton
     static ContentResolver provideContentResolver(Context context) {
         return context.getContentResolver();
+    }
+
+    @Provides
+    @Singleton
+    @Nullable
+    static ContextHubManager provideContextHubManager(Context context) {
+        return context.getSystemService(ContextHubManager.class);
     }
 
     @Provides
