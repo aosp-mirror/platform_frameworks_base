@@ -548,7 +548,6 @@
                 android:exported="true" />
 
         <service android:name=".wallpapers.GradientColorWallpaper"
-            android:featureFlag="android.app.enable_connected_displays_wallpaper"
             android:singleUser="true"
             android:permission="android.permission.BIND_WALLPAPER"
             android:exported="true" />

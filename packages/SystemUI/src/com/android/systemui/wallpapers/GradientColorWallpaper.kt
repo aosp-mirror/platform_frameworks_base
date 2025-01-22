@@ -16,6 +16,7 @@
 
 package com.android.systemui.wallpapers
 
+import android.app.Flags
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.service.wallpaper.WallpaperService
@@ -26,7 +27,15 @@ import androidx.core.graphics.toRectF
 /** A wallpaper that shows a static gradient color image wallpaper. */
 class GradientColorWallpaper : WallpaperService() {
 
-    override fun onCreateEngine(): Engine = GradientColorWallpaperEngine()
+    override fun onCreateEngine(): Engine =
+        if (Flags.enableConnectedDisplaysWallpaper()) {
+            GradientColorWallpaperEngine()
+        } else {
+            EmptyWallpaperEngine()
+        }
+
+    /** Empty engine used when the feature flag is disabled. */
+    inner class EmptyWallpaperEngine : Engine()
 
     inner class GradientColorWallpaperEngine : Engine() {
         init {
