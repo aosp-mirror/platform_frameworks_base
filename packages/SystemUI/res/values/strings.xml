@@ -2384,6 +2384,12 @@
     <string name="group_accessibility_toggle_slow_keys">Toggle slow keys</string>
     <!-- User visible title for the keyboard shortcut that toggles Voice Access. [CHAR LIMIT=70] -->
     <string name="group_accessibility_toggle_voice_access">Toggle Voice Access</string>
+    <!-- User visible title for the keyboard shortcut that toggles Talkback. [CHAR LIMIT=70] -->
+    <string name="group_accessibility_toggle_talkback">Toggle Talkback</string>
+    <!-- User visible title for the keyboard shortcut that toggles Magnification. [CHAR LIMIT=70] -->
+    <string name="group_accessibility_toggle_magnification">Toggle Magnification</string>
+    <!-- User visible title for the keyboard shortcut that activates Select to Speak service. [CHAR LIMIT=70] -->
+    <string name="group_accessibility_activate_select_to_speak">Activate Select to Speak</string>
 
     <!-- SysUI Tuner: Label for screen about do not disturb settings [CHAR LIMIT=60] -->
     <string name="volume_and_do_not_disturb">Do Not Disturb</string>
