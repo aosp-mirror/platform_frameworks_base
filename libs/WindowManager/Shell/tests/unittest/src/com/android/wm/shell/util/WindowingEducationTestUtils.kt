@@ -81,7 +81,9 @@ fun createWindowingEducationProto(
     appHandleHintViewedTimestampMillis: Long? = null,
     appHandleHintUsedTimestampMillis: Long? = null,
     appUsageStats: Map<String, Int>? = null,
-    appUsageStatsLastUpdateTimestampMillis: Long? = null
+    appUsageStatsLastUpdateTimestampMillis: Long? = null,
+    enterDesktopModeHintViewedTimestampMillis: Long? = null,
+    exitDesktopModeHintViewedTimestampMillis: Long? = null,
 ): WindowingEducationProto =
     WindowingEducationProto.newBuilder()
         .apply {
@@ -90,6 +92,12 @@ fun createWindowingEducationProto(
           }
           if (appHandleHintUsedTimestampMillis != null) {
             setAppHandleHintUsedTimestampMillis(appHandleHintUsedTimestampMillis)
+          }
+          if (enterDesktopModeHintViewedTimestampMillis != null) {
+              setEnterDesktopModeHintViewedTimestampMillis(enterDesktopModeHintViewedTimestampMillis)
+          }
+          if (exitDesktopModeHintViewedTimestampMillis != null) {
+              setExitDesktopModeHintViewedTimestampMillis(exitDesktopModeHintViewedTimestampMillis)
           }
           setAppHandleEducation(
               createAppHandleEducationProto(appUsageStats, appUsageStatsLastUpdateTimestampMillis))

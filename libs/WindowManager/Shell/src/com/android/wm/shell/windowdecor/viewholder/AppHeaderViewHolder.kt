@@ -329,11 +329,6 @@ class AppHeaderViewHolder(
     }
 
     fun runOnAppChipGlobalLayout(runnable: () -> Unit) {
-        if (openMenuButton.isAttachedToWindow) {
-            // App chip is already inflated.
-            runnable()
-            return
-        }
         // Wait for app chip to be inflated before notifying repository.
         openMenuButton.viewTreeObserver.addOnGlobalLayoutListener(object :
             OnGlobalLayoutListener {
