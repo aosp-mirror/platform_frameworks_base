@@ -1446,6 +1446,7 @@ class DesktopTasksController(
     }
 
     private fun addLaunchHomePendingIntent(wct: WindowContainerTransaction, displayId: Int) {
+        val userHandle = UserHandle.of(userId)
         val launchHomeIntent =
             Intent(Intent.ACTION_MAIN).apply {
                 if (displayId != DEFAULT_DISPLAY) {
@@ -1461,11 +1462,13 @@ class DesktopTasksController(
                     ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
             }
         val pendingIntent =
-            PendingIntent.getActivity(
+            PendingIntent.getActivityAsUser(
                 context,
-                /* requestCode = */ 0,
+                /* requestCode= */ 0,
                 launchHomeIntent,
                 PendingIntent.FLAG_IMMUTABLE,
+                /* options= */ null,
+                userHandle,
             )
         wct.sendPendingIntent(pendingIntent, launchHomeIntent, options.toBundle())
     }
