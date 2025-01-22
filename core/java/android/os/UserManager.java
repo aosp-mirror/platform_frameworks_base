@@ -30,6 +30,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SpecialUsers.CanBeALL;
+import android.annotation.SpecialUsers.CanBeNULL;
+import android.annotation.SpecialUsers.CannotBeSpecialUser;
 import android.annotation.StringDef;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
@@ -3913,7 +3916,8 @@ public class UserManager {
             android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.QUERY_USERS,
             android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
-    public @NonNull UserProperties getUserProperties(@NonNull UserHandle userHandle) {
+    public @NonNull UserProperties getUserProperties(
+            @CannotBeSpecialUser @NonNull UserHandle userHandle) {
         final int userId = userHandle.getIdentifier();
 
         if (userId < 0 && android.multiuser.Flags.fixGetUserPropertyCache()) {
@@ -6811,7 +6815,7 @@ public class UserManager {
      */
     @SystemApi
     public static final class EnforcingUser implements Parcelable {
-        private final @UserIdInt int userId;
+        private final @CanBeALL @CanBeNULL @UserIdInt int userId;
         private final @UserRestrictionSource int userRestrictionSource;
 
         /**
@@ -6856,7 +6860,7 @@ public class UserManager {
          *
          * <p> Will be UserHandle.USER_NULL when restriction is set by the system.
          */
-        public UserHandle getUserHandle() {
+        public @CanBeALL @CanBeNULL UserHandle getUserHandle() {
             return UserHandle.of(userId);
         }
 
