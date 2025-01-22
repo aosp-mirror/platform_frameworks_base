@@ -28,6 +28,7 @@ import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
+import android.app.WindowConfiguration.WindowingMode;
 import android.content.pm.ActivityInfo.WindowLayout;
 import android.graphics.Rect;
 
@@ -186,6 +187,7 @@ class LaunchParamsController {
         TaskDisplayArea mPreferredTaskDisplayArea;
 
         /** The windowing mode to be in. */
+        @WindowingMode
         int mWindowingMode;
 
         /** Sets values back to default. {@link #isEmpty} will return {@code true} once called. */
