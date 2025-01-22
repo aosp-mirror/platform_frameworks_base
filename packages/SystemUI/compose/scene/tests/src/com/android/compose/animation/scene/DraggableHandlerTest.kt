@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.overscroll
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -40,6 +44,7 @@ import com.android.compose.animation.scene.content.state.TransitionState.Compani
 import com.android.compose.animation.scene.content.state.TransitionState.Transition
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.gesture.NestedDraggable
+import com.android.compose.gesture.effect.OffsetOverscrollEffectFactory
 import com.android.compose.test.MonotonicClockTestScope
 import com.android.compose.test.runMonotonicClockTest
 import com.android.mechanics.spec.InputDirection
@@ -67,22 +72,25 @@ class DraggableHandlerTest {
                 canChangeScene = { canChangeScene(it) },
             )
 
+        val defaultEffectFactory =
+            OffsetOverscrollEffectFactory(testScope, MotionScheme.standard().defaultSpatialSpec())
+
         var layoutDirection = LayoutDirection.Rtl
             set(value) {
                 field = value
-                layoutImpl.updateContents(scenesBuilder, layoutDirection)
+                layoutImpl.updateContents(scenesBuilder, layoutDirection, defaultEffectFactory)
             }
 
         var mutableUserActionsA = mapOf(Swipe.Up to SceneB, Swipe.Down to SceneC)
             set(value) {
                 field = value
-                layoutImpl.updateContents(scenesBuilder, layoutDirection)
+                layoutImpl.updateContents(scenesBuilder, layoutDirection, defaultEffectFactory)
             }
 
         var mutableUserActionsB = mapOf(Swipe.Up to SceneC, Swipe.Down to SceneA)
             set(value) {
                 field = value
-                layoutImpl.updateContents(scenesBuilder, layoutDirection)
+                layoutImpl.updateContents(scenesBuilder, layoutDirection, defaultEffectFactory)
             }
 
         private val scenesBuilder: SceneTransitionLayoutScope<ContentScope>.() -> Unit = {
@@ -125,6 +133,7 @@ class DraggableHandlerTest {
                     // work well with advanceUntilIdle(), which is used by some tests.
                     animationScope = testScope,
                     directionChangeSlop = directionChangeSlop,
+                    defaultEffectFactory = defaultEffectFactory,
                 )
                 .apply { setContentsAndLayoutTargetSizeForTest(LAYOUT_SIZE) }
 

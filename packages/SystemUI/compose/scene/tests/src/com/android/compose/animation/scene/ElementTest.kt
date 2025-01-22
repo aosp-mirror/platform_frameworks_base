@@ -18,6 +18,7 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
@@ -32,6 +33,7 @@ import androidx.compose.foundation.overscroll
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -72,6 +74,7 @@ import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.gesture.effect.OffsetOverscrollEffect
+import com.android.compose.gesture.effect.rememberOffsetOverscrollEffectFactory
 import com.android.compose.test.assertSizeIsEqualTo
 import com.android.compose.test.setContentAndCreateMainScope
 import com.android.compose.test.transition
@@ -668,16 +671,20 @@ class ElementTest {
         rule.setContent {
             density = LocalDensity.current
             touchSlop = LocalViewConfiguration.current.touchSlop
-            SceneTransitionLayout(state, Modifier.size(layoutWidth, layoutHeight)) {
-                scene(key = SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
-                    Spacer(Modifier.fillMaxSize())
-                }
-                scene(SceneB) {
-                    Spacer(
-                        Modifier.overscroll(verticalOverscrollEffect)
-                            .fillMaxSize()
-                            .element(TestElements.Foo)
-                    )
+            CompositionLocalProvider(
+                LocalOverscrollFactory provides rememberOffsetOverscrollEffectFactory()
+            ) {
+                SceneTransitionLayout(state, Modifier.size(layoutWidth, layoutHeight)) {
+                    scene(key = SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
+                        Spacer(Modifier.fillMaxSize())
+                    }
+                    scene(SceneB) {
+                        Spacer(
+                            Modifier.overscroll(verticalOverscrollEffect)
+                                .fillMaxSize()
+                                .element(TestElements.Foo)
+                        )
+                    }
                 }
             }
         }
@@ -724,20 +731,24 @@ class ElementTest {
         rule.setContent {
             density = LocalDensity.current
             touchSlop = LocalViewConfiguration.current.touchSlop
-            SceneTransitionLayout(state, Modifier.size(layoutWidth, layoutHeight)) {
-                scene(key = SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
-                    Spacer(
-                        Modifier.overscroll(verticalOverscrollEffect)
-                            .fillMaxSize()
-                            .element(TestElements.Foo)
-                    )
-                }
-                scene(SceneB) {
-                    Spacer(
-                        Modifier.overscroll(verticalOverscrollEffect)
-                            .fillMaxSize()
-                            .element(TestElements.Bar)
-                    )
+            CompositionLocalProvider(
+                LocalOverscrollFactory provides rememberOffsetOverscrollEffectFactory()
+            ) {
+                SceneTransitionLayout(state, Modifier.size(layoutWidth, layoutHeight)) {
+                    scene(key = SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
+                        Spacer(
+                            Modifier.overscroll(verticalOverscrollEffect)
+                                .fillMaxSize()
+                                .element(TestElements.Foo)
+                        )
+                    }
+                    scene(SceneB) {
+                        Spacer(
+                            Modifier.overscroll(verticalOverscrollEffect)
+                                .fillMaxSize()
+                                .element(TestElements.Bar)
+                        )
+                    }
                 }
             }
         }
@@ -820,16 +831,20 @@ class ElementTest {
         rule.setContent {
             density = LocalDensity.current
             touchSlop = LocalViewConfiguration.current.touchSlop
-            SceneTransitionLayout(state, Modifier.size(layoutWidth, layoutHeight)) {
-                scene(key = SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
-                    Spacer(Modifier.fillMaxSize())
-                }
-                scene(SceneB) {
-                    Spacer(
-                        Modifier.overscroll(verticalOverscrollEffect)
-                            .element(TestElements.Foo)
-                            .fillMaxSize()
-                    )
+            CompositionLocalProvider(
+                LocalOverscrollFactory provides rememberOffsetOverscrollEffectFactory()
+            ) {
+                SceneTransitionLayout(state, Modifier.size(layoutWidth, layoutHeight)) {
+                    scene(key = SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
+                        Spacer(Modifier.fillMaxSize())
+                    }
+                    scene(SceneB) {
+                        Spacer(
+                            Modifier.overscroll(verticalOverscrollEffect)
+                                .element(TestElements.Foo)
+                                .fillMaxSize()
+                        )
+                    }
                 }
             }
         }
@@ -875,27 +890,31 @@ class ElementTest {
         rule.setContent {
             density = LocalDensity.current
             touchSlop = LocalViewConfiguration.current.touchSlop
-            SceneTransitionLayout(
-                state = state,
-                modifier = Modifier.size(layoutWidth, layoutHeight),
+            CompositionLocalProvider(
+                LocalOverscrollFactory provides rememberOffsetOverscrollEffectFactory()
             ) {
-                scene(SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
-                    Box(
-                        Modifier
-                            // A scrollable that does not consume the scroll gesture
-                            .scrollable(
-                                state = rememberScrollableState(consumeScrollDelta = { 0f }),
-                                orientation = Orientation.Vertical,
-                            )
-                            .fillMaxSize()
-                    )
-                }
-                scene(SceneB) {
-                    Spacer(
-                        Modifier.overscroll(verticalOverscrollEffect)
-                            .element(TestElements.Foo)
-                            .fillMaxSize()
-                    )
+                SceneTransitionLayout(
+                    state = state,
+                    modifier = Modifier.size(layoutWidth, layoutHeight),
+                ) {
+                    scene(SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
+                        Box(
+                            Modifier
+                                // A scrollable that does not consume the scroll gesture
+                                .scrollable(
+                                    state = rememberScrollableState(consumeScrollDelta = { 0f }),
+                                    orientation = Orientation.Vertical,
+                                )
+                                .fillMaxSize()
+                        )
+                    }
+                    scene(SceneB) {
+                        Spacer(
+                            Modifier.overscroll(verticalOverscrollEffect)
+                                .element(TestElements.Foo)
+                                .fillMaxSize()
+                        )
+                    }
                 }
             }
         }

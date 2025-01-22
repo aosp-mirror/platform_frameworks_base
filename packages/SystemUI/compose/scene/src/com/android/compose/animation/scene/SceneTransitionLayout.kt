@@ -17,6 +17,9 @@
 package com.android.compose.animation.scene
 
 import androidx.annotation.FloatRange
+import androidx.compose.foundation.LocalOverscrollFactory
+import androidx.compose.foundation.OverscrollEffect
+import androidx.compose.foundation.OverscrollFactory
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -37,7 +40,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import com.android.compose.gesture.NestedScrollableBound
-import com.android.compose.gesture.effect.ContentOverscrollEffect
 
 /**
  * [SceneTransitionLayout] is a container that automatically animates its content whenever its state
@@ -82,12 +84,19 @@ interface SceneTransitionLayoutScope<out CS : ContentScope> {
      * You can configure [userActions] so that swiping on this layout or navigating back will
      * transition to a different scene.
      *
+     * By default, [verticalOverscrollEffect][ContentScope.verticalOverscrollEffect] and
+     * [horizontalOverscrollEffect][ContentScope.horizontalOverscrollEffect] of this scene will be
+     * created using [LocalOverscrollFactory]. You can specify a non-null [effectFactory] to set up
+     * a custom factory that will be used by this scene and by any calls to
+     * rememberOverscrollEffect() inside the scene.
+     *
      * Important: scene order along the z-axis follows call order. Calling scene(A) followed by
      * scene(B) will mean that scene B renders after/above scene A.
      */
     fun scene(
         key: SceneKey,
         userActions: Map<UserAction, UserActionResult> = emptyMap(),
+        effectFactory: OverscrollFactory? = null,
         content: @Composable CS.() -> Unit,
     )
 
@@ -108,6 +117,12 @@ interface SceneTransitionLayoutScope<out CS : ContentScope> {
      * to prevent swipes from reaching other scenes or overlays behind this one. Clicking this
      * protective layer will close the overlay.
      *
+     * By default, [verticalOverscrollEffect][ContentScope.verticalOverscrollEffect] and
+     * [horizontalOverscrollEffect][ContentScope.horizontalOverscrollEffect] of this overlay will be
+     * created using [LocalOverscrollFactory]. You can specify a non-null [effectFactory] to set up
+     * a custom factory that will be used by this content and by any calls to
+     * rememberOverscrollEffect() inside the content.
+     *
      * Important: overlays must be defined after all scenes. Overlay order along the z-axis follows
      * call order. Calling overlay(A) followed by overlay(B) will mean that overlay B renders
      * after/above overlay A.
@@ -118,6 +133,7 @@ interface SceneTransitionLayoutScope<out CS : ContentScope> {
             mapOf(Back to UserActionResult.HideOverlay(key)),
         alignment: Alignment = Alignment.Center,
         isModal: Boolean = true,
+        effectFactory: OverscrollFactory? = null,
         content: @Composable CS.() -> Unit,
     )
 }
@@ -262,7 +278,7 @@ interface ContentScope : BaseContentScope {
      * The overscroll effect applied to the content in the vertical direction. This can be used to
      * customize how the content behaves when the scene is over scrolled.
      *
-     * For example, you can use it with the `Modifier.overscroll()` modifier:
+     * You should use this effect exactly once with the `Modifier.overscroll()` modifier:
      * ```kotlin
      * @Composable
      * fun ContentScope.MyScene() {
@@ -276,26 +292,9 @@ interface ContentScope : BaseContentScope {
      * }
      * ```
      *
-     * Or you can read the `overscrollDistance` value directly, if you need some custom overscroll
-     * behavior:
-     * ```kotlin
-     * @Composable
-     * fun ContentScope.MyScene() {
-     *     Box(
-     *         modifier = Modifier
-     *             .graphicsLayer {
-     *                 // Translate half of the overscroll
-     *                 translationY = verticalOverscrollEffect.overscrollDistance * 0.5f
-     *             }
-     *     ) {
-     *         // ... your content ...
-     *     }
-     * }
-     * ```
-     *
      * @see horizontalOverscrollEffect
      */
-    val verticalOverscrollEffect: ContentOverscrollEffect
+    val verticalOverscrollEffect: OverscrollEffect
 
     /**
      * The overscroll effect applied to the content in the horizontal direction. This can be used to
@@ -303,7 +302,7 @@ interface ContentScope : BaseContentScope {
      *
      * @see verticalOverscrollEffect
      */
-    val horizontalOverscrollEffect: ContentOverscrollEffect
+    val horizontalOverscrollEffect: OverscrollEffect
 
     /**
      * Animate some value at the content level.
@@ -746,6 +745,7 @@ internal fun SceneTransitionLayoutForTesting(
     val density = LocalDensity.current
     val directionChangeSlop = LocalViewConfiguration.current.touchSlop
     val layoutDirection = LocalLayoutDirection.current
+    val defaultEffectFactory = checkNotNull(LocalOverscrollFactory.current)
     val animationScope = rememberCoroutineScope()
     val layoutImpl = remember {
         SceneTransitionLayoutImpl(
@@ -761,13 +761,14 @@ internal fun SceneTransitionLayoutForTesting(
                 ancestors = ancestors,
                 lookaheadScope = lookaheadScope,
                 directionChangeSlop = directionChangeSlop,
+                defaultEffectFactory = defaultEffectFactory,
             )
             .also { onLayoutImpl?.invoke(it) }
     }
 
     // TODO(b/317014852): Move this into the SideEffect {} again once STLImpl.scenes is not a
     // SnapshotStateMap anymore.
-    layoutImpl.updateContents(builder, layoutDirection)
+    layoutImpl.updateContents(builder, layoutDirection, defaultEffectFactory)
 
     SideEffect {
         if (state != layoutImpl.state) {

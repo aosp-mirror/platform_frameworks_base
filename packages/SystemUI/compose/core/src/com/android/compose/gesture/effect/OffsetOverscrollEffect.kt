@@ -19,7 +19,7 @@ package com.android.compose.gesture.effect
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.foundation.OverscrollEffect
-import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.OverscrollFactory
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -37,24 +37,42 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 
+@Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+fun rememberOffsetOverscrollEffect(
+    animationSpec: AnimationSpec<Float> = MaterialTheme.motionScheme.defaultSpatialSpec()
+): OffsetOverscrollEffect {
+    val animationScope = rememberCoroutineScope()
+    return remember(animationScope, animationSpec) {
+        OffsetOverscrollEffect(animationScope, animationSpec)
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+fun rememberOffsetOverscrollEffectFactory(
+    animationSpec: AnimationSpec<Float> = MaterialTheme.motionScheme.defaultSpatialSpec()
+): OverscrollFactory {
+    val animationScope = rememberCoroutineScope()
+    return remember(animationScope, animationSpec) {
+        OffsetOverscrollEffectFactory(animationScope, animationSpec)
+    }
+}
+
+data class OffsetOverscrollEffectFactory(
+    private val animationScope: CoroutineScope,
+    private val animationSpec: AnimationSpec<Float>,
+) : OverscrollFactory {
+    override fun createOverscrollEffect(): OverscrollEffect {
+        return OffsetOverscrollEffect(animationScope, animationSpec)
+    }
+}
+
 /** An [OverscrollEffect] that offsets the content by the overscroll value. */
-class OffsetOverscrollEffect(
-    orientation: Orientation,
-    animationScope: CoroutineScope,
-    animationSpec: AnimationSpec<Float>,
-) : BaseContentOverscrollEffect(orientation, animationScope, animationSpec) {
-    private var _node: DelegatableNode = newNode()
-    override val node: DelegatableNode
-        get() = _node
-
-    fun newNode(): DelegatableNode {
-        return object : Modifier.Node(), LayoutModifierNode {
-            override fun onDetach() {
-                super.onDetach()
-                // TODO(b/379086317) Remove this workaround: avoid to reuse the same node.
-                _node = newNode()
-            }
-
+class OffsetOverscrollEffect(animationScope: CoroutineScope, animationSpec: AnimationSpec<Float>) :
+    BaseContentOverscrollEffect(animationScope, animationSpec) {
+    override val node: DelegatableNode =
+        object : Modifier.Node(), LayoutModifierNode {
             override fun MeasureScope.measure(
                 measurable: Measurable,
                 constraints: Constraints,
@@ -62,11 +80,16 @@ class OffsetOverscrollEffect(
                 val placeable = measurable.measure(constraints)
                 return layout(placeable.width, placeable.height) {
                     val offsetPx = computeOffset(density = this@measure, overscrollDistance)
-                    placeable.placeRelativeWithLayer(position = offsetPx.toIntOffset())
+                    if (offsetPx != 0) {
+                        placeable.placeRelativeWithLayer(
+                            with(requireConverter()) { offsetPx.toIntOffset() }
+                        )
+                    } else {
+                        placeable.placeRelative(0, 0)
+                    }
                 }
             }
         }
-    }
 
     companion object {
         private val MaxDistance = 400.dp
@@ -77,18 +100,6 @@ class OffsetOverscrollEffect(
             val progress = ProgressConverter.Default.convert(overscrollDistance / maxDistancePx)
             return (progress * maxDistancePx).roundToInt()
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-fun rememberOffsetOverscrollEffect(
-    orientation: Orientation,
-    animationSpec: AnimationSpec<Float> = MaterialTheme.motionScheme.defaultSpatialSpec(),
-): OffsetOverscrollEffect {
-    val animationScope = rememberCoroutineScope()
-    return remember(orientation, animationScope, animationSpec) {
-        OffsetOverscrollEffect(orientation, animationScope, animationSpec)
     }
 }
 

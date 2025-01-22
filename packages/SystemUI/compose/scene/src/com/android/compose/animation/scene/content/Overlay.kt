@@ -16,6 +16,7 @@
 
 package com.android.compose.animation.scene.content
 
+import androidx.compose.foundation.OverscrollFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -39,7 +40,8 @@ internal class Overlay(
     globalZIndex: Long,
     alignment: Alignment,
     isModal: Boolean,
-) : Content(key, layoutImpl, content, actions, zIndex, globalZIndex) {
+    effectFactory: OverscrollFactory,
+) : Content(key, layoutImpl, content, actions, zIndex, globalZIndex, effectFactory) {
     var alignment by mutableStateOf(alignment)
     var isModal by mutableStateOf(isModal)
 

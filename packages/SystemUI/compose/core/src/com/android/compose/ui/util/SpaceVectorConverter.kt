@@ -37,11 +37,11 @@ interface SpaceVectorConverter {
 
 fun SpaceVectorConverter(orientation: Orientation) =
     when (orientation) {
-        Orientation.Horizontal -> HorizontalConverter
-        Orientation.Vertical -> VerticalConverter
+        Orientation.Horizontal -> HorizontalSpaceVectorConverter
+        Orientation.Vertical -> VerticalSpaceVectorConverter
     }
 
-private data object HorizontalConverter : SpaceVectorConverter {
+data object HorizontalSpaceVectorConverter : SpaceVectorConverter {
     override fun Offset.toFloat() = x
 
     override fun Velocity.toFloat() = x
@@ -55,7 +55,7 @@ private data object HorizontalConverter : SpaceVectorConverter {
     override fun Int.toIntOffset() = IntOffset(this, 0)
 }
 
-private data object VerticalConverter : SpaceVectorConverter {
+data object VerticalSpaceVectorConverter : SpaceVectorConverter {
     override fun Offset.toFloat() = y
 
     override fun Velocity.toFloat() = y
