@@ -159,6 +159,17 @@
         <item name="android:shadowRadius">?attr/shadowRadius</item>
     </style>
 
+    <style name="TextAppearance.Keyguard.BottomArea.DoubleShadow">
+        <item name="keyShadowBlur">0.5dp</item>
+        <item name="keyShadowOffsetX">0.5dp</item>
+        <item name="keyShadowOffsetY">0.5dp</item>
+        <item name="keyShadowAlpha">0.8</item>
+        <item name="ambientShadowBlur">0.5dp</item>
+        <item name="ambientShadowOffsetX">0.5dp</item>
+        <item name="ambientShadowOffsetY">0.5dp</item>
+        <item name="ambientShadowAlpha">0.6</item>
+    </style>
+
     <style name="TextAppearance.Keyguard.BottomArea.Button">
         <item name="android:shadowRadius">0</item>
     </style>
