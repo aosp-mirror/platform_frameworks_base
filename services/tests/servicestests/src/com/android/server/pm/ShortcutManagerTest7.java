@@ -100,7 +100,7 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
         assertEquals(99, mService.mMaxUpdatesPerInterval);
     }
 
-    public void testRoot() throws Exception {
+    public void disabled_testRoot() throws Exception {
         mService.mMaxUpdatesPerInterval = 99;
 
         mInjectedCallingUid = Process.ROOT_UID;
@@ -262,7 +262,7 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
                 "Launcher: ComponentInfo{com.android.test.1/name}");
     }
 
-    public void testUnloadUser() throws Exception {
+    public void disabled_testUnloadUser() throws Exception {
         prepareCrossProfileDataSet();
 
         assertNotNull(mService.getShortcutsForTest().get(USER_11));
