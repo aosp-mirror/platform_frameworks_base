@@ -214,9 +214,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
          * Notifies when the state of running animation is changed. The state is either "running" or
          * "idle".
          *
-         * @param running {@code true} if there is any animation running; {@code false} otherwise.
+         * @param running       {@code true} if the given insets types start running
+         *                      {@code false} otherwise.
+         * @param animationType {@link AnimationType}
+         * @param insetsTypes   {@link Type}.
          */
-        default void notifyAnimationRunningStateChanged(boolean running) {}
+        default void notifyAnimationRunningStateChanged(boolean running,
+                @AnimationType int animationType, @InsetsType int insetsTypes) {
+        }
 
         /** @see ViewRootImpl#isHandlingPointerEvent */
         default boolean isHandlingPointerEvent() {
@@ -744,9 +749,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     final InsetsAnimationControlRunner runner = new InsetsResizeAnimationRunner(
                             mFrame, mFromState, mToState, RESIZE_INTERPOLATOR,
                             ANIMATION_DURATION_RESIZE, mTypes, InsetsController.this);
-                    if (mRunningAnimations.isEmpty()) {
-                        mHost.notifyAnimationRunningStateChanged(true);
-                    }
+                    mHost.notifyAnimationRunningStateChanged(true,
+                            runner.getAnimationType(), mTypes);
                     mRunningAnimations.add(new RunningAnimation(runner, runner.getAnimationType()));
                 }
             };
@@ -1560,9 +1564,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
         }
         ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_ANIMATION_RUNNING);
-        if (mRunningAnimations.isEmpty()) {
-            mHost.notifyAnimationRunningStateChanged(true);
-        }
+        mHost.notifyAnimationRunningStateChanged(true, animationType, types);
         mRunningAnimations.add(new RunningAnimation(runner, animationType));
         if (DEBUG) Log.d(TAG, "Animation added to runner. useInsetsAnimationThread: "
                 + useInsetsAnimationThread);
@@ -1842,9 +1844,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 break;
             }
         }
-        if (mRunningAnimations.isEmpty()) {
-            mHost.notifyAnimationRunningStateChanged(false);
-        }
+        mHost.notifyAnimationRunningStateChanged(
+                false, control.getAnimationType(), removedTypes);
         onAnimationStateChanged(removedTypes, false /* running */);
     }
 

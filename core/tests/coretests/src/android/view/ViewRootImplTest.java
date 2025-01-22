@@ -1054,7 +1054,8 @@ public class ViewRootImplTest {
         ViewRootImpl viewRootImpl = mView.getViewRootImpl();
         sInstrumentation.runOnMainSync(() -> {
             mView.invalidate();
-            viewRootImpl.notifyInsetsAnimationRunningStateChanged(true);
+            viewRootImpl.notifyInsetsAnimationRunningStateChanged(true, 0 /* animationType */,
+                    0 /* insetsTypes */  /* areOtherAnimationsRunning */);
             mView.invalidate();
         });
         sInstrumentation.waitForIdleSync();
