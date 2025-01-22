@@ -3581,8 +3581,6 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * @hide
-     *
      * Returns who set a user restriction on a user.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      * @param restrictionKey the string key representing the restriction
@@ -6266,9 +6264,6 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    /**
-     * @hide
-     */
     @Override
     public @NonNull UserInfo createRestrictedProfileWithThrow(
             @Nullable String name, @UserIdInt int parentUserId)
@@ -8495,7 +8490,6 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * @hide
      * Checks whether to show a notification for sounds (e.g., alarms, timers, etc.) from
      * background users.
      */
