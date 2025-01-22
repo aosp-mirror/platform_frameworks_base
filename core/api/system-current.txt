@@ -15450,6 +15450,8 @@ package android.telephony {
     field public static final int CONDITIONAL_IE_ERROR = 100; // 0x64
     field public static final int DESTINATION_OUT_OF_ORDER = 27; // 0x1b
     field @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public static final int EMERGENCY_PERM_FAILURE = 326; // 0x146
+    field @FlaggedApi("com.android.internal.telephony.flags.add_ims_redial_codes_for_emergency_calls") public static final int EMERGENCY_REDIAL_ON_IMS = 3001; // 0xbb9
+    field @FlaggedApi("com.android.internal.telephony.flags.add_ims_redial_codes_for_emergency_calls") public static final int EMERGENCY_REDIAL_ON_VOWIFI = 3002; // 0xbba
     field @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public static final int EMERGENCY_TEMP_FAILURE = 325; // 0x145
     field public static final int ERROR_UNSPECIFIED = 65535; // 0xffff
     field public static final int FACILITY_REJECTED = 29; // 0x1d

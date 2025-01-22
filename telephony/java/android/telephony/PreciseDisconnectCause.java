@@ -326,6 +326,13 @@ public final class PreciseDisconnectCause {
     @Deprecated
     public static final int CDMA_ACCESS_BLOCKED                              = 1009;
 
+    /** Call was disconnected with cause code retry over volte. */
+    @FlaggedApi(Flags.FLAG_ADD_IMS_REDIAL_CODES_FOR_EMERGENCY_CALLS)
+    public static final int EMERGENCY_REDIAL_ON_IMS                                = 3001;
+    /** Call was disconnected with cause code retry over vowifi. */
+    @FlaggedApi(Flags.FLAG_ADD_IMS_REDIAL_CODES_FOR_EMERGENCY_CALLS)
+    public static final int EMERGENCY_REDIAL_ON_VOWIFI                             = 3002;
+
     /* OEM specific error codes. To be used by OEMs when they don't want to
        reveal error code which would be replaced by ERROR_UNSPECIFIED */
     public static final int OEM_CAUSE_1                                      = 0xf001;
