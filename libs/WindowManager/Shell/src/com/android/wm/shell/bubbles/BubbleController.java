@@ -2613,6 +2613,17 @@ public class BubbleController implements ConfigurationChangeListener,
                     public void animateBubbleBarLocation(BubbleBarLocation location) {
                         mListener.call(l -> l.animateBubbleBarLocation(location));
                     }
+
+                    @Override
+                    public void onDragItemOverBubbleBarDragZone(
+                            @NonNull BubbleBarLocation location) {
+                        mListener.call(l -> l.onDragItemOverBubbleBarDragZone(location));
+                    }
+
+                    @Override
+                    public void onItemDraggedOutsideBubbleBarDropZone() {
+                        mListener.call(IBubblesListener::onItemDraggedOutsideBubbleBarDropZone);
+                    }
                 };
 
         IBubblesImpl(BubbleController controller) {
