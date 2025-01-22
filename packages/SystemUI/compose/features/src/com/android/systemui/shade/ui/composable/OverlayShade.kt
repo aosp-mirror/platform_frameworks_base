@@ -21,6 +21,7 @@ package com.android.systemui.shade.ui.composable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -57,9 +58,11 @@ import com.android.systemui.res.R
 /** Renders a lightweight shade UI container, as an overlay. */
 @Composable
 fun ContentScope.OverlayShade(
+    isShadeLayoutWide: Boolean,
     panelAlignment: Alignment,
     onScrimClicked: () -> Unit,
     modifier: Modifier = Modifier,
+    header: @Composable () -> Unit,
     content: @Composable () -> Unit,
 ) {
     Box(modifier) {
@@ -67,12 +70,18 @@ fun ContentScope.OverlayShade(
 
         Box(modifier = Modifier.fillMaxSize().panelPadding(), contentAlignment = panelAlignment) {
             Panel(
+                isShadeLayoutWide = isShadeLayoutWide,
                 modifier =
                     Modifier.overscroll(verticalOverscrollEffect)
                         .element(OverlayShade.Elements.Panel)
                         .panelSize(),
+                header = header,
                 content = content,
             )
+        }
+
+        if (isShadeLayoutWide) {
+            header()
         }
     }
 }
@@ -90,7 +99,12 @@ private fun ContentScope.Scrim(onClicked: () -> Unit, modifier: Modifier = Modif
 }
 
 @Composable
-private fun ContentScope.Panel(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+private fun ContentScope.Panel(
+    isShadeLayoutWide: Boolean,
+    modifier: Modifier = Modifier,
+    header: @Composable () -> Unit,
+    content: @Composable () -> Unit,
+) {
     Box(modifier = modifier.clip(OverlayShade.Shapes.RoundedCornerPanel)) {
         Spacer(
             modifier =
@@ -102,9 +116,15 @@ private fun ContentScope.Panel(modifier: Modifier = Modifier, content: @Composab
                     )
         )
 
-        // This content is intentionally rendered as a separate element from the background in order
-        // to allow for more flexibility when defining transitions.
-        content()
+        Column {
+            if (!isShadeLayoutWide) {
+                header()
+            }
+
+            // This content is intentionally rendered as a separate element from the background in
+            // order to allow for more flexibility when defining transitions.
+            content()
+        }
     }
 }
 

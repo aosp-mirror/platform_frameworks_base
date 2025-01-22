@@ -144,6 +144,7 @@ public class NotificationIconContainer extends ViewGroup {
 
     private int mMaxIcons = Integer.MAX_VALUE;
     private boolean mOverrideIconColor;
+    private boolean mUseInverseOverrideIconColor;
     private boolean mIsStaticLayout = true;
     private final HashMap<View, IconState> mIconStates = new HashMap<>();
     private int mDotPadding;
@@ -169,6 +170,7 @@ public class NotificationIconContainer extends ViewGroup {
     private final int[] mAbsolutePosition = new int[2];
     @Nullable private View mIsolatedIconForAnimation;
     private int mThemedTextColorPrimary;
+    private int mThemedTextColorPrimaryInverse;
     @Nullable private Runnable mIsolatedIconAnimationEndRunnable;
     private boolean mUseIncreasedIconScale;
 
@@ -191,6 +193,8 @@ public class NotificationIconContainer extends ViewGroup {
                 com.android.internal.R.style.Theme_DeviceDefault_DayNight);
         mThemedTextColorPrimary = Utils.getColorAttr(themedContext,
                 com.android.internal.R.attr.textColorPrimary).getDefaultColor();
+        mThemedTextColorPrimaryInverse = Utils.getColorAttr(themedContext,
+                com.android.internal.R.attr.textColorPrimaryInverse).getDefaultColor();
     }
 
     @Override
@@ -713,6 +717,10 @@ public class NotificationIconContainer extends ViewGroup {
         mOverrideIconColor = override;
     }
 
+    public void setUseInverseOverrideIconColor(boolean override) {
+        mUseInverseOverrideIconColor = override;
+    }
+
     public class IconState extends ViewState {
         public float iconAppearAmount = 1.0f;
         public float clampedAppearAmount = 1.0f;
@@ -821,7 +829,9 @@ public class NotificationIconContainer extends ViewGroup {
                 }
                 icon.setVisibleState(visibleState, animationsAllowed);
                 if (mOverrideIconColor) {
-                    icon.setIconColor(mThemedTextColorPrimary,
+                    int overrideIconColor = mUseInverseOverrideIconColor
+                            ? mThemedTextColorPrimaryInverse : mThemedTextColorPrimary;
+                    icon.setIconColor(overrideIconColor,
                             /* animate= */ needsCannedAnimation && animationsAllowed);
                 }
                 if (animate) {
