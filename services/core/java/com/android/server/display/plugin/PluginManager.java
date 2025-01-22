@@ -74,15 +74,17 @@ public class PluginManager {
     /**
      * Adds change listener for particular plugin type
      */
-    public <T> void subscribe(PluginType<T> type, PluginChangeListener<T> listener) {
-        mPluginStorage.addListener(type, listener);
+    public <T> void subscribe(PluginType<T> type, String uniqueDisplayId,
+            PluginChangeListener<T> listener) {
+        mPluginStorage.addListener(type, uniqueDisplayId, listener);
     }
 
     /**
      * Removes change listener
      */
-    public <T> void unsubscribe(PluginType<T> type, PluginChangeListener<T> listener) {
-        mPluginStorage.removeListener(type, listener);
+    public <T> void unsubscribe(PluginType<T> type, String uniqueDisplayId,
+            PluginChangeListener<T> listener) {
+        mPluginStorage.removeListener(type, uniqueDisplayId, listener);
     }
 
     /**
