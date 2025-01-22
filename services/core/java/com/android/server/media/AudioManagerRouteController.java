@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Maintains a list of all available routes and supports transfers to any of them.
@@ -90,7 +91,11 @@ import java.util.Objects;
     @NonNull private final Context mContext;
     @NonNull private final AudioManager mAudioManager;
     @NonNull private final Handler mHandler;
-    @NonNull private final OnDeviceRouteChangedListener mOnDeviceRouteChangedListener;
+
+    @NonNull
+    private final CopyOnWriteArrayList<OnDeviceRouteChangedListener>
+            mOnDeviceRouteChangedListeners = new CopyOnWriteArrayList<>();
+
     @NonNull private final BluetoothDeviceRoutesManager mBluetoothRouteController;
 
     @NonNull private final AudioProductStrategy mStrategyForMedia;
@@ -131,7 +136,7 @@ import java.util.Objects;
         mAudioManager = Objects.requireNonNull(audioManager);
         mHandler = new Handler(Objects.requireNonNull(looper));
         mStrategyForMedia = Objects.requireNonNull(strategyForMedia);
-        mOnDeviceRouteChangedListener = Objects.requireNonNull(onDeviceRouteChangedListener);
+        mOnDeviceRouteChangedListeners.add(Objects.requireNonNull(onDeviceRouteChangedListener));
 
         mBuiltInSpeakerSuitabilityStatus =
                 DeviceRouteController.getBuiltInSpeakerSuitabilityStatus(mContext);
@@ -142,6 +147,11 @@ import java.util.Objects;
         // Just build routes but don't notify. The caller may not expect the listener to be invoked
         // before this constructor has finished executing.
         rebuildAvailableRoutes();
+    }
+
+    public void registerRouteChangeListener(
+            @NonNull OnDeviceRouteChangedListener onDeviceRouteChangedListener) {
+        mOnDeviceRouteChangedListeners.add(onDeviceRouteChangedListener);
     }
 
     @RequiresPermission(
@@ -281,7 +291,9 @@ import java.util.Objects;
             })
     private void rebuildAvailableRoutesAndNotify() {
         rebuildAvailableRoutes();
-        mOnDeviceRouteChangedListener.onDeviceRouteChanged();
+        for (OnDeviceRouteChangedListener listener : mOnDeviceRouteChangedListeners) {
+            listener.onDeviceRouteChanged();
+        }
     }
 
     @RequiresPermission(
