@@ -33,9 +33,9 @@ import com.android.systemui.shade.shadeTestUtil
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.TestScope
 
-val Kosmos.bouncerWindowBlurTestUtil by
+val Kosmos.keyguardWindowBlurTestUtil by
     Kosmos.Fixture {
-        BouncerWindowBlurTestUtil(
+        KeyguardWindowBlurTestUtil(
             shadeTestUtil = shadeTestUtil,
             fakeKeyguardTransitionRepository = fakeKeyguardTransitionRepository,
             fakeKeyguardRepository = fakeKeyguardRepository,
@@ -43,7 +43,7 @@ val Kosmos.bouncerWindowBlurTestUtil by
         )
     }
 
-class BouncerWindowBlurTestUtil(
+class KeyguardWindowBlurTestUtil(
     private val shadeTestUtil: ShadeTestUtil,
     private val fakeKeyguardTransitionRepository: FakeKeyguardTransitionRepository,
     private val fakeKeyguardRepository: FakeKeyguardRepository,
