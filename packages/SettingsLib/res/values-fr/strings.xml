@@ -254,8 +254,8 @@
     <string name="adb_wireless_error" msgid="721958772149779856">"Erreur"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Débogage sans fil"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Pour afficher et utiliser les appareils disponibles, activez le débogage sans fil"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Associer l\'appareil avec un code QR"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Associer les nouveaux appareils à l\'aide d\'un lecteur de code QR"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Associer l\'appareil avec un QR code"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Associer les nouveaux appareils à l\'aide d\'un lecteur de QR code"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Associer l\'appareil avec un code d\'association"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Associer les nouveaux appareils à l\'aide d\'un code à six chiffres"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Appareils associés"</string>
@@ -269,12 +269,12 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Code d\'association via le Wi-Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Échec de l\'association"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Assurez-vous que l\'appareil est connecté au même réseau."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Associer l\'appareil via le Wi‑Fi à l\'aide d\'un code QR"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Associer l\'appareil via le Wi‑Fi à l\'aide d\'un QR code"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Association de l\'appareil…"</string>
-    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Échec de l\'association à l\'appareil. Le code QR est incorrect, ou l\'appareil n\'est pas connecté au même réseau."</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Échec de l\'association à l\'appareil. Le QR code est incorrect, ou l\'appareil n\'est pas connecté au même réseau."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adresse IP et port"</string>
-    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Scanner un code QR"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Associez l\'appareil via le Wi‑Fi à l\'aide d\'un code QR"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Scanner un QR code"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Associez l\'appareil via le Wi‑Fi à l\'aide d\'un QR code"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Connectez-vous à un réseau Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, débogage, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Raccourci vers rapport de bug"</string>

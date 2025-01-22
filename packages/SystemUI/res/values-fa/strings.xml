@@ -167,7 +167,7 @@
     <string name="issuerecord_start_error" msgid="3402782952722871190">"هنگام شروع ضبط مشکل، خطایی پیش آمد"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"درحال مشاهده در حالت تمام‌صفحه"</string>
     <string name="immersive_cling_description" msgid="2717426731830851921">"برای خروج، از بالای صفحه تند به پایین بکشید"</string>
-    <string name="immersive_cling_positive" msgid="3076681691468978568">"متوجه‌ام"</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"متوجهم"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"برگشت"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"صفحهٔ اصلی"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"منو"</string>
@@ -527,12 +527,11 @@
     <string name="accessibility_action_label_expand_widget" msgid="9190524260912211759">"افزایش ارتفاع"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ابزاره‌های صفحه قفل"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"برای باز کردن برنامه بااستفاده از ابزاره، باید هویت خودتان را به‌تأیید برسانید. همچنین، به‌خاطر داشته باشید که همه می‌توانند آن‌ها را مشاهده کنند، حتی وقتی رایانه لوحی‌تان قفل است. برخی‌از ابزاره‌ها ممکن است برای صفحه قفل درنظر گرفته نشده باشند و ممکن است اضافه کردن آن‌ها در اینجا ناامن باشد."</string>
-    <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"متوجه‌ام"</string>
+    <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"متوجهم"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"ابزاره‌ها"</string>
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
-    <skip />
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
-    <skip />
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"برای افزودن میان‌بر «ابزاره‌ها»، مطمئن شوید «نمایش ابزاره‌ها در صفحه قفل» در تنظیمات فعال باشد."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"تنظیمات"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"دکمه نمایش دادن محافظ صفحه‌نمایش"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"تغییر کاربر"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"منوی پایین‌پر"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"همه برنامه‌ها و داده‌های این جلسه حذف خواهد شد."</string>
@@ -593,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"اعلان‌ها"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"مکالمه‌ها"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"پاک کردن همه اعلان‌های بی‌صدا"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"باز کردن تنظیمات اعلان"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"اعلان‌ها توسط «مزاحم نشوید» موقتاً متوقف شدند"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{اعلانی موقتاً متوقف نشده است}=1{اعلان‌ها را «{mode}» موقتاً متوقف کرده است}=2{اعلان‌ها را «{mode}» و یک حالت دیگر موقتاً متوقف کرد‌اند}one{اعلان‌ها را «{mode}» و # حالت دیگر موقتاً متوقف کرده‌اند}other{اعلان‌ها را «{mode}» و # حالت دیگر موقتاً متوقف کرده‌اند}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"اکنون شروع کنید"</string>
@@ -709,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"ردیابی سر"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"برای تغییر حالت زنگ، تک‌ضرب بزنید"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"حالت زنگ"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>، برای تغییر حالت زنگ تک‌ضرب بزنید"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"صامت کردن"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"باصدا کردن"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"لرزش"</string>
@@ -875,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"قفل صفحه"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"یادداشت‌برداری"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"چندوظیفگی"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"استفاده از صفحهٔ دونیمه با برنامه فعلی در سمت راست"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"استفاده از صفحهٔ دونیمه با برنامه فعلی در سمت چپ"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"جابه‌جایی از صفحهٔ دونیمه به تمام صفحه"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"استفاده از صفحهٔ دونیمه با قرار گرفتن برنامه در سمت راست"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"استفاده از صفحهٔ دونیمه با قرار گرفتن برنامه در سمت چپ"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"رفتن به حالت تمام‌صفحه"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"رفتن به برنامه سمت راست یا پایین درحین استفاده از صفحهٔ دونیمه"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"رفتن به برنامه سمت چپ یا بالا درحین استفاده از صفحهٔ دونیمه"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"درحین صفحهٔ دونیمه: برنامه‌ای را با دیگری جابه‌جا می‌کند"</string>
@@ -1430,20 +1427,17 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"میان‌برهای صفحه‌کلید"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"سفارشی‌سازی کردن میان‌برهای صفحه‌کلید"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"میان‌بر حذف شود؟"</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"به تنظیم پیش‌فرض بازنشانی می‌کنید؟"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"برای اختصاص دادن میان‌بر، کلید را فشار دهید"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"با این کار، میان‌بر سفارشی شما برای همیشه حذف می‌شود."</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"با این کار، همه میان‌برهای سفارشی برای همیشه حذف خواهند شد."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"جستجوی میان‌برها"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"نتیجه‌ای برای جستجو پیدا نشد"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"نماد جمع کردن"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"نماد کلید کنش یا متا"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"نماد جمع"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"سفارشی‌سازی کردن"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"بازنشانی"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"تمام"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"نماد ازهم بازکردن"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"یا"</string>
@@ -1453,8 +1447,7 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"تنظیمات صفحه‌کلید"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"تنظیم میان‌بر"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"حذف"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"بله، بازنشانی شود"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"لغو"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"کلید را فشار دهید"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"ترکیب کلید ازقبل درحال استفاده است. کلید دیگری را امتحان کنید."</string>
@@ -1486,8 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"دکمه کنش را روی صفحه لمسی فشار دهید"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"عالی بود!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"اشاره «مشاهده همه برنامه‌ها» را تمام کردید"</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"پویانمایی آموزش گام‌به‌گام، برای توقف موقت و ازسرگیری پخش کلیک کنید."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"نور پس‌زمینه صفحه‌کلید"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"‏سطح %1$d از %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"کنترل خانه هوشمند"</string>

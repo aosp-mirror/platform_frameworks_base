@@ -72,8 +72,8 @@
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ပုံသေအားဖြင့် ခေါ်ဆိုသူအိုင်ဒီ(Caller ID)အား ကန့်သတ်မထားပါ။ နောက်ထပ်အဝင်ခေါ်ဆိုမှု-ကန့်သတ်ထားသည်။"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ပုံသေအားဖြင့် ခေါ်ဆိုသူအိုင်ဒီ(Caller ID)အား ကန့်သတ်မထားပါ။ နောက်ထပ်အဝင်ခေါ်ဆိုမှု-ကန့်သတ်မထားပါ။"</string>
     <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"ဤအက်ပ်သည် ၁၆ KB နှင့် တွဲမသုံးနိုင်ပါ။ APK ချိန်ညှိခြင်း စစ်ဆေးမှု မအောင်မြင်ပါ။ ဤအက်ပ်သည် တွဲသုံးနိုင်သော စာမျက်နှာအရွယ်အစားမုဒ်သုံး၍ လုပ်ဆောင်ပါမည်။ အကောင်းဆုံး တွဲသုံးနိုင်မှုအတွက် အပလီကေးရှင်းကို ၁၆ KB ပံ့ပိုးမှုဖြင့် ပြန်လည်တည်ဆောက်ပါ။ နောက်ထပ်အချက်အလက်အတွက် &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; တွင် ကြည့်ပါ"</string>
-    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"ဤအက်ပ်သည် ၁၆ KB နှင့် တွဲမသုံးနိုင်ပါ။ ELF ချိန်ညှိခြင်း စစ်ဆေးမှု မအောင်မြင်ပါ။ ဤအက်ပ်သည် တွဲသုံးနိုင်သော စာမျက်နှာအရွယ်အစားမုဒ်သုံး၍ လုပ်ဆောင်ပါမည်။ အကောင်းဆုံး တွဲသုံးနိုင်မှုအတွက် အပလီကေးရှင်းကို ၁၆ KB ပံ့ပိုးမှုဖြင့် ပြန်လည်တည်ဆောက်ပါ။ နောက်ထပ်အချက်အလက်အတွက် &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; တွင် ကြည့်ပါ"</string>
-    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"ဤအက်ပ်သည် ၁၆ KB နှင့် တွဲမသုံးနိုင်ပါ။ APK နှင့် ELF ချိန်ညှိခြင်း စစ်ဆေးမှု မအောင်မြင်ပါ။ ဤအက်ပ်သည် တွဲသုံးနိုင်သော စာမျက်နှာအရွယ်အစားမုဒ်သုံး၍ လုပ်ဆောင်ပါမည်။ အကောင်းဆုံး တွဲသုံးနိုင်မှုအတွက် အပလီကေးရှင်းကို ၁၆ KB ပံ့ပိုးမှုဖြင့် ပြန်လည်တည်ဆောက်ပါ။ နောက်ထပ်အချက်အလက်အတွက် &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; တွင် ကြည့်ပါ"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"ဤအက်ပ်ကို ၁၆ KB နှင့် တွဲမသုံးနိုင်ပါ။ ELF ချိန်ညှိခြင်း စစ်ဆေးမှု မအောင်မြင်ပါ။ ဤအက်ပ်ကို တွဲသုံးနိုင်သော စာမျက်နှာအရွယ်အစားမုဒ်သုံး၍ လုပ်ဆောင်ပါမည်။ အကောင်းဆုံး တွဲသုံးနိုင်မှုအတွက် အပလီကေးရှင်းကို ၁၆ KB ပံ့ပိုးမှုဖြင့် ပြန်လည်တည်ဆောက်ပါ။ နောက်ထပ်အချက်အလက်အတွက် &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; တွင် ကြည့်ပါ"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"ဤအက်ပ်ကို ၁၆ KB နှင့် တွဲမသုံးနိုင်ပါ။ APK နှင့် ELF ချိန်ညှိခြင်း စစ်ဆေးမှု မအောင်မြင်ပါ။ ဤအက်ပ်ကို တွဲသုံးနိုင်သော စာမျက်နှာအရွယ်အစားမုဒ်သုံး၍ လုပ်ဆောင်ပါမည်။ အကောင်းဆုံး တွဲသုံးနိုင်မှုအတွက် အပလီကေးရှင်းကို ၁၆ KB ပံ့ပိုးမှုဖြင့် ပြန်လည်တည်ဆောက်ပါ။ နောက်ထပ်အချက်အလက်အတွက် &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; တွင် ကြည့်ပါ"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"ဝန်ဆောင်မှုအား ကန့်သတ်မထားပါ"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"သင်သည် ခေါ်ဆိုသူ ID ဆက်တင်ကို မပြောင်းလဲနိုင်ပါ။"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"ဒေတာကို <xliff:g id="CARRIERDISPLAY">%s</xliff:g> သို့ ပြောင်းထားသည်"</string>
@@ -1158,38 +1158,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> နာရီအတွင်း"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> ရက်အတွင်း"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> နှစ်အတွင်း"</string>
-    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
-    <skip />
-    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
-    <skip />
-    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
-    <skip />
-    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
-    <skip />
-    <!-- no translation found for duration_days_medium (5994225628248661388) -->
-    <skip />
-    <!-- no translation found for duration_years_medium (734023884353592526) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
-    <skip />
-    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
-    <skip />
-    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
-    <skip />
-    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
-    <skip />
-    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
-    <skip />
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"ပြီးခဲ့သော <xliff:g id="COUNT">%d</xliff:g> မိနစ်"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"ပြီးခဲ့သော <xliff:g id="COUNT">%d</xliff:g> နာရီ"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"ပြီးခဲ့သော <xliff:g id="COUNT">%d</xliff:g> ရက်"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"ပြီးခဲ့သော <xliff:g id="COUNT">%d</xliff:g> နှစ်"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> မိနစ်"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> နာရီ"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> ရက်"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> နှစ်"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"<xliff:g id="COUNT">%d</xliff:g> မိနစ်အတွင်း"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"<xliff:g id="COUNT">%d</xliff:g> နာရီအတွင်း"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"<xliff:g id="COUNT">%d</xliff:g> ရက်အတွင်း"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"<xliff:g id="COUNT">%d</xliff:g> နှစ်အတွင်း"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"ပြီးခဲ့သော <xliff:g id="COUNT">%d</xliff:g> မိနစ်"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"ပြီးခဲ့သော <xliff:g id="COUNT">%d</xliff:g> နာရီ"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"ပြီးခဲ့သော <xliff:g id="COUNT">%d</xliff:g> ရက်"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"ပြီးခဲ့သော <xliff:g id="COUNT">%d</xliff:g> နှစ်"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{ပြီးခဲ့သော # မိနစ်}other{ပြီးခဲ့သော # မိနစ်}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{ပြီးခဲ့သော # နာရီ}other{ပြီးခဲ့သော # နာရီ}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{ပြီးခဲ့သော # ရက်}other{ပြီးခဲ့သော # ရက်}}"</string>
@@ -1955,13 +1939,13 @@
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ဒေတာချွေတာမှုစနစ် ဖွင့်မလား။"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ဖွင့်ရန်"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{တစ်မိနစ်ကြာ ({formattedTime} အထိ)}other{# မိနစ်ကြာ ({formattedTime} အထိ)}}"</string>
-    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{1 မိနစ်ကြာ ({formattedTime} အထိ)}other{# မိနစ်ကြာ ({formattedTime} အထိ)}}"</string>
-    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{1 နာရီကြာ ({formattedTime} အထိ)}other{# နာရီကြာ ({formattedTime} အထိ)}}"</string>
-    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{1 နာရီကြာ ({formattedTime} အထိ)}other{# နာရီကြာ ({formattedTime} အထိ)}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{၁ မိနစ်ကြာ ({formattedTime} အထိ)}other{# မိနစ်ကြာ ({formattedTime} အထိ)}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{၁ နာရီကြာ ({formattedTime} အထိ)}other{# နာရီကြာ ({formattedTime} အထိ)}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{၁ နာရီကြာ ({formattedTime} အထိ)}other{# နာရီကြာ ({formattedTime} အထိ)}}"</string>
     <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{တစ်မိနစ်ကြာ}other{# မိနစ်ကြာ}}"</string>
     <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{1 မိနစ်ကြာ}other{# မိနစ်ကြာ}}"</string>
-    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{1 နာရီကြာ}other{# နာရီကြာ}}"</string>
-    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{1 နာရီကြာ}other{# နာရီကြာ}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{၁ နာရီကြာ}other{# နာရီကြာ}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{1၁ နာရီကြာ}other{# နာရီကြာ}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> အထိ"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>အထိ"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> အထိ (လာမည့် နှိုးစက်)"</string>
