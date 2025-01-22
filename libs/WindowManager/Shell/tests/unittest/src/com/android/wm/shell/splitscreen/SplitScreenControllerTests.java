@@ -213,7 +213,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
 
     @Test
     public void startIntent_multiInstancesSupported_appendsMultipleTaskFag() {
-        doReturn(true).when(mMultiInstanceHelper).supportsMultiInstanceSplit(any());
+        doReturn(true).when(mMultiInstanceHelper).supportsMultiInstanceSplit(any(), anyInt());
         Intent startIntent = createStartIntent("startActivity");
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(mContext, 0, startIntent, FLAG_IMMUTABLE);
@@ -252,13 +252,13 @@ public class SplitScreenControllerTests extends ShellTestCase {
 
         verify(mStageCoordinator).startTask(anyInt(), eq(SPLIT_POSITION_TOP_OR_LEFT),
                 isNull(), isNull(), eq(SPLIT_INDEX_0));
-        verify(mMultiInstanceHelper, never()).supportsMultiInstanceSplit(any());
+        verify(mMultiInstanceHelper, never()).supportsMultiInstanceSplit(any(), anyInt());
         verify(mStageCoordinator, never()).switchSplitPosition(any());
     }
 
     @Test
     public void startIntent_multiInstancesSupported_startTaskInBackgroundAfterSplitActivated() {
-        doReturn(true).when(mMultiInstanceHelper).supportsMultiInstanceSplit(any());
+        doReturn(true).when(mMultiInstanceHelper).supportsMultiInstanceSplit(any(), anyInt());
         doNothing().when(mSplitScreenController).startTask(anyInt(), anyInt(), any(), any());
         Intent startIntent = createStartIntent("startActivity");
         PendingIntent pendingIntent =
@@ -276,14 +276,14 @@ public class SplitScreenControllerTests extends ShellTestCase {
         mSplitScreenController.startIntent(pendingIntent, mContext.getUserId(), null,
                 SPLIT_POSITION_TOP_OR_LEFT, null /* options */, null /* hideTaskToken */,
                 SPLIT_INDEX_0);
-        verify(mMultiInstanceHelper, never()).supportsMultiInstanceSplit(any());
+        verify(mMultiInstanceHelper, never()).supportsMultiInstanceSplit(any(), anyInt());
         verify(mStageCoordinator).startTask(anyInt(), eq(SPLIT_POSITION_TOP_OR_LEFT),
                 isNull(), isNull(), eq(SPLIT_INDEX_0));
     }
 
     @Test
     public void startIntent_multiInstancesNotSupported_switchesPositionAfterSplitActivated() {
-        doReturn(false).when(mMultiInstanceHelper).supportsMultiInstanceSplit(any());
+        doReturn(false).when(mMultiInstanceHelper).supportsMultiInstanceSplit(any(), anyInt());
         Intent startIntent = createStartIntent("startActivity");
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(mContext, 0, startIntent, FLAG_IMMUTABLE);
