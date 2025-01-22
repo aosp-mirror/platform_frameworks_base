@@ -1772,6 +1772,11 @@ public class Notification implements Parcelable
      */
     public static final String EXTRA_FOREGROUND_APPS = "android.foregroundApps";
 
+    /**
+     * @hide
+     */
+    public static final String EXTRA_SUMMARIZED_CONTENT = "android.summarization";
+
     @UnsupportedAppUsage
     private Icon mSmallIcon;
     @UnsupportedAppUsage

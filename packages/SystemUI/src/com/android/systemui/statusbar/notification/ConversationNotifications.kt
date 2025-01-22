@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification
 
 import android.app.Notification
+import android.app.Notification.EXTRA_SUMMARIZED_CONTENT
 import android.content.Context
 import android.content.pm.LauncherApps
 import android.graphics.drawable.AnimatedImageDrawable
@@ -66,6 +67,12 @@ constructor(
             messagingStyle.shortcutIcon = launcherApps.getShortcutIcon(shortcutInfo)
             shortcutInfo.label?.let { label -> messagingStyle.conversationTitle = label }
         }
+        if (NmSummarizationUiFlag.isEnabled) {
+            entry.sbn.notification.extras.putCharSequence(
+                EXTRA_SUMMARIZED_CONTENT, entry.ranking.summarization
+            )
+        }
+
         messagingStyle.unreadMessageCount =
             conversationNotificationManager.getUnreadCount(entry, recoveredBuilder)
         return messagingStyle

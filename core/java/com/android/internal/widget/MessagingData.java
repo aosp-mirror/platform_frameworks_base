@@ -32,6 +32,7 @@ final class MessagingData {
     private final List<List<MessagingMessage>> mGroups;
     private final List<Person> mSenders;
     private final int mUnreadCount;
+    private final CharSequence mSummarization;
 
     private ConversationHeaderData mConversationHeaderData;
 
@@ -41,8 +42,7 @@ final class MessagingData {
             List<Person> senders) {
         this(user, showSpinner, /* unreadCount= */0,
                 historicMessagingMessages, newMessagingMessages,
-                groups,
-                senders, null);
+                groups, senders, null, null);
     }
 
     MessagingData(Person user, boolean showSpinner,
@@ -51,7 +51,8 @@ final class MessagingData {
             List<MessagingMessage> newMessagingMessages,
             List<List<MessagingMessage>> groups,
             List<Person> senders,
-            @Nullable ConversationHeaderData conversationHeaderData) {
+            @Nullable ConversationHeaderData conversationHeaderData,
+            CharSequence summarization) {
         mUser = user;
         mShowSpinner = showSpinner;
         mUnreadCount = unreadCount;
@@ -60,6 +61,7 @@ final class MessagingData {
         mGroups = groups;
         mSenders = senders;
         mConversationHeaderData = conversationHeaderData;
+        mSummarization = summarization;
     }
 
     public Person getUser() {
@@ -93,5 +95,10 @@ final class MessagingData {
     @Nullable
     public ConversationHeaderData getConversationHeaderData() {
         return mConversationHeaderData;
+    }
+
+    @Nullable
+    public CharSequence getSummarization() {
+        return mSummarization;
     }
 }
