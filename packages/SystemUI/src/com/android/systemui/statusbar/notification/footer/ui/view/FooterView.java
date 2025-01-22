@@ -138,10 +138,12 @@ public class FooterView extends StackScrollerDecorView {
         DumpUtilsKt.withIncreasedIndent(pw, () -> {
             pw.println("visibility: " + DumpUtilsKt.visibilityString(getVisibility()));
             pw.println("manageButton showHistory: " + mShowHistory);
-            pw.println("manageButton visibility: "
-                    + DumpUtilsKt.visibilityString(mClearAllButton.getVisibility()));
-            pw.println("dismissButton visibility: "
-                    + DumpUtilsKt.visibilityString(mClearAllButton.getVisibility()));
+            if (mManageOrHistoryButton != null)
+                pw.println("mManageOrHistoryButton visibility: "
+                        + DumpUtilsKt.visibilityString(mManageOrHistoryButton.getVisibility()));
+            if (mClearAllButton != null)
+                pw.println("mClearAllButton visibility: "
+                        + DumpUtilsKt.visibilityString(mClearAllButton.getVisibility()));
         });
     }
 

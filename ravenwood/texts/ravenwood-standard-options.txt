@@ -5,6 +5,8 @@
 # Keep all classes / methods / fields, but make the methods throw.
 --default-throw
 
+--delete-finals
+
 # Uncomment below lines to enable each feature.
 
 #--default-method-call-hook
