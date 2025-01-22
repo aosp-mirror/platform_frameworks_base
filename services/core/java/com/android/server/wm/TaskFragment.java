@@ -2758,7 +2758,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             // We only want to update for organized TaskFragment. Task will handle itself.
             return;
         }
-        if (mSurfaceControl == null || mSurfaceAnimator.hasLeash() || mSurfaceFreezer.hasLeash()) {
+        if (mSurfaceControl == null || mSurfaceAnimator.hasLeash()) {
             return;
         }
 
@@ -2898,20 +2898,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         final Task task = getTask();
         // Skip change transition when the Task is drag resizing.
         return task != null && !task.isDragResizing() && super.canStartChangeTransition();
-    }
-
-    /**
-     * Returns {@code true} if the starting bounds of the closing organized TaskFragment is
-     * recorded. Otherwise, return {@code false}.
-     */
-    boolean setClosingChangingStartBoundsIfNeeded() {
-        if (isOrganizedTaskFragment() && mDisplayContent != null
-                && mDisplayContent.mChangingContainers.remove(this)) {
-            mDisplayContent.mClosingChangingContainers.put(
-                    this, new Rect(mSurfaceFreezer.mFreezeBounds));
-            return true;
-        }
-        return false;
     }
 
     @Override

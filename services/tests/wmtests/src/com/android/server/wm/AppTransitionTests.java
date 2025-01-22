@@ -409,7 +409,6 @@ public class AppTransitionTests extends WindowTestsBase {
         task.getBounds(taskBounds);
         taskFragment.setBounds(0, 0, taskBounds.right / 2, taskBounds.bottom);
         spyOn(taskFragment);
-        mockSurfaceFreezerSnapshot(taskFragment.mSurfaceFreezer);
 
         assertTrue(mDc.mChangingContainers.isEmpty());
         assertFalse(mDc.mAppTransition.isTransitionSet());
@@ -422,7 +421,6 @@ public class AppTransitionTests extends WindowTestsBase {
         verify(taskFragment).initializeChangeTransition(activity.getBounds(), activityLeash);
         assertTrue(mDc.mChangingContainers.contains(taskFragment));
         assertTrue(mDc.mAppTransition.containsTransitRequest(TRANSIT_CHANGE));
-        assertEquals(startBounds, taskFragment.mSurfaceFreezer.mFreezeBounds);
     }
 
     @Test
