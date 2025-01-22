@@ -26,6 +26,7 @@ import com.android.systemui.Flags;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.res.R;
 import com.android.systemui.scrim.ScrimView;
+import com.android.systemui.shade.ui.ShadeColors;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
@@ -86,16 +87,24 @@ public enum ScrimState {
             } else {
                 mAnimationDuration = ScrimController.ANIMATION_DURATION;
             }
-            mFrontTint = mBackgroundColor;
-            mBehindTint = mBackgroundColor;
-            mNotifTint = mClipQsScrim ? mBackgroundColor : Color.TRANSPARENT;
-
-            mFrontAlpha = 0;
-            mBehindAlpha = mClipQsScrim ? 1 : mScrimBehindAlphaKeyguard;
-            mNotifAlpha = mClipQsScrim ? mScrimBehindAlphaKeyguard : 0;
-            if (mClipQsScrim) {
-                updateScrimColor(mScrimBehind, 1f /* alpha */, mBackgroundColor);
+            if (Flags.notificationShadeBlur()) {
+                mBehindTint = Color.TRANSPARENT;
+                mNotifTint = ShadeColors.notificationScrim(mScrimBehind.getResources());
+                mBehindAlpha = 0.0f;
+                mNotifAlpha = 0.0f;
+                mFrontAlpha = 0.0f;
+            } else {
+                mFrontTint = mBackgroundColor;
+                mBehindTint = mBackgroundColor;
+                mNotifTint = mClipQsScrim ? mBackgroundColor : Color.TRANSPARENT;
+                mFrontAlpha = 0;
+                mBehindAlpha = mClipQsScrim ? 1 : mScrimBehindAlphaKeyguard;
+                mNotifAlpha = mClipQsScrim ? mScrimBehindAlphaKeyguard : 0;
+                if (mClipQsScrim) {
+                    updateScrimColor(mScrimBehind, 1f /* alpha */, mBackgroundColor);
+                }
             }
+
         }
     },
 
@@ -169,13 +178,21 @@ public enum ScrimState {
 
         @Override
         public void prepare(ScrimState previousState) {
-            mBehindAlpha = mClipQsScrim ? 1 : mDefaultScrimAlpha;
-            mNotifAlpha = 1f;
-            mFrontAlpha = 0f;
-            mBehindTint = mClipQsScrim ? Color.TRANSPARENT : mBackgroundColor;
+            if (Flags.notificationShadeBlur()) {
+                mBehindTint = ShadeColors.shadePanel(mScrimBehind.getResources());
+                mBehindAlpha = Color.alpha(mBehindTint) / 255.0f;
+                mNotifTint = ShadeColors.notificationScrim(mScrimBehind.getResources());
+                mNotifAlpha = Color.alpha(mNotifTint) / 255.0f;
+                mFrontAlpha = 0.0f;
+            } else {
+                mBehindAlpha = mClipQsScrim ? 1 : mDefaultScrimAlpha;
+                mNotifAlpha = 1f;
+                mFrontAlpha = 0f;
+                mBehindTint = mClipQsScrim ? Color.TRANSPARENT : mBackgroundColor;
 
-            if (mClipQsScrim) {
-                updateScrimColor(mScrimBehind, 1f /* alpha */, mBackgroundColor);
+                if (mClipQsScrim) {
+                    updateScrimColor(mScrimBehind, 1f /* alpha */, mBackgroundColor);
+                }
             }
         }
     },
@@ -282,6 +299,13 @@ public enum ScrimState {
                 mFrontTint = mBackgroundColor;
                 mBehindTint = mBackgroundColor;
                 mBlankScreen = true;
+            } else if (Flags.notificationShadeBlur()) {
+                mBehindTint = ShadeColors.shadePanel(mScrimBehind.getResources());
+                mBehindAlpha = Color.alpha(mBehindTint) / 255.0f;
+                mNotifTint = ShadeColors.notificationScrim(mScrimBehind.getResources());
+                mNotifAlpha = Color.alpha(mNotifTint) / 255.0f;
+                mFrontAlpha = 0.0f;
+                return;
             }
 
             if (mClipQsScrim) {

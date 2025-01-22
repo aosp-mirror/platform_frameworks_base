@@ -868,6 +868,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
      * bounds instead.
      */
     public void setClipsQsScrim(boolean clipScrim) {
+        if (Flags.notificationShadeBlur()) {
+            // Never clip scrims when blur is enabled, colors of UI elements are supposed to "add"
+            // up across the scrims.
+            mClipsQsScrim = false;
+            return;
+        }
         if (clipScrim == mClipsQsScrim) {
             return;
         }
@@ -957,11 +963,20 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                     mBehindAlpha = 1;
                     mNotificationsAlpha = behindFraction * mDefaultScrimAlpha;
                 } else {
-                    mBehindAlpha = mLargeScreenShadeInterpolator.getBehindScrimAlpha(
-                            mPanelExpansionFraction * mDefaultScrimAlpha);
-                    mNotificationsAlpha =
-                            mLargeScreenShadeInterpolator.getNotificationScrimAlpha(
-                                    mPanelExpansionFraction);
+                    if (Flags.notificationShadeBlur()) {
+                        // TODO (b/390730594): match any spec for controlling alpha based on shade
+                        //  expansion fraction.
+                        mBehindAlpha = mState.getBehindAlpha() * mPanelExpansionFraction;
+                        mBehindTint = mState.getBehindTint();
+                        mNotificationsAlpha = mState.getNotifAlpha() * mPanelExpansionFraction;
+                        mNotificationsTint = mState.getNotifTint();
+                    } else {
+                        mBehindAlpha = mLargeScreenShadeInterpolator.getBehindScrimAlpha(
+                                mPanelExpansionFraction * mDefaultScrimAlpha);
+                        mNotificationsAlpha =
+                                mLargeScreenShadeInterpolator.getNotificationScrimAlpha(
+                                        mPanelExpansionFraction);
+                    }
                 }
                 mBehindTint = mState.getBehindTint();
                 mInFrontAlpha = 0;
@@ -1015,7 +1030,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                             .saturate(mTransitionToLockScreenFullShadeNotificationsProgress);
                 } else if (mState == ScrimState.SHADE_LOCKED) {
                     // going from KEYGUARD to SHADE_LOCKED state
-                    mNotificationsAlpha = getInterpolatedFraction();
+                    if (Flags.notificationShadeBlur()) {
+                        mNotificationsAlpha = mState.getNotifAlpha() * getInterpolatedFraction();
+                    } else {
+                        mNotificationsAlpha = getInterpolatedFraction();
+                    }
                 } else if (mState == ScrimState.GLANCEABLE_HUB
                         && mTransitionToFullShadeProgress == 0.0f) {
                     // Notification scrim should not be visible on the glanceable hub unless the
