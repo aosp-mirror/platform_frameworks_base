@@ -372,25 +372,8 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
 
     /* package */ void onEndpointSessionOpenRequest(
             int sessionId, HubEndpointInfo initiator, String serviceDescriptor) {
-        if (!hasEndpointPermissions(initiator)) {
-            halCloseEndpointSessionNoThrow(sessionId, Reason.PERMISSION_DENIED);
-            return;
-        }
-
-        synchronized (mOpenSessionLock) {
-            if (hasSessionId(sessionId)) {
-                Log.e(TAG, "Existing session in onEndpointSessionOpenRequest: id=" + sessionId);
-                halCloseEndpointSessionNoThrow(sessionId, Reason.UNSPECIFIED);
-                return;
-            }
-            mSessionInfoMap.put(sessionId, new SessionInfo(initiator, true));
-        }
-
         boolean success =
-                invokeCallback(
-                        (consumer) ->
-                                consumer.onSessionOpenRequest(
-                                        sessionId, initiator, serviceDescriptor));
+                onEndpointSessionOpenRequestInternal(sessionId, initiator, serviceDescriptor);
         if (!success) {
             cleanupSessionResources(sessionId);
         }
@@ -437,6 +420,33 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         synchronized (mOpenSessionLock) {
             return mSessionInfoMap.contains(sessionId);
         }
+    }
+
+    private boolean onEndpointSessionOpenRequestInternal(
+            int sessionId, HubEndpointInfo initiator, String serviceDescriptor) {
+        if (!hasEndpointPermissions(initiator)) {
+            Log.e(
+                    TAG,
+                    "onEndpointSessionOpenRequest: "
+                            + initiator
+                            + " doesn't have permission for "
+                            + mEndpointInfo);
+            halCloseEndpointSessionNoThrow(sessionId, Reason.PERMISSION_DENIED);
+            return false;
+        }
+
+        synchronized (mOpenSessionLock) {
+            if (hasSessionId(sessionId)) {
+                Log.e(TAG, "Existing session in onEndpointSessionOpenRequest: id=" + sessionId);
+                halCloseEndpointSessionNoThrow(sessionId, Reason.UNSPECIFIED);
+                return false;
+            }
+            mSessionInfoMap.put(sessionId, new SessionInfo(initiator, true));
+        }
+
+        return invokeCallback(
+                (consumer) ->
+                        consumer.onSessionOpenRequest(sessionId, initiator, serviceDescriptor));
     }
 
     private byte onMessageReceivedInternal(int sessionId, HubMessage message) {
