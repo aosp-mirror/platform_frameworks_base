@@ -1769,8 +1769,8 @@ flag {
 flag {
     name: "bouncer_ui_revamp"
     namespace: "systemui"
-    description: "Updates to background (blur), button animations and font changes."
-    bug: "376491880"
+    description: "Updates to background (blur) for bouncer"
+    bug: "370555003"
 }
 
 flag {
