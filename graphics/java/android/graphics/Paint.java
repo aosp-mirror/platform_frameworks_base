@@ -2198,10 +2198,12 @@ public class Paint {
      * is configured as {@code 'wght' 500, 'ital' 1}, and if the override is specified as
      * {@code 'wght' 700, `wdth` 150}, then the effective font variation setting is
      * {@code `wght' 700, 'ital' 1, 'wdth' 150}. The `wght` value is updated by override, 'ital'
-     * value is preserved because no overrides, and `wdth` value is added by override.
+     * value is preserved because no overrides, and `wdth` value is added by override. If the font
+     * variation override is empty or null, nothing overrides and original font variation settings
+     * assigned to the font instance is used as it is.
      *
-     * @param fontVariationOverride font variation settings. You can pass null or empty string as
-     *                              no variation settings.
+     * @param fontVariationOverride font variation override. You can pass null or empty string for
+     *                              clearing font variation override.
      *
      * @return true if the provided font variation settings is valid. Otherwise returns false.
      *
