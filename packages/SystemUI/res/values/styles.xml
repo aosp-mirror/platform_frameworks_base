@@ -430,6 +430,7 @@
 
     <style name="Theme.SystemUI.MediaProjectionAppSelector"
         parent="@*android:style/Theme.DeviceDefault.Chooser">
+        <item name="android:colorBackground">@*android:color/materialColorSurfaceContainer</item>
     </style>
 
     <!-- Standard animations for hiding and showing the status bar. -->
