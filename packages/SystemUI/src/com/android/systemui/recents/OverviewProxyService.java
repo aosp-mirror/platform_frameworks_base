@@ -61,7 +61,6 @@ import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.PatternMatcher;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -100,6 +99,7 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.views.NavigationBar;
 import com.android.systemui.navigationbar.views.NavigationBarView;
 import com.android.systemui.navigationbar.views.buttons.KeyButtonView;
+import com.android.systemui.process.ProcessWrapper;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
@@ -675,11 +675,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             DumpManager dumpManager,
             Optional<UnfoldTransitionProgressForwarder> unfoldTransitionProgressForwarder,
             BroadcastDispatcher broadcastDispatcher,
-            Optional<BackAnimation> backAnimation
+            Optional<BackAnimation> backAnimation,
+            ProcessWrapper processWrapper
     ) {
         // b/241601880: This component should only be running for primary users or
         // secondaryUsers when visibleBackgroundUsers are supported.
-        boolean isSystemUser = Process.myUserHandle().equals(UserHandle.SYSTEM);
+        boolean isSystemUser = processWrapper.isSystemUser();
         boolean isVisibleBackgroundUser =
                 userManager.isVisibleBackgroundUsersSupported() && !userManager.isUserForeground();
         if (!isSystemUser && isVisibleBackgroundUser) {

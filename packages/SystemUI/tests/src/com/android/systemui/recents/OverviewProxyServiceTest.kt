@@ -21,14 +21,11 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.os.PowerManager
-import android.os.Process
-import android.os.UserHandle
 import android.os.UserManager
 import android.testing.TestableContext
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.internal.app.AssistUtils
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
@@ -42,6 +39,7 @@ import com.android.systemui.model.SysUiState
 import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.navigationbar.NavigationBarController
 import com.android.systemui.navigationbar.NavigationModeController
+import com.android.systemui.process.ProcessWrapper
 import com.android.systemui.recents.OverviewProxyService.ACTION_QUICKSTEP
 import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.settings.UserTracker
@@ -92,6 +90,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private lateinit var subject: OverviewProxyService
     @Mock private val dumpManager = DumpManager()
+    @Mock private val processWrapper = ProcessWrapper()
     private val displayTracker = FakeDisplayTracker(mContext)
     private val fakeSystemClock = FakeSystemClock()
     private val sysUiState = SysUiState(displayTracker, kosmos.sceneContainerPlugin)
@@ -146,6 +145,8 @@ class OverviewProxyServiceTest : SysuiTestCase() {
 
         mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
 
+        // return isSystemUser as true by default.
+        `when`(processWrapper.isSystemUser).thenReturn(true)
         subject = createOverviewProxyService(context)
     }
 
@@ -202,68 +203,44 @@ class OverviewProxyServiceTest : SysuiTestCase() {
 
     @Test
     fun connectToOverviewService_primaryUserNoVisibleBgUsersSupported_expectBindService() {
-        val mockitoSession =
-            ExtendedMockito.mockitoSession().spyStatic(Process::class.java).startMocking()
-        try {
-            `when`(Process.myUserHandle()).thenReturn(UserHandle.SYSTEM)
-            `when`(userManager.isVisibleBackgroundUsersSupported()).thenReturn(false)
-            val spyContext = spy(context)
-            val ops = createOverviewProxyService(spyContext)
-            ops.startConnectionToCurrentUser()
-            verify(spyContext, atLeast(1)).bindServiceAsUser(any(), any(), anyInt(), any())
-        } finally {
-            mockitoSession.finishMocking()
-        }
+        `when`(processWrapper.isSystemUser).thenReturn(true)
+        `when`(userManager.isVisibleBackgroundUsersSupported()).thenReturn(false)
+        val spyContext = spy(context)
+        val ops = createOverviewProxyService(spyContext)
+        ops.startConnectionToCurrentUser()
+        verify(spyContext, atLeast(1)).bindServiceAsUser(any(), any(), anyInt(), any())
     }
 
     @Test
     fun connectToOverviewService_nonPrimaryUserNoVisibleBgUsersSupported_expectNoBindService() {
-        val mockitoSession =
-            ExtendedMockito.mockitoSession().spyStatic(Process::class.java).startMocking()
-        try {
-            `when`(Process.myUserHandle()).thenReturn(UserHandle.of(12345))
-            `when`(userManager.isVisibleBackgroundUsersSupported()).thenReturn(false)
-            val spyContext = spy(context)
-            val ops = createOverviewProxyService(spyContext)
-            ops.startConnectionToCurrentUser()
-            verify(spyContext, times(0)).bindServiceAsUser(any(), any(), anyInt(), any())
-        } finally {
-            mockitoSession.finishMocking()
-        }
+        `when`(processWrapper.isSystemUser).thenReturn(false)
+        `when`(userManager.isVisibleBackgroundUsersSupported()).thenReturn(false)
+        val spyContext = spy(context)
+        val ops = createOverviewProxyService(spyContext)
+        ops.startConnectionToCurrentUser()
+        verify(spyContext, times(0)).bindServiceAsUser(any(), any(), anyInt(), any())
     }
 
     @Test
     fun connectToOverviewService_nonPrimaryBgUserVisibleBgUsersSupported_expectBindService() {
-        val mockitoSession =
-            ExtendedMockito.mockitoSession().spyStatic(Process::class.java).startMocking()
-        try {
-            `when`(Process.myUserHandle()).thenReturn(UserHandle.of(12345))
-            `when`(userManager.isVisibleBackgroundUsersSupported()).thenReturn(true)
-            `when`(userManager.isUserForeground()).thenReturn(false)
-            val spyContext = spy(context)
-            val ops = createOverviewProxyService(spyContext)
-            ops.startConnectionToCurrentUser()
-            verify(spyContext, atLeast(1)).bindServiceAsUser(any(), any(), anyInt(), any())
-        } finally {
-            mockitoSession.finishMocking()
-        }
+        `when`(processWrapper.isSystemUser).thenReturn(false)
+        `when`(userManager.isVisibleBackgroundUsersSupported()).thenReturn(true)
+        `when`(userManager.isUserForeground()).thenReturn(false)
+        val spyContext = spy(context)
+        val ops = createOverviewProxyService(spyContext)
+        ops.startConnectionToCurrentUser()
+        verify(spyContext, atLeast(1)).bindServiceAsUser(any(), any(), anyInt(), any())
     }
 
     @Test
     fun connectToOverviewService_nonPrimaryFgUserVisibleBgUsersSupported_expectNoBindService() {
-        val mockitoSession =
-            ExtendedMockito.mockitoSession().spyStatic(Process::class.java).startMocking()
-        try {
-            `when`(Process.myUserHandle()).thenReturn(UserHandle.of(12345))
-            `when`(userManager.isVisibleBackgroundUsersSupported()).thenReturn(true)
-            `when`(userManager.isUserForeground()).thenReturn(true)
-            val spyContext = spy(context)
-            val ops = createOverviewProxyService(spyContext)
-            ops.startConnectionToCurrentUser()
-            verify(spyContext, times(0)).bindServiceAsUser(any(), any(), anyInt(), any())
-        } finally {
-            mockitoSession.finishMocking()
-        }
+        `when`(processWrapper.isSystemUser).thenReturn(false)
+        `when`(userManager.isVisibleBackgroundUsersSupported()).thenReturn(true)
+        `when`(userManager.isUserForeground()).thenReturn(true)
+        val spyContext = spy(context)
+        val ops = createOverviewProxyService(spyContext)
+        ops.startConnectionToCurrentUser()
+        verify(spyContext, times(0)).bindServiceAsUser(any(), any(), anyInt(), any())
     }
 
     private fun createOverviewProxyService(ctx: Context): OverviewProxyService {
@@ -292,6 +269,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
             unfoldTransitionProgressForwarder,
             broadcastDispatcher,
             backAnimation,
+            processWrapper,
         )
     }
 }
