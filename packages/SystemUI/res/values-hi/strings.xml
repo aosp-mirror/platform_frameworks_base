@@ -750,6 +750,8 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"अपडेट हो रहा है"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"वर्क प्रोफ़ाइल"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"फ़्लाइट मोड"</string>
+    <!-- no translation found for status_bar_supervision (6735015942701134125) -->
+    <skip />
     <string name="zen_alarm_warning" msgid="7844303238486849503">"आपको <xliff:g id="WHEN">%1$s</xliff:g> पर अपना अगला अलार्म नहीं सुनाई देगा"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> बजे"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g> पर"</string>
@@ -1430,6 +1432,8 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"सिस्टम के ऐप्लिकेशन"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"मल्टीटास्किंग (एक साथ कई काम करना)"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"स्प्लिट स्क्रीन"</string>
+    <!-- no translation found for shortcutHelper_category_accessibility (8068337792277570938) -->
+    <skip />
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"इनपुट"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"ऐप शॉर्टकट"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"मौजूदा ऐप्लिकेशन"</string>
@@ -1438,8 +1442,7 @@
     <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"पसंद के मुताबिक शॉर्टकट बनाएं"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"क्या आपको शॉर्टकट हटाना है?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"क्या आपको फिर से डिफ़ॉल्ट सेटिंग चालू करनी है?"</string>
-    <!-- no translation found for shortcut_customize_mode_add_shortcut_description (7636040209946696120) -->
-    <skip />
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="7636040209946696120">"यह शॉर्टकट बनाने के लिए, ऐक्शन बटन और एक या उससे ज़्यादा अन्य बटन एक साथ दबाएं"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"ऐसा करने पर, पसंद के मुताबिक बनाया गया आपका शॉर्टकट हमेशा के लिए मिट जाएगा."</string>
     <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"ऐसा करने पर, पसंद के मुताबिक बनाए गए आपके सभी शॉर्टकट हमेशा के लिए मिट जाएंगे."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"शॉर्टकट खोजें"</string>
@@ -1461,8 +1464,7 @@
     <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"हां, रीसेट करें"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"रद्द करें"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"बटन दबाएं"</string>
-    <!-- no translation found for shortcut_customizer_key_combination_in_use_error_message (3325858369539848162) -->
-    <skip />
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="3325858369539848162">"बटन का यह कॉम्बिनेशन पहले से इस्तेमाल किया जा रहा है. कोई दूसरा कॉम्बिनेशन आज़माएं."</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"शॉर्टकट सेट नहीं किया जा सकता."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="shortcut_helper_add_shortcut_button_label" msgid="7655779534665954910">"शॉर्टकट जोड़ें"</string>
@@ -1476,8 +1478,7 @@
     <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"वापस जाएं"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"होम स्क्रीन पर जाएं"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"हाल ही में इस्तेमाल किए गए ऐप्लिकेशन देखें"</string>
-    <!-- no translation found for touchpad_tutorial_switch_apps_gesture_button (7768255095423767779) -->
-    <skip />
+    <string name="touchpad_tutorial_switch_apps_gesture_button" msgid="7768255095423767779">"ऐप्लिकेशन के बीच स्विच करें"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"हो गया"</string>
     <string name="gesture_error_title" msgid="469064941635578511">"फिर से कोशिश करें!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"वापस जाएं"</string>
@@ -1495,15 +1496,12 @@
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"बहुत बढ़िया!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"अब आपको हाथ के जेस्चर का इस्तेमाल करके, हाल ही में इस्तेमाल किए गए ऐप्लिकेशन देखने का तरीका पता चल गया है."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"हाल ही में इस्तेमाल किए गए ऐप्लिकेशन देखने के लिए, अपने टचपैड पर तीन उंगलियों से ऊपर की ओर स्वाइप करें और दबाकर रखें"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_action_title (6835222344612924512) -->
+    <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"ऐप्लिकेशन के बीच स्विच करें"</string>
+    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2751565200937541667) -->
     <skip />
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (6859830005390732562) -->
-    <skip />
-    <!-- no translation found for touchpad_switch_apps_gesture_success_title (4894947244328032458) -->
-    <skip />
-    <!-- no translation found for touchpad_switch_apps_gesture_success_body (8151089866035126312) -->
-    <skip />
-    <!-- no translation found for touchpad_switch_gesture_error_body (2211950382592343759) -->
+    <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"बहुत बढ़िया!"</string>
+    <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"आपने जान लिया है कि हाथ का जेस्चर इस्तेमाल करके ऐप्लिकेशन के बीच स्विच कैसे करें."</string>
+    <!-- no translation found for touchpad_switch_gesture_error_body (5508381152326379652) -->
     <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"सभी ऐप्लिकेशन देखें"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"अपने कीबोर्ड पर ऐक्शन बटन दबाएं"</string>
