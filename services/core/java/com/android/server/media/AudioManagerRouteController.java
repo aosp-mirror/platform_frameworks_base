@@ -117,6 +117,35 @@ import java.util.concurrent.CopyOnWriteArrayList;
     @NonNull
     private MediaRoute2Info mSelectedRoute;
 
+    // A singleton AudioManagerRouteController.
+    private static AudioManagerRouteController mInstance;
+
+    // A flag indicating if the start function has been called.
+    private boolean mStarted = false;
+
+    // Get the singleton AudioManagerRouteController. Create a new one if it's not available yet.
+    public static AudioManagerRouteController getInstance(
+            @NonNull Context context,
+            @NonNull AudioManager audioManager,
+            @NonNull Looper looper,
+            @NonNull AudioProductStrategy strategyForMedia,
+            @NonNull BluetoothAdapter btAdapter) {
+        if (!com.android.media.flags.Flags.enableUseOfSingletonAudioManagerRouteController()) {
+            return new AudioManagerRouteController(
+                    context, audioManager, looper, strategyForMedia, btAdapter);
+        }
+
+        synchronized (AudioManagerRouteController.class) {
+            if (mInstance == null) {
+                mInstance =
+                        new AudioManagerRouteController(
+                                context, audioManager, looper, strategyForMedia, btAdapter);
+            }
+
+            return mInstance;
+        }
+    }
+
     // TODO: b/305199571 - Support nullable btAdapter and strategyForMedia which, when null, means
     // no support for transferring to inactive bluetooth routes and transferring to any routes
     // respectively.
@@ -130,13 +159,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
             @NonNull AudioManager audioManager,
             @NonNull Looper looper,
             @NonNull AudioProductStrategy strategyForMedia,
-            @NonNull BluetoothAdapter btAdapter,
-            @NonNull OnDeviceRouteChangedListener onDeviceRouteChangedListener) {
+            @NonNull BluetoothAdapter btAdapter) {
         mContext = Objects.requireNonNull(context);
         mAudioManager = Objects.requireNonNull(audioManager);
         mHandler = new Handler(Objects.requireNonNull(looper));
         mStrategyForMedia = Objects.requireNonNull(strategyForMedia);
-        mOnDeviceRouteChangedListeners.add(Objects.requireNonNull(onDeviceRouteChangedListener));
 
         mBuiltInSpeakerSuitabilityStatus =
                 DeviceRouteController.getBuiltInSpeakerSuitabilityStatus(mContext);
@@ -154,6 +181,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
         mOnDeviceRouteChangedListeners.add(onDeviceRouteChangedListener);
     }
 
+    public void unregisterRouteChangeListener(
+            @NonNull OnDeviceRouteChangedListener onDeviceRouteChangedListener) {
+        mOnDeviceRouteChangedListeners.remove(onDeviceRouteChangedListener);
+    }
+
     @RequiresPermission(
             anyOf = {
                 Manifest.permission.MODIFY_AUDIO_ROUTING,
@@ -161,7 +193,18 @@ import java.util.concurrent.CopyOnWriteArrayList;
             })
     @Override
     public void start(UserHandle mUser) {
-        mBluetoothRouteController.start(mUser);
+        // When AudioManagerRouteController is singleton, only need to call this function once.
+        if (com.android.media.flags.Flags.enableUseOfSingletonAudioManagerRouteController()) {
+            if (mStarted) {
+                return;
+            }
+            mStarted = true;
+        }
+
+        mBluetoothRouteController.start(
+                com.android.media.flags.Flags.enableUseOfSingletonAudioManagerRouteController()
+                        ? UserHandle.SYSTEM
+                        : mUser);
         mAudioManager.registerAudioDeviceCallback(mAudioDeviceCallback, mHandler);
         mAudioManager.addOnDevicesForAttributesChangedListener(
                 AudioRoutingUtils.ATTRIBUTES_MEDIA,
@@ -176,6 +219,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
             })
     @Override
     public void stop() {
+        // Singleton AudioManagerRouteController doesn't need to call stop function.
+        if (com.android.media.flags.Flags.enableUseOfSingletonAudioManagerRouteController()) {
+            return;
+        }
+
         mAudioManager.removeOnDevicesForAttributesChangedListener(
                 mOnDevicesForAttributesChangedListener);
         mAudioManager.unregisterAudioDeviceCallback(mAudioDeviceCallback);
