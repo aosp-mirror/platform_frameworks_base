@@ -19,7 +19,6 @@ package com.android.wm.shell.flicker.pip
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
-import android.platform.test.annotations.RequiresFlagsDisabled
 import android.tools.Rotation
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
@@ -29,7 +28,6 @@ import android.tools.helpers.WindowUtils
 import android.tools.traces.parsers.toFlickerComponent
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.wm.shell.Flags
 import com.android.wm.shell.flicker.utils.SplitScreenUtils
 import org.junit.Assume
 import org.junit.FixMethodOrder
@@ -64,7 +62,6 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@RequiresFlagsDisabled(Flags.FLAG_ENABLE_PIP2)
 open class FromSplitScreenAutoEnterPipOnGoToHomeTest(flicker: LegacyFlickerTest) :
     AutoEnterPipOnGoToHomeTest(flicker) {
     private val portraitDisplayBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_0)
