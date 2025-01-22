@@ -27,10 +27,13 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.transition.KeyguardTransitionAnimationCallback
+import com.android.systemui.keyguard.shared.transition.KeyguardTransitionAnimationCallbackDelegator
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
+import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
@@ -57,6 +60,9 @@ constructor(
     private val unfoldTransitionInteractor: UnfoldTransitionInteractor,
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val transitionInteractor: KeyguardTransitionInteractor,
+    private val keyguardTransitionAnimationCallbackDelegator:
+        KeyguardTransitionAnimationCallbackDelegator,
+    @Assisted private val keyguardTransitionAnimationCallback: KeyguardTransitionAnimationCallback,
 ) : ExclusiveActivatable() {
     @VisibleForTesting val clockSize = clockInteractor.clockSize
 
@@ -79,29 +85,36 @@ constructor(
 
     override suspend fun onActivated(): Nothing {
         coroutineScope {
-            launch {
-                combine(
-                        unfoldTransitionInteractor.unfoldTranslationX(isOnStartSide = true),
-                        unfoldTransitionInteractor.unfoldTranslationX(isOnStartSide = false),
-                    ) { start, end ->
-                        UnfoldTranslations(start = start, end = end)
-                    }
-                    .collect { _unfoldTranslations.value = it }
-            }
+            try {
+                keyguardTransitionAnimationCallbackDelegator.delegate =
+                    keyguardTransitionAnimationCallback
+                launch {
+                    combine(
+                            unfoldTransitionInteractor.unfoldTranslationX(isOnStartSide = true),
+                            unfoldTransitionInteractor.unfoldTranslationX(isOnStartSide = false),
+                        ) { start, end ->
+                            UnfoldTranslations(start = start, end = end)
+                        }
+                        .collect { _unfoldTranslations.value = it }
+                }
 
-            launch {
-                transitionInteractor
-                    .transitionValue(KeyguardState.OCCLUDED)
-                    .map { it > 0f }
-                    .collect { fullyOrPartiallyOccluded ->
-                        // Content is visible unless we're OCCLUDED. Currently, we don't have nice
-                        // animations into and out of OCCLUDED, so the lockscreen/AOD content is
-                        // hidden immediately upon entering/exiting OCCLUDED.
-                        _isContentVisible.value = !fullyOrPartiallyOccluded
-                    }
-            }
+                launch {
+                    transitionInteractor
+                        .transitionValue(KeyguardState.OCCLUDED)
+                        .map { it > 0f }
+                        .collect { fullyOrPartiallyOccluded ->
+                            // Content is visible unless we're OCCLUDED. Currently, we don't have
+                            // nice
+                            // animations into and out of OCCLUDED, so the lockscreen/AOD content is
+                            // hidden immediately upon entering/exiting OCCLUDED.
+                            _isContentVisible.value = !fullyOrPartiallyOccluded
+                        }
+                }
 
-            awaitCancellation()
+                awaitCancellation()
+            } finally {
+                keyguardTransitionAnimationCallbackDelegator.delegate = null
+            }
         }
     }
 
@@ -151,6 +164,8 @@ constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(): LockscreenContentViewModel
+        fun create(
+            keyguardTransitionAnimationCallback: KeyguardTransitionAnimationCallback
+        ): LockscreenContentViewModel
     }
 }

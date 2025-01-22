@@ -37,6 +37,7 @@ import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.keyguard.shared.transition.keyguardTransitionAnimationCallback
 import com.android.systemui.keyguard.util.FrameCallbackProvider
 import com.android.systemui.keyguard.util.KeyguardTransitionRunner
 import com.android.systemui.kosmos.testDispatcher
@@ -81,7 +82,11 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        underTest = KeyguardTransitionRepositoryImpl(Dispatchers.Main)
+        underTest =
+            KeyguardTransitionRepositoryImpl(
+                Dispatchers.Main,
+                kosmos.keyguardTransitionAnimationCallback,
+            )
         runBlocking {
             callbackProvider = FrameCallbackProvider(testScope.backgroundScope)
             withContext(Dispatchers.Main) {
@@ -411,7 +416,11 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
     @Test
     fun simulateRaceConditionIsProcessedInOrder() =
         testScope.runTest {
-            val ktr = KeyguardTransitionRepositoryImpl(kosmos.testDispatcher)
+            val ktr =
+                KeyguardTransitionRepositoryImpl(
+                    kosmos.testDispatcher,
+                    kosmos.keyguardTransitionAnimationCallback,
+                )
             val steps by collectValues(ktr.transitions.dropWhile { step -> step.from == OFF })
 
             // Add a delay to the first transition in order to attempt to have the second transition
@@ -448,7 +457,11 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
     @Test
     fun simulateRaceConditionIsProcessedInOrderUsingUpdateTransition() =
         testScope.runTest {
-            val ktr = KeyguardTransitionRepositoryImpl(kosmos.testDispatcher)
+            val ktr =
+                KeyguardTransitionRepositoryImpl(
+                    kosmos.testDispatcher,
+                    kosmos.keyguardTransitionAnimationCallback,
+                )
             val steps by collectValues(ktr.transitions.dropWhile { step -> step.from == OFF })
 
             // Begin a manual transition

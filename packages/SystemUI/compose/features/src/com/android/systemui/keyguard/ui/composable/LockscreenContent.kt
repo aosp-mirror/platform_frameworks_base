@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.composable
 
+import android.view.View
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -25,8 +26,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ContentScope
+import com.android.internal.jank.Cuj
+import com.android.internal.jank.Cuj.CujType
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.transition.KeyguardTransitionAnimationCallback
 import com.android.systemui.keyguard.ui.composable.blueprint.ComposableLockscreenSceneBlueprint
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import com.android.systemui.lifecycle.rememberViewModel
@@ -44,6 +50,7 @@ class LockscreenContent(
     private val notificationScrimViewModelFactory: NotificationLockscreenScrimViewModel.Factory,
     private val blueprints: Set<@JvmSuppressWildcards ComposableLockscreenSceneBlueprint>,
     private val clockInteractor: KeyguardClockInteractor,
+    private val interactionJankMonitor: InteractionJankMonitor,
 ) {
     private val blueprintByBlueprintId: Map<String, ComposableLockscreenSceneBlueprint> by lazy {
         blueprints.associateBy { it.id }
@@ -51,8 +58,14 @@ class LockscreenContent(
 
     @Composable
     fun ContentScope.Content(modifier: Modifier = Modifier) {
+        val view = LocalView.current
         val viewModel =
-            rememberViewModel("LockscreenContent-viewModel") { viewModelFactory.create() }
+            rememberViewModel("LockscreenContent-viewModel") {
+                viewModelFactory.create(
+                    keyguardTransitionAnimationCallback =
+                        KeyguardTransitionAnimationCallbackImpl(view, interactionJankMonitor)
+                )
+            }
         val notificationLockscreenScrimViewModel =
             rememberViewModel("LockscreenContent-scrimViewModel") {
                 notificationScrimViewModelFactory.create()
@@ -69,7 +82,6 @@ class LockscreenContent(
 
         val coroutineScope = rememberCoroutineScope()
         val blueprintId by viewModel.blueprintId(coroutineScope).collectAsStateWithLifecycle()
-        val view = LocalView.current
         DisposableEffect(view) {
             clockInteractor.clockEventController.registerListeners(view)
 
@@ -80,6 +92,33 @@ class LockscreenContent(
         with(blueprint) {
             Content(viewModel, modifier.sysuiResTag("keyguard_root_view"))
             NotificationLockscreenScrim(notificationLockscreenScrimViewModel)
+        }
+    }
+}
+
+private class KeyguardTransitionAnimationCallbackImpl(
+    private val view: View,
+    private val interactionJankMonitor: InteractionJankMonitor,
+) : KeyguardTransitionAnimationCallback {
+
+    override fun onAnimationStarted(from: KeyguardState, to: KeyguardState) {
+        cujOrNull(from, to)?.let { cuj -> interactionJankMonitor.begin(view, cuj) }
+    }
+
+    override fun onAnimationEnded(from: KeyguardState, to: KeyguardState) {
+        cujOrNull(from, to)?.let { cuj -> interactionJankMonitor.end(cuj) }
+    }
+
+    override fun onAnimationCanceled(from: KeyguardState, to: KeyguardState) {
+        cujOrNull(from, to)?.let { cuj -> interactionJankMonitor.cancel(cuj) }
+    }
+
+    @CujType
+    private fun cujOrNull(from: KeyguardState, to: KeyguardState): Int? {
+        return when {
+            from == KeyguardState.AOD -> Cuj.CUJ_LOCKSCREEN_TRANSITION_FROM_AOD
+            to == KeyguardState.AOD -> Cuj.CUJ_LOCKSCREEN_TRANSITION_TO_AOD
+            else -> null
         }
     }
 }
