@@ -29,6 +29,7 @@ import android.view.MotionEvent
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.cts.input.BatchedEventSplitter
 import com.android.cts.input.CaptureEventActivity
+import com.android.cts.input.DebugInputRule
 import com.android.cts.input.InputJsonParser
 import com.android.cts.input.VirtualDisplayActivityScenario
 import com.android.cts.input.inputeventmatchers.isResampled
@@ -97,6 +98,10 @@ class UinputRecordingIntegrationTests {
     private lateinit var instrumentation: Instrumentation
     private lateinit var parser: InputJsonParser
 
+
+    @get:Rule
+    val debugInputRule = DebugInputRule()
+
     @get:Rule
     val testName = TestName()
 
@@ -109,6 +114,7 @@ class UinputRecordingIntegrationTests {
         parser = InputJsonParser(instrumentation.context)
     }
 
+    @DebugInputRule.DebugInput(bug = 389901828)
     @Test
     fun testEvemuRecording() {
         VirtualDisplayActivityScenario.AutoClose<CaptureEventActivity>(
