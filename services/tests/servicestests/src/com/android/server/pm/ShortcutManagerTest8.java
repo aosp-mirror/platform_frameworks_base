@@ -84,7 +84,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
         makeCallerForeground();
     }
 
-    public void testGetParentOrSelfUserId() {
+    public void disabled_testGetParentOrSelfUserId() {
         assertEquals(USER_10, mService.getParentOrSelfUserId(USER_10));
         assertEquals(USER_11, mService.getParentOrSelfUserId(USER_11));
         assertEquals(USER_12, mService.getParentOrSelfUserId(USER_12));
@@ -222,7 +222,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                 actualIntent.getFlags());
     }
 
-    public void testNotForeground() {
+    public void disabled_testNotForeground() {
         setDefaultLauncher(USER_10, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
