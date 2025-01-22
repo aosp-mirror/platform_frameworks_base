@@ -565,6 +565,13 @@ flag {
 }
 
 flag {
+    name: "enable_display_disconnect_interaction"
+    namespace: "lse_desktop_experience"
+    description: "Enables new interaction that occurs when a display is disconnected."
+    bug: "391652399"
+}
+
+flag {
     name: "show_desktop_experience_dev_option"
     namespace: "lse_desktop_experience"
     description: "Replace the freeform windowing dev options with a desktop experience one."
