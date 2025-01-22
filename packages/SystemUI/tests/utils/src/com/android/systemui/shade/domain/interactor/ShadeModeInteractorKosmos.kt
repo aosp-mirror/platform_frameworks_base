@@ -16,14 +16,57 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import android.provider.Settings
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shared.settings.data.repository.secureSettingsRepository
+import kotlinx.coroutines.launch
 
 val Kosmos.shadeModeInteractor by Fixture {
     ShadeModeInteractorImpl(
         applicationScope = applicationCoroutineScope,
         repository = shadeRepository,
+        secureSettingsRepository = secureSettingsRepository,
     )
+}
+
+// TODO(b/391578667): Make this user-aware once supported by FakeSecureSettingsRepository.
+/**
+ * Enables the Dual Shade setting, and (optionally) sets the shade layout to be wide (`true`)
+ * or narrow (`false`).
+ *
+ * In a wide layout, notifications and quick settings shades each take up only half the screen
+ * width. In a narrow layout, they each take up the entire screen width.
+ */
+fun Kosmos.enableDualShade(wideLayout: Boolean? = null) {
+    testScope.launch {
+        secureSettingsRepository.setInt(Settings.Secure.DUAL_SHADE, 1)
+
+        if (wideLayout != null) {
+            fakeShadeRepository.setShadeLayoutWide(wideLayout)
+        }
+    }
+}
+
+// TODO(b/391578667): Make this user-aware once supported by FakeSecureSettingsRepository.
+fun Kosmos.disableDualShade() {
+    testScope.launch { secureSettingsRepository.setInt(Settings.Secure.DUAL_SHADE, 0) }
+}
+
+fun Kosmos.enableSingleShade() {
+    testScope.launch {
+        disableDualShade()
+        fakeShadeRepository.setShadeLayoutWide(false)
+    }
+}
+
+fun Kosmos.enableSplitShade() {
+    testScope.launch {
+        disableDualShade()
+        fakeShadeRepository.setShadeLayoutWide(true)
+    }
 }
