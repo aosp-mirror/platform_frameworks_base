@@ -131,7 +131,7 @@ constructor(
                                 bubbleExpandBehavior ==
                                     NoteTaskBubbleExpandBehavior.KEEP_IF_EXPANDED &&
                                     bubbles.isBubbleExpanded(
-                                        Bubble.getAppBubbleKeyForApp(intent.`package`, userHandle)
+                                        Bubble.getNoteBubbleKeyForApp(intent.`package`, userHandle)
                                     )
                             ) {
                                 return@ifPresentOrElse

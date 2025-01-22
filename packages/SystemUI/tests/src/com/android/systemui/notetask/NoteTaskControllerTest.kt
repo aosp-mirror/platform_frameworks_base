@@ -179,7 +179,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             .apply { infoReference.set(expectedInfo) }
             .onBubbleExpandChanged(
                 isExpanding = true,
-                key = Bubble.getAppBubbleKeyForApp(expectedInfo.packageName, expectedInfo.user),
+                key = Bubble.getNoteBubbleKeyForApp(expectedInfo.packageName, expectedInfo.user),
             )
 
         verify(eventLogger).logNoteTaskOpened(expectedInfo)
@@ -194,7 +194,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             .apply { infoReference.set(expectedInfo) }
             .onBubbleExpandChanged(
                 isExpanding = false,
-                key = Bubble.getAppBubbleKeyForApp(expectedInfo.packageName, expectedInfo.user),
+                key = Bubble.getNoteBubbleKeyForApp(expectedInfo.packageName, expectedInfo.user),
             )
 
         verify(eventLogger).logNoteTaskClosed(expectedInfo)
@@ -209,7 +209,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             .apply { infoReference.set(expectedInfo) }
             .onBubbleExpandChanged(
                 isExpanding = true,
-                key = Bubble.getAppBubbleKeyForApp(expectedInfo.packageName, expectedInfo.user),
+                key = Bubble.getNoteBubbleKeyForApp(expectedInfo.packageName, expectedInfo.user),
             )
 
         verifyNoMoreInteractions(bubbles, keyguardManager, userManager, eventLogger)
@@ -223,7 +223,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             .apply { infoReference.set(expectedInfo) }
             .onBubbleExpandChanged(
                 isExpanding = false,
-                key = Bubble.getAppBubbleKeyForApp(expectedInfo.packageName, expectedInfo.user),
+                key = Bubble.getNoteBubbleKeyForApp(expectedInfo.packageName, expectedInfo.user),
             )
 
         verifyNoMoreInteractions(bubbles, keyguardManager, userManager, eventLogger)
@@ -241,7 +241,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         createNoteTaskController(isEnabled = false)
             .onBubbleExpandChanged(
                 isExpanding = true,
-                key = Bubble.getAppBubbleKeyForApp(NOTE_TASK_INFO.packageName, NOTE_TASK_INFO.user),
+                key = Bubble.getNoteBubbleKeyForApp(NOTE_TASK_INFO.packageName, NOTE_TASK_INFO.user),
             )
 
         verifyNoMoreInteractions(bubbles, keyguardManager, userManager, eventLogger)

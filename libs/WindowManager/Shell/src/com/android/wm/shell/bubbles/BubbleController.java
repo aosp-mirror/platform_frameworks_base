@@ -1590,7 +1590,7 @@ public class BubbleController implements ConfigurationChangeListener,
             return;
         }
 
-        String appBubbleKey = Bubble.getAppBubbleKeyForApp(intent.getPackage(), user);
+        String appBubbleKey = Bubble.getNoteBubbleKeyForApp(intent.getPackage(), user);
         PackageManager packageManager = getPackageManagerForUser(mContext, user.getIdentifier());
         if (!isResizableActivity(intent, packageManager, appBubbleKey)) return; // logs errors
 
@@ -1628,8 +1628,9 @@ public class BubbleController implements ConfigurationChangeListener,
                 // Update the bubble entry in the overflow with the latest intent.
                 b.setAppBubbleIntent(intent);
             } else {
-                // App bubble does not exist, lets add and expand it
-                b = Bubble.createAppBubble(intent, user, icon, mMainExecutor, mBackgroundExecutor);
+                // Notes bubble does not exist, lets add and expand it
+                b = Bubble.createNotesBubble(intent, user, icon, mMainExecutor,
+                        mBackgroundExecutor);
             }
             ProtoLog.d(WM_SHELL_BUBBLES, "inflateAndAdd %s", appBubbleKey);
             b.setShouldAutoExpand(true);

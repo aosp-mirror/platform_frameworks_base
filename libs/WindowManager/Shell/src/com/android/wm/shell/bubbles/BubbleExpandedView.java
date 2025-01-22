@@ -285,7 +285,7 @@ public class BubbleExpandedView extends LinearLayout {
             // The taskId is saved to use for removeTask, preventing appearance in recent tasks.
             mTaskId = taskId;
 
-            if (mBubble != null && mBubble.isAppBubble()) {
+            if (mBubble != null && mBubble.isNoteBubble()) {
                 // Let the controller know sooner what the taskId is.
                 mManager.setAppBubbleTaskId(mBubble.getKey(), mTaskId);
             }

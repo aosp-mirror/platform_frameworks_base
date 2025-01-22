@@ -1975,12 +1975,11 @@ public class BubbleStackView extends FrameLayout
             return;
         }
 
-        if (firstBubble && bubble.isAppBubble() && !mPositioner.hasUserModifiedDefaultPosition()) {
-            // TODO (b/294284894): update language around "app bubble" here
-            // If it's an app bubble and we don't have a previous resting position, update the
-            // controllers to use the default position for the app bubble (it'd be different from
+        if (firstBubble && bubble.isNoteBubble() && !mPositioner.hasUserModifiedDefaultPosition()) {
+            // If it's an note bubble and we don't have a previous resting position, update the
+            // controllers to use the default position for the note bubble (it'd be different from
             // the position initialized with the controllers originally).
-            PointF startPosition =  mPositioner.getDefaultStartPosition(true /* isAppBubble */);
+            PointF startPosition =  mPositioner.getDefaultStartPosition(true /* isNoteBubble */);
             mStackOnLeftOrWillBe = mPositioner.isStackOnLeft(startPosition);
             mStackAnimationController.setStackPosition(startPosition);
             mExpandedAnimationController.setCollapsePoint(startPosition);
