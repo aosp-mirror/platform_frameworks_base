@@ -211,6 +211,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
     @Test
     public void testAddRemoveSplitNotifyChange() {
+        reset(mRecentTasksController);
         RecentTaskInfo t1 = makeTaskInfo(1);
         RecentTaskInfo t2 = makeTaskInfo(2);
         setRawList(t1, t2);
@@ -225,6 +226,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
     @Test
     public void testAddSameSplitBoundsInfoSkipNotifyChange() {
+        reset(mRecentTasksController);
         RecentTaskInfo t1 = makeTaskInfo(1);
         RecentTaskInfo t2 = makeTaskInfo(2);
         setRawList(t1, t2);
@@ -535,6 +537,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
     @Test
     public void testTaskWindowingModeChangedNotifiesChange() {
+        reset(mRecentTasksController);
         RecentTaskInfo t1 = makeTaskInfo(1);
         setRawList(t1);
 
@@ -551,7 +554,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
                 WINDOWING_MODE_MULTI_WINDOW);
         mShellTaskOrganizer.onTaskInfoChanged(rt2MultiWIndow);
 
-        verify(mRecentTasksController).notifyRecentTasksChanged();
+        // One for onTaskAppeared and one for onTaskInfoChanged
+        verify(mRecentTasksController, times(2)).notifyRecentTasksChanged();
     }
 
     @Test
