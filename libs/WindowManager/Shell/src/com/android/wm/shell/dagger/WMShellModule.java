@@ -755,7 +755,8 @@ public abstract class WMShellModule {
             DesktopWallpaperActivityTokenProvider desktopWallpaperActivityTokenProvider,
             Optional<BubbleController> bubbleController,
             OverviewToDesktopTransitionObserver overviewToDesktopTransitionObserver,
-            DesksOrganizer desksOrganizer) {
+            DesksOrganizer desksOrganizer,
+            UserProfileContexts userProfileContexts) {
         return new DesktopTasksController(
                 context,
                 shellInit,
@@ -790,7 +791,8 @@ public abstract class WMShellModule {
                 desktopWallpaperActivityTokenProvider,
                 bubbleController,
                 overviewToDesktopTransitionObserver,
-                desksOrganizer);
+                desksOrganizer,
+                userProfileContexts);
     }
 
     @WMSingleton

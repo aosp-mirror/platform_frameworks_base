@@ -100,6 +100,7 @@ import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.common.UserProfileContexts
 import com.android.wm.shell.desktopmode.DesktopImmersiveController.ExitResult
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
@@ -251,6 +252,7 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
     @Mock
     private lateinit var overviewToDesktopTransitionObserver: OverviewToDesktopTransitionObserver
     @Mock private lateinit var desksOrganizer: DesksOrganizer
+    @Mock private lateinit var userProfileContexts: UserProfileContexts
 
     private lateinit var controller: DesktopTasksController
     private lateinit var shellInit: ShellInit
@@ -345,6 +347,7 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
             )
             .thenReturn(ExitResult.NoExit)
         whenever(desktopWallpaperActivityTokenProvider.getToken()).thenReturn(wallpaperToken)
+        whenever(userProfileContexts[anyInt()]).thenReturn(context)
 
         controller = createController()
         controller.setSplitScreenController(splitScreenController)
@@ -402,6 +405,7 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
             Optional.of(bubbleController),
             overviewToDesktopTransitionObserver,
             desksOrganizer,
+            userProfileContexts,
         )
 
     @After
