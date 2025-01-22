@@ -32,8 +32,6 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 
-import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
-import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_BOUNDS;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_SAME;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
@@ -116,7 +114,7 @@ public class PipTransition extends PipTransitionController {
     private final HomeTransitionObserver mHomeTransitionObserver;
     private final Optional<SplitScreenController> mSplitScreenOptional;
     private final PipAnimationController mPipAnimationController;
-    private @PipAnimationController.AnimationType int mEnterAnimationType = ANIM_TYPE_BOUNDS;
+    private @AnimationType int mEnterAnimationType = ANIM_TYPE_BOUNDS;
     private Transitions.TransitionFinishCallback mFinishCallback;
     private SurfaceControl.Transaction mFinishTransaction;
     private final Rect mExitDestinationBounds = new Rect();
@@ -992,7 +990,7 @@ public class PipTransition extends PipTransitionController {
     }
 
     @Override
-    public void setEnterAnimationType(@PipAnimationController.AnimationType int type) {
+    public void setEnterAnimationType(@AnimationType int type) {
         mEnterAnimationType = type;
     }
 

@@ -21,7 +21,7 @@ import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
-import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
+import static com.android.wm.shell.pip.PipTransitionController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.shared.TransitionUtil.isOpeningMode;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
@@ -148,6 +148,7 @@ public class MixedTransitionHelper {
                 }
             }
 
+            pipHandler.setEnterAnimationType(ANIM_TYPE_ALPHA);
             if (PipUtils.isPip2ExperimentEnabled()) {
                 TransitionInfo pipInfo = subCopy(info, TRANSIT_PIP, false /* withChanges */);
                 pipInfo.getChanges().add(pipChange);
@@ -157,7 +158,6 @@ public class MixedTransitionHelper {
                 pipHandler.startAnimation(mixed.mTransition, pipInfo, startTransaction,
                         finishTransaction, finishCB);
             } else {
-                pipHandler.setEnterAnimationType(ANIM_TYPE_ALPHA);
                 pipHandler.startEnterAnimation(pipChange, startTransaction, finishTransaction,
                         finishCB);
             }

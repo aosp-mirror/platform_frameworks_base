@@ -141,6 +141,8 @@ public class PipTransition extends PipTransitionController implements
 
     private ValueAnimator mTransitionAnimator;
 
+    private @AnimationType int mEnterAnimationType = ANIM_TYPE_BOUNDS;
+
     public PipTransition(
             Context context,
             @NonNull ShellInit shellInit,
@@ -812,12 +814,11 @@ public class PipTransition extends PipTransitionController implements
         if (TransitionUtil.isOpeningType(info.getType())) {
             for (TransitionInfo.Change change : info.getChanges()) {
                 if (change.getLeash() == null) continue;
-                if (change.getMode() == TRANSIT_OPEN || change.getMode() == TRANSIT_TO_FRONT) {
+                if (TransitionUtil.isOpeningMode(change.getMode())) {
                     startTransaction.setAlpha(change.getLeash(), 1f);
                 }
             }
         }
-
     }
 
     private WindowContainerTransaction getEnterPipTransaction(@NonNull IBinder transition,
@@ -901,10 +902,19 @@ public class PipTransition extends PipTransitionController implements
 
     private boolean isLegacyEnter(@NonNull TransitionInfo info) {
         TransitionInfo.Change pipChange = getPipChange(info);
-        // If the only change in the changes list is a opening type PiP task,
-        // then this is legacy-enter PiP.
-        return pipChange != null && info.getChanges().size() == 1
-                && (pipChange.getMode() == TRANSIT_TO_FRONT || pipChange.getMode() == TRANSIT_OPEN);
+        if (pipChange != null) {
+            if (mEnterAnimationType == ANIM_TYPE_ALPHA) {
+                // If enter animation type is force overridden to an alpha type,
+                // treat this as legacy, and reset the animation type to default (i.e. bounds type).
+                setEnterAnimationType(ANIM_TYPE_BOUNDS);
+                return true;
+            }
+            // If the only change in the changes list is a opening type PiP task,
+            // then this is legacy-enter PiP.
+            return info.getChanges().size() == 1
+                    && TransitionUtil.isOpeningMode(pipChange.getMode());
+        }
+        return false;
     }
 
     private boolean isRemovePipTransition(@NonNull TransitionInfo info) {
@@ -951,6 +961,20 @@ public class PipTransition extends PipTransitionController implements
                     initActivityPos.y);
         }
     }
+
+    /**
+     * Sets the type of animation to run upon entering PiP.
+     *
+     * By default, {@link PipTransition} uses various signals from Transitions to figure out
+     * the animation type. But we should provide the ability to override this animation type to
+     * mixed handlers, for instance, as they can split up and modify incoming {@link TransitionInfo}
+     * to pass it onto multiple {@link Transitions.TransitionHandler}s.
+     */
+    @Override
+    public void setEnterAnimationType(@AnimationType int type) {
+        mEnterAnimationType = type;
+    }
+
     void cacheAndStartTransitionAnimator(@NonNull ValueAnimator animator) {
         mTransitionAnimator = animator;
         mTransitionAnimator.start();
