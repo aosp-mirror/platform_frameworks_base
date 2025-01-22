@@ -144,6 +144,16 @@ class DesktopTaskChangeListenerTest : ShellTestCase() {
     }
 
     @Test
+    fun onTaskMovingToFront_freeformTaskOutsideDesktop_addsTaskToRepo() {
+        val task = createFullscreenTask().apply { isVisible = true }
+        whenever(desktopUserRepositories.current.isActiveTask(task.taskId)).thenReturn(true)
+
+        desktopTaskChangeListener.onTaskMovingToFront(task)
+
+        verify(desktopUserRepositories.current).addTask(task.displayId, task.taskId, task.isVisible)
+    }
+
+    @Test
     @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
     fun onTaskClosing_backNavEnabled_nonClosingTask_minimizesTaskInRepo() {
         val task = createFreeformTask().apply { isVisible = true }

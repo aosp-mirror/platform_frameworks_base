@@ -159,7 +159,8 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
     }
 
     @Test
-    public void focusTaskChanged_addsFreeformTaskToRepo() {
+    @DisableFlags(FLAG_ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS)
+    public void focusTaskChanged_noTransitionObserversFlag_addsFreeformTaskToRepo() {
         ActivityManager.RunningTaskInfo task =
                 new TestRunningTaskInfoBuilder().setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         task.isFocused = true;
@@ -167,6 +168,19 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
         mFreeformTaskListener.onFocusTaskChanged(task);
 
         verify(mDesktopUserRepositories.getCurrent())
+                .addTask(task.displayId, task.taskId, task.isVisible);
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS)
+    public void focusTaskChanged_enableTransitionObservers_freeformTaskNotAddedToRepo() {
+        ActivityManager.RunningTaskInfo task =
+                new TestRunningTaskInfoBuilder().setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+        task.isFocused = true;
+
+        mFreeformTaskListener.onFocusTaskChanged(task);
+
+        verify(mDesktopUserRepositories.getCurrent(), never())
                 .addTask(task.displayId, task.taskId, task.isVisible);
     }
 

@@ -171,7 +171,8 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
 
     @Override
     public void onFocusTaskChanged(RunningTaskInfo taskInfo) {
-        if (taskInfo.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
+        if (taskInfo.getWindowingMode() != WINDOWING_MODE_FREEFORM
+                || DesktopModeFlags.ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS.isTrue()) {
             return;
         }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG,

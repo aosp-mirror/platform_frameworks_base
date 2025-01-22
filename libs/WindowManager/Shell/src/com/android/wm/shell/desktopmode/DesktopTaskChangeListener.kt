@@ -70,8 +70,7 @@ class DesktopTaskChangeListener(private val desktopUserRepositories: DesktopUser
         if (!isFreeformTask(taskInfo)) {
             desktopRepository.removeTask(taskInfo.displayId, taskInfo.taskId)
         }
-        // TODO: b/367268953 - Connect this with DesktopRepository for handling
-        // task moving to front for tasks in windowing mode.
+        desktopRepository.addTask(taskInfo.displayId, taskInfo.taskId, taskInfo.isVisible)
     }
 
     override fun onTaskMovingToBack(taskInfo: RunningTaskInfo) {
