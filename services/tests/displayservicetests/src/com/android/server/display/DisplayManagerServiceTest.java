@@ -31,6 +31,7 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_C
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
+import static android.hardware.display.DisplayManagerGlobal.INTERNAL_EVENT_FLAG_TOPOLOGY_UPDATED;
 import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_SYSTEM;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.provider.Settings.Secure.MIRROR_BUILT_IN_DISPLAY;
@@ -413,6 +414,9 @@ public class DisplayManagerServiceTest {
                     .setStrictness(Strictness.LENIENT)
                     .spyStatic(SystemProperties.class)
                     .build();
+
+    private int mUniqueIdCount = 0;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -3864,6 +3868,7 @@ public class DisplayManagerServiceTest {
     public void testSetDisplayTopology() {
         manageDisplaysPermission(/* granted= */ true);
         when(mMockFlags.isDisplayTopologyEnabled()).thenReturn(true);
+        when(mMockFlags.isDisplayContentModeManagementEnabled()).thenReturn(true);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
         DisplayManagerService.BinderService displayManagerBinderService =
@@ -3892,6 +3897,7 @@ public class DisplayManagerServiceTest {
     public void testShouldNotifyTopologyChanged() {
         manageDisplaysPermission(/* granted= */ true);
         when(mMockFlags.isDisplayTopologyEnabled()).thenReturn(true);
+        when(mMockFlags.isDisplayContentModeManagementEnabled()).thenReturn(true);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerService.BinderService displayManagerBinderService =
                 displayManager.new BinderService();
@@ -3900,19 +3906,22 @@ public class DisplayManagerServiceTest {
 
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
         displayManagerBinderService.registerCallbackWithEventMask(callback,
-                DisplayManagerGlobal.INTERNAL_EVENT_FLAG_TOPOLOGY_UPDATED);
+                INTERNAL_EVENT_FLAG_TOPOLOGY_UPDATED);
         waitForIdleHandler(handler);
 
-        displayManagerBinderService.setDisplayTopology(new DisplayTopology());
-        waitForIdleHandler(handler);
-
-        assertThat(callback.receivedEvents()).containsExactly(TOPOLOGY_CHANGED_EVENT);
+        var topology = initDisplayTopology(displayManager, displayManagerBinderService, callback,
+                handler, /*shouldEmitTopologyChangeEvent=*/ true);
+        callback.clear();
+        callback.expectsEvent(TOPOLOGY_CHANGED_EVENT);
+        displayManagerBinderService.setDisplayTopology(topology);
+        callback.waitForExpectedEvent();
     }
 
     @Test
     public void testShouldNotNotifyTopologyChanged_WhenClientIsNotSubscribed() {
         manageDisplaysPermission(/* granted= */ true);
         when(mMockFlags.isDisplayTopologyEnabled()).thenReturn(true);
+        when(mMockFlags.isDisplayContentModeManagementEnabled()).thenReturn(true);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerService.BinderService displayManagerBinderService =
                 displayManager.new BinderService();
@@ -3925,9 +3934,13 @@ public class DisplayManagerServiceTest {
                 STANDARD_DISPLAY_EVENTS);
         waitForIdleHandler(handler);
 
-        displayManagerBinderService.setDisplayTopology(new DisplayTopology());
+        var topology = initDisplayTopology(displayManager, displayManagerBinderService, callback,
+                handler, /*shouldEmitTopologyChangeEvent=*/ false);
+        callback.clear();
+        callback.expectsEvent(TOPOLOGY_CHANGED_EVENT); // should not happen
+        displayManagerBinderService.setDisplayTopology(topology);
+        callback.waitForNonExpectedEvent(); // checks that event did not happen
         waitForIdleHandler(handler);
-
         assertThat(callback.receivedEvents()).isEmpty();
     }
 
@@ -4605,6 +4618,7 @@ public class DisplayManagerServiceTest {
                             new float[0], new int[0]);
         }
         displayDeviceInfo.name = "" + displayType;
+        displayDeviceInfo.uniqueId = "uniqueId" + mUniqueIdCount++;
         displayDeviceInfo.modeId = 1;
         displayDeviceInfo.type = displayType;
         displayDeviceInfo.renderFrameRate = displayDeviceInfo.supportedModes[0].getRefreshRate();
@@ -4675,6 +4689,42 @@ public class DisplayManagerServiceTest {
                     .enforceCallingOrSelfPermission(eq(MANAGE_DISPLAYS), any());
             mPermissionEnforcer.revoke(MANAGE_DISPLAYS);
         }
+    }
+
+    private DisplayTopology initDisplayTopology(DisplayManagerService displayManager,
+            DisplayManagerService.BinderService displayManagerBinderService,
+            FakeDisplayManagerCallback callback,
+            Handler handler, boolean shouldEmitTopologyChangeEvent) {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS, 1);
+        callback.expectsEvent(TOPOLOGY_CHANGED_EVENT);
+        FakeDisplayDevice displayDevice0 =
+                createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
+        int displayId0 = getDisplayIdForDisplayDevice(displayManager, displayManagerBinderService,
+                displayDevice0);
+        if (shouldEmitTopologyChangeEvent) {
+            callback.waitForExpectedEvent();
+        } else {
+            callback.waitForNonExpectedEvent();
+        }
+        callback.clear();
+
+        callback.expectsEvent(TOPOLOGY_CHANGED_EVENT);
+        FakeDisplayDevice displayDevice1 = createFakeDisplayDevice(displayManager,
+                new float[]{60f}, Display.TYPE_OVERLAY);
+        int displayId1 = getDisplayIdForDisplayDevice(displayManager, displayManagerBinderService,
+                displayDevice1);
+        waitForIdleHandler(handler);
+        if (shouldEmitTopologyChangeEvent) {
+            callback.waitForExpectedEvent();
+        } else {
+            callback.waitForNonExpectedEvent();
+        }
+
+        var topology = new DisplayTopology();
+        topology.addDisplay(displayId0, 2048, 800);
+        topology.addDisplay(displayId1, 1920, 1080);
+        return topology;
     }
 
     private static class FakeDisplayManagerCallback extends IDisplayManagerCallback.Stub
