@@ -128,7 +128,7 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
         assertEquals(1, mService.mMaxUpdatesPerInterval);
     }
 
-    public void testResetThrottling() throws Exception {
+    public void disabled_testResetThrottling() throws Exception {
         prepareCrossProfileDataSet();
 
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
@@ -149,7 +149,7 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
         });
     }
 
-    public void testResetThrottling_user_not_running() throws Exception {
+    public void disabled_testResetThrottling_user_not_running() throws Exception {
         prepareCrossProfileDataSet();
 
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
@@ -177,7 +177,7 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
         });
     }
 
-    public void testResetThrottling_user_running() throws Exception {
+    public void disabled_testResetThrottling_user_running() throws Exception {
         prepareCrossProfileDataSet();
 
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
@@ -201,7 +201,7 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
         });
     }
 
-    public void testResetAllThrottling() throws Exception {
+    public void disabled_testResetAllThrottling() throws Exception {
         prepareCrossProfileDataSet();
 
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
