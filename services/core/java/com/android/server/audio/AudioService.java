@@ -13034,10 +13034,10 @@ public class AudioService extends IAudioService.Stub
                 int uid = intent.getIntExtra(Intent.EXTRA_UID, Process.INVALID_UID);
                 if (intent.getBooleanExtra(EXTRA_REPLACING, false) ||
                         intent.getBooleanExtra(EXTRA_ARCHIVAL, false)) return;
-                if (action.equals(ACTION_PACKAGE_ADDED)) {
+                if (ACTION_PACKAGE_ADDED.equals(action)) {
                     audioserverExecutor.execute(() ->
                             provider.onModifyPackageState(uid, pkgName, false /* isRemoved */));
-                } else if (action.equals(ACTION_PACKAGE_REMOVED)) {
+                } else if (ACTION_PACKAGE_REMOVED.equals(action)) {
                     audioserverExecutor.execute(() ->
                             provider.onModifyPackageState(uid, pkgName, true /* isRemoved */));
                 }
