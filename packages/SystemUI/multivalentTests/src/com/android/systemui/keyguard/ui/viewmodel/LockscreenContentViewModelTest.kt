@@ -18,7 +18,6 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -37,7 +36,7 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.shadeRepository
-import com.android.systemui.shade.shared.flag.DualShade
+import com.android.systemui.shade.domain.interactor.enableDualShade
 import com.android.systemui.testKosmos
 import com.android.systemui.unfold.fakeUnfoldTransitionProgressProvider
 import com.android.systemui.util.mockito.whenever
@@ -134,11 +133,11 @@ class LockscreenContentViewModelTest(flags: FlagsParameterization) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
     fun areNotificationsVisible_dualShadeWideOnLockscreen_true() =
         with(kosmos) {
             testScope.runTest {
                 val areNotificationsVisible by collectLastValue(underTest.areNotificationsVisible())
+                kosmos.enableDualShade()
                 shadeRepository.setShadeLayoutWide(true)
                 fakeKeyguardClockRepository.setClockSize(ClockSize.LARGE)
 

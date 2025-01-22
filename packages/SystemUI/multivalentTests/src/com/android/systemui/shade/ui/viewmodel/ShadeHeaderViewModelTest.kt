@@ -1,8 +1,6 @@
 package com.android.systemui.shade.ui.viewmodel
 
 import android.content.Intent
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.provider.AlarmClock
 import android.provider.Settings
 import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
@@ -23,7 +21,8 @@ import com.android.systemui.plugins.activityStarter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.shared.flag.DualShade
+import com.android.systemui.shade.domain.interactor.disableDualShade
+import com.android.systemui.shade.domain.interactor.enableDualShade
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.fakeMobileIconsInteractor
 import com.android.systemui.testKosmos
@@ -101,9 +100,9 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(DualShade.FLAG_NAME)
     fun onSystemIconChipClicked_locked_collapsesShadeToLockscreen() =
         testScope.runTest {
+            kosmos.disableDualShade()
             setDeviceEntered(false)
             setScene(Scenes.Shade)
 
@@ -114,9 +113,9 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
     fun onSystemIconChipClicked_lockedOnQsShade_collapsesShadeToLockscreen() =
         testScope.runTest {
+            kosmos.enableDualShade()
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
             setDeviceEntered(false)
@@ -132,9 +131,9 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
     fun onSystemIconChipClicked_lockedOnNotifShade_expandsQsShade() =
         testScope.runTest {
+            kosmos.enableDualShade()
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
             setDeviceEntered(false)
@@ -151,9 +150,9 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(DualShade.FLAG_NAME)
     fun onSystemIconChipClicked_unlocked_collapsesShadeToGone() =
         testScope.runTest {
+            kosmos.disableDualShade()
             setDeviceEntered(true)
             setScene(Scenes.Shade)
 
@@ -164,9 +163,9 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
     fun onSystemIconChipClicked_unlockedOnQsShade_collapsesShadeToGone() =
         testScope.runTest {
+            kosmos.enableDualShade()
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
             setDeviceEntered(true)
@@ -182,9 +181,9 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
     fun onSystemIconChipClicked_unlockedOnNotifShade_expandsQsShade() =
         testScope.runTest {
+            kosmos.enableDualShade()
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
             setDeviceEntered(true)
@@ -201,9 +200,9 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
     fun onNotificationIconChipClicked_lockedOnNotifShade_collapsesShadeToLockscreen() =
         testScope.runTest {
+            kosmos.enableDualShade()
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
             setDeviceEntered(false)
@@ -219,9 +218,9 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
     fun onNotificationIconChipClicked_lockedOnQsShade_expandsNotifShade() =
         testScope.runTest {
+            kosmos.enableDualShade()
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
             setDeviceEntered(false)
@@ -238,9 +237,9 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
     fun onNotificationIconChipClicked_unlockedOnNotifShade_collapsesShadeToGone() =
         testScope.runTest {
+            kosmos.enableDualShade()
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
             setDeviceEntered(true)
@@ -256,9 +255,9 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
     fun onNotificationIconChipClicked_unlockedOnQsShade_expandsNotifShade() =
         testScope.runTest {
+            kosmos.enableDualShade()
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
             setDeviceEntered(true)

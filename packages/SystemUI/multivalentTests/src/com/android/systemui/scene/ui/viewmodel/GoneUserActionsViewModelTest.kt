@@ -16,8 +16,6 @@
 
 package com.android.systemui.scene.ui.viewmodel
 
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -32,9 +30,10 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
-import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.domain.interactor.enableDualShade
+import com.android.systemui.shade.domain.interactor.enableSingleShade
+import com.android.systemui.shade.domain.interactor.enableSplitShade
 import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -53,7 +52,6 @@ class GoneUserActionsViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val shadeRepository by lazy { kosmos.shadeRepository }
     private lateinit var underTest: GoneUserActionsViewModel
 
     @Before
@@ -63,44 +61,40 @@ class GoneUserActionsViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(DualShade.FLAG_NAME)
     fun downTransitionKey_splitShadeEnabled_isGoneToSplitShade() =
         testScope.runTest {
             val userActions by collectLastValue(underTest.actions)
-            shadeRepository.setShadeLayoutWide(true)
+            kosmos.enableSplitShade()
             runCurrent()
 
             assertThat(userActions?.get(Swipe.Down)?.transitionKey).isEqualTo(ToSplitShade)
         }
 
     @Test
-    @DisableFlags(DualShade.FLAG_NAME)
     fun downTransitionKey_splitShadeDisabled_isNull() =
         testScope.runTest {
             val userActions by collectLastValue(underTest.actions)
-            shadeRepository.setShadeLayoutWide(false)
+            kosmos.enableSingleShade()
             runCurrent()
 
             assertThat(userActions?.get(Swipe.Down)?.transitionKey).isNull()
         }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
     fun downTransitionKey_dualShadeEnabled_isNull() =
         testScope.runTest {
             val userActions by collectLastValue(underTest.actions)
-            shadeRepository.setShadeLayoutWide(true)
+            kosmos.enableDualShade(wideLayout = true)
             runCurrent()
 
             assertThat(userActions?.get(Swipe.Down)?.transitionKey).isNull()
         }
 
     @Test
-    @DisableFlags(DualShade.FLAG_NAME)
     fun swipeDownWithTwoFingers_singleShade_goesToQuickSettings() =
         testScope.runTest {
             val userActions by collectLastValue(underTest.actions)
-            shadeRepository.setShadeLayoutWide(false)
+            kosmos.enableSingleShade()
             runCurrent()
 
             assertThat(userActions?.get(swipeDownFromTopWithTwoFingers()))
@@ -108,11 +102,10 @@ class GoneUserActionsViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(DualShade.FLAG_NAME)
     fun swipeDownWithTwoFingers_splitShade_goesToShade() =
         testScope.runTest {
             val userActions by collectLastValue(underTest.actions)
-            shadeRepository.setShadeLayoutWide(true)
+            kosmos.enableSplitShade()
             runCurrent()
 
             assertThat(userActions?.get(swipeDownFromTopWithTwoFingers()))
@@ -120,10 +113,10 @@ class GoneUserActionsViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
     fun swipeDownWithTwoFingers_dualShadeEnabled_isNull() =
         testScope.runTest {
             val userActions by collectLastValue(underTest.actions)
+            kosmos.enableDualShade()
             runCurrent()
 
             assertThat(userActions?.get(swipeDownFromTopWithTwoFingers())).isNull()

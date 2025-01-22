@@ -16,7 +16,6 @@
 
 package com.android.systemui.notifications.ui.viewmodel
 
-import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -36,8 +35,8 @@ import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.domain.interactor.enableDualShade
 import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shade.ui.viewmodel.notificationsShadeOverlayContentViewModel
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.setActiveNotifs
@@ -56,7 +55,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @EnableSceneContainer
-@EnableFlags(DualShade.FLAG_NAME)
 class NotificationsShadeOverlayContentViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
@@ -68,6 +66,7 @@ class NotificationsShadeOverlayContentViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         kosmos.sceneContainerStartable.start()
+        kosmos.enableDualShade()
         underTest.activateIn(testScope)
     }
 

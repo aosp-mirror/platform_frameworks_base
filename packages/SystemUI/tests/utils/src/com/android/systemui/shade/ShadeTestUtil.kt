@@ -32,7 +32,7 @@ import kotlinx.coroutines.test.runCurrent
 import org.junit.Assert
 
 /** Sets up shade state for tests for either value of the scene container flag. */
-class ShadeTestUtil constructor(val delegate: ShadeTestUtilDelegate) {
+class ShadeTestUtil(val delegate: ShadeTestUtilDelegate) {
 
     /** Sets shade expansion to a value between 0-1. */
     fun setShadeExpansion(shadeExpansion: Float) {

@@ -18,8 +18,6 @@
 
 package com.android.systemui.scene.ui.viewmodel
 
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_DOWN
 import android.view.MotionEvent.ACTION_OUTSIDE
@@ -41,9 +39,10 @@ import com.android.systemui.scene.sceneContainerViewModelFactory
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
-import com.android.systemui.shade.data.repository.fakeShadeRepository
+import com.android.systemui.shade.domain.interactor.enableDualShade
+import com.android.systemui.shade.domain.interactor.enableSingleShade
+import com.android.systemui.shade.domain.interactor.enableSplitShade
 import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.data.repository.fakeRemoteInputRepository
 import com.android.systemui.testKosmos
@@ -69,7 +68,6 @@ class SceneContainerViewModelTest : SysuiTestCase() {
     private val testScope by lazy { kosmos.testScope }
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val fakeSceneDataSource by lazy { kosmos.fakeSceneDataSource }
-    private val fakeShadeRepository by lazy { kosmos.fakeShadeRepository }
     private val sceneContainerConfig by lazy { kosmos.sceneContainerConfig }
     private val fakeRemoteInputRepository by lazy { kosmos.fakeRemoteInputRepository }
     private val falsingManager by lazy { kosmos.fakeFalsingManager }
@@ -324,44 +322,40 @@ class SceneContainerViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(DualShade.FLAG_NAME)
     fun edgeDetector_singleShade_usesDefaultEdgeDetector() =
         testScope.runTest {
             val shadeMode by collectLastValue(kosmos.shadeInteractor.shadeMode)
-            fakeShadeRepository.setShadeLayoutWide(false)
-            assertThat(shadeMode).isEqualTo(ShadeMode.Single)
+            kosmos.enableSingleShade()
 
+            assertThat(shadeMode).isEqualTo(ShadeMode.Single)
             assertThat(underTest.edgeDetector).isEqualTo(DefaultEdgeDetector)
         }
 
     @Test
-    @DisableFlags(DualShade.FLAG_NAME)
     fun edgeDetector_splitShade_usesDefaultEdgeDetector() =
         testScope.runTest {
             val shadeMode by collectLastValue(kosmos.shadeInteractor.shadeMode)
-            fakeShadeRepository.setShadeLayoutWide(true)
-            assertThat(shadeMode).isEqualTo(ShadeMode.Split)
+            kosmos.enableSplitShade()
 
+            assertThat(shadeMode).isEqualTo(ShadeMode.Split)
             assertThat(underTest.edgeDetector).isEqualTo(DefaultEdgeDetector)
         }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
     fun edgeDetector_dualShade_narrowScreen_usesSplitEdgeDetector() =
         testScope.runTest {
             val shadeMode by collectLastValue(kosmos.shadeInteractor.shadeMode)
-            fakeShadeRepository.setShadeLayoutWide(false)
+            kosmos.enableDualShade(wideLayout = false)
 
             assertThat(shadeMode).isEqualTo(ShadeMode.Dual)
             assertThat(underTest.edgeDetector).isEqualTo(kosmos.splitEdgeDetector)
         }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
     fun edgeDetector_dualShade_wideScreen_usesSplitEdgeDetector() =
         testScope.runTest {
             val shadeMode by collectLastValue(kosmos.shadeInteractor.shadeMode)
-            fakeShadeRepository.setShadeLayoutWide(true)
+            kosmos.enableDualShade(wideLayout = true)
 
             assertThat(shadeMode).isEqualTo(ShadeMode.Dual)
             assertThat(underTest.edgeDetector).isEqualTo(kosmos.splitEdgeDetector)

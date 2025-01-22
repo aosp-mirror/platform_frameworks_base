@@ -17,7 +17,6 @@
 package com.android.systemui.shade.ui.viewmodel
 
 import android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS
-import android.platform.test.annotations.DisableFlags
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -36,12 +35,11 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
 import com.android.systemui.media.controls.shared.model.MediaData
-import com.android.systemui.qs.ui.adapter.fakeQSSceneAdapter
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.shadeRepository
-import com.android.systemui.shade.shared.flag.DualShade
+import com.android.systemui.shade.domain.interactor.disableDualShade
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
 import com.android.systemui.testKosmos
@@ -64,20 +62,19 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @EnableSceneContainer
-@DisableFlags(DualShade.FLAG_NAME)
 class ShadeSceneContentViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val shadeRepository by lazy { kosmos.shadeRepository }
-    private val qsSceneAdapter by lazy { kosmos.fakeQSSceneAdapter }
 
     private val underTest: ShadeSceneContentViewModel by lazy { kosmos.shadeSceneContentViewModel }
 
     @Before
     fun setUp() {
         underTest.activateIn(testScope)
+        kosmos.disableDualShade()
     }
 
     @Test

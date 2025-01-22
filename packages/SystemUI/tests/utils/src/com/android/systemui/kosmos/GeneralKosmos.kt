@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.kosmos
 
 import com.android.systemui.SysuiTestCase
@@ -6,9 +24,8 @@ import com.android.systemui.coroutines.FlowValue
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.settings.brightness.ui.BrightnessWarningToast
-import com.android.systemui.util.mockito.mock
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -46,8 +63,6 @@ var Kosmos.backgroundCoroutineContext: CoroutineContext by Fixture {
     backgroundScope.coroutineContext
 }
 var Kosmos.mainCoroutineContext: CoroutineContext by Fixture { testScope.coroutineContext }
-var Kosmos.brightnessWarningToast: BrightnessWarningToast by
-    Kosmos.Fixture { mock<BrightnessWarningToast>() }
 
 /**
  * Run this test body with a [Kosmos] as receiver, and using the [testScope] currently installed in
