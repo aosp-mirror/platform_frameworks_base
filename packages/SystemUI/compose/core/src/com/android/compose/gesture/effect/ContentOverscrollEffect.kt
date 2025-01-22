@@ -18,6 +18,8 @@ package com.android.compose.gesture.effect
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.SpringSpec
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.OverscrollEffect
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
@@ -46,7 +48,7 @@ open class BaseContentOverscrollEffect(
     private val animationSpec: AnimationSpec<Float>,
 ) : ContentOverscrollEffect {
     /** The [Animatable] that holds the current overscroll value. */
-    private val animatable = Animatable(initialValue = 0f, visibilityThreshold = 0.5f)
+    private val animatable = Animatable(initialValue = 0f)
     private var lastConverter: SpaceVectorConverter? = null
 
     override val overscrollDistance: Float
@@ -131,8 +133,26 @@ open class BaseContentOverscrollEffect(
             launch {
                 val consumed = performFling(velocity)
                 val remaining = velocity - consumed
-                animatable.animateTo(0f, animationSpec, remaining.toFloat())
+                animatable.animateTo(
+                    0f,
+                    animationSpec.withVisibilityThreshold(1f),
+                    remaining.toFloat(),
+                )
             }
+        }
+    }
+
+    private fun <T> AnimationSpec<T>.withVisibilityThreshold(
+        visibilityThreshold: T
+    ): AnimationSpec<T> {
+        return when (this) {
+            is SpringSpec ->
+                spring(
+                    stiffness = stiffness,
+                    dampingRatio = dampingRatio,
+                    visibilityThreshold = visibilityThreshold,
+                )
+            else -> this
         }
     }
 
