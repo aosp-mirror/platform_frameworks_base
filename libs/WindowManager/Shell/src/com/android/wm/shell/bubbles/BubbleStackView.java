@@ -633,8 +633,6 @@ public class BubbleStackView extends FrameLayout
                         mMagneticTarget,
                         mIndividualBubbleMagnetListener);
 
-                hideCurrentInputMethod();
-
                 // Save the magnetized individual bubble so we can dispatch touch events to it.
                 mMagnetizedObject = mExpandedAnimationController.getMagnetizedBubbleDraggingOut();
             } else {
@@ -669,6 +667,10 @@ public class BubbleStackView extends FrameLayout
             // If we're expanding or collapsing, ignore all touch events.
             if (mIsExpansionAnimating || mShowedUserEducationInTouchListenerActive) {
                 return;
+            }
+
+            if (mPositioner.isImeVisible()) {
+                hideCurrentInputMethod();
             }
 
             // Show the dismiss target, if we haven't already.
