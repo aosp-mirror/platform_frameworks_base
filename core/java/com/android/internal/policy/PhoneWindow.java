@@ -478,8 +478,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     public static boolean isOptingOutEdgeToEdgeEnforcement(ApplicationInfo info, boolean local,
             TypedArray windowStyle) {
         final boolean disabled = Flags.disableOptOutEdgeToEdge()
-                // TODO (b/377864165): Don't exclude system apps after they are ready.
-                && !info.isSystemApp()
                 && (local
                         // Calling this doesn't require a permission.
                         ? CompatChanges.isChangeEnabled(DISABLE_OPT_OUT_EDGE_TO_EDGE)
