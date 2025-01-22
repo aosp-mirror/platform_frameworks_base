@@ -95,18 +95,17 @@ constructor(
     private fun overscrollEvents(direction: Float): Flow<OverscrollEventModel> {
         var startPosition: Float? = null
         return inputEventsInteractor.event
-            .mapNotNull { (it as? SliderInputEvent.Touch)?.event }
+            .mapNotNull { it as? SliderInputEvent.Touch }
             .transform { touchEvent ->
                 // Skip events from inside the slider bounds for the case when the user adjusts
-                // slider
-                // towards max when the slider is already on max value.
-                if (touchEvent.isFinalEvent()) {
+                // slider towards max when the slider is already on max value.
+                if (touchEvent is SliderInputEvent.Touch.End) {
                     startPosition = null
                     emit(OverscrollEventModel.Animate(0f))
                     return@transform
                 }
                 val currentStartPosition = startPosition
-                val newPosition: Float = touchEvent.rawY
+                val newPosition: Float = touchEvent.y
                 if (currentStartPosition == null) {
                     startPosition = newPosition
                 } else {
@@ -124,11 +123,6 @@ constructor(
                     emit(OverscrollEventModel.Move(interpolatedOffset))
                 }
             }
-    }
-
-    /** @return true when the [MotionEvent] indicates the end of the gesture. */
-    private fun MotionEvent.isFinalEvent(): Boolean {
-        return actionMasked == MotionEvent.ACTION_UP || actionMasked == MotionEvent.ACTION_CANCEL
     }
 
     /** Models overscroll event */

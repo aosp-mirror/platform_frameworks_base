@@ -17,7 +17,6 @@
 package com.android.systemui.volume.dialog.sliders.ui
 
 import android.graphics.drawable.Drawable
-import android.view.MotionEvent
 import android.view.View
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -44,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
@@ -56,15 +54,17 @@ import com.android.systemui.res.R
 import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
 import com.android.systemui.volume.dialog.sliders.ui.compose.VolumeDialogSliderTrack
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogOverscrollViewModel
-import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderInputEventsViewModel
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderViewModel
 import com.android.systemui.volume.haptics.ui.VolumeHapticsConfigsProvider
 import javax.inject.Inject
 import kotlin.math.round
 import kotlin.math.roundToInt
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.isActive
 
 @VolumeDialogSliderScope
 class VolumeDialogSliderViewBinder
@@ -72,7 +72,6 @@ class VolumeDialogSliderViewBinder
 constructor(
     private val viewModel: VolumeDialogSliderViewModel,
     private val overscrollViewModel: VolumeDialogOverscrollViewModel,
-    private val inputViewModel: VolumeDialogSliderInputEventsViewModel,
     private val hapticsViewModelFactory: SliderHapticsViewModel.Factory,
 ) {
     fun bind(view: View) {
@@ -80,7 +79,6 @@ constructor(
         sliderComposeView.setContent {
             VolumeDialogSlider(
                 viewModel = viewModel,
-                inputViewModel = inputViewModel,
                 overscrollViewModel = overscrollViewModel,
                 hapticsViewModelFactory =
                     if (com.android.systemui.Flags.hapticsForComposeSliders()) {
@@ -97,7 +95,6 @@ constructor(
 @Composable
 private fun VolumeDialogSlider(
     viewModel: VolumeDialogSliderViewModel,
-    inputViewModel: VolumeDialogSliderInputEventsViewModel,
     overscrollViewModel: VolumeDialogOverscrollViewModel,
     hapticsViewModelFactory: SliderHapticsViewModel.Factory?,
     modifier: Modifier = Modifier,
@@ -175,17 +172,12 @@ private fun VolumeDialogSlider(
         interactionSource = interactionSource,
         modifier =
             modifier.pointerInput(Unit) {
-                awaitPointerEventScope {
-                    // we should wait for all new pointer events
-                    while (true) {
-                        val event: PointerEvent = awaitPointerEvent()
-                        PointerEvent::class
-                            .java
-                            .methods
-                            .find { it.name.startsWith("getMotionEvent") }!!
-                            .invoke(event)
-                            ?.let { it as? MotionEvent? }
-                            ?.let { inputViewModel.onTouchEvent(it) }
+                coroutineScope {
+                    val currentContext = currentCoroutineContext()
+                    awaitPointerEventScope {
+                        while (currentContext.isActive) {
+                            viewModel.onTouchEvent(awaitPointerEvent())
+                        }
                     }
                 }
             },
