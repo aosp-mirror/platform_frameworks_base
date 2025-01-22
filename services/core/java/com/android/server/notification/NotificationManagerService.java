@@ -632,6 +632,8 @@ public class NotificationManagerService extends SystemService {
     // Minium number of sparse groups for a package before autogrouping them
     private static final int AUTOGROUP_SPARSE_GROUPS_AT_COUNT = 3;
 
+    private static final Duration ZEN_BROADCAST_DELAY = Duration.ofMillis(250);
+
     private IActivityManager mAm;
     private ActivityTaskManagerInternal mAtm;
     private ActivityManager mActivityManager;
@@ -3178,6 +3180,24 @@ public class NotificationManagerService extends SystemService {
         sendRegisteredOnlyBroadcast(new Intent(action));
     }
 
+    /**
+     * Schedules a broadcast to be sent to runtime receivers and DND-policy-access packages. The
+     * broadcast will be sent after {@link #ZEN_BROADCAST_DELAY}, unless a new broadcast is
+     * scheduled in the interim, in which case the previous one is dropped and the waiting period
+     * is <em>restarted</em>.
+     *
+     * <p>Note that this uses <em>equality of the {@link Intent#getAction}</em> as the criteria for
+     * deduplicating pending broadcasts, ignoring the extras and anything else. This is intentional
+     * so that e.g. rapidly changing some value A -> B -> C will only produce a broadcast for C
+     * (instead of every time because the extras are different).
+     */
+    private void sendZenBroadcastWithDelay(Intent intent) {
+        String token = "zen_broadcast:" + intent.getAction();
+        mHandler.removeCallbacksAndEqualMessages(token);
+        mHandler.postDelayed(() -> sendRegisteredOnlyBroadcast(intent), token,
+                ZEN_BROADCAST_DELAY.toMillis());
+    }
+
     private void sendRegisteredOnlyBroadcast(Intent baseIntent) {
         int[] userIds = mUmInternal.getProfileIds(mAmi.getCurrentUserId(), true);
         if (Flags.nmBinderPerfReduceZenBroadcasts()) {
@@ -3371,14 +3391,25 @@ public class NotificationManagerService extends SystemService {
 
     @GuardedBy("mNotificationLock")
     private void updateEffectsSuppressorLocked() {
+        final long oldSuppressedEffects = mZenModeHelper.getSuppressedEffects();
         final long updatedSuppressedEffects = calculateSuppressedEffects();
-        if (updatedSuppressedEffects == mZenModeHelper.getSuppressedEffects()) return;
+        if (updatedSuppressedEffects == oldSuppressedEffects) return;
+
         final List<ComponentName> suppressors = getSuppressors();
         ZenLog.traceEffectsSuppressorChanged(
-                mEffectsSuppressors, suppressors, updatedSuppressedEffects);
-        mEffectsSuppressors = suppressors;
+                mEffectsSuppressors, suppressors, oldSuppressedEffects, updatedSuppressedEffects);
         mZenModeHelper.setSuppressedEffects(updatedSuppressedEffects);
-        sendRegisteredOnlyBroadcast(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED);
+
+        if (Flags.nmBinderPerfThrottleEffectsSuppressorBroadcast()) {
+            if (!suppressors.equals(mEffectsSuppressors)) {
+                mEffectsSuppressors = suppressors;
+                sendZenBroadcastWithDelay(
+                        new Intent(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED));
+            }
+        } else {
+            mEffectsSuppressors = suppressors;
+            sendRegisteredOnlyBroadcast(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED);
+        }
     }
 
     private void exitIdle() {
@@ -3500,12 +3531,18 @@ public class NotificationManagerService extends SystemService {
     }
 
     private ArrayList<ComponentName> getSuppressors() {
-        ArrayList<ComponentName> names = new ArrayList<ComponentName>();
+        ArrayList<ComponentName> names = new ArrayList<>();
         for (int i = mListenersDisablingEffects.size() - 1; i >= 0; --i) {
             ArraySet<ComponentName> serviceInfoList = mListenersDisablingEffects.valueAt(i);
 
             for (ComponentName info : serviceInfoList) {
-                names.add(info);
+                if (Flags.nmBinderPerfThrottleEffectsSuppressorBroadcast()) {
+                    if (!names.contains(info)) {
+                        names.add(info);
+                    }
+                } else {
+                    names.add(info);
+                }
             }
         }
 

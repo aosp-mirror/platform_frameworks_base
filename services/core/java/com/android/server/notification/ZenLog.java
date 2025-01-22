@@ -140,8 +140,9 @@ public class ZenLog {
     }
 
     public static void traceEffectsSuppressorChanged(List<ComponentName> oldSuppressors,
-            List<ComponentName> newSuppressors, long suppressedEffects) {
-        append(TYPE_SUPPRESSOR_CHANGED, "suppressed effects:" + suppressedEffects + ","
+            List<ComponentName> newSuppressors, long oldSuppressedEffects, long suppressedEffects) {
+        append(TYPE_SUPPRESSOR_CHANGED, "suppressed effects:"
+                + oldSuppressedEffects + "->" + suppressedEffects + ","
                 + componentListToString(oldSuppressors) + "->"
                 + componentListToString(newSuppressors));
     }
