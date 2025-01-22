@@ -25,6 +25,8 @@ import android.os.Bundle
 import android.os.UserHandle
 import android.view.View
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.internal.R
 import com.android.systemui.Flags
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
@@ -47,10 +49,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /** A repository storing information about the current wallpaper. */
@@ -59,7 +61,7 @@ interface WallpaperRepository {
     val wallpaperInfo: StateFlow<WallpaperInfo?>
 
     /** Emits true if the current user's current wallpaper supports ambient mode. */
-    val wallpaperSupportsAmbientMode: StateFlow<Boolean>
+    val wallpaperSupportsAmbientMode: Flow<Boolean>
 
     /** Set rootView to get its windowToken afterwards */
     var rootView: View?
@@ -78,9 +80,6 @@ constructor(
     private val wallpaperManager: WallpaperManager,
     context: Context,
 ) : WallpaperRepository {
-    private val deviceSupportsAodWallpaper =
-        context.resources.getBoolean(com.android.internal.R.bool.config_dozeSupportsAodWallpaper)
-
     private val wallpaperChanged: Flow<Unit> =
         broadcastDispatcher
             .broadcastFlow(IntentFilter(Intent.ACTION_WALLPAPER_CHANGED), user = UserHandle.ALL)
@@ -121,7 +120,7 @@ constructor(
         )
 
     override val wallpaperInfo: StateFlow<WallpaperInfo?> =
-        if (!wallpaperManager.isWallpaperSupported || !deviceSupportsAodWallpaper) {
+        if (!wallpaperManager.isWallpaperSupported) {
             MutableStateFlow(null).asStateFlow()
         } else {
             combine(wallpaperChanged, selectedUser, ::Pair)
@@ -136,25 +135,8 @@ constructor(
                 )
         }
 
-    override val wallpaperSupportsAmbientMode: StateFlow<Boolean> =
-        wallpaperInfo
-            .map {
-                if (ambientAod()) {
-                    // Force this mode for now, until ImageWallpaper supports it directly
-                    // TODO(b/371236225)
-                    true
-                } else {
-                    // If WallpaperInfo is null, it's ImageWallpaper which never supports ambient
-                    // mode.
-                    it?.supportsAmbientMode() == true
-                }
-            }
-            .stateIn(
-                scope,
-                // Always be listening for wallpaper changes.
-                SharingStarted.Eagerly,
-                initialValue = if (ambientAod()) true else false,
-            )
+    override val wallpaperSupportsAmbientMode: Flow<Boolean> =
+        flowOf(context.resources.getBoolean(R.bool.config_dozeSupportsAodWallpaper) && ambientAod())
 
     override var rootView: View? = null
 
