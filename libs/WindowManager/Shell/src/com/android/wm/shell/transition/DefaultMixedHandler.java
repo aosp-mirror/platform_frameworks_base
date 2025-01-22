@@ -367,7 +367,7 @@ public class DefaultMixedHandler implements MixedTransitionHandler,
     }
 
     @Override
-    public Consumer<IBinder> handleRecentsRequest(WindowContainerTransaction outWCT) {
+    public Consumer<IBinder> handleRecentsRequest() {
         if (mRecentsHandler != null) {
             if (mSplitHandler.isSplitScreenVisible()) {
                 return this::setRecentsTransitionDuringSplit;
@@ -381,6 +381,21 @@ public class DefaultMixedHandler implements MixedTransitionHandler,
             }
         }
         return null;
+    }
+
+    @Override
+    public void handleFinishRecents(boolean returnToApp,
+            @NonNull WindowContainerTransaction finishWct,
+            @NonNull SurfaceControl.Transaction finishT) {
+        if (mRecentsHandler != null) {
+            for (int i = mActiveTransitions.size() - 1; i >= 0; --i) {
+                final MixedTransition mixed = mActiveTransitions.get(i);
+                if (mixed.mType == MixedTransition.TYPE_RECENTS_DURING_SPLIT) {
+                    ((RecentsMixedTransition) mixed).onAnimateRecentsDuringSplitFinishing(
+                            returnToApp, finishWct, finishT);
+                }
+            }
+        }
     }
 
     private void setRecentsTransitionDuringSplit(IBinder transition) {

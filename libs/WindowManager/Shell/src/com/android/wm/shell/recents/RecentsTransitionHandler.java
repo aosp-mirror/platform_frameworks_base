@@ -222,7 +222,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
         RecentsMixedHandler mixer = null;
         Consumer<IBinder> setTransitionForMixer = null;
         for (int i = 0; i < mMixers.size(); ++i) {
-            setTransitionForMixer = mMixers.get(i).handleRecentsRequest(wct);
+            setTransitionForMixer = mMixers.get(i).handleRecentsRequest();
             if (setTransitionForMixer != null) {
                 mixer = mMixers.get(i);
                 break;
@@ -1455,6 +1455,11 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                 }
             }
 
+            // Notify the mixers of the pending finish
+            for (int i = 0; i < mMixers.size(); ++i) {
+                mMixers.get(i).handleFinishRecents(returningToApp, wct, t);
+            }
+
             if (Flags.enableRecentsBookendTransition()) {
                 if (!wct.isEmpty()) {
                     ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
@@ -1653,15 +1658,22 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
      */
     public interface RecentsMixedHandler extends Transitions.TransitionHandler {
         /**
-         * Called when a recents request comes in. The handler can add operations to outWCT. If
-         * the handler wants to "accept" the transition, it should return a Consumer accepting the
-         * IBinder for the transition. If not, it should return `null`.
+         * Called when a recents request comes in. If the handler wants to "accept" the transition,
+         * it should return a Consumer accepting the IBinder for the transition. If not, it should
+         * return `null`.
          *
          * If a mixed-handler accepts this recents, it will be the de-facto handler for this
          * transition and is required to call the associated {@link #startAnimation},
          * {@link #mergeAnimation}, and {@link #onTransitionConsumed} methods.
          */
         @Nullable
-        Consumer<IBinder> handleRecentsRequest(WindowContainerTransaction outWCT);
+        Consumer<IBinder> handleRecentsRequest();
+
+        /**
+         * Called when a recents transition has finished, with a WCT and SurfaceControl Transaction
+         * that can be used to add to any changes needed to restore the state.
+         */
+        void handleFinishRecents(boolean returnToApp, @NonNull WindowContainerTransaction finishWct,
+                @NonNull SurfaceControl.Transaction finishT);
     }
 }
