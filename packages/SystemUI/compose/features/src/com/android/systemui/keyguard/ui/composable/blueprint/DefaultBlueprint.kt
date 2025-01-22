@@ -45,7 +45,6 @@ import com.android.systemui.keyguard.ui.composable.section.StatusBarSection
 import com.android.systemui.keyguard.ui.composable.section.TopAreaSection
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUiAod
 import java.util.Optional
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -130,9 +129,7 @@ constructor(
                             if (!isShadeLayoutWide && !isBypassEnabled) {
                                 Box(modifier = Modifier.weight(weight = 1f)) {
                                     Column(Modifier.align(alignment = Alignment.TopStart)) {
-                                        if (PromotedNotificationUiAod.isEnabled) {
-                                            AodPromotedNotification()
-                                        }
+                                        AodPromotedNotificationArea()
                                         AodNotificationIcons(
                                             modifier = Modifier.padding(start = aodIconPadding)
                                         )
@@ -145,9 +142,7 @@ constructor(
                                 }
                             } else {
                                 Column {
-                                    if (PromotedNotificationUiAod.isEnabled) {
-                                        AodPromotedNotification()
-                                    }
+                                    AodPromotedNotificationArea()
                                     AodNotificationIcons(
                                         modifier = Modifier.padding(start = aodIconPadding)
                                     )
