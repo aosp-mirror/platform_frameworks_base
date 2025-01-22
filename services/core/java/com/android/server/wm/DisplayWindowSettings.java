@@ -246,13 +246,26 @@ class DisplayWindowSettings {
     }
 
     void setShouldShowSystemDecorsLocked(@NonNull DisplayContent dc, boolean shouldShow) {
+        final boolean changed = (shouldShow != shouldShowSystemDecorsLocked(dc));
+
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final SettingsProvider.SettingsEntry overrideSettings =
                 mSettingsProvider.getOverrideSettings(displayInfo);
         overrideSettings.mShouldShowSystemDecors = shouldShow;
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
+
         if (enableDisplayContentModeManagement()) {
+            if (dc.isDefaultDisplay || dc.isPrivate() || !changed) {
+                return;
+            }
+
             dc.getDisplayPolicy().updateHasNavigationBarIfNeeded();
+
+            if (shouldShow) {
+                mService.mRoot.startSystemDecorations(dc, "setShouldShowSystemDecorsLocked");
+            } else {
+                dc.getDisplayPolicy().notifyDisplayRemoveSystemDecorations();
+            }
         }
     }
 

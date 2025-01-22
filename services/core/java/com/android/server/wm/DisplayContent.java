@@ -3261,9 +3261,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         mWmService.mDisplayWindowSettings.setShouldShowSystemDecorsLocked(this, shouldShow);
 
-        if (shouldShow) {
-            mRootWindowContainer.startSystemDecorations(this, "onDisplayInfoChangeApplied");
-        } else {
+        if (!shouldShow) {
             clearAllTasksOnDisplay(null);
         }
     }
@@ -6471,7 +6469,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mRemoving;
     }
 
-    private void clearAllTasksOnDisplay(@Nullable Runnable clearTasksCallback) {
+    void clearAllTasksOnDisplay(@Nullable Runnable clearTasksCallback) {
         Task lastReparentedRootTask;
         mRootWindowContainer.mTaskSupervisor.beginDeferResume();
         try {
