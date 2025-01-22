@@ -26,6 +26,8 @@ import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static com.android.server.wm.DisplayContent.FORCE_SCALING_MODE_AUTO;
 import static com.android.server.wm.DisplayContent.FORCE_SCALING_MODE_DISABLED;
 
+import static com.android.server.display.feature.flags.Flags.enableDisplayContentModeManagement;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
@@ -249,6 +251,9 @@ class DisplayWindowSettings {
                 mSettingsProvider.getOverrideSettings(displayInfo);
         overrideSettings.mShouldShowSystemDecors = shouldShow;
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
+        if (enableDisplayContentModeManagement()) {
+            dc.getDisplayPolicy().updateHasNavigationBarIfNeeded();
+        }
     }
 
     boolean isHomeSupportedLocked(@NonNull DisplayContent dc) {

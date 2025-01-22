@@ -67,6 +67,7 @@ import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_SCREEN_ON;
+import static com.android.server.display.feature.flags.Flags.enableDisplayContentModeManagement;
 import static com.android.server.policy.PhoneWindowManager.TOAST_WINDOW_TIMEOUT;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
@@ -744,6 +745,31 @@ public class DisplayPolicy {
 
     public boolean hasNavigationBar() {
         return mHasNavigationBar;
+    }
+
+    void updateHasNavigationBarIfNeeded() {
+        if (!enableDisplayContentModeManagement()) {
+            Slog.e(TAG, "mHasNavigationBar shouldn't be updated when the flag is off.");
+        }
+
+        if (mDisplayContent.isDefaultDisplay) {
+            return;
+        }
+
+        final boolean hasNavigationBar = mDisplayContent.isSystemDecorationsSupported();
+        if (mHasNavigationBar == hasNavigationBar) {
+            return;
+        }
+
+        mHasNavigationBar = hasNavigationBar;
+        mHandler.post(
+                () -> {
+                    final int displayId = getDisplayId();
+                    StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
+                    if (statusBar != null) {
+                        statusBar.setHasNavigationBar(displayId, mHasNavigationBar);
+                    }
+                });
     }
 
     public boolean hasStatusBar() {
