@@ -29,6 +29,7 @@ import android.window.DesktopModeFlags;
 import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.LaunchAdjacentController;
+import com.android.wm.shell.desktopmode.DesktopModeLoggerTransitionObserver;
 import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopUserRepositories;
@@ -52,6 +53,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
     private final ShellTaskOrganizer mShellTaskOrganizer;
     private final Optional<DesktopUserRepositories> mDesktopUserRepositories;
     private final Optional<DesktopTasksController> mDesktopTasksController;
+    private final DesktopModeLoggerTransitionObserver mDesktopModeLoggerTransitionObserver;
     private final WindowDecorViewModel mWindowDecorationViewModel;
     private final LaunchAdjacentController mLaunchAdjacentController;
     private final Optional<TaskChangeListener> mTaskChangeListener;
@@ -64,6 +66,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<DesktopUserRepositories> desktopUserRepositories,
             Optional<DesktopTasksController> desktopTasksController,
+            DesktopModeLoggerTransitionObserver desktopModeLoggerTransitionObserver,
             LaunchAdjacentController launchAdjacentController,
             WindowDecorViewModel windowDecorationViewModel,
             Optional<TaskChangeListener> taskChangeListener) {
@@ -72,6 +75,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         mWindowDecorationViewModel = windowDecorationViewModel;
         mDesktopUserRepositories = desktopUserRepositories;
         mDesktopTasksController = desktopTasksController;
+        mDesktopModeLoggerTransitionObserver = desktopModeLoggerTransitionObserver;
         mLaunchAdjacentController = launchAdjacentController;
         mTaskChangeListener = taskChangeListener;
         if (shellInit != null) {
@@ -130,6 +134,9 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
                 repository.removeTask(taskInfo.displayId, taskInfo.taskId);
             }
         }
+        // TODO: b/367268649 - This listener shouldn't need to call the transition observer directly
+        // for logging once the logic in the observer is moved.
+        mDesktopModeLoggerTransitionObserver.onTaskVanished(taskInfo);
         mWindowDecorationViewModel.onTaskVanished(taskInfo);
         updateLaunchAdjacentController();
     }
