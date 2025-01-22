@@ -1351,12 +1351,6 @@
     <string name="communal_widgets_disclaimer_text">To open an app using a widget, you\u2019ll need to verify it\u2019s you. Also, keep in mind that anyone can view them, even when your tablet\u2019s locked. Some widgets may not have been intended for your lock screen and may be unsafe to add here.</string>
     <!-- Button for user to verify they understand the information presented. [CHAR LIMIT=50] -->
     <string name="communal_widgets_disclaimer_button">Got it</string>
-    <!-- Label for a lock screen affordance to show widgets on the lock screen. [CHAR LIMIT=20] -->
-    <string name="glanceable_hub_lockscreen_affordance_label">Widgets</string>
-    <!-- Text explaining why the lock screen affordance to show widgets on the lockscreen is disabled and how to enable the affordance in settings. [CHAR LIMIT=NONE] -->
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text">To add the \"Widgets\" shortcut, make sure \"Show widgets on lock screen\" is enabled in settings.</string>
-    <!-- Label for a button used to open Settings in order to enable showing widgets on the lock screen. [CHAR LIMIT=NONE] -->
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label">Settings</string>
     <!-- Content description for a "show screensaver" button on glanceable hub. [CHAR LIMIT=NONE] -->
     <string name="accessibility_glanceable_hub_to_dream_button">Show screensaver button</string>
 
