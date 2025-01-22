@@ -145,6 +145,16 @@ flag {
 }
 
 flag {
+    name: "event_dispatcher_raw_event"
+    namespace: "accessibility"
+    description: "Fixes EventDispatcher#sendMotionEvent callers to properly provide raw event"
+    bug: "385812366"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "fix_drag_pointer_when_ending_drag"
     namespace: "accessibility"
     description: "Send the correct pointer id when transitioning from dragging to delegating states."

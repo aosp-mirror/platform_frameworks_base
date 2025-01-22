@@ -497,13 +497,14 @@ public class TouchExplorer extends BaseEventStreamTransformation
 
                 // We have just decided that the user is touch,
                 // exploring so start sending events.
-                mSendHoverEnterAndMoveDelayed.addEvent(event, mState.getLastReceivedEvent());
+                mSendHoverEnterAndMoveDelayed.addEvent(event,
+                        Flags.eventDispatcherRawEvent() ? rawEvent : mState.getLastReceivedEvent());
                 mSendHoverEnterAndMoveDelayed.forceSendAndRemove();
                 mSendHoverExitDelayed.cancel();
                 mDispatcher.sendMotionEvent(
                         event,
                         ACTION_HOVER_MOVE,
-                        event,
+                        Flags.eventDispatcherRawEvent() ? rawEvent : event,
                         pointerIdBits,
                         policyFlags);
                 return true;
@@ -1099,7 +1100,8 @@ public class TouchExplorer extends BaseEventStreamTransformation
      *
      * @param policyFlags The policy flags associated with the event.
      */
-    private void sendHoverExitAndTouchExplorationGestureEndIfNeeded(int policyFlags) {
+    @VisibleForTesting
+    void sendHoverExitAndTouchExplorationGestureEndIfNeeded(int policyFlags) {
         MotionEvent event = mState.getLastInjectedHoverEvent();
         if (event != null && event.getActionMasked() != ACTION_HOVER_EXIT) {
             final int pointerIdBits = event.getPointerIdBits();
@@ -1109,7 +1111,8 @@ public class TouchExplorer extends BaseEventStreamTransformation
             mDispatcher.sendMotionEvent(
                     event,
                     ACTION_HOVER_EXIT,
-                    mState.getLastReceivedEvent(),
+                    Flags.eventDispatcherRawEvent() ? mState.getLastReceivedRawEvent() :
+                            mState.getLastReceivedEvent(),
                     pointerIdBits,
                     policyFlags);
         }
@@ -1131,7 +1134,8 @@ public class TouchExplorer extends BaseEventStreamTransformation
             mDispatcher.sendMotionEvent(
                     event,
                     ACTION_HOVER_ENTER,
-                    mState.getLastReceivedEvent(),
+                    Flags.eventDispatcherRawEvent() ? mState.getLastReceivedRawEvent() :
+                            mState.getLastReceivedEvent(),
                     pointerIdBits,
                     policyFlags);
         }
