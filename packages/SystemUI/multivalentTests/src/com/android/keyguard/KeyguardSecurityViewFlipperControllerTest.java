@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -129,23 +130,40 @@ public class KeyguardSecurityViewFlipperControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void asynchronouslyInflateView() {
-        mKeyguardSecurityViewFlipperController.asynchronouslyInflateView(SecurityMode.PIN,
-                mKeyguardSecurityCallback, null);
-        verify(mAsyncLayoutInflater).inflate(anyInt(), eq(mView), any(
-                AsyncLayoutInflater.OnInflateFinishedListener.class));
+    public void asynchronouslyInflateView_setNeedsInput() {
+        mKeyguardSecurityViewFlipperController.clearViews();
+        ArgumentCaptor<AsyncLayoutInflater.OnInflateFinishedListener> argumentCaptor =
+                ArgumentCaptor.forClass(AsyncLayoutInflater.OnInflateFinishedListener.class);
+        mKeyguardSecurityViewFlipperController.getSecurityView(SecurityMode.PIN,
+                mKeyguardSecurityCallback, controller -> {});
+        verify(mAsyncLayoutInflater).inflate(anyInt(), eq(mView), argumentCaptor.capture());
+        argumentCaptor.getValue().onInflateFinished(
+                LayoutInflater.from(getContext()).inflate(R.layout.keyguard_pin_view, null),
+                R.layout.keyguard_pin_view, mView);
     }
 
     @Test
-    public void asynchronouslyInflateView_setNeedsInput() {
+    public void getSecurityView_multipleInvocations_callsAsyncInflateOnce() {
+        mKeyguardSecurityViewFlipperController.clearViews();
+        // Make 2 calls to get security view
+        var callback1 = mock(KeyguardSecurityViewFlipperController.OnViewInflatedCallback.class);
+        var callback2 = mock(KeyguardSecurityViewFlipperController.OnViewInflatedCallback.class);
+        mKeyguardSecurityViewFlipperController.getSecurityView(SecurityMode.PIN,
+                mKeyguardSecurityCallback, callback1);
+        mKeyguardSecurityViewFlipperController.getSecurityView(SecurityMode.PIN,
+                mKeyguardSecurityCallback, callback2);
+
+        // Verify inflation is called once...
         ArgumentCaptor<AsyncLayoutInflater.OnInflateFinishedListener> argumentCaptor =
                 ArgumentCaptor.forClass(AsyncLayoutInflater.OnInflateFinishedListener.class);
-        mKeyguardSecurityViewFlipperController.asynchronouslyInflateView(SecurityMode.PIN,
-                mKeyguardSecurityCallback, null);
         verify(mAsyncLayoutInflater).inflate(anyInt(), eq(mView), argumentCaptor.capture());
         argumentCaptor.getValue().onInflateFinished(
-                LayoutInflater.from(getContext()).inflate(R.layout.keyguard_password_view, null),
-                R.layout.keyguard_password_view, mView);
+                LayoutInflater.from(getContext()).inflate(R.layout.keyguard_pin_view, null),
+                R.layout.keyguard_pin_view, mView);
+
+        // ... and both callbacks get invoked
+        verify(callback1).onViewInflated(mKeyguardInputViewController);
+        verify(callback2).onViewInflated(mKeyguardInputViewController);
     }
 
     @Test

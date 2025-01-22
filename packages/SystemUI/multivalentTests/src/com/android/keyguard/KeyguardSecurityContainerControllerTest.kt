@@ -783,7 +783,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         underTest.reinflateViewFlipper(onViewInflatedCallback)
         verify(viewFlipperController).clearViews()
         verify(viewFlipperController)
-            .asynchronouslyInflateView(any(), any(), onViewInflatedCallbackArgumentCaptor.capture())
+            .getSecurityView(any(), any(), onViewInflatedCallbackArgumentCaptor.capture())
         onViewInflatedCallbackArgumentCaptor.value.onViewInflated(inputViewController)
         verify(view).updateSecurityViewFlipper()
     }

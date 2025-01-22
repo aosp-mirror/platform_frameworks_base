@@ -1242,7 +1242,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     public void reinflateViewFlipper(
             KeyguardSecurityViewFlipperController.OnViewInflatedCallback onViewInflatedListener) {
         mSecurityViewFlipperController.clearViews();
-        mSecurityViewFlipperController.asynchronouslyInflateView(mCurrentSecurityMode,
+        mSecurityViewFlipperController.getSecurityView(mCurrentSecurityMode,
                 mKeyguardSecurityCallback, (controller) -> {
                 mView.updateSecurityViewFlipper();
                 onViewInflatedListener.onViewInflated(controller);
