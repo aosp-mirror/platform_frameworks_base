@@ -4853,7 +4853,7 @@ public class StatsPullAtomService extends SystemService {
             Slog.e(TAG, "Disconnected from keystore service. Cannot pull.", e);
             return StatsManager.PULL_SKIP;
         } catch (ServiceSpecificException e) {
-            Slog.e(TAG, "pulling keystore metrics failed", e);
+            Slog.e(TAG, "Pulling keystore atom with tag " + atomTag + " failed", e);
             return StatsManager.PULL_SKIP;
         } finally {
             Binder.restoreCallingIdentity(callingToken);

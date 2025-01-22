@@ -77,6 +77,7 @@ public class UidObserverController {
      * This is for verifying the UID report flow.
      */
     private static final boolean VALIDATE_UID_STATES = true;
+    @GuardedBy("mLock")
     private final ActiveUids mValidateUids;
 
     UidObserverController(@NonNull Handler handler) {
@@ -282,31 +283,30 @@ public class UidObserverController {
         }
         mUidObservers.finishBroadcast();
 
-        if (VALIDATE_UID_STATES && mUidObservers.getRegisteredCallbackCount() > 0) {
-            for (int j = 0; j < numUidChanges; ++j) {
-                final ChangeRecord item = mActiveUidChanges[j];
-                if ((item.change & UidRecord.CHANGE_GONE) != 0) {
-                    mValidateUids.remove(item.uid);
-                } else {
-                    UidRecord validateUid = mValidateUids.get(item.uid);
-                    if (validateUid == null) {
-                        validateUid = new UidRecord(item.uid, null);
-                        mValidateUids.put(item.uid, validateUid);
+        synchronized (mLock) {
+            if (VALIDATE_UID_STATES && mUidObservers.getRegisteredCallbackCount() > 0) {
+                for (int j = 0; j < numUidChanges; ++j) {
+                    final ChangeRecord item = mActiveUidChanges[j];
+                    if ((item.change & UidRecord.CHANGE_GONE) != 0) {
+                        mValidateUids.remove(item.uid);
+                    } else {
+                        UidRecord validateUid = mValidateUids.get(item.uid);
+                        if (validateUid == null) {
+                            validateUid = new UidRecord(item.uid, null);
+                            mValidateUids.put(item.uid, validateUid);
+                        }
+                        if ((item.change & UidRecord.CHANGE_IDLE) != 0) {
+                            validateUid.setIdle(true);
+                        } else if ((item.change & UidRecord.CHANGE_ACTIVE) != 0) {
+                            validateUid.setIdle(false);
+                        }
+                        validateUid.setSetProcState(item.procState);
+                        validateUid.setCurProcState(item.procState);
+                        validateUid.setSetCapability(item.capability);
+                        validateUid.setCurCapability(item.capability);
                     }
-                    if ((item.change & UidRecord.CHANGE_IDLE) != 0) {
-                        validateUid.setIdle(true);
-                    } else if ((item.change & UidRecord.CHANGE_ACTIVE) != 0) {
-                        validateUid.setIdle(false);
-                    }
-                    validateUid.setSetProcState(item.procState);
-                    validateUid.setCurProcState(item.procState);
-                    validateUid.setSetCapability(item.capability);
-                    validateUid.setCurCapability(item.capability);
                 }
             }
-        }
-
-        synchronized (mLock) {
             for (int j = 0; j < numUidChanges; j++) {
                 final ChangeRecord changeRecord = mActiveUidChanges[j];
                 changeRecord.isPending = false;
@@ -433,7 +433,9 @@ public class UidObserverController {
     }
 
     UidRecord getValidateUidRecord(int uid) {
-        return mValidateUids.get(uid);
+        synchronized (mLock) {
+            return mValidateUids.get(uid);
+        }
     }
 
     void dump(@NonNull PrintWriter pw, @Nullable String dumpPackage) {
@@ -488,12 +490,16 @@ public class UidObserverController {
 
     boolean dumpValidateUids(@NonNull PrintWriter pw, @Nullable String dumpPackage, int dumpAppId,
             @NonNull String header, boolean needSep) {
-        return mValidateUids.dump(pw, dumpPackage, dumpAppId, header, needSep);
+        synchronized (mLock) {
+            return mValidateUids.dump(pw, dumpPackage, dumpAppId, header, needSep);
+        }
     }
 
     void dumpValidateUidsProto(@NonNull ProtoOutputStream proto, @Nullable String dumpPackage,
             int dumpAppId, long fieldId) {
-        mValidateUids.dumpProto(proto, dumpPackage, dumpAppId, fieldId);
+        synchronized (mLock) {
+            mValidateUids.dumpProto(proto, dumpPackage, dumpAppId, fieldId);
+        }
     }
 
     static final class ChangeRecord {
