@@ -750,6 +750,8 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Ažuriranje"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Radni profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Način rada u avionu"</string>
+    <!-- no translation found for status_bar_supervision (6735015942701134125) -->
+    <skip />
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Nećete čuti sljedeći alarm u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -1430,6 +1432,8 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Sistemske aplikacije"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Multitasking"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Podijeljeni ekran"</string>
+    <!-- no translation found for shortcutHelper_category_accessibility (8068337792277570938) -->
+    <skip />
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Unos"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Prečice aplikacije"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Trenutna aplikacija"</string>
@@ -1438,7 +1442,7 @@
     <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"Prilagodite prečice"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Ukloniti prečicu?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Vratiti na zadano?"</string>
-    <string name="shortcut_customize_mode_add_shortcut_description" msgid="7636040209946696120">"Da biste izradili taj prečac, pritisnite tipku za radnju i jednu ili više drugih tipki zajedno"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="7636040209946696120">"Da kreirate ovu prečicu, istovremeno pritisnite tipku radnji i jednu ili više tipki"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Ovo će trajno izbrisati prilagođenu prečicu."</string>
     <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Ovo će trajno izbrisati sve vaše prilagođene prečice."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Pretražite prečice"</string>
@@ -1460,7 +1464,7 @@
     <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Da, vrati na zadano"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Otkaži"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Pritisnite tipku"</string>
-    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="3325858369539848162">"Ta se kombinacija već koristi. Pokušajte s nekom drugom kombinacijom."</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="3325858369539848162">"Ta se kombinacija tipki već koristi. Pokušajte s drugom kombinacijom."</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Prečica se ne može postaviti."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="shortcut_helper_add_shortcut_button_label" msgid="7655779534665954910">"Dodavanje prečice"</string>
@@ -1474,8 +1478,7 @@
     <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"Nazad"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Odlazak na početni ekran"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Prikaži nedavne aplikacije"</string>
-    <!-- no translation found for touchpad_tutorial_switch_apps_gesture_button (7768255095423767779) -->
-    <skip />
+    <string name="touchpad_tutorial_switch_apps_gesture_button" msgid="7768255095423767779">"Promijenite aplikaciju"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Gotovo"</string>
     <string name="gesture_error_title" msgid="469064941635578511">"Pokušajte ponovo!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Nazad"</string>
@@ -1493,15 +1496,12 @@
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Sjajno!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Izvršili ste pokret za prikaz nedavnih aplikacija."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Da pogledate nedavne aplikacije, prevucite nagore i zadržite s tri prsta na dodirnoj podlozi"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_action_title (6835222344612924512) -->
+    <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"Promijenite aplikaciju"</string>
+    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2751565200937541667) -->
     <skip />
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (6859830005390732562) -->
-    <skip />
-    <!-- no translation found for touchpad_switch_apps_gesture_success_title (4894947244328032458) -->
-    <skip />
-    <!-- no translation found for touchpad_switch_apps_gesture_success_body (8151089866035126312) -->
-    <skip />
-    <!-- no translation found for touchpad_switch_gesture_error_body (2211950382592343759) -->
+    <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"Sjajno!"</string>
+    <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"Izvršili ste pokret za promjenu aplikacije."</string>
+    <!-- no translation found for touchpad_switch_gesture_error_body (5508381152326379652) -->
     <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Pogledajte sve aplikacije"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Pritisnite tipku radnji na tastaturi"</string>

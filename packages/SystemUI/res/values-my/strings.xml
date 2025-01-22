@@ -750,6 +750,8 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"အပ်ဒိတ်လုပ်နေသည်"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"အလုပ် ပရိုဖိုင်"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"လေယာဉ်ပျံမုဒ်"</string>
+    <!-- no translation found for status_bar_supervision (6735015942701134125) -->
+    <skip />
     <string name="zen_alarm_warning" msgid="7844303238486849503">"<xliff:g id="WHEN">%1$s</xliff:g> ၌သင့်နောက်ထပ် နှိုးစက်ကို ကြားမည်မဟုတ်ပါ"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> ၌"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g> တွင်"</string>
@@ -1430,6 +1432,8 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"စနစ် အက်ပ်များ"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"တစ်ပြိုင်နက် များစွာလုပ်ခြင်း"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"မျက်နှာပြင် ခွဲ၍ပြသခြင်း"</string>
+    <!-- no translation found for shortcutHelper_category_accessibility (8068337792277570938) -->
+    <skip />
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ထည့်သွင်းမှု"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"အက်ပ်ဖြတ်လမ်းလင့်ခ်များ"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"လက်ရှိအက်ပ်"</string>
@@ -1438,8 +1442,7 @@
     <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"ဖြတ်လမ်းများ စိတ်ကြိုက်ပြင်ဆင်ခြင်း"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"ဖြတ်လမ်းလင့်ခ် ဖယ်ရှားမလား။"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"မူရင်းသို့ ပြန်လည်ပြင်ဆင်သတ်မှတ်မလား။"</string>
-    <!-- no translation found for shortcut_customize_mode_add_shortcut_description (7636040209946696120) -->
-    <skip />
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="7636040209946696120">"ဤဖြတ်လမ်းလင့်ခ် ပြုလုပ်ရန်အတွက် ‘လုပ်ဆောင်ချက်ကီး’ နှင့် တစ်ခု (သို့) တစ်ခုထက်ပိုသော အခြားကီးကို အတူနှိပ်ပါ"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"၎င်းသည် သင့်စိတ်ကြိုက် ဖြတ်လမ်းလင့်ခ်ကို အပြီးဖျက်ပါမည်။"</string>
     <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"၎င်းသည် သင့်စိတ်ကြိုက်ဖြတ်လမ်းလင့်ခ်အားလုံးကို အပြီးဖျက်မည်။"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ရှာဖွေစာလုံး ဖြတ်လမ်း"</string>
@@ -1461,8 +1464,7 @@
     <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"ပြင်ဆင်ရန်"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"မလုပ်တော့"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"ကီးကို နှိပ်ပါ"</string>
-    <!-- no translation found for shortcut_customizer_key_combination_in_use_error_message (3325858369539848162) -->
-    <skip />
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="3325858369539848162">"ကီးပေါင်းစပ်ခြင်းကို သုံးနေပြီးဖြစ်သည်။ အခြားပေါင်းစပ်မှုတစ်ခု စမ်းကြည့်ပါ။"</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"ဖြတ်လမ်းလင့်ခ် သတ်မှတ်၍မရပါ။"</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="shortcut_helper_add_shortcut_button_label" msgid="7655779534665954910">"ဖြတ်လမ်းလင့်ခ် ထည့်ရန်"</string>
@@ -1476,8 +1478,7 @@
     <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"နောက်သို့"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"ပင်မစာမျက်နှာသို့ သွားရန်"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"မကြာသေးမီကအက်ပ်များကို ကြည့်ရန်"</string>
-    <!-- no translation found for touchpad_tutorial_switch_apps_gesture_button (7768255095423767779) -->
-    <skip />
+    <string name="touchpad_tutorial_switch_apps_gesture_button" msgid="7768255095423767779">"အက်ပ်များကူးပြောင်းခြင်း"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"ပြီးပြီ"</string>
     <string name="gesture_error_title" msgid="469064941635578511">"ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ပြန်သွားရန်"</string>
@@ -1495,15 +1496,12 @@
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"တော်ပါပေသည်။"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"မကြာသေးမီကအက်ပ်များကို ကြည့်ခြင်းလက်ဟန် သင်ခန်းစာပြီးပါပြီ။"</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"လတ်တလောအက်ပ်များကြည့်ရန် တာ့ချ်ပက်တွင် လက်သုံးချောင်းဖြင့် အပေါ်သို့ပွတ်ဆွဲပြီး ဖိထားပါ"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_action_title (6835222344612924512) -->
+    <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"အက်ပ်များကူးပြောင်းခြင်း"</string>
+    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2751565200937541667) -->
     <skip />
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (6859830005390732562) -->
-    <skip />
-    <!-- no translation found for touchpad_switch_apps_gesture_success_title (4894947244328032458) -->
-    <skip />
-    <!-- no translation found for touchpad_switch_apps_gesture_success_body (8151089866035126312) -->
-    <skip />
-    <!-- no translation found for touchpad_switch_gesture_error_body (2211950382592343759) -->
+    <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"တော်ပါပေသည်။"</string>
+    <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"အက်ပ်ပြောင်းလက်ဟန် လုပ်ပြီးပါပြီ။"</string>
+    <!-- no translation found for touchpad_switch_gesture_error_body (5508381152326379652) -->
     <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"အက်ပ်အားလုံးကို ကြည့်ခြင်း"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"ကီးဘုတ်တွင် လုပ်ဆောင်ချက်ကီး နှိပ်ပါ"</string>
