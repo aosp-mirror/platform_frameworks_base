@@ -79,7 +79,7 @@ var Kosmos.shortcutHelperInputShortcutsSource: KeyboardShortcutGroupsSource by
 var Kosmos.shortcutHelperCurrentAppShortcutsSource: KeyboardShortcutGroupsSource by
     Kosmos.Fixture { CurrentAppShortcutsSource(windowManager) }
 
-val Kosmos.shortcutHelperAccessibilityShortcutsSource: KeyboardShortcutGroupsSource by
+var Kosmos.shortcutHelperAccessibilityShortcutsSource: KeyboardShortcutGroupsSource by
     Kosmos.Fixture { AccessibilityShortcutsSource(mainResources) }
 
 val Kosmos.shortcutHelperExclusions by
