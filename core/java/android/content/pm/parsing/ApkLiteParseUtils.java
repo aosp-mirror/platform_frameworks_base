@@ -541,9 +541,9 @@ public class ApkLiteParseUtils {
                         case TAG_USES_SDK_LIBRARY:
                             String usesSdkLibName = parser.getAttributeValue(
                                     ANDROID_RES_NAMESPACE, "name");
-                            // TODO(b/379219371): Due to a bug in bundletool, some apps can use
-                            //  versionMajor as string. Until it is resolved, we are adding a
-                            //  workaround here.
+                            // TODO(b/391604666): Due to a bug in bundletool, old apps could be
+                            //  using versionMajor as string. Do not remove this workaround until
+                            //  b/391604666 is resolved.
                             String usesSdkLibVersionMajorString = parser.getAttributeValue(
                                     ANDROID_RES_NAMESPACE, "versionMajor");
                             long usesSdkLibVersionMajor = XmlUtils.convertValueToInt(
