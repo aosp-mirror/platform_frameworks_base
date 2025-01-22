@@ -18,15 +18,13 @@ package com.android.systemui.touchpad.tutorial.ui.viewmodel
 
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureRecognizer
 import com.android.systemui.touchpad.tutorial.ui.gesture.SwitchAppsGestureRecognizer
-import com.android.systemui.touchpad.tutorial.ui.gesture.VelocityTracker
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class SwitchAppsGestureRecognizerProvider
 @Inject
-constructor(val resources: TouchpadGestureResources, val velocityTracker: VelocityTracker) :
-    GestureRecognizerProvider {
+constructor(val resources: TouchpadGestureResources) : GestureRecognizerProvider {
 
     override val recognizer: Flow<GestureRecognizer> =
         resources.distanceThreshold().map {
