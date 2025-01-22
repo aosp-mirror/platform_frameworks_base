@@ -527,13 +527,14 @@ public abstract class RegisteredServicesCache<V> {
                     lastUpdateTime = packageInfo.lastUpdateTime;
                 } catch (NameNotFoundException | SecurityException e) {
                     Slog.d(TAG, "Fail to get the PackageInfo in generateServicesMap: " + e);
-                    continue;
                 }
-                ServiceInfo<V> serviceInfo = getServiceInfoFromServiceCache(componentName,
-                        lastUpdateTime);
-                if (serviceInfo != null) {
-                    serviceInfos.add(serviceInfo);
-                    continue;
+                if (lastUpdateTime >= 0) {
+                    ServiceInfo<V> serviceInfo = getServiceInfoFromServiceCache(componentName,
+                            lastUpdateTime);
+                    if (serviceInfo != null) {
+                        serviceInfos.add(serviceInfo);
+                        continue;
+                    }
                 }
             }
             try {
