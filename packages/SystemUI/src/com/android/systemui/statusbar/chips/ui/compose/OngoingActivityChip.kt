@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +48,7 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.chips.ui.compose.modifiers.neverDecreaseWidth
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.ui.viewmodel.rememberChronometerState
 
 @Composable
 fun OngoingActivityChip(model: OngoingActivityChipModel.Shown, modifier: Modifier = Modifier) {
@@ -195,11 +197,12 @@ private fun ChipContent(viewModel: OngoingActivityChipModel.Shown, modifier: Mod
     val context = LocalContext.current
     when (viewModel) {
         is OngoingActivityChipModel.Shown.Timer -> {
-            ChronometerText(
-                startTimeMillis = viewModel.startTimeMs,
+            val timerState = rememberChronometerState(startTimeMillis = viewModel.startTimeMs)
+            Text(
+                text = timerState.currentTimeText,
                 style = MaterialTheme.typography.labelLarge,
                 color = Color(viewModel.colors.text(context)),
-                modifier = modifier,
+                modifier = modifier.neverDecreaseWidth(),
             )
         }
 
