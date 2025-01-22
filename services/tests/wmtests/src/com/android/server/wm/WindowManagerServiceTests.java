@@ -36,6 +36,7 @@ import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
@@ -1433,6 +1434,52 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 any(), anyBoolean(), anyInt(), eq(displayId));
         doReturn(windowToken).when(mWm.mWindowContextListenerController).getContainer(
                 eq(windowToken.token));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_FIX_HIDE_OVERLAY_API)
+    public void testUpdateOverlayWindows_singleWindowRequestsHiding_doNotHideOverlayWithSameUid() {
+        WindowState overlayWindow = newWindowBuilder("overlay_window",
+                TYPE_APPLICATION_OVERLAY).build();
+        WindowState appWindow = newWindowBuilder("app_window", TYPE_APPLICATION).build();
+        makeWindowVisible(appWindow, overlayWindow);
+
+        int uid = 100000;
+        spyOn(appWindow);
+        spyOn(overlayWindow);
+        doReturn(true).when(appWindow).hideNonSystemOverlayWindowsWhenVisible();
+        doReturn(uid).when(appWindow).getOwningUid();
+        doReturn(uid).when(overlayWindow).getOwningUid();
+
+        mWm.updateNonSystemOverlayWindowsVisibilityIfNeeded(appWindow, true);
+
+        verify(overlayWindow).setForceHideNonSystemOverlayWindowIfNeeded(false);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_FIX_HIDE_OVERLAY_API)
+    public void testUpdateOverlayWindows_multipleWindowsRequestHiding_hideOverlaysWithAnyUids() {
+        WindowState overlayWindow = newWindowBuilder("overlay_window",
+                TYPE_APPLICATION_OVERLAY).build();
+        WindowState appWindow1 = newWindowBuilder("app_window_1", TYPE_APPLICATION).build();
+        WindowState appWindow2 = newWindowBuilder("app_window_2", TYPE_APPLICATION).build();
+        makeWindowVisible(appWindow1, appWindow2, overlayWindow);
+
+        int uid1 = 100000;
+        int uid2 = 100001;
+        spyOn(appWindow1);
+        spyOn(appWindow2);
+        spyOn(overlayWindow);
+        doReturn(true).when(appWindow1).hideNonSystemOverlayWindowsWhenVisible();
+        doReturn(true).when(appWindow2).hideNonSystemOverlayWindowsWhenVisible();
+        doReturn(uid1).when(appWindow1).getOwningUid();
+        doReturn(uid1).when(overlayWindow).getOwningUid();
+        doReturn(uid2).when(appWindow2).getOwningUid();
+
+        mWm.updateNonSystemOverlayWindowsVisibilityIfNeeded(appWindow1, true);
+        mWm.updateNonSystemOverlayWindowsVisibilityIfNeeded(appWindow2, true);
+
+        verify(overlayWindow).setForceHideNonSystemOverlayWindowIfNeeded(true);
     }
 
     @Test
