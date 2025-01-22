@@ -683,9 +683,9 @@
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Du kan gemme eller slette din aktivitet ved afslutning"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Nulstil for at slette sessionsaktiviteten nu, eller gem eller slet aktivitet ved afslutning"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Vælg billede"</string>
-    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"For mange forkerte forsøg. Dataene på denne enhed slettes."</string>
-    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"For mange forkerte forsøg. Denne bruger slettes."</string>
-    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"For mange forkerte forsøg. Denne arbejdsprofil og de tilhørende data slettes."</string>
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"For mange mislykkede forsøg. Dataene på denne enhed slettes."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"For mange mislykkede forsøg. Denne bruger slettes."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"For mange mislykkede forsøg. Denne arbejdsprofil og de tilhørende data slettes."</string>
     <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Luk"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Enhedens standardindstilling"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Deaktiveret"</string>
