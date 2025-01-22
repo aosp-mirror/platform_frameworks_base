@@ -380,6 +380,7 @@ class ExpandableNotificationRowBuilder(
             mSmartReplyController,
             Mockito.mock(IStatusBarService::class.java, STUB_ONLY),
             Mockito.mock(UiEventLogger::class.java, STUB_ONLY),
+            Mockito.mock(NotificationRebindingTracker::class.java, STUB_ONLY),
         )
         row.setAboveShelfChangedListener {}
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags)

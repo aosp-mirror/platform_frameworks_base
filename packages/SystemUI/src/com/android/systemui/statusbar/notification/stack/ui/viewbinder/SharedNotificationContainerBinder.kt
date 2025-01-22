@@ -76,6 +76,7 @@ constructor(
                                 marginTop = it.marginTop,
                                 marginEnd = it.marginEnd,
                                 marginBottom = it.marginBottom,
+                                nsslAlpha = controller.alpha,
                             )
 
                             controller.setOverExpansion(0f)

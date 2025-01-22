@@ -21,6 +21,7 @@ import static android.os.Trace.TRACE_TAG_APP;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_UP;
 
+import static com.android.app.tracing.TrackGroupUtils.trackGroup;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SHADE_CLEAR_ALL;
 import static com.android.systemui.Flags.notificationOverExpansionClippingFix;
@@ -1392,6 +1393,16 @@ public class NotificationStackScrollLayout
             getViewTreeObserver().addOnPreDrawListener(mChildrenUpdater);
             mChildrenUpdateRequested = true;
             invalidate();
+        }
+    }
+
+    @Override
+    public void setAlpha(float alpha) {
+        super.setAlpha(alpha);
+        if (Trace.isEnabled()) {
+            Trace.setCounter(
+                    trackGroup(/* groupName= */ "shade", /* trackName= */ "NSSLResultingAlpha"),
+                    (int) (alpha * 100));
         }
     }
 

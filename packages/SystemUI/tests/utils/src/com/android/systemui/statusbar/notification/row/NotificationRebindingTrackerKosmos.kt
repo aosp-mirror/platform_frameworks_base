@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.stack
+package com.android.systemui.statusbar.notification.row
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 
-val Kosmos.notificationStackScrollLayoutController by
-    Kosmos.Fixture { mock<NotificationStackScrollLayoutController>() }
-
-val Kosmos.notificationStackRebindingHider by
-    Kosmos.Fixture { mock<NotificationStackRebindingHider>() }
+val Kosmos.notificationRebindingTracker by
+    Kosmos.Fixture {
+        NotificationRebindingTracker(
+            activeNotificationsInteractor = activeNotificationsInteractor,
+            bgScope = testScope.backgroundScope,
+            appScope = testScope.backgroundScope,
+        )
+    }

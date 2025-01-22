@@ -252,6 +252,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private NotificationGuts mGuts;
     private NotificationEntry mEntry;
     private String mAppName;
+    private NotificationRebindingTracker mRebindingTracker;
     private FalsingManager mFalsingManager;
 
     /**
@@ -1526,7 +1527,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         // TODO: Move content inflation logic out of this call
         RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
         params.setNeedsReinflation(true);
-        mRowContentBindStage.requestRebind(mEntry, null /* callback */);
+
+        var rebindEndCallback = mRebindingTracker.trackRebinding(mEntry.getKey());
+        mRowContentBindStage.requestRebind(mEntry, (e) -> rebindEndCallback.onFinished());
         Trace.endSection();
     }
 
@@ -2015,9 +2018,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             SmartReplyConstants smartReplyConstants,
             SmartReplyController smartReplyController,
             IStatusBarService statusBarService,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            NotificationRebindingTracker notificationRebindingTracker) {
         mEntry = entry;
         mAppName = appName;
+        mRebindingTracker = notificationRebindingTracker;
         if (mMenuRow == null) {
             mMenuRow = new NotificationMenuRow(mContext, peopleNotificationIdentifier);
         }
