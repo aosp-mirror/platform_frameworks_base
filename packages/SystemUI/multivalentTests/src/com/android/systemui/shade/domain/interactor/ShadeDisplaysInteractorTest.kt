@@ -160,6 +160,8 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
 
             underTest.start()
 
+            verify(notificationStackRebindingHider)
+                .setVisible(visible = eq(true), animated = eq(false))
             verify(notificationStackRebindingHider, never()).setVisible(eq(false), eq(false))
             verify(notificationStackRebindingHider, never()).setVisible(eq(true), eq(true))
         }

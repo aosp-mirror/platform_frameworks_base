@@ -43,6 +43,7 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -75,7 +76,9 @@ constructor(
     override fun start() {
         ShadeWindowGoesAround.isUnexpectedlyInLegacyMode()
         bgScope.launchTraced(TAG) {
-            shadePositionRepository.displayId.collect { displayId -> moveShadeWindowTo(displayId) }
+            shadePositionRepository.displayId.collectLatest { displayId ->
+                moveShadeWindowTo(displayId)
+            }
         }
     }
 
@@ -83,21 +86,19 @@ constructor(
     private suspend fun moveShadeWindowTo(destinationId: Int) {
         Log.d(TAG, "Trying to move shade window to display with id $destinationId")
         logMoveShadeWindowTo(destinationId)
-        // Why using the shade context here instead of the view's Display?
-        // The context's display is updated before the view one, so it is a better indicator of
-        // which display the shade is supposed to be at. The View display is updated after the first
-        // rendering with the new config.
-        val currentDisplay = shadeContext.display
-        if (currentDisplay == null) {
-            Log.w(TAG, "Current shade display is null")
-            return
-        }
-        val currentId = currentDisplay.displayId
-        if (currentId == destinationId) {
-            Log.w(TAG, "Trying to move the shade to a display it was already in")
-            return
-        }
+        var currentId = -1
         try {
+            // Why using the shade context here instead of the view's Display?
+            // The context's display is updated before the view one, so it is a better indicator of
+            // which display the shade is supposed to be at. The View display is updated after the
+            // first
+            // rendering with the new config.
+            val currentDisplay = shadeContext.display ?: error("Current shade display is null")
+            currentId = currentDisplay.displayId
+            if (currentId == destinationId) {
+                error("Trying to move the shade to a display it was already in")
+            }
+
             withContext(mainThreadContext) {
                 traceReparenting {
                     collapseAndExpandShadeIfNeeded(destinationId) {
@@ -121,6 +122,10 @@ constructor(
         previouslyExpandedElement?.collapse(reason = COLLAPSE_EXPAND_REASON)
         val notificationStackHidden =
             if (!hasActiveNotifications) {
+                // This covers the case the previous move was cancelled before setting the
+                // visibility back. As there are no notifications, nothing can flicker here, and
+                // showing them all of a sudden is ok.
+                notificationStackRebindingHider.setVisible(visible = true, animated = false)
                 false
             } else {
                 // Hiding as otherwise there might be flickers as the inflation with new dimensions
@@ -137,7 +142,6 @@ constructor(
         // If the user was trying to expand a specific shade element, let's make sure to expand
         // that one. Otherwise, we can just re-expand the previous expanded element.
         elementToExpand?.expand(COLLAPSE_EXPAND_REASON)
-
         if (notificationStackHidden) {
             if (hasActiveNotifications) {
                 // "onMovedToDisplay" is what synchronously triggers the rebinding of views: we need
