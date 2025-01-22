@@ -269,6 +269,36 @@ class NotificationGutsManagerTest(flags: FlagsParameterization) : SysuiTestCase(
     }
 
     @Test
+    fun testOpenAndCloseGutsWithoutSave() {
+        val guts = spy(NotificationGuts(mContext))
+        whenever(guts.post(any())).thenAnswer { invocation: InvocationOnMock ->
+            handler.post(((invocation.arguments[0] as Runnable)))
+            null
+        }
+
+        // Test doesn't support animation since the guts view is not attached.
+        doNothing().whenever(guts).openControls(anyInt(), anyInt(), anyBoolean(), any())
+
+        val realRow = createTestNotificationRow()
+        val menuItem = createTestMenuItem(realRow)
+
+        val row = spy(realRow)
+        whenever(row.windowToken).thenReturn(Binder())
+        whenever(row.guts).thenReturn(guts)
+
+        assertTrue(gutsManager.openGutsInternal(row, 0, 0, menuItem))
+        executor.runAllReady()
+        verify(guts).openControls(anyInt(), anyInt(), anyBoolean(), any<Runnable>())
+
+        gutsManager.closeAndUndoGuts()
+
+        verify(guts).closeControls(anyInt(), anyInt(), eq(false), eq(false))
+        verify(row, times(1)).setGutsView(any<MenuItem>())
+        executor.runAllReady()
+        verify(headsUpManager).setGutsShown(realRow.entry, false)
+    }
+
+    @Test
     fun testLockscreenShadeVisible_visible_gutsNotClosed() =
         testScope.runTest {
             // First, start out lockscreen or shade as not visible
@@ -375,52 +405,6 @@ class NotificationGutsManagerTest(flags: FlagsParameterization) : SysuiTestCase(
             // THEN the list container is reset
             verify(notificationListContainer).resetExposedMenuView(anyBoolean(), anyBoolean())
         }
-
-    @Test
-    fun testChangeDensityOrFontScale() {
-        val guts = spy(NotificationGuts(mContext))
-        whenever(guts.post(any())).thenAnswer { invocation: InvocationOnMock ->
-            handler.post(((invocation.arguments[0] as Runnable)))
-            null
-        }
-
-        // Test doesn't support animation since the guts view is not attached.
-        doNothing().whenever(guts).openControls(anyInt(), anyInt(), anyBoolean(), any<Runnable>())
-
-        val realRow = createTestNotificationRow()
-        val menuItem = createTestMenuItem(realRow)
-
-        val row = spy(realRow)
-
-        whenever(row.windowToken).thenReturn(Binder())
-        whenever(row.guts).thenReturn(guts)
-        doNothing().whenever(row).ensureGutsInflated()
-
-        val realEntry = realRow.entry
-        val entry = spy(realEntry)
-
-        whenever(entry.row).thenReturn(row)
-        whenever(entry.guts).thenReturn(guts)
-
-        assertTrue(gutsManager.openGutsInternal(row, 0, 0, menuItem))
-        executor.runAllReady()
-        verify(guts).openControls(anyInt(), anyInt(), anyBoolean(), any<Runnable>())
-
-        // called once by mGutsManager.bindGuts() in mGutsManager.openGuts()
-        verify(row).setGutsView(any<MenuItem>())
-
-        row.onDensityOrFontScaleChanged()
-        gutsManager.onDensityOrFontScaleChanged(entry)
-
-        executor.runAllReady()
-
-        gutsManager.closeAndSaveGuts(false, false, false, 0, 0, false)
-
-        verify(guts).closeControls(anyBoolean(), anyBoolean(), anyInt(), anyInt(), anyBoolean())
-
-        // called again by mGutsManager.bindGuts(), in mGutsManager.onDensityOrFontScaleChanged()
-        verify(row, times(2)).setGutsView(any<MenuItem>())
-    }
 
     @Test
     fun testAppOpsSettingsIntent_camera() {
