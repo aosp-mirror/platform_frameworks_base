@@ -44,7 +44,7 @@ public class AmbientDisplayConfiguration {
     private final Context mContext;
     private final boolean mAlwaysOnByDefault;
     private final boolean mPickupGestureEnabledByDefault;
-    private final boolean mScreenOffUdfpsEnabledByDefault;
+    private final boolean mScreenOffUdfpsAvailable;
 
     /** Copied from android.provider.Settings.Secure since these keys are hidden. */
     private static final String[] DOZE_SETTINGS = {
@@ -72,7 +72,7 @@ public class AmbientDisplayConfiguration {
         mAlwaysOnByDefault = mContext.getResources().getBoolean(R.bool.config_dozeAlwaysOnEnabled);
         mPickupGestureEnabledByDefault =
                 mContext.getResources().getBoolean(R.bool.config_dozePickupGestureEnabled);
-        mScreenOffUdfpsEnabledByDefault =
+        mScreenOffUdfpsAvailable =
                 mContext.getResources().getBoolean(R.bool.config_screen_off_udfps_enabled);
     }
 
@@ -152,7 +152,8 @@ public class AmbientDisplayConfiguration {
     /** @hide */
     public boolean screenOffUdfpsEnabled(int user) {
         return !TextUtils.isEmpty(udfpsLongPressSensorType())
-                && ((mScreenOffUdfpsEnabledByDefault && Flags.screenOffUnlockUdfps())
+                && ((mScreenOffUdfpsAvailable && Flags.screenOffUnlockUdfps())
+                && mContext.getResources().getBoolean(R.bool.config_screen_off_udfps_default_on)
                 ? boolSettingDefaultOn(SCREEN_OFF_UNLOCK_UDFPS_ENABLED, user)
                 : boolSettingDefaultOff(SCREEN_OFF_UNLOCK_UDFPS_ENABLED, user));
     }

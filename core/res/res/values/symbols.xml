@@ -5791,6 +5791,9 @@
   <!-- Fingerprint screen off unlock config -->
   <java-symbol type="bool" name="config_screen_off_udfps_enabled" />
 
+  <!-- Default toggle for fp screen of unlcok-->
+  <java-symbol type="bool" name="config_screen_off_udfps_default_on" />
+
   <!-- Style for Wear Material3 Button. Will only be used for sdk 36 or above. -->
   <java-symbol type="style" name="Widget.DeviceDefault.Button.WearMaterial3" />
 
