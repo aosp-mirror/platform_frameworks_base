@@ -564,7 +564,7 @@ constructor(
                 .collect {
                     switchToScene(
                         targetSceneKey = Scenes.Lockscreen,
-                        loggingReason = "device became non-interactive",
+                        loggingReason = "device became non-interactive (SceneContainerStartable)",
                     )
                 }
         }

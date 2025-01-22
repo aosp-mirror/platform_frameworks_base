@@ -199,11 +199,14 @@ constructor(
             )
         } else if (transitionKey == Instant) {
             // TODO(b/356596436): Define instant transition instead of snapToScene().
-            sceneInteractor.snapToScene(toScene = SceneFamilies.Home, loggingReason = loggingReason)
+            sceneInteractor.snapToScene(
+                toScene = SceneFamilies.Home,
+                loggingReason = loggingReason + " (collapseNotificationsShade)",
+            )
         } else {
             sceneInteractor.changeScene(
                 toScene = SceneFamilies.Home,
-                loggingReason = loggingReason,
+                loggingReason = loggingReason + " (collapseNotificationsShade)",
                 transitionKey =
                     transitionKey ?: ToSplitShade.takeIf { shadeModeInteractor.isSplitShade },
             )
@@ -230,11 +233,14 @@ constructor(
             if (bypassNotificationsShade || isSplitShade) SceneFamilies.Home else Scenes.Shade
         if (transitionKey == Instant) {
             // TODO(b/356596436): Define instant transition instead of snapToScene().
-            sceneInteractor.snapToScene(toScene = targetScene, loggingReason = loggingReason)
+            sceneInteractor.snapToScene(
+                toScene = targetScene,
+                loggingReason = loggingReason + " (collapseQuickSettingsShade)",
+            )
         } else {
             sceneInteractor.changeScene(
                 toScene = targetScene,
-                loggingReason = loggingReason,
+                loggingReason = loggingReason + " (collapseQuickSettingsShade)",
                 transitionKey = transitionKey ?: ToSplitShade.takeIf { isSplitShade },
             )
         }

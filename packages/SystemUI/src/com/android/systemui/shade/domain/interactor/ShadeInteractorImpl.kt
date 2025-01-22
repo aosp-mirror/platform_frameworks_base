@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import android.util.Log
 import com.android.app.tracing.coroutines.flow.flowName
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -38,6 +39,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 /** The non-empty SceneInteractor implementation. */
@@ -98,18 +100,36 @@ constructor(
 
     override val isShadeTouchable: Flow<Boolean> =
         combine(
-            powerInteractor.isAsleep,
-            keyguardTransitionInteractor.isInTransition(Edge.create(to = KeyguardState.AOD)),
-            keyguardRepository.dozeTransitionModel.map { it.to == DozeStateModel.DOZE_PULSING },
-        ) { isAsleep, goingToSleep, isPulsing ->
-            when {
-                // If the device is going to sleep, only accept touches if we're still
-                // animating
-                goingToSleep -> dozeParams.shouldControlScreenOff()
+            powerInteractor.isAsleep
+                .onEach { Log.d(TAG, "isShadeTouchable: upstream isAsleep=$it") },
+            keyguardTransitionInteractor
+                .isInTransition(Edge.create(to = KeyguardState.AOD))
+                .onEach {
+                    Log.d(
+                        TAG,
+                        "isShadeTouchable: upstream isTransitioningToAod=$it",
+                    )
+                },
+            keyguardRepository.dozeTransitionModel
+                .map { it.to == DozeStateModel.DOZE_PULSING }
+                .onEach {
+                    Log.d(TAG, "isShadeTouchable: upstream isPulsing=$it")
+                },
+        ) { isAsleep, isTransitioningToAod, isPulsing ->
+            val downstream = when {
+                // If the device is transitioning to AOD, only accept touches if
+                // still animating.
+                isTransitioningToAod -> dozeParams.shouldControlScreenOff()
                 // If the device is asleep, only accept touches if there's a pulse
                 isAsleep -> isPulsing
                 else -> true
             }
+            Log.d(TAG, "isShadeTouchable emitting $downstream, values:")
+            Log.d(TAG, "  isAsleep=$isAsleep")
+            Log.d(TAG, "  isTransitioningToAod=$isTransitioningToAod")
+            Log.d(TAG, "  isPulsing=$isPulsing")
+            Log.d(TAG, "")
+            downstream
         }
 
     override val isExpandToQsEnabled: Flow<Boolean> =
@@ -128,4 +148,8 @@ constructor(
                 disableFlags.isQuickSettingsEnabled() &&
                 !isDozing
         }
+
+    companion object {
+        private const val TAG = "ShadeInteractor"
+    }
 }
