@@ -17,7 +17,9 @@
 package com.android.systemui.window.domain.interactor
 
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.window.data.repository.windowRootViewBlurRepository
 
 val Kosmos.windowRootViewBlurInteractor by
@@ -25,5 +27,7 @@ val Kosmos.windowRootViewBlurInteractor by
         WindowRootViewBlurInteractor(
             repository = windowRootViewBlurRepository,
             keyguardInteractor = keyguardInteractor,
+            keyguardTransitionInteractor = keyguardTransitionInteractor,
+            applicationScope = applicationCoroutineScope,
         )
     }
