@@ -281,7 +281,7 @@ public final class MediaRouter2 {
                     /* executor */ null,
                     /* onInstanceInvalidatedListener */ null);
         } catch (IllegalArgumentException ex) {
-            Log.e(TAG, "Package " + clientPackageName + " not found. Ignoring.");
+            Log.e(TAG, "Failed to create proxy router for package '" + clientPackageName + "'", ex);
             return null;
         }
     }
