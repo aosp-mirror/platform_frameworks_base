@@ -4157,7 +4157,8 @@ public final class DisplayManagerService extends SystemService {
 
         public boolean shouldReceiveRefreshRateWithChangeUpdate(int event) {
             if (mFlags.isRefreshRateEventForForegroundAppsEnabled()
-                    && event == DisplayManagerGlobal.EVENT_DISPLAY_REFRESH_RATE_CHANGED) {
+                    && event == DisplayManagerGlobal.EVENT_DISPLAY_REFRESH_RATE_CHANGED
+                    && mActivityManagerInternal != null) {
                 int procState = mActivityManagerInternal.getUidProcessState(mUid);
                 int importance = ActivityManager.RunningAppProcessInfo
                         .procStateToImportance(procState);

@@ -2126,11 +2126,12 @@ public class DisplayManagerServiceTest {
 
     @Test
     public void test_displayChangedNotified_displayInfoFramerateOverridden() {
+        when(mMockFlags.isFramerateOverrideTriggersRrCallbacksEnabled()).thenReturn(false);
+
         DisplayManagerService displayManager =
-                new DisplayManagerService(mContext, mShortMockedInjector);
+                new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerService.BinderService displayManagerBinderService =
                 displayManager.new BinderService();
-        when(mMockFlags.isFramerateOverrideTriggersRrCallbacksEnabled()).thenReturn(false);
 
         registerDefaultDisplays(displayManager);
         displayManager.onBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
