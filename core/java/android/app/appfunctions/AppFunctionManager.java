@@ -42,7 +42,8 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
- * Provides access to app functions.
+ * Provides access to App Functions. App Functions is currently a
+ * beta/experimental preview feature.
  *
  * <p>An app function is a piece of functionality that apps expose to the system for cross-app
  * orchestration.
