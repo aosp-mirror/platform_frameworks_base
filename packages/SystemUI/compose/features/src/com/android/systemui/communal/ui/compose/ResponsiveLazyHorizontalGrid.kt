@@ -272,9 +272,8 @@ private fun calculateNumCellsWidth(width: Dp) =
     }
 
 private fun calculateNumCellsHeight(height: Dp) =
-    // See https://developer.android.com/develop/ui/views/layout/use-window-size-classes
     when {
-        height >= 900.dp -> 3
+        height >= 1000.dp -> 3
         height >= 480.dp -> 2
         else -> 1
     }
