@@ -47,7 +47,7 @@ import java.util.concurrent.Executor;
  * <p>An app function is a piece of functionality that apps expose to the system for cross-app
  * orchestration.
  *
- * <p>**Building App Functions:**
+ * <h3>Building App Functions</h3>
  *
  * <p>Most developers should build app functions through the AppFunctions SDK. This SDK library
  * offers a more convenient and type-safe way to build app functions. The SDK provides predefined
@@ -56,7 +56,7 @@ import java.util.concurrent.Executor;
  * these data classes into {@link ExecuteAppFunctionRequest#getParameters()} and {@link
  * ExecuteAppFunctionResponse#getResultDocument()}.
  *
- * <p>**Discovering App Functions:**
+ * <h3>Discovering App Functions</h3>
  *
  * <p>When there is a package change or the device starts up, the metadata of available functions is
  * indexed on-device by {@link AppSearchManager}. AppSearch stores the indexed information as an
@@ -66,7 +66,7 @@ import java.util.concurrent.Executor;
  * document is based on the packages that have visibility to the app providing the app functions.
  * AppFunction SDK provides a convenient way to achieve this and is the preferred method.
  *
- * <p>**Executing App Functions:**
+ * <h3>Executing App Functions</h3>
  *
  * <p>To execute an app function, the caller app can retrieve the {@code functionIdentifier} from
  * the {@code AppFunctionStaticMetadata} document and use it to build an {@link
@@ -76,7 +76,7 @@ import java.util.concurrent.Executor;
  * apps. An app can always execute its own app functions and doesn't need these permissions.
  * AppFunction SDK provides a convenient way to achieve this and is the preferred method.
  *
- * <p>**Example:**
+ * <h3>Example</h3>
  *
  * <p>An assistant app is trying to fulfill the user request "Save XYZ into my note". The assistant
  * app should first list all available app functions as {@code AppFunctionStaticMetadata} documents
