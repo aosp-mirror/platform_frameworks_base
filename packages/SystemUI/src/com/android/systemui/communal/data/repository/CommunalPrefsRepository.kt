@@ -51,6 +51,12 @@ interface CommunalPrefsRepository {
 
     /** Save the CTA tile dismissed state for the current user. */
     suspend fun setCtaDismissed(user: UserInfo)
+
+    /** Whether hub onboarding has been dismissed. */
+    fun isHubOnboardingDismissed(user: UserInfo): Flow<Boolean>
+
+    /** Save the hub onboarding dismissed state for the current user. */
+    suspend fun setHubOnboardingDismissed(user: UserInfo)
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -64,9 +70,6 @@ constructor(
     @CommunalLog logBuffer: LogBuffer,
 ) : CommunalPrefsRepository {
     private val logger by lazy { Logger(logBuffer, TAG) }
-
-    override fun isCtaDismissed(user: UserInfo): Flow<Boolean> =
-        readKeyForUser(user, CTA_DISMISSED_STATE)
 
     /**
      * Emits an event each time a Backup & Restore restoration job is completed, and once at the
@@ -82,18 +85,29 @@ constructor(
             .onEach { logger.i("Restored state for communal preferences.") }
             .emitOnStart()
 
+    override fun isCtaDismissed(user: UserInfo): Flow<Boolean> =
+        readKeyForUser(user, CTA_DISMISSED_STATE)
+
     override suspend fun setCtaDismissed(user: UserInfo) =
         withContext(bgDispatcher) {
             getSharedPrefsForUser(user).edit().putBoolean(CTA_DISMISSED_STATE, true).apply()
             logger.i("Dismissed CTA tile")
         }
 
+    override fun isHubOnboardingDismissed(user: UserInfo): Flow<Boolean> =
+        readKeyForUser(user, HUB_ONBOARDING_DISMISSED_STATE)
+
+    override suspend fun setHubOnboardingDismissed(user: UserInfo) =
+        withContext(bgDispatcher) {
+            getSharedPrefsForUser(user)
+                .edit()
+                .putBoolean(HUB_ONBOARDING_DISMISSED_STATE, true)
+                .apply()
+            logger.i("Dismissed hub onboarding")
+        }
+
     private fun getSharedPrefsForUser(user: UserInfo): SharedPreferences {
-        return userFileManager.getSharedPreferences(
-            FILE_NAME,
-            Context.MODE_PRIVATE,
-            user.id,
-        )
+        return userFileManager.getSharedPreferences(FILE_NAME, Context.MODE_PRIVATE, user.id)
     }
 
     private fun readKeyForUser(user: UserInfo, key: String): Flow<Boolean> {
@@ -109,5 +123,6 @@ constructor(
         const val TAG = "CommunalPrefsRepository"
         const val FILE_NAME = "communal_hub_prefs"
         const val CTA_DISMISSED_STATE = "cta_dismissed"
+        const val HUB_ONBOARDING_DISMISSED_STATE = "hub_onboarding_dismissed"
     }
 }

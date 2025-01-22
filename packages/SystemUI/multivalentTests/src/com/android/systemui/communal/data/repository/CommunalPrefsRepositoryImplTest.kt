@@ -88,6 +88,34 @@ class CommunalPrefsRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun isHubOnboardingDismissedValue_byDefault_isFalse() =
+        testScope.runTest {
+            val isHubOnboardingDismissed by
+                collectLastValue(underTest.isHubOnboardingDismissed(MAIN_USER))
+            assertThat(isHubOnboardingDismissed).isFalse()
+        }
+
+    @Test
+    fun isHubOnboardingDismissedValue_onSet_isTrue() =
+        testScope.runTest {
+            val isHubOnboardingDismissed by
+                collectLastValue(underTest.isHubOnboardingDismissed(MAIN_USER))
+
+            underTest.setHubOnboardingDismissed(MAIN_USER)
+            assertThat(isHubOnboardingDismissed).isTrue()
+        }
+
+    @Test
+    fun isHubOnboardingDismissedValue_onSetForDifferentUser_isStillFalse() =
+        testScope.runTest {
+            val isHubOnboardingDismissed by
+                collectLastValue(underTest.isHubOnboardingDismissed(MAIN_USER))
+
+            underTest.setHubOnboardingDismissed(SECONDARY_USER)
+            assertThat(isHubOnboardingDismissed).isFalse()
+        }
+
+    @Test
     fun getSharedPreferences_whenFileRestored() =
         testScope.runTest {
             val isCtaDismissed by collectLastValue(underTest.isCtaDismissed(MAIN_USER))

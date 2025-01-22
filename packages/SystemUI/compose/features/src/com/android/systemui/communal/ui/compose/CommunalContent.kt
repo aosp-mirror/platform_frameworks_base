@@ -37,6 +37,7 @@ import com.android.systemui.communal.smartspace.SmartspaceInteractionHandler
 import com.android.systemui.communal.ui.compose.section.AmbientStatusBarSection
 import com.android.systemui.communal.ui.compose.section.CommunalPopupSection
 import com.android.systemui.communal.ui.compose.section.CommunalToDreamButtonSection
+import com.android.systemui.communal.ui.compose.section.HubOnboardingSection
 import com.android.systemui.communal.ui.view.layout.sections.CommunalAppWidgetSection
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.keyguard.ui.composable.blueprint.BlueprintAlignmentLines
@@ -62,6 +63,7 @@ constructor(
     private val communalPopupSection: CommunalPopupSection,
     private val widgetSection: CommunalAppWidgetSection,
     private val communalToDreamButtonSection: CommunalToDreamButtonSection,
+    private val hubOnboardingSection: HubOnboardingSection,
 ) {
 
     @Composable
@@ -83,6 +85,7 @@ constructor(
                             modifier = Modifier.element(Communal.Elements.Grid),
                             contentScope = this@Content,
                         )
+                        with(hubOnboardingSection) { BottomSheet() }
                     }
                     if (communalSettingsInteractor.isV2FlagEnabled()) {
                         Icon(
