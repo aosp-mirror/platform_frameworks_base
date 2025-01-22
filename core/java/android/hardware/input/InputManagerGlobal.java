@@ -57,6 +57,8 @@ import android.view.InputMonitor;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.PointerIcon;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -1252,6 +1254,43 @@ public final class InputManagerGlobal {
                 mKeyGestureEventHandlers = null;
                 mKeyGestureHandler = null;
             }
+        }
+    }
+
+    /**
+     * Sets the keyboard layout override for the specified input device. This will set the
+     * keyboard layout as the default for the input device irrespective of the underlying IME
+     * configuration.
+     *
+     * <p>
+     * Prefer using {@link InputManager#setKeyboardLayoutForInputDevice(InputDeviceIdentifier, int,
+     * InputMethodInfo, InputMethodSubtype, String)} for normal use cases.
+     * </p><p>
+     * This method is to be used only for special cases where we knowingly want to set a
+     * particular keyboard layout for a keyboard, ignoring the IME configuration. e.g. Setting a
+     * default layout for an Android Emulator where we know the preferred H/W keyboard layout.
+     * </p><p>
+     * NOTE: This may affect the typing experience if the layout isn't compatible with the IME
+     * configuration.
+     * </p><p>
+     * NOTE: User can still change the keyboard layout configuration from the settings page.
+     * </p>
+     *
+     * @param identifier The identifier for the input device.
+     * @param keyboardLayoutDescriptor The keyboard layout descriptor to use.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
+    public void setKeyboardLayoutOverrideForInputDevice(@NonNull InputDeviceIdentifier identifier,
+            @NonNull String keyboardLayoutDescriptor) {
+        Objects.requireNonNull(identifier, "identifier should not be null");
+        Objects.requireNonNull(keyboardLayoutDescriptor,
+                "keyboardLayoutDescriptor should not be null");
+        try {
+            mIm.setKeyboardLayoutOverrideForInputDevice(identifier, keyboardLayoutDescriptor);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

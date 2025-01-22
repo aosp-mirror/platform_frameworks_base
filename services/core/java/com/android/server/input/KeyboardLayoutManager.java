@@ -113,6 +113,7 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     private static final int MSG_UPDATE_EXISTING_DEVICES = 1;
     private static final int MSG_RELOAD_KEYBOARD_LAYOUTS = 2;
     private static final int MSG_UPDATE_KEYBOARD_LAYOUTS = 3;
+    private static final String GLOBAL_OVERRIDE_KEY = "GLOBAL_OVERRIDE_KEY";
 
     private final Context mContext;
     private final NativeInputManagerService mNative;
@@ -508,26 +509,44 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     }
 
     @AnyThread
-    public void setKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
-            @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
-            @Nullable InputMethodSubtype imeSubtype,
+    public void setKeyboardLayoutOverrideForInputDevice(InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor) {
-        Objects.requireNonNull(keyboardLayoutDescriptor,
-                "keyboardLayoutDescriptor must not be null");
         InputDevice inputDevice = getInputDevice(identifier);
         if (inputDevice == null || inputDevice.isVirtual() || !inputDevice.isFullKeyboard()) {
             return;
         }
         KeyboardIdentifier keyboardIdentifier = new KeyboardIdentifier(inputDevice);
-        String layoutKey = new LayoutKey(keyboardIdentifier,
+        setKeyboardLayoutForInputDeviceInternal(keyboardIdentifier, GLOBAL_OVERRIDE_KEY,
+                keyboardLayoutDescriptor);
+    }
+
+    @AnyThread
+    public void setKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
+            @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
+            @Nullable InputMethodSubtype imeSubtype,
+            String keyboardLayoutDescriptor) {
+        InputDevice inputDevice = getInputDevice(identifier);
+        if (inputDevice == null || inputDevice.isVirtual() || !inputDevice.isFullKeyboard()) {
+            return;
+        }
+        KeyboardIdentifier keyboardIdentifier = new KeyboardIdentifier(inputDevice);
+        final String datastoreKey = new LayoutKey(keyboardIdentifier,
                 new ImeInfo(userId, imeInfo, imeSubtype)).toString();
+        setKeyboardLayoutForInputDeviceInternal(keyboardIdentifier, datastoreKey,
+                keyboardLayoutDescriptor);
+    }
+
+    private void setKeyboardLayoutForInputDeviceInternal(KeyboardIdentifier identifier,
+            String datastoreKey, String keyboardLayoutDescriptor) {
+        Objects.requireNonNull(keyboardLayoutDescriptor,
+                "keyboardLayoutDescriptor must not be null");
         synchronized (mDataStore) {
             try {
-                if (mDataStore.setKeyboardLayout(keyboardIdentifier.toString(), layoutKey,
+                if (mDataStore.setKeyboardLayout(identifier.toString(), datastoreKey,
                         keyboardLayoutDescriptor)) {
                     if (DEBUG) {
                         Slog.d(TAG, "setKeyboardLayoutForInputDevice() " + identifier
-                                + " key: " + layoutKey
+                                + " key: " + datastoreKey
                                 + " keyboardLayoutDescriptor: " + keyboardLayoutDescriptor);
                     }
                     mHandler.sendEmptyMessage(MSG_RELOAD_KEYBOARD_LAYOUTS);
@@ -634,6 +653,12 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
             String layout = mDataStore.getKeyboardLayout(keyboardIdentifier.toString(), layoutKey);
             if (layout != null) {
                 return new KeyboardLayoutSelectionResult(layout, LAYOUT_SELECTION_CRITERIA_USER);
+            }
+
+            layout = mDataStore.getKeyboardLayout(keyboardIdentifier.toString(),
+                    GLOBAL_OVERRIDE_KEY);
+            if (layout != null) {
+                return new KeyboardLayoutSelectionResult(layout, LAYOUT_SELECTION_CRITERIA_DEVICE);
             }
         }
 
