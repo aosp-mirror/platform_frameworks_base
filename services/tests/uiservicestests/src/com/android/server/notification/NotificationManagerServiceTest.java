@@ -253,7 +253,6 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.session.MediaSession;
 import android.net.ConnectivityManager;
-import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.os.Binder;
@@ -571,6 +570,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Mock
     NotificationAttentionHelper mAttentionHelper;
 
+    @Mock
+    NetworkCapabilities mWifiNetworkCapabilities;
+
     private NotificationManagerService.WorkerHandler mWorkerHandler;
 
     private class TestableToastCallback extends ITransientNotification.Stub {
@@ -771,7 +773,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mActivityIntentImmutable = spy(PendingIntent.getActivity(mContext, 0,
                 new Intent().setPackage(mPkg), FLAG_IMMUTABLE));
 
-        when(mConnectivityManager.getActiveNetwork()).thenReturn(null);
+        when(mWifiNetworkCapabilities.hasTransport(eq(NetworkCapabilities.TRANSPORT_WIFI)))
+                .thenReturn(true);
+        when(mWifiNetworkCapabilities
+                .hasCapability(eq(NetworkCapabilities.NET_CAPABILITY_VALIDATED)))
+                .thenReturn(true);
+        when(mWifiNetworkCapabilities
+                .hasCapability(eq(NetworkCapabilities.NET_CAPABILITY_TRUSTED)))
+                .thenReturn(true);
 
         initNMS();
     }
@@ -14391,13 +14400,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testMakeRankingUpdate_clearsHasSensitiveContentIfConnectedToWifi() {
         mSetFlagsRule.enableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS,
                 FLAG_REDACT_SENSITIVE_CONTENT_NOTIFICATIONS_ON_LOCKSCREEN);
-        when(mConnectivityManager.getActiveNetwork()).thenReturn(mock(Network.class));
-        when(mConnectivityManager.getNetworkCapabilities(any())).thenReturn(
-                new NetworkCapabilities.Builder()
-                        .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                        .build()
-        );
-        mService.updateWifiConnectionState();
+        mService.updateWifiConnectionState(mWifiNetworkCapabilities);
         when(mListeners.hasSensitiveContent(any())).thenReturn(true);
         NotificationRecord pkgA = new NotificationRecord(mContext,
                 generateSbn("a", 1000, 9, 0), mTestNotificationChannel);
@@ -14416,13 +14419,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testMakeRankingUpdate_doesntClearHasSensitiveContentIfNotConnectedToWifi() {
         mSetFlagsRule.enableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS,
                 FLAG_REDACT_SENSITIVE_CONTENT_NOTIFICATIONS_ON_LOCKSCREEN);
-        when(mConnectivityManager.getActiveNetwork()).thenReturn(mock(Network.class));
-        when(mConnectivityManager.getNetworkCapabilities(any())).thenReturn(
-                new NetworkCapabilities.Builder()
-                        .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-                        .build()
-        );
-        mService.updateWifiConnectionState();
+        mService.updateWifiConnectionState(mock(NetworkCapabilities.class));
         when(mListeners.hasSensitiveContent(any())).thenReturn(true);
         NotificationRecord record = getSensitiveNotificationRecord();
         mService.addNotification(record);
@@ -14440,13 +14437,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testMakeRankingUpdate_doesntClearHasSensitiveContentIfNotSysUi() {
         mSetFlagsRule.enableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
         mSetFlagsRule.disableFlags(FLAG_REDACT_SENSITIVE_CONTENT_NOTIFICATIONS_ON_LOCKSCREEN);
-        when(mConnectivityManager.getActiveNetwork()).thenReturn(mock(Network.class));
-        when(mConnectivityManager.getNetworkCapabilities(any())).thenReturn(
-                new NetworkCapabilities.Builder()
-                        .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                        .build()
-        );
-        mService.updateWifiConnectionState();
+        mService.updateWifiConnectionState(mWifiNetworkCapabilities);
         when(mListeners.hasSensitiveContent(any())).thenReturn(true);
         NotificationRecord record = getSensitiveNotificationRecord();
         mService.addNotification(record);
@@ -14463,13 +14454,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testMakeRankingUpdate_doesntClearHasSensitiveContentIfFlagDisabled() {
         mSetFlagsRule.enableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
         mSetFlagsRule.disableFlags(FLAG_REDACT_SENSITIVE_CONTENT_NOTIFICATIONS_ON_LOCKSCREEN);
-        when(mConnectivityManager.getActiveNetwork()).thenReturn(mock(Network.class));
-        when(mConnectivityManager.getNetworkCapabilities(any())).thenReturn(
-                new NetworkCapabilities.Builder()
-                        .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                        .build()
-        );
-        mService.updateWifiConnectionState();
+        mService.updateWifiConnectionState(mWifiNetworkCapabilities);
         when(mListeners.hasSensitiveContent(any())).thenReturn(true);
         NotificationRecord record = getSensitiveNotificationRecord();
         mService.addNotification(record);

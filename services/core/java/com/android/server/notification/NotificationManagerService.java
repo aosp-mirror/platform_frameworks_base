@@ -258,7 +258,6 @@ import android.metrics.LogMaker;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkRequest;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -2834,33 +2833,25 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void registerNetworkCallback() {
-        NetworkRequest request = new NetworkRequest.Builder().addTransportType(
-                NetworkCapabilities.TRANSPORT_WIFI).build();
-        mConnectivityManager.registerNetworkCallback(request,
+        mConnectivityManager.registerDefaultNetworkCallback(
                 new ConnectivityManager.NetworkCallback() {
-                // Need to post to another thread, as we can't call synchronous ConnectivityManager
-                // methods from the callback itself, due to potential race conditions.
-                @Override
-                public void onAvailable(@NonNull Network network) {
-                    mHandler.post(() -> updateWifiConnectionState());
-                }
-                @Override
-                public void onLost(@NonNull Network network) {
-                    mHandler.post(() -> updateWifiConnectionState());
-                }
-            });
-        updateWifiConnectionState();
+                    @Override
+                    public void onCapabilitiesChanged(@NonNull Network network,
+                            @NonNull NetworkCapabilities capabilities) {
+                        updateWifiConnectionState(capabilities);
+                    }
+                    @Override
+                    public void onLost(@NonNull Network network) {
+                        mConnectedToWifi = false;
+                    }
+                }, mHandler);
     }
 
     @VisibleForTesting()
-    void updateWifiConnectionState() {
-        Network current = mConnectivityManager.getActiveNetwork();
-        NetworkCapabilities capabilities = mConnectivityManager.getNetworkCapabilities(current);
-        if (current == null || capabilities == null) {
-            mConnectedToWifi = false;
-            return;
-        }
-        mConnectedToWifi = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
+    void updateWifiConnectionState(NetworkCapabilities capabilities) {
+        mConnectedToWifi = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+                && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED);
     }
 
     /**
