@@ -169,7 +169,7 @@
     <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"درحال‌حاضر تماس‌ها، پیام‌ها، و داده‌ها هنگام استفاده از سیم‌کارت <xliff:g id="NETWORK_NAME">%1$s</xliff:g> آسیب‌پذیرتر هستند.\n\nوقتی اتصال شما دوباره رمزگذاری شود، اعلان دیگری دریافت خواهید کرد."</string>
     <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"تنظیمات امنیت شبکه تلفن همراه"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"بیشتر بدانید"</string>
-    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"متوجه‌ام"</string>
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"متوجهم"</string>
     <string name="fcComplete" msgid="1080909484660507044">"کد ویژگی کامل شد."</string>
     <string name="fcError" msgid="5325116502080221346">"مشکل در اتصال یا کد ویژگی نامعتبر."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"تأیید"</string>
