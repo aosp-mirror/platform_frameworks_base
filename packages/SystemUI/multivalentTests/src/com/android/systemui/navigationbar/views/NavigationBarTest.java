@@ -19,6 +19,7 @@ package com.android.systemui.navigationbar.views;
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN;
+import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_ADJUST_NOTHING;
 import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEFAULT;
 import static android.inputmethodservice.InputMethodService.IME_VISIBLE;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -30,6 +31,8 @@ import static com.android.systemui.assist.AssistManager.INVOCATION_TYPE_HOME_BUT
 import static com.android.systemui.navigationbar.views.NavigationBar.NavBarActionEvent.NAVBAR_ASSIST_LONGPRESS;
 import static com.android.systemui.navigationbar.views.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_LONGPRESS;
 import static com.android.systemui.navigationbar.views.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_TAP;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SWITCHER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -485,6 +488,65 @@ public class NavigationBarTest extends SysuiTestCase {
         mNavigationBar.init();
         mNavigationBar.onViewAttached();
         verify(mUserTracker).addCallback(any(UserTracker.Callback.class), any(Executor.class));
+    }
+
+    /**
+     * Verifies that the SysUI state is updated correctly when given a new IME window status with
+     * IME visible and IME Switcher button visible.
+     */
+    @Test
+    public void testSetImeWindowStatusSysuiState_ImeVisibleImeSwitcherButtonVisible() {
+        doNothing().when(mNavigationBar).checkNavBarModes();
+
+        mNavigationBar.setImeWindowStatus(DEFAULT_DISPLAY, IME_VISIBLE,
+                BACK_DISPOSITION_DEFAULT, true /* showImeSwitcher */);
+        verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_SHOWING), eq(true));
+        verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_SWITCHER_SHOWING), eq(true));
+    }
+
+    /**
+     * Verifies that the SysUI state is updated correctly when given a new IME window status with
+     * IME visible and IME Switcher button not visible.
+     */
+    @Test
+    public void testSetImeWindowStatusSysuiState_ImeVisibleImeSwitcherButtonNotVisible() {
+        doNothing().when(mNavigationBar).checkNavBarModes();
+
+        mNavigationBar.setImeWindowStatus(DEFAULT_DISPLAY, IME_VISIBLE,
+                BACK_DISPOSITION_DEFAULT, false /* showImeSwitcher */);
+        verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_SHOWING), eq(true));
+        verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_SWITCHER_SHOWING), eq(false));
+    }
+
+    /**
+     * Verifies that the SysUI state is updated correctly when given a new IME window status with
+     * IME not visible and IME Switcher button visible.
+     */
+    @Test
+    public void testSetImeWindowStatusSysuiState_ImeNotVisibleImeSwitcherButtonVisible() {
+        doNothing().when(mNavigationBar).checkNavBarModes();
+        // Set initial state for later reset to be able to take place.
+        mNavigationBar.setImeWindowStatus(DEFAULT_DISPLAY, IME_VISIBLE,
+                BACK_DISPOSITION_DEFAULT, true /* showImeSwitcher */);
+
+        mNavigationBar.setImeWindowStatus(DEFAULT_DISPLAY, 0 /* vis */,
+                BACK_DISPOSITION_DEFAULT, true /* showImeSwitcher */);
+        verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_SHOWING), eq(false));
+        verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_SWITCHER_SHOWING), eq(false));
+    }
+
+    /**
+     * Verifies that the SysUI state is updated correctly when given a new IME window status with
+     * IME visible and back disposition adjust nothing.
+     */
+    @Test
+    public void testSetImeWindowStatusSysuiState_ImeVisibleBackDispositionAdjustNothing() {
+        doNothing().when(mNavigationBar).checkNavBarModes();
+
+        mNavigationBar.setImeWindowStatus(DEFAULT_DISPLAY, IME_VISIBLE,
+                BACK_DISPOSITION_ADJUST_NOTHING, true /* showImeSwitcher */);
+        verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_SHOWING), eq(true));
+        verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_SWITCHER_SHOWING), eq(true));
     }
 
     @Test

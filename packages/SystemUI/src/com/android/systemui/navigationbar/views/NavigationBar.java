@@ -17,7 +17,7 @@
 package com.android.systemui.navigationbar.views;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
-import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
@@ -1681,7 +1681,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 .setFlag(SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE, longClickable)
                 .setFlag(SYSUI_STATE_NAV_BAR_HIDDEN, !isNavBarWindowVisible())
                 .setFlag(SYSUI_STATE_IME_SHOWING,
-                        (mNavigationIconHints & NAVIGATION_HINT_BACK_ALT) != 0)
+                        (mNavigationIconHints & NAVIGATION_HINT_IME_SHOWN) != 0)
                 .setFlag(SYSUI_STATE_IME_SWITCHER_SHOWING,
                         (mNavigationIconHints & NAVIGATION_HINT_IME_SWITCHER_SHOWN) != 0)
                 .setFlag(SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY,
@@ -1938,9 +1938,9 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             final boolean oldBackAlt =
                     (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
             if (newBackAlt != oldBackAlt) {
-                mView.onImeVisibilityChanged(newBackAlt);
-                mImeVisible = newBackAlt;
+                mView.onBackAltChanged(newBackAlt);
             }
+            mImeVisible = (hints & NAVIGATION_HINT_IME_SHOWN) != 0;
 
             mView.setNavigationIconHints(hints);
         }

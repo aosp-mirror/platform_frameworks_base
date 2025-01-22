@@ -17,7 +17,7 @@
 package com.android.systemui.navigationbar;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
-import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
@@ -361,7 +361,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mSysUiState.setFlag(SYSUI_STATE_A11Y_BUTTON_CLICKABLE, clickable)
                 .setFlag(SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE, longClickable)
                 .setFlag(SYSUI_STATE_IME_SHOWING,
-                        (mNavigationIconHints & NAVIGATION_HINT_BACK_ALT) != 0)
+                        (mNavigationIconHints & NAVIGATION_HINT_IME_SHOWN) != 0)
                 .setFlag(SYSUI_STATE_IME_SWITCHER_SHOWING,
                         (mNavigationIconHints & NAVIGATION_HINT_IME_SWITCHER_SHOWN) != 0)
                 .setFlag(SYSUI_STATE_OVERVIEW_DISABLED,
