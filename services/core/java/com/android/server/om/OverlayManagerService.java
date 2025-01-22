@@ -1064,10 +1064,12 @@ public final class OverlayManagerService extends SystemService {
                         return;
                     }
                     try {
-                        dumpState.setUserId(Integer.parseInt(args[opti]));
+                        final int userId = UserHandle.parseUserArg(args[opti]);
+                        final int realUserId = handleIncomingUser(userId, "dump");
+                        dumpState.setUserId(realUserId);
                         opti++;
-                    } catch (NumberFormatException e) {
-                        pw.println("Error: user argument is not a number: " + args[opti]);
+                    } catch (Exception e) {
+                        pw.println("Error: " + e.getMessage());
                         return;
                     }
                 } else if ("--verbose".equals(opt)) {

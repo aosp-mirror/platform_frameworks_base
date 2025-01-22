@@ -187,6 +187,9 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
                 shell("cmd overlay list " + APP_OVERLAY_PACKAGE_NAME).trim());
         assertEquals("STATE_ENABLED",
                 shell("cmd overlay dump state " + APP_OVERLAY_PACKAGE_NAME).trim());
+
+        assertEquals("STATE_ENABLED",
+                shell("cmd overlay dump --user current state " + APP_OVERLAY_PACKAGE_NAME).trim());
     }
 
     private void delay() {
