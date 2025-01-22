@@ -23,6 +23,7 @@ import android.window.RemoteTransition;
 import com.android.wm.shell.desktopmode.IDesktopTaskListener;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.shared.desktopmode.DesktopTaskToFrontReason;
+import com.android.wm.shell.desktopmode.IMoveToDesktopCallback;
 
 /**
  * Interface that is exposed to remote callers to manipulate desktop mode features.
@@ -58,7 +59,8 @@ interface IDesktopMode {
 
     /** Move a task with given `taskId` to desktop */
     void moveToDesktop(int taskId, in DesktopModeTransitionSource transitionSource,
-                        in @nullable RemoteTransition remoteTransition);
+                        in @nullable RemoteTransition remoteTransition,
+                        in @nullable IMoveToDesktopCallback callback);
 
     /** Remove desktop on the given display */
     oneway void removeDesktop(int displayId);

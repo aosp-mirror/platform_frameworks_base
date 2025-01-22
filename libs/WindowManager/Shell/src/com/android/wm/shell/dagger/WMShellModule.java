@@ -95,6 +95,7 @@ import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler;
+import com.android.wm.shell.desktopmode.OverviewToDesktopTransitionObserver;
 import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator;
 import com.android.wm.shell.desktopmode.SpringDragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler;
@@ -739,7 +740,8 @@ public abstract class WMShellModule {
             DesktopModeUiEventLogger desktopModeUiEventLogger,
             DesktopTilingDecorViewModel desktopTilingDecorViewModel,
             DesktopWallpaperActivityTokenProvider desktopWallpaperActivityTokenProvider,
-            Optional<BubbleController> bubbleController) {
+            Optional<BubbleController> bubbleController,
+            OverviewToDesktopTransitionObserver overviewToDesktopTransitionObserver) {
         return new DesktopTasksController(
                 context,
                 shellInit,
@@ -772,7 +774,8 @@ public abstract class WMShellModule {
                 desktopModeUiEventLogger,
                 desktopTilingDecorViewModel,
                 desktopWallpaperActivityTokenProvider,
-                bubbleController);
+                bubbleController,
+                overviewToDesktopTransitionObserver);
     }
 
     @WMSingleton
@@ -1397,4 +1400,10 @@ public abstract class WMShellModule {
         return new Object();
     }
 
+    @WMSingleton
+    @Provides
+    static OverviewToDesktopTransitionObserver provideOverviewToDesktopTransitionObserver(
+            Transitions transitions, ShellInit shellInit) {
+        return new OverviewToDesktopTransitionObserver(transitions, shellInit);
+    }
 }
