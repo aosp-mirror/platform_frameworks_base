@@ -45,12 +45,14 @@ resTypes = ["attr", "id", "style", "string", "dimen", "color", "array", "drawabl
             "anim", "animator", "interpolator", "mipmap", "integer", "transition", "raw", "bool",
             "fraction"]
 
+NO_FLAG_MAGIC_CONSTANT = "no_flag"
+
 _aconfig_map = {}
 _not_finalized = defaultdict(list)
 _type_ids = {}
 _type = ""
-_finalized_flags = set()
-_non_finalized_flags = set()
+_finalized_flags = defaultdict(list)
+_non_finalized_flags = defaultdict(list)
 
 
 _lowest_staging_first_id = 0x01FFFFFF
@@ -71,7 +73,12 @@ def finalize_item(comment_and_item):
 
     comment = re.search(' *<!--.+?-->\n', comment_and_item, flags=re.DOTALL).group(0)
 
-    flag = re.search('<!-- @FlaggedApi\((.+?)\)', comment, flags=re.DOTALL).group(1)
+    match = re.search('<!-- @FlaggedApi\((.+?)\)', comment, flags=re.DOTALL)
+    if match:
+        flag = match.group(1)
+    else:
+        flag = NO_FLAG_MAGIC_CONSTANT
+
     if flag.startswith("\""):
         # Flag is a string value, just remove "
         flag = flag.replace("\"", "")
@@ -84,13 +91,13 @@ def finalize_item(comment_and_item):
 
     # READ_ONLY-ENABLED is a magic string from printflags output below
     if _aconfig_map[flag] != "READ_ONLY-ENABLED":
-        _non_finalized_flags.add(flag)
+        _non_finalized_flags[flag].append(name)
         # Keep it as is in <staging-public-group> in public-staging.xml
         # Include as magic constant "removed_" in <staging-public-group-final> in public-final.xml
         # Don't assign an id in public-final.xml
         return (comment_and_item, "    <public name=\"removed_\" />\n", "")
 
-    _finalized_flags.add(flag)
+    _finalized_flags[flag].append(name)
 
     id = _type_ids[_type]
     _type_ids[_type] += 1
@@ -154,6 +161,8 @@ for line in output.stdout.splitlines():
     value = parts[1]
     _aconfig_map[key]=value
 
+_aconfig_map[NO_FLAG_MAGIC_CONSTANT]="READ_ONLY-DISABLED"
+
 with open(sys.argv[1], "r+") as stagingFile:
     with open(sys.argv[2], "r+") as finalFile:
         existing = finalFile.read()
@@ -209,9 +218,13 @@ with open(sys.argv[1], "r+") as stagingFile:
 
 
 print("\nFlags that had resources that were NOT finalized:")
-for flag in sorted(_non_finalized_flags):
-    print(flag)
+for flag in sorted(_non_finalized_flags.keys()):
+    print(f"  {flag}")
+    for value in _non_finalized_flags[flag]:
+        print(f"    {value}")
 
 print("\nFlags that had resources that were finalized:")
-for flag in sorted(_finalized_flags):
-    print(flag)
+for flag in sorted(_finalized_flags.keys()):
+    print(f"  {flag}")
+    for value in _finalized_flags[flag]:
+        print(f"    {value}")
