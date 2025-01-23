@@ -16,30 +16,88 @@
 
 package com.android.settingslib.metadata
 
+import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
 
 /**
  * Coordinate to locate a preference.
  *
- * Within an app, the preference screen key (unique among screens) plus preference key (unique on
- * the screen) is used to locate a preference.
+ * Within an app, the preference screen coordinate (unique among screens) plus preference key
+ * (unique on the screen) is used to locate a preference.
  */
-data class PreferenceCoordinate(val screenKey: String, val key: String) : Parcelable {
+open class PreferenceCoordinate : PreferenceScreenCoordinate {
+    val key: String
 
-    constructor(parcel: Parcel) : this(parcel.readString()!!, parcel.readString()!!)
+    constructor(screenKey: String, key: String) : this(screenKey, null, key)
+
+    constructor(screenKey: String, args: Bundle?, key: String) : super(screenKey, args) {
+        this.key = key
+    }
+
+    constructor(parcel: Parcel) : super(parcel) {
+        this.key = parcel.readString()!!
+    }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeString(screenKey)
+        super.writeToParcel(parcel, flags)
         parcel.writeString(key)
     }
 
     override fun describeContents() = 0
+
+    override fun equals(other: Any?) =
+        super.equals(other) && key == (other as PreferenceCoordinate).key
+
+    override fun hashCode() = super.hashCode() xor key.hashCode()
 
     companion object CREATOR : Parcelable.Creator<PreferenceCoordinate> {
 
         override fun createFromParcel(parcel: Parcel) = PreferenceCoordinate(parcel)
 
         override fun newArray(size: Int) = arrayOfNulls<PreferenceCoordinate>(size)
+    }
+}
+
+/** Coordinate to locate a preference screen. */
+open class PreferenceScreenCoordinate : Parcelable {
+    /** Unique preference screen key. */
+    val screenKey: String
+
+    /** Arguments to create parameterized preference screen. */
+    val args: Bundle?
+
+    constructor(screenKey: String, args: Bundle?) {
+        this.screenKey = screenKey
+        this.args = args
+    }
+
+    constructor(parcel: Parcel) {
+        screenKey = parcel.readString()!!
+        args = parcel.readBundle(javaClass.classLoader)
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(screenKey)
+        parcel.writeBundle(args)
+    }
+
+    override fun describeContents() = 0
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as PreferenceScreenCoordinate
+        return screenKey == other.screenKey && args.contentEquals(other.args)
+    }
+
+    // "args" is not included intentionally, otherwise we need to take care of array, etc.
+    override fun hashCode() = screenKey.hashCode()
+
+    companion object CREATOR : Parcelable.Creator<PreferenceScreenCoordinate> {
+
+        override fun createFromParcel(parcel: Parcel) = PreferenceScreenCoordinate(parcel)
+
+        override fun newArray(size: Int) = arrayOfNulls<PreferenceScreenCoordinate>(size)
     }
 }
