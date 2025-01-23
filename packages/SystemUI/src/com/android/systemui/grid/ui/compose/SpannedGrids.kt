@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
@@ -63,6 +64,7 @@ fun HorizontalSpannedGrid(
     rowSpacing: Dp,
     spans: List<Int>,
     modifier: Modifier = Modifier,
+    keys: (spanIndex: Int) -> Any = { it },
     composables: @Composable BoxScope.(spanIndex: Int) -> Unit,
 ) {
     SpannedGrid(
@@ -72,6 +74,7 @@ fun HorizontalSpannedGrid(
         spans = spans,
         isVertical = false,
         modifier = modifier,
+        keys = keys,
         composables = composables,
     )
 }
@@ -103,6 +106,7 @@ fun VerticalSpannedGrid(
     rowSpacing: Dp,
     spans: List<Int>,
     modifier: Modifier = Modifier,
+    keys: (spanIndex: Int) -> Any = { it },
     composables: @Composable BoxScope.(spanIndex: Int) -> Unit,
 ) {
     SpannedGrid(
@@ -112,6 +116,7 @@ fun VerticalSpannedGrid(
         spans = spans,
         isVertical = true,
         modifier = modifier,
+        keys = keys,
         composables = composables,
     )
 }
@@ -124,6 +129,7 @@ private fun SpannedGrid(
     spans: List<Int>,
     isVertical: Boolean,
     modifier: Modifier = Modifier,
+    keys: (spanIndex: Int) -> Any = { it },
     composables: @Composable BoxScope.(spanIndex: Int) -> Unit,
 ) {
     val crossAxisArrangement = Arrangement.spacedBy(crossAxisSpacing)
@@ -167,17 +173,19 @@ private fun SpannedGrid(
     Layout(
         {
             (0 until spans.size).map { spanIndex ->
-                Box(
-                    Modifier.semantics {
-                        collectionItemInfo =
-                            if (isVertical) {
-                                CollectionItemInfo(spanIndex, 1, 0, 1)
-                            } else {
-                                CollectionItemInfo(0, 1, spanIndex, 1)
-                            }
+                key(keys(spanIndex)) {
+                    Box(
+                        Modifier.semantics {
+                            collectionItemInfo =
+                                if (isVertical) {
+                                    CollectionItemInfo(spanIndex, 1, 0, 1)
+                                } else {
+                                    CollectionItemInfo(0, 1, spanIndex, 1)
+                                }
+                        }
+                    ) {
+                        composables(spanIndex)
                     }
-                ) {
-                    composables(spanIndex)
                 }
             }
         },

@@ -17,6 +17,7 @@
 package com.android.systemui.haptics.msdl.qs
 
 import android.service.quicksettings.Tile
+import androidx.compose.runtime.Stable
 import com.android.systemui.Flags
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
@@ -175,6 +176,7 @@ constructor(
 }
 
 @SysUISingleton
+@Stable
 class TileHapticsViewModelFactoryProvider
 @Inject
 constructor(private val tileHapticsViewModelFactory: TileHapticsViewModel.Factory) {

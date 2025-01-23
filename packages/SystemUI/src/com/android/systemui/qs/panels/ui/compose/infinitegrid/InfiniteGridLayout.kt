@@ -18,8 +18,8 @@ package com.android.systemui.qs.panels.ui.compose.infinitegrid
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -86,27 +86,28 @@ constructor(
         val scope = rememberCoroutineScope()
         var cellIndex = 0
 
+        val spans by remember(sizedTiles) { derivedStateOf { sizedTiles.fastMap { it.width } } }
+
         VerticalSpannedGrid(
             columns = columns,
             columnSpacing = dimensionResource(R.dimen.qs_tile_margin_horizontal),
             rowSpacing = dimensionResource(R.dimen.qs_tile_margin_vertical),
-            spans = sizedTiles.fastMap { it.width },
+            spans = spans,
+            keys = { sizedTiles[it].tile.spec },
         ) { spanIndex ->
             val it = sizedTiles[spanIndex]
             val column = cellIndex % columns
             cellIndex += it.width
-            key(it.tile.spec) {
-                Tile(
-                    tile = it.tile,
-                    iconOnly = iconTilesViewModel.isIconTile(it.tile.spec),
-                    modifier = Modifier.element(it.tile.spec.toElementKey(spanIndex)),
-                    squishiness = { squishiness },
-                    tileHapticsViewModelFactoryProvider = tileHapticsViewModelFactoryProvider,
-                    coroutineScope = scope,
-                    bounceableInfo = bounceables.bounceableInfo(it, spanIndex, column, columns),
-                    detailsViewModel = detailsViewModel,
-                )
-            }
+            Tile(
+                tile = it.tile,
+                iconOnly = iconTilesViewModel.isIconTile(it.tile.spec),
+                modifier = Modifier.element(it.tile.spec.toElementKey(spanIndex)),
+                squishiness = { squishiness },
+                tileHapticsViewModelFactoryProvider = tileHapticsViewModelFactoryProvider,
+                coroutineScope = scope,
+                bounceableInfo = bounceables.bounceableInfo(it, spanIndex, column, columns),
+                detailsViewModel = detailsViewModel,
+            )
         }
     }
 
