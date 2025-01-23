@@ -7249,7 +7249,7 @@ public class NotificationManagerService extends SystemService {
                 if (!mAssistants.isAdjustmentAllowed(potentialKey)) {
                     toRemove.add(potentialKey);
                 }
-                if (notificationClassification() && adjustments.containsKey(KEY_TYPE)) {
+                if (notificationClassification() && potentialKey.equals(KEY_TYPE)) {
                     mAssistants.setNasUnsupportedDefaults(r.getSbn().getNormalizedUserId());
                     if (!mAssistants.isAdjustmentKeyTypeAllowed(adjustments.getInt(KEY_TYPE))) {
                         toRemove.add(potentialKey);
