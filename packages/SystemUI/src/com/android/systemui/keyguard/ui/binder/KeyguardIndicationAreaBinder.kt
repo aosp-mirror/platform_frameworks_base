@@ -23,6 +23,7 @@ import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.systemui.Flags
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
@@ -73,7 +74,6 @@ object KeyguardIndicationAreaBinder {
         disposables +=
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
-
                     launch("$TAG#viewModel.indicationAreaTranslationX") {
                         viewModel.indicationAreaTranslationX.collect { translationX ->
                             view.translationX = translationX
@@ -119,6 +119,9 @@ object KeyguardIndicationAreaBinder {
                     launch("$TAG#viewModel.configurationChange") {
                         viewModel.configurationChange.collect {
                             configurationBasedDimensions.value = loadFromResources(view)
+                            if (Flags.indicationTextA11yFix()) {
+                                indicationController.onConfigurationChanged()
+                            }
                         }
                     }
 
@@ -140,7 +143,7 @@ object KeyguardIndicationAreaBinder {
                 view.resources.getDimensionPixelOffset(R.dimen.keyguard_indication_area_padding),
             indicationTextSizePx =
                 view.resources.getDimensionPixelSize(
-                    com.android.internal.R.dimen.text_size_small_material,
+                    com.android.internal.R.dimen.text_size_small_material
                 ),
         )
     }
