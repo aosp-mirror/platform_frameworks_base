@@ -124,7 +124,7 @@ class FlexClockController(private val clockCtx: ClockContext) : ClockController 
                 ClockFontAxis(
                     key = "wght",
                     type = AxisType.Float,
-                    minValue = 1f,
+                    minValue = 25f,
                     currentValue = 400f,
                     maxValue = 1000f,
                     name = "Weight",
