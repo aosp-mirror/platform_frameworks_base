@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.desktopmode.compatui
 
+import android.content.Intent
 import android.os.Binder
 import android.testing.AndroidTestingRunner
 import android.view.SurfaceControl
@@ -29,7 +30,9 @@ import com.android.wm.shell.desktopmode.DesktopRepository
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFullscreenTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFullscreenTaskBuilder
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.createSystemModalTask
+import com.android.wm.shell.desktopmode.DesktopTestHelpers.createSystemModalTaskBuilder
 import com.android.wm.shell.desktopmode.DesktopUserRepositories
+import com.android.wm.shell.desktopmode.DesktopWallpaperActivity
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.TransitionInfoBuilder
 import com.android.wm.shell.transition.Transitions
@@ -114,6 +117,19 @@ class SystemModalsTransitionHandlerTest : ShellTestCase() {
 
         assertThat(transitionHandler.startAnimation(Binder(), info, startT, finishT) {}).isFalse()
     }
+
+    @Test
+    fun startAnimation_launchingWallpaperTask_doesNotAnimate() {
+        val wallpaperTask =
+            createSystemModalTaskBuilder().setBaseIntent(createWallpaperIntent()).build()
+        val info =
+            TransitionInfoBuilder(TRANSIT_OPEN).addChange(TRANSIT_OPEN, wallpaperTask).build()
+
+        assertThat(transitionHandler.startAnimation(Binder(), info, startT, finishT) {}).isFalse()
+    }
+
+    private fun createWallpaperIntent() =
+        Intent().apply { setComponent(DesktopWallpaperActivity.wallpaperActivityComponent) }
 
     @Test
     fun startAnimation_launchingFullscreenTask_doesNotAnimate() {
