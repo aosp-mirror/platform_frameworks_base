@@ -108,11 +108,13 @@ public class TtsSpan implements ParcelableSpan {
 
     /**
      * The text associated with this span is a time, consisting of a number of
-     * hours and minutes, specified with {@link #ARG_HOURS} and
-     * {@link #ARG_MINUTES}.
+     * hours, minutes, and seconds specified with {@link #ARG_HOURS}, {@link #ARG_MINUTES}, and
+     * {@link #ARG_SECONDS}.
      * Also accepts the arguments {@link #ARG_GENDER},
      * {@link #ARG_ANIMACY}, {@link #ARG_MULTIPLICITY} and
-     * {@link #ARG_CASE}.
+     * {@link #ARG_CASE}. This is different from {@link #TYPE_DURATION}. This should be used to
+     * convey a particular moment in time, such as a clock time, while {@link #TYPE_DURATION} should
+     * be used to convey an interval of time.
      */
     public static final String TYPE_TIME = "android.type.time";
 
@@ -310,16 +312,18 @@ public class TtsSpan implements ParcelableSpan {
     public static final String ARG_UNIT = "android.arg.unit";
 
     /**
-     * Argument used to specify the hours of a time. The hours should be
-     * provided as an integer in the range from 0 up to and including 24.
-     * Can be used with {@link #TYPE_TIME}.
+     * Argument used to specify the hours of a time or duration. The hours should be
+     * provided as an integer in the range from 0 up to and including 24 for
+     * {@link #TYPE_TIME}.
+     * Can be used with {@link #TYPE_TIME} or {@link #TYPE_DURATION}.
      */
     public static final String ARG_HOURS = "android.arg.hours";
 
     /**
-     * Argument used to specify the minutes of a time. The minutes should be
-     * provided as an integer in the range from 0 up to and including 59.
-     * Can be used with {@link #TYPE_TIME}.
+     * Argument used to specify the minutes of a time or duration. The minutes should be
+     * provided as an integer in the range from 0 up to and including 59 for
+     * {@link #TYPE_TIME}.
+     * Can be used with {@link #TYPE_TIME} or {@link #TYPE_DURATION}.
      */
     public static final String ARG_MINUTES = "android.arg.minutes";
 
