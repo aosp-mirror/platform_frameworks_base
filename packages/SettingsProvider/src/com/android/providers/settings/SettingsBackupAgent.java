@@ -89,6 +89,7 @@ import java.io.OutputStream;
 import java.time.DateTimeException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -97,7 +98,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.HashMap;
 import java.util.zip.CRC32;
 
 /**
@@ -1753,8 +1753,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
         if (previousDensity == null || previousDensity != newDensity) {
             // From nothing to something is a change.
-            DisplayDensityConfiguration.setForcedDisplayDensity(
-                    Display.DEFAULT_DISPLAY, newDensity);
+            DisplayDensityConfiguration.setForcedDisplayDensity(getBaseContext(),
+                    info -> info.type == Display.TYPE_INTERNAL, newDensity);
         }
     }
 
