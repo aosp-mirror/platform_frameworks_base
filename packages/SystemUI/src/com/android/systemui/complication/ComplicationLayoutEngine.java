@@ -27,16 +27,15 @@ import static com.android.systemui.complication.ComplicationLayoutParams.POSITIO
 import static com.android.systemui.complication.dagger.ComplicationHostViewModule.COMPLICATIONS_FADE_IN_DURATION;
 import static com.android.systemui.complication.dagger.ComplicationHostViewModule.COMPLICATIONS_FADE_OUT_DURATION;
 import static com.android.systemui.complication.dagger.ComplicationHostViewModule.COMPLICATION_DIRECTIONAL_SPACING_DEFAULT;
-import static com.android.systemui.complication.dagger.ComplicationHostViewModule.COMPLICATION_MARGIN_POSITION_BOTTOM;
-import static com.android.systemui.complication.dagger.ComplicationHostViewModule.COMPLICATION_MARGIN_POSITION_END;
-import static com.android.systemui.complication.dagger.ComplicationHostViewModule.COMPLICATION_MARGIN_POSITION_START;
-import static com.android.systemui.complication.dagger.ComplicationHostViewModule.COMPLICATION_MARGIN_POSITION_TOP;
+import static com.android.systemui.complication.dagger.ComplicationHostViewModule.COMPLICATION_MARGINS;
 import static com.android.systemui.complication.dagger.ComplicationHostViewModule.SCOPED_COMPLICATIONS_LAYOUT;
 
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Constraints;
 
@@ -52,11 +51,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 
 /**
  * {@link ComplicationLayoutEngine} arranges a collection of {@link ComplicationViewModel} based on
@@ -401,6 +402,16 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
             return mDirectionGroups.get(direction).add(entryBuilder);
         }
 
+        public void updateDirectionalMargins(Map<Integer, Margins> directionalMargins) {
+            // the new map should have the same set of directional keys as the old map
+            if (!(directionalMargins.keySet())
+                    .containsAll(mDirectionalMargins.keySet())) {
+                Log.e(TAG, "Directional margins map does not have the same keys");
+                return;
+            }
+            mDirectionalMargins.replaceAll((direction, v) -> directionalMargins.get(direction));
+        }
+
         @Override
         public void onEntriesChanged() {
             // Whenever an entry is added/removed from a child {@link DirectionGroup}, it is vital
@@ -584,42 +595,36 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
     private final TouchInsetManager.TouchInsetSession mSession;
     private final int mFadeInDuration;
     private final int mFadeOutDuration;
-    private final HashMap<Integer, HashMap<Integer, Margins>> mPositionDirectionMarginMapping;
-
+    private final HashMap<Integer, HashMap<Integer, Margins>> mPositionDirectionMarginMapping =
+            new HashMap<>();
+    private final Provider<Margins> mComplicationMarginsProvider;
+    private Rect mScreenBounds = new Rect();
     /** */
     @Inject
     public ComplicationLayoutEngine(@Named(SCOPED_COMPLICATIONS_LAYOUT) ConstraintLayout layout,
             @Named(COMPLICATION_DIRECTIONAL_SPACING_DEFAULT) int defaultDirectionalSpacing,
-            @Named(COMPLICATION_MARGIN_POSITION_START) int complicationMarginPositionStart,
-            @Named(COMPLICATION_MARGIN_POSITION_TOP) int complicationMarginPositionTop,
-            @Named(COMPLICATION_MARGIN_POSITION_END) int complicationMarginPositionEnd,
-            @Named(COMPLICATION_MARGIN_POSITION_BOTTOM) int complicationMarginPositionBottom,
+            @Named(COMPLICATION_MARGINS) Provider<Margins> complicationMarginsProvider,
             TouchInsetManager.TouchInsetSession session,
             @Named(COMPLICATIONS_FADE_IN_DURATION) int fadeInDuration,
-            @Named(COMPLICATIONS_FADE_OUT_DURATION) int fadeOutDuration) {
+            @Named(COMPLICATIONS_FADE_OUT_DURATION) int fadeOutDuration
+    ) {
         mLayout = layout;
         mDefaultDirectionalSpacing = defaultDirectionalSpacing;
         mSession = session;
         mFadeInDuration = fadeInDuration;
         mFadeOutDuration = fadeOutDuration;
-        mPositionDirectionMarginMapping = generatePositionDirectionalMarginsMapping(
-                complicationMarginPositionStart,
-                complicationMarginPositionTop,
-                complicationMarginPositionEnd,
-                complicationMarginPositionBottom);
+        mComplicationMarginsProvider = complicationMarginsProvider;
+        updatePositionDirectionalMarginsMapping(mPositionDirectionMarginMapping,
+                mComplicationMarginsProvider.get());
     }
 
-    private static HashMap<Integer, HashMap<Integer, Margins>>
-            generatePositionDirectionalMarginsMapping(int complicationMarginPositionStart,
-            int complicationMarginPositionTop,
-            int complicationMarginPositionEnd,
-            int complicationMarginPositionBottom) {
-        HashMap<Integer, HashMap<Integer, Margins>> mapping = new HashMap<>();
-
-        final Margins startMargins = new Margins(complicationMarginPositionStart, 0, 0, 0);
-        final Margins topMargins = new Margins(0, complicationMarginPositionTop, 0, 0);
-        final Margins endMargins = new Margins(0, 0, complicationMarginPositionEnd, 0);
-        final Margins bottomMargins = new Margins(0, 0, 0, complicationMarginPositionBottom);
+    private static void updatePositionDirectionalMarginsMapping(
+            Map<Integer, HashMap<Integer, Margins>> mapping,
+            Margins complicationMargins) {
+        final Margins startMargins = new Margins(complicationMargins.start, 0, 0, 0);
+        final Margins topMargins = new Margins(0, complicationMargins.top, 0, 0);
+        final Margins endMargins = new Margins(0, 0, complicationMargins.end, 0);
+        final Margins bottomMargins = new Margins(0, 0, 0, complicationMargins.bottom);
 
         addToMapping(mapping, POSITION_START | POSITION_TOP, DIRECTION_END, topMargins);
         addToMapping(mapping, POSITION_START | POSITION_TOP, DIRECTION_DOWN, startMargins);
@@ -632,16 +637,36 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
 
         addToMapping(mapping, POSITION_END | POSITION_BOTTOM, DIRECTION_START, bottomMargins);
         addToMapping(mapping, POSITION_END | POSITION_BOTTOM, DIRECTION_UP, endMargins);
-
-        return mapping;
     }
 
-    private static void addToMapping(HashMap<Integer, HashMap<Integer, Margins>> mapping,
+    private static void addToMapping(Map<Integer, HashMap<Integer, Margins>> mapping,
             @Position int position, @Direction int direction, Margins margins) {
         if (!mapping.containsKey(position)) {
             mapping.put(position, new HashMap<>());
         }
         mapping.get(position).put(direction, margins);
+    }
+
+    /**
+     * Update margins on screen dimension change.
+      */
+    public void updateLayoutEngine(@NonNull Rect bounds) {
+        if (bounds.width() == mScreenBounds.width() && bounds.height() == mScreenBounds.height()) {
+            return;
+        }
+        mScreenBounds = bounds;
+        updatePositionDirectionalMarginsMapping(mPositionDirectionMarginMapping,
+                mComplicationMarginsProvider.get());
+
+        // update each position group and layout of entries
+        for (Integer position : mPositions.keySet()) {
+            PositionGroup positionGroup = mPositions.get(position);
+            positionGroup.updateDirectionalMargins(mPositionDirectionMarginMapping
+                    .get(position));
+            positionGroup.onEntriesChanged();
+        }
+        Log.d(TAG, "Updated margins for complications as screen size changed to width = "
+                + bounds.width() + "px, height = " + bounds.height() + "px.");
     }
 
     @Override
