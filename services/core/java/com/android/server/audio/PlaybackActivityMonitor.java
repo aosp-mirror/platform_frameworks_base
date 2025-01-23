@@ -435,6 +435,49 @@ public final class PlaybackActivityMonitor
     /**
      * Update event for port
      * @param portId Port id to update
+     * @param event the mute event containing info about the mute
+     * @param binderUid Calling binder uid
+     */
+    public void portMuteEvent(int portId, @PlayerMuteEvent int event, int binderUid) {
+        if (!UserHandle.isCore(binderUid)) {
+            Log.e(TAG, "Forbidden operation from uid " + binderUid);
+            return;
+        }
+
+        synchronized (mPlayerLock) {
+            int piid;
+            if (portToPiidSimplification()) {
+                int idxOfPiid = mPiidToPortId.indexOfValue(portId);
+                if (idxOfPiid < 0) {
+                    Log.w(TAG, "No piid assigned for invalid/internal port id " + portId);
+                    return;
+                }
+                piid = mPiidToPortId.keyAt(idxOfPiid);
+            } else {
+                piid = mPortIdToPiid.get(portId, PLAYER_PIID_INVALID);
+                if (piid == PLAYER_PIID_INVALID) {
+                    Log.w(TAG, "No piid assigned for invalid/internal port id " + portId);
+                    return;
+                }
+            }
+            final AudioPlaybackConfiguration apc = mPlayers.get(piid);
+            if (apc == null) {
+                Log.w(TAG, "No AudioPlaybackConfiguration assigned for piid " + piid);
+                return;
+            }
+
+            if (apc.getPlayerType()
+                    == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL) {
+                // FIXME SoundPool not ready for state reporting
+                return;
+            }
+            mEventHandler.sendMessage(
+                mEventHandler.obtainMessage(MSG_IIL_UPDATE_PLAYER_MUTED_EVENT, piid, event, null));
+        }
+    }
+   /**
+     * Update event for port
+     * @param portId Port id to update
      * @param event The new port event
      * @param extras The values associated with this event
      * @param binderUid Calling binder uid
@@ -479,15 +522,10 @@ public final class PlaybackActivityMonitor
                 return;
             }
 
-            if (event == AudioPlaybackConfiguration.PLAYER_UPDATE_MUTED) {
-                mEventHandler.sendMessage(
-                        mEventHandler.obtainMessage(MSG_IIL_UPDATE_PLAYER_MUTED_EVENT, piid,
-                                portId,
-                                extras));
-            } else if (event == AudioPlaybackConfiguration.PLAYER_UPDATE_FORMAT) {
+            if (event == AudioPlaybackConfiguration.PLAYER_UPDATE_FORMAT) {
                 mEventHandler.sendMessage(
                         mEventHandler.obtainMessage(MSG_IIL_UPDATE_PLAYER_FORMAT, piid,
-                                portId,
+                                -1,
                                 extras));
             }
         }
@@ -1695,9 +1733,7 @@ public final class PlaybackActivityMonitor
      * event for player getting muted
      * args:
      *     msg.arg1: piid
-     *     msg.arg2: port id
-     *     msg.obj: extras describing the mute reason
-     *         type: PersistableBundle
+     *     msg.arg2: mute reason
      */
     private static final int MSG_IIL_UPDATE_PLAYER_MUTED_EVENT = 2;
 
@@ -1705,7 +1741,6 @@ public final class PlaybackActivityMonitor
      * event for player reporting playback format and spatialization status
      * args:
      *     msg.arg1: piid
-     *     msg.arg2: port id
      *     msg.obj: extras describing the sample rate, channel mask, spatialized
      *         type: PersistableBundle
      */
@@ -1729,17 +1764,9 @@ public final class PlaybackActivityMonitor
                         break;
 
                     case MSG_IIL_UPDATE_PLAYER_MUTED_EVENT:
-                        // TODO: replace PersistableBundle with own struct
-                        PersistableBundle extras = (PersistableBundle) msg.obj;
-                        if (extras == null) {
-                            Log.w(TAG, "Received mute event with no extras");
-                            break;
-                        }
-                        @PlayerMuteEvent int eventValue = extras.getInt(EXTRA_PLAYER_EVENT_MUTE);
-
                         synchronized (mPlayerLock) {
                             int piid = msg.arg1;
-
+                            @PlayerMuteEvent int eventValue = msg.arg2;
 
                             int[] eventValues = new int[1];
                             eventValues[0] = eventValue;

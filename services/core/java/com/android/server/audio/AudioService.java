@@ -888,6 +888,16 @@ public class AudioService extends IAudioService.Stub
         public void permissionUpdateBarrier() {
             AudioService.this.permissionUpdateBarrier();
         }
+
+        /**
+         * Update mute state event for port
+         * @param portId Port id to update
+         * @param event the mute event containing info about the mute
+         */
+        @Override
+        public void portMuteEvent(int portId, int event) {
+            mPlaybackMonitor.portMuteEvent(portId, event, Binder.getCallingUid());
+        }
     };
 
     // List of binder death handlers for setMode() client processes.
