@@ -672,46 +672,6 @@ public class Transitions implements RemoteCallable<Transitions>,
         return -1;
     }
 
-    /**
-     * Look through a transition and see if all non-closing changes are no-animation. If so, no
-     * animation should play.
-     */
-    static boolean isAllNoAnimation(TransitionInfo info) {
-        if (isClosingType(info.getType())) {
-            // no-animation is only relevant for launching (open) activities.
-            return false;
-        }
-        boolean hasNoAnimation = false;
-        final int changeSize = info.getChanges().size();
-        for (int i = changeSize - 1; i >= 0; --i) {
-            final TransitionInfo.Change change = info.getChanges().get(i);
-            if (isClosingType(change.getMode())) {
-                // ignore closing apps since they are a side-effect of the transition and don't
-                // animate.
-                continue;
-            }
-            if (change.hasFlags(FLAG_NO_ANIMATION)) {
-                hasNoAnimation = true;
-            } else if (!TransitionUtil.isOrderOnly(change) && !change.hasFlags(FLAG_IS_OCCLUDED)) {
-                // Ignore the order only or occluded changes since they shouldn't be visible during
-                // animation. For anything else, we need to animate if at-least one relevant
-                // participant *is* animated,
-                return false;
-            }
-        }
-        return hasNoAnimation;
-    }
-
-    /**
-     * Check if all changes in this transition are only ordering changes. If so, we won't animate.
-     */
-    static boolean isAllOrderOnly(TransitionInfo info) {
-        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
-            if (!TransitionUtil.isOrderOnly(info.getChanges().get(i))) return false;
-        }
-        return true;
-    }
-
     private Track getOrCreateTrack(int trackId) {
         while (trackId >= mTracks.size()) {
             mTracks.add(new Track());

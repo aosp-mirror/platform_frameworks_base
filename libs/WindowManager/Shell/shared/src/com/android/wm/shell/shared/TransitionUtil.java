@@ -127,6 +127,46 @@ public class TransitionUtil {
     }
 
     /**
+     * Check if all changes in this transition are only ordering changes. If so, we won't animate.
+     */
+    public static boolean isAllOrderOnly(TransitionInfo info) {
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            if (!isOrderOnly(info.getChanges().get(i))) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Look through a transition and see if all non-closing changes are no-animation. If so, no
+     * animation should play.
+     */
+    public static boolean isAllNoAnimation(TransitionInfo info) {
+        if (isClosingType(info.getType())) {
+            // no-animation is only relevant for launching (open) activities.
+            return false;
+        }
+        boolean hasNoAnimation = false;
+        final int changeSize = info.getChanges().size();
+        for (int i = changeSize - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            if (isClosingType(change.getMode())) {
+                // ignore closing apps since they are a side-effect of the transition and don't
+                // animate.
+                continue;
+            }
+            if (change.hasFlags(TransitionInfo.FLAG_NO_ANIMATION)) {
+                hasNoAnimation = true;
+            } else if (!isOrderOnly(change) && !change.hasFlags(TransitionInfo.FLAG_IS_OCCLUDED)) {
+                // Ignore the order only or occluded changes since they shouldn't be visible during
+                // animation. For anything else, we need to animate if at-least one relevant
+                // participant *is* animated,
+                return false;
+            }
+        }
+        return hasNoAnimation;
+    }
+
+    /**
      * Filter that selects leaf-tasks only. THIS IS ORDER-DEPENDENT! For it to work properly, you
      * MUST call `test` in the same order that the changes appear in the TransitionInfo.
      */
