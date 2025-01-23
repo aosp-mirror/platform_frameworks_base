@@ -2872,7 +2872,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
 
         verify(mGroupHelper, times(1)).onChannelUpdated(eq(Process.myUserHandle().getIdentifier()),
-                eq(mPkg), eq(mTestNotificationChannel), any());
+                eq(mPkg), eq(mTestNotificationChannel), any(), any());
     }
 
     @Test

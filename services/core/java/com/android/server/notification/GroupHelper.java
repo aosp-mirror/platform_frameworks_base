@@ -146,18 +146,27 @@ public class GroupHelper {
     private static List<NotificationSectioner> NOTIFICATION_SHADE_SECTIONS =
             getNotificationShadeSections();
 
+    private static List<NotificationSectioner> NOTIFICATION_BUNDLE_SECTIONS;
+
     private static List<NotificationSectioner> getNotificationShadeSections() {
         ArrayList<NotificationSectioner> sectionsList = new ArrayList<>();
         if (android.service.notification.Flags.notificationClassification()) {
             sectionsList.addAll(List.of(
                 new NotificationSectioner("PromotionsSection", 0, (record) ->
-                    NotificationChannel.PROMOTIONS_ID.equals(record.getChannel().getId())),
+                        NotificationChannel.PROMOTIONS_ID.equals(record.getChannel().getId())
+                        && record.getImportance() < NotificationManager.IMPORTANCE_DEFAULT),
                 new NotificationSectioner("SocialSection", 0, (record) ->
-                    NotificationChannel.SOCIAL_MEDIA_ID.equals(record.getChannel().getId())),
+                        NotificationChannel.SOCIAL_MEDIA_ID.equals(record.getChannel().getId())
+                        && record.getImportance() < NotificationManager.IMPORTANCE_DEFAULT),
                 new NotificationSectioner("NewsSection", 0, (record) ->
-                    NotificationChannel.NEWS_ID.equals(record.getChannel().getId())),
+                        NotificationChannel.NEWS_ID.equals(record.getChannel().getId())
+                        && record.getImportance() < NotificationManager.IMPORTANCE_DEFAULT),
                 new NotificationSectioner("RecsSection", 0, (record) ->
-                    NotificationChannel.RECS_ID.equals(record.getChannel().getId()))));
+                        NotificationChannel.RECS_ID.equals(record.getChannel().getId())
+                        && record.getImportance() < NotificationManager.IMPORTANCE_DEFAULT)
+                ));
+
+            NOTIFICATION_BUNDLE_SECTIONS = new ArrayList<>(sectionsList);
         }
 
         if (Flags.notificationForceGroupConversations()) {
@@ -828,7 +837,7 @@ public class GroupHelper {
                     }
                     moveNotificationsToNewSection(record.getUserId(), pkgName,
                             List.of(new NotificationMoveOp(record, null, fullAggregateGroupKey)),
-                            REGROUP_REASON_BUNDLE);
+                            Map.of(record.getKey(), REGROUP_REASON_BUNDLE));
                     return;
                 }
             }
@@ -895,7 +904,12 @@ public class GroupHelper {
             return false;
         }
 
-        return NotificationChannel.SYSTEM_RESERVED_IDS.contains(record.getChannel().getId());
+        return isInBundleSection(record);
+    }
+
+    private static boolean isInBundleSection(final NotificationRecord record) {
+        final NotificationSectioner sectioner = getSection(record);
+        return (sectioner != null && NOTIFICATION_BUNDLE_SECTIONS.contains(sectioner));
     }
 
     /**
@@ -1084,10 +1098,10 @@ public class GroupHelper {
                                       FullyQualifiedGroupKey newGroup) { }
 
     /**
-     * Called when a notification channel is updated (channel attributes have changed),
-     * so that this helper can adjust the aggregate groups by moving children
-     * if their section has changed.
-     * see {@link #onNotificationPostedWithDelay(NotificationRecord, List, Map)}
+     * Called when a notification channel is updated (channel attributes have changed), so that this
+     * helper can adjust the aggregate groups by moving children if their section has changed. see
+     * {@link #onNotificationPostedWithDelay(NotificationRecord, List, Map)}
+     *
      * @param userId the userId of the channel
      * @param pkgName the channel's package
      * @param channel the channel that was updated
@@ -1095,19 +1109,30 @@ public class GroupHelper {
      */
     @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_FORCE_GROUPING)
     public void onChannelUpdated(final int userId, final String pkgName,
-            final NotificationChannel channel, final List<NotificationRecord> notificationList) {
+            final NotificationChannel channel, final List<NotificationRecord> notificationList,
+            ArrayMap<String, NotificationRecord> summaryByGroupKey) {
         synchronized (mAggregatedNotifications) {
+            final ArrayMap<String, Integer> regroupingReasonMap = new ArrayMap<>();
             ArrayMap<String, NotificationRecord> notificationsToCheck = new ArrayMap<>();
             for (NotificationRecord r : notificationList) {
                 if (r.getChannel().getId().equals(channel.getId())
                     && r.getSbn().getPackageName().equals(pkgName)
                     && r.getUserId() == userId) {
                     notificationsToCheck.put(r.getKey(), r);
+                    regroupingReasonMap.put(r.getKey(), REGROUP_REASON_CHANNEL_UPDATE);
+                    if (notificationRegroupOnClassification()) {
+                        // Notification is unbundled and original summary found
+                        // => regroup in original group
+                        if (!isInBundleSection(r)
+                                && isOriginalGroupSummaryPresent(r, summaryByGroupKey)) {
+                            regroupingReasonMap.put(r.getKey(),
+                                    REGROUP_REASON_UNBUNDLE_ORIGINAL_GROUP);
+                        }
+                    }
                 }
             }
 
-            regroupNotifications(userId, pkgName, notificationsToCheck,
-                    REGROUP_REASON_CHANNEL_UPDATE);
+            regroupNotifications(userId, pkgName, notificationsToCheck, regroupingReasonMap);
         }
     }
 
@@ -1124,8 +1149,10 @@ public class GroupHelper {
         synchronized (mAggregatedNotifications) {
             ArrayMap<String, NotificationRecord> notificationsToCheck = new ArrayMap<>();
             notificationsToCheck.put(record.getKey(), record);
+            ArrayMap<String, Integer> regroupReasons = new ArrayMap<>();
+            regroupReasons.put(record.getKey(), REGROUP_REASON_BUNDLE);
             regroupNotifications(record.getUserId(), record.getSbn().getPackageName(),
-                    notificationsToCheck, REGROUP_REASON_BUNDLE);
+                    notificationsToCheck, regroupReasons);
         }
     }
 
@@ -1144,16 +1171,16 @@ public class GroupHelper {
             ArrayMap<String, NotificationRecord> notificationsToCheck = new ArrayMap<>();
             notificationsToCheck.put(record.getKey(), record);
             regroupNotifications(record.getUserId(), record.getSbn().getPackageName(),
-                    notificationsToCheck,
-                    originalSummaryExists ? REGROUP_REASON_UNBUNDLE_ORIGINAL_GROUP
-                        : REGROUP_REASON_UNBUNDLE);
+                    notificationsToCheck, Map.of(record.getKey(),
+                        originalSummaryExists ? REGROUP_REASON_UNBUNDLE_ORIGINAL_GROUP
+                            : REGROUP_REASON_UNBUNDLE));
         }
     }
 
     @GuardedBy("mAggregatedNotifications")
     private void regroupNotifications(int userId, String pkgName,
             ArrayMap<String, NotificationRecord> notificationsToCheck,
-            @RegroupingReason int regroupingReason) {
+            Map<String, Integer> regroupReasons) {
         // The list of notification operations required after the channel update
         final ArrayList<NotificationMoveOp> notificationsToMove = new ArrayList<>();
 
@@ -1170,15 +1197,13 @@ public class GroupHelper {
 
         // Handle "grouped correctly" notifications that were re-classified (bundled)
         if (notificationRegroupOnClassification()) {
-            if (regroupingReason == REGROUP_REASON_BUNDLE) {
-                notificationsToMove.addAll(
-                        getReclassifiedNotificationsMoveOps(userId, pkgName, notificationsToCheck));
-            }
+            notificationsToMove.addAll(
+                    getReclassifiedNotificationsMoveOps(userId, pkgName, notificationsToCheck));
         }
 
         // Batch move to new section
         if (!notificationsToMove.isEmpty()) {
-            moveNotificationsToNewSection(userId, pkgName, notificationsToMove, regroupingReason);
+            moveNotificationsToNewSection(userId, pkgName, notificationsToMove, regroupReasons);
         }
     }
 
@@ -1187,9 +1212,9 @@ public class GroupHelper {
         final ArrayList<NotificationMoveOp> notificationsToMove = new ArrayList<>();
         for (NotificationRecord record : notificationsToCheck.values()) {
             if (isChildOfValidAppGroup(record)) {
-                // Check if section changes
+                // Check if section changes to a bundle section
                 NotificationSectioner sectioner = getSection(record);
-                if (sectioner != null) {
+                if (sectioner != null && NOTIFICATION_BUNDLE_SECTIONS.contains(sectioner)) {
                     FullyQualifiedGroupKey newFullAggregateGroupKey =
                             new FullyQualifiedGroupKey(userId, pkgName, sectioner);
                     if (DEBUG) {
@@ -1202,6 +1227,24 @@ public class GroupHelper {
             }
         }
         return notificationsToMove;
+    }
+
+    /**
+     *  Checks if the original group's summary exists for a notification that was regrouped
+     * @param r notification to check
+     * @param summaryByGroupKey map of the current group summaries
+     * @return true if the original group summary exists
+     */
+    public static boolean isOriginalGroupSummaryPresent(final NotificationRecord r,
+            final ArrayMap<String, NotificationRecord> summaryByGroupKey) {
+        if (r.getSbn().isAppGroup() && r.getNotification().isGroupChild()) {
+            final String oldGroupKey = GroupHelper.getFullAggregateGroupKey(
+                    r.getSbn().getPackageName(), r.getOriginalGroupKey(), r.getUserId());
+            NotificationRecord groupSummary = summaryByGroupKey.get(oldGroupKey);
+            // We only care about app-provided valid groups
+            return (groupSummary != null && !GroupHelper.isAggregatedGroup(groupSummary));
+        }
+        return false;
     }
 
     @GuardedBy("mAggregatedNotifications")
@@ -1298,7 +1341,8 @@ public class GroupHelper {
 
     @GuardedBy("mAggregatedNotifications")
     private void moveNotificationsToNewSection(final int userId, final String pkgName,
-            final List<NotificationMoveOp> notificationsToMove, int regroupingReason) {
+            final List<NotificationMoveOp> notificationsToMove,
+            final Map<String, Integer> regroupReasons) {
         record GroupUpdateOp(FullyQualifiedGroupKey groupKey, NotificationRecord record,
                              boolean hasSummary) { }
         // Bundled operations to apply to groups affected by the channel update
@@ -1317,7 +1361,7 @@ public class GroupHelper {
                 Log.i(TAG,
                     "moveNotificationToNewSection: " + record + " " + newFullAggregateGroupKey
                             + " from: " + oldFullAggregateGroupKey + " regroupingReason: "
-                            + regroupingReason);
+                            + regroupReasons);
             }
 
             // Update/remove aggregate summary for old group
@@ -1347,7 +1391,8 @@ public class GroupHelper {
             // after all notifications have been handled
             if (newFullAggregateGroupKey != null) {
                 if (notificationRegroupOnClassification()
-                        && regroupingReason == REGROUP_REASON_UNBUNDLE_ORIGINAL_GROUP) {
+                    && regroupReasons.getOrDefault(record.getKey(), REGROUP_REASON_CHANNEL_UPDATE)
+                        == REGROUP_REASON_UNBUNDLE_ORIGINAL_GROUP) {
                     // Just reset override group key, original summary exists
                     // => will be grouped back to its original group
                     record.setOverrideGroupKey(null);
