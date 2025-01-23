@@ -175,9 +175,9 @@ java_library {
 }
 
 java_device_for_host {
-    name: "ravenwood-junit-impl-for-ravenizer",
+    name: "ravenwood-junit-for-ravenizer",
     libs: [
-        "ravenwood-junit-impl",
+        "ravenwood-junit",
     ],
     visibility: [":__subpackages__"],
 }
