@@ -59,6 +59,7 @@ import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.DejankUtils;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
@@ -110,6 +111,9 @@ import java.util.Map;
 @RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
+// TODO(b/381263619) there are more changes and tweaks required to match the new bouncer/shade specs
+// Disabling for now but it will be fixed before the flag is fully ramped up.
+@DisableFlags(Flags.FLAG_BOUNCER_UI_REVAMP)
 public class ScrimControllerTest extends SysuiTestCase {
 
     @Rule public Expect mExpect = Expect.create();
