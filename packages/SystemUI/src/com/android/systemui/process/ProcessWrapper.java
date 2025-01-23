@@ -27,12 +27,8 @@ import javax.inject.Inject;
  * providing a mockable target around these details.
  */
 public class ProcessWrapper {
-    private final ActivityManager mActivityManager;
-
     @Inject
-    public ProcessWrapper(ActivityManager activityManager) {
-        mActivityManager = activityManager;
-    }
+    public ProcessWrapper() {}
 
     /**
      * Returns {@code true} if System User is running the current process.
@@ -42,10 +38,10 @@ public class ProcessWrapper {
     }
 
     /**
-     * Returns {@code true} if the foreground user or profile is running the current process.
+     * Returns {@code true} if the foreground user is running the current process.
      */
-    public boolean isForegroundUserOrProfile() {
-        return mActivityManager.isProfileForeground(myUserHandle());
+    public boolean isForegroundUser() {
+        return ActivityManager.getCurrentUser() == myUserHandle().getIdentifier();
     }
 
     /**

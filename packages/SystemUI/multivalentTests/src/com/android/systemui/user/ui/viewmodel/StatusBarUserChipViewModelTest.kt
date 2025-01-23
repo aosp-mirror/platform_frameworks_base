@@ -265,7 +265,7 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
                     guestUserInteractor = guestUserInteractor,
                     uiEventLogger = uiEventLogger,
                     userRestrictionChecker = mock(),
-                    processWrapper = ProcessWrapperFake(activityManager)
+                    processWrapper = ProcessWrapperFake()
                 )
         )
     }
