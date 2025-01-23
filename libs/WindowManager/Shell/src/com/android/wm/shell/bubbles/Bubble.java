@@ -28,6 +28,7 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Person;
+import android.app.TaskInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.LocusId;
@@ -57,6 +58,7 @@ import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.bubbles.BubbleInfo;
 import com.android.wm.shell.shared.bubbles.ParcelableFlyoutMessage;
+import com.android.wm.shell.taskview.TaskView;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -204,6 +206,13 @@ public class Bubble implements BubbleViewProvider {
     private Intent mAppIntent;
 
     /**
+     * Set while preparing a transition for animation. Several steps are needed before animation
+     * starts, so this is used to detect and route associated events to the coordinating transition.
+     */
+    @Nullable
+    private BubbleTransitions.BubbleTransition mPreparingTransition;
+
+    /**
      * Create a bubble with limited information based on given {@link ShortcutInfo}.
      * Note: Currently this is only being used when the bubble is persisted to disk.
      */
@@ -280,6 +289,30 @@ public class Bubble implements BubbleViewProvider {
         mShortcutInfo = info;
     }
 
+    private Bubble(
+            TaskInfo task,
+            UserHandle user,
+            @Nullable Icon icon,
+            String key,
+            @ShellMainThread Executor mainExecutor,
+            @ShellBackgroundThread Executor bgExecutor) {
+        mGroupKey = null;
+        mLocusId = null;
+        mFlags = 0;
+        mUser = user;
+        mIcon = icon;
+        mIsAppBubble = true;
+        mKey = key;
+        mShowBubbleUpdateDot = false;
+        mMainExecutor = mainExecutor;
+        mBgExecutor = bgExecutor;
+        mTaskId = task.taskId;
+        mAppIntent = null;
+        mDesiredHeight = Integer.MAX_VALUE;
+        mPackageName = task.baseActivity.getPackageName();
+    }
+
+
     /** Creates an app bubble. */
     public static Bubble createAppBubble(Intent intent, UserHandle user, @Nullable Icon icon,
             @ShellMainThread Executor mainExecutor, @ShellBackgroundThread Executor bgExecutor) {
@@ -288,6 +321,16 @@ public class Bubble implements BubbleViewProvider {
                 icon,
                 /* isAppBubble= */ true,
                 /* key= */ getAppBubbleKeyForApp(intent.getPackage(), user),
+                mainExecutor, bgExecutor);
+    }
+
+    /** Creates a task bubble. */
+    public static Bubble createTaskBubble(TaskInfo info, UserHandle user, @Nullable Icon icon,
+            @ShellMainThread Executor mainExecutor, @ShellBackgroundThread Executor bgExecutor) {
+        return new Bubble(info,
+                user,
+                icon,
+                getAppBubbleKeyForTask(info),
                 mainExecutor, bgExecutor);
     }
 
@@ -314,6 +357,15 @@ public class Bubble implements BubbleViewProvider {
      */
     public static String getBubbleKeyForShortcut(ShortcutInfo info) {
         return info.getPackage() + ":" + info.getUserId() + ":" + info.getId();
+    }
+
+    /**
+     * Returns the key for an app bubble from an app with package name, {@code packageName} on an
+     * Android user, {@code user}.
+     */
+    public static String getAppBubbleKeyForTask(TaskInfo taskInfo) {
+        Objects.requireNonNull(taskInfo);
+        return KEY_APP_BUBBLE + ":" + taskInfo.taskId;
     }
 
     @VisibleForTesting(visibility = PRIVATE)
@@ -469,6 +521,10 @@ public class Bubble implements BubbleViewProvider {
         return mBubbleTaskView;
     }
 
+    public TaskView getTaskView() {
+        return mBubbleTaskView.getTaskView();
+    }
+
     /**
      * @return the ShortcutInfo id if it exists, or the metadata shortcut id otherwise.
      */
@@ -484,6 +540,10 @@ public class Bubble implements BubbleViewProvider {
 
     boolean hasMetadataShortcutId() {
         return (mMetadataShortcutId != null && !mMetadataShortcutId.isEmpty());
+    }
+
+    BubbleTransitions.BubbleTransition getPreparingTransition() {
+        return mPreparingTransition;
     }
 
     /**
@@ -553,6 +613,13 @@ public class Bubble implements BubbleViewProvider {
     @VisibleForTesting
     void setInflateSynchronously(boolean inflateSynchronously) {
         mInflateSynchronously = inflateSynchronously;
+    }
+
+    /**
+     * Sets the current bubble-transition that is coordinating a change in this bubble.
+     */
+    void setPreparingTransition(BubbleTransitions.BubbleTransition transit) {
+        mPreparingTransition = transit;
     }
 
     /**

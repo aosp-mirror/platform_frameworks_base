@@ -92,6 +92,10 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         getHolder().addCallback(this);
     }
 
+    public TaskViewTaskController getController() {
+        return mTaskViewTaskController;
+    }
+
     /**
      * Launch a new activity.
      *

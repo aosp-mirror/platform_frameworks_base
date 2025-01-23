@@ -22,6 +22,7 @@ import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 
 import android.annotation.NonNull;
 import android.app.PendingIntent;
+import android.app.TaskInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.LocusId;
@@ -466,6 +467,17 @@ public class BubbleData {
         Bubble bubbleToReturn = findAndRemoveBubbleFromOverflow(bubbleKey);
         if (bubbleToReturn == null) {
             bubbleToReturn = Bubble.createAppBubble(intent, user, null, mMainExecutor, mBgExecutor);
+        }
+        return bubbleToReturn;
+    }
+
+    Bubble getOrCreateBubble(TaskInfo taskInfo) {
+        UserHandle user = UserHandle.of(mCurrentUserId);
+        String bubbleKey = Bubble.getAppBubbleKeyForTask(taskInfo);
+        Bubble bubbleToReturn = findAndRemoveBubbleFromOverflow(bubbleKey);
+        if (bubbleToReturn == null) {
+            bubbleToReturn = Bubble.createTaskBubble(taskInfo, user, null, mMainExecutor,
+                    mBgExecutor);
         }
         return bubbleToReturn;
     }

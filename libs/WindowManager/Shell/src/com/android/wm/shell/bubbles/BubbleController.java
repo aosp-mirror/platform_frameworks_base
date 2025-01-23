@@ -110,6 +110,7 @@ import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
 import com.android.wm.shell.shared.bubbles.BubbleBarUpdate;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
@@ -287,6 +288,8 @@ public class BubbleController implements ConfigurationChangeListener,
     /** Used to send updates to the views from {@link #mBubbleDataListener}. */
     private BubbleViewCallback mBubbleViewCallback;
 
+    private final BubbleTransitions mBubbleTransitions;
+
     public BubbleController(Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
@@ -350,12 +353,16 @@ public class BubbleController implements ConfigurationChangeListener,
                 context.getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.importance_ring_stroke_width));
         mDisplayController = displayController;
+        final TaskViewTransitions tvTransitions;
         if (TaskViewTransitions.useRepo()) {
-            mTaskViewController = new TaskViewTransitions(transitions, taskViewRepository,
-                    organizer, syncQueue);
+            tvTransitions = new TaskViewTransitions(transitions, taskViewRepository, organizer,
+                    syncQueue);
         } else {
-            mTaskViewController = taskViewTransitions;
+            tvTransitions = taskViewTransitions;
         }
+        mTaskViewController = tvTransitions;
+        mBubbleTransitions = new BubbleTransitions(transitions, organizer, taskViewRepository, data,
+                tvTransitions, context);
         mTransitions = transitions;
         mOneHandedOptional = oneHandedOptional;
         mDragAndDropController = dragAndDropController;
@@ -1456,7 +1463,19 @@ public class BubbleController implements ConfigurationChangeListener,
      * @param taskInfo the task.
      */
     public void expandStackAndSelectBubble(ActivityManager.RunningTaskInfo taskInfo) {
-        // TODO(384976265): Not implemented yet
+        if (!BubbleAnythingFlagHelper.enableBubbleToFullscreen()) return;
+        Bubble b = mBubbleData.getOrCreateBubble(taskInfo); // Removes from overflow
+        ProtoLog.v(WM_SHELL_BUBBLES, "expandStackAndSelectBubble - intent=%s", taskInfo.taskId);
+        if (b.isInflated()) {
+            mBubbleData.setSelectedBubbleAndExpandStack(b);
+        } else {
+            b.enable(Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE);
+            // Lazy init stack view when a bubble is created
+            ensureBubbleViewsAndWindowCreated();
+            mBubbleTransitions.startConvertToBubble(b, taskInfo, mExpandedViewManager,
+                    mBubbleTaskViewFactory, mBubblePositioner, mLogger, mStackView, mLayerView,
+                    mBubbleIconFactory, mInflateSynchronously);
+        }
     }
 
     /**
@@ -2261,9 +2280,16 @@ public class BubbleController implements ConfigurationChangeListener,
 
     private void showExpandedViewForBubbleBar() {
         BubbleViewProvider selectedBubble = mBubbleData.getSelectedBubble();
-        if (selectedBubble != null && mLayerView != null) {
-            mLayerView.showExpandedView(selectedBubble);
+        if (selectedBubble == null) return;
+        if (selectedBubble instanceof Bubble) {
+            final Bubble bubble = (Bubble) selectedBubble;
+            if (bubble.getPreparingTransition() != null) {
+                bubble.getPreparingTransition().continueExpand();
+                return;
+            }
         }
+        if (mLayerView == null) return;
+        mLayerView.showExpandedView(selectedBubble);
     }
 
     private void collapseExpandedViewForBubbleBar() {
