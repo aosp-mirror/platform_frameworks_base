@@ -534,6 +534,16 @@ flag {
 }
 
 flag {
+    name: "indication_text_a11y_fix"
+    namespace: "systemui"
+    description: "add double shadow to the indication text at the bottom of the lock screen"
+    bug: "349297241"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
    name: "rest_to_unlock"
    namespace: "systemui"
    description: "Require prolonged touch for fingerprint authentication"
