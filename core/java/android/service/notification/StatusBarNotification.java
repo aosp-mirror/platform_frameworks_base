@@ -18,6 +18,8 @@ package android.service.notification;
 
 import static android.text.TextUtils.formatSimple;
 
+import static com.android.window.flags.Flags.enablePerDisplayPackageContextCacheInStatusbarNotif;
+
 import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -37,9 +39,9 @@ import android.util.ArrayMap;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import static com.android.window.flags.Flags.enablePerDisplayPackageContextCacheInStatusbarNotif;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -81,7 +83,8 @@ public class StatusBarNotification implements Parcelable {
     @Deprecated
     private Context mContext; // used for inflation & icon expansion
     // Maps display id to context used for remote view content inflation and status bar icon.
-    private final Map<Integer, Context> mContextForDisplayId = new ArrayMap<>();
+    private final Map<Integer, Context> mContextForDisplayId =
+            Collections.synchronizedMap(new ArrayMap<>());
 
     /** @hide */
     public StatusBarNotification(String pkg, String opPkg, int id,
