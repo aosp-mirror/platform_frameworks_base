@@ -222,7 +222,8 @@ public final class UiAutomation {
 
     private OnAccessibilityEventListener mOnAccessibilityEventListener;
 
-    private boolean mWaitingForEventDelivery;
+    // Count the nested clients waiting for data delivery
+    private int mCurrentEventWatchersCount = 0;
 
     private long mLastEventTimeMillis;
 
@@ -1132,73 +1133,70 @@ public final class UiAutomation {
      */
     public AccessibilityEvent executeAndWaitForEvent(Runnable command,
             AccessibilityEventFilter filter, long timeoutMillis) throws TimeoutException {
+        int watchersDepth;
+        // Track events added after the index for this command, it is to support nested calls.
+        // This doesn't support concurrent calls correctly.
+        int eventQueueStartIndex;
+        final long executionStartTimeMillis;
+
         // Acquire the lock and prepare for receiving events.
         synchronized (mLock) {
             throwIfNotConnectedLocked();
-            mEventQueue.clear();
-            // Prepare to wait for an event.
-            mWaitingForEventDelivery = true;
+            watchersDepth = ++mCurrentEventWatchersCount;
+            executionStartTimeMillis = SystemClock.uptimeMillis();
+            eventQueueStartIndex = mEventQueue.size();
+        }
+        if (DEBUG) {
+            Log.d(LOG_TAG, "executeAndWaitForEvent: watchersCount=" + watchersDepth
+                    + ", eventQueueStartIndex=" + eventQueueStartIndex);
         }
 
-        // Note: We have to release the lock since calling out with this lock held
-        // can bite. We will correctly filter out events from other interactions,
-        // so starting to collect events before running the action is just fine.
-
-        // We will ignore events from previous interactions.
-        final long executionStartTimeMillis = SystemClock.uptimeMillis();
-        // Execute the command *without* the lock being held.
-        command.run();
-
-        List<AccessibilityEvent> receivedEvents = new ArrayList<>();
-
-        // Acquire the lock and wait for the event.
         try {
-            // Wait for the event.
+            // Execute the command *without* the lock being held.
+            command.run();
+            synchronized (mLock) {
+                if (watchersDepth != mCurrentEventWatchersCount) {
+                    throw new IllegalStateException("Unexpected event watchers count, expected: "
+                            + watchersDepth + ", actual: " + mCurrentEventWatchersCount);
+                }
+            }
             final long startTimeMillis = SystemClock.uptimeMillis();
-            while (true) {
-                List<AccessibilityEvent> localEvents = new ArrayList<>();
+            List<AccessibilityEvent> receivedEvents = new ArrayList<>();
+            long elapsedTimeMillis = 0;
+            int currentQueueSize = 0;
+            while (timeoutMillis > elapsedTimeMillis) {
+                AccessibilityEvent event = null;
                 synchronized (mLock) {
-                    localEvents.addAll(mEventQueue);
-                    mEventQueue.clear();
-                }
-                // Drain the event queue
-                while (!localEvents.isEmpty()) {
-                    AccessibilityEvent event = localEvents.remove(0);
-                    // Ignore events from previous interactions.
-                    if (event.getEventTime() < executionStartTimeMillis) {
-                        continue;
-                    }
-                    if (filter.accept(event)) {
-                        return event;
-                    }
-                    receivedEvents.add(event);
-                }
-                // Check if timed out and if not wait.
-                final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
-                final long remainingTimeMillis = timeoutMillis - elapsedTimeMillis;
-                if (remainingTimeMillis <= 0) {
-                    throw new TimeoutException("Expected event not received within: "
-                            + timeoutMillis + " ms among: " + receivedEvents);
-                }
-                synchronized (mLock) {
-                    if (mEventQueue.isEmpty()) {
+                    currentQueueSize = mEventQueue.size();
+                    if (eventQueueStartIndex < currentQueueSize) {
+                        event = mEventQueue.get(eventQueueStartIndex++);
+                    } else {
                         try {
-                            mLock.wait(remainingTimeMillis);
+                            mLock.wait(timeoutMillis - elapsedTimeMillis);
                         } catch (InterruptedException ie) {
                             /* ignore */
                         }
                     }
                 }
+                elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
+                if (event == null || event.getEventTime() < executionStartTimeMillis) {
+                    continue;
+                }
+                if (filter.accept(event)) {
+                    return event;
+                }
+                receivedEvents.add(event);
             }
+            if (eventQueueStartIndex < currentQueueSize) {
+                Log.w(LOG_TAG, "Timed out before reading all events from the queue");
+            }
+            throw new TimeoutException("Expected event not received before timeout, events: "
+                    + receivedEvents);
         } finally {
-            int size = receivedEvents.size();
-            for (int i = 0; i < size; i++) {
-                receivedEvents.get(i).recycle();
-            }
-
             synchronized (mLock) {
-                mWaitingForEventDelivery = false;
-                mEventQueue.clear();
+                if (--mCurrentEventWatchersCount == 0) {
+                    mEventQueue.clear();
+                }
                 mLock.notifyAll();
             }
         }
@@ -1957,7 +1955,7 @@ public final class UiAutomation {
                         // It is not guaranteed that the accessibility framework sends events by the
                         // order of event timestamp.
                         mLastEventTimeMillis = Math.max(mLastEventTimeMillis, event.getEventTime());
-                        if (mWaitingForEventDelivery) {
+                        if (mCurrentEventWatchersCount > 0) {
                             mEventQueue.add(AccessibilityEvent.obtain(event));
                         }
                         mLock.notifyAll();
