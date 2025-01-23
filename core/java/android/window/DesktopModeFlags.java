@@ -35,6 +35,10 @@ import java.util.function.BooleanSupplier;
  * windowing features which are aiming for developer preview before their release. It allows
  * developer option to override the default behavior of these flags.
  *
+ * <p> The flags here will be controlled by either {@link
+ * Settings.Global#DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES} or the {@code
+ * persyst.wm.debug.desktop_experience_devopts} system property.
+ *
  * <p>NOTE: Flags should only be added to this enum when they have received Product and UX
  * alignment that the feature is ready for developer preview, otherwise just do a flag check.
  *
@@ -110,7 +114,7 @@ public enum DesktopModeFlags {
 
         /**
          * Determines state of flag based on the actual flag and desktop mode developer option
-         * overrides.
+         * or desktop experience developer option overrides.
          */
         public boolean isTrue() {
             return isFlagTrue(mFlagFunction, mShouldOverrideByDevOption);
