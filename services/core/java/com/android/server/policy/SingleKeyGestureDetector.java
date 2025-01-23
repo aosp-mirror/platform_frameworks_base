@@ -24,6 +24,8 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.ViewConfiguration;
 
+import com.android.hardware.input.Flags;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -355,6 +357,19 @@ public final class SingleKeyGestureDetector {
         }
 
         if (event.getKeyCode() == mActiveRule.mKeyCode) {
+            if (Flags.abortSlowMultiPress()
+                    && (event.getEventTime() - mLastDownTime
+                            >= mActiveRule.getLongPressTimeoutMs())) {
+                // In this case, we are either on a first long press (but long press behavior is not
+                // supported for this rule), or, on a non-first press that is at least as long as
+                // the long-press duration. Thus, we will cancel the multipress gesture.
+                if (DEBUG) {
+                    Log.d(TAG, "The duration of the press is too slow. Resetting.");
+                }
+                reset();
+                return false;
+            }
+
             // key-up action should always be triggered if not processed by long press.
             MessageObject object = new MessageObject(mActiveRule, mActiveRule.mKeyCode,
                     mKeyPressCounter, event);

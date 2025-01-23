@@ -225,3 +225,13 @@ flag {
     description: "Removes modifiers from the original key event that activated the fallback, ensuring that only the intended fallback event is sent."
     bug: "382545048"
 }
+
+flag {
+    name: "abort_slow_multi_press"
+    namespace: "wear_frameworks"
+    description: "If a press that's a part of a multipress takes too long, the multipress gesture will be cancelled."
+    bug: "370095426"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
