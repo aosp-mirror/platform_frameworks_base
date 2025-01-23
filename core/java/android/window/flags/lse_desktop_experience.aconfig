@@ -556,3 +556,10 @@ flag {
        purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "show_desktop_experience_dev_option"
+    namespace: "lse_desktop_experience"
+    description: "Replace the freeform windowing dev options with a desktop experience one."
+    bug: "389092752"
+}

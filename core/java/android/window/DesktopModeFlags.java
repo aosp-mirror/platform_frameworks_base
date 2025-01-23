@@ -20,12 +20,13 @@ import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.content.ContentResolver;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Log;
 
 import com.android.window.flags.Flags;
 
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 
 /**
  * Checks desktop mode flag state.
@@ -90,9 +91,35 @@ public enum DesktopModeFlags {
     INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC(
             Flags::includeTopTransparentFullscreenTaskInDesktopHeuristic, true);
 
-    private static final String TAG = "DesktopModeFlagsUtil";
+    /**
+     * Flag class, to be used in case the enum cannot be used because the flag is not accessible.
+     *
+     * <p> This class will still use the process-wide cache.
+     */
+    public static class DesktopModeFlag {
+        // Function called to obtain aconfig flag value.
+        private final BooleanSupplier mFlagFunction;
+        // Whether the flag state should be affected by developer option.
+        private final boolean mShouldOverrideByDevOption;
+
+        public DesktopModeFlag(BooleanSupplier flagFunction, boolean shouldOverrideByDevOption) {
+            this.mFlagFunction = flagFunction;
+            this.mShouldOverrideByDevOption = shouldOverrideByDevOption;
+        }
+
+        /**
+         * Determines state of flag based on the actual flag and desktop mode developer option
+         * overrides.
+         */
+        public boolean isTrue() {
+            return isFlagTrue(mFlagFunction, mShouldOverrideByDevOption);
+        }
+
+    }
+
+    private static final String TAG = "DesktopModeFlags";
     // Function called to obtain aconfig flag value.
-    private final Supplier<Boolean> mFlagFunction;
+    private final BooleanSupplier mFlagFunction;
     // Whether the flag state should be affected by developer option.
     private final boolean mShouldOverrideByDevOption;
 
@@ -100,7 +127,9 @@ public enum DesktopModeFlags {
     // be refreshed only on reboots as overridden state is expected to take effect on reboots.
     private static ToggleOverride sCachedToggleOverride;
 
-    DesktopModeFlags(Supplier<Boolean> flagFunction, boolean shouldOverrideByDevOption) {
+    public static final String SYSTEM_PROPERTY_NAME = "persist.wm.debug.desktop_experience_devopts";
+
+    DesktopModeFlags(BooleanSupplier flagFunction, boolean shouldOverrideByDevOption) {
         this.mFlagFunction = flagFunction;
         this.mShouldOverrideByDevOption = shouldOverrideByDevOption;
     }
@@ -110,24 +139,42 @@ public enum DesktopModeFlags {
      * overrides.
      */
     public boolean isTrue() {
-        Application application = ActivityThread.currentApplication();
-        if (!Flags.showDesktopWindowingDevOption()
-                || !mShouldOverrideByDevOption
-                || application == null) {
-            return mFlagFunction.get();
-        } else {
-            boolean shouldToggleBeEnabledByDefault = Flags.enableDesktopWindowingMode();
-            return switch (getToggleOverride(application.getContentResolver())) {
-                case OVERRIDE_UNSET -> mFlagFunction.get();
-                // When toggle override matches its default state, don't override flags. This
-                // helps users reset their feature overrides.
-                case OVERRIDE_OFF -> !shouldToggleBeEnabledByDefault && mFlagFunction.get();
-                case OVERRIDE_ON -> shouldToggleBeEnabledByDefault ? mFlagFunction.get() : true;
-            };
-        }
+        return isFlagTrue(mFlagFunction, mShouldOverrideByDevOption);
     }
 
-    private ToggleOverride getToggleOverride(ContentResolver contentResolver) {
+    private static boolean isFlagTrue(BooleanSupplier flagFunction,
+            boolean shouldOverrideByDevOption) {
+        if (!shouldOverrideByDevOption) return flagFunction.getAsBoolean();
+        if (Flags.showDesktopExperienceDevOption()) {
+            return switch (getToggleOverride(null)) {
+                case OVERRIDE_UNSET, OVERRIDE_OFF -> flagFunction.getAsBoolean();
+                case OVERRIDE_ON -> true;
+            };
+        }
+        if (Flags.showDesktopWindowingDevOption()) {
+            Application application = ActivityThread.currentApplication();
+            if (application == null) {
+                Log.w(TAG, "Could not get the current application.");
+                return flagFunction.getAsBoolean();
+            }
+            ContentResolver contentResolver = application.getContentResolver();
+            if (contentResolver == null) {
+                Log.w(TAG, "Could not get the content resolver for the application.");
+                return flagFunction.getAsBoolean();
+            }
+            boolean shouldToggleBeEnabledByDefault = Flags.enableDesktopWindowingMode();
+            return switch (getToggleOverride(contentResolver)) {
+                case OVERRIDE_UNSET -> flagFunction.getAsBoolean();
+                // When toggle override matches its default state, don't override flags. This
+                // helps users reset their feature overrides.
+                case OVERRIDE_OFF -> !shouldToggleBeEnabledByDefault && flagFunction.getAsBoolean();
+                case OVERRIDE_ON -> !shouldToggleBeEnabledByDefault || flagFunction.getAsBoolean();
+            };
+        }
+        return flagFunction.getAsBoolean();
+    }
+
+    private static ToggleOverride getToggleOverride(@Nullable ContentResolver contentResolver) {
         // If cached, return it
         if (sCachedToggleOverride != null) {
             return sCachedToggleOverride;
@@ -143,12 +190,21 @@ public enum DesktopModeFlags {
     /**
      *  Returns {@link ToggleOverride} from Settings.Global set by toggle.
      */
-    private ToggleOverride getToggleOverrideFromSystem(ContentResolver contentResolver) {
-        int settingValue = Settings.Global.getInt(
-                contentResolver,
-                Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES,
-                ToggleOverride.OVERRIDE_UNSET.getSetting()
-        );
+    private static ToggleOverride getToggleOverrideFromSystem(
+            @Nullable ContentResolver contentResolver) {
+        int settingValue;
+        if (Flags.showDesktopExperienceDevOption()) {
+            settingValue = SystemProperties.getInt(
+                    SYSTEM_PROPERTY_NAME,
+                    ToggleOverride.OVERRIDE_UNSET.getSetting()
+            );
+        } else {
+            settingValue = Settings.Global.getInt(
+                    contentResolver,
+                    Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES,
+                    ToggleOverride.OVERRIDE_UNSET.getSetting()
+            );
+        }
         return ToggleOverride.fromSetting(settingValue, ToggleOverride.OVERRIDE_UNSET);
     }
 

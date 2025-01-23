@@ -218,6 +218,13 @@ public class DesktopModeStatus {
         return isDeviceEligibleForDesktopMode(context) && Flags.showDesktopWindowingDevOption();
     }
 
+    /**
+     * Return {@code true} if desktop mode dev option should be shown on current device
+     */
+    public static boolean canShowDesktopExperienceDevOption(@NonNull Context context) {
+        return Flags.showDesktopExperienceDevOption();
+    }
+
     /** Returns if desktop mode dev option should be enabled if there is no user override. */
     public static boolean shouldDevOptionBeEnabledByDefault() {
         return Flags.enableDesktopWindowingMode();
@@ -290,7 +297,7 @@ public class DesktopModeStatus {
     /**
      * Return {@code true} if desktop mode is unrestricted and is supported in the device.
      */
-    private static boolean isDeviceEligibleForDesktopMode(@NonNull Context context) {
+    public static boolean isDeviceEligibleForDesktopMode(@NonNull Context context) {
         return !enforceDeviceRestrictions() || isDesktopModeSupported(context);
     }
 

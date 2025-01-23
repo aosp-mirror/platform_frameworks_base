@@ -13788,6 +13788,16 @@ public final class Settings {
                 = "enable_freeform_support";
 
         /**
+         * Whether to override the availability of the desktop experiences features on the
+         * device. With desktop experiences enabled, secondary displays can be used to run
+         * apps, in desktop mode by default. Otherwise they can only be used for mirroring.
+         * @hide
+         */
+        @Readable
+        public static final String DEVELOPMENT_OVERRIDE_DESKTOP_EXPERIENCE_FEATURES =
+                "override_desktop_experience_features";
+
+        /**
          * Whether to override the availability of the desktop mode on the main display of the
          * device. If on, users can make move an app to the desktop, allowing a freeform windowing
          * experience.
