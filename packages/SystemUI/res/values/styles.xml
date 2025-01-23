@@ -176,15 +176,9 @@
 
     <style name="TextAppearance.QS.Status">
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:textColor">?attr/onSurface</item>
+        <item name="android:textColor">@color/shade_header_text_color</item>
         <item name="android:textSize">14sp</item>
         <item name="android:letterSpacing">0.01</item>
-    </style>
-
-    <style name="TextAppearance.QS.Status.Carriers" />
-
-    <style name="TextAppearance.QS.Status.Carriers.NoCarrierText">
-        <item name="android:textColor">?attr/onSurfaceVariant</item>
     </style>
 
     <style name="TextAppearance.QS.Status.Build">

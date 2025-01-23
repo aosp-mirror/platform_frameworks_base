@@ -296,7 +296,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
 
         verify(clock).setTextAppearance(R.style.TextAppearance_QS_Status)
         verify(date).setTextAppearance(R.style.TextAppearance_QS_Status)
-        verify(carrierGroup).updateTextAppearance(R.style.TextAppearance_QS_Status_Carriers)
+        verify(carrierGroup).updateTextAppearance(R.style.TextAppearance_QS_Status)
     }
 
     @Test

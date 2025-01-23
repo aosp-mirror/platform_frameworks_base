@@ -24,6 +24,7 @@
     <color name="qs_tile_divider">#29ffffff</color><!-- 16% white -->
     <color name="qs_detail_button_white">#B3FFFFFF</color><!-- 70% white -->
     <color name="status_bar_clock_color">#FFFFFFFF</color>
+    <color name="shade_header_text_color">#FFFFFFFF</color>
     <color name="qs_tile_disabled_color">#9E9E9E</color> <!-- 38% black -->
     <color name="status_bar_icons_hover_color_light">#38FFFFFF</color> <!-- 22% white -->
     <color name="status_bar_icons_hover_color_dark">#38000000</color> <!-- 22% black -->
