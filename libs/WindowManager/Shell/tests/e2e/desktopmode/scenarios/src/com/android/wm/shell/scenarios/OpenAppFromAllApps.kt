@@ -20,12 +20,12 @@ import android.app.Instrumentation
 import android.tools.NavBar
 import android.tools.flicker.rules.ChangeDisplayOrientationRule
 import android.tools.Rotation
+import android.tools.device.apphelpers.CalculatorAppHelper
 import android.tools.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.helpers.DesktopModeAppHelper
-import com.android.server.wm.flicker.helpers.MailAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.window.flags.Flags
 import com.android.wm.shell.Utils
@@ -44,7 +44,7 @@ abstract class OpenAppFromAllApps(val rotation: Rotation = Rotation.ROTATION_0) 
     private val wmHelper = WindowManagerStateHelper(instrumentation)
     private val device = UiDevice.getInstance(instrumentation)
     private val testApp = DesktopModeAppHelper(SimpleAppHelper(instrumentation))
-    private val mailApp = MailAppHelper(instrumentation)
+    private val calculatorApp = CalculatorAppHelper(instrumentation)
 
     @Rule
     @JvmField val testSetupRule = Utils.testSetupRule(NavBar.MODE_GESTURAL, rotation)
@@ -64,13 +64,13 @@ abstract class OpenAppFromAllApps(val rotation: Rotation = Rotation.ROTATION_0) 
     open fun openApp() {
         tapl.launchedAppState.taskbar
             .openAllApps()
-            .getAppIcon(mailApp.appName)
-            .launch(mailApp.packageName)
+            .getAppIcon(calculatorApp.appName)
+            .launch(calculatorApp.packageName)
     }
 
     @After
     fun teardown() {
-        mailApp.exit(wmHelper)
+        calculatorApp.exit(wmHelper)
         testApp.exit(wmHelper)
     }
 }
