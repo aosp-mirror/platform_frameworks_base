@@ -641,6 +641,17 @@ public class MediaQualityContract {
          */
         public static final String PARAMETER_DIGITAL_OUTPUT_MODE = "digital_output_mode";
 
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_ACTIVE_PROFILE = "active_profile";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_SOUND_STYLE = "sound_style";
+
+
 
         private SoundQuality() {
         }
