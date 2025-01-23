@@ -706,7 +706,7 @@ public class HeadsUpManagerImpl
     }
 
     private void updateHeadsUpFlow() {
-        mHeadsUpNotificationRows.setValue(new HashSet<>(getHeadsUpEntryPhoneMap().values()));
+        mHeadsUpNotificationRows.setValue(new HashSet<>(mHeadsUpEntryMap.values()));
     }
 
     @Override
@@ -730,11 +730,6 @@ public class HeadsUpManagerImpl
     @Override
     public boolean isHeadsUpAnimatingAwayValue() {
         return mHeadsUpAnimatingAway.getValue();
-    }
-
-    @NonNull
-    private ArrayMap<String, HeadsUpEntry> getHeadsUpEntryPhoneMap() {
-        return mHeadsUpEntryMap;
     }
 
     /**
@@ -1014,7 +1009,7 @@ public class HeadsUpManagerImpl
     @Override
     public void setRemoteInputActive(
             @NonNull NotificationEntry entry, boolean remoteInputActive) {
-        HeadsUpEntry headsUpEntry = getHeadsUpEntryPhone(entry.getKey());
+        HeadsUpEntry headsUpEntry = mHeadsUpEntryMap.get(entry.getKey());
         if (headsUpEntry != null && headsUpEntry.mRemoteInputActive != remoteInputActive) {
             headsUpEntry.mRemoteInputActive = remoteInputActive;
             if (ExpandHeadsUpOnInlineReply.isEnabled() && remoteInputActive) {
@@ -1027,11 +1022,6 @@ public class HeadsUpManagerImpl
             }
             updateTopHeadsUpFlow();
         }
-    }
-
-    @Nullable
-    private HeadsUpEntry getHeadsUpEntryPhone(@NonNull String key) {
-        return mHeadsUpEntryMap.get(key);
     }
 
     @Override
@@ -1125,7 +1115,7 @@ public class HeadsUpManagerImpl
             return true;
         }
 
-        HeadsUpEntry headsUpEntry = getHeadsUpEntryPhone(key);
+        HeadsUpEntry headsUpEntry = mHeadsUpEntryMap.get(key);
         HeadsUpEntry topEntry = getTopHeadsUpEntryPhone();
 
         if (headsUpEntry == null || headsUpEntry != topEntry) {
