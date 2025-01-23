@@ -972,7 +972,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             final RelayoutParams.OccludingCaptionElement controlsElement =
                     new RelayoutParams.OccludingCaptionElement();
             controlsElement.mWidthResId = R.dimen.desktop_mode_customizable_caption_margin_end;
-            if (Flags.enableMinimizeButton()) {
+            if (DesktopModeFlags.ENABLE_MINIMIZE_BUTTON.isTrue()) {
                 controlsElement.mWidthResId =
                       R.dimen.desktop_mode_customizable_caption_with_minimize_button_margin_end;
             }

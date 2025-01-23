@@ -89,7 +89,8 @@ public enum DesktopModeFlags {
     ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX(
             Flags::enableDesktopAppLaunchTransitionsBugfix, false),
     INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC(
-            Flags::includeTopTransparentFullscreenTaskInDesktopHeuristic, true);
+            Flags::includeTopTransparentFullscreenTaskInDesktopHeuristic, true),
+    ENABLE_MINIMIZE_BUTTON(Flags::enableMinimizeButton, true);
 
     /**
      * Flag class, to be used in case the enum cannot be used because the flag is not accessible.
