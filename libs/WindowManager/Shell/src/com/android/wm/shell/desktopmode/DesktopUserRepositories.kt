@@ -21,9 +21,9 @@ import android.content.Context
 import android.content.pm.UserInfo
 import android.os.UserManager
 import android.util.SparseArray
+import android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_HSUM
 import androidx.core.util.forEach
 import com.android.internal.protolog.ProtoLog
-import com.android.window.flags.Flags
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
 import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
@@ -68,7 +68,7 @@ class DesktopUserRepositories(
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             shellInit.addInitCallback(::onInit, this)
         }
-        if (Flags.enableDesktopWindowingHsum()) {
+        if (ENABLE_DESKTOP_WINDOWING_HSUM.isTrue()) {
             userIdToProfileIdsMap[userId] = userManager.getProfiles(userId).map { it.id }
         }
     }
@@ -80,7 +80,7 @@ class DesktopUserRepositories(
 
     /** Returns [DesktopRepository] for the parent user id. */
     fun getProfile(profileId: Int): DesktopRepository {
-        if (Flags.enableDesktopWindowingHsum()) {
+        if (ENABLE_DESKTOP_WINDOWING_HSUM.isTrue()) {
             for ((uid, profileIds) in userIdToProfileIdsMap) {
                 if (profileId in profileIds) {
                     return desktopRepoByUserId.getOrCreate(uid)
@@ -101,14 +101,14 @@ class DesktopUserRepositories(
     override fun onUserChanged(newUserId: Int, userContext: Context) {
         logD("onUserChanged previousUserId=%d, newUserId=%d", userId, newUserId)
         userId = newUserId
-        if (Flags.enableDesktopWindowingHsum()) {
+        if (ENABLE_DESKTOP_WINDOWING_HSUM.isTrue()) {
             sanitizeUsers()
         }
     }
 
     override fun onUserProfilesChanged(profiles: MutableList<UserInfo>) {
         logD("onUserProfilesChanged profiles=%s", profiles.toString())
-        if (Flags.enableDesktopWindowingHsum()) {
+        if (ENABLE_DESKTOP_WINDOWING_HSUM.isTrue()) {
             // TODO(b/366397912): Remove all persisted profile data when the profile changes.
             userIdToProfileIdsMap[userId] = profiles.map { it.id }
         }
