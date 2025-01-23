@@ -90,6 +90,8 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val statusBarContentInsetsProviderStore = kosmos.fakeStatusBarContentInsetsProviderStore
     private val statusBarContentInsetsProvider = statusBarContentInsetsProviderStore.defaultDisplay
+    private val statusBarContentInsetsProviderForSecondaryDisplay =
+        statusBarContentInsetsProviderStore.forDisplay(SECONDARY_DISPLAY_ID)
 
     private val fakeDarkIconDispatcher = kosmos.fakeDarkIconDispatcher
     @Mock private lateinit var shadeViewController: ShadeViewController
@@ -143,6 +145,12 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
                     as PhoneStatusBarView
             controller = createAndInitController(view)
         }
+
+        `when`(
+                statusBarContentInsetsProviderForSecondaryDisplay
+                    .getStatusBarContentInsetsForCurrentRotation()
+            )
+            .thenReturn(Insets.NONE)
 
         val contextForSecondaryDisplay =
             SysuiTestableContext(
