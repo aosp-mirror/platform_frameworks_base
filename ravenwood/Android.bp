@@ -661,6 +661,9 @@ android_ravenwood_libgroup {
         // StatsD
         "framework-statsd.ravenwood",
 
+        // Graphics
+        "framework-graphics.ravenwood",
+
         // Provide runtime versions of utils linked in below
         "junit",
         "truth",

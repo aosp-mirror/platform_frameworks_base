@@ -206,6 +206,9 @@ java_sdk_library {
     visibility: [
         "//frameworks/base", // Framework
     ],
+    impl_library_visibility: [
+        "//frameworks/base/ravenwood",
+    ],
 
     srcs: [
         ":framework-graphics-srcs",
