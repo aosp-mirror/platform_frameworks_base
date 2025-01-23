@@ -3014,6 +3014,14 @@ class DesktopTasksController(
             controller = null
         }
 
+        override fun createDesk(displayId: Int) {
+            // TODO: b/362720497 - Implement this API.
+        }
+
+        override fun activateDesk(deskId: Int, remoteTransition: RemoteTransition?) {
+            // TODO: b/362720497 - Implement this API.
+        }
+
         override fun showDesktopApps(displayId: Int, remoteTransition: RemoteTransition?) {
             executeRemoteCallWithTaskPermission(controller, "showDesktopApps") { c ->
                 c.showDesktopApps(displayId, remoteTransition)
@@ -3039,17 +3047,6 @@ class DesktopTasksController(
                 WM_SHELL_DESKTOP_MODE,
                 "IDesktopModeImpl: hideStashedDesktopApps is deprecated",
             )
-        }
-
-        override fun getVisibleTaskCount(displayId: Int): Int {
-            val result = IntArray(1)
-            executeRemoteCallWithTaskPermission(
-                controller,
-                "visibleTaskCount",
-                { controller -> result[0] = controller.visibleTaskCount(displayId) },
-                /* blocking= */ true,
-            )
-            return result[0]
         }
 
         override fun onDesktopSplitSelectAnimComplete(taskInfo: RunningTaskInfo) {
