@@ -275,9 +275,12 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     }
 
     @Override
-    public void notifyAnimationRunningStateChanged(boolean running) {
+    public void notifyAnimationRunningStateChanged(boolean running,
+            @InsetsController.AnimationType int animationType,
+            @WindowInsets.Type.InsetsType int insetsTypes) {
         if (mViewRoot != null) {
-            mViewRoot.notifyInsetsAnimationRunningStateChanged(running);
+            mViewRoot.notifyInsetsAnimationRunningStateChanged(
+                    running, animationType, insetsTypes);
         }
     }
 

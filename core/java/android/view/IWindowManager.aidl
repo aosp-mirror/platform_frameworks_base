@@ -1146,6 +1146,14 @@ interface IWindowManager
      */
     KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId);
 
+    /*
+     * Notifies about IME insets animation.
+     *
+     * @param running Indicates the insets animation state.
+     * @param animationType Indicates the {@link InsetsController.AnimationType}
+     */
+     oneway void notifyImeInsetsAnimationStateChanged(boolean running, int animationType);
+
     /**
      * Returns whether the display with {@code displayId} ignores orientation request.
      */

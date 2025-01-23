@@ -899,7 +899,9 @@ class InsetsPolicy {
         }
 
         @Override
-        public void notifyAnimationRunningStateChanged(boolean running) {
+        public void notifyAnimationRunningStateChanged(boolean running,
+                @InsetsController.AnimationType int animationType,
+                @InsetsType int insetsTypes) {
             mInsetsAnimationRunning = running;
         }
     }

@@ -19,6 +19,7 @@ package com.android.server.autofill;
 import static android.Manifest.permission.MANAGE_AUTO_FILL;
 import static android.content.Context.AUTOFILL_MANAGER_SERVICE;
 import static android.service.autofill.Flags.fixGetAutofillComponent;
+import static android.service.autofill.Flags.improveFillDialogAconfig;
 import static android.view.autofill.AutofillManager.MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS;
 import static android.view.autofill.AutofillManager.getSmartSuggestionModeToString;
 
@@ -70,6 +71,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
+import android.view.InsetsController;
 import android.view.autofill.AutofillFeatureFlags;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
@@ -96,6 +98,7 @@ import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
 import com.android.server.infra.SecureSettingsServiceNameResolver;
+import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -243,6 +246,8 @@ public final class AutofillManagerService
 
     private static final boolean DEFAULT_PCC_USE_FALLBACK = true;
 
+    private static final boolean DBG = false;
+
     public AutofillManagerService(Context context) {
         super(context,
                 new SecureSettingsServiceNameResolver(context, Settings.Secure.AUTOFILL_SERVICE),
@@ -301,7 +306,78 @@ public final class AutofillManagerService
             mCredentialAutofillService = null;
             Slog.w(TAG, "Invalid CredentialAutofillService");
         }
+
+        if (improveFillDialogAconfig()) {
+            WindowManagerInternal windowManagerInternal = LocalServices.getService(
+                    WindowManagerInternal.class);
+            WindowManagerInternal.ImeInsetsAnimationChangeListener
+                    imeInsetsAnimationChangeListener =
+                    new WindowManagerInternal.ImeInsetsAnimationChangeListener() {
+                        @Override
+                        public void onAnimationStart(
+                                @InsetsController.AnimationType int animationType, int userId) {
+                            if (DBG) {
+                                Slog.e(TAG,
+                                        "onAnimationStart() notifyImeAnimationStart() "
+                                                + "animationType:"
+                                                + String.valueOf(animationType));
+                            }
+                            synchronized (mLock) {
+
+                                // We are mostly interested in animations that show up the IME
+                                if (animationType == InsetsController.ANIMATION_TYPE_HIDE) {
+                                    // IME is going away
+                                    mIsImeShowing = false;
+                                }
+                                if (animationType != InsetsController.ANIMATION_TYPE_SHOW) {
+                                    return;
+                                }
+                                mIsImeShowing = true;
+                                mImeAnimatingWhileShowingUp = true;
+                                final AutofillManagerServiceImpl service =
+                                        peekServiceForUserWithLocalBinderIdentityLocked(userId);
+                                if (service != null) {
+                                    service.notifyImeAnimationStart();
+                                } else if (sVerbose) {
+                                    Slog.v(TAG,
+                                            "notifyImeAnimationStart(): no service for " + userId);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onAnimationEnd(
+                                @InsetsController.AnimationType int animationType, int userId) {
+                            if (DBG) {
+                                Slog.e(TAG,
+                                        "onAnimationEnd() notifyImeAnimationEnd() "
+                                                + "animationType:"
+                                                + String.valueOf(animationType));
+                            }
+                            // We are only interested in animations that show up the IME
+                            if (animationType != InsetsController.ANIMATION_TYPE_SHOW) {
+                                return;
+                            }
+                            mImeAnimatingWhileShowingUp = false;
+                            synchronized (mLock) {
+                                final AutofillManagerServiceImpl service =
+                                        peekServiceForUserWithLocalBinderIdentityLocked(userId);
+                                if (service != null) {
+                                    service.notifyImeAnimationEnd();
+                                } else if (sVerbose) {
+                                    Slog.v(TAG, "notifyImeAnimationEnd(): no service for "
+                                            + userId);
+                                }
+                            }
+                        }
+                    };
+            windowManagerInternal.setImeInsetsAnimationChangeListener(
+                    imeInsetsAnimationChangeListener);
+        }
     }
+
+    public boolean mImeAnimatingWhileShowingUp = false;
+    public boolean mIsImeShowing = false;
 
     @Override // from AbstractMasterSystemService
     protected String getServiceSettingsProperty() {
