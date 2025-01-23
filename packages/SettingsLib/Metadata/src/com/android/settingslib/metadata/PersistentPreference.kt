@@ -78,13 +78,8 @@ annotation class SensitivityLevel {
 /** Preference metadata that has a value persisted in datastore. */
 interface PersistentPreference<T> : PreferenceMetadata {
 
-    /**
-     * The value type the preference is associated with.
-     *
-     * TODO(b/388167302): Remove the default implementation once all subclasses are migrated.
-     */
-    val valueType: Class<T>?
-        get() = null
+    /** The value type the preference is associated with. */
+    val valueType: Class<T>
 
     /**
      * Returns the key-value storage of the preference.
