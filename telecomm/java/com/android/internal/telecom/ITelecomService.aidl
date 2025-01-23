@@ -415,4 +415,5 @@ interface ITelecomService {
      */
     boolean hasForegroundServiceDelegation(in PhoneAccountHandle phoneAccountHandle,
                                                        String callingPackage);
+    void setMetricsTestMode(boolean enabled);
 }
