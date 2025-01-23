@@ -19,7 +19,8 @@ package com.android.systemui.shade.display
 import com.android.systemui.shade.domain.interactor.ShadeExpandedStateInteractor.ShadeElement
 import dagger.Binds
 import dagger.Module
-import dagger.multibindings.IntoSet
+import dagger.Provides
+import dagger.multibindings.ElementsIntoSet
 import kotlinx.coroutines.flow.StateFlow
 
 /** Describes the display the shade should be shown in. */
@@ -53,27 +54,25 @@ interface ShadeExpansionIntent {
     fun consumeExpansionIntent(): ShadeElement?
 }
 
-@Module
+@Module(includes = [AllShadeDisplayPoliciesModule::class])
 interface ShadeDisplayPolicyModule {
 
     @Binds fun provideDefaultPolicy(impl: DefaultDisplayShadePolicy): ShadeDisplayPolicy
 
     @Binds
     fun provideShadeExpansionIntent(impl: StatusBarTouchShadeDisplayPolicy): ShadeExpansionIntent
+}
 
-    @IntoSet
-    @Binds
-    fun provideDefaultDisplayPolicyToSet(impl: DefaultDisplayShadePolicy): ShadeDisplayPolicy
-
-    @IntoSet
-    @Binds
-    fun provideAnyExternalShadeDisplayPolicyToSet(
-        impl: AnyExternalShadeDisplayPolicy
-    ): ShadeDisplayPolicy
-
-    @Binds
-    @IntoSet
-    fun provideStatusBarTouchShadeDisplayPolicy(
-        impl: StatusBarTouchShadeDisplayPolicy
-    ): ShadeDisplayPolicy
+@Module
+internal object AllShadeDisplayPoliciesModule {
+    @Provides
+    @ElementsIntoSet
+    fun provideShadeDisplayPolicies(
+        defaultPolicy: DefaultDisplayShadePolicy,
+        externalPolicy: AnyExternalShadeDisplayPolicy,
+        statusBarPolicy: StatusBarTouchShadeDisplayPolicy,
+        focusPolicy: FocusShadeDisplayPolicy,
+    ): Set<ShadeDisplayPolicy> {
+        return setOf(defaultPolicy, externalPolicy, statusBarPolicy, focusPolicy)
+    }
 }
