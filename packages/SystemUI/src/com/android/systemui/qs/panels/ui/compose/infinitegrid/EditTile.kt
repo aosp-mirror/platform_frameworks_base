@@ -498,11 +498,9 @@ fun gridHeight(rows: Int, tileHeight: Dp, tilePadding: Dp, gridPadding: Dp): Dp 
     return ((tileHeight + tilePadding) * rows) + gridPadding * 2
 }
 
-private fun GridCell.key(index: Int, dragAndDropState: DragAndDropState): Any {
+private fun GridCell.key(index: Int): Any {
     return when (this) {
-        is TileGridCell -> {
-            if (dragAndDropState.isMoving(tile.tileSpec)) index else key
-        }
+        is TileGridCell -> key
         is SpacerGridCell -> index
     }
 }
@@ -510,10 +508,13 @@ private fun GridCell.key(index: Int, dragAndDropState: DragAndDropState): Any {
 /**
  * Adds a list of [GridCell] to the lazy grid
  *
- * @param cells the pairs of [GridCell] to [AnimatableTileViewModel]
+ * @param cells the pairs of [GridCell] to [BounceableTileViewModel]
+ * @param columns the number of columns of this tile grid
  * @param dragAndDropState the [DragAndDropState] for this grid
  * @param selectionState the [MutableSelectionState] for this grid
- * @param onToggleSize the callback when a tile's size is toggled
+ * @param coroutineScope the [CoroutineScope] to be used for the tiles
+ * @param largeTilesSpan the width used for large tiles
+ * @param onResize the callback when a tile has a new [ResizeOperation]
  */
 fun LazyGridScope.EditTiles(
     cells: List<Pair<GridCell, BounceableTileViewModel>>,
@@ -526,7 +527,7 @@ fun LazyGridScope.EditTiles(
 ) {
     items(
         count = cells.size,
-        key = { cells[it].first.key(it, dragAndDropState) },
+        key = { cells[it].first.key(it) },
         span = { cells[it].first.span },
         contentType = { TileType },
     ) { index ->
@@ -536,13 +537,12 @@ fun LazyGridScope.EditTiles(
                     // If the tile is being moved, replace it with a visible spacer
                     SpacerGridCell(
                         Modifier.background(
-                                color =
-                                    MaterialTheme.colorScheme.secondary.copy(
-                                        alpha = EditModeTileDefaults.PLACEHOLDER_ALPHA
-                                    ),
-                                shape = RoundedCornerShape(InactiveCornerRadius),
-                            )
-                            .animateItem()
+                            color =
+                                MaterialTheme.colorScheme.secondary.copy(
+                                    alpha = EditModeTileDefaults.PLACEHOLDER_ALPHA
+                                ),
+                            shape = RoundedCornerShape(InactiveCornerRadius),
+                        )
                     )
                 } else {
                     TileGridCell(
