@@ -35,7 +35,6 @@ import static com.android.hardware.input.Flags.touchpadVisualizer;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandlerMultiKeyGestures;
 import static com.android.input.flags.Flags.FLAG_KEYBOARD_REPEAT_KEYS;
-import static com.android.input.flags.Flags.enableInputFilterRustImpl;
 import static com.android.input.flags.Flags.keyboardRepeatKeys;
 
 import android.Manifest;
@@ -883,7 +882,7 @@ public class InputSettings {
      * @hide
      */
     public static boolean isAccessibilityBounceKeysFeatureEnabled() {
-        return keyboardA11yBounceKeysFlag() && enableInputFilterRustImpl();
+        return keyboardA11yBounceKeysFlag();
     }
 
     /**
@@ -967,7 +966,7 @@ public class InputSettings {
      * @hide
      */
     public static boolean isAccessibilitySlowKeysFeatureFlagEnabled() {
-        return keyboardA11ySlowKeysFlag() && enableInputFilterRustImpl();
+        return keyboardA11ySlowKeysFlag();
     }
 
     /**
@@ -1053,7 +1052,7 @@ public class InputSettings {
      * @hide
      */
     public static boolean isAccessibilityStickyKeysFeatureEnabled() {
-        return keyboardA11yStickyKeysFlag() && enableInputFilterRustImpl();
+        return keyboardA11yStickyKeysFlag();
     }
 
     /**
