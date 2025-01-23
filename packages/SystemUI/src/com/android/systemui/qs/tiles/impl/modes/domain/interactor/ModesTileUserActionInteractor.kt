@@ -54,7 +54,7 @@ constructor(
                     handleToggleClick(input.data)
                 }
                 is QSTileUserAction.LongClick -> {
-                    qsTileIntentUserInputHandler.handle(action.expandable, longClickIntent)
+                    handleLongClick(action.expandable)
                 }
             }
         }
@@ -93,6 +93,10 @@ constructor(
         } else {
             zenModeInteractor.deactivateAllModes()
         }
+    }
+
+    fun handleLongClick(expandable: Expandable?) {
+        qsTileIntentUserInputHandler.handle(expandable, longClickIntent)
     }
 
     companion object {
