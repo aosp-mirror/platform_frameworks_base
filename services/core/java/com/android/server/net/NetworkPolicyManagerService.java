@@ -3612,13 +3612,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final long token = Binder.clearCallingIdentity();
         try {
             config = mCarrierConfigManager.getConfigForSubId(subId);
-            tm = mContext.getSystemService(TelephonyManager.class);
+            tm = mContext.getSystemService(TelephonyManager.class).createForSubscriptionId(subId);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
 
-        // First check: does caller have carrier privilege?
-        if (tm != null && tm.hasCarrierPrivileges(subId)) {
+        // First check: does callingPackage have carrier privilege?
+        // Note that we can't call TelephonyManager.hasCarrierPrivileges() which will check if
+        // ourself has carrier privileges
+        if (tm != null && (tm.checkCarrierPrivilegesForPackage(callingPackage)
+                == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS)) {
             return;
         }
 
