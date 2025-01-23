@@ -2093,7 +2093,7 @@ class DesktopTasksController(
      */
     private fun handleIncompatibleTaskLaunch(task: RunningTaskInfo): WindowContainerTransaction? {
         logV("handleIncompatibleTaskLaunch")
-        if (!isDesktopModeShowing(task.displayId)) return null
+        if (!isDesktopModeShowing(task.displayId) && !forceEnterDesktop(task.displayId)) return null
         // Only update task repository for transparent task.
         if (
             DesktopModeFlags.INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC
