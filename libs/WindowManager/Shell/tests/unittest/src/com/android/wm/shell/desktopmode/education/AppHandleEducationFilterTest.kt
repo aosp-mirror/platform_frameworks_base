@@ -89,9 +89,9 @@ class AppHandleEducationFilterTest : ShellTestCase() {
     }
 
     @Test
-    fun shouldShowAppHandleEducation_isTriggerValid_returnsTrue() = runTest {
-        // setup() makes sure that all of the conditions satisfy and #shouldShowAppHandleEducation
-        // should return true
+    fun shouldShowDesktopModeEducation_isTriggerValid_returnsTrue() = runTest {
+        // setup() makes sure that all of the conditions satisfy and
+        // [shouldShowDesktopModeEducation] should return true
         val windowingEducationProto =
             createWindowingEducationProto(
                 appUsageStats = mapOf(GMAIL_PACKAGE_NAME to 4),
@@ -99,16 +99,15 @@ class AppHandleEducationFilterTest : ShellTestCase() {
             )
         `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
 
-        val result = educationFilter.shouldShowAppHandleEducation(createAppHandleState())
+        val result = educationFilter.shouldShowDesktopModeEducation(createAppHandleState())
 
         assertThat(result).isTrue()
     }
 
     @Test
-    fun shouldShowAppHandleEducation_focusAppNotInAllowlist_returnsFalse() = runTest {
+    fun shouldShowDesktopModeEducation_focusAppNotInAllowlist_returnsFalse() = runTest {
         // Pass Youtube as current focus app, it is not in allowlist hence
-        // #shouldShowAppHandleEducation
-        // should return false
+        // [shouldShowDesktopModeEducation] should return false
         testableResources.addOverride(
             R.array.desktop_windowing_app_handle_education_allowlist_apps,
             arrayOf(GMAIL_PACKAGE_NAME),
@@ -122,16 +121,15 @@ class AppHandleEducationFilterTest : ShellTestCase() {
             createAppHandleState(createTaskInfo(runningTaskPackageName = YOUTUBE_PACKAGE_NAME))
         `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
 
-        val result = educationFilter.shouldShowAppHandleEducation(captionState)
+        val result = educationFilter.shouldShowDesktopModeEducation(captionState)
 
         assertThat(result).isFalse()
     }
 
     @Test
-    fun shouldShowAppHandleEducation_timeSinceSetupIsNotSufficient_returnsFalse() = runTest {
-        // Time required to have passed setup is > 100 years, hence #shouldShowAppHandleEducation
-        // should
-        // return false
+    fun shouldShowDesktopModeEducation_timeSinceSetupIsNotSufficient_returnsFalse() = runTest {
+        // Time required to have passed setup is > 100 years, hence [shouldShowDesktopModeEducation]
+        // should return false
         testableResources.addOverride(
             R.integer.desktop_windowing_education_required_time_since_setup_seconds,
             MAX_VALUE,
@@ -143,50 +141,15 @@ class AppHandleEducationFilterTest : ShellTestCase() {
             )
         `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
 
-        val result = educationFilter.shouldShowAppHandleEducation(createAppHandleState())
+        val result = educationFilter.shouldShowDesktopModeEducation(createAppHandleState())
 
         assertThat(result).isFalse()
     }
 
     @Test
-    fun shouldShowAppHandleEducation_appHandleHintViewedBefore_returnsFalse() = runTest {
-        // App handle hint has been viewed before, hence #shouldShowAppHandleEducation should return
-        // false
-        val windowingEducationProto =
-            createWindowingEducationProto(
-                appUsageStats = mapOf(GMAIL_PACKAGE_NAME to 4),
-                appHandleHintViewedTimestampMillis = 123L,
-                appUsageStatsLastUpdateTimestampMillis = Long.MAX_VALUE,
-            )
-        `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
-
-        val result = educationFilter.shouldShowAppHandleEducation(createAppHandleState())
-
-        assertThat(result).isFalse()
-    }
-
-    @Test
-    fun shouldShowAppHandleEducation_appHandleHintUsedBefore_returnsFalse() = runTest {
-        // App handle hint has been used before, hence #shouldShowAppHandleEducation should return
-        // false
-        val windowingEducationProto =
-            createWindowingEducationProto(
-                appUsageStats = mapOf(GMAIL_PACKAGE_NAME to 4),
-                appHandleHintUsedTimestampMillis = 123L,
-                appUsageStatsLastUpdateTimestampMillis = Long.MAX_VALUE,
-            )
-        `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
-
-        val result = educationFilter.shouldShowAppHandleEducation(createAppHandleState())
-
-        assertThat(result).isFalse()
-    }
-
-    @Test
-    fun shouldShowAppHandleEducation_doesNotHaveMinAppUsage_returnsFalse() = runTest {
+    fun shouldShowDesktopModeEducation_doesNotHaveMinAppUsage_returnsFalse() = runTest {
         // Simulate that gmail app has been launched twice before, minimum app launch count is 3,
-        // hence
-        // #shouldShowAppHandleEducation should return false
+        // hence [shouldShowDesktopModeEducation] should return false
         testableResources.addOverride(R.integer.desktop_windowing_education_min_app_launch_count, 3)
         val windowingEducationProto =
             createWindowingEducationProto(
@@ -195,13 +158,13 @@ class AppHandleEducationFilterTest : ShellTestCase() {
             )
         `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
 
-        val result = educationFilter.shouldShowAppHandleEducation(createAppHandleState())
+        val result = educationFilter.shouldShowDesktopModeEducation(createAppHandleState())
 
         assertThat(result).isFalse()
     }
 
     @Test
-    fun shouldShowAppHandleEducation_appUsageStatsStale_queryAppUsageStats() = runTest {
+    fun shouldShowDesktopModeEducation_appUsageStatsStale_queryAppUsageStats() = runTest {
         // UsageStats caching interval is set to 0ms, that means caching should happen very
         // frequently
         testableResources.addOverride(
@@ -209,8 +172,7 @@ class AppHandleEducationFilterTest : ShellTestCase() {
             0,
         )
         // The DataStore currently holds a proto object where Gmail's app launch count is recorded
-        // as 4.
-        // This value exceeds the minimum required count of 3.
+        // as 4. This value exceeds the minimum required count of 3.
         testableResources.addOverride(R.integer.desktop_windowing_education_min_app_launch_count, 3)
         val windowingEducationProto =
             createWindowingEducationProto(
@@ -223,40 +185,20 @@ class AppHandleEducationFilterTest : ShellTestCase() {
             .thenReturn(mapOf(GMAIL_PACKAGE_NAME to UsageStats().apply { mAppLaunchCount = 2 }))
         `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
 
-        val result = educationFilter.shouldShowAppHandleEducation(createAppHandleState())
+        val result = educationFilter.shouldShowDesktopModeEducation(createAppHandleState())
 
         // Result should be false as queried usage stats should be considered to determine the
-        // result
-        // instead of cached stats
+        // result instead of cached stats
         assertThat(result).isFalse()
     }
 
     @Test
-    fun shouldShowAppHandleEducation_appHandleMenuExpanded_returnsFalse() = runTest {
-        val windowingEducationProto =
-            createWindowingEducationProto(
-                appUsageStats = mapOf(GMAIL_PACKAGE_NAME to 4),
-                appUsageStatsLastUpdateTimestampMillis = Long.MAX_VALUE,
-            )
-        // Simulate app handle menu is expanded
-        val captionState = createAppHandleState(isHandleMenuExpanded = true)
-        `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
-
-        val result = educationFilter.shouldShowAppHandleEducation(captionState)
-
-        // We should not show app handle education if app menu is expanded
-        assertThat(result).isFalse()
-    }
-
-    @Test
-    fun shouldShowAppHandleEducation_overridePrerequisite_returnsTrue() = runTest {
+    fun shouldShowDesktopModeEducation_overridePrerequisite_returnsTrue() = runTest {
         // Simulate that gmail app has been launched twice before, minimum app launch count is 3,
-        // hence
-        // #shouldShowAppHandleEducation should return false. But as we are overriding prerequisite
-        // conditions, #shouldShowAppHandleEducation should return true.
+        // hence [shouldShowDesktopModeEducation] should return false. But as we are overriding
+        // prerequisite conditions, [shouldShowDesktopModeEducation] should return true.
         testableResources.addOverride(R.integer.desktop_windowing_education_min_app_launch_count, 3)
-        val systemPropertiesKey =
-            "persist.desktop_windowing_app_handle_education_override_conditions"
+        val systemPropertiesKey = "persist.windowing_force_show_desktop_mode_education"
         whenever(SystemProperties.getBoolean(eq(systemPropertiesKey), anyBoolean()))
             .thenReturn(true)
         val windowingEducationProto =
@@ -266,7 +208,7 @@ class AppHandleEducationFilterTest : ShellTestCase() {
             )
         `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
 
-        val result = educationFilter.shouldShowAppHandleEducation(createAppHandleState())
+        val result = educationFilter.shouldShowDesktopModeEducation(createAppHandleState())
 
         assertThat(result).isTrue()
     }

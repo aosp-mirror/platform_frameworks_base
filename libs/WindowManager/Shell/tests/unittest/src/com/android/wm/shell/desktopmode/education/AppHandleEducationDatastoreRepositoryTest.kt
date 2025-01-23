@@ -123,6 +123,24 @@ class AppHandleEducationDatastoreRepositoryTest {
         }
 
     @Test
+    fun updateEnterDesktopModeHintViewedTimestampMillis_updatesDatastoreProto() =
+        runTest(StandardTestDispatcher()) {
+            datastoreRepository.updateEnterDesktopModeHintViewedTimestampMillis(true)
+
+            val result = testDatastore.data.first().hasEnterDesktopModeHintViewedTimestampMillis()
+            assertThat(result).isEqualTo(true)
+        }
+
+    @Test
+    fun updateExitDesktopModeHintViewedTimestampMillis_updatesDatastoreProto() =
+        runTest(StandardTestDispatcher()) {
+            datastoreRepository.updateExitDesktopModeHintViewedTimestampMillis(true)
+
+            val result = testDatastore.data.first().hasExitDesktopModeHintViewedTimestampMillis()
+            assertThat(result).isEqualTo(true)
+        }
+
+    @Test
     fun updateAppHandleHintUsedTimestampMillis_updatesDatastoreProto() =
         runTest(StandardTestDispatcher()) {
             datastoreRepository.updateAppHandleHintUsedTimestampMillis(true)

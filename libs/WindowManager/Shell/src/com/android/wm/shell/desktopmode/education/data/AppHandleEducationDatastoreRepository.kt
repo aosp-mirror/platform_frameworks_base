@@ -91,6 +91,40 @@ constructor(private val dataStore: DataStore<WindowingEducationProto>) {
     }
 
     /**
+     * Updates [WindowingEducationProto.enterDesktopModeHintViewedTimestampMillis_] field in
+     * datastore with current timestamp if [isViewed] is true, if not then clears the field.
+     */
+    suspend fun updateEnterDesktopModeHintViewedTimestampMillis(isViewed: Boolean) {
+        dataStore.updateData { preferences ->
+            if (isViewed) {
+                preferences
+                    .toBuilder()
+                    .setEnterDesktopModeHintViewedTimestampMillis(System.currentTimeMillis())
+                    .build()
+            } else {
+                preferences.toBuilder().clearEnterDesktopModeHintViewedTimestampMillis().build()
+            }
+        }
+    }
+
+    /**
+     * Updates [WindowingEducationProto.exitDesktopModeHintViewedTimestampMillis_] field in
+     * datastore with current timestamp if [isViewed] is true, if not then clears the field.
+     */
+    suspend fun updateExitDesktopModeHintViewedTimestampMillis(isViewed: Boolean) {
+        dataStore.updateData { preferences ->
+            if (isViewed) {
+                preferences
+                    .toBuilder()
+                    .setExitDesktopModeHintViewedTimestampMillis(System.currentTimeMillis())
+                    .build()
+            } else {
+                preferences.toBuilder().clearExitDesktopModeHintViewedTimestampMillis().build()
+            }
+        }
+    }
+
+    /**
      * Updates [WindowingEducationProto.appHandleHintUsedTimestampMillis_] field in datastore with
      * current timestamp if [isViewed] is true, if not then clears the field.
      */

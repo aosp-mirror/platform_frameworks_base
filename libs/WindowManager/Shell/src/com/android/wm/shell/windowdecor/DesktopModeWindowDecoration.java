@@ -542,6 +542,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 if (appHeader != null) {
                     appHeader.setAppName(name);
                     appHeader.setAppIcon(icon);
+                    if (canEnterDesktopMode(mContext) && isEducationEnabled()) {
+                        notifyCaptionStateChanged();
+                    }
                 }
             });
         }
