@@ -1359,6 +1359,8 @@
     <string name="hub_onboarding_bottom_sheet_text">Access your favorite widgets and screen savers while charging.</string>
     <!-- Hub onboarding bottom sheet action button title. [CHAR LIMIT=NONE] -->
     <string name="hub_onboarding_bottom_sheet_action_button">Let\u2019s go</string>
+    <!-- Text for a tooltip that appears over the "show screensaver" button on glanceable hub. [CHAR LIMIT=NONE] -->
+    <string name="glanceable_hub_to_dream_button_tooltip">Show your favorite screensavers while charging</string>
 
     <!-- Related to user switcher --><skip/>
 

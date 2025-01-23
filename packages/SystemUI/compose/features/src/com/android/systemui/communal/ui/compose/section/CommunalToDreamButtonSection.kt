@@ -16,14 +16,37 @@
 
 package com.android.systemui.communal.ui.compose.section
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.toRect
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import com.android.compose.PlatformIconButton
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
+import com.android.systemui.communal.ui.compose.extensions.observeTaps
 import com.android.systemui.communal.ui.viewmodel.CommunalToDreamButtonViewModel
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.res.R
@@ -43,23 +66,111 @@ constructor(
 
         val viewModel =
             rememberViewModel("CommunalToDreamButtonSection") { viewModelFactory.create() }
-        val shouldShowDreamButtonOnHub by
-            viewModel.shouldShowDreamButtonOnHub.collectAsStateWithLifecycle(false)
 
-        if (!shouldShowDreamButtonOnHub) {
+        if (!viewModel.shouldShowDreamButtonOnHub) {
             return
         }
 
-        PlatformIconButton(
-            onClick = { viewModel.onShowDreamButtonTap() },
-            iconResource = R.drawable.ic_screensaver_auto,
-            contentDescription =
-                stringResource(R.string.accessibility_glanceable_hub_to_dream_button),
-            colors =
-                IconButtonDefaults.filledIconButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                ),
+        if (viewModel.shouldShowTooltip) {
+            Column(
+                modifier =
+                    Modifier.widthIn(max = tooltipMaxWidth).pointerInput(Unit) {
+                        observeTaps { viewModel.setDreamButtonTooltipDismissed() }
+                    }
+            ) {
+                Tooltip(
+                    pointerOffsetDp = buttonSize.div(2),
+                    text = stringResource(R.string.glanceable_hub_to_dream_button_tooltip),
+                )
+                GoToDreamButton(
+                    modifier = Modifier.width(buttonSize).height(buttonSize).align(Alignment.End)
+                ) {
+                    viewModel.onShowDreamButtonTap()
+                }
+            }
+        } else {
+            GoToDreamButton(modifier = Modifier.width(buttonSize).height(buttonSize)) {
+                viewModel.onShowDreamButtonTap()
+            }
+        }
+    }
+
+    companion object {
+        private val buttonSize = 64.dp
+        private val tooltipMaxWidth = 350.dp
+    }
+}
+
+@Composable
+private fun GoToDreamButton(modifier: Modifier, onClick: () -> Unit) {
+    PlatformIconButton(
+        modifier = modifier,
+        onClick = onClick,
+        iconResource = R.drawable.ic_screensaver_auto,
+        contentDescription = stringResource(R.string.accessibility_glanceable_hub_to_dream_button),
+        colors =
+            IconButtonDefaults.filledIconButtonColors(
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+            ),
+    )
+}
+
+@Composable
+private fun Tooltip(pointerOffsetDp: Dp, text: String) {
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = TooltipShape(pointerSizeDp = 12.dp, pointerOffsetDp = pointerOffsetDp),
+    ) {
+        Text(
+            modifier = Modifier.padding(start = 32.dp, top = 16.dp, end = 32.dp, bottom = 32.dp),
+            color = MaterialTheme.colorScheme.onSurface,
+            text = text,
         )
+    }
+
+    Spacer(modifier = Modifier.height(4.dp))
+}
+
+private class TooltipShape(private val pointerSizeDp: Dp, private val pointerOffsetDp: Dp) : Shape {
+
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density,
+    ): Outline {
+
+        val pointerSizePx = with(density) { pointerSizeDp.toPx() }
+        val pointerOffsetPx = with(density) { pointerOffsetDp.toPx() }
+        val cornerRadius = CornerRadius(CornerSize(16.dp).toPx(size, density))
+        val bubbleSize = size.copy(height = size.height - pointerSizePx)
+
+        val path =
+            Path().apply {
+                addRoundRect(
+                    RoundRect(
+                        rect = bubbleSize.toRect(),
+                        topLeft = cornerRadius,
+                        topRight = cornerRadius,
+                        bottomRight = cornerRadius,
+                        bottomLeft = cornerRadius,
+                    )
+                )
+                addPath(
+                    Path().apply {
+                        moveTo(0f, 0f)
+                        lineTo(pointerSizePx / 2f, pointerSizePx)
+                        lineTo(pointerSizePx, 0f)
+                        close()
+                    },
+                    offset =
+                        Offset(
+                            x = bubbleSize.width - pointerOffsetPx - pointerSizePx / 2f,
+                            y = bubbleSize.height,
+                        ),
+                )
+            }
+
+        return Outline.Generic(path)
     }
 }

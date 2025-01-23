@@ -25,7 +25,8 @@ import kotlinx.coroutines.flow.map
 /** Fake implementation of [CommunalPrefsRepository] */
 class FakeCommunalPrefsRepository : CommunalPrefsRepository {
     private val _isCtaDismissed = MutableStateFlow<Set<UserInfo>>(emptySet())
-    private val _isHubOnboardingismissed = MutableStateFlow<Set<UserInfo>>(emptySet())
+    private val _isHubOnboardingDismissed = MutableStateFlow<Set<UserInfo>>(emptySet())
+    private val _isDreamButtonTooltipDismissed = MutableStateFlow<Set<UserInfo>>(emptySet())
 
     override fun isCtaDismissed(user: UserInfo): Flow<Boolean> =
         _isCtaDismissed.map { it.contains(user) }
@@ -35,10 +36,18 @@ class FakeCommunalPrefsRepository : CommunalPrefsRepository {
     }
 
     override fun isHubOnboardingDismissed(user: UserInfo): Flow<Boolean> =
-        _isHubOnboardingismissed.map { it.contains(user) }
+        _isHubOnboardingDismissed.map { it.contains(user) }
 
     override suspend fun setHubOnboardingDismissed(user: UserInfo) {
-        _isHubOnboardingismissed.value =
-            _isHubOnboardingismissed.value.toMutableSet().apply { add(user) }
+        _isHubOnboardingDismissed.value =
+            _isHubOnboardingDismissed.value.toMutableSet().apply { add(user) }
+    }
+
+    override fun isDreamButtonTooltipDismissed(user: UserInfo): Flow<Boolean> =
+        _isDreamButtonTooltipDismissed.map { it.contains(user) }
+
+    override suspend fun setDreamButtonTooltipDismissed(user: UserInfo) {
+        _isDreamButtonTooltipDismissed.value =
+            _isDreamButtonTooltipDismissed.value.toMutableSet().apply { add(user) }
     }
 }

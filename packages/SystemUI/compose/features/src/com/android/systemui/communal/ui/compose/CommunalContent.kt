@@ -156,14 +156,8 @@ constructor(
 
                 val bottomAreaPlaceable = bottomAreaMeasurable.measure(noMinConstraints)
 
-                val screensaverButtonSizeInt = screensaverButtonSize.roundToPx()
                 val screensaverButtonPlaceable =
-                    screensaverButtonMeasurable?.measure(
-                        Constraints.fixed(
-                            width = screensaverButtonSizeInt,
-                            height = screensaverButtonSizeInt,
-                        )
-                    )
+                    screensaverButtonMeasurable?.measure(noMinConstraints)
 
                 val communalGridPlaceable =
                     communalGridMeasurable.measure(
@@ -181,12 +175,12 @@ constructor(
                     screensaverButtonPlaceable?.place(
                         x =
                             constraints.maxWidth -
-                                screensaverButtonSizeInt -
-                                screensaverButtonPaddingInt,
+                                screensaverButtonPaddingInt -
+                                screensaverButtonPlaceable.width,
                         y =
                             constraints.maxHeight -
-                                screensaverButtonSizeInt -
-                                screensaverButtonPaddingInt,
+                                screensaverButtonPaddingInt -
+                                screensaverButtonPlaceable.height,
                     )
                 }
             }
@@ -194,7 +188,6 @@ constructor(
     }
 
     companion object {
-        private val screensaverButtonSize: Dp = 64.dp
         private val screensaverButtonPadding: Dp = 24.dp
 
         // TODO(b/382739998): Remove these hardcoded values once lock icon size and bottom area

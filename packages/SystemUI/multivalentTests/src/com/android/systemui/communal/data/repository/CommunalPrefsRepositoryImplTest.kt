@@ -116,6 +116,34 @@ class CommunalPrefsRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun isDreamButtonTooltipDismissedValue_byDefault_isFalse() =
+        testScope.runTest {
+            val isDreamButtonTooltipDismissed by
+                collectLastValue(underTest.isDreamButtonTooltipDismissed(MAIN_USER))
+            assertThat(isDreamButtonTooltipDismissed).isFalse()
+        }
+
+    @Test
+    fun isDreamButtonTooltipDismissedValue_onSet_isTrue() =
+        testScope.runTest {
+            val isDreamButtonTooltipDismissed by
+                collectLastValue(underTest.isDreamButtonTooltipDismissed(MAIN_USER))
+
+            underTest.setDreamButtonTooltipDismissed(MAIN_USER)
+            assertThat(isDreamButtonTooltipDismissed).isTrue()
+        }
+
+    @Test
+    fun isDreamButtonTooltipDismissedValue_onSetForDifferentUser_isStillFalse() =
+        testScope.runTest {
+            val isDreamButtonTooltipDismissed by
+                collectLastValue(underTest.isDreamButtonTooltipDismissed(MAIN_USER))
+
+            underTest.setDreamButtonTooltipDismissed(SECONDARY_USER)
+            assertThat(isDreamButtonTooltipDismissed).isFalse()
+        }
+
+    @Test
     fun getSharedPreferences_whenFileRestored() =
         testScope.runTest {
             val isCtaDismissed by collectLastValue(underTest.isCtaDismissed(MAIN_USER))
