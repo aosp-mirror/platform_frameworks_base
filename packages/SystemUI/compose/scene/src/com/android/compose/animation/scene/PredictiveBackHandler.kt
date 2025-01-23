@@ -18,19 +18,26 @@ package com.android.compose.animation.scene
 
 import androidx.activity.BackEventCompat
 import androidx.activity.compose.PredictiveBackHandler
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.snap
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.util.fastCoerceIn
 import com.android.compose.animation.scene.UserActionResult.ChangeScene
 import com.android.compose.animation.scene.UserActionResult.HideOverlay
 import com.android.compose.animation.scene.UserActionResult.ReplaceByOverlay
 import com.android.compose.animation.scene.UserActionResult.ShowOverlay
-import com.android.compose.animation.scene.transition.animateProgress
 import com.android.mechanics.ProvidedGestureContext
 import com.android.mechanics.spec.InputDirection
+import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun PredictiveBackHandler(
@@ -91,5 +98,65 @@ private fun UserActionResult.copy(
         is ShowOverlay -> copy(transitionKey = transitionKey)
         is HideOverlay -> copy(transitionKey = transitionKey)
         is ReplaceByOverlay -> copy(transitionKey = transitionKey)
+    }
+}
+
+private suspend fun <T : ContentKey> animateProgress(
+    state: MutableSceneTransitionLayoutStateImpl,
+    animation: SwipeAnimation<T>,
+    progress: Flow<Float>,
+    commitSpec: AnimationSpec<Float>?,
+    cancelSpec: AnimationSpec<Float>?,
+    animationScope: CoroutineScope? = null,
+) {
+    suspend fun animateOffset(targetContent: T, spec: AnimationSpec<Float>?) {
+        if (state.transitionState != animation.contentTransition || animation.isAnimatingOffset()) {
+            return
+        }
+
+        animation.animateOffset(
+            initialVelocity = 0f,
+            targetContent = targetContent,
+
+            // Important: we have to specify a spec that correctly animates *progress* (low
+            // visibility threshold) and not *offset* (higher visibility threshold).
+            spec = spec ?: animation.contentTransition.transformationSpec.progressSpec,
+        )
+    }
+
+    coroutineScope {
+        val collectionJob = launch {
+            try {
+                progress.collectLatest { progress ->
+                    // Progress based animation should never overscroll given that the
+                    // absoluteDistance exposed to overscroll builders is always 1f and will not
+                    // lead to any noticeable transformation.
+                    animation.dragOffset = progress.fastCoerceIn(0f, 1f)
+                }
+
+                // Transition committed.
+                animateOffset(animation.toContent, commitSpec)
+            } catch (e: CancellationException) {
+                // Transition cancelled.
+                animateOffset(animation.fromContent, cancelSpec)
+            }
+        }
+
+        // Start the transition.
+        animationScope?.launch { startTransition(state, animation, collectionJob) }
+            ?: startTransition(state, animation, collectionJob)
+    }
+}
+
+private suspend fun <T : ContentKey> startTransition(
+    state: MutableSceneTransitionLayoutStateImpl,
+    animation: SwipeAnimation<T>,
+    progressCollectionJob: Job,
+) {
+    state.startTransition(animation.contentTransition)
+    // The transition is done. Cancel the collection in case the transition was finished
+    // because it was interrupted by another transition.
+    if (progressCollectionJob.isActive) {
+        progressCollectionJob.cancel()
     }
 }
