@@ -17,6 +17,8 @@
 package com.android.systemui.volume.dialog.domain.interactor
 
 import android.annotation.SuppressLint
+import android.media.AudioManager.RINGER_MODE_NORMAL
+import android.media.AudioManager.RINGER_MODE_SILENT
 import android.os.Handler
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.plugins.VolumeDialogController
@@ -60,10 +62,10 @@ constructor(
                 awaitClose { volumeDialogController.removeCallback(producer) }
             }
             .buffer(capacity = BUFFER_CAPACITY, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-            .shareIn(replay = 0, scope = coroutineScope, started = SharingStarted.WhileSubscribed())
+            .shareIn(replay = 0, scope = coroutineScope, started = SharingStarted.Eagerly)
             .onStart { emit(VolumeDialogEventModel.SubscribedToEvents) }
 
-    private class VolumeDialogEventModelProducer(
+    private inner class VolumeDialogEventModelProducer(
         private val scope: ProducerScope<VolumeDialogEventModel>
     ) : VolumeDialogController.Callbacks {
         override fun onShowRequested(reason: Int, keyguardLocked: Boolean, lockTaskModeState: Int) {
@@ -93,14 +95,6 @@ constructor(
         // Configuration change is never emitted by the VolumeDialogControllerImpl now.
         override fun onConfigurationChanged() = Unit
 
-        override fun onShowVibrateHint() {
-            scope.trySend(VolumeDialogEventModel.ShowVibrateHint)
-        }
-
-        override fun onShowSilentHint() {
-            scope.trySend(VolumeDialogEventModel.ShowSilentHint)
-        }
-
         override fun onScreenOff() {
             scope.trySend(VolumeDialogEventModel.ScreenOff)
         }
@@ -112,16 +106,6 @@ constructor(
         override fun onAccessibilityModeChanged(showA11yStream: Boolean?) {
             scope.trySend(VolumeDialogEventModel.AccessibilityModeChanged(showA11yStream == true))
         }
-
-        // Captions button is remove from the Volume Dialog
-        override fun onCaptionComponentStateChanged(
-            isComponentEnabled: Boolean,
-            fromTooltip: Boolean,
-        ) = Unit
-
-        // Captions button is remove from the Volume Dialog
-        override fun onCaptionEnabledStateChanged(isEnabled: Boolean, checkBeforeSwitch: Boolean) =
-            Unit
 
         override fun onShowCsdWarning(csdWarning: Int, durationMs: Int) {
             scope.trySend(
@@ -135,5 +119,25 @@ constructor(
         override fun onVolumeChangedFromKey() {
             scope.trySend(VolumeDialogEventModel.VolumeChangedFromKey)
         }
+
+        // This should've been handled in side the controller itself.
+        override fun onShowVibrateHint() {
+            volumeDialogController.setRingerMode(RINGER_MODE_SILENT, false)
+        }
+
+        // This should've been handled in side the controller itself.
+        override fun onShowSilentHint() {
+            volumeDialogController.setRingerMode(RINGER_MODE_NORMAL, false)
+        }
+
+        // Captions button is remove from the Volume Dialog
+        override fun onCaptionComponentStateChanged(
+            isComponentEnabled: Boolean,
+            fromTooltip: Boolean,
+        ) = Unit
+
+        // Captions button is remove from the Volume Dialog
+        override fun onCaptionEnabledStateChanged(isEnabled: Boolean, checkBeforeSwitch: Boolean) =
+            Unit
     }
 }

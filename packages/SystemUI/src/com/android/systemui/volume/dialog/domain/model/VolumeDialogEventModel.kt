@@ -38,10 +38,6 @@ sealed interface VolumeDialogEventModel {
 
     data class LayoutDirectionChanged(val layoutDirection: Int) : VolumeDialogEventModel
 
-    data object ShowVibrateHint : VolumeDialogEventModel
-
-    data object ShowSilentHint : VolumeDialogEventModel
-
     data object ScreenOff : VolumeDialogEventModel
 
     data class ShowSafetyWarning(val flags: Int) : VolumeDialogEventModel
