@@ -18,6 +18,7 @@ package androidx.window.extensions.embedding;
 
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -3154,15 +3155,22 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 final WindowContainerTransaction wct = transactionRecord.getTransaction();
                 final TaskFragmentContainer launchedInTaskFragment;
                 if (launchingActivity != null) {
-                    final int taskId = getTaskId(launchingActivity);
                     final String overlayTag = options.getString(KEY_OVERLAY_TAG);
                     if (Flags.activityEmbeddingOverlayPresentationFlag()
                             && overlayTag != null) {
                         launchedInTaskFragment = createOrUpdateOverlayTaskFragmentIfNeeded(wct,
                                 options, intent, launchingActivity);
                     } else {
-                        launchedInTaskFragment = resolveStartActivityIntent(wct, taskId, intent,
-                                launchingActivity);
+                        final int taskId = getTaskId(launchingActivity);
+                        if (taskId != INVALID_TASK_ID) {
+                            launchedInTaskFragment = resolveStartActivityIntent(wct, taskId, intent,
+                                    launchingActivity);
+                        } else {
+                            // We cannot get a valid task id of launchingActivity so we fall back to
+                            // treat it as a non-Activity context.
+                            launchedInTaskFragment =
+                                    resolveStartActivityIntentFromNonActivityContext(wct, intent);
+                        }
                     }
                 } else {
                     launchedInTaskFragment = resolveStartActivityIntentFromNonActivityContext(wct,
