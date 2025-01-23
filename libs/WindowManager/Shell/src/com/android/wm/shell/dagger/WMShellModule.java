@@ -108,6 +108,8 @@ import com.android.wm.shell.desktopmode.education.AppToWebEducationController;
 import com.android.wm.shell.desktopmode.education.AppToWebEducationFilter;
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository;
 import com.android.wm.shell.desktopmode.education.data.AppToWebEducationDatastoreRepository;
+import com.android.wm.shell.desktopmode.multidesks.DesksOrganizer;
+import com.android.wm.shell.desktopmode.multidesks.RootTaskDesksOrganizer;
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository;
 import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer;
 import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializerImpl;
@@ -703,6 +705,16 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
+    static DesksOrganizer provideDesksOrganizer(
+            @NonNull ShellInit shellInit,
+            @NonNull ShellCommandHandler shellCommandHandler,
+            @NonNull ShellTaskOrganizer shellTaskOrganizer
+    ) {
+        return new RootTaskDesksOrganizer(shellInit, shellCommandHandler, shellTaskOrganizer);
+    }
+
+    @WMSingleton
+    @Provides
     @DynamicOverride
     static DesktopTasksController provideDesktopTasksController(
             Context context,
@@ -741,7 +753,8 @@ public abstract class WMShellModule {
             DesktopTilingDecorViewModel desktopTilingDecorViewModel,
             DesktopWallpaperActivityTokenProvider desktopWallpaperActivityTokenProvider,
             Optional<BubbleController> bubbleController,
-            OverviewToDesktopTransitionObserver overviewToDesktopTransitionObserver) {
+            OverviewToDesktopTransitionObserver overviewToDesktopTransitionObserver,
+            DesksOrganizer desksOrganizer) {
         return new DesktopTasksController(
                 context,
                 shellInit,
@@ -775,7 +788,8 @@ public abstract class WMShellModule {
                 desktopTilingDecorViewModel,
                 desktopWallpaperActivityTokenProvider,
                 bubbleController,
-                overviewToDesktopTransitionObserver);
+                overviewToDesktopTransitionObserver,
+                desksOrganizer);
     }
 
     @WMSingleton
@@ -1183,10 +1197,11 @@ public abstract class WMShellModule {
             Transitions transitions,
             DisplayController displayController,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            IWindowManager windowManager
+            IWindowManager windowManager,
+            Optional<DesktopUserRepositories> desktopUserRepositories,
+            Optional<DesktopTasksController> desktopTasksController
     ) {
-        if (!DesktopModeStatus.canEnterDesktopMode(context)
-                || !Flags.enableDisplayWindowingModeSwitching()) {
+        if (!DesktopModeStatus.canEnterDesktopMode(context)) {
             return Optional.empty();
         }
         return Optional.of(
@@ -1196,7 +1211,9 @@ public abstract class WMShellModule {
                         transitions,
                         displayController,
                         rootTaskDisplayAreaOrganizer,
-                        windowManager));
+                        windowManager,
+                        desktopUserRepositories.get(),
+                        desktopTasksController.get()));
     }
 
     @WMSingleton

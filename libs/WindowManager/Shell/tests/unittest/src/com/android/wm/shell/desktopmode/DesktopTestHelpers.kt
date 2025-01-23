@@ -35,6 +35,7 @@ object DesktopTestHelpers {
     ): RunningTaskInfo =
         TestRunningTaskInfoBuilder()
             .setDisplayId(displayId)
+            .setParentTaskId(displayId)
             .setToken(MockToken().token())
             .setActivityType(ACTIVITY_TYPE_STANDARD)
             .setWindowingMode(WINDOWING_MODE_FREEFORM)

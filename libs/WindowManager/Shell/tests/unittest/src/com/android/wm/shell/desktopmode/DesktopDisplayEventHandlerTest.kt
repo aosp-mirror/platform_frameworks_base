@@ -20,6 +20,8 @@ import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.content.ContentResolver
 import android.os.Binder
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import android.provider.Settings
 import android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS
 import android.testing.AndroidTestingRunner
@@ -29,20 +31,25 @@ import android.view.WindowManager.TRANSIT_CHANGE
 import android.window.DisplayAreaInfo
 import android.window.WindowContainerTransaction
 import androidx.test.filters.SmallTest
+import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.dx.mockito.inline.extended.ExtendedMockito.never
+import com.android.dx.mockito.inline.extended.StaticMockitoSession
+import com.android.window.flags.Flags
 import com.android.wm.shell.MockToken
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayController.OnDisplaysChangedListener
 import com.android.wm.shell.common.ShellExecutor
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mock
 import org.mockito.Mockito.anyInt
@@ -53,6 +60,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
+import org.mockito.quality.Strictness
 
 /**
  * Test class for [DesktopDisplayEventHandler]
@@ -63,18 +71,33 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidTestingRunner::class)
 class DesktopDisplayEventHandlerTest : ShellTestCase() {
 
+    @JvmField @Rule val setFlagsRule = SetFlagsRule()
+
     @Mock lateinit var testExecutor: ShellExecutor
     @Mock lateinit var transitions: Transitions
     @Mock lateinit var displayController: DisplayController
     @Mock lateinit var rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
     @Mock private lateinit var mockWindowManager: IWindowManager
+    @Mock private lateinit var mockDesktopUserRepositories: DesktopUserRepositories
+    @Mock private lateinit var mockDesktopRepository: DesktopRepository
+    @Mock private lateinit var mockDesktopTasksController: DesktopTasksController
 
+    private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var shellInit: ShellInit
     private lateinit var handler: DesktopDisplayEventHandler
 
+    private val onDisplaysChangedListenerCaptor = argumentCaptor<OnDisplaysChangedListener>()
+
     @Before
     fun setUp() {
+        mockitoSession =
+            mockitoSession()
+                .strictness(Strictness.LENIENT)
+                .spyStatic(DesktopModeStatus::class.java)
+                .startMocking()
+
         shellInit = spy(ShellInit(testExecutor))
+        whenever(mockDesktopUserRepositories.current).thenReturn(mockDesktopRepository)
         whenever(transitions.startTransition(anyInt(), any(), isNull())).thenAnswer { Binder() }
         val tda = DisplayAreaInfo(MockToken().token(), DEFAULT_DISPLAY, 0)
         whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)).thenReturn(tda)
@@ -86,8 +109,17 @@ class DesktopDisplayEventHandlerTest : ShellTestCase() {
                 displayController,
                 rootTaskDisplayAreaOrganizer,
                 mockWindowManager,
+                mockDesktopUserRepositories,
+                mockDesktopTasksController,
             )
         shellInit.init()
+        verify(displayController)
+            .addDisplayWindowListener(onDisplaysChangedListenerCaptor.capture())
+    }
+
+    @After
+    fun tearDown() {
+        mockitoSession.finishMocking()
     }
 
     private fun testDisplayWindowingModeSwitch(
@@ -96,8 +128,6 @@ class DesktopDisplayEventHandlerTest : ShellTestCase() {
         expectTransition: Boolean,
     ) {
         val externalDisplayId = 100
-        val captor = ArgumentCaptor.forClass(OnDisplaysChangedListener::class.java)
-        verify(displayController).addDisplayWindowListener(captor.capture())
         val tda = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)!!
         tda.configuration.windowConfiguration.windowingMode = defaultWindowingMode
         whenever(mockWindowManager.getWindowingMode(anyInt())).thenAnswer { defaultWindowingMode }
@@ -111,12 +141,12 @@ class DesktopDisplayEventHandlerTest : ShellTestCase() {
             // The external display connected.
             whenever(rootTaskDisplayAreaOrganizer.getDisplayIds())
                 .thenReturn(intArrayOf(DEFAULT_DISPLAY, externalDisplayId))
-            captor.value.onDisplayAdded(externalDisplayId)
+            onDisplaysChangedListenerCaptor.lastValue.onDisplayAdded(externalDisplayId)
             tda.configuration.windowConfiguration.windowingMode = WINDOWING_MODE_FREEFORM
             // The external display disconnected.
             whenever(rootTaskDisplayAreaOrganizer.getDisplayIds())
                 .thenReturn(intArrayOf(DEFAULT_DISPLAY))
-            captor.value.onDisplayRemoved(externalDisplayId)
+            onDisplaysChangedListenerCaptor.lastValue.onDisplayRemoved(externalDisplayId)
 
             if (expectTransition) {
                 val arg = argumentCaptor<WindowContainerTransaction>()
@@ -157,6 +187,44 @@ class DesktopDisplayEventHandlerTest : ShellTestCase() {
             extendedDisplayEnabled = true,
             expectTransition = false,
         )
+    }
+
+    @Test
+    fun testDisplayAdded_supportsDesks_createsDesk() {
+        whenever(DesktopModeStatus.canEnterDesktopMode(context)).thenReturn(true)
+
+        onDisplaysChangedListenerCaptor.lastValue.onDisplayAdded(DEFAULT_DISPLAY)
+
+        verify(mockDesktopTasksController).createDesk(DEFAULT_DISPLAY)
+    }
+
+    @Test
+    fun testDisplayAdded_cannotEnterDesktopMode_doesNotCreateDesk() {
+        whenever(DesktopModeStatus.canEnterDesktopMode(context)).thenReturn(false)
+
+        onDisplaysChangedListenerCaptor.lastValue.onDisplayAdded(DEFAULT_DISPLAY)
+
+        verify(mockDesktopTasksController, never()).createDesk(DEFAULT_DISPLAY)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun testDeskRemoved_noDesksRemain_createsDesk() {
+        whenever(mockDesktopRepository.getNumberOfDesks(DEFAULT_DISPLAY)).thenReturn(0)
+
+        handler.onDeskRemoved(DEFAULT_DISPLAY, deskId = 1)
+
+        verify(mockDesktopTasksController).createDesk(DEFAULT_DISPLAY)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun testDeskRemoved_desksRemain_doesNotCreateDesk() {
+        whenever(mockDesktopRepository.getNumberOfDesks(DEFAULT_DISPLAY)).thenReturn(1)
+
+        handler.onDeskRemoved(DEFAULT_DISPLAY, deskId = 1)
+
+        verify(mockDesktopTasksController, never()).createDesk(DEFAULT_DISPLAY)
     }
 
     private class ExtendedDisplaySettingsSession(
