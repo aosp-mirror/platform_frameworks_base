@@ -22,6 +22,7 @@ import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.TwoStatePreference
+import com.android.settingslib.metadata.EXTRA_BINDING_SCREEN_ARGS
 import com.android.settingslib.metadata.EXTRA_BINDING_SCREEN_KEY
 import com.android.settingslib.metadata.PreferenceMetadata
 import com.android.settingslib.metadata.PreferenceScreenMetadata
@@ -35,9 +36,11 @@ interface PreferenceScreenBinding : PreferenceBinding {
         super.bind(preference, metadata)
         val context = preference.context
         val screenMetadata = metadata as PreferenceScreenMetadata
+        val extras = preference.extras
         // Pass the preference key to fragment, so that the fragment could find associated
         // preference screen registered in PreferenceScreenRegistry
-        preference.extras.putString(EXTRA_BINDING_SCREEN_KEY, preference.key)
+        extras.putString(EXTRA_BINDING_SCREEN_KEY, preference.key)
+        screenMetadata.arguments?.let { extras.putBundle(EXTRA_BINDING_SCREEN_ARGS, it) }
         if (preference is PreferenceScreen) {
             val screenTitle = screenMetadata.screenTitle
             preference.title =

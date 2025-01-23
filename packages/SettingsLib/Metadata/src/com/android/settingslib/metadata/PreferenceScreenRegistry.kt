@@ -17,10 +17,13 @@
 package com.android.settingslib.metadata
 
 import android.content.Context
+import android.os.Bundle
+import android.util.Log
 import com.android.settingslib.datastore.KeyValueStore
 
 /** Registry of all available preference screens in the app. */
 object PreferenceScreenRegistry : ReadWritePermitProvider {
+    private const val TAG = "ScreenRegistry"
 
     /** Provider of key-value store. */
     private lateinit var keyValueStoreProvider: KeyValueStoreProvider
@@ -52,9 +55,28 @@ object PreferenceScreenRegistry : ReadWritePermitProvider {
     fun getKeyValueStore(context: Context, preference: PreferenceMetadata): KeyValueStore? =
         keyValueStoreProvider.getKeyValueStore(context, preference)
 
-    /** Creates [PreferenceScreenMetadata] of particular screen key. */
-    fun create(context: Context, screenKey: String?): PreferenceScreenMetadata? =
-        screenKey?.let { preferenceScreenMetadataFactories[it]?.create(context.applicationContext) }
+    /** Creates [PreferenceScreenMetadata] of particular screen. */
+    fun create(context: Context, screenCoordinate: PreferenceScreenCoordinate) =
+        create(context, screenCoordinate.screenKey, screenCoordinate.args)
+
+    /** Creates [PreferenceScreenMetadata] of particular screen key with given arguments. */
+    fun create(context: Context, screenKey: String?, args: Bundle?): PreferenceScreenMetadata? {
+        if (screenKey == null) return null
+        val factory = preferenceScreenMetadataFactories[screenKey] ?: return null
+        val appContext = context.applicationContext
+        if (factory is PreferenceScreenMetadataParameterizedFactory) {
+            if (args != null) return factory.create(appContext, args)
+            // In case the parameterized screen was a normal scree, it is expected to accept
+            // Bundle.EMPTY arguments and take care of backward compatibility.
+            if (factory.acceptEmptyArguments()) return factory.create(appContext)
+            Log.e(TAG, "screen $screenKey is parameterized but args is not provided")
+            return null
+        } else {
+            if (args == null) return factory.create(appContext)
+            Log.e(TAG, "screen $screenKey is not parameterized but args is provided")
+            return null
+        }
+    }
 
     /**
      * Sets the provider to check read write permit. Read and write requests are denied by default.

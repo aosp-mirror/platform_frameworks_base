@@ -31,6 +31,7 @@ import com.android.settingslib.datastore.KeyValueStore
 import com.android.settingslib.datastore.KeyedDataObservable
 import com.android.settingslib.datastore.KeyedObservable
 import com.android.settingslib.datastore.KeyedObserver
+import com.android.settingslib.metadata.EXTRA_BINDING_SCREEN_ARGS
 import com.android.settingslib.metadata.PersistentPreference
 import com.android.settingslib.metadata.PreferenceChangeReason
 import com.android.settingslib.metadata.PreferenceHierarchy
@@ -227,14 +228,16 @@ class PreferenceScreenBindingHelper(
         /** Updates preference screen that has incomplete hierarchy. */
         @JvmStatic
         fun bind(preferenceScreen: PreferenceScreen) {
-            PreferenceScreenRegistry.create(preferenceScreen.context, preferenceScreen.key)?.run {
+            val context = preferenceScreen.context
+            val args = preferenceScreen.peekExtras()?.getBundle(EXTRA_BINDING_SCREEN_ARGS)
+            PreferenceScreenRegistry.create(context, preferenceScreen.key, args)?.run {
                 if (!hasCompleteHierarchy()) {
                     val preferenceBindingFactory =
                         (this as? PreferenceScreenCreator)?.preferenceBindingFactory ?: return
                     bindRecursively(
                         preferenceScreen,
                         preferenceBindingFactory,
-                        getPreferenceHierarchy(preferenceScreen.context),
+                        getPreferenceHierarchy(context),
                     )
                 }
             }

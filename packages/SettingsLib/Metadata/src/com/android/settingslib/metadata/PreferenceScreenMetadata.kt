@@ -18,12 +18,25 @@ package com.android.settingslib.metadata
 
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import androidx.annotation.AnyThread
 import androidx.fragment.app.Fragment
+import kotlinx.coroutines.flow.Flow
 
-/** Metadata of preference screen. */
+/**
+ * Metadata of preference screen.
+ *
+ * For parameterized preference screen that relies on additional information (e.g. package name,
+ * language code) to build its content, the subclass must:
+ * - override [arguments] in constructor
+ * - add a static method `fun parameters(context: Context): List<Bundle>` (context is optional) to
+ *   provide all possible arguments
+ */
 @AnyThread
 interface PreferenceScreenMetadata : PreferenceMetadata {
+    /** Arguments to build the screen content. */
+    val arguments: Bundle?
+        get() = null
 
     /**
      * The screen title resource, which precedes [getScreenTitle] if provided.
@@ -65,7 +78,12 @@ interface PreferenceScreenMetadata : PreferenceMetadata {
     fun getLaunchIntent(context: Context, metadata: PreferenceMetadata?): Intent? = null
 }
 
-/** Factory of [PreferenceScreenMetadata]. */
+/**
+ * Factory of [PreferenceScreenMetadata].
+ *
+ * Annotation processor generates implementation of this interface based on
+ * [ProvidePreferenceScreen] when [ProvidePreferenceScreen.parameterized] is `false`.
+ */
 fun interface PreferenceScreenMetadataFactory {
 
     /**
@@ -74,4 +92,45 @@ fun interface PreferenceScreenMetadataFactory {
      * @param context application context to create the PreferenceScreenMetadata
      */
     fun create(context: Context): PreferenceScreenMetadata
+}
+
+/**
+ * Parameterized factory of [PreferenceScreenMetadata].
+ *
+ * Annotation processor generates implementation of this interface based on
+ * [ProvidePreferenceScreen] when [ProvidePreferenceScreen.parameterized] is `true`.
+ */
+interface PreferenceScreenMetadataParameterizedFactory : PreferenceScreenMetadataFactory {
+    override fun create(context: Context) = create(context, Bundle.EMPTY)
+
+    /**
+     * Creates a new [PreferenceScreenMetadata] with given arguments.
+     *
+     * @param context application context to create the PreferenceScreenMetadata
+     * @param args arguments to create the screen metadata, [Bundle.EMPTY] is reserved for the
+     *   default case when screen is migrated from normal to parameterized
+     */
+    fun create(context: Context, args: Bundle): PreferenceScreenMetadata
+
+    /**
+     * Returns all possible arguments to create [PreferenceScreenMetadata].
+     *
+     * Note that [Bundle.EMPTY] is a special arguments reserved for backward compatibility when a
+     * preference screen was a normal screen but migrated to parameterized screen later:
+     * 1. Set [ProvidePreferenceScreen.parameterizedMigration] to `true`, so that the generated
+     *    [acceptEmptyArguments] will be `true`.
+     * 1. In the original [parameters] implementation, produce a [Bundle.EMPTY] for the default
+     *    case.
+     *
+     * Do not use [Bundle.EMPTY] for other purpose.
+     */
+    fun parameters(context: Context): Flow<Bundle>
+
+    /**
+     * Returns true when the parameterized screen was a normal screen.
+     *
+     * The [PreferenceScreenMetadata] is expected to accept an empty arguments ([Bundle.EMPTY]) and
+     * take care of backward compatibility.
+     */
+    fun acceptEmptyArguments(): Boolean = false
 }
