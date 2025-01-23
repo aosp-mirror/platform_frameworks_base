@@ -407,8 +407,6 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
                         mLeftoversHandler.mergeAnimation(
                                 transition, info, t, mergeTarget, finishCallback);
                     }
-                } else {
-                    mPipHandler.end();
                 }
                 return;
             case TYPE_KEYGUARD:
