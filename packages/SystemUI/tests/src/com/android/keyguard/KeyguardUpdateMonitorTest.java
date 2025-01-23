@@ -38,6 +38,7 @@ import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_STATE_CANCELL
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_STATE_STOPPED;
 import static com.android.keyguard.KeyguardUpdateMonitor.DEFAULT_CANCEL_SIGNAL_TIMEOUT;
 import static com.android.keyguard.KeyguardUpdateMonitor.HAL_POWER_PRESS_TIMEOUT;
+import static com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_V2;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_OPENED;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_UNKNOWN;
 
@@ -139,6 +140,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor;
 import com.android.systemui.deviceentry.data.repository.FaceWakeUpTriggersConfig;
 import com.android.systemui.deviceentry.data.repository.FaceWakeUpTriggersConfigImpl;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
@@ -180,6 +182,9 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -188,9 +193,6 @@ import java.util.Random;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
-import platform.test.runner.parameterized.Parameters;
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4.class)
@@ -304,6 +306,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private JavaAdapter mJavaAdapter;
     @Mock
     private SceneInteractor mSceneInteractor;
+    @Mock
+    private CommunalSceneInteractor mCommunalSceneInteractor;
     @Captor
     private ArgumentCaptor<FaceAuthenticationListener> mFaceAuthenticationListener;
 
@@ -1080,6 +1084,49 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         callback.onBiometricPromptDismissed();
 
         // THEN we should listen for fingerprint
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(false)).isTrue();
+    }
+
+    @Test
+    @EnableFlags(FLAG_GLANCEABLE_HUB_V2)
+    public void udfpsStopsListeningWhenCommunalShowing() {
+        // GIVEN keyguard showing
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mKeyguardUpdateMonitor.setKeyguardShowing(true, false);
+
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isTrue();
+
+        // WHEN communal is shown
+        mKeyguardUpdateMonitor.onCommunalShowingChanged(true);
+
+        // THEN shouldn't listen for fingerprint
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isFalse();
+
+        // WHEN alternate bouncer shows on top of communal, we should listen for fingerprint
+        mKeyguardUpdateMonitor.setAlternateBouncerVisibility(true);
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isTrue();
+
+        // WHEN communal is hidden
+        mKeyguardUpdateMonitor.onCommunalShowingChanged(false);
+        mKeyguardUpdateMonitor.setAlternateBouncerVisibility(false);
+
+        // THEN listen for fingerprint
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isTrue();
+    }
+
+    @Test
+    @EnableFlags(FLAG_GLANCEABLE_HUB_V2)
+    public void sfpsNotAffectedByCommunalShowing() {
+        // GIVEN keyguard showing
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mKeyguardUpdateMonitor.setKeyguardShowing(true, false);
+
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(false)).isTrue();
+
+        // WHEN communal is shown
+        mKeyguardUpdateMonitor.onCommunalShowingChanged(true);
+
+        // THEN we should still listen for fingerprint if not UDFPS
         assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(false)).isTrue();
     }
 
@@ -2669,7 +2716,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mTaskStackChangeListeners, mSelectedUserInteractor, mActivityTaskManager,
                     () -> mAlternateBouncerInteractor,
                     () -> mJavaAdapter,
-                    () -> mSceneInteractor);
+                    () -> mSceneInteractor,
+                    mCommunalSceneInteractor);
             setAlternateBouncerVisibility(false);
             setPrimaryBouncerVisibility(false);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);

@@ -43,6 +43,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+import static com.android.systemui.Flags.glanceableHubV2;
 import static com.android.systemui.Flags.simPinBouncerReset;
 import static com.android.systemui.Flags.simPinUseSlotId;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_OPENED;
@@ -128,6 +129,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -294,6 +296,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final Provider<JavaAdapter> mJavaAdapter;
     private final Provider<SceneInteractor> mSceneInteractor;
     private final Provider<AlternateBouncerInteractor> mAlternateBouncerInteractor;
+    private final CommunalSceneInteractor mCommunalSceneInteractor;
     private final AuthController mAuthController;
     private final UiEventLogger mUiEventLogger;
     private final Set<String> mAllowFingerprintOnOccludingActivitiesFromPackage;
@@ -404,6 +407,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     protected int mFingerprintRunningState = BIOMETRIC_STATE_STOPPED;
     private boolean mFingerprintDetectRunning;
     private boolean mIsDreaming;
+    private boolean mCommunalShowing;
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private final FingerprintInteractiveToAuthProvider mFingerprintInteractiveToAuthProvider;
 
@@ -2205,7 +2209,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             IActivityTaskManager activityTaskManagerService,
             Provider<AlternateBouncerInteractor> alternateBouncerInteractor,
             Provider<JavaAdapter> javaAdapter,
-            Provider<SceneInteractor> sceneInteractor) {
+            Provider<SceneInteractor> sceneInteractor,
+            CommunalSceneInteractor communalSceneInteractor) {
         mContext = context;
         mSubscriptionManager = subscriptionManager;
         mUserTracker = userTracker;
@@ -2254,6 +2259,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mJavaAdapter = javaAdapter;
         mSceneInteractor = sceneInteractor;
+        mCommunalSceneInteractor = communalSceneInteractor;
 
         mHandler = new Handler(mainLooper) {
             @Override
@@ -2532,6 +2538,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             mJavaAdapter.get().alwaysCollectFlow(
                     mSceneInteractor.get().getTransitionState(),
                     this::onTransitionStateChanged
+            );
+        }
+
+        if (glanceableHubV2()) {
+            mJavaAdapter.get().alwaysCollectFlow(
+                    mCommunalSceneInteractor.isCommunalVisible(),
+                    this::onCommunalShowingChanged
             );
         }
 
@@ -2837,6 +2850,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
+     * Sets whether the communal hub is showing.
+     */
+    @VisibleForTesting
+    void onCommunalShowingChanged(boolean showing) {
+        mCommunalShowing = showing;
+        updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
+    }
+
+    /**
      * Whether the alternate bouncer is showing.
      */
     public void setAlternateBouncerShowing(boolean showing) {
@@ -2998,11 +3020,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         final boolean strongerAuthRequired = !isUnlockingWithFingerprintAllowed();
         final boolean shouldListenBouncerState =
                 !strongerAuthRequired || !isPrimaryBouncerShowingOrWillBeShowing();
+        final boolean isUdfpsAuthRequiredOnCommunal =
+                !mCommunalShowing || isAlternateBouncerShowing();
 
         final boolean shouldListenUdfpsState = !isUdfps
                 || (!userCanSkipBouncer
                 && !strongerAuthRequired
-                && userDoesNotHaveTrust);
+                && userDoesNotHaveTrust
+                && (!glanceableHubV2() || isUdfpsAuthRequiredOnCommunal));
 
 
         boolean shouldListen = shouldListenKeyguardState && shouldListenUserState
@@ -3033,7 +3058,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     mSwitchingUser,
                     mIsSystemUser,
                     isUdfps,
-                    userDoesNotHaveTrust));
+                    userDoesNotHaveTrust,
+                    mCommunalShowing));
 
         return shouldListen;
     }
