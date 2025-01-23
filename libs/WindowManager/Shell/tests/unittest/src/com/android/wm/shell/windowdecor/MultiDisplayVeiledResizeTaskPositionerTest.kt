@@ -51,11 +51,10 @@ import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_UNDEFI
 import java.util.function.Supplier
 import junit.framework.Assert
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.Mock
-import org.mockito.Mockito.any
 import org.mockito.Mockito.argThat
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.eq
@@ -93,6 +92,8 @@ class MultiDisplayVeiledResizeTaskPositionerTest : ShellTestCase() {
     @Mock private lateinit var mockFinishCallback: TransitionFinishCallback
     @Mock private lateinit var mockTransitions: Transitions
     @Mock private lateinit var mockInteractionJankMonitor: InteractionJankMonitor
+    @Mock private lateinit var mockSurfaceControl: SurfaceControl
+
     private lateinit var resources: TestableResources
     private lateinit var spyDisplayLayout0: DisplayLayout
     private lateinit var spyDisplayLayout1: DisplayLayout
@@ -145,6 +146,8 @@ class MultiDisplayVeiledResizeTaskPositionerTest : ShellTestCase() {
             .`when`(spyDisplayLayout0)
             .getStableBounds(any())
         `when`(mockTransactionFactory.get()).thenReturn(mockTransaction)
+        `when`(mockDesktopWindowDecoration.leash).thenReturn(mockSurfaceControl)
+        `when`(mockTransaction.setPosition(any(), any(), any())).thenReturn(mockTransaction)
         mockDesktopWindowDecoration.mTaskInfo =
             ActivityManager.RunningTaskInfo().apply {
                 taskId = TASK_ID
@@ -207,7 +210,6 @@ class MultiDisplayVeiledResizeTaskPositionerTest : ShellTestCase() {
     }
 
     @Test
-    @Ignore("Causing presubmit failure b/391717499")
     fun testDragResize_movesTask_doesNotShowResizeVeil() = runOnUiThread {
         taskPositioner.onDragPositioningStart(
             CTRL_TYPE_UNDEFINED,
@@ -247,7 +249,6 @@ class MultiDisplayVeiledResizeTaskPositionerTest : ShellTestCase() {
     }
 
     @Test
-    @Ignore("Causing presubmit failure b/391717499")
     fun testDragResize_movesTaskToNewDisplay() = runOnUiThread {
         taskPositioner.onDragPositioningStart(
             CTRL_TYPE_UNDEFINED,
@@ -373,7 +374,6 @@ class MultiDisplayVeiledResizeTaskPositionerTest : ShellTestCase() {
     }
 
     @Test
-    @Ignore("Causing presubmit failure b/391717499")
     fun testDragResize_drag_setBoundsNotRunIfDragEndsInDisallowedEndArea() = runOnUiThread {
         taskPositioner.onDragPositioningStart(
             CTRL_TYPE_UNDEFINED, // drag

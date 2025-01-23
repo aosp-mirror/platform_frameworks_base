@@ -199,7 +199,7 @@ class MultiDisplayVeiledResizeTaskPositioner(
                 // TODO(b/383069173): Render drag indicator(s)
 
                 t.setPosition(
-                    desktopWindowDecoration.mTaskSurface,
+                    desktopWindowDecoration.leash,
                     repositionTaskBounds.left.toFloat(),
                     repositionTaskBounds.top.toFloat(),
                 )
