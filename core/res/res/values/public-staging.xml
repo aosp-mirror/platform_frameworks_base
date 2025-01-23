@@ -109,34 +109,13 @@
     =============================================================== -->
   <eat-comment/>
 
-  <staging-public-group type="attr" first-id="0x01b70000">
+  <staging-public-group type="attr" first-id="0x01b30000">
       <!-- @FlaggedApi("android.content.pm.sdk_lib_independence") -->
     <public name="optional"/>
-    <!-- @FlaggedApi("android.media.tv.flags.enable_ad_service_fw") -->
-    <public name="adServiceTypes" />
-    <!-- @FlaggedApi("android.view.inputmethod.ime_switcher_revamp_api") -->
-    <public name="languageSettingsActivity"/>
-    <!-- @FlaggedApi(android.service.controls.flags.Flags.FLAG_HOME_PANEL_DREAM) -->
-    <public name="dreamCategory"/>
-    <!-- @FlaggedApi("android.permission.flags.replace_body_sensor_permission_enabled")
-         @hide @SystemApi -->
-    <public name="backgroundPermission"/>
-    <!-- @FlaggedApi(android.view.accessibility.supplemental_description) -->
-    <public name="supplementalDescription"/>
-    <!-- @FlaggedApi("android.security.enable_intent_matching_flags") -->
-    <public name="intentMatchingFlags"/>
-    <!-- @FlaggedApi(android.view.inputmethod.Flags.FLAG_IME_SWITCHER_REVAMP_API) -->
-    <public name="layoutLabel"/>
     <!-- @FlaggedApi(android.content.pm.Flags.FLAG_CHANGE_LAUNCHER_BADGING) -->
     <public name="alternateLauncherIcons"/>
     <!-- @FlaggedApi(android.content.pm.Flags.FLAG_CHANGE_LAUNCHER_BADGING) -->
     <public name="alternateLauncherLabels"/>
-    <!-- @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB) -->
-    <public name="pageSizeCompat" />
-    <!-- @FlaggedApi(android.nfc.Flags.FLAG_NFC_ASSOCIATED_ROLE_SERVICES) -->
-    <public name="wantsRoleHolderPriority"/>
-    <!-- @FlaggedApi(android.sdk.Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME) -->
-    <public name="minSdkVersionFull"/>
     <!-- @hide Only for device overlay to use this. -->
     <public name="pointerIconVectorFill"/>
     <!-- @hide Only for device overlay to use this. -->
@@ -147,39 +126,27 @@
     <public name="pointerIconVectorStrokeInverse"/>
   </staging-public-group>
 
-  <staging-public-group type="id" first-id="0x01b60000">
+  <staging-public-group type="id" first-id="0x01b20000">
     <!-- @FlaggedApi(android.appwidget.flags.Flags.FLAG_ENGAGEMENT_METRICS) -->
     <public name="remoteViewsMetricsId"/>
   </staging-public-group>
 
-  <staging-public-group type="style" first-id="0x01b50000">
+  <staging-public-group type="style" first-id="0x01b10000">
   </staging-public-group>
 
-  <staging-public-group type="string" first-id="0x01b40000">
-    <!-- @FlaggedApi(android.content.pm.Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
-         @hide @SystemApi -->
-    <public name="config_systemDependencyInstaller" />
-    <!-- @hide @SystemApi -->
-    <public name="removed_config_defaultReservedForTestingProfileGroupExclusivity" />
-    <!-- @FlaggedApi(android.permission.flags.Flags.FLAG_SYSTEM_VENDOR_INTELLIGENCE_ROLE_ENABLED)
-         @hide @SystemApi -->
-    <public name="config_systemVendorIntelligence" />
-
+  <staging-public-group type="string" first-id="0x01b00000">
     <!-- @FlaggedApi(android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE)
      @hide @SystemApi -->
     <public name="config_defaultOnDeviceIntelligenceService" />
-
     <!-- @FlaggedApi(android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE)
      @hide @SystemApi -->
     <public name="config_defaultOnDeviceSandboxedInferenceService" />
-
     <!-- @FlaggedApi(android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE)
      @hide @SystemApi -->
     <public name="config_defaultOnDeviceIntelligenceDeviceConfigNamespace" />
-
   </staging-public-group>
 
-  <staging-public-group type="dimen" first-id="0x01b30000">
+  <staging-public-group type="dimen" first-id="0x01af0000">
     <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
     <public name="config_motionStandardFastSpatialDamping"/>
     <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
@@ -216,7 +183,7 @@
     <public name="config_shapeCornerRadiusXlarge"/>
   </staging-public-group>
 
-  <staging-public-group type="color" first-id="0x01b20000">
+  <staging-public-group type="color" first-id="0x01ae0000">
     <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
     <public name="system_inverse_on_surface_light"/>
     <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
@@ -243,28 +210,28 @@
     <public name="system_surface_tint_dark"/>
   </staging-public-group>
 
-  <staging-public-group type="array" first-id="0x01b10000">
+  <staging-public-group type="array" first-id="0x01ad0000">
   </staging-public-group>
 
-  <staging-public-group type="drawable" first-id="0x01b00000">
+  <staging-public-group type="drawable" first-id="0x01ac0000">
   </staging-public-group>
 
-  <staging-public-group type="layout" first-id="0x01af0000">
+  <staging-public-group type="layout" first-id="0x01ab0000">
   </staging-public-group>
 
-  <staging-public-group type="anim" first-id="0x01ae0000">
+  <staging-public-group type="anim" first-id="0x01aa0000">
   </staging-public-group>
 
-  <staging-public-group type="animator" first-id="0x01ad0000">
+  <staging-public-group type="animator" first-id="0x01a90000">
   </staging-public-group>
 
-  <staging-public-group type="interpolator" first-id="0x01ac0000">
+  <staging-public-group type="interpolator" first-id="0x01a80000">
   </staging-public-group>
 
-  <staging-public-group type="mipmap" first-id="0x01ab0000">
+  <staging-public-group type="mipmap" first-id="0x01a70000">
   </staging-public-group>
 
-  <staging-public-group type="integer" first-id="0x01aa0000">
+  <staging-public-group type="integer" first-id="0x01a60000">
     <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
     <public name="config_motionStandardFastSpatialStiffness"/>
     <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
@@ -291,16 +258,16 @@
     <public name="config_motionExpressiveSlowEffectStiffness"/>
   </staging-public-group>
 
-  <staging-public-group type="transition" first-id="0x01a90000">
+  <staging-public-group type="transition" first-id="0x01a50000">
   </staging-public-group>
 
-  <staging-public-group type="raw" first-id="0x01a80000">
+  <staging-public-group type="raw" first-id="0x01a40000">
   </staging-public-group>
 
-  <staging-public-group type="bool" first-id="0x01a70000">
+  <staging-public-group type="bool" first-id="0x01a30000">
   </staging-public-group>
 
-  <staging-public-group type="fraction" first-id="0x01a60000">
+  <staging-public-group type="fraction" first-id="0x01a20000">
   </staging-public-group>
 
 </resources>
