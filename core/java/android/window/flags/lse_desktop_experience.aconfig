@@ -563,3 +563,13 @@ flag {
     description: "Replace the freeform windowing dev options with a desktop experience one."
     bug: "389092752"
 }
+
+flag {
+    name: "enable_quickswitch_desktop_split_bugfix"
+    namespace: "lse_desktop_experience"
+    description: "Enables splitting QuickSwitch between fullscreen apps and Desktop workspaces."
+    bug: "345296916"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
