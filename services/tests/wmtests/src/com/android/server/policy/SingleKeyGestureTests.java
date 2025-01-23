@@ -39,6 +39,7 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
+import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.KeyEvent;
 
@@ -57,6 +58,7 @@ import java.util.concurrent.TimeUnit;
  * Build/Install/Run:
  *  atest WmTests:SingleKeyGestureTests
  */
+@Presubmit
 public class SingleKeyGestureTests {
     @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
