@@ -101,6 +101,7 @@ import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.common.UserProfileContexts
+import com.android.wm.shell.compatui.DesktopModeCompatPolicy
 import com.android.wm.shell.desktopmode.DesktopImmersiveController.ExitResult
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
@@ -261,6 +262,7 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
     private lateinit var desktopTasksLimiter: DesktopTasksLimiter
     private lateinit var recentsTransitionStateListener: RecentsTransitionStateListener
     private lateinit var testScope: CoroutineScope
+    private lateinit var desktopModeCompatPolicy: DesktopModeCompatPolicy
 
     private val shellExecutor = TestShellExecutor()
 
@@ -311,6 +313,7 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
                 mContext,
                 mockHandler,
             )
+        desktopModeCompatPolicy = DesktopModeCompatPolicy(context)
 
         whenever(shellTaskOrganizer.getRunningTasks(anyInt())).thenAnswer { runningTasks }
         whenever(transitions.startTransition(anyInt(), any(), isNull())).thenAnswer { Binder() }
@@ -406,6 +409,7 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
             overviewToDesktopTransitionObserver,
             desksOrganizer,
             userProfileContexts,
+            desktopModeCompatPolicy,
         )
 
     @After
