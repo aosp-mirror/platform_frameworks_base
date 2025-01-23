@@ -311,6 +311,9 @@ public class RecentTasksController implements TaskStackListenerCallback,
 
     public void onTaskAdded(RunningTaskInfo taskInfo) {
         notifyRunningTaskAppeared(taskInfo);
+        if (!enableShellTopTaskTracking()) {
+            notifyRecentTasksChanged();
+        }
     }
 
     public void onTaskRemoved(RunningTaskInfo taskInfo) {
