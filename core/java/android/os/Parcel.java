@@ -4661,7 +4661,7 @@ public final class Parcel {
      * @hide
      */
     @Nullable
-    private Object readLazyValue(@Nullable ClassLoaderProvider loaderProvider) {
+    public Object readLazyValue(@Nullable ClassLoader loader) {
         int start = dataPosition();
         int type = readInt();
         if (isLengthPrefixed(type)) {
@@ -4672,15 +4672,10 @@ public final class Parcel {
             int end = MathUtils.addOrThrow(dataPosition(), objectLength);
             int valueLength = end - start;
             setDataPosition(end);
-            return new LazyValue(this, start, valueLength, type, loaderProvider);
+            return new LazyValue(this, start, valueLength, type, loader);
         } else {
-            return readValue(type, getClassLoader(loaderProvider), /* clazz */ null);
+            return readValue(type, loader, /* clazz */ null);
         }
-    }
-
-    @Nullable
-    private static ClassLoader getClassLoader(@Nullable ClassLoaderProvider loaderProvider) {
-        return loaderProvider == null ? null : loaderProvider.getClassLoader();
     }
 
 
@@ -4696,12 +4691,7 @@ public final class Parcel {
         private final int mPosition;
         private final int mLength;
         private final int mType;
-        // this member is set when a bundle that includes a LazyValue is unparceled. But it is used
-        // when apply method is called. Between these 2 events, the bundle's ClassLoader could have
-        // changed. Let the bundle be a ClassLoaderProvider allows the bundle provides its current
-        // ClassLoader at the time apply method is called.
-        @NonNull
-        private final ClassLoaderProvider mLoaderProvider;
+        @Nullable private final ClassLoader mLoader;
         @Nullable private Object mObject;
 
         /**
@@ -4712,13 +4702,12 @@ public final class Parcel {
          */
         @Nullable private volatile Parcel mSource;
 
-        LazyValue(Parcel source, int position, int length, int type,
-                @NonNull ClassLoaderProvider loaderProvider) {
+        LazyValue(Parcel source, int position, int length, int type, @Nullable ClassLoader loader) {
             mSource = requireNonNull(source);
             mPosition = position;
             mLength = length;
             mType = type;
-            mLoaderProvider = loaderProvider;
+            mLoader = loader;
         }
 
         @Override
@@ -4731,8 +4720,7 @@ public final class Parcel {
                         int restore = source.dataPosition();
                         try {
                             source.setDataPosition(mPosition);
-                            mObject = source.readValue(mLoaderProvider.getClassLoader(), clazz,
-                                    itemTypes);
+                            mObject = source.readValue(mLoader, clazz, itemTypes);
                         } finally {
                             source.setDataPosition(restore);
                         }
@@ -4805,8 +4793,7 @@ public final class Parcel {
                 return Objects.equals(mObject, value.mObject);
             }
             // Better safely fail here since this could mean we get different objects.
-            if (!Objects.equals(mLoaderProvider.getClassLoader(),
-                    value.mLoaderProvider.getClassLoader())) {
+            if (!Objects.equals(mLoader, value.mLoader)) {
                 return false;
             }
             // Otherwise compare metadata prior to comparing payload.
@@ -4820,22 +4807,8 @@ public final class Parcel {
         @Override
         public int hashCode() {
             // Accessing mSource first to provide memory barrier for mObject
-            return Objects.hash(mSource == null, mObject, mLoaderProvider.getClassLoader(), mType,
-                    mLength);
+            return Objects.hash(mSource == null, mObject, mLoader, mType, mLength);
         }
-    }
-
-    /**
-     * Provides a ClassLoader.
-     * @hide
-     */
-    public interface ClassLoaderProvider {
-        /**
-         * Returns a ClassLoader.
-         *
-         * @return ClassLoader
-         */
-        ClassLoader getClassLoader();
     }
 
     /** Same as {@link #readValue(ClassLoader, Class, Class[])} without any item types. */
@@ -5578,8 +5551,8 @@ public final class Parcel {
     }
 
     private void readArrayMapInternal(@NonNull ArrayMap<? super String, Object> outVal,
-            int size, @Nullable ClassLoaderProvider loaderProvider) {
-        readArrayMap(outVal, size, /* sorted */ true, /* lazy */ false, loaderProvider, null);
+            int size, @Nullable ClassLoader loader) {
+        readArrayMap(outVal, size, /* sorted */ true, /* lazy */ false, loader, null);
     }
 
     /**
@@ -5593,12 +5566,11 @@ public final class Parcel {
      * @hide
      */
     void readArrayMap(ArrayMap<? super String, Object> map, int size, boolean sorted,
-            boolean lazy, @Nullable ClassLoaderProvider loaderProvider, int[] lazyValueCount) {
+            boolean lazy, @Nullable ClassLoader loader, int[] lazyValueCount) {
         ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, size);
         while (size > 0) {
             String key = readString();
-            Object value = (lazy) ? readLazyValue(loaderProvider) : readValue(
-                    getClassLoader(loaderProvider));
+            Object value = (lazy) ? readLazyValue(loader) : readValue(loader);
             if (value instanceof LazyValue) {
                 lazyValueCount[0]++;
             }
@@ -5619,12 +5591,12 @@ public final class Parcel {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void readArrayMap(@NonNull ArrayMap<? super String, Object> outVal,
-            @Nullable ClassLoaderProvider loaderProvider) {
+            @Nullable ClassLoader loader) {
         final int N = readInt();
         if (N < 0) {
             return;
         }
-        readArrayMapInternal(outVal, N, loaderProvider);
+        readArrayMapInternal(outVal, N, loader);
     }
 
     /**
