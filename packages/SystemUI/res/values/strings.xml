@@ -2083,6 +2083,12 @@
     <!-- [CHAR LIMIT=80] Text shown in feedback button in notification guts for a bundled notification -->
     <string name="notification_guts_bundle_feedback" translatable="false">Provide Bundle Feedback</string>
 
+    <!-- [CHAR LIMIT=30] Text shown in button used to dismiss this single notification. -->
+    <string name="notification_inline_dismiss">Dismiss</string>
+
+    <!-- [CHAR LIMIT=30] Text shown in button used to prevent app from showing Live Updates, for this notification and all future ones -->
+    <string name="notification_inline_disable_promotion">Don\'t show again</string>
+
     <!-- Notification: Control panel: Label that displays when the app's notifications cannot be blocked. -->
     <string name="notification_unblockable_desc">These notifications can\'t be modified.</string>
 

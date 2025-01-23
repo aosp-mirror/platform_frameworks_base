@@ -544,6 +544,7 @@ class NotificationGutsManagerTest(flags: FlagsParameterization) : SysuiTestCase(
                 /* wasShownHighPriority = */ eq(true),
                 eq(assistantFeedbackController),
                 eq(metricsLogger),
+                any<View.OnClickListener>(),
             )
     }
 
@@ -580,6 +581,7 @@ class NotificationGutsManagerTest(flags: FlagsParameterization) : SysuiTestCase(
                 /* wasShownHighPriority = */ eq(false),
                 eq(assistantFeedbackController),
                 eq(metricsLogger),
+                any<View.OnClickListener>(),
             )
     }
 
@@ -614,6 +616,7 @@ class NotificationGutsManagerTest(flags: FlagsParameterization) : SysuiTestCase(
                 /* wasShownHighPriority = */ eq(false),
                 eq(assistantFeedbackController),
                 eq(metricsLogger),
+                any<View.OnClickListener>(),
             )
     }
 
@@ -651,6 +654,7 @@ class NotificationGutsManagerTest(flags: FlagsParameterization) : SysuiTestCase(
                 /* wasShownHighPriority = */ eq(false),
                 eq(assistantFeedbackController),
                 eq(metricsLogger),
+                any<View.OnClickListener>(),
             )
     }
 

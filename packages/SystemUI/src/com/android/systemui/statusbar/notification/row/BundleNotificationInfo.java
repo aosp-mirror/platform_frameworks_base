@@ -64,11 +64,11 @@ public class BundleNotificationInfo extends NotificationInfo {
             boolean isNonblockable,
             boolean wasShownHighPriority,
             AssistantFeedbackController assistantFeedbackController,
-            MetricsLogger metricsLogger) throws RemoteException {
+            MetricsLogger metricsLogger, OnClickListener onCloseClick) throws RemoteException {
         super.bindNotification(pm, iNotificationManager, onUserInteractionCallback,
                 channelEditorDialogController, pkg, notificationChannel, entry, onSettingsClick,
                 onAppSettingsClick, uiEventLogger, isDeviceProvisioned, isNonblockable,
-                wasShownHighPriority, assistantFeedbackController, metricsLogger);
+                wasShownHighPriority, assistantFeedbackController, metricsLogger, onCloseClick);
 
         // Additionally, bind the feedback button.
         ComponentName assistant = iNotificationManager.getAllowedNotificationAssistant();
