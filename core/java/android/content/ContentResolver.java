@@ -2722,10 +2722,10 @@ public abstract class ContentResolver implements ContentInterface {
 
     /** @hide - designated user version */
     @UnsupportedAppUsage
-    public final void registerContentObserver(Uri uri, boolean notifyForDescendents,
+    public final void registerContentObserver(Uri uri, boolean notifyForDescendants,
             ContentObserver observer, @UserIdInt int userHandle) {
         try {
-            getContentService().registerContentObserver(uri, notifyForDescendents,
+            getContentService().registerContentObserver(uri, notifyForDescendants,
                     observer.getContentObserver(), userHandle, mTargetSdkVersion);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

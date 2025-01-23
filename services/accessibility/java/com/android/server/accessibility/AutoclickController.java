@@ -16,7 +16,9 @@
 
 package com.android.server.accessibility;
 
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+import static android.view.MotionEvent.BUTTON_PRIMARY;
+import static android.view.accessibility.AccessibilityManager.AUTOCLICK_CURSOR_AREA_SIZE_DEFAULT;
+import static android.view.accessibility.AccessibilityManager.AUTOCLICK_DELAY_DEFAULT;
 
 import static com.android.server.accessibility.AutoclickIndicatorView.SHOW_INDICATOR_DELAY_TIME;
 
@@ -26,7 +28,6 @@ import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
-import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -37,7 +38,6 @@ import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
 import android.view.WindowManager;
-import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -96,8 +96,7 @@ public class AutoclickController extends BaseEventStreamTransformation {
                     initiateAutoclickIndicator(handler);
                 }
 
-                mClickScheduler =
-                        new ClickScheduler(handler, AccessibilityManager.AUTOCLICK_DELAY_DEFAULT);
+                mClickScheduler = new ClickScheduler(handler, AUTOCLICK_DELAY_DEFAULT);
                 mAutoclickSettingsObserver = new AutoclickSettingsObserver(mUserId, handler);
                 mAutoclickSettingsObserver.start(
                         mContext.getContentResolver(),
@@ -117,21 +116,8 @@ public class AutoclickController extends BaseEventStreamTransformation {
         mAutoclickIndicatorScheduler = new AutoclickIndicatorScheduler(handler);
         mAutoclickIndicatorView = new AutoclickIndicatorView(mContext);
 
-        final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
-        layoutParams.type = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
-        layoutParams.flags =
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-        layoutParams.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
-        layoutParams.setFitInsetsTypes(0);
-        layoutParams.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-        layoutParams.format = PixelFormat.TRANSLUCENT;
-        layoutParams.setTitle(AutoclickIndicatorView.class.getSimpleName());
-        layoutParams.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
-
         mWindowManager = mContext.getSystemService(WindowManager.class);
-        mWindowManager.addView(mAutoclickIndicatorView, layoutParams);
+        mWindowManager.addView(mAutoclickIndicatorView, mAutoclickIndicatorView.getLayoutParams());
     }
 
     @Override
@@ -247,18 +233,24 @@ public class AutoclickController extends BaseEventStreamTransformation {
             mContentResolver = contentResolver;
             mClickScheduler = clickScheduler;
             mAutoclickIndicatorScheduler = autoclickIndicatorScheduler;
-            mContentResolver.registerContentObserver(mAutoclickDelaySettingUri, false, this,
+            mContentResolver.registerContentObserver(
+                    mAutoclickDelaySettingUri,
+                    /* notifyForDescendants= */ false,
+                    /* observer= */ this,
                     mUserId);
 
             // Initialize mClickScheduler's initial delay value.
-            onChange(true, mAutoclickDelaySettingUri);
+            onChange(/* selfChange= */ true, mAutoclickDelaySettingUri);
 
             if (Flags.enableAutoclickIndicator()) {
                 // Register observer to listen to cursor area size setting change.
                 mContentResolver.registerContentObserver(
-                        mAutoclickCursorAreaSizeSettingUri, false, this, mUserId);
+                        mAutoclickCursorAreaSizeSettingUri,
+                        /* notifyForDescendants= */ false,
+                        /* observer= */ this,
+                        mUserId);
                 // Initialize mAutoclickIndicatorView's initial size.
-                onChange(true, mAutoclickCursorAreaSizeSettingUri);
+                onChange(/* selfChange= */ true, mAutoclickCursorAreaSizeSettingUri);
             }
         }
 
@@ -279,9 +271,12 @@ public class AutoclickController extends BaseEventStreamTransformation {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             if (mAutoclickDelaySettingUri.equals(uri)) {
-                int delay = Settings.Secure.getIntForUser(
-                        mContentResolver, Settings.Secure.ACCESSIBILITY_AUTOCLICK_DELAY,
-                        AccessibilityManager.AUTOCLICK_DELAY_DEFAULT, mUserId);
+                int delay =
+                        Settings.Secure.getIntForUser(
+                                mContentResolver,
+                                Settings.Secure.ACCESSIBILITY_AUTOCLICK_DELAY,
+                                AUTOCLICK_DELAY_DEFAULT,
+                                mUserId);
                 mClickScheduler.updateDelay(delay);
             }
             if (Flags.enableAutoclickIndicator()
@@ -290,7 +285,7 @@ public class AutoclickController extends BaseEventStreamTransformation {
                         Settings.Secure.getIntForUser(
                                 mContentResolver,
                                 Settings.Secure.ACCESSIBILITY_AUTOCLICK_CURSOR_AREA_SIZE,
-                                AccessibilityManager.AUTOCLICK_CURSOR_AREA_SIZE_DEFAULT,
+                                AUTOCLICK_CURSOR_AREA_SIZE_DEFAULT,
                                 mUserId);
                 if (mAutoclickIndicatorScheduler != null) {
                     mAutoclickIndicatorScheduler.updateCursorAreaSize(size);
@@ -581,18 +576,30 @@ public class AutoclickController extends BaseEventStreamTransformation {
 
             final long now = SystemClock.uptimeMillis();
 
-            MotionEvent downEvent = MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN, 1,
-                    mTempPointerProperties, mTempPointerCoords, mMetaState,
-                    MotionEvent.BUTTON_PRIMARY, 1.0f, 1.0f, mLastMotionEvent.getDeviceId(), 0,
-                    mLastMotionEvent.getSource(), mLastMotionEvent.getFlags());
+            MotionEvent downEvent =
+                    MotionEvent.obtain(
+                            /* downTime= */ now,
+                            /* eventTime= */ now,
+                            MotionEvent.ACTION_DOWN,
+                            /* pointerCount= */ 1,
+                            mTempPointerProperties,
+                            mTempPointerCoords,
+                            mMetaState,
+                            BUTTON_PRIMARY,
+                            /* xPrecision= */ 1.0f,
+                            /* yPrecision= */ 1.0f,
+                            mLastMotionEvent.getDeviceId(),
+                            /* edgeFlags= */ 0,
+                            mLastMotionEvent.getSource(),
+                            mLastMotionEvent.getFlags());
 
             MotionEvent pressEvent = MotionEvent.obtain(downEvent);
             pressEvent.setAction(MotionEvent.ACTION_BUTTON_PRESS);
-            pressEvent.setActionButton(MotionEvent.BUTTON_PRIMARY);
+            pressEvent.setActionButton(BUTTON_PRIMARY);
 
             MotionEvent releaseEvent = MotionEvent.obtain(downEvent);
             releaseEvent.setAction(MotionEvent.ACTION_BUTTON_RELEASE);
-            releaseEvent.setActionButton(MotionEvent.BUTTON_PRIMARY);
+            releaseEvent.setActionButton(BUTTON_PRIMARY);
             releaseEvent.setButtonState(0);
 
             MotionEvent upEvent = MotionEvent.obtain(downEvent);
