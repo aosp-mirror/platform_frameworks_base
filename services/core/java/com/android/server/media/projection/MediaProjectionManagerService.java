@@ -58,6 +58,7 @@ import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
 import android.media.projection.IMediaProjectionManager;
 import android.media.projection.IMediaProjectionWatcherCallback;
+import android.media.projection.MediaProjectionEvent;
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
 import android.media.projection.ReviewGrantedConsentResult;
@@ -80,6 +81,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.media.projection.flags.Flags;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
@@ -177,9 +179,31 @@ public final class MediaProjectionManagerService extends SystemService
 
     private void maybeStopMediaProjection(int reason) {
         synchronized (mLock) {
-            if (!mMediaProjectionStopController.isExemptFromStopping(mProjectionGrant, reason)) {
-                Slog.d(TAG, "Content Recording: Stopping MediaProjection due to "
-                        + MediaProjectionStopController.stopReasonToString(reason));
+            if (mMediaProjectionStopController.isExemptFromStopping(mProjectionGrant, reason)) {
+                return;
+            }
+
+            if (Flags.showStopDialogPostCallEnd()
+                    && mMediaProjectionStopController.isStopReasonCallEnd(reason)) {
+                MediaProjectionEvent event =
+                        new MediaProjectionEvent(
+                                MediaProjectionEvent
+                                        .PROJECTION_STARTED_DURING_CALL_AND_ACTIVE_POST_CALL,
+                                System.currentTimeMillis());
+                Slog.d(
+                        TAG,
+                        "Scheduling event: "
+                                + event.getEventType()
+                                + " for reason: "
+                                + MediaProjectionStopController.stopReasonToString(reason));
+
+                // Post the PROJECTION_STARTED_DURING_CALL_AND_ACTIVE_POST_CALL event with a delay.
+                mHandler.postDelayed(() -> dispatchEvent(event), 500);
+            } else {
+                Slog.d(
+                        TAG,
+                        "Stopping MediaProjection due to reason: "
+                                + MediaProjectionStopController.stopReasonToString(reason));
                 mProjectionGrant.stop(StopReason.STOP_DEVICE_LOCKED);
             }
         }
@@ -386,6 +410,24 @@ public final class MediaProjectionManagerService extends SystemService
             @NonNull MediaProjectionInfo projectionInfo,
             @Nullable ContentRecordingSession session) {
         mCallbackDelegate.dispatchSession(projectionInfo, session);
+    }
+
+    private void dispatchEvent(@NonNull MediaProjectionEvent event) {
+        if (!Flags.showStopDialogPostCallEnd()) {
+            Slog.d(
+                    TAG,
+                    "Event dispatch skipped. Reason: Flag showStopDialogPostCallEnd "
+                            + "is disabled. Event details: "
+                            + event);
+            return;
+        }
+        MediaProjectionInfo projectionInfo;
+        ContentRecordingSession session;
+        synchronized (mLock) {
+            projectionInfo = mProjectionGrant != null ? mProjectionGrant.getProjectionInfo() : null;
+            session = mProjectionGrant != null ? mProjectionGrant.mSession : null;
+        }
+        mCallbackDelegate.dispatchEvent(event, projectionInfo, session);
     }
 
     /**
@@ -1467,6 +1509,25 @@ public final class MediaProjectionManagerService extends SystemService
             }
         }
 
+        private void dispatchEvent(
+                @NonNull MediaProjectionEvent event,
+                @Nullable MediaProjectionInfo info,
+                @Nullable ContentRecordingSession session) {
+            if (!Flags.showStopDialogPostCallEnd()) {
+                Slog.d(
+                        TAG,
+                        "Event dispatch skipped. Reason: Flag showStopDialogPostCallEnd "
+                                + "is disabled. Event details: "
+                                + event);
+                return;
+            }
+            synchronized (mLock) {
+                for (IMediaProjectionWatcherCallback callback : mWatcherCallbacks.values()) {
+                    mHandler.post(new WatcherEventCallback(callback, event, info, session));
+                }
+            }
+        }
+
         public void dispatchSession(
                 @NonNull MediaProjectionInfo projectionInfo,
                 @Nullable ContentRecordingSession session) {
@@ -1589,6 +1650,41 @@ public final class MediaProjectionManagerService extends SystemService
                 mCallback.onStop();
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to notify media projection has stopped", e);
+            }
+        }
+    }
+
+    private static final class WatcherEventCallback implements Runnable {
+        private final IMediaProjectionWatcherCallback mCallback;
+        private final MediaProjectionEvent mEvent;
+        private final MediaProjectionInfo mProjectionInfo;
+        private final ContentRecordingSession mSession;
+
+        WatcherEventCallback(
+                @NonNull IMediaProjectionWatcherCallback callback,
+                @NonNull MediaProjectionEvent event,
+                @Nullable MediaProjectionInfo projectionInfo,
+                @Nullable ContentRecordingSession session) {
+            mCallback = callback;
+            mEvent = event;
+            mProjectionInfo = projectionInfo;
+            mSession = session;
+        }
+
+        @Override
+        public void run() {
+            if (!Flags.showStopDialogPostCallEnd()) {
+                Slog.d(
+                        TAG,
+                        "Not running WatcherEventCallback. Reason: Flag "
+                                + "showStopDialogPostCallEnd is disabled. "
+                );
+                return;
+            }
+            try {
+                mCallback.onMediaProjectionEvent(mEvent, mProjectionInfo, mSession);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to notify MediaProjectionEvent change", e);
             }
         }
     }
