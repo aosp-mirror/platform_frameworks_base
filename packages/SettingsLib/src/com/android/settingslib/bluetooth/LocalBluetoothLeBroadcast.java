@@ -1087,8 +1087,9 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
 
     private String generateRandomPassword() {
         String randomUUID = UUID.randomUUID().toString();
-        // first 12 chars from xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
-        return randomUUID.substring(0, 8) + randomUUID.substring(9, 13);
+        // first 16 chars from xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+        return randomUUID.substring(0, 8) + randomUUID.substring(9, 13) + randomUUID.substring(14,
+                18);
     }
 
     private void registerContentObserver() {
