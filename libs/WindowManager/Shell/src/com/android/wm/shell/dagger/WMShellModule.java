@@ -398,6 +398,7 @@ public abstract class WMShellModule {
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<DesktopUserRepositories> desktopUserRepositories,
             Optional<DesktopTasksController> desktopTasksController,
+            DesktopModeLoggerTransitionObserver desktopModeLoggerTransitionObserver,
             LaunchAdjacentController launchAdjacentController,
             WindowDecorViewModel windowDecorViewModel,
             Optional<TaskChangeListener> taskChangeListener) {
@@ -410,6 +411,7 @@ public abstract class WMShellModule {
                 shellTaskOrganizer,
                 desktopUserRepositories,
                 desktopTasksController,
+                desktopModeLoggerTransitionObserver,
                 launchAdjacentController,
                 windowDecorViewModel,
                 taskChangeListener);
