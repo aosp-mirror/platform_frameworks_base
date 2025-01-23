@@ -27,6 +27,8 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode.PIN
 import com.android.systemui.Flags
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.Flags.FLAG_COMMUNAL_SCENE_KTF_REFACTOR
+import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_V2
+import com.android.systemui.Flags.glanceableHubV2
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.communal.domain.interactor.CommunalSceneTransitionInteractor
@@ -34,6 +36,8 @@ import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.communal.domain.interactor.communalSceneTransitionInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
+import com.android.systemui.communal.domain.interactor.setCommunalV2ConfigEnabled
+import com.android.systemui.communal.domain.interactor.setCommunalV2Enabled
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.flags.BrokenWithSceneContainer
 import com.android.systemui.flags.DisableSceneContainer
@@ -152,6 +156,9 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
         if (!SceneContainerFlag.isEnabled) {
             mSetFlagsRule.disableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+        }
+        if (glanceableHubV2()) {
+            kosmos.setCommunalV2ConfigEnabled(true)
         }
         featureFlags = FakeFeatureFlags()
 
@@ -1940,6 +1947,39 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
                     ownerName = CommunalSceneTransitionInteractor::class.simpleName,
                     from = KeyguardState.GLANCEABLE_HUB,
                     to = KeyguardState.GONE,
+                    animatorAssertion = { it.isNull() },
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    @DisableSceneContainer
+    @EnableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR, FLAG_GLANCEABLE_HUB_V2)
+    fun glanceableHubToDreaming_v2() =
+        testScope.runTest {
+            kosmos.setCommunalV2Enabled(true)
+
+            // GIVEN a device that is not dreaming or dozing
+            keyguardRepository.setDreamingWithOverlay(false)
+            keyguardRepository.setDozeTransitionModel(
+                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
+            )
+            advanceTimeBy(600.milliseconds)
+
+            // GIVEN a prior transition has run to glanceable hub
+            communalSceneInteractor.changeScene(CommunalScenes.Communal, "test")
+            runCurrent()
+            clearInvocations(transitionRepository)
+
+            keyguardRepository.setDreamingWithOverlay(true)
+            advanceTimeBy(100.milliseconds)
+
+            assertThat(transitionRepository)
+                .startedTransition(
+                    ownerName = CommunalSceneTransitionInteractor::class.simpleName,
+                    from = KeyguardState.GLANCEABLE_HUB,
+                    to = KeyguardState.DREAMING,
                     animatorAssertion = { it.isNull() },
                 )
 
