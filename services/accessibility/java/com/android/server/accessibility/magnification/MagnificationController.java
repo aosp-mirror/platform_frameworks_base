@@ -36,6 +36,8 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -53,6 +55,7 @@ import android.view.accessibility.MagnificationAnimationCallback;
 import com.android.internal.accessibility.util.AccessibilityStatsLogUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.wm.WindowManagerInternal;
@@ -110,6 +113,20 @@ public class MagnificationController implements MagnificationConnectionManager.C
     private final MagnificationPanStepProvider mPanStepProvider;
 
     private final Executor mBackgroundExecutor;
+
+    private final Handler mHandler;
+    private @PanDirection int mActivePanDirection = PAN_DIRECTION_DOWN;
+    private int mActivePanDisplay = Display.INVALID_DISPLAY;
+    private boolean mRepeatKeysEnabled = true;
+
+    private @ZoomDirection int mActiveZoomDirection = ZOOM_DIRECTION_IN;
+    private int mActiveZoomDisplay = Display.INVALID_DISPLAY;
+
+    // TODO(b/355499907): Get initial repeat interval from repeat keys settings.
+    @VisibleForTesting
+    public static final int INITIAL_KEYBOARD_REPEAT_INTERVAL_MS = 500;
+    @VisibleForTesting
+    public static final int KEYBOARD_REPEAT_INTERVAL_MS = 60;
 
     @GuardedBy("mLock")
     private final SparseIntArray mCurrentMagnificationModeArray = new SparseIntArray();
@@ -287,12 +304,13 @@ public class MagnificationController implements MagnificationConnectionManager.C
 
     public MagnificationController(AccessibilityManagerService ams, Object lock,
             Context context, MagnificationScaleProvider scaleProvider,
-            Executor backgroundExecutor) {
+            Executor backgroundExecutor, Looper looper) {
         mAms = ams;
         mLock = lock;
         mContext = context;
         mScaleProvider = scaleProvider;
         mBackgroundExecutor = backgroundExecutor;
+        mHandler = new Handler(looper);
         LocalServices.getService(WindowManagerInternal.class)
                 .getAccessibilityController().setUiChangesForAccessibilityCallbacks(this);
         mSupportWindowMagnification = context.getPackageManager().hasSystemFeature(
@@ -303,14 +321,20 @@ public class MagnificationController implements MagnificationConnectionManager.C
         mAlwaysOnMagnificationFeatureFlag = new AlwaysOnMagnificationFeatureFlag(context);
         mAlwaysOnMagnificationFeatureFlag.addOnChangedListener(
                 mBackgroundExecutor, mAms::updateAlwaysOnMagnification);
+
+        // TODO(b/355499907): Add an observer for repeat keys enabled changes,
+        // rather than initializing once at startup.
+        mRepeatKeysEnabled = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(), Settings.Secure.KEY_REPEAT_ENABLED, 1,
+                UserHandle.USER_CURRENT) != 0;
     }
 
     @VisibleForTesting
     public MagnificationController(AccessibilityManagerService ams, Object lock,
             Context context, FullScreenMagnificationController fullScreenMagnificationController,
             MagnificationConnectionManager magnificationConnectionManager,
-            MagnificationScaleProvider scaleProvider, Executor backgroundExecutor) {
-        this(ams, lock, context, scaleProvider, backgroundExecutor);
+            MagnificationScaleProvider scaleProvider, Executor backgroundExecutor, Looper looper) {
+        this(ams, lock, context, scaleProvider, backgroundExecutor, looper);
         mFullScreenMagnificationController = fullScreenMagnificationController;
         mMagnificationConnectionManager = magnificationConnectionManager;
     }
@@ -354,27 +378,60 @@ public class MagnificationController implements MagnificationConnectionManager.C
         // pan diagonally) by decreasing diagonal movement by sqrt(2) to make it appear the same
         // speed as non-diagonal movement.
         panMagnificationByStep(displayId, direction);
+        mActivePanDirection = direction;
+        mActivePanDisplay = displayId;
+        if (mRepeatKeysEnabled) {
+            mHandler.sendMessageDelayed(
+                    PooledLambda.obtainMessage(MagnificationController::maybeContinuePan, this),
+                    INITIAL_KEYBOARD_REPEAT_INTERVAL_MS);
+        }
     }
 
     @Override
     public void onPanMagnificationStop(int displayId,
             @MagnificationController.PanDirection int direction) {
-        // TODO(b/388847283): Handle held key gestures, which can be used
-        // for continuous scaling and panning, until they are released.
-
+        if (direction == mActivePanDirection) {
+            mActivePanDisplay = Display.INVALID_DISPLAY;
+        }
     }
 
     @Override
     public void onScaleMagnificationStart(int displayId,
             @MagnificationController.ZoomDirection int direction) {
         scaleMagnificationByStep(displayId, direction);
+        mActiveZoomDirection = direction;
+        mActiveZoomDisplay = displayId;
+        if (mRepeatKeysEnabled) {
+            mHandler.sendMessageDelayed(
+                    PooledLambda.obtainMessage(MagnificationController::maybeContinueZoom, this),
+                    INITIAL_KEYBOARD_REPEAT_INTERVAL_MS);
+        }
     }
 
     @Override
     public void onScaleMagnificationStop(int displayId,
             @MagnificationController.ZoomDirection int direction) {
-        // TODO(b/388847283): Handle held key gestures, which can be used
-        // for continuous scaling and panning, until they are released.
+        if (direction == mActiveZoomDirection) {
+            mActiveZoomDisplay = Display.INVALID_DISPLAY;
+        }
+    }
+
+    private void maybeContinuePan() {
+        if (mActivePanDisplay != Display.INVALID_DISPLAY) {
+            panMagnificationByStep(mActivePanDisplay, mActivePanDirection);
+            mHandler.sendMessageDelayed(
+                    PooledLambda.obtainMessage(MagnificationController::maybeContinuePan, this),
+                    KEYBOARD_REPEAT_INTERVAL_MS);
+        }
+    }
+
+    private void maybeContinueZoom() {
+        if (mActiveZoomDisplay != Display.INVALID_DISPLAY) {
+            scaleMagnificationByStep(mActiveZoomDisplay, mActiveZoomDirection);
+            mHandler.sendMessageDelayed(
+                    PooledLambda.obtainMessage(MagnificationController::maybeContinueZoom, this),
+                    KEYBOARD_REPEAT_INTERVAL_MS);
+        }
     }
 
     private void handleUserInteractionChanged(int displayId, int mode) {
