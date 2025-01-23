@@ -61,6 +61,7 @@ internal object SingleLineViewInflater {
         builder: Notification.Builder,
         systemUiContext: Context,
         redactText: Boolean,
+        summarization: String?
     ): SingleLineViewModel {
         if (AsyncHybridViewInflation.isUnexpectedlyInLegacyMode()) {
             return SingleLineViewModel(null, null, null)
@@ -108,6 +109,7 @@ internal object SingleLineViewInflater {
                 conversationSenderName =
                     if (isGroupConversation) conversationTextData?.senderName else null,
                 avatar = conversationAvatar,
+                summarization = summarization
             )
 
         return SingleLineViewModel(
@@ -132,6 +134,7 @@ internal object SingleLineViewInflater {
                                 .ic_redacted_notification_single_line_icon
                         )
                     ),
+                    null
                 )
             } else {
                 null

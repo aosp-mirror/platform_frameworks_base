@@ -719,6 +719,7 @@ constructor(
                         builder = builder,
                         systemUiContext = systemUiContext,
                         redactText = false,
+                        summarization = entry.ranking.summarization
                     )
                 } else null
 
@@ -735,6 +736,7 @@ constructor(
                             builder = builder,
                             systemUiContext = systemUiContext,
                             redactText = true,
+                            summarization = null
                         )
                     } else {
                         SingleLineViewInflater.inflateRedactedSingleLineViewModel(
