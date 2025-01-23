@@ -28,7 +28,6 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
@@ -494,13 +493,6 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             == MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE
                             ? R.string.accessibility_bluetooth_name
                             : R.string.accessibility_cast_name, device.getName()));
-            view.setAccessibilityDelegate(new View.AccessibilityDelegate() {
-                public void onInitializeAccessibilityNodeInfo(View host,
-                        AccessibilityNodeInfo info) {
-                    super.onInitializeAccessibilityNodeInfo(host, info);
-                    host.setOnClickListener(null);
-                }
-            });
         }
     }
 
