@@ -2009,6 +2009,10 @@
     <!-- Component name of the built in wallpaper used to display bitmap wallpapers. This must not be null. -->
     <string name="image_wallpaper_component" translatable="false">com.android.systemui/com.android.systemui.wallpapers.ImageWallpaper</string>
 
+    <!-- Component name of the built in wallpaper that is used when the user-selected wallpaper is
+         incompatible with the display's resolution or aspect ratio. -->
+    <string name="fallback_wallpaper_component" translatable="false">com.android.systemui/com.android.systemui.wallpapers.GradientColorWallpaper</string>
+
     <!-- True if WallpaperService is enabled -->
     <bool name="config_enableWallpaperService">true</bool>
 

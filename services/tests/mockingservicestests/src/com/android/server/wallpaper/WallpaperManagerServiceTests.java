@@ -144,6 +144,8 @@ public class WallpaperManagerServiceTests {
     private static ComponentName sImageWallpaperComponentName;
     private static ComponentName sDefaultWallpaperComponent;
 
+    private static ComponentName sFallbackWallpaperComponentName;
+
     private IPackageManager mIpm = AppGlobals.getPackageManager();
 
     @Mock
@@ -195,6 +197,8 @@ public class WallpaperManagerServiceTests {
                 sContext.getResources().getString(R.string.image_wallpaper_component));
         // Mock default wallpaper as image wallpaper if there is no pre-defined default wallpaper.
         sDefaultWallpaperComponent = WallpaperManager.getCmfDefaultWallpaperComponent(sContext);
+        sFallbackWallpaperComponentName = ComponentName.unflattenFromString(
+                sContext.getResources().getString(R.string.fallback_wallpaper_component));
 
         if (sDefaultWallpaperComponent == null) {
             sDefaultWallpaperComponent = sImageWallpaperComponentName;
@@ -205,6 +209,9 @@ public class WallpaperManagerServiceTests {
         }
 
         sContext.addMockService(sImageWallpaperComponentName, sWallpaperService);
+        if (sFallbackWallpaperComponentName != null) {
+            sContext.addMockService(sFallbackWallpaperComponentName, sWallpaperService);
+        }
     }
 
     @AfterClass
@@ -216,6 +223,7 @@ public class WallpaperManagerServiceTests {
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         sImageWallpaperComponentName = null;
         sDefaultWallpaperComponent = null;
+        sFallbackWallpaperComponentName = null;
         reset(sContext);
     }
 
@@ -306,6 +314,7 @@ public class WallpaperManagerServiceTests {
      * Tests that internal basic data should be correct after boot up.
      */
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_CONNECTED_DISPLAYS_WALLPAPER)
     public void testDataCorrectAfterBoot() {
         mService.switchUser(USER_SYSTEM, null);
 
@@ -869,6 +878,22 @@ public class WallpaperManagerServiceTests {
     }
     // Verify a secondary display removed ended
 
+     // Test fallback wallpaper after enabling connected display supports.
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_CONNECTED_DISPLAYS_WALLPAPER)
+    public void testFallbackWallpaperForConnectedDisplays() {
+        final WallpaperData fallbackData = mService.mFallbackWallpaper;
+
+        assertWithMessage(
+                "The connected wallpaper component should be fallback wallpaper component from "
+                        + "config file.")
+                .that(fallbackData.connection.mWallpaper.getComponent())
+                .isEqualTo(sFallbackWallpaperComponentName);
+        assertWithMessage("Fallback wallpaper should support both lock & system.")
+                .that(fallbackData.mWhich)
+                .isEqualTo(FLAG_LOCK | FLAG_SYSTEM);
+    }
+
     // Verify that after continue switch user from userId 0 to lastUserId, the wallpaper data for
     // non-current user must not bind to wallpaper service.
     private void verifyNoConnectionBeforeLastUser(int lastUserId) {
@@ -893,11 +918,11 @@ public class WallpaperManagerServiceTests {
         final WallpaperData lastLockData = mService.mLastLockWallpaper;
         assertWithMessage("Last wallpaper must not be null").that(lastLockData).isNotNull();
         assertWithMessage("Last wallpaper component must be equals.")
-                .that(expectedComponent)
-                .isEqualTo(lastLockData.getComponent());
+                .that(lastLockData.getComponent())
+                .isEqualTo(expectedComponent);
         assertWithMessage("The user id in last wallpaper should be the last switched user")
-                .that(lastUserId)
-                .isEqualTo(lastLockData.userId);
+                .that(lastLockData.userId)
+                .isEqualTo(lastUserId);
         assertWithMessage("Must exist user data connection on last wallpaper data")
                 .that(lastLockData.connection)
                 .isNotNull();
