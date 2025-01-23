@@ -56,12 +56,12 @@ public interface StatusBarManagerInternal {
     void toggleKeyboardShortcutsMenu(int deviceId);
 
     /**
-     * Used by InputMethodManagerService to notify the IME status.
+     * Sets the new IME window status.
      *
-     * @param displayId The display to which the IME is bound to.
-     * @param vis The IME visibility.
-     * @param backDisposition The IME back disposition.
-     * @param showImeSwitcher {@code true} when the IME switcher button should be shown.
+     * @param displayId The id of the display to which the IME is bound.
+     * @param vis The IME window visibility.
+     * @param backDisposition The IME back disposition mode.
+     * @param showImeSwitcher Whether the IME Switcher button should be shown.
      */
     void setImeWindowStatus(int displayId, @ImeWindowVisibility int vis,
             @BackDispositionMode int backDisposition, boolean showImeSwitcher);

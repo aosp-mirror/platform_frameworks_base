@@ -536,8 +536,10 @@ public final class NavBarHelper implements
     }
 
     /**
-     * @return Whether the IME is shown on top of the screen given the {@code vis} flag of
-     * {@link InputMethodService} and the keyguard states.
+     * Checks whether the IME is shown on top of the screen, based on the given IME window
+     * visibility flags, and the current keyguard state.
+     *
+     * @param vis the IME window visibility.
      */
     public boolean isImeShown(@ImeWindowVisibility int vis) {
         View shadeWindowView =  mNotificationShadeWindowController.getWindowRootView();

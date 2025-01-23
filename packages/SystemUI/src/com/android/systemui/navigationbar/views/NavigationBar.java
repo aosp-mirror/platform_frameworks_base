@@ -18,11 +18,12 @@ package com.android.systemui.navigationbar.views;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
-import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.WindowType;
 import static android.app.StatusBarManager.WindowVisibleState;
+import static android.app.StatusBarManager.navigationHintsToString;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.view.InsetsSource.FLAG_SUPPRESS_SCRIM;
@@ -43,7 +44,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SHOWING;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SWITCHER_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SWITCHER_BUTTON_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 import static com.android.systemui.shared.system.QuickStepContract.isGesturalMode;
@@ -56,6 +57,7 @@ import android.annotation.NonNull;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.StatusBarManager;
+import android.app.StatusBarManager.NavigationHint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Insets;
@@ -233,6 +235,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
     private @WindowVisibleState int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
 
+    @NavigationHint
     private int mNavigationIconHints = 0;
     private @TransitionMode int mTransitionMode;
     private boolean mLongPressHomeEnabled;
@@ -817,7 +820,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         if (mSavedState != null) {
             getBarTransitions().getLightTransitionsController().restoreState(mSavedState);
         }
-        setNavigationIconHints(mNavigationIconHints);
         setWindowVisible(isNavBarWindowVisible());
         mView.setBehavior(mBehavior);
         setNavBarMode(mNavBarMode);
@@ -1111,6 +1113,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         pw.println("  mLongPressHomeEnabled=" + mLongPressHomeEnabled);
         pw.println("  mNavigationBarWindowState="
                 + windowStateToString(mNavigationBarWindowState));
+        pw.println("  mNavigationIconHints=" + navigationHintsToString(mNavigationIconHints));
         pw.println("  mTransitionMode="
                 + BarTransitions.modeToString(mTransitionMode));
         pw.println("  mTransientShown=" + mTransientShown);
@@ -1137,9 +1140,11 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         }
         boolean imeShown = mNavBarHelper.isImeShown(vis);
         showImeSwitcher = imeShown && showImeSwitcher;
-        int hints = Utilities.calculateBackDispositionHints(mNavigationIconHints, backDisposition,
+        int hints = Utilities.calculateNavigationIconHints(mNavigationIconHints, backDisposition,
                 imeShown, showImeSwitcher);
-        if (hints == mNavigationIconHints) return;
+        if (hints == mNavigationIconHints) {
+            return;
+        }
 
         setNavigationIconHints(hints);
         checkBarModes();
@@ -1682,8 +1687,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 .setFlag(SYSUI_STATE_NAV_BAR_HIDDEN, !isNavBarWindowVisible())
                 .setFlag(SYSUI_STATE_IME_SHOWING,
                         (mNavigationIconHints & NAVIGATION_HINT_IME_SHOWN) != 0)
-                .setFlag(SYSUI_STATE_IME_SWITCHER_SHOWING,
-                        (mNavigationIconHints & NAVIGATION_HINT_IME_SWITCHER_SHOWN) != 0)
+                .setFlag(SYSUI_STATE_IME_SWITCHER_BUTTON_SHOWING,
+                        (mNavigationIconHints & NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN) != 0)
                 .setFlag(SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY,
                         allowSystemGestureIgnoringBarVisibility())
                 .commitUpdate(mDisplayId);
@@ -1926,12 +1931,20 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             };
 
     @VisibleForTesting
+    @NavigationHint
     int getNavigationIconHints() {
         return mNavigationIconHints;
     }
 
-    private void setNavigationIconHints(int hints) {
-        if (hints == mNavigationIconHints) return;
+    /**
+     * Updates the navigation icons based on {@code hints}.
+     *
+     * @param hints bit flags defined in {@link StatusBarManager}.
+     */
+    private void setNavigationIconHints(@NavigationHint int hints) {
+        if (hints == mNavigationIconHints) {
+            return;
+        }
         if (!isLargeScreen(mContext)) {
             // All IME functions handled by launcher via Sysui flags for large screen
             final boolean newBackAlt = (hints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
@@ -1945,9 +1958,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             mView.setNavigationIconHints(hints);
         }
         if (DEBUG) {
-            android.widget.Toast.makeText(mContext,
-                    "Navigation icon hints = " + hints,
-                    500).show();
+            android.widget.Toast.makeText(mContext, "Navigation icon hints = " + hints, 500)
+                    .show();
         }
         mNavigationIconHints = hints;
     }

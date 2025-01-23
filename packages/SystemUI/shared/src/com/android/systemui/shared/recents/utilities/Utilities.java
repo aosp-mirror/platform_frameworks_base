@@ -18,9 +18,10 @@ package com.android.systemui.shared.recents.utilities;
 
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
-import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN;
 
 import android.annotation.TargetApi;
+import android.app.StatusBarManager.NavigationHint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -103,10 +104,15 @@ public class Utilities {
     }
 
     /**
-     * @return updated set of flags from InputMethodService based off {@param oldHints}
-     *          Leaves original hints unmodified
+     * Gets the updated navigation icon hints, based on the current ones and the given IME state.
+     *
+     * @param oldHints        current navigation icon hints.
+     * @param backDisposition the IME back disposition mode.
+     * @param imeShown        whether the IME is currently visible.
+     * @param showImeSwitcher whether the IME Switcher button should be shown.
      */
-    public static int calculateBackDispositionHints(int oldHints,
+    @NavigationHint
+    public static int calculateNavigationIconHints(@NavigationHint int oldHints,
             @BackDispositionMode int backDisposition, boolean imeShown, boolean showImeSwitcher) {
         int hints = oldHints;
         switch (backDisposition) {
@@ -129,9 +135,9 @@ public class Utilities {
             hints &= ~NAVIGATION_HINT_IME_SHOWN;
         }
         if (showImeSwitcher) {
-            hints |= NAVIGATION_HINT_IME_SWITCHER_SHOWN;
+            hints |= NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN;
         } else {
-            hints &= ~NAVIGATION_HINT_IME_SWITCHER_SHOWN;
+            hints &= ~NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN;
         }
 
         return hints;

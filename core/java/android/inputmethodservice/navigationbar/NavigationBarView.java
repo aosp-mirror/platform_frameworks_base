@@ -16,6 +16,8 @@
 
 package android.inputmethodservice.navigationbar;
 
+import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN;
 import static android.inputmethodservice.navigationbar.NavigationBarConstants.DARK_MODE_ICON_COLOR_SINGLE_TONE;
 import static android.inputmethodservice.navigationbar.NavigationBarConstants.LIGHT_MODE_ICON_COLOR_SINGLE_TONE;
 import static android.inputmethodservice.navigationbar.NavigationBarConstants.NAVBAR_BACK_BUTTON_IME_OFFSET;
@@ -28,6 +30,7 @@ import android.annotation.DrawableRes;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.app.StatusBarManager;
+import android.app.StatusBarManager.NavigationHint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
@@ -63,7 +66,8 @@ public final class NavigationBarView extends FrameLayout {
     private int mCurrentRotation = -1;
 
     int mDisabledFlags = 0;
-    int mNavigationIconHints = StatusBarManager.NAVIGATION_HINT_BACK_ALT;
+    @NavigationHint
+    private int mNavigationIconHints = 0;
     private final int mNavBarMode = NAV_BAR_MODE_GESTURAL;
 
     private KeyButtonDrawable mBackIcon;
@@ -241,8 +245,7 @@ public final class NavigationBarView extends FrameLayout {
     }
 
     private void orientBackButton(KeyButtonDrawable drawable) {
-        final boolean useAltBack =
-                (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
+        final boolean useAltBack = (mNavigationIconHints & NAVIGATION_HINT_BACK_ALT) != 0;
         final boolean isRtl = mConfiguration.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
         float degrees = useAltBack ? (isRtl ? 90 : -90) : 0;
         if (drawable.getRotation() == degrees) {
@@ -284,8 +287,10 @@ public final class NavigationBarView extends FrameLayout {
      *
      * @param hints bit flags defined in {@link StatusBarManager}.
      */
-    public void setNavigationIconHints(int hints) {
-        if (hints == mNavigationIconHints) return;
+    public void setNavigationIconHints(@NavigationHint int hints) {
+        if (hints == mNavigationIconHints) {
+            return;
+        }
         final boolean newBackAlt = (hints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
         final boolean oldBackAlt =
                 (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
@@ -312,9 +317,10 @@ public final class NavigationBarView extends FrameLayout {
         getImeSwitchButton().setImageDrawable(mImeSwitcherIcon);
 
         // Update IME button visibility, a11y and rotate button always overrides the appearance
-        final boolean imeSwitcherVisible =
-                (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN) != 0;
-        getImeSwitchButton().setVisibility(imeSwitcherVisible ? View.VISIBLE : View.INVISIBLE);
+        final boolean isImeSwitcherButtonVisible =
+                (mNavigationIconHints & NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN) != 0;
+        getImeSwitchButton()
+                .setVisibility(isImeSwitcherButtonVisible ? View.VISIBLE : View.INVISIBLE);
 
         getBackButton().setVisibility(View.VISIBLE);
         getHomeHandle().setVisibility(View.INVISIBLE);

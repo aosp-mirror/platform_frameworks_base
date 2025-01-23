@@ -60,6 +60,7 @@ import com.android.internal.statusbar.NotificationVisibility;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -195,12 +196,40 @@ public class StatusBarManager {
      */
     private static final int DEFAULT_SIM_LOCKED_DISABLED_FLAGS = DISABLE_EXPAND;
 
-    /** @hide */
-    public static final int NAVIGATION_HINT_BACK_ALT      = 1 << 0;
-    /** @hide */
-    public static final int NAVIGATION_HINT_IME_SHOWN     = 1 << 1;
-    /** @hide */
-    public static final int NAVIGATION_HINT_IME_SWITCHER_SHOWN = 1 << 2;
+    /**
+     * The back button is visually adjusted to indicate that it will dismiss the IME when pressed.
+     * This only takes effect while the IME is visible. By default, it is set while the IME is
+     * visible, but may be overridden by the
+     * {@link android.inputmethodservice.InputMethodService.BackDispositionMode backDispositionMode}
+     * set by the IME.
+     *
+     * @hide
+     */
+    public static final int NAVIGATION_HINT_BACK_ALT = 1 << 0;
+    /**
+     * The IME is visible.
+     *
+     * @hide
+     */
+    public static final int NAVIGATION_HINT_IME_SHOWN = 1 << 1;
+    /**
+     * The IME Switcher button is visible. This only takes effect while the IME is visible.
+     *
+     * @hide
+     */
+    public static final int NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN = 1 << 2;
+    /**
+     * Navigation bar flags related to the IME state.
+     *
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "NAVIGATION_HINT_" }, value = {
+            NAVIGATION_HINT_BACK_ALT,
+            NAVIGATION_HINT_IME_SHOWN,
+            NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface NavigationHint {}
 
     /** @hide */
     public static final int WINDOW_STATUS_BAR = 1;
@@ -1322,6 +1351,22 @@ public class StatusBarManager {
         int taskId = ActivityClient.getInstance().getTaskForActivity(activityToken, false);
         return new AppClipsServiceConnector(mContext)
                 .canLaunchCaptureContentActivityForNote(taskId);
+    }
+
+    /** @hide */
+    @NonNull
+    public static String navigationHintsToString(@NavigationHint int hints) {
+        final var hintStrings = new ArrayList<String>();
+        if ((hints & NAVIGATION_HINT_BACK_ALT) != 0) {
+            hintStrings.add("NAVIGATION_HINT_BACK_ALT");
+        }
+        if ((hints & NAVIGATION_HINT_IME_SHOWN) != 0) {
+            hintStrings.add("NAVIGATION_HINT_IME_SHOWN");
+        }
+        if ((hints & NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN) != 0) {
+            hintStrings.add("NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN");
+        }
+        return String.join(" | ", hintStrings);
     }
 
     /** @hide */
