@@ -16,6 +16,7 @@
 
 package com.android.systemui.shared.clocks
 
+import com.android.systemui.animation.GSFAxes
 import com.android.systemui.customization.R
 import com.android.systemui.plugins.clocks.AlarmData
 import com.android.systemui.plugins.clocks.AxisType
@@ -122,7 +123,7 @@ class FlexClockController(private val clockCtx: ClockContext) : ClockController 
         val FONT_AXES =
             listOf(
                 ClockFontAxis(
-                    key = "wght",
+                    key = GSFAxes.WEIGHT,
                     type = AxisType.Float,
                     minValue = 25f,
                     currentValue = 400f,
@@ -131,7 +132,7 @@ class FlexClockController(private val clockCtx: ClockContext) : ClockController 
                     description = "Glyph Weight",
                 ),
                 ClockFontAxis(
-                    key = "wdth",
+                    key = GSFAxes.WIDTH,
                     type = AxisType.Float,
                     minValue = 25f,
                     currentValue = 100f,
@@ -140,7 +141,7 @@ class FlexClockController(private val clockCtx: ClockContext) : ClockController 
                     description = "Glyph Width",
                 ),
                 ClockFontAxis(
-                    key = "ROND",
+                    key = GSFAxes.ROUND,
                     type = AxisType.Boolean,
                     minValue = 0f,
                     currentValue = 0f,
@@ -149,7 +150,7 @@ class FlexClockController(private val clockCtx: ClockContext) : ClockController 
                     description = "Glyph Roundness",
                 ),
                 ClockFontAxis(
-                    key = "slnt",
+                    key = GSFAxes.SLANT,
                     type = AxisType.Boolean,
                     minValue = 0f,
                     currentValue = 0f,

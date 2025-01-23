@@ -34,6 +34,7 @@ import android.view.View.MeasureSpec.EXACTLY
 import android.view.animation.Interpolator
 import android.widget.TextView
 import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.animation.GSFAxes
 import com.android.systemui.animation.TextAnimator
 import com.android.systemui.customization.R
 import com.android.systemui.log.core.Logger
@@ -490,22 +491,22 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
             Paint().also { it.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OUT) }
 
         val AOD_COLOR = Color.WHITE
-        val OPTICAL_SIZE_AXIS = ClockFontAxisSetting("opsz", 144f)
+        val OPTICAL_SIZE_AXIS = ClockFontAxisSetting(GSFAxes.OPTICAL_SIZE, 144f)
         val DEFAULT_LS_VARIATION =
             listOf(
                 OPTICAL_SIZE_AXIS,
-                ClockFontAxisSetting("wght", 400f),
-                ClockFontAxisSetting("wdth", 100f),
-                ClockFontAxisSetting("ROND", 0f),
-                ClockFontAxisSetting("slnt", 0f),
+                ClockFontAxisSetting(GSFAxes.WEIGHT, 400f),
+                ClockFontAxisSetting(GSFAxes.WIDTH, 100f),
+                ClockFontAxisSetting(GSFAxes.ROUND, 0f),
+                ClockFontAxisSetting(GSFAxes.SLANT, 0f),
             )
         val DEFAULT_AOD_VARIATION =
             listOf(
                 OPTICAL_SIZE_AXIS,
-                ClockFontAxisSetting("wght", 200f),
-                ClockFontAxisSetting("wdth", 100f),
-                ClockFontAxisSetting("ROND", 0f),
-                ClockFontAxisSetting("slnt", 0f),
+                ClockFontAxisSetting(GSFAxes.WEIGHT, 200f),
+                ClockFontAxisSetting(GSFAxes.WIDTH, 100f),
+                ClockFontAxisSetting(GSFAxes.ROUND, 0f),
+                ClockFontAxisSetting(GSFAxes.SLANT, 0f),
             )
     }
 }
