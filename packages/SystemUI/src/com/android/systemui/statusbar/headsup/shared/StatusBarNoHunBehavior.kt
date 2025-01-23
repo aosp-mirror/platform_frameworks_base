@@ -33,7 +33,7 @@ object StatusBarNoHunBehavior {
     /** Is the refactor enabled */
     @JvmStatic
     inline val isEnabled
-        get() = Flags.statusBarNoHunBehavior() && android.app.Flags.notificationsRedesignAppIcons()
+        get() = Flags.statusBarNoHunBehavior()
 
     /**
      * Called to ensure code is only run when the flag is enabled. This protects users from the
