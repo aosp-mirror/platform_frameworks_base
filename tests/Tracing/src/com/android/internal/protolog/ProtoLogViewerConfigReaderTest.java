@@ -33,6 +33,7 @@ import org.junit.runners.JUnit4;
 import perfetto.protos.ProtologCommon;
 
 import java.io.File;
+import java.io.IOException;
 
 @Presubmit
 @RunWith(JUnit4.class)
@@ -158,5 +159,15 @@ public class ProtoLogViewerConfigReaderTest {
         unloadViewerConfig();
         loadViewerConfig();
         unloadViewerConfig();
+    }
+
+    @Test
+    public void testMessageHashIsAvailableInFile() throws IOException {
+        Truth.assertThat(mConfig.messageHashIsAvailableInFile(1)).isTrue();
+        Truth.assertThat(mConfig.messageHashIsAvailableInFile(2)).isTrue();
+        Truth.assertThat(mConfig.messageHashIsAvailableInFile(3)).isTrue();
+        Truth.assertThat(mConfig.messageHashIsAvailableInFile(4)).isTrue();
+        Truth.assertThat(mConfig.messageHashIsAvailableInFile(5)).isTrue();
+        Truth.assertThat(mConfig.messageHashIsAvailableInFile(6)).isFalse();
     }
 }

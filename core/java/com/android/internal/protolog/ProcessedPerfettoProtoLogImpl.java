@@ -28,6 +28,7 @@ import com.android.internal.protolog.common.IProtoLogGroup;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class ProcessedPerfettoProtoLogImpl extends PerfettoProtoLogImpl {
@@ -161,13 +162,37 @@ public class ProcessedPerfettoProtoLogImpl extends PerfettoProtoLogImpl {
         messageString = message.getMessage(mViewerConfigReader);
 
         if (messageString == null) {
-            throw new RuntimeException("Failed to decode message for logcat. "
-                    + "Message hash (" + message.getMessageHash() + ") either not available in "
-                    + "viewerConfig file (" +  mViewerConfigFilePath + ") or "
-                    + "not loaded into memory from file before decoding.");
+            // Either we failed to load the config for this log message from the viewer config file
+            // into memory, or the message hash is simply not available in the viewer config file.
+            // We want to confirm that the message hash is not available in the viewer config file
+            // before throwing an exception.
+            throw new RuntimeException(getReasonForFailureToGetMessageString(message));
         }
 
         return messageString;
+    }
+
+    private String getReasonForFailureToGetMessageString(Message message) {
+        if (message.getMessageHash() == null) {
+            return "Trying to get message from null message hash";
+        }
+
+        try {
+            if (mViewerConfigReader.messageHashIsAvailableInFile(message.getMessageHash())) {
+                return "Failed to decode message for logcat logging. "
+                        + "Message hash (" + message.getMessageHash() + ") is not available in "
+                        + "viewerConfig file (" +  mViewerConfigFilePath + "). This might be due "
+                        + "to the viewer config file and the executing code being out of sync.";
+            } else {
+                return "Failed to decode message for logcat. "
+                        + "Message hash (" + message.getMessageHash() + ") was available in the "
+                        + "viewerConfig file (" +  mViewerConfigFilePath + ") but wasn't loaded "
+                        + "into memory from file before decoding! This is likely a bug.";
+            }
+        } catch (IOException e) {
+            return "Failed to get string message to log but could not identify the root cause due "
+                    + "to an IO error in reading the viewer config file.";
+        }
     }
 
     private void loadLogcatGroupsViewerConfig(@NonNull IProtoLogGroup[] protoLogGroups) {
