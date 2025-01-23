@@ -40,7 +40,7 @@ import kotlinx.coroutines.CoroutineScope
 @Composable
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun rememberOffsetOverscrollEffect(
-    animationSpec: AnimationSpec<Float> = MaterialTheme.motionScheme.defaultSpatialSpec()
+    animationSpec: AnimationSpec<Float> = MaterialTheme.motionScheme.slowSpatialSpec()
 ): OffsetOverscrollEffect {
     val animationScope = rememberCoroutineScope()
     return remember(animationScope, animationSpec) {
@@ -51,7 +51,7 @@ fun rememberOffsetOverscrollEffect(
 @Composable
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun rememberOffsetOverscrollEffectFactory(
-    animationSpec: AnimationSpec<Float> = MaterialTheme.motionScheme.defaultSpatialSpec()
+    animationSpec: AnimationSpec<Float> = MaterialTheme.motionScheme.slowSpatialSpec()
 ): OverscrollFactory {
     val animationScope = rememberCoroutineScope()
     return remember(animationScope, animationSpec) {

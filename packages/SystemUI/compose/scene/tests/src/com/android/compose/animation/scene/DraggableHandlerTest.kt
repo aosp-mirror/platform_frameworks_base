@@ -18,7 +18,9 @@
 
 package com.android.compose.animation.scene
 
+import androidx.compose.animation.SplineBasedFloatDecayAnimationSpec
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.generateDecayAnimationSpec
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.overscroll
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -119,10 +121,11 @@ class DraggableHandlerTest {
         val transitionInterceptionThreshold = 0.05f
         val directionChangeSlop = 10f
 
+        private val density = Density(1f)
         private val layoutImpl =
             SceneTransitionLayoutImpl(
                     state = layoutState,
-                    density = Density(1f),
+                    density = density,
                     layoutDirection = LayoutDirection.Ltr,
                     swipeSourceDetector = DefaultEdgeDetector,
                     swipeDetector = DefaultSwipeDetector,
@@ -134,6 +137,8 @@ class DraggableHandlerTest {
                     animationScope = testScope,
                     directionChangeSlop = directionChangeSlop,
                     defaultEffectFactory = defaultEffectFactory,
+                    decayAnimationSpec =
+                        SplineBasedFloatDecayAnimationSpec(density).generateDecayAnimationSpec(),
                 )
                 .apply { setContentsAndLayoutTargetSizeForTest(LAYOUT_SIZE) }
 

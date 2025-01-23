@@ -17,6 +17,7 @@
 package com.android.compose.animation.scene
 
 import androidx.annotation.VisibleForTesting
+import androidx.compose.animation.core.DecayAnimationSpec
 import androidx.compose.foundation.OverscrollFactory
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
@@ -82,6 +83,7 @@ internal class SceneTransitionLayoutImpl(
     internal var swipeSourceDetector: SwipeSourceDetector,
     internal var swipeDetector: SwipeDetector,
     internal var transitionInterceptionThreshold: Float,
+    internal var decayAnimationSpec: DecayAnimationSpec<Float>,
     builder: SceneTransitionLayoutScope<InternalContentScope>.() -> Unit,
 
     /**

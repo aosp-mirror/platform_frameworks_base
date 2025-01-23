@@ -127,7 +127,14 @@ internal class DraggableHandler(
                 directionChangeSlop = layoutImpl.directionChangeSlop,
             )
 
-        return createSwipeAnimation(layoutImpl, result, isUpOrLeft, orientation, gestureContext)
+        return createSwipeAnimation(
+            layoutImpl,
+            result,
+            isUpOrLeft,
+            orientation,
+            gestureContext,
+            layoutImpl.decayAnimationSpec,
+        )
     }
 
     private fun resolveSwipeSource(startedPosition: Offset): SwipeSource.Resolved? {

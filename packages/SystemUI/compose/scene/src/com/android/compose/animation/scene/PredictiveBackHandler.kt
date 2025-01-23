@@ -70,6 +70,7 @@ internal fun PredictiveBackHandler(
                 distance = 1f,
                 gestureContext =
                     ProvidedGestureContext(dragOffset = 0f, direction = InputDirection.Max),
+                decayAnimationSpec = layoutImpl.decayAnimationSpec,
             )
 
         animateProgress(
