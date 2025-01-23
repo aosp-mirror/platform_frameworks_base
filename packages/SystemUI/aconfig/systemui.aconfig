@@ -227,6 +227,13 @@ flag {
 }
 
 flag {
+  name: "notification_bundle_ui"
+  namespace: "systemui"
+  description: "Three-level group UI for notification bundles"
+  bug: "367996732"
+}
+
+flag {
     name: "notification_background_tint_optimization"
     namespace: "systemui"
     description: "Re-enable the codepath that removed tinting of notifications when the"
