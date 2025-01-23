@@ -54,6 +54,7 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
+import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
@@ -186,6 +187,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
             @NonNull PipScheduler pipScheduler,
             @NonNull SizeSpecSource sizeSpecSource,
             @NonNull PipDisplayLayoutState pipDisplayLayoutState,
+            DisplayController displayController,
             PipMotionHelper pipMotionHelper,
             FloatingContentCoordinator floatingContentCoordinator,
             PipUiEventLogger pipUiEventLogger,
@@ -212,7 +214,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         mMotionHelper = pipMotionHelper;
         mPipScheduler.setUpdateMovementBoundsRunnable(this::updateMovementBounds);
         mPipDismissTargetHandler = new PipDismissTargetHandler(context, pipUiEventLogger,
-                mMotionHelper, mainExecutor);
+                mMotionHelper, mPipDisplayLayoutState, displayController, mainExecutor);
         mTouchState = new PipTouchState(ViewConfiguration.get(context),
                 () -> {
                     mMenuController.showMenuWithPossibleDelay(MENU_STATE_FULL,

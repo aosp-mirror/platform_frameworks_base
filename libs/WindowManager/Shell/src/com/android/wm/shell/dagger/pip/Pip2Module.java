@@ -180,6 +180,7 @@ public abstract class Pip2Module {
             @NonNull PipScheduler pipScheduler,
             @NonNull SizeSpecSource sizeSpecSource,
             @NonNull PipDisplayLayoutState pipDisplayLayoutState,
+            DisplayController displayController,
             PipMotionHelper pipMotionHelper,
             FloatingContentCoordinator floatingContentCoordinator,
             PipUiEventLogger pipUiEventLogger,
@@ -187,8 +188,9 @@ public abstract class Pip2Module {
             Optional<PipPerfHintController> pipPerfHintControllerOptional) {
         return new PipTouchHandler(context, shellInit, shellCommandHandler, menuPhoneController,
                 pipBoundsAlgorithm, pipBoundsState, pipTransitionState, pipScheduler,
-                sizeSpecSource, pipDisplayLayoutState, pipMotionHelper, floatingContentCoordinator,
-                pipUiEventLogger, mainExecutor, pipPerfHintControllerOptional);
+                sizeSpecSource, pipDisplayLayoutState, displayController, pipMotionHelper,
+                floatingContentCoordinator, pipUiEventLogger, mainExecutor,
+                pipPerfHintControllerOptional);
     }
 
     @WMSingleton
