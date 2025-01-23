@@ -1,5 +1,5 @@
 package: "com.android.systemui.accessibility.accessibilitymenu"
-container: "system"
+container: "system_ext"
 
 # NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
 
