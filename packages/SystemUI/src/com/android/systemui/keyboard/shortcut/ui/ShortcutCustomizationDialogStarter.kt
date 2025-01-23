@@ -108,20 +108,31 @@ constructor(
 
     private fun setDialogProperties(dialog: SystemUIDialog, uiState: ShortcutCustomizationUiState) {
         dialog.setOnDismissListener { viewModel.onDialogDismissed() }
-        dialog.setTitle(
-            resources.getString(
-                when (uiState) {
-                    is AddShortcutDialog ->
-                        R.string.shortcut_customize_mode_add_shortcut_description
-                    is DeleteShortcutDialog ->
-                        R.string.shortcut_customize_mode_remove_shortcut_description
-                    else -> R.string.shortcut_customize_mode_reset_shortcut_description
-                }
-            )
-        )
+        dialog.setTitle("${getDialogTitle(uiState)}. ${getDialogDescription(uiState)}")
         // By default, apps cannot intercept action key. The system always handles it. This
         // flag is needed to enable customisation dialog window to intercept action key
         dialog.window?.addPrivateFlags(PRIVATE_FLAG_ALLOW_ACTION_KEY_EVENTS)
+    }
+
+    private fun getDialogTitle(uiState: ShortcutCustomizationUiState): String {
+        return when (uiState) {
+            is AddShortcutDialog -> uiState.shortcutLabel
+            is DeleteShortcutDialog ->
+                resources.getString(R.string.shortcut_customize_mode_remove_shortcut_dialog_title)
+            else ->
+                resources.getString(R.string.shortcut_customize_mode_reset_shortcut_dialog_title)
+        }
+    }
+
+    private fun getDialogDescription(uiState: ShortcutCustomizationUiState): String {
+        return resources.getString(
+            when (uiState) {
+                is AddShortcutDialog -> R.string.shortcut_customize_mode_add_shortcut_description
+                is DeleteShortcutDialog ->
+                    R.string.shortcut_customize_mode_remove_shortcut_description
+                else -> R.string.shortcut_customize_mode_reset_shortcut_description
+            }
+        )
     }
 
     @AssistedFactory
