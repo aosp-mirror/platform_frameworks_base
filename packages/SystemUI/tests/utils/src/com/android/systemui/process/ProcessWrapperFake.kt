@@ -16,10 +16,9 @@
 
 package com.android.systemui.process
 
-import android.app.ActivityManager
 import android.os.UserHandle
 
-class ProcessWrapperFake(activityManager: ActivityManager) : ProcessWrapper(activityManager) {
+class ProcessWrapperFake : ProcessWrapper() {
 
     var systemUser: Boolean = false
 
