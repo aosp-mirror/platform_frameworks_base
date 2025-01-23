@@ -159,6 +159,8 @@ class RecentsMixedTransition extends DefaultMixedHandler.MixedTransition {
             // If pair-to-pair switching, the post-recents clean-up isn't needed.
             wct = wct != null ? wct : new WindowContainerTransaction();
             if (mAnimType != ANIM_TYPE_PAIR_TO_PAIR) {
+                // TODO(b/346588978): Only called if !enableRecentsBookendTransition(), can remove
+                // once that rolls out
                 mSplitHandler.onRecentsInSplitAnimationFinish(wct, finishTransaction);
             } else {
                 // notify pair-to-pair recents animation finish
@@ -175,6 +177,17 @@ class RecentsMixedTransition extends DefaultMixedHandler.MixedTransition {
             mSplitHandler.onRecentsInSplitAnimationCanceled();
         }
         return handled;
+    }
+
+    /**
+     * Called when the recents animation during split is about to finish.
+     */
+    void onAnimateRecentsDuringSplitFinishing(boolean returnToApp,
+            @NonNull WindowContainerTransaction finishWct,
+            @NonNull SurfaceControl.Transaction finishT) {
+        if (mAnimType != ANIM_TYPE_PAIR_TO_PAIR) {
+            mSplitHandler.onRecentsInSplitAnimationFinishing(returnToApp, finishWct, finishT);
+        }
     }
 
     @Override

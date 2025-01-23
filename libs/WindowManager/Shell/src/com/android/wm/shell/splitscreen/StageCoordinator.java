@@ -129,6 +129,7 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.policy.FoldLockSettingsObserver;
 import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -3766,13 +3767,31 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mTaskOrganizer.applyTransaction(wct);
     }
 
+    public void onRecentsInSplitAnimationFinishing(boolean returnToApp,
+            @NonNull WindowContainerTransaction finishWct,
+            @NonNull SurfaceControl.Transaction finishT) {
+        if (!Flags.enableRecentsBookendTransition()) {
+            // The non-bookend recents transition case will be handled by
+            // RecentsMixedTransition wrapping the finish callback and calling
+            // onRecentsInSplitAnimationFinish()
+            return;
+        }
+
+        onRecentsInSplitAnimationFinishInner(returnToApp, finishWct, finishT);
+    }
+
     /** Call this when the recents animation during split-screen finishes. */
-    public void onRecentsInSplitAnimationFinish(WindowContainerTransaction finishWct,
-            SurfaceControl.Transaction finishT) {
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onRecentsInSplitAnimationFinish");
-        mPausingTasks.clear();
+    public void onRecentsInSplitAnimationFinish(@NonNull WindowContainerTransaction finishWct,
+            @NonNull SurfaceControl.Transaction finishT) {
+        if (Flags.enableRecentsBookendTransition()) {
+            // The bookend recents transition case will be handled by
+            // onRecentsInSplitAnimationFinishing above
+            return;
+        }
+
         // Check if the recent transition is finished by returning to the current
         // split, so we can restore the divider bar.
+        boolean returnToApp = false;
         for (int i = 0; i < finishWct.getHierarchyOps().size(); ++i) {
             final WindowContainerTransaction.HierarchyOp op =
                     finishWct.getHierarchyOps().get(i);
@@ -3787,12 +3806,25 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
             if (op.getType() == HIERARCHY_OP_TYPE_REORDER && op.getToTop()
                     && anyStageContainsContainer) {
-                updateSurfaceBounds(mSplitLayout, finishT,
-                        false /* applyResizingOffset */);
-                finishT.reparent(mSplitLayout.getDividerLeash(), mRootTaskLeash);
-                setDividerVisibility(true, finishT);
-                return;
+                returnToApp = true;
             }
+        }
+        onRecentsInSplitAnimationFinishInner(returnToApp, finishWct, finishT);
+    }
+
+    /** Call this when the recents animation during split-screen finishes. */
+    public void onRecentsInSplitAnimationFinishInner(boolean returnToApp,
+            @NonNull WindowContainerTransaction finishWct,
+            @NonNull SurfaceControl.Transaction finishT) {
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onRecentsInSplitAnimationFinish: returnToApp=%b",
+                returnToApp);
+        mPausingTasks.clear();
+        if (returnToApp) {
+            updateSurfaceBounds(mSplitLayout, finishT,
+                    false /* applyResizingOffset */);
+            finishT.reparent(mSplitLayout.getDividerLeash(), mRootTaskLeash);
+            setDividerVisibility(true, finishT);
+            return;
         }
 
         setSplitsVisible(false);
