@@ -23,10 +23,12 @@ import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPlugin
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPluginScope
 import com.android.systemui.volume.dialog.data.repository.VolumeDialogStateRepository
 import com.android.systemui.volume.dialog.domain.model.VolumeDialogEventModel
+import com.android.systemui.volume.dialog.shared.model.VolumeDialogCsdWarningModel
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogSafetyWarningModel
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStateModel
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStreamModel
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.launchIn
@@ -64,6 +66,14 @@ constructor(
                     is VolumeDialogEventModel.ShowSafetyWarning -> {
                         setSafetyWarning(VolumeDialogSafetyWarningModel.Visible(event.flags))
                     }
+                    is VolumeDialogEventModel.ShowCsdWarning -> {
+                        setCsdWarning(
+                            VolumeDialogCsdWarningModel.Visible(
+                                warning = event.csdWarning,
+                                duration = event.durationMs.milliseconds,
+                            )
+                        )
+                    }
                     is VolumeDialogEventModel.SubscribedToEvents -> {
                         volumeDialogController.getState()
                     }
@@ -79,6 +89,10 @@ constructor(
 
     fun setSafetyWarning(model: VolumeDialogSafetyWarningModel) {
         volumeDialogStateRepository.updateState { it.copy(isShowingSafetyWarning = model) }
+    }
+
+    fun setCsdWarning(model: VolumeDialogCsdWarningModel) {
+        volumeDialogStateRepository.updateState { it.copy(isShowingCsdWarning = model) }
     }
 
     /** Returns a copy of [model] filled with the values from [VolumeDialogController.State]. */

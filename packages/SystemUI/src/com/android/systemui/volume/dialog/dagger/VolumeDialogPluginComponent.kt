@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.dialog.dagger
 
+import com.android.systemui.volume.dialog.dagger.factory.VolumeDialogPluginComponentFactory
 import com.android.systemui.volume.dialog.dagger.module.VolumeDialogPluginModule
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPlugin
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPluginScope
@@ -35,9 +36,9 @@ interface VolumeDialogPluginComponent {
     fun viewModel(): VolumeDialogPluginViewModel
 
     @Subcomponent.Factory
-    interface Factory {
+    interface Factory : VolumeDialogPluginComponentFactory {
 
-        fun create(
+        override fun create(
             @BindsInstance @VolumeDialogPlugin scope: CoroutineScope
         ): VolumeDialogPluginComponent
     }
