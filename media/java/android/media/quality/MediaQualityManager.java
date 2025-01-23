@@ -51,7 +51,6 @@ import java.util.function.Consumer;
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
 @SystemService(Context.MEDIA_QUALITY_SERVICE)
 public final class MediaQualityManager {
-    // TODO: unhide the APIs for api review
     private static final String TAG = "MediaQualityManager";
 
     private final IMediaQualityManager mService;
@@ -123,7 +122,6 @@ public final class MediaQualityManager {
             public void onPictureProfileAdded(String profileId, PictureProfile profile) {
                 synchronized (mPpLock) {
                     for (PictureProfileCallbackRecord record : mPpCallbackRecords) {
-                        // TODO: filter callback record
                         record.postPictureProfileAdded(profileId, profile);
                     }
                 }
@@ -132,7 +130,6 @@ public final class MediaQualityManager {
             public void onPictureProfileUpdated(String profileId, PictureProfile profile) {
                 synchronized (mPpLock) {
                     for (PictureProfileCallbackRecord record : mPpCallbackRecords) {
-                        // TODO: filter callback record
                         record.postPictureProfileUpdated(profileId, profile);
                     }
                 }
@@ -141,7 +138,6 @@ public final class MediaQualityManager {
             public void onPictureProfileRemoved(String profileId, PictureProfile profile) {
                 synchronized (mPpLock) {
                     for (PictureProfileCallbackRecord record : mPpCallbackRecords) {
-                        // TODO: filter callback record
                         record.postPictureProfileRemoved(profileId, profile);
                     }
                 }
@@ -151,7 +147,6 @@ public final class MediaQualityManager {
                     String profileId, List<ParameterCapability> caps) {
                 synchronized (mPpLock) {
                     for (PictureProfileCallbackRecord record : mPpCallbackRecords) {
-                        // TODO: filter callback record
                         record.postParameterCapabilitiesChanged(profileId, caps);
                     }
                 }
@@ -160,7 +155,6 @@ public final class MediaQualityManager {
             public void onError(String profileId, int err) {
                 synchronized (mPpLock) {
                     for (PictureProfileCallbackRecord record : mPpCallbackRecords) {
-                        // TODO: filter callback record
                         record.postError(profileId, err);
                     }
                 }
@@ -171,7 +165,6 @@ public final class MediaQualityManager {
             public void onSoundProfileAdded(String profileId, SoundProfile profile) {
                 synchronized (mSpLock) {
                     for (SoundProfileCallbackRecord record : mSpCallbackRecords) {
-                        // TODO: filter callback record
                         record.postSoundProfileAdded(profileId, profile);
                     }
                 }
@@ -180,7 +173,6 @@ public final class MediaQualityManager {
             public void onSoundProfileUpdated(String profileId, SoundProfile profile) {
                 synchronized (mSpLock) {
                     for (SoundProfileCallbackRecord record : mSpCallbackRecords) {
-                        // TODO: filter callback record
                         record.postSoundProfileUpdated(profileId, profile);
                     }
                 }
@@ -189,7 +181,6 @@ public final class MediaQualityManager {
             public void onSoundProfileRemoved(String profileId, SoundProfile profile) {
                 synchronized (mSpLock) {
                     for (SoundProfileCallbackRecord record : mSpCallbackRecords) {
-                        // TODO: filter callback record
                         record.postSoundProfileRemoved(profileId, profile);
                     }
                 }
@@ -199,7 +190,6 @@ public final class MediaQualityManager {
                     String profileId, List<ParameterCapability> caps) {
                 synchronized (mSpLock) {
                     for (SoundProfileCallbackRecord record : mSpCallbackRecords) {
-                        // TODO: filter callback record
                         record.postParameterCapabilitiesChanged(profileId, caps);
                     }
                 }
@@ -208,7 +198,6 @@ public final class MediaQualityManager {
             public void onError(String profileId, int err) {
                 synchronized (mSpLock) {
                     for (SoundProfileCallbackRecord record : mSpCallbackRecords) {
-                        // TODO: filter callback record
                         record.postError(profileId, err);
                     }
                 }
