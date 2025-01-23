@@ -16,12 +16,16 @@
 
 package com.android.systemui.volume.dialog.domain.interactor
 
+import android.media.AudioManager.RINGER_MODE_NORMAL
+import android.media.AudioManager.RINGER_MODE_SILENT
+import android.media.AudioManager.RINGER_MODE_VIBRATE
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.collectLastValue
 import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
+import com.android.systemui.plugins.fakeVolumeDialogController
 import com.android.systemui.testKosmos
 import com.android.systemui.volume.dialog.domain.model.VolumeDialogEventModel
 import com.google.common.truth.Truth.assertThat
@@ -43,5 +47,31 @@ class VolumeDialogCallbacksInteractorTest : SysuiTestCase() {
         kosmos.runTest {
             val event by collectLastValue(underTest.event)
             assertThat(event).isInstanceOf(VolumeDialogEventModel.SubscribedToEvents::class.java)
+        }
+
+    @Test
+    fun showSilentHint_setsRingerModeToNormal() =
+        kosmos.runTest {
+            fakeVolumeDialogController.setRingerMode(RINGER_MODE_VIBRATE, false)
+
+            underTest // It should eagerly collect the values and update the controller
+            fakeVolumeDialogController.onShowSilentHint()
+            fakeVolumeDialogController.getState()
+
+            assertThat(fakeVolumeDialogController.state.ringerModeInternal)
+                .isEqualTo(RINGER_MODE_NORMAL)
+        }
+
+    @Test
+    fun showVibrateHint_setsRingerModeToSilent() =
+        kosmos.runTest {
+            fakeVolumeDialogController.setRingerMode(RINGER_MODE_VIBRATE, false)
+
+            underTest // It should eagerly collect the values and update the controller
+            fakeVolumeDialogController.onShowVibrateHint()
+            fakeVolumeDialogController.getState()
+
+            assertThat(fakeVolumeDialogController.state.ringerModeInternal)
+                .isEqualTo(RINGER_MODE_SILENT)
         }
 }

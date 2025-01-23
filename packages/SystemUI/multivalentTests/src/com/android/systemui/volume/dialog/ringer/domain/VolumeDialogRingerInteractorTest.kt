@@ -25,14 +25,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.volume.shared.model.RingerMode
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runTest
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.plugins.fakeVolumeDialogController
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,8 +42,7 @@ import org.junit.runner.RunWith
 @TestableLooper.RunWithLooper
 class VolumeDialogRingerInteractorTest : SysuiTestCase() {
 
-    private val kosmos = testKosmos()
-    private val testScope = kosmos.testScope
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val controller = kosmos.fakeVolumeDialogController
 
     private lateinit var underTest: VolumeDialogRingerInteractor
@@ -57,13 +55,11 @@ class VolumeDialogRingerInteractorTest : SysuiTestCase() {
 
     @Test
     fun setRingerMode_normal() =
-        testScope.runTest {
-            runCurrent()
+        kosmos.runTest {
             val ringerModel by collectLastValue(underTest.ringerModel)
 
             underTest.setRingerMode(RingerMode(RINGER_MODE_NORMAL))
             controller.getState()
-            runCurrent()
 
             assertThat(ringerModel).isNotNull()
             assertThat(ringerModel?.currentRingerMode).isEqualTo(RingerMode(RINGER_MODE_NORMAL))
@@ -71,13 +67,11 @@ class VolumeDialogRingerInteractorTest : SysuiTestCase() {
 
     @Test
     fun setRingerMode_silent() =
-        testScope.runTest {
-            runCurrent()
+        kosmos.runTest {
             val ringerModel by collectLastValue(underTest.ringerModel)
 
             underTest.setRingerMode(RingerMode(RINGER_MODE_SILENT))
             controller.getState()
-            runCurrent()
 
             assertThat(ringerModel).isNotNull()
             assertThat(ringerModel?.currentRingerMode).isEqualTo(RingerMode(RINGER_MODE_SILENT))
@@ -85,13 +79,11 @@ class VolumeDialogRingerInteractorTest : SysuiTestCase() {
 
     @Test
     fun setRingerMode_vibrate() =
-        testScope.runTest {
-            runCurrent()
+        kosmos.runTest {
             val ringerModel by collectLastValue(underTest.ringerModel)
 
             underTest.setRingerMode(RingerMode(RINGER_MODE_VIBRATE))
             controller.getState()
-            runCurrent()
 
             assertThat(ringerModel).isNotNull()
             assertThat(ringerModel?.currentRingerMode).isEqualTo(RingerMode(RINGER_MODE_VIBRATE))
