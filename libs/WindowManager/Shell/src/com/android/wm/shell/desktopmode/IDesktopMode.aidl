@@ -28,6 +28,11 @@ import com.android.wm.shell.shared.desktopmode.DesktopTaskToFrontReason;
  * Interface that is exposed to remote callers to manipulate desktop mode features.
  */
 interface IDesktopMode {
+    /** If possible, creates a new desk on the display whose ID is `displayId`. */
+    oneway void createDesk(int displayId);
+
+    /** Activates the desk whose ID is `deskId` on whatever display it currently exists on. */
+    oneway void activateDesk(int deskId, in RemoteTransition remoteTransition);
 
     /** Show apps on the desktop on the given display */
     void showDesktopApps(int displayId, in RemoteTransition remoteTransition);
@@ -46,9 +51,6 @@ interface IDesktopMode {
      */
     oneway void showDesktopApp(int taskId, in @nullable RemoteTransition remoteTransition,
             in DesktopTaskToFrontReason toFrontReason);
-
-    /** Get count of visible desktop tasks on the given display */
-    int getVisibleTaskCount(int displayId);
 
     /** Perform cleanup transactions after the animation to split select is complete */
     oneway void onDesktopSplitSelectAnimComplete(in RunningTaskInfo taskInfo);
