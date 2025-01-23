@@ -205,6 +205,15 @@ public class KeyguardManager {
     public static final String EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS = "check_dpm";
 
     /**
+     * When switching to a secure user, system server will expect a callback when the UI has
+     * completed the switch.
+     *
+     * @hide
+     */
+    public static final String LOCK_ON_USER_SWITCH_CALLBACK = "onSwitchCallback";
+
+
+    /**
      *
      * Password lock type, see {@link #setLock}
      *
