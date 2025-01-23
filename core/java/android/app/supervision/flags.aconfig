@@ -48,3 +48,11 @@ flag {
   description: "Flag that enables the Supervision settings screen with top-level Android settings entry point"
   bug: "383404606"
 }
+
+flag {
+  name: "enable_app_approval"
+  is_exported: true
+  namespace: "supervision"
+  description: "Flag to enable the App Approval settings in Android settings UI"
+  bug: "390185393"
+}
