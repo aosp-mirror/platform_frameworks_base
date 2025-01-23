@@ -32,19 +32,24 @@ public class LauncherActivityInfoInternal implements Parcelable {
     @NonNull private ComponentName mComponentName;
     @NonNull private IncrementalStatesInfo mIncrementalStatesInfo;
     @NonNull private UserHandle mUser;
+    private boolean mSupportsMultiInstance;
 
     /**
      * @param info ActivityInfo from which to create the LauncherActivityInfo.
      * @param incrementalStatesInfo The package's states.
      * @param user The user the activity info belongs to.
+     * @param supportsMultiInstance Whether the activity supports multi-instance as declared in its
+     *                              app manifest
      */
     public LauncherActivityInfoInternal(@NonNull ActivityInfo info,
             @NonNull IncrementalStatesInfo incrementalStatesInfo,
-            @NonNull UserHandle user) {
+            @NonNull UserHandle user,
+            boolean supportsMultiInstance) {
         mActivityInfo = info;
         mComponentName = new ComponentName(info.packageName, info.name);
         mIncrementalStatesInfo = incrementalStatesInfo;
         mUser = user;
+        mSupportsMultiInstance = supportsMultiInstance;
     }
 
     public LauncherActivityInfoInternal(Parcel source) {
@@ -52,6 +57,7 @@ public class LauncherActivityInfoInternal implements Parcelable {
         mComponentName = new ComponentName(mActivityInfo.packageName, mActivityInfo.name);
         mIncrementalStatesInfo = source.readTypedObject(IncrementalStatesInfo.CREATOR);
         mUser = source.readTypedObject(UserHandle.CREATOR);
+        mSupportsMultiInstance = source.readBoolean();
     }
 
     public ComponentName getComponentName() {
@@ -70,6 +76,10 @@ public class LauncherActivityInfoInternal implements Parcelable {
         return mIncrementalStatesInfo;
     }
 
+    public boolean supportsMultiInstance() {
+        return mSupportsMultiInstance;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -80,6 +90,7 @@ public class LauncherActivityInfoInternal implements Parcelable {
         dest.writeTypedObject(mActivityInfo, flags);
         dest.writeTypedObject(mIncrementalStatesInfo, flags);
         dest.writeTypedObject(mUser, flags);
+        dest.writeBoolean(mSupportsMultiInstance);
     }
 
     public static final @android.annotation.NonNull Creator<LauncherActivityInfoInternal> CREATOR =
