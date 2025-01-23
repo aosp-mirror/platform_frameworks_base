@@ -18,6 +18,8 @@ package com.android.wm.shell.shared.desktopmode;
 
 import static android.hardware.display.DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED;
 
+import static com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper.enableBubbleToFullscreen;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -270,7 +272,8 @@ public class DesktopModeStatus {
      * necessarily enabling desktop mode
      */
     public static boolean overridesShowAppHandle(@NonNull Context context) {
-        return Flags.showAppHandleLargeScreens() && deviceHasLargeScreen(context);
+        return (Flags.showAppHandleLargeScreens() || enableBubbleToFullscreen())
+                && deviceHasLargeScreen(context);
     }
 
     /**
