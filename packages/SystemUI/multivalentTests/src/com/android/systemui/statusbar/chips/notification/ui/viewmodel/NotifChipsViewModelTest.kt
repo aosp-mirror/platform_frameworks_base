@@ -609,7 +609,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
                 listOf(
                     activeNotificationModel(
                         key = "notif",
-                        statusBarChipIcon = mock<StatusBarIconView>(),
+                        statusBarChipIcon = createStatusBarIconViewOrNull(),
                         promotedContent = promotedContentBuilder.build(),
                     )
                 )
