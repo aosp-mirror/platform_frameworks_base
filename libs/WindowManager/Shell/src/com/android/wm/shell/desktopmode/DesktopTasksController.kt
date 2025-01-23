@@ -85,6 +85,7 @@ import com.android.wm.shell.common.RemoteCallable
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SingleInstanceRemoteListener
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.common.UserProfileContexts
 import com.android.wm.shell.compatui.isTopActivityExemptFromDesktopWindowing
 import com.android.wm.shell.compatui.isTransparentTask
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
@@ -183,6 +184,7 @@ class DesktopTasksController(
     private val bubbleController: Optional<BubbleController>,
     private val overviewToDesktopTransitionObserver: OverviewToDesktopTransitionObserver,
     private val desksOrganizer: DesksOrganizer,
+    private val userProfileContexts: UserProfileContexts,
 ) :
     RemoteCallable<DesktopTasksController>,
     Transitions.TransitionHandler,
@@ -1862,7 +1864,9 @@ class DesktopTasksController(
         //  need updates in some cases.
         val baseActivity = callingTaskInfo.baseActivity ?: return
         val fillIn: Intent =
-            context.packageManager.getLaunchIntentForPackage(baseActivity.packageName) ?: return
+            userProfileContexts[callingTaskInfo.userId]
+                ?.packageManager
+                ?.getLaunchIntentForPackage(baseActivity.packageName) ?: return
         fillIn.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
         val launchIntent =
             PendingIntent.getActivity(
