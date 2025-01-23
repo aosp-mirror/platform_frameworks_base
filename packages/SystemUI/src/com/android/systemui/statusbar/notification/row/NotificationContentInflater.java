@@ -57,6 +57,7 @@ import com.android.systemui.statusbar.notification.ConversationNotificationProce
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.promoted.PromotedNotificationContentExtractor;
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUiForceExpanded;
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel;
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation;
@@ -1111,6 +1112,10 @@ public class NotificationContentInflater implements NotificationRowContentBinder
 
         entry.setHeadsUpStatusBarText(result.headsUpStatusBarText);
         entry.setHeadsUpStatusBarTextPublic(result.headsUpStatusBarTextPublic);
+        if (PromotedNotificationUiForceExpanded.isEnabled()) {
+            row.setPromotedOngoing(entry.isOngoingPromoted());
+        }
+
         Trace.endAsyncSection(APPLY_TRACE_METHOD, System.identityHashCode(row));
         if (endListener != null) {
             endListener.onAsyncInflationFinished(entry);
