@@ -182,6 +182,16 @@ flag {
 }
 
 flag {
+  name: "nm_binder_perf_throttle_effects_suppressor_broadcast"
+  namespace: "systemui"
+  description: "Delay sending the ACTION_EFFECTS_SUPPRESSOR_CHANGED broadcast if it changes too often"
+  bug: "371776935"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "fix_calling_uid_from_cps"
   namespace: "systemui"
   description: "Correctly checks zen rule ownership when a CPS notifies with a Condition"
