@@ -70,6 +70,7 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.common.UserProfileContexts;
 import com.android.wm.shell.common.split.SplitState;
 import com.android.wm.shell.compatui.letterbox.LetterboxCommandHandler;
 import com.android.wm.shell.compatui.letterbox.LetterboxTransitionObserver;
@@ -991,9 +992,10 @@ public abstract class WMShellModule {
     static WindowDecorTaskResourceLoader provideWindowDecorTaskResourceLoader(
             @NonNull Context context, @NonNull ShellInit shellInit,
             @NonNull ShellController shellController,
-            @NonNull ShellCommandHandler shellCommandHandler) {
+            @NonNull ShellCommandHandler shellCommandHandler,
+            @NonNull UserProfileContexts userProfileContexts) {
         return new WindowDecorTaskResourceLoader(context, shellInit, shellController,
-                shellCommandHandler);
+                shellCommandHandler, userProfileContexts);
     }
 
     @WMSingleton
@@ -1423,4 +1425,14 @@ public abstract class WMShellModule {
             Transitions transitions, ShellInit shellInit) {
         return new OverviewToDesktopTransitionObserver(transitions, shellInit);
     }
+
+    @WMSingleton
+    @Provides
+    static UserProfileContexts provideUserProfilesContexts(
+            Context context,
+            ShellController shellController,
+            ShellInit shellInit) {
+        return new UserProfileContexts(context, shellController, shellInit);
+    }
+
 }
