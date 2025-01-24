@@ -18,7 +18,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-    android:paddingStart="?android:attr/listPreferredItemPaddingStart">
+    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+    android:filterTouchesWhenObscured="true">
 
     <com.android.settingslib.widget.CollapsableTextView
         android:id="@+id/collapsable_text_view"
