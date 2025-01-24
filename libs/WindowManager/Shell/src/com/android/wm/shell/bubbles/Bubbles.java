@@ -36,6 +36,7 @@ import android.window.ScreenCapture.ScreenshotHardwareBuffer;
 import android.window.ScreenCapture.SynchronousScreenCaptureListener;
 
 import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.wm.shell.shared.annotations.ExternalThread;
@@ -330,6 +331,18 @@ public interface Bubbles {
          * Does not result in a state change.
          */
         void animateBubbleBarLocation(BubbleBarLocation location);
+
+        /**
+         * Called when an application icon is being dragged over the Bubble Bar drop zone.
+         * The location of the Bubble Bar is provided as an argument.
+         */
+        void onDragItemOverBubbleBarDragZone(@NonNull BubbleBarLocation location);
+
+        /**
+         * Called when an application icon is being dragged outside the Bubble Bar drop zone.
+         * Always called after {@link #onDragItemOverBubbleBarDragZone(BubbleBarLocation)}
+         */
+        void onItemDraggedOutsideBubbleBarDropZone();
     }
 
     /** Listener to find out about stack expansion / collapse events. */

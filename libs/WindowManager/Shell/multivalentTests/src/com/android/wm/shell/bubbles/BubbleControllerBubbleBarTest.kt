@@ -296,5 +296,9 @@ class BubbleControllerBubbleBarTest {
         override fun onBubbleStateChange(update: BubbleBarUpdate?) {}
 
         override fun animateBubbleBarLocation(location: BubbleBarLocation?) {}
+
+        override fun onDragItemOverBubbleBarDragZone(location: BubbleBarLocation) {}
+
+        override fun onItemDraggedOutsideBubbleBarDropZone() {}
     }
 }
