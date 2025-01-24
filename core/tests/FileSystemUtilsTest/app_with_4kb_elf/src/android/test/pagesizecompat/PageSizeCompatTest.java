@@ -34,8 +34,7 @@ import java.util.concurrent.TimeUnit;
 @RunWith(AndroidJUnit4.class)
 public class PageSizeCompatTest {
 
-    @Test
-    public void testPageSizeCompat_embedded4KbLib() throws Exception {
+    public void testPageSizeCompat_appLaunch(boolean shouldPass) throws Exception {
         Context context = InstrumentationRegistry.getContext();
         CountDownLatch receivedSignal = new CountDownLatch(1);
 
@@ -62,6 +61,16 @@ public class PageSizeCompatTest {
         launchIntent.putExtra(MainActivity.KEY_OPERAND_2, op2);
         context.startActivity(launchIntent);
 
-        Assert.assertTrue("Failed to launch app", receivedSignal.await(10, TimeUnit.SECONDS));
+        Assert.assertEquals(receivedSignal.await(10, TimeUnit.SECONDS), shouldPass);
+    }
+
+    @Test
+    public void testPageSizeCompat_compatEnabled() throws Exception {
+        testPageSizeCompat_appLaunch(true);
+    }
+
+    @Test
+    public void testPageSizeCompat_compatDisabled() throws Exception {
+        testPageSizeCompat_appLaunch(false);
     }
 }
