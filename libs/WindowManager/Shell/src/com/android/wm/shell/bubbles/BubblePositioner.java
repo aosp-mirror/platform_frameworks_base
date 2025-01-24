@@ -27,19 +27,21 @@ import android.graphics.RectF;
 import android.view.Surface;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.IconNormalizer;
 import com.android.wm.shell.R;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
+import com.android.wm.shell.shared.bubbles.BubbleDropTargetBoundsProvider;
 import com.android.wm.shell.shared.bubbles.DeviceConfig;
 
 /**
  * Keeps track of display size, configuration, and specific bubble sizes. One place for all
  * placement and positioning calculations to refer to.
  */
-public class BubblePositioner {
+public class BubblePositioner implements BubbleDropTargetBoundsProvider {
 
     /** The screen edge the bubble stack is pinned to */
     public enum StackPinnedEdge {
@@ -100,6 +102,7 @@ public class BubblePositioner {
     private int mManageButtonHeight;
     private int mOverflowHeight;
     private int mMinimumFlyoutWidthLargeScreen;
+    private int mBubbleBarExpandedViewDropTargetPadding;
 
     private PointF mRestingStackPosition;
 
@@ -164,6 +167,8 @@ public class BubblePositioner {
                 res.getDimensionPixelSize(R.dimen.bubble_bar_expanded_view_width),
                 mPositionRect.width() - 2 * mExpandedViewPadding
         );
+        mBubbleBarExpandedViewDropTargetPadding = res.getDimensionPixelSize(
+                R.dimen.bubble_bar_expanded_view_drop_target_padding);
 
         if (mShowingInBubbleBar) {
             mExpandedViewLargeScreenWidth = mExpandedViewBubbleBarWidth;
@@ -964,5 +969,15 @@ public class BubblePositioner {
         }
         int top = getExpandedViewBottomForBubbleBar() - height;
         out.offsetTo(left, top);
+    }
+
+    @NonNull
+    @Override
+    public Rect getBubbleBarExpandedViewDropTargetBounds(boolean onLeft) {
+        Rect bounds = new Rect();
+        getBubbleBarExpandedViewBounds(onLeft, false, bounds);
+        bounds.inset(mBubbleBarExpandedViewDropTargetPadding,
+                mBubbleBarExpandedViewDropTargetPadding);
+        return bounds;
     }
 }
