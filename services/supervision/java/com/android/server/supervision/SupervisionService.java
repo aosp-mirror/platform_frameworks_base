@@ -51,7 +51,6 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.pm.UserManagerInternal;
 
 import java.io.FileDescriptor;
@@ -62,17 +61,17 @@ import java.util.List;
 public class SupervisionService extends ISupervisionManager.Stub {
     private static final String LOG_TAG = "SupervisionService";
 
-    private final Context mContext;
-
     // TODO(b/362756788): Does this need to be a LockGuard lock?
     private final Object mLockDoNoUseDirectly = new Object();
 
     @GuardedBy("getLockObject()")
     private final SparseArray<SupervisionUserData> mUserData = new SparseArray<>();
 
+    private final Context mContext;
     private final DevicePolicyManagerInternal mDpmInternal;
     private final PackageManager mPackageManager;
     private final UserManagerInternal mUserManagerInternal;
+    final SupervisionManagerInternal mInternal = new SupervisionManagerInternalImpl();
 
     public SupervisionService(Context context) {
         mContext = context.createAttributionContext(LOG_TAG);
@@ -82,6 +81,12 @@ public class SupervisionService extends ISupervisionManager.Stub {
         mUserManagerInternal.addUserLifecycleListener(new UserLifecycleListener());
     }
 
+    /**
+     * Returns whether supervision is enabled for the given user.
+     *
+     * <p>Supervision is automatically enabled when the supervision app becomes the profile owner or
+     * explicitly enabled via an internal call to {@link #setSupervisionEnabledForUser}.
+     */
     @Override
     public boolean isSupervisionEnabledForUser(@UserIdInt int userId) {
         if (UserHandle.getUserId(Binder.getCallingUid()) != userId) {
@@ -89,6 +94,20 @@ public class SupervisionService extends ISupervisionManager.Stub {
         }
         synchronized (getLockObject()) {
             return getUserDataLocked(userId).supervisionEnabled;
+        }
+    }
+
+    /**
+     * Returns the package name of the active supervision app or null if supervision is disabled.
+     */
+    @Override
+    @Nullable
+    public String getActiveSupervisionAppPackage(@UserIdInt int userId) {
+        if (UserHandle.getUserId(Binder.getCallingUid()) != userId) {
+            enforcePermission(INTERACT_ACROSS_USERS);
+        }
+        synchronized (getLockObject()) {
+            return getUserDataLocked(userId).supervisionAppPackage;
         }
     }
 
@@ -140,35 +159,53 @@ public class SupervisionService extends ISupervisionManager.Stub {
         return data;
     }
 
-    void setSupervisionEnabledForUser(@UserIdInt int userId, boolean enabled) {
+    /**
+     * Sets supervision as enabled or disabled for the given user and, in case supervision is being
+     * enabled, the package of the active supervision app.
+     */
+    private void setSupervisionEnabledForUser(
+            @UserIdInt int userId, boolean enabled, @Nullable String supervisionAppPackage) {
         synchronized (getLockObject()) {
-            getUserDataLocked(userId).supervisionEnabled = enabled;
+            SupervisionUserData data = getUserDataLocked(userId);
+            data.supervisionEnabled = enabled;
+            data.supervisionAppPackage = enabled ? supervisionAppPackage : null;
         }
     }
 
-    /** Ensures that supervision is enabled when supervision app is the profile owner. */
+    /** Ensures that supervision is enabled when the supervision app is the profile owner. */
     private void syncStateWithDevicePolicyManager(@UserIdInt int userId) {
-        if (isProfileOwner(userId)) {
-            setSupervisionEnabledForUser(userId, true);
+        final ComponentName po =
+                mDpmInternal != null ? mDpmInternal.getProfileOwnerAsUser(userId) : null;
+
+        if (po != null && po.getPackageName().equals(getSystemSupervisionPackage())) {
+            setSupervisionEnabledForUser(userId, true, po.getPackageName());
+        } else if (po != null && po.equals(getSupervisionProfileOwnerComponent())) {
+            // TODO(b/392071637): Consider not enabling supervision in case profile owner is given
+            // to the legacy supervision profile owner component.
+            setSupervisionEnabledForUser(userId, true, po.getPackageName());
         } else {
             // TODO(b/381428475): Avoid disabling supervision when the app is not the profile owner.
             // This might only be possible after introducing specific and public APIs to enable
-            // supervision.
-            setSupervisionEnabledForUser(userId, false);
+            // and disable supervision.
+            setSupervisionEnabledForUser(userId, false, /* supervisionAppPackage= */ null);
         }
     }
 
-    /** Returns whether the supervision app has profile owner status. */
-    private boolean isProfileOwner(@UserIdInt int userId) {
-        ComponentName profileOwner =
-                mDpmInternal != null ? mDpmInternal.getProfileOwnerAsUser(userId) : null;
-        return profileOwner != null && isSupervisionAppPackage(profileOwner.getPackageName());
+    /**
+     * Returns the {@link ComponentName} of the supervision profile owner component.
+     *
+     * <p>This component is used to give GMS Kids Module permission to supervise the device and may
+     * still be active during the transition to the {@code SYSTEM_SUPERVISION} role.
+     */
+    private ComponentName getSupervisionProfileOwnerComponent() {
+        return ComponentName.unflattenFromString(
+                mContext.getResources()
+                        .getString(R.string.config_defaultSupervisionProfileOwnerComponent));
     }
 
-    /** Returns whether the given package name belongs to the supervision role holder. */
-    private boolean isSupervisionAppPackage(String packageName) {
-        return packageName.equals(
-                mContext.getResources().getString(R.string.config_systemSupervision));
+    /** Returns the package assigned to the {@code SYSTEM_SUPERVISION} role. */
+    private String getSystemSupervisionPackage() {
+        return mContext.getResources().getString(R.string.config_systemSupervision);
     }
 
     /** Enforces that the caller has the given permission. */
@@ -228,19 +265,21 @@ public class SupervisionService extends ISupervisionManager.Stub {
         }
     }
 
-    final SupervisionManagerInternal mInternal = new SupervisionManagerInternalImpl();
-
     private final class SupervisionManagerInternalImpl extends SupervisionManagerInternal {
         @Override
         public boolean isActiveSupervisionApp(int uid) {
-            String[] packages = mPackageManager.getPackagesForUid(uid);
-            if (packages == null) {
+            int userId = UserHandle.getUserId(uid);
+            String supervisionAppPackage = getActiveSupervisionAppPackage(userId);
+            if (supervisionAppPackage == null) {
                 return false;
             }
-            for (var packageName : packages) {
-                if (SupervisionService.this.isSupervisionAppPackage(packageName)) {
-                    int userId = UserHandle.getUserId(uid);
-                    return SupervisionService.this.isSupervisionEnabledForUser(userId);
+
+            String[] packages = mPackageManager.getPackagesForUid(uid);
+            if (packages != null) {
+                for (var packageName : packages) {
+                    if (supervisionAppPackage.equals(packageName)) {
+                        return true;
+                    }
                 }
             }
             return false;
@@ -253,7 +292,8 @@ public class SupervisionService extends ISupervisionManager.Stub {
 
         @Override
         public void setSupervisionEnabledForUser(@UserIdInt int userId, boolean enabled) {
-            SupervisionService.this.setSupervisionEnabledForUser(userId, enabled);
+            SupervisionService.this.setSupervisionEnabledForUser(
+                    userId, enabled, getSystemSupervisionPackage());
         }
 
         @Override

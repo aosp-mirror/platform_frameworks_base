@@ -16,6 +16,7 @@
 
 package android.app.supervision;
 
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.UserHandleAware;
@@ -94,6 +95,22 @@ public class SupervisionManager {
     public boolean isSupervisionEnabledForUser(@UserIdInt int userId) {
         try {
             return mService.isSupervisionEnabledForUser(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the package name of the app that is acting as the active supervision app or null if
+     * supervision is disabled.
+     *
+     * @hide
+     */
+    @UserHandleAware
+    @Nullable
+    public String getActiveSupervisionAppPackage() {
+        try {
+            return mService.getActiveSupervisionAppPackage(mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

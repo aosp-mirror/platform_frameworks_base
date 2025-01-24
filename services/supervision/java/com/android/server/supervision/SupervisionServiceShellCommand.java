@@ -32,16 +32,18 @@ public class SupervisionServiceShellCommand extends ShellCommand {
             return handleDefaultCommands(null);
         }
         switch (cmd) {
-            case "enable": return setEnabled(true);
-            case "disable": return setEnabled(false);
-            default: return handleDefaultCommands(cmd);
+            case "enable":
+                return setEnabled(true);
+            case "disable":
+                return setEnabled(false);
+            default:
+                return handleDefaultCommands(cmd);
         }
     }
 
     private int setEnabled(boolean enabled) {
-        final var pw = getOutPrintWriter();
         final var userId = UserHandle.parseUserArg(getNextArgRequired());
-        mService.setSupervisionEnabledForUser(userId, enabled);
+        mService.mInternal.setSupervisionEnabledForUser(userId, enabled);
         return 0;
     }
 
