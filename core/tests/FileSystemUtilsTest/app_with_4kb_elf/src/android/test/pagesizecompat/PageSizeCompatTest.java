@@ -16,6 +16,8 @@
 
 package android.test.pagesizecompat;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +25,10 @@ import android.content.IntentFilter;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject2;
+import androidx.test.uiautomator.Until;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,6 +39,8 @@ import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
 public class PageSizeCompatTest {
+    private static final String WARNING_TEXT = "PageSizeCompatTestApp";
+    private static final long TIMEOUT = 5000;
 
     public void testPageSizeCompat_appLaunch(boolean shouldPass) throws Exception {
         Context context = InstrumentationRegistry.getContext();
@@ -61,6 +69,9 @@ public class PageSizeCompatTest {
         launchIntent.putExtra(MainActivity.KEY_OPERAND_2, op2);
         context.startActivity(launchIntent);
 
+        UiDevice device = UiDevice.getInstance(getInstrumentation());
+        device.waitForWindowUpdate(null, TIMEOUT);
+
         Assert.assertEquals(receivedSignal.await(10, TimeUnit.SECONDS), shouldPass);
     }
 
@@ -72,5 +83,16 @@ public class PageSizeCompatTest {
     @Test
     public void testPageSizeCompat_compatDisabled() throws Exception {
         testPageSizeCompat_appLaunch(false);
+    }
+
+    @Test
+    public void testPageSizeCompat_compatByAlignmentChecks() throws Exception {
+        testPageSizeCompat_appLaunch(true);
+
+        //verify warning dialog
+        UiDevice device = UiDevice.getInstance(getInstrumentation());
+        device.waitForWindowUpdate(null, TIMEOUT);
+        UiObject2 targetObject = device.wait(Until.findObject(By.text(WARNING_TEXT)), TIMEOUT);
+        Assert.assertTrue(targetObject != null);
     }
 }
