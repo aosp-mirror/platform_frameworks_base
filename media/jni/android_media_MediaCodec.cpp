@@ -16,7 +16,9 @@
 
 //#define LOG_NDEBUG 0
 #define LOG_TAG "MediaCodec-JNI"
+#define ATRACE_TAG  ATRACE_TAG_VIDEO
 #include <utils/Log.h>
+#include <utils/Trace.h>
 
 #include <type_traits>
 
@@ -2106,7 +2108,7 @@ static void android_media_MediaCodec_queueInputBuffer(
         jlong timestampUs,
         jint flags) {
     ALOGV("android_media_MediaCodec_queueInputBuffer");
-
+    ScopedTrace trace(ATRACE_TAG, "MediaCodec::queueInputBuffer#jni");
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
     if (codec == NULL || codec->initCheck() != OK) {
@@ -2192,6 +2194,7 @@ static void android_media_MediaCodec_queueInputBuffers(
         jint index,
         jobjectArray objArray) {
     ALOGV("android_media_MediaCodec_queueInputBuffers");
+    ScopedTrace trace(ATRACE_TAG, "MediaCodec::queueInputBuffers#jni");
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
     if (codec == NULL || codec->initCheck() != OK || objArray == NULL) {
         throwExceptionAsNecessary(env, INVALID_OPERATION, codec);
@@ -2431,6 +2434,7 @@ static void android_media_MediaCodec_queueSecureInputBuffer(
         jobject cryptoInfoObj,
         jlong timestampUs,
         jint flags) {
+    ScopedTrace trace(ATRACE_TAG, "MediaCodec::queueSecureInputBuffer#jni");
     ALOGV("android_media_MediaCodec_queueSecureInputBuffer");
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
@@ -2641,6 +2645,7 @@ static void android_media_MediaCodec_queueSecureInputBuffers(
         jint index,
         jobjectArray bufferInfosObjs,
         jobjectArray cryptoInfoObjs) {
+    ScopedTrace trace(ATRACE_TAG, "MediaCodec::queueSecureInputBuffers#jni");
     ALOGV("android_media_MediaCodec_queueSecureInputBuffers");
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
@@ -2685,6 +2690,7 @@ static void android_media_MediaCodec_queueSecureInputBuffers(
 }
 
 static jobject android_media_MediaCodec_mapHardwareBuffer(JNIEnv *env, jclass, jobject bufferObj) {
+    ScopedTrace trace(ATRACE_TAG, "MediaCodec::mapHardwareBuffer#jni");
     ALOGV("android_media_MediaCodec_mapHardwareBuffer");
     AHardwareBuffer *hardwareBuffer = android_hardware_HardwareBuffer_getNativeHardwareBuffer(
             env, bufferObj);
@@ -3028,6 +3034,7 @@ static void extractBufferFromContext(
 static void android_media_MediaCodec_native_queueLinearBlock(
         JNIEnv *env, jobject thiz, jint index, jobject bufferObj,
         jobjectArray cryptoInfoArray, jobjectArray objArray, jobject keys, jobject values) {
+    ScopedTrace trace(ATRACE_TAG, "MediaCodec::queueLinearBlock#jni");
     ALOGV("android_media_MediaCodec_native_queueLinearBlock");
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
@@ -3145,6 +3152,7 @@ static void android_media_MediaCodec_native_queueHardwareBuffer(
         JNIEnv *env, jobject thiz, jint index, jobject bufferObj,
         jlong presentationTimeUs, jint flags, jobject keys, jobject values) {
     ALOGV("android_media_MediaCodec_native_queueHardwareBuffer");
+    ScopedTrace trace(ATRACE_TAG, "MediaCodec::queueHardwareBuffer#jni");
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
