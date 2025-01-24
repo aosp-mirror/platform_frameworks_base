@@ -78,17 +78,10 @@ public class DesktopModeStatus {
             "persist.wm.debug.desktop_use_rounded_corners", true);
 
     /**
-     * Name of the system property used to set the device restriction.
-     */
-    @VisibleForTesting
-    static final String ENFORCE_DEVICE_RESTRICTIONS_PROPERTY =
-            "persist.wm.debug.desktop_mode_enforce_device_restrictions";
-
-    /**
      * Flag to indicate whether to restrict desktop mode to supported devices.
      */
     private static final boolean ENFORCE_DEVICE_RESTRICTIONS = SystemProperties.getBoolean(
-            ENFORCE_DEVICE_RESTRICTIONS_PROPERTY, true);
+            "persist.wm.debug.desktop_mode_enforce_device_restrictions", true);
 
     private static final boolean USE_APP_TO_WEB_BUILD_TIME_GENERIC_LINKS =
             SystemProperties.getBoolean(
@@ -261,6 +254,7 @@ public class DesktopModeStatus {
         return DesktopModeFlags.isDesktopModeForcedEnabled()
                 && canShowDesktopModeDevOption(context);
     }
+
     /**
      * Returns whether the multiple desktops feature is enabled for this device (both backend and
      * frontend implementations).
@@ -321,7 +315,7 @@ public class DesktopModeStatus {
      */
     public static boolean isDeviceEligibleForDesktopMode(@NonNull Context context) {
         return !enforceDeviceRestrictions() || isDesktopModeSupported(context) || (
-                Flags.forceEnableDesktopModeWithDevOption() && isDesktopModeDevOptionSupported(
+                Flags.enableDesktopModeThroughDevOption() && isDesktopModeDevOptionSupported(
                         context));
     }
 

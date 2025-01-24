@@ -600,3 +600,13 @@ flag {
     description: "Enables split screen on non default displays"
     bug: "384999213"
 }
+
+flag {
+    name: "enable_desktop_mode_through_dev_option"
+    namespace: "lse_desktop_experience"
+    description: "Enables support for desktop mode through developer options for devices eligible for desktop mode."
+    bug: "382238347"
+    metadata {
+       purpose: PURPOSE_BUGFIX
+    }
+}

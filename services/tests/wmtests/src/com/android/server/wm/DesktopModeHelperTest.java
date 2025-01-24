@@ -84,13 +84,15 @@ public class DesktopModeHelperTest {
         resetFlagOverride();
     }
 
-    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    @DisableFlags({Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
+            Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION})
     @Test
     public void canEnterDesktopMode_DWFlagDisabled_configsOff_returnsFalse() {
         assertThat(DesktopModeHelper.canEnterDesktopMode(mMockContext)).isFalse();
     }
 
-    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    @DisableFlags({Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
+            Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION})
     @Test
     public void canEnterDesktopMode_DWFlagDisabled_configsOn_disableDeviceCheck_returnsFalse()
             throws Exception {
@@ -102,7 +104,8 @@ public class DesktopModeHelperTest {
         assertThat(DesktopModeHelper.canEnterDesktopMode(mMockContext)).isFalse();
     }
 
-    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    @DisableFlags({Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
+            Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION})
     @Test
     public void canEnterDesktopMode_DWFlagDisabled_configDevOptionOn_returnsFalse() {
         doReturn(true).when(mMockResources).getBoolean(
@@ -111,7 +114,8 @@ public class DesktopModeHelperTest {
         assertThat(DesktopModeHelper.canEnterDesktopMode(mMockContext)).isFalse();
     }
 
-    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    @DisableFlags({Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
+            Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION})
     @Test
     public void canEnterDesktopMode_DWFlagDisabled_configDevOptionOn_flagOverrideOn_returnsTrue()
             throws Exception {
@@ -122,12 +126,14 @@ public class DesktopModeHelperTest {
         assertThat(DesktopModeHelper.canEnterDesktopMode(mMockContext)).isTrue();
     }
 
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION)
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     @Test
     public void canEnterDesktopMode_DWFlagEnabled_configsOff_returnsFalse() {
         assertThat(DesktopModeHelper.canEnterDesktopMode(mMockContext)).isFalse();
     }
 
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION)
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     @Test
     public void canEnterDesktopMode_DWFlagEnabled_configDesktopModeOff_returnsFalse() {
@@ -137,6 +143,7 @@ public class DesktopModeHelperTest {
         assertThat(DesktopModeHelper.canEnterDesktopMode(mMockContext)).isFalse();
     }
 
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION)
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     @Test
     public void canEnterDesktopMode_DWFlagEnabled_configDesktopModeOn_returnsTrue() {
@@ -145,6 +152,7 @@ public class DesktopModeHelperTest {
         assertThat(DesktopModeHelper.canEnterDesktopMode(mMockContext)).isTrue();
     }
 
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION)
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     @Test
     public void canEnterDesktopMode_DWFlagEnabled_configsOff_disableDeviceRestrictions_returnsTrue()
@@ -154,6 +162,7 @@ public class DesktopModeHelperTest {
         assertThat(DesktopModeHelper.canEnterDesktopMode(mMockContext)).isTrue();
     }
 
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION)
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     @Test
     public void canEnterDesktopMode_DWFlagEnabled_configDevOptionOn_flagOverrideOn_returnsTrue() {
@@ -163,6 +172,35 @@ public class DesktopModeHelperTest {
         setFlagOverride(DesktopModeFlags.ToggleOverride.OVERRIDE_ON);
 
         assertThat(DesktopModeHelper.canEnterDesktopMode(mMockContext)).isTrue();
+    }
+
+    @Test
+    public void isDeviceEligibleForDesktopMode_configDEModeOn_returnsTrue() {
+        doReturn(true).when(mMockResources).getBoolean(eq(R.bool.config_isDesktopModeSupported));
+
+        assertThat(DesktopModeHelper.isDeviceEligibleForDesktopMode(mMockContext)).isTrue();
+    }
+
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION)
+    @Test
+    public void isDeviceEligibleForDesktopMode_supportFlagOff_returnsFalse() {
+        assertThat(DesktopModeHelper.isDeviceEligibleForDesktopMode(mMockContext)).isFalse();
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION)
+    @Test
+    public void isDeviceEligibleForDesktopMode_supportFlagOn_returnsFalse() {
+        assertThat(DesktopModeHelper.isDeviceEligibleForDesktopMode(mMockContext)).isFalse();
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION)
+    @Test
+    public void isDeviceEligibleForDesktopMode_supportFlagOn_configDevOptModeOn_returnsTrue() {
+        doReturn(true).when(mMockResources).getBoolean(
+                eq(R.bool.config_isDesktopModeDevOptionSupported)
+        );
+
+        assertThat(DesktopModeHelper.isDeviceEligibleForDesktopMode(mMockContext)).isTrue();
     }
 
     private void resetEnforceDeviceRestriction() throws Exception {

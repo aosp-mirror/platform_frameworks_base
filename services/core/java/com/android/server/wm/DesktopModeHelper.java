@@ -23,6 +23,7 @@ import android.window.DesktopModeFlags;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 
 /**
  * Constants for desktop mode feature
@@ -64,12 +65,15 @@ public final class DesktopModeHelper {
      * Check if Desktop mode should be enabled because the dev option is shown and enabled.
      */
     private static boolean isDesktopModeEnabledByDevOption(@NonNull Context context) {
-        return DesktopModeFlags.isDesktopModeForcedEnabled()
-                && isDesktopModeDevOptionsSupported(context);
+        return DesktopModeFlags.isDesktopModeForcedEnabled() && (isDesktopModeDevOptionsSupported(
+                context) || isDeviceEligibleForDesktopMode(context));
     }
 
-    private static boolean isDeviceEligibleForDesktopMode(@NonNull Context context) {
-        return !shouldEnforceDeviceRestrictions() || isDesktopModeSupported(context);
+    @VisibleForTesting
+    static boolean isDeviceEligibleForDesktopMode(@NonNull Context context) {
+        return !shouldEnforceDeviceRestrictions() || isDesktopModeSupported(context)  || (
+                Flags.enableDesktopModeThroughDevOption() && isDesktopModeDevOptionsSupported(
+                        context));
     }
 
     /**
