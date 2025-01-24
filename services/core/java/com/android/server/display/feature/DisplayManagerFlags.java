@@ -21,6 +21,7 @@ import android.os.Build;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.window.DesktopExperienceFlags;
 
 import com.android.server.display.feature.flags.Flags;
 import com.android.server.display.utils.DebugUtils;
@@ -250,7 +251,7 @@ public class DisplayManagerFlags {
     );
     private final FlagState mEnableDisplayContentModeManagementFlagState = new FlagState(
             Flags.FLAG_ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT,
-            Flags::enableDisplayContentModeManagement
+            DesktopExperienceFlags.ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT::isTrue
     );
 
     private final FlagState mSubscribeGranularDisplayEvents = new FlagState(
