@@ -55,6 +55,7 @@ import com.android.systemui.customization.R as customR
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.domain.interactor.WallpaperFocalAreaInteractor
 import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewClockViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewSmartspaceViewBinder
@@ -117,6 +118,7 @@ constructor(
     private val secureSettings: SecureSettings,
     private val defaultShortcutsSection: DefaultShortcutsSection,
     private val keyguardQuickAffordanceViewBinder: KeyguardQuickAffordanceViewBinder,
+    private val wallpaperFocalAreaInteractor: WallpaperFocalAreaInteractor,
 ) {
     val hostToken: IBinder? = bundle.getBinder(KEY_HOST_TOKEN)
     private val width: Int = bundle.getInt(KEY_VIEW_WIDTH)

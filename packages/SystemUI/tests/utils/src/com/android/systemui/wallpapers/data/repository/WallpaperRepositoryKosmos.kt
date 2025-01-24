@@ -19,7 +19,6 @@ package com.android.systemui.wallpapers.data.repository
 import android.content.applicationContext
 import com.android.app.wallpaperManager
 import com.android.systemui.broadcast.broadcastDispatcher
-import com.android.systemui.keyguard.data.repository.keyguardClockRepository
 import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -34,8 +33,7 @@ val Kosmos.wallpaperRepository by Fixture {
         bgDispatcher = testDispatcher,
         broadcastDispatcher = broadcastDispatcher,
         userRepository = userRepository,
-        wallpaperManager = wallpaperManager,
-        keyguardClockRepository = keyguardClockRepository,
         keyguardRepository = keyguardRepository,
+        wallpaperManager = wallpaperManager,
     )
 }

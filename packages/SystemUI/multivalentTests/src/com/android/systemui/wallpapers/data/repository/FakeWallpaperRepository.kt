@@ -26,4 +26,5 @@ class FakeWallpaperRepository : WallpaperRepository {
     override val wallpaperInfo = MutableStateFlow<WallpaperInfo?>(null)
     override val wallpaperSupportsAmbientMode = flowOf(false)
     override var rootView: View? = null
+    override val shouldSendFocalArea = MutableStateFlow(false)
 }

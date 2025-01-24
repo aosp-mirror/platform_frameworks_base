@@ -31,7 +31,6 @@ import com.android.systemui.Flags
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.keyguard.data.repository.KeyguardClockRepository
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.shared.Flags.ambientAod
 import com.android.systemui.user.data.model.SelectedUserModel
@@ -45,6 +44,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -65,6 +65,9 @@ interface WallpaperRepository {
 
     /** Set rootView to get its windowToken afterwards */
     var rootView: View?
+
+    /** when we use magic portrait wallpapers, we should always get its bounds from keyguard */
+    val shouldSendFocalArea: StateFlow<Boolean>
 }
 
 @SysUISingleton
@@ -76,7 +79,6 @@ constructor(
     broadcastDispatcher: BroadcastDispatcher,
     userRepository: UserRepository,
     keyguardRepository: KeyguardRepository,
-    keyguardClockRepository: KeyguardClockRepository,
     private val wallpaperManager: WallpaperManager,
     context: Context,
 ) : WallpaperRepository {
@@ -97,27 +99,7 @@ constructor(
             // Only update the wallpaper status once the user selection has finished.
             .filter { it.selectionStatus == SelectionStatus.SELECTION_COMPLETE }
 
-    /** The bottom of notification stack respect to the top of screen. */
-    private val notificationStackAbsoluteBottom: StateFlow<Float> =
-        keyguardRepository.notificationStackAbsoluteBottom
-
-    /** The top of shortcut respect to the top of screen. */
-    private val shortcutAbsoluteTop: StateFlow<Float> = keyguardRepository.shortcutAbsoluteTop
-
-    /**
-     * The top of notification stack to give a default state of lockscreen remaining space for
-     * states with notifications to compare with. It's the bottom of smartspace date and weather
-     * smartspace in small clock state, plus proper bottom margin.
-     */
-    private val notificationStackDefaultTop = keyguardClockRepository.notificationDefaultTop
     @VisibleForTesting var sendLockscreenLayoutJob: Job? = null
-    private val lockscreenRemainingSpaceWithNotification: Flow<Triple<Float, Float, Float>> =
-        combine(
-            notificationStackAbsoluteBottom,
-            notificationStackDefaultTop,
-            shortcutAbsoluteTop,
-            ::Triple,
-        )
 
     override val wallpaperInfo: StateFlow<WallpaperInfo?> =
         if (!wallpaperManager.isWallpaperSupported) {
@@ -140,15 +122,16 @@ constructor(
 
     override var rootView: View? = null
 
-    val shouldSendNotificationLayout =
+    override val shouldSendFocalArea =
         wallpaperInfo
             .map {
-                val shouldSendNotificationLayout = shouldSendNotificationLayout(it)
+                val shouldSendNotificationLayout =
+                    it?.component?.className == MAGIC_PORTRAIT_CLASSNAME
                 if (shouldSendNotificationLayout) {
                     sendLockscreenLayoutJob =
                         scope.launch {
-                            lockscreenRemainingSpaceWithNotification.collect {
-                                (notificationBottom, notificationDefaultTop, shortcutTop) ->
+                            keyguardRepository.wallpaperFocalAreaBounds.collect {
+                                wallpaperFocalAreaBounds ->
                                 wallpaperManager.sendWallpaperCommand(
                                     /* windowToken = */ rootView?.windowToken,
                                     /* action = */ WallpaperManager
@@ -157,14 +140,22 @@ constructor(
                                     /* y = */ 0,
                                     /* z = */ 0,
                                     /* extras = */ Bundle().apply {
-                                        putFloat("screenLeft", 0F)
-                                        putFloat("smartspaceBottom", notificationDefaultTop)
-                                        putFloat("notificationBottom", notificationBottom)
                                         putFloat(
-                                            "screenRight",
-                                            context.resources.displayMetrics.widthPixels.toFloat(),
+                                            "wallpaperFocalAreaLeft",
+                                            wallpaperFocalAreaBounds.left,
                                         )
-                                        putFloat("shortCutTop", shortcutTop)
+                                        putFloat(
+                                            "wallpaperFocalAreaRight",
+                                            wallpaperFocalAreaBounds.right,
+                                        )
+                                        putFloat(
+                                            "wallpaperFocalAreaTop",
+                                            wallpaperFocalAreaBounds.top,
+                                        )
+                                        putFloat(
+                                            "wallpaperFocalAreaBottom",
+                                            wallpaperFocalAreaBounds.bottom,
+                                        )
                                     },
                                 )
                             }
@@ -176,23 +167,14 @@ constructor(
             }
             .stateIn(
                 scope,
-                // Always be listening for wallpaper changes.
-                if (Flags.magicPortraitWallpapers()) SharingStarted.Eagerly
-                else SharingStarted.Lazily,
-                initialValue = false,
+                // Always be listening for wallpaper changes when magic portrait flag is on
+                if (Flags.magicPortraitWallpapers()) SharingStarted.Eagerly else WhileSubscribed(),
+                initialValue = Flags.magicPortraitWallpapers(),
             )
 
     private suspend fun getWallpaper(selectedUser: SelectedUserModel): WallpaperInfo? {
         return withContext(bgDispatcher) {
             wallpaperManager.getWallpaperInfoForUser(selectedUser.userInfo.id)
-        }
-    }
-
-    private fun shouldSendNotificationLayout(wallpaperInfo: WallpaperInfo?): Boolean {
-        return if (wallpaperInfo != null && wallpaperInfo.component != null) {
-            wallpaperInfo.component!!.className == MAGIC_PORTRAIT_CLASSNAME
-        } else {
-            false
         }
     }
 

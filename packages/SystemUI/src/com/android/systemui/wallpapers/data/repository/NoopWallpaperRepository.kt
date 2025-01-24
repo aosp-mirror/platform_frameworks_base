@@ -36,4 +36,5 @@ class NoopWallpaperRepository @Inject constructor() : WallpaperRepository {
     override val wallpaperInfo: StateFlow<WallpaperInfo?> = MutableStateFlow(null).asStateFlow()
     override val wallpaperSupportsAmbientMode = flowOf(false)
     override var rootView: View? = null
+    override val shouldSendFocalArea: StateFlow<Boolean> = MutableStateFlow(false).asStateFlow()
 }

@@ -27,6 +27,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
+import com.android.systemui.keyguard.domain.interactor.WallpaperFocalAreaInteractor
 import com.android.systemui.keyguard.ui.binder.KeyguardBlueprintViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardRootViewBinder
 import com.android.systemui.keyguard.ui.binder.LightRevealScrimViewBinder
@@ -79,6 +80,7 @@ constructor(
     private val keyguardClockViewModel: KeyguardClockViewModel,
     private val smartspaceViewModel: KeyguardSmartspaceViewModel,
     private val clockInteractor: KeyguardClockInteractor,
+    private val wallpaperFocalAreaInteractor: WallpaperFocalAreaInteractor,
     private val keyguardViewMediator: KeyguardViewMediator,
     private val deviceEntryUnlockTrackerViewBinder: Optional<DeviceEntryUnlockTrackerViewBinder>,
     private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
@@ -139,6 +141,7 @@ constructor(
                 screenOffAnimationController,
                 shadeInteractor,
                 clockInteractor,
+                wallpaperFocalAreaInteractor,
                 keyguardClockViewModel,
                 interactionJankMonitor,
                 deviceEntryHapticsInteractor,
