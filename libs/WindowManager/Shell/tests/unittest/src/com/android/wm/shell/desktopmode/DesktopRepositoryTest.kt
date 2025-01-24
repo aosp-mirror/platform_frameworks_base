@@ -17,6 +17,7 @@
 package com.android.wm.shell.desktopmode
 
 import android.graphics.Rect
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import android.platform.test.flag.junit.SetFlagsRule
@@ -1157,6 +1158,14 @@ class DesktopRepositoryTest(flags: FlagsParameterization) : ShellTestCase() {
         repo.setTaskInPip(DEFAULT_DESKTOP_ID, taskId = 1, enterPip = false)
 
         assertThat(repo.shouldDesktopBeActiveForPip(DEFAULT_DESKTOP_ID)).isFalse()
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun addTask_deskDoesNotExists_createsDesk() {
+        repo.addTask(displayId = 999, taskId = 6, isVisible = true)
+
+        assertThat(repo.getActiveTaskIdsInDesk(999)).contains(6)
     }
 
     class TestListener : DesktopRepository.ActiveTasksListener {
