@@ -114,6 +114,7 @@ import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.shared.annotations.ShellAnimationThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.annotations.ShellSplashscreenThread;
+import com.android.wm.shell.shared.desktopmode.DesktopModeCompatPolicy;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -254,6 +255,12 @@ public abstract class WMShellBaseModule {
                 unfoldAnimationController,
                 recentTasksOptional,
                 mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static DesktopModeCompatPolicy provideDesktopModeCompatPolicy(Context context) {
+        return new DesktopModeCompatPolicy(context);
     }
 
     @WMSingleton

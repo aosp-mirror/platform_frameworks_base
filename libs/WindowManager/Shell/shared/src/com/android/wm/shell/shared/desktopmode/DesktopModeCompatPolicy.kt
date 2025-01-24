@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.compatui
+package com.android.wm.shell.shared.desktopmode
 
-import android.app.ActivityManager.RunningTaskInfo
+import android.app.TaskInfo
 import android.content.Context
+import android.window.DesktopModeFlags
 import com.android.internal.R
-import com.android.wm.shell.dagger.WMSingleton
-import javax.inject.Inject
 
 /**
  * Class to decide whether to apply app compat policies in desktop mode.
  */
 // TODO(b/347289970): Consider replacing with API
-@WMSingleton
-class DesktopModeCompatPolicy @Inject constructor(context: Context) {
+class DesktopModeCompatPolicy(context: Context) {
 
     private val systemUiPackage: String = context.resources.getString(R.string.config_systemUi)
 
@@ -37,16 +35,26 @@ class DesktopModeCompatPolicy @Inject constructor(context: Context) {
      * not being displayed, regardless of its configuration, we will not exempt it as to remain in
      * the desktop windowing environment.
      */
-    fun isTopActivityExemptFromDesktopWindowing(task: RunningTaskInfo) =
-        (isSystemUiTask(task) || isTransparentTask(task)) && !task.isTopActivityNoDisplay
+    fun isTopActivityExemptFromDesktopWindowing(task: TaskInfo) =
+        isTopActivityExemptFromDesktopWindowing(task.baseActivity?.packageName,
+            task.numActivities, task.isTopActivityNoDisplay, task.isActivityStackTransparent)
+
+    fun isTopActivityExemptFromDesktopWindowing(packageName: String?,
+        numActivities: Int, isTopActivityNoDisplay: Boolean, isActivityStackTransparent: Boolean) =
+        DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODALS_POLICY.isTrue
+                && ((isSystemUiTask(packageName)
+                || isTransparentTask(isActivityStackTransparent, numActivities))
+                && !isTopActivityNoDisplay)
 
     /**
      * Returns true if all activities in a tasks stack are transparent. If there are no activities
      * will return false.
      */
-    fun isTransparentTask(task: RunningTaskInfo): Boolean = task.isActivityStackTransparent
-            && task.numActivities > 0
+    fun isTransparentTask(task: TaskInfo): Boolean =
+        isTransparentTask(task.isActivityStackTransparent, task.numActivities)
 
-    private fun isSystemUiTask(task: RunningTaskInfo): Boolean =
-        task.baseActivity?.packageName == systemUiPackage
+    private fun isTransparentTask(isActivityStackTransparent: Boolean, numActivities: Int) =
+        isActivityStackTransparent && numActivities > 0
+
+    private fun isSystemUiTask(packageName: String?) = packageName == systemUiPackage
 }

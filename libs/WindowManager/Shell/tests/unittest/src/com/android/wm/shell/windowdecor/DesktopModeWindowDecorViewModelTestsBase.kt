@@ -55,7 +55,6 @@ import com.android.wm.shell.common.DisplayInsetsController
 import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.SyncTransactionQueue
-import com.android.wm.shell.compatui.DesktopModeCompatPolicy
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler
 import com.android.wm.shell.desktopmode.DesktopImmersiveController
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger
@@ -70,6 +69,7 @@ import com.android.wm.shell.desktopmode.education.AppToWebEducationController
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter
 import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
+import com.android.wm.shell.shared.desktopmode.DesktopModeCompatPolicy
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
