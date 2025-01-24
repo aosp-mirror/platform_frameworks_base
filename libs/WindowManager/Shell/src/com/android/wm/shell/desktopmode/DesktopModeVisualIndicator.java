@@ -76,7 +76,11 @@ public class DesktopModeVisualIndicator {
         /** Indicates impending transition into split select on the left side */
         TO_SPLIT_LEFT_INDICATOR,
         /** Indicates impending transition into split select on the right side */
-        TO_SPLIT_RIGHT_INDICATOR
+        TO_SPLIT_RIGHT_INDICATOR,
+        /** Indicates impending transition into bubble on the left side */
+        TO_BUBBLE_LEFT_INDICATOR,
+        /** Indicates impending transition into bubble on the right side */
+        TO_BUBBLE_RIGHT_INDICATOR
     }
 
     /**
@@ -175,14 +179,23 @@ public class DesktopModeVisualIndicator {
                 captionHeight);
         final Region splitRightRegion = calculateSplitRightRegion(layout, transitionAreaWidth,
                 captionHeight);
-        if (fullscreenRegion.contains((int) inputCoordinates.x, (int) inputCoordinates.y)) {
+        final int x = (int) inputCoordinates.x;
+        final int y = (int) inputCoordinates.y;
+        if (fullscreenRegion.contains(x, y)) {
             result = TO_FULLSCREEN_INDICATOR;
         }
-        if (splitLeftRegion.contains((int) inputCoordinates.x, (int) inputCoordinates.y)) {
+        if (splitLeftRegion.contains(x, y)) {
             result = IndicatorType.TO_SPLIT_LEFT_INDICATOR;
         }
-        if (splitRightRegion.contains((int) inputCoordinates.x, (int) inputCoordinates.y)) {
+        if (splitRightRegion.contains(x, y)) {
             result = IndicatorType.TO_SPLIT_RIGHT_INDICATOR;
+        }
+        if (BubbleAnythingFlagHelper.enableBubbleToFullscreen()) {
+            if (calculateBubbleLeftRegion(layout).contains(x, y)) {
+                result = IndicatorType.TO_BUBBLE_LEFT_INDICATOR;
+            } else if (calculateBubbleRightRegion(layout).contains(x, y)) {
+                result = IndicatorType.TO_BUBBLE_RIGHT_INDICATOR;
+            }
         }
         if (mDragStartState != DragStartState.DRAGGED_INTENT) {
             transitionIndicator(result);
@@ -245,6 +258,25 @@ public class DesktopModeVisualIndicator {
         region.union(new Rect(layout.width() - transitionEdgeWidth, transitionHeight,
                 layout.width(), layout.height()));
         return region;
+    }
+
+    @VisibleForTesting
+    Region calculateBubbleLeftRegion(DisplayLayout layout) {
+        int regionWidth = mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.bubble_transform_area_width);
+        int regionHeight = mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.bubble_transform_area_height);
+        return new Region(0, layout.height() - regionHeight, regionWidth, layout.height());
+    }
+
+    @VisibleForTesting
+    Region calculateBubbleRightRegion(DisplayLayout layout) {
+        int regionWidth = mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.bubble_transform_area_width);
+        int regionHeight = mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.bubble_transform_area_height);
+        return new Region(layout.width() - regionWidth, layout.height() - regionHeight,
+                layout.width(), layout.height());
     }
 
     /**
@@ -481,6 +513,21 @@ public class DesktopModeVisualIndicator {
                     return new Rect(desktopStableBounds.width() / 2 + padding, padding,
                             desktopStableBounds.width() - padding,
                             desktopStableBounds.height());
+                case TO_BUBBLE_LEFT_INDICATOR:
+                    // TODO(b/388851898): define based on bubble size on the device
+                    return new Rect(
+                            padding,
+                            desktopStableBounds.height() / 2 - padding,
+                            desktopStableBounds.width() / 2 - padding,
+                            desktopStableBounds.height());
+                case TO_BUBBLE_RIGHT_INDICATOR:
+                    // TODO(b/388851898): define based on bubble size on the device
+                    return new Rect(
+                            desktopStableBounds.width() / 2 + padding,
+                            desktopStableBounds.height() / 2 - padding,
+                            desktopStableBounds.width() - padding,
+                            desktopStableBounds.height()
+                    );
                 default:
                     throw new IllegalArgumentException("Invalid indicator type provided.");
             }
