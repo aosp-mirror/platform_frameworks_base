@@ -32,14 +32,12 @@ import android.view.KeyEvent.KEYCODE_RECENT_APPS
 import android.view.KeyEvent.KEYCODE_S
 import android.view.KeyEvent.KEYCODE_SLASH
 import android.view.KeyEvent.KEYCODE_TAB
-import android.view.KeyEvent.KEYCODE_V
 import android.view.KeyEvent.META_ALT_ON
 import android.view.KeyEvent.META_CTRL_ON
 import android.view.KeyEvent.META_META_ON
 import android.view.KeyEvent.META_SHIFT_ON
 import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
-import com.android.hardware.input.Flags.enableVoiceAccessKeyGestures
 import com.android.systemui.Flags.shortcutHelperKeyGlyph
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyboard.shortcut.data.model.shortcutInfo
@@ -120,8 +118,8 @@ constructor(@Main private val resources: Resources, private val inputManager: In
         return shortcuts
     }
 
-    private fun systemControlsShortcuts(): List<KeyboardShortcutInfo>  {
-        val shortcuts = mutableListOf(
+    private fun systemControlsShortcuts() =
+        listOf(
             // Access list of all apps and search (i.e. Search/Launcher):
             //  - Meta
             shortcutInfo(resources.getString(R.string.group_system_access_all_apps_search)) {
@@ -177,19 +175,6 @@ constructor(@Main private val resources: Resources, private val inputManager: In
                 command(META_META_ON, KEYCODE_L)
             },
         )
-
-        if (enableVoiceAccessKeyGestures()) {
-            shortcuts.add(
-                // Toggle voice access:
-                //  - Meta + Alt + V
-                shortcutInfo(resources.getString(R.string.group_system_toggle_voice_access)) {
-                    command(META_META_ON or META_ALT_ON, KEYCODE_V)
-                }
-            )
-        }
-
-        return shortcuts
-    }
 
     private fun systemAppsShortcuts() =
         listOf(

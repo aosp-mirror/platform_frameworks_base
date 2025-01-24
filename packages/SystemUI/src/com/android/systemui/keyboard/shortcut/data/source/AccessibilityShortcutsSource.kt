@@ -22,10 +22,12 @@ import android.view.KeyEvent.KEYCODE_3
 import android.view.KeyEvent.KEYCODE_4
 import android.view.KeyEvent.KEYCODE_5
 import android.view.KeyEvent.KEYCODE_6
+import android.view.KeyEvent.KEYCODE_V
 import android.view.KeyEvent.META_ALT_ON
 import android.view.KeyEvent.META_META_ON
 import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
+import com.android.hardware.input.Flags.enableVoiceAccessKeyGestures
 import com.android.hardware.input.Flags.keyboardA11yShortcutControl
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyboard.shortcut.data.model.shortcutInfo
@@ -90,6 +92,18 @@ class AccessibilityShortcutsSource @Inject constructor(@Main private val resourc
                     }
                 )
             }
+        }
+
+        if (enableVoiceAccessKeyGestures()) {
+            shortcuts.add(
+                // Toggle voice access:
+                //  - Meta + Alt + V
+                shortcutInfo(
+                    resources.getString(R.string.group_accessibility_toggle_voice_access)
+                ) {
+                    command(META_META_ON or META_ALT_ON, KEYCODE_V)
+                }
+            )
         }
 
         return shortcuts
