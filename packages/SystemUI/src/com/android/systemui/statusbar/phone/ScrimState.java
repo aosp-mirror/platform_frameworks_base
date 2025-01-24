@@ -24,6 +24,7 @@ import android.graphics.Color;
 import com.android.app.tracing.coroutines.TrackTracer;
 import com.android.systemui.Flags;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.keyguard.ui.transitions.BlurConfig;
 import com.android.systemui.res.R;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.shade.ui.ShadeColors;
@@ -149,7 +150,14 @@ public enum ScrimState {
         @Override
         public void prepare(ScrimState previousState) {
             if (Flags.bouncerUiRevamp()) {
-                mBehindAlpha = 0f;
+                if (previousState == SHADE_LOCKED) {
+                    mBehindAlpha = previousState.getBehindAlpha();
+                    mNotifAlpha = previousState.getNotifAlpha();
+                    mNotifBlurRadius = mBlurConfig.getMaxBlurRadiusPx();
+                } else {
+                    mNotifAlpha = 0f;
+                    mBehindAlpha = 0f;
+                }
                 mFrontAlpha = TRANSPARENT_BOUNCER_SCRIM_ALPHA;
                 mFrontTint = mSurfaceColor;
                 return;
@@ -395,6 +403,7 @@ public enum ScrimState {
     DozeParameters mDozeParameters;
     DockManager mDockManager;
     boolean mDisplayRequiresBlanking;
+    protected BlurConfig mBlurConfig;
     boolean mLaunchingAffordanceWithPreview;
     boolean mOccludeAnimationPlaying;
     boolean mWakeLockScreenSensorActive;
@@ -403,8 +412,12 @@ public enum ScrimState {
     boolean mClipQsScrim;
     int mBackgroundColor;
 
+    // This is needed to blur the scrim behind the scrimmed bouncer to avoid showing
+    // the notification section border
+    protected float mNotifBlurRadius = 0.0f;
+
     public void init(ScrimView scrimInFront, ScrimView scrimBehind, DozeParameters dozeParameters,
-            DockManager dockManager) {
+            DockManager dockManager, BlurConfig blurConfig) {
         mBackgroundColor = scrimBehind.getContext().getColor(R.color.shade_scrim_background_dark);
         mScrimInFront = scrimInFront;
         mScrimBehind = scrimBehind;
@@ -412,6 +425,7 @@ public enum ScrimState {
         mDozeParameters = dozeParameters;
         mDockManager = dockManager;
         mDisplayRequiresBlanking = dozeParameters.getDisplayNeedsBlanking();
+        mBlurConfig = blurConfig;
     }
 
     /** Prepare state for transition. */
@@ -517,5 +531,9 @@ public enum ScrimState {
 
     public void setClipQsScrim(boolean clipsQsScrim) {
         mClipQsScrim = clipsQsScrim;
+    }
+
+    public float getNotifBlurRadius() {
+        return mNotifBlurRadius;
     }
 }

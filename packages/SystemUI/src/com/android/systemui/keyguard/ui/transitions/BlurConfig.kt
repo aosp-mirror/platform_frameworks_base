@@ -23,10 +23,4 @@ data class BlurConfig(val minBlurRadiusPx: Float, val maxBlurRadiusPx: Float) {
     // No-op config that will be used by dagger of other SysUI variants which don't blur the
     // background surface.
     @Inject constructor() : this(0.0f, 0.0f)
-
-    companion object {
-        // Blur the shade much lesser than the background surface so that the surface is
-        // distinguishable from the background.
-        @JvmStatic fun Float.maxBlurRadiusToNotificationPanelBlurRadius(): Float = this / 3.0f
-    }
 }

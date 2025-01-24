@@ -66,6 +66,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.ScrimAlpha;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
+import com.android.systemui.keyguard.ui.transitions.BlurConfig;
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.res.R;
@@ -258,6 +259,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private int mScrimsVisibility;
     private final TriConsumer<ScrimState, Float, GradientColors> mScrimStateListener;
     private final LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
+    private final BlurConfig mBlurConfig;
     private Consumer<Integer> mScrimVisibleListener;
     private boolean mBlankScreen;
     private boolean mScreenBlankingCallbackCalled;
@@ -339,9 +341,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             KeyguardInteractor keyguardInteractor,
             @Main CoroutineDispatcher mainDispatcher,
-            LargeScreenShadeInterpolator largeScreenShadeInterpolator) {
+            LargeScreenShadeInterpolator largeScreenShadeInterpolator,
+            BlurConfig blurConfig) {
         mScrimStateListener = lightBarController::setScrimState;
         mLargeScreenShadeInterpolator = largeScreenShadeInterpolator;
+        mBlurConfig = blurConfig;
         // All scrims default alpha need to match bouncer background alpha to make sure the
         // transitions involving the bouncer are smooth and don't overshoot the bouncer alpha.
         mDefaultScrimAlpha =
@@ -406,7 +410,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
         final ScrimState[] states = ScrimState.values();
         for (int i = 0; i < states.length; i++) {
-            states[i].init(mScrimInFront, mScrimBehind, mDozeParameters, mDockManager);
+            states[i].init(mScrimInFront, mScrimBehind, mDozeParameters, mDockManager, mBlurConfig);
             states[i].setScrimBehindAlphaKeyguard(mScrimBehindAlphaKeyguard);
             states[i].setDefaultScrimAlpha(mDefaultScrimAlpha);
         }
@@ -868,7 +872,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
      * bounds instead.
      */
     public void setClipsQsScrim(boolean clipScrim) {
-        if (Flags.notificationShadeBlur()) {
+        if (Flags.notificationShadeBlur() || Flags.bouncerUiRevamp()) {
             // Never clip scrims when blur is enabled, colors of UI elements are supposed to "add"
             // up across the scrims.
             mClipsQsScrim = false;
@@ -1209,6 +1213,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             mNotificationsScrim.setColors(mColors, animateScrimNotifications);
 
             dispatchBackScrimState(mScrimBehind.getViewAlpha());
+        }
+        if (Flags.bouncerUiRevamp()) {
+            // Blur the notification scrim as needed. The blur is needed only when we show the
+            // expanded shade behind the bouncer. Without it, the notification scrim outline is
+            // visible behind the bouncer.
+            mNotificationsScrim.setBlurRadius(mState.getNotifBlurRadius());
         }
 
         // We also want to hide FLAG_SHOW_WHEN_LOCKED activities under the scrim.

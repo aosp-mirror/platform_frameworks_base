@@ -24,7 +24,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.BlurConfig
-import com.android.systemui.keyguard.ui.transitions.BlurConfig.Companion.maxBlurRadiusToNotificationPanelBlurRadius
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -88,9 +87,7 @@ constructor(
             shadeDependentFlows.transitionFlow(
                 flowWhenShadeIsNotExpanded = emptyFlow(),
                 flowWhenShadeIsExpanded =
-                    transitionAnimation.immediatelyTransitionTo(
-                        blurConfig.maxBlurRadiusPx.maxBlurRadiusToNotificationPanelBlurRadius()
-                    ),
+                    transitionAnimation.immediatelyTransitionTo(blurConfig.maxBlurRadiusPx),
             )
         } else {
             emptyFlow()
