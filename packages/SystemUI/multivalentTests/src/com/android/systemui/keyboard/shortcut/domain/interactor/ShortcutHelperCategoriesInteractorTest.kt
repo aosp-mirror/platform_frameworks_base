@@ -38,6 +38,7 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.InputMethodEditor
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MultiTasking
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.System
+import com.android.systemui.keyboard.shortcut.shortcutHelperAccessibilityShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperAppCategoriesShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperCategoriesInteractor
 import com.android.systemui.keyboard.shortcut.shortcutHelperCurrentAppShortcutsSource
@@ -76,6 +77,7 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
             it.shortcutHelperMultiTaskingShortcutsSource = multitaskingShortcutsSource
             it.shortcutHelperAppCategoriesShortcutsSource = FakeKeyboardShortcutGroupsSource()
             it.shortcutHelperCurrentAppShortcutsSource = FakeKeyboardShortcutGroupsSource()
+            it.shortcutHelperAccessibilityShortcutsSource = FakeKeyboardShortcutGroupsSource()
             it.userTracker = FakeUserTracker(onCreateCurrentUserContext = { mockUserContext })
         }
 

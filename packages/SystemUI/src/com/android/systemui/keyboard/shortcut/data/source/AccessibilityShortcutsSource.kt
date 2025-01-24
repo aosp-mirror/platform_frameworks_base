@@ -17,9 +17,18 @@
 package com.android.systemui.keyboard.shortcut.data.source
 
 import android.content.res.Resources
+import android.hardware.input.InputSettings
+import android.view.KeyEvent.KEYCODE_3
+import android.view.KeyEvent.KEYCODE_4
+import android.view.KeyEvent.KEYCODE_5
+import android.view.KeyEvent.KEYCODE_6
+import android.view.KeyEvent.META_ALT_ON
+import android.view.KeyEvent.META_META_ON
 import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
+import com.android.hardware.input.Flags.keyboardA11yShortcutControl
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyboard.shortcut.data.model.shortcutInfo
 import com.android.systemui.res.R
 import javax.inject.Inject
 
@@ -33,5 +42,56 @@ class AccessibilityShortcutsSource @Inject constructor(@Main private val resourc
             )
         )
 
-    private fun accessibilityShortcuts() = listOf<KeyboardShortcutInfo>()
+    private fun accessibilityShortcuts(): List<KeyboardShortcutInfo> {
+        val shortcuts = mutableListOf<KeyboardShortcutInfo>()
+
+        if (keyboardA11yShortcutControl()) {
+            if (InputSettings.isAccessibilityBounceKeysFeatureEnabled()) {
+                shortcuts.add(
+                    // Toggle bounce keys:
+                    //  - Meta + Alt + 3
+                    shortcutInfo(
+                        resources.getString(R.string.group_accessibility_toggle_bounce_keys)
+                    ) {
+                        command(META_META_ON or META_ALT_ON, KEYCODE_3)
+                    }
+                )
+            }
+            if (InputSettings.isAccessibilityMouseKeysFeatureFlagEnabled()) {
+                shortcuts.add(
+                    // Toggle mouse keys:
+                    //  - Meta + Alt + 4
+                    shortcutInfo(
+                        resources.getString(R.string.group_accessibility_toggle_mouse_keys)
+                    ) {
+                        command(META_META_ON or META_ALT_ON, KEYCODE_4)
+                    }
+                )
+            }
+            if (InputSettings.isAccessibilityStickyKeysFeatureEnabled()) {
+                shortcuts.add(
+                    // Toggle sticky keys:
+                    //  - Meta + Alt + 5
+                    shortcutInfo(
+                        resources.getString(R.string.group_accessibility_toggle_sticky_keys)
+                    ) {
+                        command(META_META_ON or META_ALT_ON, KEYCODE_5)
+                    }
+                )
+            }
+            if (InputSettings.isAccessibilitySlowKeysFeatureFlagEnabled()) {
+                shortcuts.add(
+                    // Toggle slow keys:
+                    //  - Meta + Alt + 6
+                    shortcutInfo(
+                        resources.getString(R.string.group_accessibility_toggle_slow_keys)
+                    ) {
+                        command(META_META_ON or META_ALT_ON, KEYCODE_6)
+                    }
+                )
+            }
+        }
+
+        return shortcuts
+    }
 }

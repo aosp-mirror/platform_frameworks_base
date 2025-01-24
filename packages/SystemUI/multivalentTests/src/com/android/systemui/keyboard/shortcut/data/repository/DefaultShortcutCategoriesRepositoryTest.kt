@@ -50,6 +50,7 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
+import com.android.systemui.keyboard.shortcut.shortcutHelperAccessibilityShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperAppCategoriesShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperCurrentAppShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperInputShortcutsSource
@@ -88,6 +89,7 @@ class DefaultShortcutCategoriesRepositoryTest : SysuiTestCase() {
             it.shortcutHelperAppCategoriesShortcutsSource = fakeAppCategoriesSource
             it.shortcutHelperInputShortcutsSource = FakeKeyboardShortcutGroupsSource()
             it.shortcutHelperCurrentAppShortcutsSource = FakeKeyboardShortcutGroupsSource()
+            it.shortcutHelperAccessibilityShortcutsSource = FakeKeyboardShortcutGroupsSource()
         }
 
     private val repo = kosmos.defaultShortcutCategoriesRepository
@@ -284,14 +286,20 @@ class DefaultShortcutCategoriesRepositoryTest : SysuiTestCase() {
             val categories by collectLastValue(repo.categories)
 
             val cycleForwardThroughRecentAppsShortcut =
-                categories?.first { it.type == ShortcutCategoryType.MultiTasking }
-                    ?.subCategories?.first { it.label == recentAppsGroup.label }
-                    ?.shortcuts?.first { it.label == CYCLE_FORWARD_THROUGH_RECENT_APPS_SHORTCUT_LABEL }
+                categories
+                    ?.first { it.type == ShortcutCategoryType.MultiTasking }
+                    ?.subCategories
+                    ?.first { it.label == recentAppsGroup.label }
+                    ?.shortcuts
+                    ?.first { it.label == CYCLE_FORWARD_THROUGH_RECENT_APPS_SHORTCUT_LABEL }
 
             val cycleBackThroughRecentAppsShortcut =
-                categories?.first { it.type == ShortcutCategoryType.MultiTasking }
-                    ?.subCategories?.first { it.label == recentAppsGroup.label }
-                    ?.shortcuts?.first { it.label == CYCLE_BACK_THROUGH_RECENT_APPS_SHORTCUT_LABEL }
+                categories
+                    ?.first { it.type == ShortcutCategoryType.MultiTasking }
+                    ?.subCategories
+                    ?.first { it.label == recentAppsGroup.label }
+                    ?.shortcuts
+                    ?.first { it.label == CYCLE_BACK_THROUGH_RECENT_APPS_SHORTCUT_LABEL }
 
             assertThat(cycleForwardThroughRecentAppsShortcut?.isCustomizable).isFalse()
             assertThat(cycleBackThroughRecentAppsShortcut?.isCustomizable).isFalse()

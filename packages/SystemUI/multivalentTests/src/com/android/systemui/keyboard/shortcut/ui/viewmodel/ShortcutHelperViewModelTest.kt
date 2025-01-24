@@ -45,6 +45,7 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.System
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import com.android.systemui.keyboard.shortcut.shared.model.shortcut
+import com.android.systemui.keyboard.shortcut.shortcutHelperAccessibilityShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperAppCategoriesShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperCurrentAppShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperInputShortcutsSource
@@ -95,6 +96,7 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
             it.shortcutHelperMultiTaskingShortcutsSource = fakeMultiTaskingSource
             it.shortcutHelperAppCategoriesShortcutsSource = FakeKeyboardShortcutGroupsSource()
             it.shortcutHelperInputShortcutsSource = FakeKeyboardShortcutGroupsSource()
+            it.shortcutHelperAccessibilityShortcutsSource = FakeKeyboardShortcutGroupsSource()
             it.shortcutHelperCurrentAppShortcutsSource = fakeCurrentAppsSource
             it.userTracker = FakeUserTracker(onCreateCurrentUserContext = { mockUserContext })
         }
@@ -112,9 +114,12 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
         fakeSystemSource.setGroups(TestShortcuts.systemGroups)
         fakeMultiTaskingSource.setGroups(TestShortcuts.multitaskingGroups)
         fakeCurrentAppsSource.setGroups(TestShortcuts.currentAppGroups)
-        whenever(mockPackageManager.getApplicationInfo(anyString(), eq(0))).thenReturn(mockApplicationInfo)
-        whenever(mockPackageManager.getApplicationLabel(mockApplicationInfo)).thenReturn("Current App")
-        whenever(mockPackageManager.getApplicationIcon(anyString())).thenThrow(NameNotFoundException())
+        whenever(mockPackageManager.getApplicationInfo(anyString(), eq(0)))
+            .thenReturn(mockApplicationInfo)
+        whenever(mockPackageManager.getApplicationLabel(mockApplicationInfo))
+            .thenReturn("Current App")
+        whenever(mockPackageManager.getApplicationIcon(anyString()))
+            .thenThrow(NameNotFoundException())
         whenever(mockUserContext.packageManager).thenReturn(mockPackageManager)
         whenever(mockUserContext.getSystemService(INPUT_SERVICE)).thenReturn(inputManager)
     }
@@ -278,11 +283,11 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
     fun shortcutsUiState_currentAppIsLauncher_defaultSelectedCategoryIsSystem() =
         testScope.runTest {
             whenever(
-                mockRoleManager.getRoleHoldersAsUser(
-                    RoleManager.ROLE_HOME,
-                    fakeUserTracker.userHandle,
+                    mockRoleManager.getRoleHoldersAsUser(
+                        RoleManager.ROLE_HOME,
+                        fakeUserTracker.userHandle,
+                    )
                 )
-            )
                 .thenReturn(listOf(TestShortcuts.currentAppPackageName))
             val uiState by collectLastValue(viewModel.shortcutsUiState)
 
@@ -318,23 +323,23 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
                         label = "System",
                         iconSource = IconSource(imageVector = Icons.Default.Tv),
                         shortcutCategory =
-                        ShortcutCategory(
-                            System,
-                            subCategoryWithShortcutLabels("first Foo shortcut1"),
-                            subCategoryWithShortcutLabels(
-                                "second foO shortcut2",
-                                subCategoryLabel = SECOND_SIMPLE_GROUP_LABEL,
+                            ShortcutCategory(
+                                System,
+                                subCategoryWithShortcutLabels("first Foo shortcut1"),
+                                subCategoryWithShortcutLabels(
+                                    "second foO shortcut2",
+                                    subCategoryLabel = SECOND_SIMPLE_GROUP_LABEL,
+                                ),
                             ),
-                        ),
                     ),
                     ShortcutCategoryUi(
                         label = "Multitasking",
                         iconSource = IconSource(imageVector = Icons.Default.VerticalSplit),
                         shortcutCategory =
-                        ShortcutCategory(
-                            MultiTasking,
-                            subCategoryWithShortcutLabels("third FoO shortcut1"),
-                        ),
+                            ShortcutCategory(
+                                MultiTasking,
+                                subCategoryWithShortcutLabels("third FoO shortcut1"),
+                            ),
                     ),
                 )
         }
@@ -420,9 +425,8 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
     @Test
     fun shortcutsUiState_shouldShowResetButton_isTrueWhenThereAreCustomShortcuts() =
         testScope.runTest {
-            whenever(
-                inputManager.getCustomInputGestures(/* filter= */ InputGestureData.Filter.KEY)
-            ).thenReturn(listOf(allAppsInputGestureData))
+            whenever(inputManager.getCustomInputGestures(/* filter= */ InputGestureData.Filter.KEY))
+                .thenReturn(listOf(allAppsInputGestureData))
             val uiState by collectLastValue(viewModel.shortcutsUiState)
 
             testHelper.showFromActivity()
@@ -433,7 +437,7 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
 
     @Test
     fun shortcutsUiState_searchQuery_isResetAfterHelperIsClosedAndReOpened() =
-        testScope.runTest{
+        testScope.runTest {
             val uiState by collectLastValue(viewModel.shortcutsUiState)
 
             openHelperAndSearchForFooString()
@@ -443,7 +447,7 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
             assertThat((uiState as? ShortcutsUiState.Active)?.searchQuery).isEqualTo("")
         }
 
-    private fun openHelperAndSearchForFooString(){
+    private fun openHelperAndSearchForFooString() {
         testHelper.showFromActivity()
         viewModel.onSearchQueryChanged("foo")
     }

@@ -2377,6 +2377,15 @@
     <!-- User visible title for the keyboard shortcut that takes the user to the maps app. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications_maps">Maps</string>
 
+    <!-- User visible title for the keyboard shortcut that toggles bounce keys. [CHAR LIMIT=70]-->
+    <string name="group_accessibility_toggle_bounce_keys">Toggle bounce keys</string>
+    <!-- User visible title for the keyboard shortcut that toggles mouse keys. [CHAR LIMIT=70]-->
+    <string name="group_accessibility_toggle_mouse_keys">Toggle mouse keys</string>
+    <!-- User visible title for the keyboard shortcut that toggles sticky keys. [CHAR LIMIT=70]-->
+    <string name="group_accessibility_toggle_sticky_keys">Toggle sticky keys</string>
+    <!-- User visible title for the keyboard shortcut that toggles slow keys. [CHAR LIMIT=70]-->
+    <string name="group_accessibility_toggle_slow_keys">Toggle slow keys</string>
+
     <!-- SysUI Tuner: Label for screen about do not disturb settings [CHAR LIMIT=60] -->
     <string name="volume_and_do_not_disturb">Do Not Disturb</string>
 
