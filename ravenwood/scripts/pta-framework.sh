@@ -79,6 +79,7 @@ run_pta() {
         $extra_args
 
     if ! [[ -f $OUT_SCRIPT ]] ; then
+        echo "No files need updating."
         # no operations generated.
         exit 0
     fi
