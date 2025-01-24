@@ -107,7 +107,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Parameters(name = "{0}")
     public static List<FlagsParameterization> getParams() {
         return SceneContainerFlagParameterizationKt
-                .andSceneContainer(allCombinationsOf(Flags.FLAG_STABILIZE_HEADS_UP_GROUP));
+                .andSceneContainer(allCombinationsOf(Flags.FLAG_STABILIZE_HEADS_UP_GROUP_V2));
     }
 
     private VisualStabilityCoordinator mCoordinator;

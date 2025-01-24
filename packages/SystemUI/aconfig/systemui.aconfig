@@ -1942,16 +1942,6 @@ flag {
 }
 
 flag {
-    name: "stabilize_heads_up_group"
-    namespace: "systemui"
-    description: "Stabilize heads up groups in VisualStabilityCoordinator"
-    bug: "381864715"
-    metadata {
-      purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
    name: "magnetic_notification_horizontal_swipe"
    namespace: "systemui"
    description: "Add support for magnetic behavior on horizontal notification swipes."
