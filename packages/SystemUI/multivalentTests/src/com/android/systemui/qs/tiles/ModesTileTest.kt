@@ -49,6 +49,7 @@ import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
 import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 import com.android.systemui.statusbar.policy.ui.dialog.ModesDialogDelegate
 import com.android.systemui.statusbar.policy.ui.dialog.modesDialogEventLogger
+import com.android.systemui.statusbar.policy.ui.dialog.viewmodel.modesDialogViewModel
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.settings.FakeSettings
@@ -146,6 +147,7 @@ class ModesTileTest : SysuiTestCase() {
                 tileDataInteractor,
                 mapper,
                 userActionInteractor,
+                kosmos.modesDialogViewModel,
             )
 
         underTest.initialize()
