@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.accessibility;
+package com.android.server.accessibility.autoclick;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
@@ -38,6 +38,8 @@ import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
+
+import com.android.server.accessibility.AccessibilityTraceManager;
 
 import org.junit.After;
 import org.junit.Before;
