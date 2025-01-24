@@ -310,3 +310,17 @@ flag {
   description: "removes sbnholder from NLS"
   bug: "362981561"
 }
+
+flag {
+  name: "nm_summarization"
+  namespace: "systemui"
+  description: "Allows the NAS to summarize notifications"
+  bug: "390417189"
+}
+
+flag {
+  name: "nm_summarization_ui"
+  namespace: "systemui"
+  description: "Shows summarized notifications in the UI"
+  bug: "390217880"
+}

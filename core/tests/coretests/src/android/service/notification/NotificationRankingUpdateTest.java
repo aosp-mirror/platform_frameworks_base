@@ -124,7 +124,8 @@ public class NotificationRankingUpdateTest {
                     getRankingAdjustment(i),
                     isBubble(i),
                     getProposedImportance(i),
-                    hasSensitiveContent(i)
+                    hasSensitiveContent(i),
+                    getSummarization(i)
             );
             rankings[i] = ranking;
         }
@@ -334,6 +335,17 @@ public class NotificationRankingUpdateTest {
     }
 
     /**
+     * Produces a String that can be used to represent getSummarization, based on the provided
+     * index.
+     */
+    public static String getSummarization(int index) {
+        if ((android.app.Flags.nmSummarizationUi() || android.app.Flags.nmSummarization())) {
+            return "summary " + index;
+        }
+        return null;
+    }
+
+    /**
      * Produces a boolean that can be used to represent isBubble, based on the provided index.
      */
     public static boolean isBubble(int index) {
@@ -461,7 +473,8 @@ public class NotificationRankingUpdateTest {
                 /* rankingAdjustment= */ 0,
                 /* isBubble= */ false,
                 /* proposedImportance= */ 0,
-                /* sensitiveContent= */ false
+                /* sensitiveContent= */ false,
+                /* summarization = */ null
         );
         return ranking;
     }
@@ -550,7 +563,8 @@ public class NotificationRankingUpdateTest {
                 tweak.getRankingAdjustment(),
                 tweak.isBubble(),
                 tweak.getProposedImportance(),
-                tweak.hasSensitiveContent()
+                tweak.hasSensitiveContent(),
+                tweak.getSummarization()
         );
         assertNotEquals(nru, nru2);
     }

@@ -13446,6 +13446,7 @@ package android.service.notification {
     field public static final String KEY_RANKING_SCORE = "key_ranking_score";
     field public static final String KEY_SENSITIVE_CONTENT = "key_sensitive_content";
     field public static final String KEY_SNOOZE_CRITERIA = "key_snooze_criteria";
+    field @FlaggedApi("android.app.nm_summarization") public static final String KEY_SUMMARIZATION = "key_summarization";
     field public static final String KEY_TEXT_REPLIES = "key_text_replies";
     field @FlaggedApi("android.service.notification.notification_classification") public static final String KEY_TYPE = "key_type";
     field public static final String KEY_USER_SENTIMENT = "key_user_sentiment";

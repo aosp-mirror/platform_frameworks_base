@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.Notification;
 import android.os.Build;
 import android.os.Bundle;
@@ -221,6 +222,14 @@ public final class Adjustment implements Parcelable {
      */
     @FlaggedApi(Flags.FLAG_NOTIFICATION_CLASSIFICATION)
     public static final int TYPE_CONTENT_RECOMMENDATION = 4;
+
+    /**
+     * Data type: String, the classification type of this notification. The OS may display
+     * notifications differently depending on the type, and may change the alerting level of the
+     * notification.
+     */
+    @FlaggedApi(android.app.Flags.FLAG_NM_SUMMARIZATION)
+    public static final String KEY_SUMMARIZATION = "key_summarization";
 
     /**
      * Create a notification adjustment.

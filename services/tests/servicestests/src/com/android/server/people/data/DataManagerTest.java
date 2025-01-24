@@ -1762,7 +1762,8 @@ public final class DataManagerTest {
                     /* rankingAdjustment= */ 0,
                     /* isBubble= */ false,
                     /* proposedImportance= */ 0,
-                    /* sensitiveContent= */ false
+                    /* sensitiveContent= */ false,
+                    /* summarization = */ null
             );
             return true;
         }).when(mRankingMap).getRanking(eq(key),
@@ -1806,7 +1807,8 @@ public final class DataManagerTest {
                     /* rankingAdjustment= */ 0,
                     /* isBubble= */ false,
                     /* proposedImportance= */ 0,
-                    /* sensitiveContent= */ false
+                    /* sensitiveContent= */ false,
+                    /* summarization = */ null
             );
             return true;
         }).when(mRankingMap).getRanking(eq(CUSTOM_KEY),
