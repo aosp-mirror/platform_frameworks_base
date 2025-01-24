@@ -909,6 +909,14 @@ package android.companion {
     method @NonNull public android.companion.AssociationInfo.Builder setTimeApproved(long);
   }
 
+  public final class AssociationRequest implements android.os.Parcelable {
+    method public boolean isSkipRoleGrant();
+  }
+
+  public static final class AssociationRequest.Builder {
+    method @NonNull @RequiresPermission(android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES) public android.companion.AssociationRequest.Builder setSkipRoleGrant(boolean);
+  }
+
   public final class CompanionDeviceManager {
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public void enableSecureTransport(boolean);
   }

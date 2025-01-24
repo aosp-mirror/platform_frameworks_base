@@ -282,8 +282,8 @@ public class AssociationRequestsProcessor {
         Binder.withCleanCallingIdentity(() -> {
             createAssociation(userId, packageName, macAddress, request.getDisplayName(),
                     request.getDeviceProfile(), request.getAssociatedDevice(),
-                    request.isSelfManaged(),
-                    callback, resultReceiver, request.getDeviceIcon());
+                    request.isSelfManaged(), callback, resultReceiver, request.getDeviceIcon(),
+                    /* skipRoleGrant= */ false);
         });
     }
 
@@ -294,7 +294,8 @@ public class AssociationRequestsProcessor {
             @Nullable MacAddress macAddress, @Nullable CharSequence displayName,
             @Nullable String deviceProfile, @Nullable AssociatedDevice associatedDevice,
             boolean selfManaged, @Nullable IAssociationRequestCallback callback,
-            @Nullable ResultReceiver resultReceiver, @Nullable Icon deviceIcon) {
+            @Nullable ResultReceiver resultReceiver, @Nullable Icon deviceIcon,
+            boolean skipRoleGrant) {
         final int id = mAssociationStore.getNextId();
         final long timestamp = System.currentTimeMillis();
 
@@ -303,8 +304,17 @@ public class AssociationRequestsProcessor {
                 selfManaged, /* notifyOnDeviceNearby */ false, /* revoked */ false,
                 /* pending */ false, timestamp, Long.MAX_VALUE, /* systemDataSyncFlags */ 0,
                 deviceIcon, /* deviceId */ null);
-        // Add role holder for association (if specified) and add new association to store.
-        maybeGrantRoleAndStoreAssociation(association, callback, resultReceiver);
+
+        if (skipRoleGrant) {
+            Slog.i(TAG, "Created association for " + association.getDeviceProfile() + " and userId="
+                    + association.getUserId() + ", packageName="
+                    + association.getPackageName() + " without granting role");
+            mAssociationStore.addAssociation(association);
+            sendCallbackAndFinish(association, callback, resultReceiver);
+        } else {
+            // Add role holder for association (if specified) and add new association to store.
+            maybeGrantRoleAndStoreAssociation(association, callback, resultReceiver);
+        }
     }
 
     /**
