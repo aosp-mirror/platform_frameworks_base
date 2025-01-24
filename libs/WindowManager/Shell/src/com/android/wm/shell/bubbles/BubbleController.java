@@ -40,9 +40,11 @@ import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.PendingIntent;
+import android.app.TaskInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -78,6 +80,8 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.window.ScreenCapture;
 import android.window.ScreenCapture.SynchronousScreenCaptureListener;
+import android.window.WindowContainerToken;
+import android.window.WindowContainerTransaction;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
@@ -360,7 +364,7 @@ public class BubbleController implements ConfigurationChangeListener,
         } else {
             tvTransitions = taskViewTransitions;
         }
-        mTaskViewController = tvTransitions;
+        mTaskViewController = new BubbleTaskViewController(tvTransitions);
         mBubbleTransitions = new BubbleTransitions(transitions, organizer, taskViewRepository, data,
                 tvTransitions, context);
         mTransitions = transitions;
@@ -2076,7 +2080,12 @@ public class BubbleController implements ConfigurationChangeListener,
         @Override
         public void removeBubble(Bubble removedBubble) {
             if (mLayerView != null) {
+                final BubbleTransitions.BubbleTransition bubbleTransit =
+                        removedBubble.getPreparingTransition();
                 mLayerView.removeBubble(removedBubble, () -> {
+                    if (bubbleTransit != null) {
+                        bubbleTransit.continueCollapse();
+                    }
                     if (!mBubbleData.hasBubbles() && !isStackExpanded()) {
                         mLayerView.setVisibility(INVISIBLE);
                         removeFromWindowManagerMaybe();
@@ -2702,7 +2711,18 @@ public class BubbleController implements ConfigurationChangeListener,
 
         @Override
         public void collapseBubbles() {
-            mMainExecutor.execute(() -> mController.collapseStack());
+            mMainExecutor.execute(() -> {
+                if (mBubbleData.getSelectedBubble() instanceof Bubble) {
+                    if (((Bubble) mBubbleData.getSelectedBubble()).getPreparingTransition()
+                            != null) {
+                        // Currently preparing a transition which will, itself, collapse the bubble.
+                        // For transition preparation, the timing of bubble-collapse must be in
+                        // sync with the rest of the set-up.
+                        return;
+                    }
+                }
+                mController.collapseStack();
+            });
         }
 
         @Override
@@ -3092,6 +3112,86 @@ public class BubbleController implements ConfigurationChangeListener,
          */
         boolean isShownInShade(String key) {
             return mKeyToShownInShadeMap.get(key);
+        }
+    }
+
+    private class BubbleTaskViewController implements TaskViewController {
+        private final TaskViewTransitions mBaseTransitions;
+
+        BubbleTaskViewController(TaskViewTransitions baseTransitions) {
+            mBaseTransitions = baseTransitions;
+        }
+
+        @Override
+        public void registerTaskView(TaskViewTaskController tv) {
+            mBaseTransitions.registerTaskView(tv);
+        }
+
+        @Override
+        public void unregisterTaskView(TaskViewTaskController tv) {
+            mBaseTransitions.unregisterTaskView(tv);
+        }
+
+        @Override
+        public void startShortcutActivity(@NonNull TaskViewTaskController destination,
+                @NonNull ShortcutInfo shortcut, @NonNull ActivityOptions options,
+                @Nullable Rect launchBounds) {
+            mBaseTransitions.startShortcutActivity(destination, shortcut, options, launchBounds);
+        }
+
+        @Override
+        public void startActivity(@NonNull TaskViewTaskController destination,
+                @NonNull PendingIntent pendingIntent, @Nullable Intent fillInIntent,
+                @NonNull ActivityOptions options, @Nullable Rect launchBounds) {
+            mBaseTransitions.startActivity(destination, pendingIntent, fillInIntent,
+                    options, launchBounds);
+        }
+
+        @Override
+        public void startRootTask(@NonNull TaskViewTaskController destination,
+                ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash,
+                @Nullable WindowContainerTransaction wct) {
+            mBaseTransitions.startRootTask(destination, taskInfo, leash, wct);
+        }
+
+        @Override
+        public void removeTaskView(@NonNull TaskViewTaskController taskView,
+                @Nullable WindowContainerToken taskToken) {
+            mBaseTransitions.removeTaskView(taskView, taskToken);
+        }
+
+        @Override
+        public void moveTaskViewToFullscreen(@NonNull TaskViewTaskController taskView) {
+            final TaskInfo tinfo = taskView.getTaskInfo();
+            if (tinfo == null) {
+                return;
+            }
+            Bubble bub = null;
+            for (Bubble b : mBubbleData.getBubbles()) {
+                if (b.getTaskId() == tinfo.taskId) {
+                    bub = b;
+                    break;
+                }
+            }
+            if (bub == null) {
+                return;
+            }
+            mBubbleTransitions.startConvertFromBubble(bub, tinfo);
+        }
+
+        @Override
+        public void setTaskViewVisible(TaskViewTaskController taskView, boolean visible) {
+            mBaseTransitions.setTaskViewVisible(taskView, visible);
+        }
+
+        @Override
+        public void setTaskBounds(TaskViewTaskController taskView, Rect boundsOnScreen) {
+            mBaseTransitions.setTaskBounds(taskView, boundsOnScreen);
+        }
+
+        @Override
+        public boolean isUsingShellTransitions() {
+            return mBaseTransitions.isUsingShellTransitions();
         }
     }
 }

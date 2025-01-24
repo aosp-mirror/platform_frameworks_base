@@ -18,6 +18,8 @@ package com.android.wm.shell.bubbles;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.View.INVISIBLE;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 
 import android.annotation.NonNull;
@@ -30,8 +32,10 @@ import android.os.IBinder;
 import android.util.Slog;
 import android.view.SurfaceControl;
 import android.view.SurfaceView;
+import android.view.View;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -52,6 +56,12 @@ import java.util.concurrent.Executor;
  */
 public class BubbleTransitions {
     private static final String TAG = "BubbleTransitions";
+
+    /**
+     * Multiplier used to convert a view elevation to an "equivalent" shadow-radius. This is the
+     * same multiple used by skia and surface-outsets in WMS.
+     */
+    private static final float ELEVATION_TO_RADIUS = 2;
 
     @NonNull final Transitions mTransitions;
     @NonNull final ShellTaskOrganizer mTaskOrganizer;
@@ -90,6 +100,44 @@ public class BubbleTransitions {
     }
 
     /**
+     * Starts a convert-from-bubble transition.
+     *
+     * @see ConvertFromBubble
+     */
+    public BubbleTransition startConvertFromBubble(Bubble bubble,
+            TaskInfo taskInfo) {
+        ConvertFromBubble convert = new ConvertFromBubble(bubble, taskInfo);
+        return convert;
+    }
+
+    /**
+     * Plucks the task-surface out of an ancestor view while making the view invisible. This helper
+     * attempts to do this seamlessly (ie. view becomes invisible in sync with task reparent).
+     */
+    private void pluck(SurfaceControl taskLeash, View fromView, SurfaceControl dest,
+            float destX, float destY, float cornerRadius, SurfaceControl.Transaction t,
+            Runnable onPlucked) {
+        SurfaceControl.Transaction pluckT = new SurfaceControl.Transaction();
+        pluckT.reparent(taskLeash, dest);
+        t.reparent(taskLeash, dest);
+        pluckT.setPosition(taskLeash, destX, destY);
+        t.setPosition(taskLeash, destX, destY);
+        pluckT.show(taskLeash);
+        pluckT.setAlpha(taskLeash, 1.f);
+        float shadowRadius = fromView.getElevation() * ELEVATION_TO_RADIUS;
+        pluckT.setShadowRadius(taskLeash, shadowRadius);
+        pluckT.setCornerRadius(taskLeash, cornerRadius);
+        t.setShadowRadius(taskLeash, shadowRadius);
+        t.setCornerRadius(taskLeash, cornerRadius);
+
+        // Need to remove the taskview AFTER applying the startTransaction because it isn't
+        // synchronized.
+        pluckT.addTransactionCommittedListener(mMainExecutor, onPlucked::run);
+        fromView.getViewRootImpl().applyTransactionOnDraw(pluckT);
+        fromView.setVisibility(INVISIBLE);
+    }
+
+    /**
      * Interface to a bubble-specific transition. Bubble transitions have a multi-step lifecycle
      * in order to coordinate with the bubble view logic. These steps are communicated on this
      * interface.
@@ -98,6 +146,7 @@ public class BubbleTransitions {
         default void surfaceCreated() {}
         default void continueExpand() {}
         void skip();
+        default void continueCollapse() {}
     }
 
     /**
@@ -314,6 +363,156 @@ public class BubbleTransitions {
                 mFinishCb.onTransitionFinished(mFinishWct);
                 mFinishCb = null;
             }
+        }
+    }
+
+    /**
+     * BubbleTransition that coordinates the setup for moving a task out of a bubble. The actual
+     * animation is owned by the "receiver" of the task; however, because Bubbles uses TaskView,
+     * we need to do some extra coordination work to get the task surface out of the view
+     * "seamlessly".
+     *
+     * The process here looks like:
+     * 1. Send transition to WM for leaving bubbles mode
+     * 2. in startAnimation, set-up a "pluck" operation to pull the task surface out of taskview
+     * 3. Once "plucked", remove the view (calls continueCollapse when surfaces can be cleaned-up)
+     * 4. Then re-dispatch the transition animation so that the "receiver" can animate it.
+     *
+     * So, constructor -> startAnimation -> continueCollapse -> re-dispatch.
+     */
+    @VisibleForTesting
+    class ConvertFromBubble implements Transitions.TransitionHandler, BubbleTransition {
+        @NonNull final Bubble mBubble;
+        IBinder mTransition;
+        TaskInfo mTaskInfo;
+        SurfaceControl mTaskLeash;
+        SurfaceControl mRootLeash;
+
+        ConvertFromBubble(@NonNull Bubble bubble, TaskInfo taskInfo) {
+            mBubble = bubble;
+            mTaskInfo = taskInfo;
+
+            mBubble.setPreparingTransition(this);
+            WindowContainerTransaction wct = new WindowContainerTransaction();
+            WindowContainerToken token = mTaskInfo.getToken();
+            wct.setWindowingMode(token, WINDOWING_MODE_UNDEFINED);
+            wct.setAlwaysOnTop(token, false);
+            mTaskOrganizer.setInterceptBackPressedOnTaskRoot(token, false);
+            mTaskViewTransitions.enqueueExternal(
+                    mBubble.getTaskView().getController(),
+                    () -> {
+                        mTransition = mTransitions.startTransition(TRANSIT_CHANGE, wct, this);
+                        return mTransition;
+                    });
+        }
+
+        @Override
+        public void skip() {
+            mBubble.setPreparingTransition(null);
+            final TaskViewTaskController tv =
+                    mBubble.getTaskView().getController();
+            tv.notifyTaskRemovalStarted(tv.getTaskInfo());
+            mTaskLeash = null;
+        }
+
+        @Override
+        public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
+                @android.annotation.Nullable TransitionRequestInfo request) {
+            return null;
+        }
+
+        @Override
+        public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+                @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+                @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        }
+
+        @Override
+        public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted,
+                @NonNull SurfaceControl.Transaction finishTransaction) {
+            if (!aborted) return;
+            mTransition = null;
+            skip();
+            mTaskViewTransitions.onExternalDone(transition);
+        }
+
+        @Override
+        public boolean startAnimation(@NonNull IBinder transition,
+                @NonNull TransitionInfo info,
+                @NonNull SurfaceControl.Transaction startTransaction,
+                @NonNull SurfaceControl.Transaction finishTransaction,
+                @NonNull Transitions.TransitionFinishCallback finishCallback) {
+            if (mTransition != transition) return false;
+
+            final TaskViewTaskController tv =
+                    mBubble.getTaskView().getController();
+            if (tv == null) {
+                mTaskViewTransitions.onExternalDone(transition);
+                return false;
+            }
+
+            TransitionInfo.Change taskChg = null;
+
+            boolean found = false;
+            for (int i = 0; i < info.getChanges().size(); ++i) {
+                final TransitionInfo.Change chg = info.getChanges().get(i);
+                if (chg.getTaskInfo() == null) continue;
+                if (chg.getMode() != TRANSIT_CHANGE) continue;
+                if (!mTaskInfo.token.equals(chg.getTaskInfo().token)) continue;
+                found = true;
+                mRepository.remove(tv);
+                taskChg = chg;
+                break;
+            }
+
+            if (!found) {
+                Slog.w(TAG, "Expected a TaskView conversion in this transition but didn't get "
+                        + "one, cleaning up the task view");
+                tv.setTaskNotFound();
+                skip();
+                mTaskViewTransitions.onExternalDone(transition);
+                return false;
+            }
+
+            mTaskLeash = taskChg.getLeash();
+            mRootLeash = info.getRoot(0).getLeash();
+
+            SurfaceControl dest =
+                    mBubble.getBubbleBarExpandedView().getViewRootImpl().getSurfaceControl();
+            final Runnable onPlucked = () -> {
+                // Need to remove the taskview AFTER applying the startTransaction because
+                // it isn't synchronized.
+                tv.notifyTaskRemovalStarted(tv.getTaskInfo());
+                // Unset after removeView so it can be used to pick a different animation.
+                mBubble.setPreparingTransition(null);
+                mBubbleData.setExpanded(false /* expanded */);
+            };
+            if (dest != null) {
+                pluck(mTaskLeash, mBubble.getBubbleBarExpandedView(), dest,
+                        taskChg.getStartAbsBounds().left - info.getRoot(0).getOffset().x,
+                        taskChg.getStartAbsBounds().top - info.getRoot(0).getOffset().y,
+                        mBubble.getBubbleBarExpandedView().getCornerRadius(), startTransaction,
+                        onPlucked);
+                mBubble.getBubbleBarExpandedView().post(() -> mTransitions.dispatchTransition(
+                        mTransition, info, startTransaction, finishTransaction, finishCallback,
+                        null));
+            } else {
+                onPlucked.run();
+                mTransitions.dispatchTransition(mTransition, info, startTransaction,
+                        finishTransaction, finishCallback, null);
+            }
+
+            mTaskViewTransitions.onExternalDone(transition);
+            return true;
+        }
+
+        @Override
+        public void continueCollapse() {
+            mBubble.cleanupTaskView();
+            if (mTaskLeash == null) return;
+            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            t.reparent(mTaskLeash, mRootLeash);
+            t.apply();
         }
     }
 }
