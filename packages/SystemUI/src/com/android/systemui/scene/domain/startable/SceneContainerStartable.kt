@@ -945,10 +945,6 @@ constructor(
                 override fun onTransitionAnimationEnd() {
                     sceneInteractor.onTransitionAnimationEnd()
                 }
-
-                override fun onTransitionAnimationCancelled() {
-                    sceneInteractor.onTransitionAnimationCancelled()
-                }
             }
         )
     }
