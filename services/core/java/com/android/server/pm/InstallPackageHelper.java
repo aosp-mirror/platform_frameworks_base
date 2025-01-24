@@ -1158,6 +1158,7 @@ final class InstallPackageHelper {
                 return;
             }
             request.setKeepArtProfile(true);
+            // TODO(b/388159696): Use performDexoptIfNeededAsync.
             DexOptHelper.performDexoptIfNeeded(request, mDexManager, mContext, null);
         }
     }
