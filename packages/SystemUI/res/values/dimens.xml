@@ -267,7 +267,7 @@
     <dimen name="notification_max_height">358dp</dimen>
 
     <!-- Height of a large promoted ongoing notification in the status bar -->
-    <dimen name="notification_max_height_for_promoted_ongoing">218dp</dimen>
+    <dimen name="notification_max_height_for_promoted_ongoing">272dp</dimen>
 
     <!-- Height of a heads up notification in the status bar for legacy custom views -->
     <dimen name="notification_max_heads_up_height_legacy">128dp</dimen>
