@@ -16,7 +16,6 @@
 
 package com.android.systemui.volume.dialog.sliders.domain.interactor
 
-import android.view.MotionEvent
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogCallbacksInteractor
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
@@ -45,7 +44,7 @@ constructor(
 
     val event: Flow<SliderInputEvent> =
         merge(
-            repository.sliderTouchEvent.map { SliderInputEvent.Touch(it) },
+            repository.sliderTouchEvent,
             volumeDialogCallbacksInteractor.event
                 .filterIsInstance(VolumeDialogEventModel.VolumeChangedFromKey::class)
                 .map { SliderInputEvent.Button },
@@ -55,7 +54,7 @@ constructor(
         event.onEach { visibilityInteractor.resetDismissTimeout() }.launchIn(coroutineScope)
     }
 
-    fun onTouchEvent(newEvent: MotionEvent) {
-        repository.update(newEvent)
+    fun onTouchEvent(pointerEvent: SliderInputEvent.Touch) {
+        repository.update(pointerEvent)
     }
 }
