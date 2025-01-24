@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.dagger;
 
+import static android.window.DesktopModeFlags.ENABLE_DESKTOP_SYSTEM_DIALOGS_TRANSITIONS;
 import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS;
 import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS_BUGFIX;
 import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODALS_POLICY;
@@ -1023,7 +1024,7 @@ public abstract class WMShellModule {
             DesktopModeCompatPolicy desktopModeCompatPolicy) {
         if (!DesktopModeStatus.canEnterDesktopMode(context)
                 || !ENABLE_DESKTOP_WINDOWING_MODALS_POLICY.isTrue()
-                || !Flags.enableDesktopSystemDialogsTransitions()) {
+                || !ENABLE_DESKTOP_SYSTEM_DIALOGS_TRANSITIONS.isTrue()) {
             return Optional.empty();
         }
         return Optional.of(
