@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.app.Flags.notificationsRedesignTemplates;
+import static android.util.MathUtils.abs;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -60,6 +61,7 @@ public class NotificationHeaderView extends RelativeLayout {
     private boolean mEntireHeaderClickable;
     private boolean mExpandOnlyOnButton;
     private boolean mAcceptAllTouches;
+    private float mTopLineTranslation;
 
     ViewOutlineProvider mProvider = new ViewOutlineProvider() {
         @Override
@@ -203,6 +205,39 @@ public class NotificationHeaderView extends RelativeLayout {
             flp.gravity = center ? Gravity.CENTER : (Gravity.TOP | Gravity.END);
         }
         mExpandButton.setLayoutParams(lp);
+    }
+
+    /** The view containing the app name, timestamp etc at the top of the notification. */
+    public NotificationTopLineView getTopLineView() {
+        return mTopLineView;
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        measureTopLineTranslation();
+    }
+
+    private void measureTopLineTranslation() {
+        if (!notificationsRedesignTemplates()) {
+            return;
+        }
+
+        // When the top line is centered (see centerTopLine), its height is MATCH_PARENT
+        int parentHeight = getMeasuredHeight();
+        // When the top line is top-aligned, its height is WRAP_CONTENT
+        float wrapContentHeight = mTopLineView.getMeasuredHeight();
+        // Calculate the translation needed between the two alignments
+        final MarginLayoutParams lp = (MarginLayoutParams) mTopLineView.getLayoutParams();
+        mTopLineTranslation = abs((parentHeight - wrapContentHeight) / 2f - lp.topMargin);
+    }
+
+    /**
+     * The vertical translation necessary between the two positions of the top line, to be used in
+     * the animation. See also {@link this#centerTopLine(boolean)}.
+     */
+    public float getTopLineTranslation() {
+        return mTopLineTranslation;
     }
 
     /**

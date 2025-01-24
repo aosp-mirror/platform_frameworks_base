@@ -123,6 +123,7 @@ public class NotificationChildrenContainer extends ViewGroup
     private NotificationHeaderViewWrapper mMinimizedGroupHeaderWrapper;
     private NotificationGroupingUtil mGroupingUtil;
     private ViewState mHeaderViewState;
+    private ViewState mTopLineViewState;
     private int mClipBottomAmount;
     private boolean mIsMinimized;
     private OnClickListener mHeaderClickListener;
@@ -884,6 +885,16 @@ public class NotificationChildrenContainer extends ViewGroup
             // The hiding is done automatically by the alpha, otherwise we'll pick it up again
             // in the next frame with the initFrom call above and have an invisible header
             mHeaderViewState.hidden = false;
+
+            if (notificationsRedesignTemplates()) {
+                if (mTopLineViewState == null) {
+                    mTopLineViewState = new ViewState();
+                }
+                mTopLineViewState.initFrom(mGroupHeader);
+                mTopLineViewState.setYTranslation(
+                        mGroupHeader.getTopLineTranslation() * expandFactor);
+                mTopLineViewState.hidden = false;
+            }
         }
     }
 
@@ -975,6 +986,9 @@ public class NotificationChildrenContainer extends ViewGroup
         }
         if (mHeaderViewState != null) {
             mHeaderViewState.applyToView(mGroupHeader);
+        }
+        if (notificationsRedesignTemplates() && mTopLineViewState != null) {
+            mTopLineViewState.applyToView(mGroupHeader.getTopLineView());
         }
         updateChildrenClipping();
     }
