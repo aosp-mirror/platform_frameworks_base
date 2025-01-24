@@ -20,6 +20,8 @@ import static android.media.codec.Flags.FLAG_CODEC_AVAILABILITY;
 import static android.media.codec.Flags.FLAG_NULL_OUTPUT_SURFACE;
 import static android.media.codec.Flags.FLAG_REGION_OF_INTEREST;
 import static android.media.codec.Flags.FLAG_SUBSESSION_METRICS;
+import static android.media.tv.flags.Flags.applyPictureProfiles;
+import static android.media.tv.flags.Flags.mediaQualityFw;
 
 import static com.android.media.codec.flags.Flags.FLAG_LARGE_AUDIO_FRAME;
 
@@ -37,6 +39,8 @@ import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.HardwareBuffer;
 import android.media.MediaCodecInfo.CodecCapabilities;
+import android.media.quality.PictureProfile;
+import android.media.quality.PictureProfileHandle;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -5370,6 +5374,9 @@ final public class MediaCodec {
      * @param params The bundle of parameters to set.
      * @throws IllegalStateException if in the Released state.
      */
+
+    private static final String PARAMETER_KEY_PICTURE_PROFILE_HANDLE = "picture-profile-handle";
+
     public final void setParameters(@Nullable Bundle params) {
         if (params == null) {
             return;
@@ -5383,19 +5390,41 @@ final public class MediaCodec {
             if (key.equals(MediaFormat.KEY_AUDIO_SESSION_ID)) {
                 int sessionId = 0;
                 try {
-                    sessionId = (Integer)params.get(key);
+                    sessionId = (Integer) params.get(key);
                 } catch (Exception e) {
                     throw new IllegalArgumentException("Wrong Session ID Parameter!");
                 }
                 keys[i] = "audio-hw-sync";
                 values[i] = AudioSystem.getAudioHwSyncForSession(sessionId);
+            } else if (applyPictureProfiles() && mediaQualityFw()
+                    && key.equals(MediaFormat.KEY_PICTURE_PROFILE_INSTANCE)) {
+                PictureProfile pictureProfile = null;
+                try {
+                    pictureProfile = (PictureProfile) params.get(key);
+                } catch (ClassCastException e) {
+                    throw new IllegalArgumentException(
+                            "Cannot cast the instance parameter to PictureProfile!");
+                } catch (Exception e) {
+                    android.util.Log.getStackTraceString(e);
+                    throw new IllegalArgumentException("Unexpected exception when casting the "
+                                                       + "instance parameter to PictureProfile!");
+                }
+                if (pictureProfile == null) {
+                    throw new IllegalArgumentException(
+                            "Picture profile instance parameter is null!");
+                }
+                PictureProfileHandle handle = pictureProfile.getHandle();
+                if (handle != PictureProfileHandle.NONE) {
+                    keys[i] = PARAMETER_KEY_PICTURE_PROFILE_HANDLE;
+                    values[i] = Long.valueOf(handle.getId());
+                }
             } else {
                 keys[i] = key;
                 Object value = params.get(key);
 
                 // Bundle's byte array is a byte[], JNI layer only takes ByteBuffer
                 if (value instanceof byte[]) {
-                    values[i] = ByteBuffer.wrap((byte[])value);
+                    values[i] = ByteBuffer.wrap((byte[]) value);
                 } else {
                     values[i] = value;
                 }
