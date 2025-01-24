@@ -44,9 +44,10 @@ import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanc
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
@@ -191,9 +192,8 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         dockManager = DockManagerFake()
         biometricSettingsRepository = FakeBiometricSettingsRepository()
 
-        val withDeps = KeyguardInteractorFactory.create()
-        keyguardInteractor = withDeps.keyguardInteractor
-        repository = withDeps.repository
+        keyguardInteractor = kosmos.keyguardInteractor
+        repository = kosmos.fakeKeyguardRepository
 
         whenever(userTracker.userHandle).thenReturn(mock())
         whenever(lockPatternUtils.getStrongAuthForUser(ArgumentMatchers.anyInt()))

@@ -304,9 +304,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
         testScope = TestScope(testDispatcher)
         underTest =
             KeyguardQuickAffordanceInteractor(
-                keyguardInteractor =
-                    KeyguardInteractorFactory.create(featureFlags = featureFlags)
-                        .keyguardInteractor,
+                keyguardInteractor = kosmos.keyguardInteractor,
                 shadeInteractor = kosmos.shadeInteractor,
                 lockPatternUtils = lockPatternUtils,
                 keyguardStateController = keyguardStateController,
