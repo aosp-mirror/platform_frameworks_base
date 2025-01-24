@@ -70,6 +70,7 @@ public final class RemotePrintDocument {
     private static final int STATE_CANCELING = 6;
     private static final int STATE_CANCELED = 7;
     private static final int STATE_DESTROYED = 8;
+    private static final int STATE_INVALID = 9;
 
     private final Context mContext;
 
@@ -287,7 +288,8 @@ public final class RemotePrintDocument {
         }
         if (mState != STATE_STARTED && mState != STATE_UPDATED
                 && mState != STATE_FAILED && mState != STATE_CANCELING
-                && mState != STATE_CANCELED && mState != STATE_DESTROYED) {
+                && mState != STATE_CANCELED && mState != STATE_DESTROYED
+                && mState != STATE_INVALID) {
             throw new IllegalStateException("Cannot finish in state:"
                     + stateToString(mState));
         }
@@ -298,6 +300,16 @@ public final class RemotePrintDocument {
             Log.e(LOG_TAG, "Error calling finish()");
             mState = STATE_FAILED;
         }
+    }
+
+    /**
+     * Mark this document as invalid.
+     */
+    public void invalid() {
+        if (DEBUG) {
+            Log.i(LOG_TAG, "[CALLED] invalid()");
+        }
+        mState = STATE_INVALID;
     }
 
     public void cancel(boolean force) {
@@ -490,6 +502,9 @@ public final class RemotePrintDocument {
             }
             case STATE_DESTROYED: {
                 return "STATE_DESTROYED";
+            }
+            case STATE_INVALID: {
+                return "STATE_INVALID";
             }
             default: {
                 return "STATE_UNKNOWN";
