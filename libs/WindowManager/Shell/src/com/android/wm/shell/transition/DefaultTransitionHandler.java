@@ -309,7 +309,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         if (TransitionUtil.isAllNoAnimation(info) || TransitionUtil.isAllOrderOnly(info)
                 || (info.getFlags() & WindowManager.TRANSIT_FLAG_INVISIBLE) != 0) {
             startTransaction.apply();
-            finishTransaction.apply();
+            // As a contract, finishTransaction should only be applied in Transitions#onFinish
             finishCallback.onTransitionFinished(null /* wct */);
             return true;
         }
