@@ -71,7 +71,6 @@ constructor(private val viewModel: VolumeDialogSlidersViewModel) {
         viewsToAnimate: Array<View>,
     ) {
         with(component.sliderViewBinder()) { bind(sliderContainer) }
-        with(component.sliderHapticsViewBinder()) { bind(sliderContainer) }
         with(component.overscrollViewBinder()) { bind(sliderContainer, viewsToAnimate) }
     }
 }

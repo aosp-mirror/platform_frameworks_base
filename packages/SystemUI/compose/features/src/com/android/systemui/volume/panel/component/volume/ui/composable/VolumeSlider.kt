@@ -67,11 +67,10 @@ import com.android.systemui.Flags
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.compose.modifiers.sysuiResTag
-import com.android.systemui.haptics.slider.SeekableSliderTrackerConfig
-import com.android.systemui.haptics.slider.SliderHapticFeedbackConfig
 import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.res.R
+import com.android.systemui.volume.haptics.ui.VolumeHapticsConfigsProvider
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.SliderState
 import kotlin.math.round
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -103,6 +102,10 @@ fun VolumeSlider(
     }
 
     val value by valueState(state)
+    val interactionSource = remember { MutableInteractionSource() }
+    val hapticsViewModel: SliderHapticsViewModel? =
+        setUpHapticsViewModel(value, state.valueRange, interactionSource, hapticsViewModelFactory)
+
     Column(modifier = modifier.animateContentSize(), verticalArrangement = Arrangement.Top) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -127,8 +130,14 @@ fun VolumeSlider(
         Slider(
             value = value,
             valueRange = state.valueRange,
-            onValueChange = onValueChange,
-            onValueChangeFinished = onValueChangeFinished,
+            onValueChange = { newValue ->
+                hapticsViewModel?.addVelocityDataPoint(newValue)
+                onValueChange(newValue)
+            },
+            onValueChangeFinished = {
+                hapticsViewModel?.onValueChangeEnded()
+                onValueChangeFinished?.invoke()
+            },
             enabled = state.isEnabled,
             modifier =
                 Modifier.height(40.dp)
@@ -210,41 +219,8 @@ private fun LegacyVolumeSlider(
 ) {
     val value by valueState(state)
     val interactionSource = remember { MutableInteractionSource() }
-    val sliderStepSize = 1f / (state.valueRange.endInclusive - state.valueRange.start)
     val hapticsViewModel: SliderHapticsViewModel? =
-        hapticsViewModelFactory?.let {
-            rememberViewModel(traceName = "SliderHapticsViewModel") {
-                it.create(
-                    interactionSource,
-                    state.valueRange,
-                    Orientation.Horizontal,
-                    SliderHapticFeedbackConfig(
-                        lowerBookendScale = 0.2f,
-                        progressBasedDragMinScale = 0.2f,
-                        progressBasedDragMaxScale = 0.5f,
-                        deltaProgressForDragThreshold = 0f,
-                        additionalVelocityMaxBump = 0.2f,
-                        maxVelocityToScale = 0.1f, /* slider progress(from 0 to 1) per sec */
-                        sliderStepSize = sliderStepSize,
-                    ),
-                    SeekableSliderTrackerConfig(
-                        lowerBookendThreshold = 0f,
-                        upperBookendThreshold = 1f,
-                    ),
-                )
-            }
-        }
-    var lastDiscreteStep by remember { mutableFloatStateOf(round(value)) }
-    LaunchedEffect(value) {
-        snapshotFlow { value }
-            .map { round(it) }
-            .filter { it != lastDiscreteStep }
-            .distinctUntilChanged()
-            .collect { discreteStep ->
-                lastDiscreteStep = discreteStep
-                hapticsViewModel?.onValueChange(discreteStep)
-            }
-    }
+        setUpHapticsViewModel(value, state.valueRange, interactionSource, hapticsViewModelFactory)
 
     PlatformSlider(
         modifier =
@@ -356,4 +332,37 @@ private fun SliderIcon(
         contentAlignment = Alignment.Center,
         content = { Icon(modifier = Modifier.size(24.dp), icon = icon) },
     )
+}
+
+@Composable
+fun setUpHapticsViewModel(
+    value: Float,
+    valueRange: ClosedFloatingPointRange<Float>,
+    interactionSource: MutableInteractionSource,
+    hapticsViewModelFactory: SliderHapticsViewModel.Factory?,
+): SliderHapticsViewModel? {
+    return hapticsViewModelFactory?.let {
+        rememberViewModel(traceName = "SliderHapticsViewModel") {
+                it.create(
+                    interactionSource,
+                    valueRange,
+                    Orientation.Horizontal,
+                    VolumeHapticsConfigsProvider.sliderHapticFeedbackConfig(valueRange),
+                    VolumeHapticsConfigsProvider.seekableSliderTrackerConfig,
+                )
+            }
+            .also { hapticsViewModel ->
+                var lastDiscreteStep by remember { mutableFloatStateOf(round(value)) }
+                LaunchedEffect(value) {
+                    snapshotFlow { value }
+                        .map { round(it) }
+                        .filter { it != lastDiscreteStep }
+                        .distinctUntilChanged()
+                        .collect { discreteStep ->
+                            lastDiscreteStep = discreteStep
+                            hapticsViewModel.onValueChange(discreteStep)
+                        }
+                }
+            }
+    }
 }

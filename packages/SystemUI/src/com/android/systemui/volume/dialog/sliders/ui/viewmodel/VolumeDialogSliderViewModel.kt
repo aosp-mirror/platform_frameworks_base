@@ -26,17 +26,18 @@ import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
 import com.android.systemui.volume.dialog.sliders.domain.interactor.VolumeDialogSliderInteractor
 import com.android.systemui.volume.dialog.sliders.domain.model.VolumeDialogSliderType
 import javax.inject.Inject
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
@@ -77,11 +78,12 @@ constructor(
             .stateIn(coroutineScope, SharingStarted.Eagerly, null)
             .filterNotNull()
 
-    val isDisabledByZenMode: Flow<Boolean> = interactor.isDisabledByZenMode
     val state: Flow<VolumeDialogSliderStateModel> =
-        model
-            .flatMapLatest { streamModel ->
-                with(streamModel) {
+        combine(
+                interactor.isDisabledByZenMode,
+                model,
+                model.flatMapLatest { streamModel ->
+                    with(streamModel) {
                         val isMuted = muteSupported && muted
                         when (sliderType) {
                             is VolumeDialogSliderType.Stream ->
@@ -101,7 +103,9 @@ constructor(
                             }
                         }
                     }
-                    .map { icon -> streamModel.toStateModel(icon) }
+                },
+            ) { isDisabledByZenMode, model, icon ->
+                model.toStateModel(icon = icon, isDisabled = isDisabledByZenMode)
             }
             .stateIn(coroutineScope, SharingStarted.Eagerly, null)
             .filterNotNull()
@@ -116,11 +120,14 @@ constructor(
             .launchIn(coroutineScope)
     }
 
-    fun setStreamVolume(volume: Int, fromUser: Boolean) {
+    fun setStreamVolume(volume: Float, fromUser: Boolean) {
         if (fromUser) {
             visibilityInteractor.resetDismissTimeout()
             userVolumeUpdates.value =
-                VolumeUpdate(newVolumeLevel = volume, timestampMillis = getTimestampMillis())
+                VolumeUpdate(
+                    newVolumeLevel = volume.roundToInt(),
+                    timestampMillis = getTimestampMillis(),
+                )
         }
     }
 

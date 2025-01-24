@@ -32,10 +32,8 @@ import com.android.systemui.volume.dialog.data.repository.volumeDialogVisibility
 import com.android.systemui.volume.dialog.sliders.domain.model.VolumeDialogSliderType
 import com.android.systemui.volume.dialog.sliders.domain.model.volumeDialogSliderType
 import com.android.systemui.volume.dialog.sliders.ui.VolumeDialogOverscrollViewBinder
-import com.android.systemui.volume.dialog.sliders.ui.VolumeDialogSliderHapticsViewBinder
 import com.android.systemui.volume.dialog.sliders.ui.VolumeDialogSliderViewBinder
 import com.android.systemui.volume.dialog.sliders.ui.volumeDialogOverscrollViewBinder
-import com.android.systemui.volume.dialog.sliders.ui.volumeDialogSliderHapticsViewBinder
 import com.android.systemui.volume.dialog.sliders.ui.volumeDialogSliderViewBinder
 import com.android.systemui.volume.mediaControllerRepository
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.mediaControllerInteractor
@@ -64,9 +62,6 @@ fun Kosmos.volumeDialogSliderComponent(type: VolumeDialogSliderType): VolumeDial
 
         override fun sliderViewBinder(): VolumeDialogSliderViewBinder =
             localKosmos.volumeDialogSliderViewBinder
-
-        override fun sliderHapticsViewBinder(): VolumeDialogSliderHapticsViewBinder =
-            localKosmos.volumeDialogSliderHapticsViewBinder
 
         override fun overscrollViewBinder(): VolumeDialogOverscrollViewBinder =
             localKosmos.volumeDialogOverscrollViewBinder

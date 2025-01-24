@@ -20,17 +20,20 @@ import android.graphics.drawable.Drawable
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStreamModel
 
 data class VolumeDialogSliderStateModel(
-    val minValue: Float,
-    val maxValue: Float,
     val value: Float,
+    val isDisabled: Boolean,
+    val valueRange: ClosedFloatingPointRange<Float>,
     val icon: Drawable,
 )
 
-fun VolumeDialogStreamModel.toStateModel(icon: Drawable): VolumeDialogSliderStateModel {
+fun VolumeDialogStreamModel.toStateModel(
+    isDisabled: Boolean,
+    icon: Drawable,
+): VolumeDialogSliderStateModel {
     return VolumeDialogSliderStateModel(
-        minValue = levelMin.toFloat(),
         value = level.toFloat(),
-        maxValue = levelMax.toFloat(),
+        isDisabled = isDisabled,
+        valueRange = levelMin.toFloat()..levelMax.toFloat(),
         icon = icon,
     )
 }

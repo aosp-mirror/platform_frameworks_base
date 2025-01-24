@@ -565,16 +565,6 @@
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <style name="SystemUI.Material3.Slider.Volume">
-        <item name="trackHeight">40dp</item>
-        <item name="thumbHeight">52dp</item>
-        <item name="trackCornerSize">12dp</item>
-        <item name="trackInsideCornerSize">2dp</item>
-        <item name="trackStopIndicatorSize">6dp</item>
-        <item name="trackIconSize">20dp</item>
-        <item name="labelBehavior">gone</item>
-    </style>
-
     <style name="SystemUI.Material3.Slider" parent="@style/Widget.Material3.Slider">
         <item name="labelStyle">@style/Widget.Material3.Slider.Label</item>
         <item name="thumbColor">@color/thumb_color</item>

@@ -16,7 +16,6 @@
 
 package com.android.systemui.volume.dialog
 
-import android.app.Dialog
 import android.content.Context
 import android.graphics.PixelFormat
 import android.os.Bundle
@@ -24,6 +23,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.activity.ComponentDialog
 import com.android.app.tracing.coroutines.coroutineScopeTraced
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -40,7 +40,7 @@ constructor(
     @Application context: Context,
     private val componentFactory: VolumeDialogComponent.Factory,
     private val visibilityInteractor: VolumeDialogVisibilityInteractor,
-) : Dialog(context, R.style.Theme_SystemUI_Dialog_Volume) {
+) : ComponentDialog(context, R.style.Theme_SystemUI_Dialog_Volume) {
 
     init {
         with(window!!) {
