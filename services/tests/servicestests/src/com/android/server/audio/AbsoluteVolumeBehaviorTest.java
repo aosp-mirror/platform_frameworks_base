@@ -38,6 +38,7 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.IAudioDeviceVolumeDispatcher;
 import android.media.VolumeInfo;
+import android.os.IpcDataCache;
 import android.os.PermissionEnforcer;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
@@ -83,6 +84,7 @@ public class AbsoluteVolumeBehaviorTest {
 
     @Before
     public void setUp() throws Exception {
+        IpcDataCache.disableForTestMode();
         mTestLooper = new TestLooper();
 
         mContext = spy(ApplicationProvider.getApplicationContext());

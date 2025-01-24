@@ -80,6 +80,7 @@ import android.media.AudioSystem;
 import android.media.IDeviceVolumeBehaviorDispatcher;
 import android.media.VolumeInfo;
 import android.media.audiopolicy.AudioVolumeGroup;
+import android.os.IpcDataCache;
 import android.os.Looper;
 import android.os.PermissionEnforcer;
 import android.os.test.TestLooper;
@@ -210,6 +211,8 @@ public class VolumeHelperTest {
 
     @Before
     public void setUp() throws Exception {
+        IpcDataCache.disableForTestMode();
+
         mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         mTestLooper = new TestLooper();
 

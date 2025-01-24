@@ -16,6 +16,15 @@
 
 package com.android.audiopolicytest;
 
+import static android.media.AudioManager.STREAM_ACCESSIBILITY;
+import static android.media.AudioManager.STREAM_ALARM;
+import static android.media.AudioManager.STREAM_DTMF;
+import static android.media.AudioManager.STREAM_MUSIC;
+import static android.media.AudioManager.STREAM_NOTIFICATION;
+import static android.media.AudioManager.STREAM_RING;
+import static android.media.AudioManager.STREAM_SYSTEM;
+import static android.media.AudioManager.STREAM_VOICE_CALL;
+
 import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
 
 import static com.android.audiopolicytest.AudioVolumeTestUtil.DEFAULT_ATTRIBUTES;
@@ -28,11 +37,15 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
+import android.media.IAudioService;
 import android.media.audiopolicy.AudioProductStrategy;
 import android.media.audiopolicy.AudioVolumeGroup;
+import android.os.IBinder;
+import android.os.ServiceManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
@@ -203,6 +216,32 @@ public class AudioManagerTest {
                         + AudioSystem.streamToString(avgStreamType) + "(" + avgStreamType + ")",
                         isVolumeGroupAssociatedToStrategy);
             }
+        }
+    }
+
+    //-----------------------------------------------------------------
+    // Test getStreamVolume consistency with AudioService
+    //-----------------------------------------------------------------
+    @Test
+    public void getStreamMinMaxVolume_consistentWithAs() throws Exception {
+        IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
+        IAudioService service = IAudioService.Stub.asInterface(b);
+        final int[] streamTypes = {
+                STREAM_VOICE_CALL,
+                STREAM_SYSTEM,
+                STREAM_RING,
+                STREAM_MUSIC,
+                STREAM_ALARM,
+                STREAM_NOTIFICATION,
+                STREAM_DTMF,
+                STREAM_ACCESSIBILITY,
+        };
+
+        for (int streamType : streamTypes) {
+            assertEquals(service.getStreamMinVolume(streamType),
+                    mAudioManager.getStreamMinVolume(streamType));
+            assertEquals(service.getStreamMaxVolume(streamType),
+                    mAudioManager.getStreamMaxVolume(streamType));
         }
     }
 
