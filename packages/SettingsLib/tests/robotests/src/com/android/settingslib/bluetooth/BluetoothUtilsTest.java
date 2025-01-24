@@ -22,9 +22,11 @@ import static com.android.settingslib.flags.Flags.FLAG_ENABLE_DETERMINING_ADVANC
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,6 +46,8 @@ import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.util.Pair;
@@ -109,6 +113,7 @@ public class BluetoothUtilsTest {
                     + "</HEARABLE_CONTROL_SLICE_WITH_WIDTH>";
     private static final String TEMP_BOND_METADATA =
             "<TEMP_BOND_TYPE>" + LE_AUDIO_SHARING_METADATA + "</TEMP_BOND_TYPE>";
+    private static final String FAKE_TEMP_BOND_METADATA = "<TEMP_BOND_TYPE>fake</TEMP_BOND_TYPE>";
     private static final String TEST_EXCLUSIVE_MANAGER_PACKAGE = "com.test.manager";
     private static final String TEST_EXCLUSIVE_MANAGER_COMPONENT = "com.test.manager/.component";
     private static final int TEST_BROADCAST_ID = 25;
@@ -1347,5 +1352,35 @@ public class BluetoothUtilsTest {
                 .thenReturn(TEMP_BOND_METADATA.getBytes());
 
         assertThat(BluetoothUtils.isTemporaryBondDevice(mBluetoothDevice)).isTrue();
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_TEMPORARY_BOND_DEVICES_UI)
+    public void setTemporaryBondDevice_flagOff_doNothing() {
+        when(mBluetoothDevice.getMetadata(METADATA_FAST_PAIR_CUSTOMIZED_FIELDS))
+                .thenReturn(new byte[]{});
+        BluetoothUtils.setTemporaryBondMetadata(mBluetoothDevice);
+        verify(mBluetoothDevice, never()).setMetadata(eq(METADATA_FAST_PAIR_CUSTOMIZED_FIELDS),
+                any());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_TEMPORARY_BOND_DEVICES_UI)
+    public void setTemporaryBondDevice_flagOn_setCorrectValue() {
+        when(mBluetoothDevice.getMetadata(METADATA_FAST_PAIR_CUSTOMIZED_FIELDS))
+                .thenReturn(new byte[]{});
+        BluetoothUtils.setTemporaryBondMetadata(mBluetoothDevice);
+        verify(mBluetoothDevice).setMetadata(METADATA_FAST_PAIR_CUSTOMIZED_FIELDS,
+                TEMP_BOND_METADATA.getBytes());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_TEMPORARY_BOND_DEVICES_UI)
+    public void setTemporaryBondDevice_flagOff_replaceAndSetCorrectValue() {
+        when(mBluetoothDevice.getMetadata(METADATA_FAST_PAIR_CUSTOMIZED_FIELDS))
+                .thenReturn(FAKE_TEMP_BOND_METADATA.getBytes());
+        BluetoothUtils.setTemporaryBondMetadata(mBluetoothDevice);
+        verify(mBluetoothDevice).setMetadata(METADATA_FAST_PAIR_CUSTOMIZED_FIELDS,
+                TEMP_BOND_METADATA.getBytes());
     }
 }
