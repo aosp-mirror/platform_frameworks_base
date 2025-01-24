@@ -2346,10 +2346,7 @@ class DesktopTasksController(
         launchTaskId: Int,
         minimizeTaskId: Int?,
     ) {
-        if (
-            !DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS.isTrue &&
-                !DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX.isTrue
-        ) {
+        if (!DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX.isTrue) {
             return
         }
         // TODO b/359523924: pass immersive task here?
