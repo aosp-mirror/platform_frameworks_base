@@ -29,7 +29,8 @@
         android:layout_height="wrap_content"
         android:paddingVertical="@dimen/settingslib_expressive_space_small1"
         android:paddingHorizontal="@dimen/settingslib_expressive_space_small4"
-        android:background="@drawable/settingslib_number_button_background">
+        android:background="@drawable/settingslib_number_button_background"
+        android:filterTouchesWhenObscured="true">
         <TextView
             android:id="@+id/settingslib_number_count"
             android:layout_width="wrap_content"
