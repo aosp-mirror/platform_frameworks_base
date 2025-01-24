@@ -133,7 +133,9 @@ public class PipTaskListener implements ShellTaskOrganizer.TaskListener,
                 taskInfo.topActivity, mPipTransitionState, mPictureInPictureParams, params);
         setPictureInPictureParams(params);
         float newAspectRatio = mPictureInPictureParams.getAspectRatioFloat();
-        if (PipUtils.aspectRatioChanged(newAspectRatio, mPipBoundsState.getAspectRatio())) {
+        if (params.hasSetAspectRatio()
+                && mPipBoundsAlgorithm.isValidPictureInPictureAspectRatio(newAspectRatio)
+                && PipUtils.aspectRatioChanged(newAspectRatio, mPipBoundsState.getAspectRatio())) {
             mPipTransitionState.setOnIdlePipTransitionStateRunnable(() -> {
                 onAspectRatioChanged(newAspectRatio);
             });

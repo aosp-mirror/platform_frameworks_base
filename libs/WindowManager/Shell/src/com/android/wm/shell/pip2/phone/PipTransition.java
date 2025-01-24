@@ -725,6 +725,12 @@ public class PipTransition extends PipTransitionController implements
                 mPipTransitionState.getPipTaskToken());
         mFinishCallback = finishCallback;
 
+        if (isPipClosing(info)) {
+            // If PiP is removed via a close (e.g. finishing of the activity), then
+            // clear out the PiP cache related to that activity component (e.g. reentry state).
+            mPipBoundsState.setLastPipComponentName(null /* lastPipComponentName */);
+        }
+
         finishTransaction.setAlpha(pipChange.getLeash(), 0f);
         if (mPendingRemoveWithFadeout) {
             PipAlphaAnimator animator = new PipAlphaAnimator(mContext, pipChange.getLeash(),
@@ -952,13 +958,29 @@ public class PipTransition extends PipTransitionController implements
 
         boolean isPipMovedToBack = info.getType() == TRANSIT_TO_BACK
                 && pipChange.getMode() == TRANSIT_TO_BACK;
-        boolean isPipClosed = info.getType() == TRANSIT_CLOSE
-                && pipChange.getMode() == TRANSIT_CLOSE;
         // If PiP is dismissed by user (i.e. via dismiss button in PiP menu)
         boolean isPipDismissed = info.getType() == TRANSIT_REMOVE_PIP
                 && pipChange.getMode() == TRANSIT_TO_BACK;
         // PiP is being removed if the pinned task is either moved to back, closed, or dismissed.
-        return isPipMovedToBack || isPipClosed || isPipDismissed;
+        return isPipMovedToBack || isPipClosing(info) || isPipDismissed;
+    }
+
+    private boolean isPipClosing(@NonNull TransitionInfo info) {
+        if (mPipTransitionState.getPipTaskToken() == null) {
+            // PiP removal makes sense if enter-PiP has cached a valid pinned task token.
+            return false;
+        }
+        TransitionInfo.Change pipChange = info.getChange(mPipTransitionState.getPipTaskToken());
+        TransitionInfo.Change pipActivityChange = info.getChanges().stream().filter(change ->
+                change.getTaskInfo() == null && change.getParent() != null
+                        && change.getParent() == mPipTransitionState.getPipTaskToken())
+                .findFirst().orElse(null);
+
+        boolean isPipTaskClosed = pipChange != null
+                && pipChange.getMode() == TRANSIT_CLOSE;
+        boolean isPipActivityClosed = pipActivityChange != null
+                && pipActivityChange.getMode() == TRANSIT_CLOSE;
+        return isPipTaskClosed || isPipActivityClosed;
     }
 
     private void prepareConfigAtEndActivity(@NonNull SurfaceControl.Transaction startTx,
