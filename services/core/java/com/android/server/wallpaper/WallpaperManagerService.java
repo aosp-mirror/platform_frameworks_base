@@ -118,6 +118,7 @@ import android.service.wallpaper.WallpaperService;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.IntArray;
 import android.util.Slog;
@@ -160,6 +161,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -805,12 +807,38 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     final WallpaperDisplayHelper mWallpaperDisplayHelper;
     final WallpaperCropper mWallpaperCropper;
 
-    private boolean supportsMultiDisplay(WallpaperConnection connection) {
-        if (connection != null) {
-            return connection.mInfo == null // This is image wallpaper
-                    || connection.mInfo.supportsMultipleDisplays();
+    // TODO(b/384519749): Remove this set after we introduce the aspect ratio check.
+    private final Set<Integer> mWallpaperCompatibleDisplaysForTest = new ArraySet<>();
+
+    private boolean isWallpaperCompatibleForDisplay(int displayId, WallpaperConnection connection) {
+        if (connection == null) {
+            return false;
         }
-        return false;
+        // Non image wallpaper.
+        if (connection.mInfo != null) {
+            return connection.mInfo.supportsMultipleDisplays();
+        }
+
+        // Image wallpaper
+        if (enableConnectedDisplaysWallpaper()) {
+            // TODO(b/384519749): check display's resolution and image wallpaper cropped image
+            //  aspect ratio.
+            return displayId == DEFAULT_DISPLAY
+                    || mWallpaperCompatibleDisplaysForTest.contains(displayId);
+        }
+        // When enableConnectedDisplaysWallpaper is off, we assume the image wallpaper supports all
+        // usable displays.
+        return true;
+    }
+
+    @VisibleForTesting
+    void addWallpaperCompatibleDisplayForTest(int displayId) {
+        mWallpaperCompatibleDisplaysForTest.add(displayId);
+    }
+
+    @VisibleForTesting
+    void removeWallpaperCompatibleDisplayForTest(int displayId) {
+        mWallpaperCompatibleDisplaysForTest.remove(displayId);
     }
 
     private void updateFallbackConnection() {
@@ -821,7 +849,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             Slog.w(TAG, "Fallback wallpaper connection has not been created yet!!");
             return;
         }
-        if (supportsMultiDisplay(systemConnection)) {
+        // TODO(b/384520326) Passing DEFAULT_DISPLAY temporarily before we revamp the
+        //  multi-display supports.
+        if (isWallpaperCompatibleForDisplay(DEFAULT_DISPLAY, systemConnection)) {
             if (fallbackConnection.mDisplayConnector.size() != 0) {
                 fallbackConnection.forEachDisplayConnector(connector -> {
                     if (connector.mEngine != null) {
@@ -996,16 +1026,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         private void initDisplayState() {
             // Do not initialize fallback wallpaper
             if (!mWallpaper.equals(mFallbackWallpaper)) {
-                if (supportsMultiDisplay(this)) {
-                    // The system wallpaper is image wallpaper or it can supports multiple displays.
-                    appendConnectorWithCondition(display ->
-                            mWallpaperDisplayHelper.isUsableDisplay(display, mClientUid));
-                } else {
-                    // The system wallpaper does not support multiple displays, so just attach it on
-                    // default display.
-                    mDisplayConnector.append(DEFAULT_DISPLAY,
-                            new DisplayConnector(DEFAULT_DISPLAY));
-                }
+                appendConnectorWithCondition(display -> {
+                    final int displayId = display.getDisplayId();
+                    if (display.getDisplayId() == DEFAULT_DISPLAY) {
+                        return true;
+                    }
+                    return mWallpaperDisplayHelper.isUsableDisplay(display, mClientUid)
+                            && isWallpaperCompatibleForDisplay(displayId, /* connection= */ this);
+                });
             }
         }
 
@@ -3990,7 +4018,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
                 for (int i = 0; i < wallpapers.size(); i++) {
                     WallpaperData wallpaper = wallpapers.get(i);
-                    if (supportsMultiDisplay(wallpaper.connection)) {
+                    if (isWallpaperCompatibleForDisplay(displayId, wallpaper.connection)) {
                         final DisplayConnector connector =
                                 wallpaper.connection.getDisplayConnectorOrCreate(displayId);
                         if (connector != null) {
@@ -4012,7 +4040,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
                 mFallbackWallpaper.mWhich = useFallbackWallpaperWhich;
             } else {
-                if (supportsMultiDisplay(mLastWallpaper.connection)) {
+                if (isWallpaperCompatibleForDisplay(displayId, mLastWallpaper.connection)) {
                     final DisplayConnector connector =
                             mLastWallpaper.connection.getDisplayConnectorOrCreate(displayId);
                     if (connector == null) return;
