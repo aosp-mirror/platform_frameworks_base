@@ -23,7 +23,6 @@ import static com.android.hardware.input.Flags.enableVoiceAccessKeyGestures;
 import static com.android.hardware.input.Flags.keyboardA11yShortcutControl;
 import static com.android.server.flags.Flags.newBugreportKeyboardShortcut;
 import static com.android.window.flags.Flags.enableMoveToNextDisplayShortcut;
-import static com.android.window.flags.Flags.enableTaskResizingKeyboardShortcuts;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -37,6 +36,7 @@ import android.os.SystemProperties;
 import android.util.IndentingPrintWriter;
 import android.util.SparseArray;
 import android.view.KeyEvent;
+import android.window.DesktopModeFlags;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -233,7 +233,7 @@ final class InputGestureManager {
                             KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
                             KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_VOICE_ACCESS));
         }
-        if (enableTaskResizingKeyboardShortcuts()) {
+        if (DesktopModeFlags.ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS.isTrue()) {
             systemShortcuts.add(createKeyGesture(
                     KeyEvent.KEYCODE_LEFT_BRACKET,
                     KeyEvent.META_META_ON,

@@ -23,10 +23,10 @@ import android.hardware.input.InputManager
 import android.hardware.input.InputManager.KeyGestureEventHandler
 import android.hardware.input.KeyGestureEvent
 import android.os.IBinder
+import android.window.DesktopModeFlags
 import com.android.hardware.input.Flags.manageKeyGestures
 import com.android.internal.protolog.ProtoLog
 import com.android.window.flags.Flags.enableMoveToNextDisplayShortcut
-import com.android.window.flags.Flags.enableTaskResizingKeyboardShortcuts
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.ShellExecutor
@@ -144,7 +144,8 @@ class DesktopModeKeyGestureHandler(
             KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW,
             KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAXIMIZE_FREEFORM_WINDOW,
             KeyGestureEvent.KEY_GESTURE_TYPE_MINIMIZE_FREEFORM_WINDOW ->
-                enableTaskResizingKeyboardShortcuts() && manageKeyGestures()
+                DesktopModeFlags.ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS.isTrue &&
+                    manageKeyGestures()
             else -> false
         }
 

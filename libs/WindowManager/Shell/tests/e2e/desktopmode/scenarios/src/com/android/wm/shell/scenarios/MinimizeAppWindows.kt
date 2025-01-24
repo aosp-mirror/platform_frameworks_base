@@ -21,6 +21,7 @@ import android.tools.NavBar
 import android.tools.Rotation
 import android.tools.flicker.rules.ChangeDisplayOrientationRule
 import android.tools.traces.parsers.WindowManagerStateHelper
+import android.window.DesktopModeFlags
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
@@ -62,7 +63,7 @@ constructor(
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() && tapl.isTablet)
         Assume.assumeTrue(Flags.enableMinimizeButton())
         if (usingKeyboard) {
-            Assume.assumeTrue(Flags.enableTaskResizingKeyboardShortcuts())
+            Assume.assumeTrue(DesktopModeFlags.ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS.isTrue)
         }
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)

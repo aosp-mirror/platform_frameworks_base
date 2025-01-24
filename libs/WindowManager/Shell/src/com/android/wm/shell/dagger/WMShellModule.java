@@ -37,6 +37,7 @@ import android.os.UserManager;
 import android.view.Choreographer;
 import android.view.IWindowManager;
 import android.view.WindowManager;
+import android.window.DesktopModeFlags;
 
 import androidx.annotation.OptIn;
 
@@ -929,7 +930,7 @@ public abstract class WMShellModule {
         if (DesktopModeStatus.canEnterDesktopMode(context) && useKeyGestureEventHandler()
                 && manageKeyGestures()
                 && (Flags.enableMoveToNextDisplayShortcut()
-                || Flags.enableTaskResizingKeyboardShortcuts())) {
+                || DesktopModeFlags.ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS.isTrue())) {
             return Optional.of(new DesktopModeKeyGestureHandler(context,
                     desktopModeWindowDecorViewModel, desktopTasksController,
                     inputManager, shellTaskOrganizer, focusTransitionObserver,
