@@ -155,7 +155,7 @@ internal fun <T : AppRecord> TogglePermissionAppListModel<T>.TogglePermissionApp
         }
         RestrictedSwitchPreference(
             model = switchModel,
-            restrictions = getRestrictions(userId, packageName),
+            restrictions = getRestrictions(userId, packageName, isAllowed()),
             ifBlockedByAdminOverrideCheckedValueTo = switchifBlockedByAdminOverrideCheckedValueTo,
             restrictionsProviderFactory = restrictionsProviderFactory,
         )

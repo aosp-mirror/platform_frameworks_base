@@ -149,13 +149,14 @@ internal class TogglePermissionInternalAppListModel<T : AppRecord>(
 
     @Composable
     fun getSummary(record: T): () -> String {
+        val allowed = listModel.isAllowed(record)
         val restrictions =
             listModel.getRestrictions(
                 userId = record.app.userId,
                 packageName = record.app.packageName,
+                allowed()
             )
         val restrictedMode by restrictionsProviderFactory.rememberRestrictedMode(restrictions)
-        val allowed = listModel.isAllowed(record)
         return RestrictedSwitchPreferenceModel.getSummary(
             context = context,
             summaryIfNoRestricted = { getSummaryIfNoRestricted(allowed()) },
