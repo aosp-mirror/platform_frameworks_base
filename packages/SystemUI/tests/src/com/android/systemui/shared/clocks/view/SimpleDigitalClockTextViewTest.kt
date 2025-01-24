@@ -19,11 +19,11 @@ import android.graphics.Typeface
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.plugins.clocks.ClockLogger
 import com.android.systemui.plugins.clocks.ClockMessageBuffers
 import com.android.systemui.plugins.clocks.ClockSettings
 import com.android.systemui.shared.clocks.ClockContext
 import com.android.systemui.shared.clocks.FontTextStyle
-import com.android.systemui.shared.clocks.LogUtil
 import com.android.systemui.shared.clocks.TypefaceCache
 import com.android.systemui.shared.clocks.view.SimpleDigitalClockTextView
 import org.junit.Assert.assertEquals
@@ -34,7 +34,7 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class SimpleDigitalClockTextViewTest : SysuiTestCase() {
-    private val messageBuffer = LogUtil.DEBUG_MESSAGE_BUFFER
+    private val messageBuffer = ClockLogger.DEBUG_MESSAGE_BUFFER
     private lateinit var underTest: SimpleDigitalClockTextView
     private val defaultLargeClockTextSize = 500F
     private val smallerTextSize = 300F

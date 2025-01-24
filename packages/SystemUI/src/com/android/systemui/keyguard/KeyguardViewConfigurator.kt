@@ -39,6 +39,8 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.dagger.KeyguardBlueprintLog
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.ShadeDisplayAware
@@ -89,6 +91,7 @@ constructor(
     private val wallpaperViewModel: WallpaperViewModel,
     @Main private val mainDispatcher: CoroutineDispatcher,
     private val msdlPlayer: MSDLPlayer,
+    @KeyguardBlueprintLog private val blueprintLog: LogBuffer,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -111,6 +114,7 @@ constructor(
                 keyguardBlueprintViewModel,
                 keyguardClockViewModel,
                 smartspaceViewModel,
+                blueprintLog,
             )
         }
         if (deviceEntryUnlockTrackerViewBinder.isPresent) {
@@ -151,6 +155,7 @@ constructor(
                 statusBarKeyguardViewManager,
                 mainDispatcher,
                 msdlPlayer,
+                blueprintLog,
             )
     }
 
