@@ -5084,39 +5084,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final List<String> permittedServices = dpm.getPermittedAccessibilityServices(userId);
 
             // permittedServices null means all accessibility services are allowed.
-            boolean allowed = permittedServices == null || permittedServices.contains(packageName);
-            if (allowed) {
-                if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
-                        && android.security.Flags.extendEcmToAllSettings()) {
-                    try {
-                        final EnhancedConfirmationManager userContextEcm =
-                                mContext.createContextAsUser(UserHandle.of(userId), /* flags = */ 0)
-                                        .getSystemService(EnhancedConfirmationManager.class);
-                        if (userContextEcm != null) {
-                            return !userContextEcm.isRestricted(packageName,
-                                    AppOpsManager.OPSTR_BIND_ACCESSIBILITY_SERVICE);
-                        }
-                        return false;
-                    } catch (PackageManager.NameNotFoundException e) {
-                        Log.e(LOG_TAG, "Exception when retrieving package:" + packageName, e);
-                        return false;
-                    }
-                } else {
-                    try {
-                        final int mode = mContext.getSystemService(AppOpsManager.class)
-                                .noteOpNoThrow(AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
-                                        uid, packageName);
-                        final boolean ecmEnabled = mContext.getResources().getBoolean(
-                                com.android.internal.R.bool.config_enhancedConfirmationModeEnabled);
-                        return !ecmEnabled || mode == AppOpsManager.MODE_ALLOWED
-                                || mode == AppOpsManager.MODE_DEFAULT;
-                    } catch (Exception e) {
-                        // Fallback in case if app ops is not available in testing.
-                        return false;
-                    }
-                }
-            }
-            return false;
+            return permittedServices == null || permittedServices.contains(packageName);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

@@ -68,7 +68,6 @@ import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.app.admin.DevicePolicyManager;
-import android.app.ecm.EnhancedConfirmationManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -2117,23 +2116,6 @@ public class AccessibilityManagerServiceTest {
 
         assertThat(mA11yms.getShortcutTypeForGenericShortcutCalls(userState.mUserId))
                 .isEqualTo(SOFTWARE);
-    }
-
-    @Test
-    @EnableFlags({android.permission.flags.Flags.FLAG_ENHANCED_CONFIRMATION_MODE_APIS_ENABLED,
-            android.security.Flags.FLAG_EXTEND_ECM_TO_ALL_SETTINGS})
-    public void isAccessibilityTargetAllowed_nonSystemUserId_useEcmWithNonSystemUserId() {
-        String fakePackageName = "FAKE_PACKAGE_NAME";
-        int uid = 0; // uid is not used in the actual implementation when flags are on
-        int userId = mTestableContext.getUserId() + 1234;
-        when(mDevicePolicyManager.getPermittedAccessibilityServices(userId)).thenReturn(
-                List.of(fakePackageName));
-        Context mockUserContext = mock(Context.class);
-        mTestableContext.addMockUserContext(userId, mockUserContext);
-
-        mA11yms.isAccessibilityTargetAllowed(fakePackageName, uid, userId);
-
-        verify(mockUserContext).getSystemService(EnhancedConfirmationManager.class);
     }
 
     @Test
