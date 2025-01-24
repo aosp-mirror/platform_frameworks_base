@@ -49,8 +49,10 @@ import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.android.systemui.inputdevice.tutorial.ui.composable.DoneButton
+import com.android.systemui.keyboard.shortcut.ui.composable.hasCompactWindowSize
 import com.android.systemui.res.R
 import com.android.systemui.touchpad.tutorial.ui.gesture.isFourFingerTouchpadSwipe
 import com.android.systemui.touchpad.tutorial.ui.gesture.isThreeFingerTouchpadSwipe
@@ -80,6 +82,7 @@ fun TutorialSelectionScreen(
                     }
                 ),
     ) {
+        val padding = if (hasCompactWindowSize()) 24.dp else 60.dp
         val configuration = LocalConfiguration.current
         when (configuration.orientation) {
             Configuration.ORIENTATION_LANDSCAPE -> {
@@ -88,7 +91,7 @@ fun TutorialSelectionScreen(
                     onHomeTutorialClicked = onHomeTutorialClicked,
                     onRecentAppsTutorialClicked = onRecentAppsTutorialClicked,
                     onSwitchAppsTutorialClicked = onSwitchAppsTutorialClicked,
-                    modifier = Modifier.weight(1f).padding(60.dp),
+                    modifier = Modifier.weight(1f).padding(padding),
                     lastSelectedScreen,
                 )
             }
@@ -98,7 +101,7 @@ fun TutorialSelectionScreen(
                     onHomeTutorialClicked = onHomeTutorialClicked,
                     onRecentAppsTutorialClicked = onRecentAppsTutorialClicked,
                     onSwitchAppsTutorialClicked = onSwitchAppsTutorialClicked,
-                    modifier = Modifier.weight(1f).padding(60.dp),
+                    modifier = Modifier.weight(1f).padding(padding),
                     lastSelectedScreen,
                 )
             }
@@ -106,7 +109,7 @@ fun TutorialSelectionScreen(
         // because other composables have weight 1, Done button will be positioned first
         DoneButton(
             onDoneButtonClicked = onDoneButtonClicked,
-            modifier = Modifier.padding(horizontal = 60.dp),
+            modifier = Modifier.padding(horizontal = padding),
         )
     }
 }
@@ -146,7 +149,7 @@ private fun VerticalSelectionButtons(
     lastSelectedScreen: Screen,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier,
     ) {
@@ -244,8 +247,13 @@ private fun TutorialButton(
                 modifier = Modifier.width(30.dp).height(30.dp),
                 tint = iconColor,
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = text, style = MaterialTheme.typography.headlineLarge, color = iconColor)
+            if (!hasCompactWindowSize()) Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = text,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.headlineLarge,
+                color = iconColor,
+            )
         }
     }
 }
