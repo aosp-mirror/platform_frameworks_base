@@ -28,8 +28,10 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.Manifest;
 import android.app.AppOpsManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
@@ -94,6 +96,10 @@ public class AbsoluteVolumeBehaviorTest {
         when(mContext.getResources()).thenReturn(mResources);
         when(mResources.getBoolean(com.android.internal.R.bool.config_useFixedVolume))
                 .thenReturn(false);
+
+        when(mContext.checkCallingOrSelfPermission(
+                 Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED))
+                 .thenReturn(PackageManager.PERMISSION_GRANTED);
 
         mSpyAudioSystem = spy(new NoOpAudioSystemAdapter());
         mSystemServer = new NoOpSystemServerAdapter();
