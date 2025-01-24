@@ -2154,6 +2154,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    /**
+     * @return ehether the application could be universal resizeable on a large screen,
+     * ignoring any overrides
+     */
+    @Override
+    public boolean canBeUniversalResizeable(@NonNull ApplicationInfo appInfo) {
+        return ActivityRecord.canBeUniversalResizeable(appInfo, mWindowManager,
+                /* isLargeScreen */ true, /* forActivity */ false);
+    }
+
     @Override
     public void removeAllVisibleRecentTasks() {
         mAmInternal.enforceCallingPermission(REMOVE_TASKS, "removeAllVisibleRecentTasks()");

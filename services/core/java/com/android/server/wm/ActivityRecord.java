@@ -3231,8 +3231,8 @@ final class ActivityRecord extends WindowToken {
      * Returns {@code true} if the fixed orientation, aspect ratio, resizability of the application
      * can be ignored.
      */
-    static boolean canBeUniversalResizeable(ApplicationInfo appInfo, WindowManagerService wms,
-            boolean isLargeScreen, boolean forActivity) {
+    static boolean canBeUniversalResizeable(@NonNull ApplicationInfo appInfo,
+            WindowManagerService wms, boolean isLargeScreen, boolean forActivity) {
         if (appInfo.category == ApplicationInfo.CATEGORY_GAME) {
             return false;
         }
