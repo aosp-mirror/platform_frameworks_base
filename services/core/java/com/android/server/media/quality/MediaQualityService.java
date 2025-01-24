@@ -1472,7 +1472,13 @@ public class MediaQualityService extends SystemService {
             RemoteCallbackList<IPictureProfileCallback> {
         @Override
         public void onCallbackDied(IPictureProfileCallback callback) {
-            //todo
+            synchronized ("mPictureProfileLock") {    //TODO: Change to lock
+                for (int i = 0; i < mUserStates.size(); i++) {
+                    int userId = mUserStates.keyAt(i);
+                    UserState userState = getOrCreateUserStateLocked(userId);
+                    userState.mPictureProfileCallbackPidUidMap.remove(callback);
+                }
+            }
         }
     }
 
@@ -1480,7 +1486,13 @@ public class MediaQualityService extends SystemService {
             RemoteCallbackList<ISoundProfileCallback> {
         @Override
         public void onCallbackDied(ISoundProfileCallback callback) {
-            //todo
+            synchronized ("mSoundProfileLock") {    //TODO: Change to lock
+                for (int i = 0; i < mUserStates.size(); i++) {
+                    int userId = mUserStates.keyAt(i);
+                    UserState userState = getOrCreateUserStateLocked(userId);
+                    userState.mSoundProfileCallbackPidUidMap.remove(callback);
+                }
+            }
         }
     }
 
