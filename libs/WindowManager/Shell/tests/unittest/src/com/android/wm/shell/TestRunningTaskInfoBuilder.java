@@ -40,6 +40,7 @@ public final class TestRunningTaskInfoBuilder {
 
     private WindowContainerToken mToken = createMockWCToken();
     private int mParentTaskId = INVALID_TASK_ID;
+    private int mTaskId = INVALID_TASK_ID;
     private Intent mBaseIntent = new Intent();
     private @WindowConfiguration.ActivityType int mActivityType = ACTIVITY_TYPE_STANDARD;
     private @WindowConfiguration.WindowingMode int mWindowingMode = WINDOWING_MODE_UNDEFINED;
@@ -70,6 +71,12 @@ public final class TestRunningTaskInfoBuilder {
 
     public TestRunningTaskInfoBuilder setParentTaskId(int taskId) {
         mParentTaskId = taskId;
+        return this;
+    }
+
+    /** Sets the task info's UID. */
+    public TestRunningTaskInfoBuilder setTaskId(int taskId) {
+        mTaskId = taskId;
         return this;
     }
 
@@ -132,7 +139,7 @@ public final class TestRunningTaskInfoBuilder {
 
     public ActivityManager.RunningTaskInfo build() {
         final ActivityManager.RunningTaskInfo info = new ActivityManager.RunningTaskInfo();
-        info.taskId = sNextTaskId++;
+        info.taskId = (mTaskId == INVALID_TASK_ID) ? sNextTaskId++ : mTaskId;
         info.baseIntent = mBaseIntent;
         info.parentTaskId = mParentTaskId;
         info.displayId = mDisplayId;
