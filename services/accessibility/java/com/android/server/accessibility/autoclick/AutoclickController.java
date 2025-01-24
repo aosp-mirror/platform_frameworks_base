@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.server.accessibility;
+package com.android.server.accessibility.autoclick;
 
 import static android.view.MotionEvent.BUTTON_PRIMARY;
 import static android.view.accessibility.AccessibilityManager.AUTOCLICK_CURSOR_AREA_SIZE_DEFAULT;
 import static android.view.accessibility.AccessibilityManager.AUTOCLICK_DELAY_DEFAULT;
 import static android.view.accessibility.AccessibilityManager.AUTOCLICK_IGNORE_MINOR_CURSOR_MOVEMENT_DEFAULT;
 
-import static com.android.server.accessibility.AutoclickIndicatorView.SHOW_INDICATOR_DELAY_TIME;
+import static com.android.server.accessibility.autoclick.AutoclickIndicatorView.SHOW_INDICATOR_DELAY_TIME;
 
 import android.accessibilityservice.AccessibilityTrace;
 import android.annotation.NonNull;
@@ -43,6 +43,9 @@ import android.view.WindowManager;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.accessibility.util.AccessibilityUtils;
+import com.android.server.accessibility.AccessibilityTraceManager;
+import com.android.server.accessibility.BaseEventStreamTransformation;
+import com.android.server.accessibility.Flags;
 
 /**
  * Implements "Automatically click on mouse stop" feature.
