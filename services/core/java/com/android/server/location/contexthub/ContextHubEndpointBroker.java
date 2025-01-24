@@ -42,6 +42,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -372,10 +373,12 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
 
     /* package */ void onEndpointSessionOpenRequest(
             int sessionId, HubEndpointInfo initiator, String serviceDescriptor) {
-        boolean success =
+        Optional<Byte> error =
                 onEndpointSessionOpenRequestInternal(sessionId, initiator, serviceDescriptor);
-        if (!success) {
-            cleanupSessionResources(sessionId);
+        if (error.isPresent()) {
+            halCloseEndpointSessionNoThrow(sessionId, error.get());
+            onCloseEndpointSession(sessionId, error.get());
+            // Resource cleanup is done in onCloseEndpointSession
         }
     }
 
@@ -422,7 +425,7 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         }
     }
 
-    private boolean onEndpointSessionOpenRequestInternal(
+    private Optional<Byte> onEndpointSessionOpenRequestInternal(
             int sessionId, HubEndpointInfo initiator, String serviceDescriptor) {
         if (!hasEndpointPermissions(initiator)) {
             Log.e(
@@ -431,22 +434,21 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
                             + initiator
                             + " doesn't have permission for "
                             + mEndpointInfo);
-            halCloseEndpointSessionNoThrow(sessionId, Reason.PERMISSION_DENIED);
-            return false;
+            return Optional.of(Reason.PERMISSION_DENIED);
         }
 
         synchronized (mOpenSessionLock) {
             if (hasSessionId(sessionId)) {
                 Log.e(TAG, "Existing session in onEndpointSessionOpenRequest: id=" + sessionId);
-                halCloseEndpointSessionNoThrow(sessionId, Reason.UNSPECIFIED);
-                return false;
+                return Optional.of(Reason.UNSPECIFIED);
             }
             mSessionInfoMap.put(sessionId, new SessionInfo(initiator, true));
         }
 
-        return invokeCallback(
+        boolean success = invokeCallback(
                 (consumer) ->
                         consumer.onSessionOpenRequest(sessionId, initiator, serviceDescriptor));
+        return success ? Optional.empty() : Optional.of(Reason.UNSPECIFIED);
     }
 
     private byte onMessageReceivedInternal(int sessionId, HubMessage message) {
