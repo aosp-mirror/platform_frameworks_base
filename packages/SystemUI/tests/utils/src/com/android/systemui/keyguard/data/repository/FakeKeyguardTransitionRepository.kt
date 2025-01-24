@@ -124,8 +124,8 @@ class FakeKeyguardTransitionRepository(
     /**
      * Sends TransitionSteps between [from] and [to], calling [runCurrent] after each step.
      *
-     * By default, sends steps through FINISHED (STARTED, RUNNING, FINISHED) but can be halted part
-     * way using [throughTransitionState].
+     * By default, sends steps through FINISHED (STARTED, RUNNING @0.5f, RUNNING @1f, FINISHED) but
+     * can be halted part way using [throughTransitionState].
      */
     suspend fun sendTransitionSteps(
         from: KeyguardState,
@@ -134,6 +134,25 @@ class FakeKeyguardTransitionRepository(
         throughTransitionState: TransitionState = TransitionState.FINISHED,
     ) {
         sendTransitionSteps(from, to, testScope.testScheduler, throughTransitionState)
+    }
+
+    /**
+     * Sends a STARTED step between [from] and [to], followed by two RUNNING steps at value
+     * [throughValue] / 2 and [throughValue], calling [runCurrent] after each step.
+     */
+    suspend fun sendTransitionStepsThroughRunning(
+        from: KeyguardState,
+        to: KeyguardState,
+        testScope: TestScope,
+        throughValue: Float = 1f,
+    ) {
+        sendTransitionSteps(
+            from,
+            to,
+            testScope.testScheduler,
+            TransitionState.RUNNING,
+            throughValue,
+        )
     }
 
     /**
@@ -178,14 +197,15 @@ class FakeKeyguardTransitionRepository(
     /**
      * Sends TransitionSteps between [from] and [to], calling [runCurrent] after each step.
      *
-     * By default, sends steps through FINISHED (STARTED, RUNNING, FINISHED) but can be halted part
-     * way using [throughTransitionState].
+     * By default, sends steps through FINISHED (STARTED, RUNNING @0.5f, RUNNING @1f, FINISHED) but
+     * can be halted part way using [throughTransitionState].
      */
     suspend fun sendTransitionSteps(
         from: KeyguardState,
         to: KeyguardState,
         testScheduler: TestCoroutineScheduler,
         throughTransitionState: TransitionState = TransitionState.FINISHED,
+        throughTransitionValue: Float = 1f,
     ) {
         val lastStep = _transitions.replayCache.lastOrNull()
         if (lastStep != null && lastStep.transitionState != TransitionState.FINISHED) {
@@ -216,13 +236,14 @@ class FakeKeyguardTransitionRepository(
             throughTransitionState == TransitionState.RUNNING ||
                 throughTransitionState == TransitionState.FINISHED
         ) {
+            // Send two steps to better simulate RUNNING transitions.
             sendTransitionStep(
                 step =
                     TransitionStep(
                         transitionState = TransitionState.RUNNING,
                         from = from,
                         to = to,
-                        value = 0.5f,
+                        value = throughTransitionValue / 2f,
                     )
             )
             testScheduler.runCurrent()
@@ -233,7 +254,7 @@ class FakeKeyguardTransitionRepository(
                         transitionState = TransitionState.RUNNING,
                         from = from,
                         to = to,
-                        value = 1f,
+                        value = throughTransitionValue,
                     )
             )
             testScheduler.runCurrent()

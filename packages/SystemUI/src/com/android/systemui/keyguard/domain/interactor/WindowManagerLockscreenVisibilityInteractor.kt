@@ -24,7 +24,6 @@ import com.android.systemui.Flags.transitionRaceCondition
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
-import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.Companion.deviceIsAsleepInState
@@ -331,17 +330,9 @@ constructor(
      * clock/smartspace/notif icons are visible.
      */
     val aodVisibility: Flow<Boolean> =
-        combine(
-                keyguardInteractor.isDozing,
-                keyguardInteractor.isAodAvailable,
-                keyguardInteractor.biometricUnlockState,
-            ) { isDozing, isAodAvailable, biometricUnlockState ->
-                // AOD is visible if we're dozing, unless we are wake and unlocking (where we go
-                // directly from AOD to unlocked while dozing).
-                isDozing &&
-                    isAodAvailable &&
-                    !BiometricUnlockMode.isWakeAndUnlock(biometricUnlockState.mode)
-            }
+        transitionInteractor
+            .transitionValue(KeyguardState.AOD)
+            .map { it == 1f }
             .distinctUntilChanged()
 
     companion object {

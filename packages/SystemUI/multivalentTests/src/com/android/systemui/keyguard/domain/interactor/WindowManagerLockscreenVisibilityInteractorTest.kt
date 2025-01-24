@@ -1045,6 +1045,41 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
             assertThat(usingKeyguardGoingAwayAnimation).isFalse()
         }
 
+    @Test
+    fun aodVisibility_visibleFullyInAod_falseOtherwise() =
+        testScope.runTest {
+            val aodVisibility by collectValues(underTest.value.aodVisibility)
+
+            transitionRepository.sendTransitionStepsThroughRunning(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.AOD,
+                testScope,
+                throughValue = 0.5f,
+            )
+
+            assertEquals(listOf(false), aodVisibility)
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.FINISHED,
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.AOD,
+                )
+            )
+            runCurrent()
+
+            assertEquals(listOf(false, true), aodVisibility)
+
+            transitionRepository.sendTransitionStepsThroughRunning(
+                from = KeyguardState.AOD,
+                to = KeyguardState.GONE,
+                testScope,
+            )
+            runCurrent()
+
+            assertEquals(listOf(false, true, false), aodVisibility)
+        }
+
     companion object {
         private val progress = MutableStateFlow(0f)
 
