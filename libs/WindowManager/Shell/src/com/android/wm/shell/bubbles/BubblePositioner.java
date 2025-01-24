@@ -87,6 +87,7 @@ public class BubblePositioner {
     private int mExpandedViewLargeScreenWidth;
     private int mExpandedViewLargeScreenInsetClosestEdge;
     private int mExpandedViewLargeScreenInsetFurthestEdge;
+    private int mExpandedViewBubbleBarWidth;
 
     private int mOverflowWidth;
     private int mExpandedViewPadding;
@@ -158,12 +159,13 @@ public class BubblePositioner {
         mBubbleOffscreenAmount = res.getDimensionPixelSize(R.dimen.bubble_stack_offscreen);
         mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
         mBubbleElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
+        mExpandedViewBubbleBarWidth = Math.min(
+                res.getDimensionPixelSize(R.dimen.bubble_bar_expanded_view_width),
+                mPositionRect.width() - 2 * mExpandedViewPadding
+        );
 
         if (mShowingInBubbleBar) {
-            mExpandedViewLargeScreenWidth = Math.min(
-                    res.getDimensionPixelSize(R.dimen.bubble_bar_expanded_view_width),
-                    mPositionRect.width() - 2 * mExpandedViewPadding
-            );
+            mExpandedViewLargeScreenWidth = mExpandedViewBubbleBarWidth;
         } else if (mDeviceConfig.isSmallTablet()) {
             mExpandedViewLargeScreenWidth = (int) (bounds.width()
                     * EXPANDED_VIEW_SMALL_TABLET_WIDTH_PERCENT);
@@ -888,7 +890,7 @@ public class BubblePositioner {
      * How wide the expanded view should be when showing from the bubble bar.
      */
     public int getExpandedViewWidthForBubbleBar(boolean isOverflow) {
-        return isOverflow ? mOverflowWidth : mExpandedViewLargeScreenWidth;
+        return isOverflow ? mOverflowWidth : mExpandedViewBubbleBarWidth;
     }
 
     /**
