@@ -29,6 +29,8 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.tv.mediaquality.AmbientBacklightColorFormat;
+import android.hardware.tv.mediaquality.DolbyAudioProcessing;
+import android.hardware.tv.mediaquality.DtsVirtualX;
 import android.hardware.tv.mediaquality.IMediaQuality;
 import android.hardware.tv.mediaquality.PictureParameter;
 import android.hardware.tv.mediaquality.PictureParameters;
@@ -775,6 +777,7 @@ public class MediaQualityService extends SystemService {
 
         private SoundParameter[] convertPersistableBundleToSoundParameterList(
                 PersistableBundle params) {
+            //TODO: set EqualizerDetail
             List<SoundParameter> soundParams = new ArrayList<>();
             if (params.containsKey(SoundQuality.PARAMETER_BALANCE)) {
                 soundParams.add(SoundParameter.balance(params.getInt(
@@ -811,15 +814,54 @@ public class MediaQualityService extends SystemService {
                 soundParams.add(SoundParameter.surroundSoundEnabled(params.getBoolean(
                         SoundQuality.PARAMETER_DIGITAL_OUTPUT_DELAY_MILLIS)));
             }
-            //TODO: equalizerDetail
-            //TODO: downmixMode
-            //TODO: enhancedAudioReturnChannelEnabled
-            //TODO: dolbyAudioProcessing
-            //TODO: dolbyDialogueEnhancer
-            //TODO: dtsVirtualX
-            //TODO: digitalOutput
-            //TODO: activeProfile
-            //TODO: soundStyle
+            if (params.containsKey(SoundQuality.PARAMETER_EARC)) {
+                soundParams.add(SoundParameter.enhancedAudioReturnChannelEnabled(params.getBoolean(
+                        SoundQuality.PARAMETER_EARC)));
+            }
+            if (params.containsKey(SoundQuality.PARAMETER_DOWN_MIX_MODE)) {
+                soundParams.add(SoundParameter.downmixMode((byte) params.getInt(
+                        SoundQuality.PARAMETER_DOWN_MIX_MODE)));
+            }
+            if (params.containsKey(SoundQuality.PARAMETER_ACTIVE_PROFILE)) {
+                soundParams.add(SoundParameter.activeProfile(params.getBoolean(
+                        SoundQuality.PARAMETER_ACTIVE_PROFILE)));
+            }
+            if (params.containsKey(SoundQuality.PARAMETER_SOUND_STYLE)) {
+                soundParams.add(SoundParameter.soundStyle((byte) params.getInt(
+                        SoundQuality.PARAMETER_SOUND_STYLE)));
+            }
+            if (params.containsKey(SoundQuality.PARAMETER_DIGITAL_OUTPUT_MODE)) {
+                soundParams.add(SoundParameter.digitalOutput((byte) params.getInt(
+                        SoundQuality.PARAMETER_DIGITAL_OUTPUT_MODE)));
+            }
+            if (params.containsKey(SoundQuality.PARAMETER_DIALOGUE_ENHANCER)) {
+                soundParams.add(SoundParameter.dolbyDialogueEnhancer((byte) params.getInt(
+                        SoundQuality.PARAMETER_DIALOGUE_ENHANCER)));
+            }
+
+            DolbyAudioProcessing dab = new DolbyAudioProcessing();
+            dab.soundMode =
+                    (byte) params.getInt(SoundQuality.PARAMETER_DOLBY_AUDIO_PROCESSING_SOUND_MODE);
+            dab.volumeLeveler =
+                    params.getBoolean(SoundQuality.PARAMETER_DOLBY_AUDIO_PROCESSING_VOLUME_LEVELER);
+            dab.surroundVirtualizer = params.getBoolean(
+                    SoundQuality.PARAMETER_DOLBY_AUDIO_PROCESSING_SURROUND_VIRTUALIZER);
+            dab.dolbyAtmos =
+                    params.getBoolean(SoundQuality.PARAMETER_DOLBY_AUDIO_PROCESSING_DOLBY_ATMOS);
+            soundParams.add(SoundParameter.dolbyAudioProcessing(dab));
+
+            DtsVirtualX dts = new DtsVirtualX();
+            dts.tbHdx = params.getBoolean(SoundQuality.PARAMETER_DTS_VIRTUAL_X_TBHDX);
+            dts.limiter = params.getBoolean(SoundQuality.PARAMETER_DTS_VIRTUAL_X_LIMITER);
+            dts.truSurroundX = params.getBoolean(
+                    SoundQuality.PARAMETER_DTS_VIRTUAL_X_TRU_SURROUND_X);
+            dts.truVolumeHd = params.getBoolean(SoundQuality.PARAMETER_DTS_VIRTUAL_X_TRU_VOLUME_HD);
+            dts.dialogClarity = params.getBoolean(
+                    SoundQuality.PARAMETER_DTS_VIRTUAL_X_DIALOG_CLARITY);
+            dts.definition = params.getBoolean(SoundQuality.PARAMETER_DTS_VIRTUAL_X_DEFINITION);
+            dts.height = params.getBoolean(SoundQuality.PARAMETER_DTS_VIRTUAL_X_HEIGHT);
+            soundParams.add(SoundParameter.dtsVirtualX(dts));
+
             return  (SoundParameter[]) soundParams.toArray();
         }
 
