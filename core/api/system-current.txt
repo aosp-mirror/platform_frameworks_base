@@ -464,7 +464,7 @@ package android {
 
   public static final class R.attr {
     field public static final int allowClearUserDataOnFailedRestore = 16844288; // 0x1010600
-    field @FlaggedApi("android.permission.flags.replace_body_sensor_permission_enabled") public static final int backgroundPermission;
+    field @FlaggedApi("android.permission.flags.replace_body_sensor_permission_enabled") public static final int backgroundPermission = 16844455; // 0x10106a7
     field @FlaggedApi("android.content.res.manifest_flagging") public static final int featureFlag = 16844428; // 0x101068c
     field public static final int gameSessionService = 16844373; // 0x1010655
     field public static final int hotwordDetectionService = 16844326; // 0x1010626
@@ -543,7 +543,7 @@ package android {
     field public static final int config_systemCallStreaming = 17039431; // 0x1040047
     field public static final int config_systemCompanionDeviceProvider = 17039417; // 0x1040039
     field public static final int config_systemContacts = 17039403; // 0x104002b
-    field @FlaggedApi("android.content.pm.sdk_dependency_installer") public static final int config_systemDependencyInstaller;
+    field @FlaggedApi("android.content.pm.sdk_dependency_installer") public static final int config_systemDependencyInstaller = 17039434; // 0x104004a
     field public static final int config_systemFinancedDeviceController = 17039430; // 0x1040046
     field public static final int config_systemGallery = 17039399; // 0x1040027
     field public static final int config_systemNotificationIntelligence = 17039413; // 0x1040035
@@ -555,7 +555,7 @@ package android {
     field public static final int config_systemTextIntelligence = 17039414; // 0x1040036
     field public static final int config_systemUi = 17039418; // 0x104003a
     field public static final int config_systemUiIntelligence = 17039410; // 0x1040032
-    field @FlaggedApi("android.permission.flags.system_vendor_intelligence_role_enabled") public static final int config_systemVendorIntelligence;
+    field @FlaggedApi("android.permission.flags.system_vendor_intelligence_role_enabled") public static final int config_systemVendorIntelligence = 17039435; // 0x104004b
     field public static final int config_systemVisualIntelligence = 17039415; // 0x1040037
     field public static final int config_systemWearHealthService = 17039428; // 0x1040044
     field public static final int config_systemWellbeing = 17039408; // 0x1040030
