@@ -24,7 +24,7 @@ import android.view.MotionEvent;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 
 // Next ID: 39
-oneway interface IOverviewProxy {
+oneway interface ILauncherProxy {
 
     void onActiveNavBarRegionChanges(in Region activeRegion) = 11;
 
@@ -140,7 +140,7 @@ oneway interface IOverviewProxy {
     void appTransitionPending(boolean pending) = 34;
 
     /**
-     * Sent right after OverviewProxy calls unbindService() on the TouchInteractionService.
+     * Sent right after LauncherProxyService calls unbindService() on the TouchInteractionService.
      * TouchInteractionService is expected to send the reply once it has finished cleaning up.
      */
     void onUnbind(IRemoteCallback reply) = 35;

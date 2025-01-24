@@ -70,7 +70,7 @@ import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.recents.LauncherProxyService;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -152,7 +152,7 @@ public class NotificationLockscreenUserManagerImpl implements
     private final List<UserChangedListener> mListeners = new ArrayList<>();
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final NotificationClickNotifier mClickNotifier;
-    private final Lazy<OverviewProxyService> mOverviewProxyServiceLazy;
+    private final Lazy<LauncherProxyService> mLauncherProxyServiceLazy;
     private final FeatureFlagsClassic mFeatureFlags;
     private boolean mShowLockscreenNotifications;
     private LockPatternUtils mLockPatternUtils;
@@ -235,8 +235,8 @@ public class NotificationLockscreenUserManagerImpl implements
                 if (!keyguardPrivateNotifications()) {
                     // Start the overview connection to the launcher service
                     // Connect if user hasn't connected yet
-                    if (mOverviewProxyServiceLazy.get().getProxy() == null) {
-                        mOverviewProxyServiceLazy.get().startConnectionToCurrentUser();
+                    if (mLauncherProxyServiceLazy.get().getProxy() == null) {
+                        mLauncherProxyServiceLazy.get().startConnectionToCurrentUser();
                     }
                 }
             } else if (Objects.equals(action, NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION)) {
@@ -318,7 +318,7 @@ public class NotificationLockscreenUserManagerImpl implements
             Lazy<NotificationVisibilityProvider> visibilityProviderLazy,
             Lazy<CommonNotifCollection> commonNotifCollectionLazy,
             NotificationClickNotifier clickNotifier,
-            Lazy<OverviewProxyService> overviewProxyServiceLazy,
+            Lazy<LauncherProxyService> launcherProxyServiceLazy,
             KeyguardManager keyguardManager,
             StatusBarStateController statusBarStateController,
             @Main Executor mainExecutor,
@@ -343,7 +343,7 @@ public class NotificationLockscreenUserManagerImpl implements
         mVisibilityProviderLazy = visibilityProviderLazy;
         mCommonNotifCollectionLazy = commonNotifCollectionLazy;
         mClickNotifier = clickNotifier;
-        mOverviewProxyServiceLazy = overviewProxyServiceLazy;
+        mLauncherProxyServiceLazy = launcherProxyServiceLazy;
         statusBarStateController.addCallback(this);
         mLockPatternUtils = lockPatternUtils;
         mKeyguardManager = keyguardManager;

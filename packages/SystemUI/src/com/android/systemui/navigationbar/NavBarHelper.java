@@ -77,7 +77,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
-import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.recents.LauncherProxyService;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.Flags;
@@ -115,7 +115,7 @@ public final class NavBarHelper implements
         AccessibilityButtonModeObserver.ModeChangedListener,
         AccessibilityButtonTargetsObserver.TargetsChangedListener,
         AccessibilityGestureTargetsObserver.TargetsChangedListener,
-        OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener,
+        LauncherProxyService.LauncherProxyListener, NavigationModeController.ModeChangedListener,
         Dumpable, CommandQueue.Callbacks, ConfigurationController.ConfigurationListener {
     private static final String TAG = NavBarHelper.class.getSimpleName();
 
@@ -199,7 +199,7 @@ public final class NavBarHelper implements
             AccessibilityButtonTargetsObserver accessibilityButtonTargetsObserver,
             AccessibilityGestureTargetsObserver accessibilityGestureTargetsObserver,
             SystemActions systemActions,
-            OverviewProxyService overviewProxyService,
+            LauncherProxyService launcherProxyService,
             Lazy<AssistManager> assistManagerLazy,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             KeyguardStateController keyguardStateController,
@@ -240,7 +240,7 @@ public final class NavBarHelper implements
         mNavBarMode = navigationModeController.addListener(this);
         mCommandQueue.addCallback(this);
         configurationController.addCallback(this);
-        overviewProxyService.addCallback(this);
+        launcherProxyService.addCallback(this);
         dumpManager.registerDumpable(this);
     }
 

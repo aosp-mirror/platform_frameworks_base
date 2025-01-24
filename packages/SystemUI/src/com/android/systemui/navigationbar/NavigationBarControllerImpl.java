@@ -52,7 +52,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.views.NavigationBar;
 import com.android.systemui.navigationbar.views.NavigationBarView;
-import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.recents.LauncherProxyService;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shared.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
@@ -115,7 +115,7 @@ public class NavigationBarControllerImpl implements
 
     @Inject
     public NavigationBarControllerImpl(Context context,
-            OverviewProxyService overviewProxyService,
+            LauncherProxyService launcherProxyService,
             NavigationModeController navigationModeController,
             SysUiState sysUiFlagsContainer,
             CommandQueue commandQueue,
@@ -145,7 +145,7 @@ public class NavigationBarControllerImpl implements
         mNavMode = navigationModeController.addListener(this);
         mNavBarHelper = navBarHelper;
         mTaskbarDelegate = taskbarDelegate;
-        mTaskbarDelegate.setDependencies(commandQueue, overviewProxyService,
+        mTaskbarDelegate.setDependencies(commandQueue, launcherProxyService,
                 navBarHelper, navigationModeController, sysUiFlagsContainer,
                 dumpManager, autoHideControllerStore.forDisplay(mContext.getDisplayId()),
                 lightBarController, pipOptional, backAnimation.orElse(null),

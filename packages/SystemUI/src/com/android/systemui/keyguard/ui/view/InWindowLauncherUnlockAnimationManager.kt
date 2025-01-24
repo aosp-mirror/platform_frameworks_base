@@ -76,9 +76,8 @@ constructor(
     private var manualUnlockAmount: Float? = null
 
     /**
-     * Called from [OverviewProxyService] to provide us with the launcher unlock animation
-     * controller, which can be used to start and update the unlock animation in the launcher
-     * process.
+     * Called from Launcher to provide us with the launcher unlock animation controller, which can
+     * be used to start and update the unlock animation in the launcher process.
      */
     override fun setLauncherUnlockController(
         activityClass: String,
@@ -117,7 +116,7 @@ constructor(
                 launcher.prepareForUnlock(
                     false,
                     Rect(),
-                    0
+                    0,
                 ) // TODO(b/293894758): Add smartspace animation support.
             }
         }
@@ -134,14 +133,14 @@ constructor(
             Log.e(
                 TAG,
                 "Called prepareForUnlock(), but not playUnlockAnimation(). " +
-                    "Failing-safe by calling setUnlockAmount(1f)"
+                    "Failing-safe by calling setUnlockAmount(1f)",
             )
             setUnlockAmount(1f, forceIfAnimating = true)
         } else if (manualUnlockSetButNotFullyVisible) {
             Log.e(
                 TAG,
                 "Unlock has ended, but manual unlock amount != 1f. " +
-                    "Failing-safe by calling setUnlockAmount(1f)"
+                    "Failing-safe by calling setUnlockAmount(1f)",
             )
             setUnlockAmount(1f, forceIfAnimating = true)
         }

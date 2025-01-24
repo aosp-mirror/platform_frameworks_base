@@ -39,7 +39,7 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.recents.LauncherProxyService;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -129,7 +129,7 @@ public class Dependency {
     @Inject Lazy<MetricsLogger> mMetricsLogger;
     @Inject Lazy<UiOffloadThread> mUiOffloadThread;
     @Inject Lazy<LightBarController> mLightBarController;
-    @Inject Lazy<OverviewProxyService> mOverviewProxyService;
+    @Inject Lazy<LauncherProxyService> mLauncherProxyService;
     @Inject Lazy<NavigationModeController> mNavBarModeController;
     @Inject Lazy<NavigationBarController> mNavigationBarController;
     @Inject Lazy<StatusBarStateController> mStatusBarStateController;
@@ -175,7 +175,7 @@ public class Dependency {
         mProviders.put(MetricsLogger.class, mMetricsLogger::get);
         mProviders.put(UiOffloadThread.class, mUiOffloadThread::get);
         mProviders.put(LightBarController.class, mLightBarController::get);
-        mProviders.put(OverviewProxyService.class, mOverviewProxyService::get);
+        mProviders.put(LauncherProxyService.class, mLauncherProxyService::get);
         mProviders.put(NavigationModeController.class, mNavBarModeController::get);
         mProviders.put(NavigationBarController.class, mNavigationBarController::get);
         mProviders.put(StatusBarStateController.class, mStatusBarStateController::get);

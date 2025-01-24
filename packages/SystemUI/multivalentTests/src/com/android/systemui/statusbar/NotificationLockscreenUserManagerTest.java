@@ -84,7 +84,7 @@ import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.log.LogWtfHandlerRule;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.recents.LauncherProxyService;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.NotificationStateChangedListener;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -156,7 +156,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     @Mock
     private NotificationClickNotifier mClickNotifier;
     @Mock
-    private OverviewProxyService mOverviewProxyService;
+    private LauncherProxyService mLauncherProxyService;
     @Mock
     private KeyguardManager mKeyguardManager;
     @Mock
@@ -1142,7 +1142,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                     (() -> mVisibilityProvider),
                     (() -> mNotifCollection),
                     mClickNotifier,
-                    (() -> mOverviewProxyService),
+                    (() -> mLauncherProxyService),
                     NotificationLockscreenUserManagerTest.this.mKeyguardManager,
                     mStatusBarStateController,
                     mMainExecutor,

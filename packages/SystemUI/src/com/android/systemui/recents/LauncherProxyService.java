@@ -100,14 +100,14 @@ import com.android.systemui.navigationbar.views.NavigationBar;
 import com.android.systemui.navigationbar.views.NavigationBarView;
 import com.android.systemui.navigationbar.views.buttons.KeyButtonView;
 import com.android.systemui.process.ProcessWrapper;
-import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
+import com.android.systemui.recents.LauncherProxyService.LauncherProxyListener;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
-import com.android.systemui.shared.recents.IOverviewProxy;
+import com.android.systemui.shared.recents.ILauncherProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
@@ -135,16 +135,16 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 /**
- * Class to send information from overview to launcher with a binder.
+ * Class to send information from SysUI to Launcher with a binder.
  */
 @SysUISingleton
-public class OverviewProxyService implements CallbackController<OverviewProxyListener>,
+public class LauncherProxyService implements CallbackController<LauncherProxyListener>,
         NavigationModeController.ModeChangedListener, Dumpable {
 
     @VisibleForTesting
     static final String ACTION_QUICKSTEP = "android.intent.action.QUICKSTEP_SERVICE";
 
-    public static final String TAG_OPS = "OverviewProxyService";
+    public static final String TAG_OPS = "LauncherProxyService";
     private static final long BACKOFF_MILLIS = 1000;
     private static final long DEFERRED_CALLBACK_MILLIS = 5000;
     // Max backoff caps at 5 mins
@@ -165,7 +165,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final Runnable mConnectionRunnable = () ->
             internalConnectToCurrentUser("runnable: startConnectionToCurrentUser");
     private final ComponentName mRecentsComponentName;
-    private final List<OverviewProxyListener> mConnectionCallbacks = new ArrayList<>();
+    private final List<LauncherProxyListener> mConnectionCallbacks = new ArrayList<>();
     private final Intent mQuickStepIntent;
     private final ScreenshotHelper mScreenshotHelper;
     private final CommandQueue mCommandQueue;
@@ -179,12 +179,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final BackAnimation mBackAnimation;
 
-    private IOverviewProxy mOverviewProxy;
+    private ILauncherProxy mLauncherProxy;
     private int mConnectionBackoffAttempts;
     private boolean mBound;
     private boolean mIsEnabled;
-    // This is set to false when the overview service is requested to be bound until it is notified
-    // that the previous service has been cleaned up in IOverviewProxy#onUnbind(). It is also set to
+    // This is set to false when the launcher service is requested to be bound until it is notified
+    // that the previous service has been cleaned up in ILauncherProxy#onUnbind(). It is also set to
     // true after a 1000ms timeout by mDeferredBindAfterTimedOutCleanup.
     private boolean mIsPrevServiceCleanedUp = true;
 
@@ -341,7 +341,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void updateContextualEduStats(boolean isTrackpadGesture, String gestureType) {
             verifyCallerAndClearCallingIdentityPostMain("updateContextualEduStats",
-                    () -> mHandler.post(() -> OverviewProxyService.this.updateContextualEduStats(
+                    () -> mHandler.post(() -> LauncherProxyService.this.updateContextualEduStats(
                             isTrackpadGesture, GestureType.valueOf(gestureType))));
         }
 
@@ -504,7 +504,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         public void onReceive(Context context, Intent intent) {
             if (Objects.equals(intent.getAction(), Intent.ACTION_USER_UNLOCKED)) {
                 if (keyguardPrivateNotifications()) {
-                    // Start the overview connection to the launcher service
+                    // Start the launcher connection to the launcher service
                     // Connect if user hasn't connected yet
                     if (getProxy() == null) {
                         startConnectionToCurrentUser();
@@ -546,14 +546,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     };
 
-    private final ServiceConnection mOverviewServiceConnection = new ServiceConnection() {
+    private final ServiceConnection mLauncherServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(TAG_OPS, "Overview proxy service connected");
+            Log.d(TAG_OPS, "Launcher proxy service connected");
             mConnectionBackoffAttempts = 0;
             mHandler.removeCallbacks(mDeferredConnectionCallback);
             try {
-                service.linkToDeath(mOverviewServiceDeathRcpt, 0);
+                service.linkToDeath(mLauncherServiceDeathRcpt, 0);
             } catch (RemoteException e) {
                 // Failed to link to death (process may have died between binding and connecting),
                 // just unbind the service for now and retry again
@@ -564,7 +564,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
 
             mCurrentBoundedUserId = mUserTracker.getUserId();
-            mOverviewProxy = IOverviewProxy.Stub.asInterface(service);
+            mLauncherProxy = ILauncherProxy.Stub.asInterface(service);
 
             Bundle params = new Bundle();
             addInterface(mSysUiProxy, params);
@@ -574,8 +574,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             mShellInterface.createExternalInterfaces(params);
 
             try {
-                Log.d(TAG_OPS, "OverviewProxyService connected, initializing overview proxy");
-                mOverviewProxy.onInitialize(params);
+                Log.d(TAG_OPS, "LauncherProxyService connected, initializing launcher proxy");
+                mLauncherProxy.onInitialize(params);
             } catch (RemoteException e) {
                 mCurrentBoundedUserId = -1;
                 Log.e(TAG_OPS, "Failed to call onInitialize()", e);
@@ -614,7 +614,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final StatusBarWindowCallback mStatusBarWindowCallback = this::onStatusBarStateChanged;
 
     // This is the death handler for the binder from the launcher service
-    private final IBinder.DeathRecipient mOverviewServiceDeathRcpt
+    private final IBinder.DeathRecipient mLauncherServiceDeathRcpt
             = this::cleanupAfterDeath;
 
     private final IVoiceInteractionSessionListener mVoiceInteractionSessionListener =
@@ -632,7 +632,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void onVoiceSessionWindowVisibilityChanged(boolean visible) {
             mContext.getMainExecutor().execute(() ->
-                    OverviewProxyService.this.onVoiceSessionWindowVisibilityChanged(visible));
+                    LauncherProxyService.this.onVoiceSessionWindowVisibilityChanged(visible));
         }
 
         @Override
@@ -652,7 +652,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject
-    public OverviewProxyService(Context context,
+    public LauncherProxyService(Context context,
             @Main Executor mainExecutor,
             CommandQueue commandQueue,
             ShellInterface shellInterface,
@@ -755,14 +755,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
             @Override
             public void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop) {
-                if (mOverviewProxy != null) {
+                if (mLauncherProxy != null) {
                     try {
                         if (DesktopModeStatus.canEnterDesktopMode(mContext)
                                 && (sysUiState.getFlags()
                                 & SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE) != 0) {
                             return;
                         }
-                        mOverviewProxy.enterStageSplitFromRunningApp(leftOrTop);
+                        mLauncherProxy.enterStageSplitFromRunningApp(leftOrTop);
                     } catch (RemoteException e) {
                         Log.w(TAG_OPS, "Unable to enter stage split from the current running app");
                     }
@@ -817,12 +817,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private void notifySystemUiStateFlags(@SystemUiStateFlags long flags) {
         if (SysUiState.DEBUG) {
-            Log.d(TAG_OPS, "Notifying sysui state change to overview service: proxy="
-                    + mOverviewProxy + " flags=" + flags);
+            Log.d(TAG_OPS, "Notifying sysui state change to launcher service: proxy="
+                    + mLauncherProxy + " flags=" + flags);
         }
         try {
-            if (mOverviewProxy != null) {
-                mOverviewProxy.onSystemUiStateChanged(flags);
+            if (mLauncherProxy != null) {
+                mLauncherProxy.onSystemUiStateChanged(flags);
             }
         } catch (RemoteException e) {
             Log.e(TAG_OPS, "Failed to notify sysui state change", e);
@@ -854,9 +854,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     private void dispatchNavButtonBounds() {
-        if (mOverviewProxy != null && mActiveNavBarRegion != null) {
+        if (mLauncherProxy != null && mActiveNavBarRegion != null) {
             try {
-                mOverviewProxy.onActiveNavBarRegionChanges(mActiveNavBarRegion);
+                mLauncherProxy.onActiveNavBarRegionChanges(mActiveNavBarRegion);
             } catch (RemoteException e) {
                 Log.e(TAG_OPS, "Failed to call onActiveNavBarRegionChanges()", e);
             }
@@ -888,7 +888,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             // This should not happen, but if any per-user SysUI component has a dependency on OPS,
             // then this could get triggered
             Log.w(TAG_OPS,
-                    "Skipping connection to overview service due to non-system foreground user "
+                    "Skipping connection to launcher service due to non-system foreground user "
                             + "caller");
             return;
         }
@@ -925,7 +925,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
         try {
             mBound = mContext.bindServiceAsUser(mQuickStepIntent,
-                    mOverviewServiceConnection,
+                    mLauncherServiceConnection,
                     Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
                     currentUser);
         } catch (SecurityException e) {
@@ -954,15 +954,15 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     @Override
-    public void addCallback(@NonNull OverviewProxyListener listener) {
+    public void addCallback(@NonNull LauncherProxyListener listener) {
         if (!mConnectionCallbacks.contains(listener)) {
             mConnectionCallbacks.add(listener);
         }
-        listener.onConnectionChanged(mOverviewProxy != null);
+        listener.onConnectionChanged(mLauncherProxy != null);
     }
 
     @Override
-    public void removeCallback(@NonNull OverviewProxyListener listener) {
+    public void removeCallback(@NonNull LauncherProxyListener listener) {
         mConnectionCallbacks.remove(listener);
     }
 
@@ -974,21 +974,21 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         return mIsEnabled;
     }
 
-    public IOverviewProxy getProxy() {
-        return mOverviewProxy;
+    public ILauncherProxy getProxy() {
+        return mLauncherProxy;
     }
 
     private void disconnectFromLauncherService(String disconnectReason) {
         Log.d(TAG_OPS, "disconnectFromLauncherService bound?: " + mBound +
-                " currentProxy: " + mOverviewProxy + " disconnectReason: " + disconnectReason,
+                " currentProxy: " + mLauncherProxy + " disconnectReason: " + disconnectReason,
                 new Throwable());
         if (mBound) {
             // Always unbind the service (ie. if called through onNullBinding or onBindingDied)
-            mContext.unbindService(mOverviewServiceConnection);
+            mContext.unbindService(mLauncherServiceConnection);
             mBound = false;
-            if (mOverviewProxy != null) {
+            if (mLauncherProxy != null) {
                 try {
-                    mOverviewProxy.onUnbind(new IRemoteCallback.Stub() {
+                    mLauncherProxy.onUnbind(new IRemoteCallback.Stub() {
                         @Override
                         public void sendResult(Bundle data) throws RemoteException {
                             // Received Launcher reply, try to bind anew.
@@ -1006,9 +1006,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
         }
 
-        if (mOverviewProxy != null) {
-            mOverviewProxy.asBinder().unlinkToDeath(mOverviewServiceDeathRcpt, 0);
-            mOverviewProxy = null;
+        if (mLauncherProxy != null) {
+            mLauncherProxy.asBinder().unlinkToDeath(mLauncherServiceDeathRcpt, 0);
+            mLauncherProxy = null;
             notifyConnectionChanged();
         }
     }
@@ -1044,7 +1044,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private void notifyConnectionChanged() {
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
-            mConnectionCallbacks.get(i).onConnectionChanged(mOverviewProxy != null);
+            mConnectionCallbacks.get(i).onConnectionChanged(mLauncherProxy != null);
         }
     }
 
@@ -1095,10 +1095,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     public void notifyAssistantVisibilityChanged(float visibility) {
         try {
-            if (mOverviewProxy != null) {
-                mOverviewProxy.onAssistantVisibilityChanged(visibility);
+            if (mLauncherProxy != null) {
+                mLauncherProxy.onAssistantVisibilityChanged(visibility);
             } else {
-                Log.e(TAG_OPS, "Failed to get overview proxy for assistant visibility.");
+                Log.e(TAG_OPS, "Failed to get launcher proxy for assistant visibility.");
             }
         } catch (RemoteException e) {
             Log.e(TAG_OPS, "Failed to call notifyAssistantVisibilityChanged()", e);
@@ -1148,10 +1148,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     public void disable(int displayId, int state1, int state2, boolean animate) {
         try {
-            if (mOverviewProxy != null) {
-                mOverviewProxy.disable(displayId, state1, state2, animate);
+            if (mLauncherProxy != null) {
+                mLauncherProxy.disable(displayId, state1, state2, animate);
             } else {
-                Log.e(TAG_OPS, "Failed to get overview proxy for disable flags.");
+                Log.e(TAG_OPS, "Failed to get launcher proxy for disable flags.");
             }
         } catch (RemoteException e) {
             Log.e(TAG_OPS, "Failed to call disable()", e);
@@ -1160,10 +1160,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     public void onRotationProposal(int rotation, boolean isValid) {
         try {
-            if (mOverviewProxy != null) {
-                mOverviewProxy.onRotationProposal(rotation, isValid);
+            if (mLauncherProxy != null) {
+                mLauncherProxy.onRotationProposal(rotation, isValid);
             } else {
-                Log.e(TAG_OPS, "Failed to get overview proxy for proposing rotation.");
+                Log.e(TAG_OPS, "Failed to get launcher proxy for proposing rotation.");
             }
         } catch (RemoteException e) {
             Log.e(TAG_OPS, "Failed to call onRotationProposal()", e);
@@ -1172,10 +1172,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     public void onSystemBarAttributesChanged(int displayId, int behavior) {
         try {
-            if (mOverviewProxy != null) {
-                mOverviewProxy.onSystemBarAttributesChanged(displayId, behavior);
+            if (mLauncherProxy != null) {
+                mLauncherProxy.onSystemBarAttributesChanged(displayId, behavior);
             } else {
-                Log.e(TAG_OPS, "Failed to get overview proxy for system bar attr change.");
+                Log.e(TAG_OPS, "Failed to get launcher proxy for system bar attr change.");
             }
         } catch (RemoteException e) {
             Log.e(TAG_OPS, "Failed to call onSystemBarAttributesChanged()", e);
@@ -1184,10 +1184,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     public void onNavButtonsDarkIntensityChanged(float darkIntensity) {
         try {
-            if (mOverviewProxy != null) {
-                mOverviewProxy.onNavButtonsDarkIntensityChanged(darkIntensity);
+            if (mLauncherProxy != null) {
+                mLauncherProxy.onNavButtonsDarkIntensityChanged(darkIntensity);
             } else {
-                Log.e(TAG_OPS, "Failed to get overview proxy to update nav buttons dark intensity");
+                Log.e(TAG_OPS, "Failed to get launcher proxy to update nav buttons dark intensity");
             }
         } catch (RemoteException e) {
             Log.e(TAG_OPS, "Failed to call onNavButtonsDarkIntensityChanged()", e);
@@ -1196,10 +1196,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     public void onNavigationBarLumaSamplingEnabled(int displayId, boolean enable) {
         try {
-            if (mOverviewProxy != null) {
-                mOverviewProxy.onNavigationBarLumaSamplingEnabled(displayId, enable);
+            if (mLauncherProxy != null) {
+                mLauncherProxy.onNavigationBarLumaSamplingEnabled(displayId, enable);
             } else {
-                Log.e(TAG_OPS, "Failed to get overview proxy to enable/disable nav bar luma"
+                Log.e(TAG_OPS, "Failed to get launcher proxy to enable/disable nav bar luma"
                         + "sampling");
             }
         } catch (RemoteException e) {
@@ -1221,7 +1221,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     @Override
     public void dump(PrintWriter pw, String[] args) {
         pw.println(TAG_OPS + " state:");
-        pw.print("  isConnected="); pw.println(mOverviewProxy != null);
+        pw.print("  isConnected="); pw.println(mLauncherProxy != null);
         pw.print("  mIsEnabled="); pw.println(isEnabled());
         pw.print("  mRecentsComponentName="); pw.println(mRecentsComponentName);
         pw.print("  mQuickStepIntent="); pw.println(mQuickStepIntent);
@@ -1237,7 +1237,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mSysUiState.dump(pw, args);
     }
 
-    public interface OverviewProxyListener {
+    public interface LauncherProxyListener {
         default void onConnectionChanged(boolean isConnected) {}
         default void onPrioritizedRotation(@Surface.Rotation int rotation) {}
         default void onOverviewShown(boolean fromHome) {}
