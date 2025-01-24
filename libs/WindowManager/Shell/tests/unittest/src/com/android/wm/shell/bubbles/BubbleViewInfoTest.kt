@@ -143,7 +143,8 @@ class BubbleViewInfoTest : ShellTestCase() {
                 mock<Transitions>(),
                 mock<SyncTransactionQueue>(),
                 mock<IWindowManager>(),
-                mock<BubbleProperties>()
+                mock<BubbleProperties>(),
+                BubbleResizabilityChecker()
             )
 
         val bubbleStackViewManager = BubbleStackViewManager.fromBubbleController(bubbleController)

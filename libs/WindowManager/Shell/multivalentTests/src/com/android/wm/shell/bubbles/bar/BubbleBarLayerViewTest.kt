@@ -43,6 +43,7 @@ import com.android.wm.shell.bubbles.BubbleDataRepository
 import com.android.wm.shell.bubbles.BubbleExpandedViewManager
 import com.android.wm.shell.bubbles.BubbleLogger
 import com.android.wm.shell.bubbles.BubblePositioner
+import com.android.wm.shell.bubbles.BubbleResizabilityChecker
 import com.android.wm.shell.bubbles.Bubbles.SysuiProxy
 import com.android.wm.shell.bubbles.FakeBubbleExpandedViewManager
 import com.android.wm.shell.bubbles.FakeBubbleFactory
@@ -201,6 +202,7 @@ class BubbleBarLayerViewTest {
             SyncTransactionQueue(TransactionPool(), mainExecutor),
             mock<IWindowManager>(),
             mock<BubbleProperties>(),
+            BubbleResizabilityChecker()
         )
     }
 

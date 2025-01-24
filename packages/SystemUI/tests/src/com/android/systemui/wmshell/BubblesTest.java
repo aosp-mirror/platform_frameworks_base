@@ -175,6 +175,7 @@ import com.android.wm.shell.bubbles.BubbleEducationController;
 import com.android.wm.shell.bubbles.BubbleEntry;
 import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubbleOverflow;
+import com.android.wm.shell.bubbles.BubbleResizabilityChecker;
 import com.android.wm.shell.bubbles.BubbleStackView;
 import com.android.wm.shell.bubbles.BubbleTaskView;
 import com.android.wm.shell.bubbles.BubbleViewInfoTask;
@@ -551,7 +552,8 @@ public class BubblesTest extends SysuiTestCase {
                 mTransitions,
                 mock(SyncTransactionQueue.class),
                 mock(IWindowManager.class),
-                mBubbleProperties);
+                mBubbleProperties,
+                new BubbleResizabilityChecker());
         mBubbleController.setExpandListener(mBubbleExpandListener);
         spyOn(mBubbleController);
 

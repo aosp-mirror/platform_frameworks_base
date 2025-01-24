@@ -161,7 +161,8 @@ class BubbleViewInfoTaskTest {
                 mock<Transitions>(),
                 SyncTransactionQueue(TransactionPool(), mainExecutor),
                 mock<IWindowManager>(),
-                mock<BubbleProperties>()
+                mock<BubbleProperties>(),
+                BubbleResizabilityChecker()
             )
 
         // TODO: (b/371829099) - when optional overflow is no longer flagged we can enable this

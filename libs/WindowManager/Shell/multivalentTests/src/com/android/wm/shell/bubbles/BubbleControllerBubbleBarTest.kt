@@ -289,6 +289,7 @@ class BubbleControllerBubbleBarTest {
             SyncTransactionQueue(TransactionPool(), mainExecutor),
             mock<IWindowManager>(),
             ProdBubbleProperties,
+            BubbleResizabilityChecker()
         )
     }
 

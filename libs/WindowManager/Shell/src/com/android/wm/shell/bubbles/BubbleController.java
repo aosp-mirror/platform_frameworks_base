@@ -49,7 +49,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
@@ -208,6 +207,7 @@ public class BubbleController implements ConfigurationChangeListener,
     private final BubbleProperties mBubbleProperties;
     private final BubbleTaskViewFactory mBubbleTaskViewFactory;
     private final BubbleExpandedViewManager mExpandedViewManager;
+    private final ResizabilityChecker mResizabilityChecker;
 
     // Used to post to main UI thread
     private final ShellExecutor mMainExecutor;
@@ -323,7 +323,8 @@ public class BubbleController implements ConfigurationChangeListener,
             Transitions transitions,
             SyncTransactionQueue syncQueue,
             IWindowManager wmService,
-            BubbleProperties bubbleProperties) {
+            BubbleProperties bubbleProperties,
+            ResizabilityChecker resizabilityChecker) {
         mContext = context;
         mShellCommandHandler = shellCommandHandler;
         mShellController = shellController;
@@ -385,6 +386,7 @@ public class BubbleController implements ConfigurationChangeListener,
             }
         };
         mExpandedViewManager = BubbleExpandedViewManager.fromBubbleController(this);
+        mResizabilityChecker = resizabilityChecker;
     }
 
     private void registerOneHandedState(OneHandedController oneHanded) {
@@ -1592,7 +1594,10 @@ public class BubbleController implements ConfigurationChangeListener,
 
         String appBubbleKey = Bubble.getNoteBubbleKeyForApp(intent.getPackage(), user);
         PackageManager packageManager = getPackageManagerForUser(mContext, user.getIdentifier());
-        if (!isResizableActivity(intent, packageManager, appBubbleKey)) return; // logs errors
+        if (!mResizabilityChecker.isResizableActivity(intent, packageManager, appBubbleKey)) {
+            // resize check logs any errors
+            return;
+        }
 
         Bubble existingAppBubble = mBubbleData.getBubbleInStackWithKey(appBubbleKey);
         ProtoLog.d(WM_SHELL_BUBBLES,
@@ -2540,7 +2545,7 @@ public class BubbleController implements ConfigurationChangeListener,
      * @param context the context to use.
      * @param entry   the entry to bubble.
      */
-    static boolean canLaunchInTaskView(Context context, BubbleEntry entry) {
+    boolean canLaunchInTaskView(Context context, BubbleEntry entry) {
         if (BubbleAnythingFlagHelper.enableCreateAnyBubble()) return true;
         PendingIntent intent = entry.getBubbleMetadata() != null
                 ? entry.getBubbleMetadata().getIntent()
@@ -2555,26 +2560,8 @@ public class BubbleController implements ConfigurationChangeListener,
         }
         PackageManager packageManager = getPackageManagerForUser(
                 context, entry.getStatusBarNotification().getUser().getIdentifier());
-        return isResizableActivity(intent.getIntent(), packageManager, entry.getKey());
-    }
-
-    static boolean isResizableActivity(Intent intent, PackageManager packageManager, String key) {
-        if (intent == null) {
-            Log.w(TAG, "Unable to send as bubble: " + key + " null intent");
-            return false;
-        }
-        ActivityInfo info = intent.resolveActivityInfo(packageManager, 0);
-        if (info == null) {
-            Log.w(TAG, "Unable to send as bubble: " + key
-                    + " couldn't find activity info for intent: " + intent);
-            return false;
-        }
-        if (!ActivityInfo.isResizeableMode(info.resizeMode)) {
-            Log.w(TAG, "Unable to send as bubble: " + key
-                    + " activity is not resizable for intent: " + intent);
-            return false;
-        }
-        return true;
+        return mResizabilityChecker.isResizableActivity(intent.getIntent(), packageManager,
+                entry.getKey());
     }
 
     static PackageManager getPackageManagerForUser(Context context, int userId) {
