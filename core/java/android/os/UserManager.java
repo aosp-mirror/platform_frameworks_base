@@ -2910,10 +2910,18 @@ public class UserManager {
      * <p>Currently, on most form factors the first human user on the device will be the main user;
      * in the future, the concept may be transferable, so a different user (or even no user at all)
      * may be designated the main user instead. On other form factors there might not be a main
+     * user. In the future, the concept may be removed, i.e. typical future devices may have no main
      * user.
      *
      * <p>Note that this will not be the system user on devices for which
      * {@link #isHeadlessSystemUserMode()} returns true.
+     *
+     * <p>NB: Features should ideally not limit functionality to the main user. Ideally, they
+     * should either work for all users or for all admin users. If a feature should only work for
+     * select users, its determination of which user should be done intelligently or be
+     * customizable. Not all devices support a main user, and the idea of singling out one user as
+     * special is contrary to overall multiuser goals.
+     *
      * @hide
      */
     @SystemApi
@@ -2929,6 +2937,12 @@ public class UserManager {
 
     /**
      * Returns the designated "main user" of the device, or {@code null} if there is no main user.
+     *
+     * <p>NB: Features should ideally not limit functionality to the main user. Ideally, they
+     * should either work for all users or for all admin users. If a feature should only work for
+     * select users, its determination of which user should be done intelligently or be
+     * customizable. Not all devices support a main user, and the idea of singling out one user as
+     * special is contrary to overall multiuser goals.
      *
      * @see #isMainUser()
      * @hide
