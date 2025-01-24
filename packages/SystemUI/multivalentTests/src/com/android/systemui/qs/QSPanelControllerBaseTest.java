@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs;
 
-import static com.android.systemui.Flags.FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS;
 import static com.android.systemui.flags.SceneContainerFlagParameterizationKt.parameterizeSceneContainerFlag;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -41,8 +40,6 @@ import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
 
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.platform.test.annotations.DisableFlags;
-import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.FlagsParameterization;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.ContextThemeWrapper;
@@ -87,6 +84,7 @@ import javax.inject.Provider;
 
 import kotlinx.coroutines.flow.MutableStateFlow;
 import kotlinx.coroutines.flow.StateFlow;
+
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
 import platform.test.runner.parameterized.Parameters;
 
@@ -505,7 +503,6 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS)
     public void setTiles_longPressEffectEnabled_nonNullLongPressEffectsAreProvided() {
         mLongPressEffectProvider.mEffectsProvided = 0;
         when(mQSHost.getTiles()).thenReturn(List.of(mQSTile, mOtherTile));
@@ -513,16 +510,6 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
         // There is one non-null effect provided for each tile in the host
         assertThat(mLongPressEffectProvider.mEffectsProvided).isEqualTo(2);
-    }
-
-    @Test
-    @DisableFlags(FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS)
-    public void setTiles_longPressEffectDisabled_noLongPressEffectsAreProvided() {
-        mLongPressEffectProvider.mEffectsProvided = 0;
-        when(mQSHost.getTiles()).thenReturn(List.of(mQSTile, mOtherTile));
-        mController.setTiles();
-
-        assertThat(mLongPressEffectProvider.mEffectsProvided).isEqualTo(0);
     }
 
     @Test
