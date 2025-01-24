@@ -70,6 +70,7 @@ import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.desktopmode.desktopwallpaperactivity.DesktopWallpaperActivityTokenProvider;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.pip2.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip2.animation.PipAlphaAnimator;
 import com.android.wm.shell.pip2.animation.PipEnterAnimator;
 import com.android.wm.shell.pip2.animation.PipExpandAnimator;
@@ -115,6 +116,7 @@ public class PipTransition extends PipTransitionController implements
     private final PipTransitionState mPipTransitionState;
     private final PipDisplayLayoutState mPipDisplayLayoutState;
     private final DisplayController mDisplayController;
+    private final PipSurfaceTransactionHelper mPipSurfaceTransactionHelper;
     private final Optional<DesktopUserRepositories> mDesktopUserRepositoriesOptional;
     private final Optional<DesktopWallpaperActivityTokenProvider>
             mDesktopWallpaperActivityTokenProviderOptional;
@@ -171,6 +173,7 @@ public class PipTransition extends PipTransitionController implements
         mPipTransitionState.addPipTransitionStateChangedListener(this);
         mPipDisplayLayoutState = pipDisplayLayoutState;
         mDisplayController = displayController;
+        mPipSurfaceTransactionHelper = new PipSurfaceTransactionHelper(mContext);
         mDesktopUserRepositoriesOptional = desktopUserRepositoriesOptional;
         mDesktopWallpaperActivityTokenProviderOptional =
                 desktopWallpaperActivityTokenProviderOptional;
@@ -341,6 +344,25 @@ public class PipTransition extends PipTransitionController implements
             mTransitionAnimator.end();
             mTransitionAnimator = null;
         }
+    }
+
+    @Override
+    public boolean syncPipSurfaceState(@NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction) {
+        final TransitionInfo.Change pipChange = getPipChange(info);
+        if (pipChange == null) return false;
+
+        // add shadow and corner radii
+        final SurfaceControl leash = pipChange.getLeash();
+        final boolean isInPip = mPipTransitionState.isInPip();
+
+        mPipSurfaceTransactionHelper.round(startTransaction, leash, isInPip)
+                .shadow(startTransaction, leash, isInPip);
+        mPipSurfaceTransactionHelper.round(finishTransaction, leash, isInPip)
+                .shadow(finishTransaction, leash, isInPip);
+
+        return true;
     }
 
     //
