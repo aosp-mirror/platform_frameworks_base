@@ -109,7 +109,6 @@ import com.android.systemui.keyguard.shared.model.Edge;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.binder.KeyguardLongPressViewBinder;
-import com.android.systemui.keyguard.ui.transitions.BlurConfig;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardTouchHandlingViewModel;
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
@@ -915,8 +914,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         if (!com.android.systemui.Flags.bouncerUiRevamp()) return;
 
         if (isBouncerShowing && isExpanded()) {
-            float shadeBlurEffect = BlurConfig.maxBlurRadiusToNotificationPanelBlurRadius(
-                    mDepthController.getMaxBlurRadiusPx());
+            float shadeBlurEffect = mDepthController.getMaxBlurRadiusPx();
             mView.setRenderEffect(RenderEffect.createBlurEffect(
                     shadeBlurEffect,
                     shadeBlurEffect,

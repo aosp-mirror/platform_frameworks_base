@@ -72,6 +72,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
+import com.android.systemui.keyguard.ui.transitions.BlurConfig;
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
@@ -290,7 +291,8 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mKeyguardTransitionInteractor,
                 mKeyguardInteractor,
                 mKosmos.getTestDispatcher(),
-                mLinearLargeScreenShadeInterpolator);
+                mLinearLargeScreenShadeInterpolator,
+                new BlurConfig(0.0f, 0.0f));
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);
@@ -1255,7 +1257,8 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mKeyguardTransitionInteractor,
                 mKeyguardInteractor,
                 mKosmos.getTestDispatcher(),
-                mLinearLargeScreenShadeInterpolator);
+                mLinearLargeScreenShadeInterpolator,
+                new BlurConfig(0.0f, 0.0f));
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);

@@ -27,6 +27,8 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
+import android.graphics.RenderEffect;
+import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.os.Looper;
 import android.util.AttributeSet;
@@ -371,6 +373,20 @@ public class ScrimView extends View {
     public void setCornerRadius(int radius) {
         if (mDrawable instanceof ScrimDrawable) {
             ((ScrimDrawable) mDrawable).setRoundedCorners(radius);
+        }
+    }
+
+    /**
+     * Blur the view with the specific blur radius or clear any blurs if the radius is 0
+     */
+    public void setBlurRadius(float blurRadius) {
+        if (blurRadius > 0) {
+            setRenderEffect(RenderEffect.createBlurEffect(
+                    blurRadius,
+                    blurRadius,
+                    Shader.TileMode.CLAMP));
+        } else {
+            setRenderEffect(null);
         }
     }
 }
