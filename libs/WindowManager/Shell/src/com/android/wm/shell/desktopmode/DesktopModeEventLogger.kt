@@ -24,10 +24,10 @@ import android.view.MotionEvent
 import android.view.MotionEvent.TOOL_TYPE_FINGER
 import android.view.MotionEvent.TOOL_TYPE_MOUSE
 import android.view.MotionEvent.TOOL_TYPE_STYLUS
+import android.window.DesktopModeFlags
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.protolog.ProtoLog
 import com.android.internal.util.FrameworkStatsLog
-import com.android.window.flags.Flags
 import com.android.wm.shell.EventLogTags
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
@@ -185,7 +185,7 @@ class DesktopModeEventLogger {
         displayController: DisplayController? = null,
         displayLayoutSize: Size? = null,
     ) {
-        if (!Flags.enableResizingMetrics()) return
+        if (!DesktopModeFlags.ENABLE_RESIZING_METRICS.isTrue) return
 
         val sessionId = currentSessionId.get()
         if (sessionId == NO_SESSION_ID) {
@@ -232,7 +232,7 @@ class DesktopModeEventLogger {
         displayController: DisplayController? = null,
         displayLayoutSize: Size? = null,
     ) {
-        if (!Flags.enableResizingMetrics()) return
+        if (!DesktopModeFlags.ENABLE_RESIZING_METRICS.isTrue) return
 
         val sessionId = currentSessionId.get()
         if (sessionId == NO_SESSION_ID) {
