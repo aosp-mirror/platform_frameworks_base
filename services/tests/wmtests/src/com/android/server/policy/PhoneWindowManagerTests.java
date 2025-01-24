@@ -48,6 +48,7 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.hardware.input.InputManager;
 import android.os.PowerManager;
+import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.filters.SmallTest;
@@ -72,6 +73,7 @@ import org.junit.Test;
  * Build/Install/Run:
  * atest WmTests:PhoneWindowManagerTests
  */
+@Presubmit
 @SmallTest
 public class PhoneWindowManagerTests {
 

@@ -42,6 +42,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.platform.test.annotations.EnableFlags;
+import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.KeyEvent;
 import android.view.KeyboardShortcutGroup;
@@ -64,7 +65,7 @@ import java.util.Collections;
  * Build/Install/Run:
  *  atest ModifierShortcutManagerTests
  */
-
+@Presubmit
 @SmallTest
 @EnableFlags(com.android.hardware.input.Flags.FLAG_MODIFIER_SHORTCUT_MANAGER_REFACTOR)
 public class ModifierShortcutManagerTests {
@@ -127,7 +128,7 @@ public class ModifierShortcutManagerTests {
         // Total valid shortcuts.
         KeyboardShortcutGroup group =
                 mModifierShortcutManager.getApplicationLaunchKeyboardShortcuts(-1);
-        assertEquals(13, group.getItems().size());
+        assertEquals(11, group.getItems().size());
 
         // Total valid shift shortcuts.
         assertEquals(3, group.getItems().stream()

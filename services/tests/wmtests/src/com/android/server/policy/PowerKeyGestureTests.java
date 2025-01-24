@@ -28,6 +28,7 @@ import static com.android.server.policy.PhoneWindowManager.SHORT_PRESS_POWER_GO_
 import static org.junit.Assert.assertEquals;
 
 import android.platform.test.annotations.EnableFlags;
+import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import android.view.Display;
 
@@ -40,6 +41,7 @@ import org.junit.Test;
  * Build/Install/Run:
  *  atest WmTests:PowerKeyGestureTests
  */
+@Presubmit
 public class PowerKeyGestureTests extends ShortcutKeyTestBase {
     @Before
     public void setUp() {
