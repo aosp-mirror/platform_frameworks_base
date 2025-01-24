@@ -467,30 +467,6 @@ class KeyGestureControllerTests {
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
-                "CTRL + ALT + DPAD_LEFT -> Change Splitscreen Focus Left",
-                intArrayOf(
-                    KeyEvent.KEYCODE_CTRL_LEFT,
-                    KeyEvent.KEYCODE_ALT_LEFT,
-                    KeyEvent.KEYCODE_DPAD_LEFT
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT,
-                intArrayOf(KeyEvent.KEYCODE_DPAD_LEFT),
-                KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "CTRL + ALT + DPAD_RIGHT -> Change Splitscreen Focus Right",
-                intArrayOf(
-                    KeyEvent.KEYCODE_CTRL_LEFT,
-                    KeyEvent.KEYCODE_ALT_LEFT,
-                    KeyEvent.KEYCODE_DPAD_RIGHT
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT,
-                intArrayOf(KeyEvent.KEYCODE_DPAD_RIGHT),
-                KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
                 "META + / -> Open Shortcut Helper",
                 intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_SLASH),
                 KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER,
