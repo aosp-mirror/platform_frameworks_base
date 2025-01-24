@@ -1634,6 +1634,10 @@ package android.hardware.camera2.params {
     method public void setColorSpace(@NonNull android.graphics.ColorSpace.Named);
   }
 
+  @FlaggedApi("com.android.internal.camera.flags.camera_multi_client") public final class SharedSessionConfiguration {
+    ctor public SharedSessionConfiguration(int, @NonNull long[]);
+  }
+
 }
 
 package android.hardware.devicestate {
