@@ -56,3 +56,11 @@ flag {
   description: "Flag to enable the App Approval settings in Android settings UI"
   bug: "390185393"
 }
+
+flag {
+  name: "enable_supervision_pin_recovery_screen"
+  is_exported: true
+  namespace: "supervision"
+  description: "Flag that enables the Supervision pin recovery screen with Supervision settings entry point"
+  bug: "390500290"
+}
