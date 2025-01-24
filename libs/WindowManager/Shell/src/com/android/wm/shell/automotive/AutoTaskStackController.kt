@@ -120,6 +120,12 @@ interface AutoTaskStackController {
     @ShellMainThread
     fun createRootTaskStack(displayId: Int, listener: RootTaskStackListener)
 
+    /**
+     * Destroys the already created task stack. It will be a no-op if no task stack exists with
+     * given [taskStackId].
+     */
+    @ShellMainThread
+    fun destroyTaskStack(taskStackId: Int)
 
     /**
      * Sets the default root task stack (launch root) on a display. Calling it again with a

@@ -65,7 +65,7 @@ class AutoTaskStackControllerImpl @Inject constructor(
     private val defaultRootTaskPerDisplay = mutableMapOf<Int, Int>()
 
     init {
-        shellInit.addInitCallback(this::onInit, this);
+        shellInit.addInitCallback(this::onInit, this)
     }
 
     fun onInit() {
@@ -148,8 +148,8 @@ class AutoTaskStackControllerImpl @Inject constructor(
                     RootTaskStack(taskInfo.taskId, taskInfo.displayId, leash, taskInfo)
                 taskStackMap[rootTask.id] = rootTask
 
-                rootTaskStack = rootTask;
-                rootTaskStackListener.onRootTaskStackCreated(rootTask);
+                rootTaskStack = rootTask
+                rootTaskStackListener.onRootTaskStackCreated(rootTask)
                 return
             }
             appTasksMap[taskInfo.taskId] = taskInfo
@@ -169,7 +169,7 @@ class AutoTaskStackControllerImpl @Inject constructor(
                 if (taskInfo.taskId == previousRootTaskStackInfo.id) {
                     previousRootTaskStackInfo = previousRootTaskStackInfo.copy(rootTaskInfo = taskInfo)
                     taskStackMap[previousRootTaskStackInfo.id] = previousRootTaskStackInfo
-                    rootTaskStack = previousRootTaskStackInfo;
+                    rootTaskStack = previousRootTaskStackInfo
                     rootTaskStackListener.onRootTaskStackInfoChanged(it)
                     return
                 }
@@ -222,6 +222,16 @@ class AutoTaskStackControllerImpl @Inject constructor(
         )
     }
 
+    override fun destroyTaskStack(taskStackId: Int) {
+        // TODO(b/384946072): Add support for DisplayAreaTaskStack
+        val taskStack = taskStackMap[taskStackId] as? RootTaskStack
+        if (taskStack == null) {
+            Slog.e(TAG, "Task stack with id $taskStackId doesn't exist")
+            return
+        }
+        val deleted: Boolean = taskOrganizer.deleteRootTask(taskStack.rootTaskInfo.token)
+    }
+
     override fun setDefaultRootTaskStackOnDisplay(displayId: Int, rootTaskStackId: Int?) {
         var wct = WindowContainerTransaction()
 
@@ -254,6 +264,7 @@ class AutoTaskStackControllerImpl @Inject constructor(
                     ACTIVITY_TYPE_ASSISTANT
                 )
             )
+            defaultRootTaskPerDisplay[displayId] = taskStack.id
         }
 
         taskOrganizer.applyTransaction(wct)
@@ -357,8 +368,8 @@ class AutoTaskStackControllerImpl @Inject constructor(
         ) ?: false
 
         if (isPlayedByDelegate) {
-            if (DBG) Slog.d(TAG, "${info.debugId} played");
-            return true;
+            if (DBG) Slog.d(TAG, "${info.debugId} played")
+            return true
         }
 
         // If for an animation which is not played by the delegate, contains a change in a known
@@ -368,10 +379,10 @@ class AutoTaskStackControllerImpl @Inject constructor(
             startTransaction.apply()
             finishCallback.onTransitionFinished(null)
             startNextTransition()
-            if (DBG) Slog.d(TAG, "${info.debugId} played");
+            if (DBG) Slog.d(TAG, "${info.debugId} played")
             return true
         }
-        return false;
+        return false
     }
 
     fun convertToWct(ast: AutoTaskStackTransaction, wct: WindowContainerTransaction) {
@@ -503,5 +514,4 @@ class AutoTaskStackControllerImpl @Inject constructor(
     ) {
         var isClaimed: IBinder? = null
     }
-
 }
