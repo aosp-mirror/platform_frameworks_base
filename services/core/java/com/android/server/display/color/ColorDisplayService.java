@@ -132,6 +132,12 @@ public final class ColorDisplayService extends SystemService {
     private static final int NOT_SET = -1;
 
     /**
+     * Min and Max values for percentage of RBC setting.
+     */
+    private static final int PERCENTAGE_MIN = 0;
+    private static final int PERCENTAGE_MAX = 100;
+
+    /**
      * Evaluator used to animate color matrix transitions.
      */
     private static final ColorMatrixEvaluator COLOR_MATRIX_EVALUATOR = new ColorMatrixEvaluator();
@@ -696,15 +702,25 @@ public final class ColorDisplayService extends SystemService {
         if (mCurrentUser == UserHandle.USER_NULL) {
             return;
         }
-        int strength = Secure.getIntForUser(getContext().getContentResolver(),
+
+        int percentage = Secure.getIntForUser(getContext().getContentResolver(),
                 Secure.REDUCE_BRIGHT_COLORS_LEVEL, NOT_SET, mCurrentUser);
-        if (strength == NOT_SET) {
-            strength = getContext().getResources().getInteger(
+        final int deviceRange;
+
+        if (percentage == NOT_SET) {
+            deviceRange = getContext().getResources().getInteger(
                     R.integer.config_reduceBrightColorsStrengthDefault);
+        } else {
+            final int deviceMin = getContext().getResources().getInteger(
+                    R.integer.config_reduceBrightColorsStrengthMin);
+            final int deviceMax = getContext().getResources().getInteger(
+                    R.integer.config_reduceBrightColorsStrengthMax);
+            deviceRange = (int) MathUtils.constrainedMap(
+                    deviceMin, deviceMax, PERCENTAGE_MIN, PERCENTAGE_MAX, percentage);
         }
-        mReduceBrightColorsTintController.setMatrix(strength);
+        mReduceBrightColorsTintController.setMatrix(deviceRange);
         if (mReduceBrightColorsListener != null) {
-            mReduceBrightColorsListener.onReduceBrightColorsStrengthChanged(strength);
+            mReduceBrightColorsListener.onReduceBrightColorsStrengthChanged(deviceRange);
         }
     }
 
