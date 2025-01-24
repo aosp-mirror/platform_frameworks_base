@@ -188,7 +188,4 @@
     <string-array name="desktop_windowing_app_handle_education_allowlist_apps"></string-array>
     <!-- Apps that can trigger Desktop Windowing App-To-Web Education -->
     <string-array name="desktop_windowing_app_to_web_education_allowlist_apps"></string-array>
-
-    <!-- Whether this device allows to drag windows across displays. -->
-    <bool name="config_enableConnectedDisplayWindowDrag">true</bool>
 </resources>

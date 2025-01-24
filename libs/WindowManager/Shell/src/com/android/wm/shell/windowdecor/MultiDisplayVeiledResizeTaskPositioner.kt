@@ -29,7 +29,6 @@ import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
 import com.android.internal.jank.Cuj
 import com.android.internal.jank.InteractionJankMonitor
-import com.android.wm.shell.R
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.MultiDisplayDragMoveBoundsCalculator
@@ -68,8 +67,6 @@ class MultiDisplayVeiledResizeTaskPositioner(
                 (ctrlType and DragPositioningCallback.CTRL_TYPE_LEFT) != 0 ||
                 (ctrlType and DragPositioningCallback.CTRL_TYPE_RIGHT) != 0
 
-    private val enableMultiDisplayWindowDrag: Boolean
-
     @DragPositioningCallback.CtrlType private var ctrlType = 0
     private var isResizingOrAnimatingResize = false
     @Surface.Rotation private var rotation = 0
@@ -96,10 +93,6 @@ class MultiDisplayVeiledResizeTaskPositioner(
 
     init {
         dragEventListeners.add(dragEventListener)
-        enableMultiDisplayWindowDrag =
-            desktopWindowDecoration.mDecorWindowContext.resources.getBoolean(
-                R.bool.config_enableConnectedDisplayWindowDrag
-            )
     }
 
     override fun onDragPositioningStart(ctrlType: Int, displayId: Int, x: Float, y: Float): Rect {
@@ -175,13 +168,8 @@ class MultiDisplayVeiledResizeTaskPositioner(
             val startDisplayLayout = displayController.getDisplayLayout(startDisplayId)
             val currentDisplayLayout = displayController.getDisplayLayout(displayId)
 
-            if (
-                startDisplayLayout == null ||
-                    currentDisplayLayout == null ||
-                    !enableMultiDisplayWindowDrag
-            ) {
-                // Fall back to single-display drag behavior if any display layout is unavailable or
-                // it's explicitly disabled.
+            if (startDisplayLayout == null || currentDisplayLayout == null) {
+                // Fall back to single-display drag behavior if any display layout is unavailable.
                 DragPositioningCallbackUtility.setPositionOnDrag(
                     desktopWindowDecoration,
                     repositionTaskBounds,
@@ -249,13 +237,8 @@ class MultiDisplayVeiledResizeTaskPositioner(
             val startDisplayLayout = displayController.getDisplayLayout(startDisplayId)
             val currentDisplayLayout = displayController.getDisplayLayout(displayId)
 
-            if (
-                startDisplayLayout == null ||
-                    currentDisplayLayout == null ||
-                    !enableMultiDisplayWindowDrag
-            ) {
-                // Fall back to single-display drag behavior if any display layout is unavailable or
-                // it's explicitly disabled.
+            if (startDisplayLayout == null || currentDisplayLayout == null) {
+                // Fall back to single-display drag behavior if any display layout is unavailable.
                 DragPositioningCallbackUtility.updateTaskBounds(
                     repositionTaskBounds,
                     taskBoundsAtDragStart,
