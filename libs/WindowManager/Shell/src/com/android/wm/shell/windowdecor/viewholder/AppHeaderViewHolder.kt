@@ -47,7 +47,6 @@ import com.android.internal.R.color.materialColorSurfaceContainerHigh
 import com.android.internal.R.color.materialColorSurfaceContainerLow
 import com.android.internal.R.color.materialColorSurfaceDim
 import com.android.window.flags.Flags
-import com.android.window.flags.Flags.enableMinimizeButton
 import com.android.wm.shell.R
 import android.window.DesktopModeFlags
 import com.android.wm.shell.windowdecor.MaximizeButtonView
@@ -226,7 +225,7 @@ class AppHeaderViewHolder(
             minimizeWindowButton.background = getDrawable(1)
         }
         maximizeButtonView.setAnimationTints(isDarkMode())
-        minimizeWindowButton.isGone = !enableMinimizeButton()
+        minimizeWindowButton.isGone = !DesktopModeFlags.ENABLE_MINIMIZE_BUTTON.isTrue()
     }
 
     private fun bindDataWithThemedHeaders(
@@ -276,7 +275,7 @@ class AppHeaderViewHolder(
                 drawableInsets = minimizeDrawableInsets
             )
         }
-        minimizeWindowButton.isGone = !enableMinimizeButton()
+        minimizeWindowButton.isGone = !DesktopModeFlags.ENABLE_MINIMIZE_BUTTON.isTrue()
         // Maximize button.
         maximizeButtonView.apply {
             setAnimationTints(
