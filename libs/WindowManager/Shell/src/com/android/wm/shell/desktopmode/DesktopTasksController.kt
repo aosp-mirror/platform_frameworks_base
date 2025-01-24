@@ -2508,7 +2508,6 @@ class DesktopTasksController(
      *
      * @param taskInfo the task being dragged.
      * @param taskSurface the leash of the task being dragged.
-     * @param position position of surface when drag ends.
      * @param inputCoordinate the coordinates of the motion event
      * @param currentDragBounds the current bounds of where the visible task is (might be actual
      *   task bounds or just task leash)
@@ -2518,7 +2517,6 @@ class DesktopTasksController(
     fun onDragPositioningEnd(
         taskInfo: RunningTaskInfo,
         taskSurface: SurfaceControl,
-        position: Point,
         inputCoordinate: PointF,
         currentDragBounds: Rect,
         validDragArea: Rect,
@@ -2546,7 +2544,7 @@ class DesktopTasksController(
                     )
                     moveToFullscreenWithAnimation(
                         taskInfo,
-                        position,
+                        Point(currentDragBounds.left, currentDragBounds.top),
                         DesktopModeTransitionSource.TASK_DRAG,
                     )
                 }
