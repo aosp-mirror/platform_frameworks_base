@@ -1146,9 +1146,9 @@ public final class UiAutomation {
             executionStartTimeMillis = SystemClock.uptimeMillis();
             eventQueueStartIndex = mEventQueue.size();
         }
-        if (DEBUG) {
-            Log.d(LOG_TAG, "executeAndWaitForEvent: watchersCount=" + watchersDepth
-                    + ", eventQueueStartIndex=" + eventQueueStartIndex);
+        if (VERBOSE) {
+            Log.v(LOG_TAG, "executeAndWaitForEvent starts at depth=" + watchersDepth + ", "
+                    + "command=" + command + ", filter=" + filter + ", timeout=" + timeoutMillis);
         }
 
         try {
@@ -1198,6 +1198,9 @@ public final class UiAutomation {
                     mEventQueue.clear();
                 }
                 mLock.notifyAll();
+            }
+            if (VERBOSE) {
+                Log.v(LOG_TAG, "executeAndWaitForEvent ends at depth=" + watchersDepth);
             }
         }
     }
