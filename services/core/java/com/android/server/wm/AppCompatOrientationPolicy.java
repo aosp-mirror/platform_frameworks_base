@@ -180,10 +180,7 @@ class AppCompatOrientationPolicy {
                 return true;
             }
 
-            final AppCompatCameraPolicy cameraPolicy = AppCompatCameraPolicy
-                    .getAppCompatCameraPolicy(mActivityRecord);
-            if (cameraPolicy != null
-                    && cameraPolicy.isTreatmentEnabledForActivity(mActivityRecord)) {
+            if (AppCompatCameraPolicy.isTreatmentEnabledForActivity(mActivityRecord)) {
                 Slog.w(TAG, "Ignoring orientation update to "
                         + screenOrientationToString(requestedOrientation)
                         + " due to camera compat treatment for " + mActivityRecord);
