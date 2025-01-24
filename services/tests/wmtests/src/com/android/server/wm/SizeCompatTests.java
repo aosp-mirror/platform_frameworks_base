@@ -4914,7 +4914,8 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    @EnableFlags({Flags.FLAG_IGNORE_ASPECT_RATIO_RESTRICTIONS_FOR_RESIZEABLE_FREEFORM_ACTIVITIES,
+            Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING})
     public void testCameraCompatAspectRatioAppliedForFixedOrientationCameraActivities() {
         // Needed to create camera compat policy in DisplayContent.
         allowDesktopMode();
@@ -4926,7 +4927,8 @@ public class SizeCompatTests extends WindowTestsBase {
         setupCameraCompatAspectRatio(cameraCompatAspectRatio, display);
 
         // Create task on test display.
-        final Task task = new TaskBuilder(mSupervisor).setDisplay(display).build();
+        final Task task = new TaskBuilder(mSupervisor).setDisplay(display)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
 
         // Create fixed portrait activity.
         final ActivityRecord fixedOrientationActivity = new ActivityBuilder(mAtm)
@@ -4939,7 +4941,8 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    @EnableFlags({Flags.FLAG_IGNORE_ASPECT_RATIO_RESTRICTIONS_FOR_RESIZEABLE_FREEFORM_ACTIVITIES,
+            Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING})
     public void testCameraCompatAspectRatioForFixedOrientationCameraActivitiesPortraitWindow() {
         // Needed to create camera compat policy in DisplayContent.
         allowDesktopMode();
@@ -4951,7 +4954,8 @@ public class SizeCompatTests extends WindowTestsBase {
         setupCameraCompatAspectRatio(cameraCompatAspectRatio, display);
 
         // Create task on test display.
-        final Task task = new TaskBuilder(mSupervisor).setDisplay(display).build();
+        final Task task = new TaskBuilder(mSupervisor).setDisplay(display)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
 
         // Create fixed portrait activity.
         final ActivityRecord fixedOrientationActivity = new ActivityBuilder(mAtm)
@@ -4964,7 +4968,8 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    @EnableFlags({Flags.FLAG_IGNORE_ASPECT_RATIO_RESTRICTIONS_FOR_RESIZEABLE_FREEFORM_ACTIVITIES,
+            Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING})
     public void testCameraCompatAspectRatioAppliedInsteadOfDefaultAspectRatio() {
         // Needed to create camera compat policy in DisplayContent.
         allowDesktopMode();
@@ -4976,7 +4981,8 @@ public class SizeCompatTests extends WindowTestsBase {
         setupCameraCompatAspectRatio(cameraCompatAspectRatio, display);
 
         // Create task on test display.
-        final Task task = new TaskBuilder(mSupervisor).setDisplay(display).build();
+        final Task task = new TaskBuilder(mSupervisor).setDisplay(display)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
 
         // App's target min aspect ratio - this should not be used, as camera controls aspect ratio.
         final float targetMinAspectRatio = 4.0f;
@@ -4993,7 +4999,8 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    @EnableFlags({Flags.FLAG_IGNORE_ASPECT_RATIO_RESTRICTIONS_FOR_RESIZEABLE_FREEFORM_ACTIVITIES,
+            Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING})
     public void testCameraCompatAspectRatio_defaultAspectRatioAppliedWhenGreater() {
         // Needed to create camera compat policy in DisplayContent.
         allowDesktopMode();
@@ -5005,7 +5012,8 @@ public class SizeCompatTests extends WindowTestsBase {
         setupCameraCompatAspectRatio(cameraCompatAspectRatio, display);
 
         // Create task on test display.
-        final Task task = new TaskBuilder(mSupervisor).setDisplay(display).build();
+        final Task task = new TaskBuilder(mSupervisor).setDisplay(display)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
 
         // App's target min aspect ratio bigger than camera compat aspect ratio - use that instead.
         final float targetMinAspectRatio = 6.0f;
