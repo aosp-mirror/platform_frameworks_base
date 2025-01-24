@@ -3097,14 +3097,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     // we'll break split
                     closingSplitTaskId = taskId;
                 }
-                if (transitType == WindowManager.TRANSIT_WAKE) {
-                    // Record which stages are receiving which changes
-                    if ((change.getMode() == TRANSIT_TO_BACK
-                            || change.getMode() == TRANSIT_TO_FRONT)
-                            && (stageOfTaskId == STAGE_TYPE_MAIN
-                            || stageOfTaskId == STAGE_TYPE_SIDE)) {
-                        stageChanges.put(getStageOfTask(taskId), change.getMode());
-                    }
+                // Record which stages are receiving which changes
+                if ((change.getMode() == TRANSIT_TO_BACK
+                        || change.getMode() == TRANSIT_TO_FRONT)
+                        && (stageOfTaskId == STAGE_TYPE_MAIN
+                        || stageOfTaskId == STAGE_TYPE_SIDE)) {
+                    stageChanges.put(getStageOfTask(taskId), change.getMode());
                 }
             }
 
