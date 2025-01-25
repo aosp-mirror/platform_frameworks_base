@@ -21,6 +21,7 @@ import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags.FLAG_BOUNCER_UI_REVAMP
+import com.android.systemui.Flags.FLAG_NOTIFICATION_SHADE_BLUR
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
@@ -155,6 +156,7 @@ class LockscreenToPrimaryBouncerTransitionViewModelTest(flags: FlagsParameteriza
         }
 
     @Test
+    @EnableFlags(FLAG_NOTIFICATION_SHADE_BLUR)
     @BrokenWithSceneContainer(388068805)
     fun blurRadiusIsMaxWhenShadeIsExpanded() =
         testScope.runTest {

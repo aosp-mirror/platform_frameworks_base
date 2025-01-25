@@ -107,7 +107,11 @@ constructor(
     override val windowBlurRadius: Flow<Float> =
         shadeDependentFlows.transitionFlow(
             flowWhenShadeIsExpanded =
-                transitionAnimation.immediatelyTransitionTo(blurConfig.maxBlurRadiusPx),
+                if (Flags.notificationShadeBlur()) {
+                    transitionAnimation.immediatelyTransitionTo(blurConfig.maxBlurRadiusPx)
+                } else {
+                    emptyFlow()
+                },
             flowWhenShadeIsNotExpanded =
                 transitionAnimation.sharedFlow(
                     duration = FromLockscreenTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,

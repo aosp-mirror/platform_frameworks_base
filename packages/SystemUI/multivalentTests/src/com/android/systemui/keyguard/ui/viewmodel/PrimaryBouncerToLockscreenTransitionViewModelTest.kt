@@ -16,12 +16,16 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_NOTIFICATION_SHADE_BLUR
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.flags.BrokenWithSceneContainer
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -35,13 +39,17 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @ExperimentalCoroutinesApi
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class PrimaryBouncerToLockscreenTransitionViewModelTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class PrimaryBouncerToLockscreenTransitionViewModelTest(flags: FlagsParameterization) :
+    SysuiTestCase() {
     val kosmos = testKosmos()
     val testScope = kosmos.testScope
 
@@ -49,9 +57,27 @@ class PrimaryBouncerToLockscreenTransitionViewModelTest : SysuiTestCase() {
     val fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
     val biometricSettingsRepository = kosmos.biometricSettingsRepository
 
-    val underTest = kosmos.primaryBouncerToLockscreenTransitionViewModel
+    private lateinit var underTest: PrimaryBouncerToLockscreenTransitionViewModel
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
+    @Before
+    fun setup() {
+        underTest = kosmos.primaryBouncerToLockscreenTransitionViewModel
+    }
 
     @Test
+    @BrokenWithSceneContainer(392346450)
     fun lockscreenAlphaStartsFromViewStateAccessorAlpha() =
         testScope.runTest {
             val viewState = ViewStateAccessor(alpha = { 0.5f })
@@ -70,6 +96,7 @@ class PrimaryBouncerToLockscreenTransitionViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(392346450)
     fun deviceEntryParentViewAlpha() =
         testScope.runTest {
             val deviceEntryParentViewAlpha by collectLastValue(underTest.deviceEntryParentViewAlpha)
@@ -89,6 +116,7 @@ class PrimaryBouncerToLockscreenTransitionViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(392346450)
     fun deviceEntryBackgroundViewAlpha_udfpsEnrolled_show() =
         testScope.runTest {
             fingerprintPropertyRepository.supportsUdfps()
@@ -113,6 +141,7 @@ class PrimaryBouncerToLockscreenTransitionViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(388068805)
     fun blurRadiusGoesFromMaxToMinWhenShadeIsNotExpanded() =
         testScope.runTest {
             val values by collectValues(underTest.windowBlurRadius)
@@ -128,6 +157,8 @@ class PrimaryBouncerToLockscreenTransitionViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(FLAG_NOTIFICATION_SHADE_BLUR)
+    @BrokenWithSceneContainer(388068805)
     fun blurRadiusRemainsAtMaxWhenShadeIsExpanded() =
         testScope.runTest {
             val values by collectValues(underTest.windowBlurRadius)

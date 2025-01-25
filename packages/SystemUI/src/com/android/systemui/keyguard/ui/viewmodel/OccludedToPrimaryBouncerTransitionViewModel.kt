@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromOccludedTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
@@ -26,12 +27,16 @@ import com.android.systemui.keyguard.ui.transitions.BlurConfig
 import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 @SysUISingleton
 class OccludedToPrimaryBouncerTransitionViewModel
 @Inject
-constructor(blurConfig: BlurConfig, animationFlow: KeyguardTransitionAnimationFlow) :
-    PrimaryBouncerTransition {
+constructor(
+    shadeDependentFlows: ShadeDependentFlows,
+    blurConfig: BlurConfig,
+    animationFlow: KeyguardTransitionAnimationFlow,
+) : PrimaryBouncerTransition {
     private val transitionAnimation =
         animationFlow
             .setup(
@@ -41,8 +46,21 @@ constructor(blurConfig: BlurConfig, animationFlow: KeyguardTransitionAnimationFl
             .setupWithoutSceneContainer(edge = Edge.create(OCCLUDED, PRIMARY_BOUNCER))
 
     override val windowBlurRadius: Flow<Float> =
-        transitionAnimation.immediatelyTransitionTo(blurConfig.maxBlurRadiusPx)
+        shadeDependentFlows.transitionFlow(
+            flowWhenShadeIsExpanded =
+                if (Flags.notificationShadeBlur()) {
+                    transitionAnimation.immediatelyTransitionTo(blurConfig.maxBlurRadiusPx)
+                } else {
+                    emptyFlow()
+                },
+            flowWhenShadeIsNotExpanded =
+                transitionAnimation.immediatelyTransitionTo(blurConfig.maxBlurRadiusPx),
+        )
 
     override val notificationBlurRadius: Flow<Float> =
-        transitionAnimation.immediatelyTransitionTo(0.0f)
+        shadeDependentFlows.transitionFlow(
+            flowWhenShadeIsExpanded =
+                transitionAnimation.immediatelyTransitionTo(blurConfig.maxBlurRadiusPx),
+            flowWhenShadeIsNotExpanded = emptyFlow(),
+        )
 }
