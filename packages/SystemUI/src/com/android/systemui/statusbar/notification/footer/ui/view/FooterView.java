@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.footer.ui.view;
 import static android.graphics.PorterDuff.Mode.SRC_ATOP;
 
 import static com.android.systemui.Flags.notificationFooterBackgroundTintOptimization;
+import static com.android.systemui.Flags.notificationShadeBlur;
 import static com.android.systemui.util.ColorUtilKt.hexColorString;
 
 import android.annotation.ColorInt;
@@ -29,6 +30,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
@@ -39,6 +41,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.graphics.ColorUtils;
+import com.android.systemui.common.shared.colors.SurfaceEffectColors;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.notification.ColorUpdateLogger;
@@ -383,9 +387,23 @@ public class FooterView extends StackScrollerDecorView {
         final Drawable historyBg = NotifRedesignFooter.isEnabled()
                 ? theme.getDrawable(R.drawable.notif_footer_btn_background) : null;
         final @ColorInt int scHigh;
+
         if (!notificationFooterBackgroundTintOptimization()) {
-            scHigh = mContext.getColor(
-                    com.android.internal.R.color.materialColorSurfaceContainerHigh);
+            if (notificationShadeBlur()) {
+                Color backgroundColor = Color.valueOf(
+                        SurfaceEffectColors.surfaceEffect0(getResources()));
+                scHigh = ColorUtils.setAlphaComponent(backgroundColor.toArgb(), 0xFF);
+                // Apply alpha on background drawables.
+                int backgroundAlpha = (int) (backgroundColor.alpha() * 0xFF);
+                clearAllBg.setAlpha(backgroundAlpha);
+                settingsBg.setAlpha(backgroundAlpha);
+                if (historyBg != null) {
+                    historyBg.setAlpha(backgroundAlpha);
+                }
+            } else {
+                scHigh = mContext.getColor(
+                        com.android.internal.R.color.materialColorSurfaceContainerHigh);
+            }
             if (scHigh != 0) {
                 final ColorFilter bgColorFilter = new PorterDuffColorFilter(scHigh, SRC_ATOP);
                 clearAllBg.setColorFilter(bgColorFilter);
