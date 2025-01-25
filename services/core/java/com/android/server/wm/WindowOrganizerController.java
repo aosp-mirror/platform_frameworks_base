@@ -756,40 +756,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                             t.getTaskFragmentOrganizer());
                 }
             }
-            // Queue-up bounds-change transactions for tasks which are now organized. Do
-            // this after hierarchy ops so we have the final organized state.
-            entries = t.getChanges().entrySet().iterator();
-            while (entries.hasNext()) {
-                final Map.Entry<IBinder, WindowContainerTransaction.Change> entry = entries.next();
-                final WindowContainer wc = WindowContainer.fromBinder(entry.getKey());
-                if (wc == null || !wc.isAttached()) {
-                    Slog.e(TAG, "Attempt to operate on detached container: " + wc);
-                    continue;
-                }
-                final Task task = wc.asTask();
-                final Rect surfaceBounds = entry.getValue().getBoundsChangeSurfaceBounds();
-                if (task == null || !task.isAttached() || surfaceBounds == null) {
-                    continue;
-                }
-                if (!task.isOrganized()) {
-                    final Task parent = task.getParent() != null ? task.getParent().asTask() : null;
-                    // Also allow direct children of created-by-organizer tasks to be
-                    // controlled. In the future, these will become organized anyways.
-                    if (parent == null || !parent.mCreatedByOrganizer) {
-                        throw new IllegalArgumentException(
-                                "Can't manipulate non-organized task surface " + task);
-                    }
-                }
-                final SurfaceControl.Transaction sft = new SurfaceControl.Transaction();
-                final SurfaceControl sc = task.getSurfaceControl();
-                sft.setPosition(sc, surfaceBounds.left, surfaceBounds.top);
-                if (surfaceBounds.isEmpty()) {
-                    sft.setWindowCrop(sc, null);
-                } else {
-                    sft.setWindowCrop(sc, surfaceBounds.width(), surfaceBounds.height());
-                }
-                task.setMainWindowSizeChangeTransaction(sft);
-            }
             if ((effects & TRANSACT_EFFECTS_LIFECYCLE) != 0) {
                 mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
                 mService.mTaskSupervisor.endDeferResume();
