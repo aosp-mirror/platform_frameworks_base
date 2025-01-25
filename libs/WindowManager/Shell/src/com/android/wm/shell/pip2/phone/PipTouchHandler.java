@@ -54,10 +54,12 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
+import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipDoubleTapHelper;
 import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
@@ -91,6 +93,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
     @NonNull private final PipTransitionState mPipTransitionState;
     @NonNull private final PipScheduler mPipScheduler;
     @NonNull private final SizeSpecSource mSizeSpecSource;
+    @NonNull private final PipDisplayLayoutState mPipDisplayLayoutState;
     private final PipUiEventLogger mPipUiEventLogger;
     private final PipDismissTargetHandler mPipDismissTargetHandler;
     private final ShellExecutor mMainExecutor;
@@ -183,6 +186,8 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
             @NonNull PipTransitionState pipTransitionState,
             @NonNull PipScheduler pipScheduler,
             @NonNull SizeSpecSource sizeSpecSource,
+            @NonNull PipDisplayLayoutState pipDisplayLayoutState,
+            DisplayController displayController,
             PipMotionHelper pipMotionHelper,
             FloatingContentCoordinator floatingContentCoordinator,
             PipUiEventLogger pipUiEventLogger,
@@ -200,6 +205,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         mPipTransitionState.addPipTransitionStateChangedListener(this::onPipTransitionStateChanged);
         mPipScheduler = pipScheduler;
         mSizeSpecSource = sizeSpecSource;
+        mPipDisplayLayoutState = pipDisplayLayoutState;
         mMenuController = menuController;
         mPipUiEventLogger = pipUiEventLogger;
         mFloatingContentCoordinator = floatingContentCoordinator;
@@ -208,7 +214,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         mMotionHelper = pipMotionHelper;
         mPipScheduler.setUpdateMovementBoundsRunnable(this::updateMovementBounds);
         mPipDismissTargetHandler = new PipDismissTargetHandler(context, pipUiEventLogger,
-                mMotionHelper, mainExecutor);
+                mMotionHelper, mPipDisplayLayoutState, displayController, mainExecutor);
         mTouchState = new PipTouchState(ViewConfiguration.get(context),
                 () -> {
                     mMenuController.showMenuWithPossibleDelay(MENU_STATE_FULL,
@@ -220,8 +226,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
                 mainExecutor);
         mPipResizeGestureHandler = new PipResizeGestureHandler(context, pipBoundsAlgorithm,
                 pipBoundsState, mTouchState, mPipScheduler, mPipTransitionState, pipUiEventLogger,
-                menuController, mainExecutor,
-                mPipPerfHintController);
+                menuController, mPipDisplayLayoutState, mainExecutor, mPipPerfHintController);
         mPipBoundsState.addOnAspectRatioChangedCallback(aspectRatio -> {
             updateMinMaxSize(aspectRatio);
             onAspectRatioChanged();
@@ -264,7 +269,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         mPipDismissTargetHandler.init();
 
         mPipInputConsumer = new PipInputConsumer(WindowManagerGlobal.getWindowManagerService(),
-                INPUT_CONSUMER_PIP, mMainExecutor);
+                INPUT_CONSUMER_PIP, mPipDisplayLayoutState, mMainExecutor);
         mPipInputConsumer.setInputListener(this::handleTouchEvent);
         mPipInputConsumer.setRegistrationListener(this::onRegistrationChanged);
 

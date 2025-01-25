@@ -159,11 +159,12 @@ public abstract class Pip2Module {
             PipUiEventLogger pipUiEventLogger,
             PipTaskListener pipTaskListener,
             @NonNull PipTransitionState pipTransitionState,
+            @NonNull PipDisplayLayoutState pipDisplayLayoutState,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler) {
         return new PhonePipMenuController(context, pipBoundsState, pipMediaController,
-                systemWindows, pipUiEventLogger, pipTaskListener, pipTransitionState, mainExecutor,
-                mainHandler);
+                systemWindows, pipUiEventLogger, pipTaskListener, pipTransitionState,
+                pipDisplayLayoutState, mainExecutor, mainHandler);
     }
 
 
@@ -178,6 +179,8 @@ public abstract class Pip2Module {
             @NonNull PipTransitionState pipTransitionState,
             @NonNull PipScheduler pipScheduler,
             @NonNull SizeSpecSource sizeSpecSource,
+            @NonNull PipDisplayLayoutState pipDisplayLayoutState,
+            DisplayController displayController,
             PipMotionHelper pipMotionHelper,
             FloatingContentCoordinator floatingContentCoordinator,
             PipUiEventLogger pipUiEventLogger,
@@ -185,8 +188,9 @@ public abstract class Pip2Module {
             Optional<PipPerfHintController> pipPerfHintControllerOptional) {
         return new PipTouchHandler(context, shellInit, shellCommandHandler, menuPhoneController,
                 pipBoundsAlgorithm, pipBoundsState, pipTransitionState, pipScheduler,
-                sizeSpecSource, pipMotionHelper, floatingContentCoordinator, pipUiEventLogger,
-                mainExecutor, pipPerfHintControllerOptional);
+                sizeSpecSource, pipDisplayLayoutState, displayController, pipMotionHelper,
+                floatingContentCoordinator, pipUiEventLogger, mainExecutor,
+                pipPerfHintControllerOptional);
     }
 
     @WMSingleton

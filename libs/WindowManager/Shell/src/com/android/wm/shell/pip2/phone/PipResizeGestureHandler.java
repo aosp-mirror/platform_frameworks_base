@@ -44,6 +44,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipPinchResizingAlgorithm;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
@@ -70,9 +71,9 @@ public class PipResizeGestureHandler implements
     private final PipScheduler mPipScheduler;
     private final PipTransitionState mPipTransitionState;
     private final PhonePipMenuController mPhonePipMenuController;
+    private final PipDisplayLayoutState mPipDisplayLayoutState;
     private final PipUiEventLogger mPipUiEventLogger;
     private final PipPinchResizingAlgorithm mPinchResizingAlgorithm;
-    private final int mDisplayId;
     private final ShellExecutor mMainExecutor;
 
     private final PointF mDownPoint = new PointF();
@@ -120,10 +121,10 @@ public class PipResizeGestureHandler implements
             PipTransitionState pipTransitionState,
             PipUiEventLogger pipUiEventLogger,
             PhonePipMenuController menuActivityController,
+            PipDisplayLayoutState pipDisplayLayoutState,
             ShellExecutor mainExecutor,
             @Nullable PipPerfHintController pipPerfHintController) {
         mContext = context;
-        mDisplayId = context.getDisplayId();
         mMainExecutor = mainExecutor;
         mPipPerfHintController = pipPerfHintController;
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
@@ -135,6 +136,7 @@ public class PipResizeGestureHandler implements
         mPipTransitionState.addPipTransitionStateChangedListener(this);
 
         mPhonePipMenuController = menuActivityController;
+        mPipDisplayLayoutState = pipDisplayLayoutState;
         mPipUiEventLogger = pipUiEventLogger;
         mPinchResizingAlgorithm = new PipPinchResizingAlgorithm();
     }
@@ -197,7 +199,7 @@ public class PipResizeGestureHandler implements
         if (mIsEnabled) {
             // Register input event receiver
             mInputMonitor = mContext.getSystemService(InputManager.class).monitorGestureInput(
-                    "pip-resize", mDisplayId);
+                    "pip-resize", mPipDisplayLayoutState.getDisplayId());
             try {
                 mMainExecutor.executeBlocking(() -> {
                     mInputEventReceiver = new PipResizeInputEventReceiver(
