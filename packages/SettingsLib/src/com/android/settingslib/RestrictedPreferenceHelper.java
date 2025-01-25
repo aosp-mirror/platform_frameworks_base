@@ -204,13 +204,30 @@ public class RestrictedPreferenceHelper {
      * package. Marks the preference as disabled if so.
      * @param settingIdentifier The key identifying the setting
      * @param packageName the package to check the settingIdentifier for
+     * @param settingEnabled Whether the setting in question is enabled
      */
     public void checkEcmRestrictionAndSetDisabled(@NonNull String settingIdentifier,
-            @NonNull String packageName) {
+            @NonNull String packageName, boolean settingEnabled) {
         updatePackageDetails(packageName, android.os.Process.INVALID_UID);
+        if (settingEnabled) {
+            setDisabledByEcm(null);
+            return;
+        }
         Intent intent = RestrictedLockUtilsInternal.checkIfRequiresEnhancedConfirmation(
                 mContext, settingIdentifier, packageName);
         setDisabledByEcm(intent);
+    }
+
+    /**
+     * Checks if the given setting is subject to Enhanced Confirmation Mode restrictions for this
+     * package. Marks the preference as disabled if so.
+     * TODO b/390196024: remove this and update all callers to use the "settingEnabled" version
+     * @param settingIdentifier The key identifying the setting
+     * @param packageName the package to check the settingIdentifier for
+     */
+    public void checkEcmRestrictionAndSetDisabled(@NonNull String settingIdentifier,
+            @NonNull String packageName) {
+        checkEcmRestrictionAndSetDisabled(settingIdentifier, packageName, false);
     }
 
     /**

@@ -41,10 +41,23 @@ public class RestrictedDropDownPreference extends DropDownPreference implements
      * package. Marks the preference as disabled if so.
      * @param settingIdentifier The key identifying the setting
      * @param packageName the package to check the settingIdentifier for
+     * @param settingEnabled Whether the setting in question is enabled
+     */
+    public void checkEcmRestrictionAndSetDisabled(@NonNull String settingIdentifier,
+            @NonNull String packageName, boolean settingEnabled) {
+        mHelper.checkEcmRestrictionAndSetDisabled(settingIdentifier, packageName, settingEnabled);
+    }
+
+    /**
+     * Checks if the given setting is subject to Enhanced Confirmation Mode restrictions for this
+     * package. Marks the preference as disabled if so.
+     * TODO b/390196024: remove this and update all callers to use the "settingEnabled" version
+     * @param settingIdentifier The key identifying the setting
+     * @param packageName the package to check the settingIdentifier for
      */
     public void checkEcmRestrictionAndSetDisabled(@NonNull String settingIdentifier,
             @NonNull String packageName) {
-        mHelper.checkEcmRestrictionAndSetDisabled(settingIdentifier, packageName);
+        mHelper.checkEcmRestrictionAndSetDisabled(settingIdentifier, packageName, false);
     }
 
     @Override
