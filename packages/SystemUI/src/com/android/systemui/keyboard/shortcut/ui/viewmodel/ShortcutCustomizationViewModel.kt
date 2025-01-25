@@ -92,7 +92,7 @@ constructor(
     fun onDialogDismissed() {
         _shortcutCustomizationUiState.value = ShortcutCustomizationUiState.Inactive
         shortcutCustomizationInteractor.onCustomizationRequested(null)
-        shortcutCustomizationInteractor.updateUserSelectedKeyCombination(null)
+        clearSelectedKeyCombination()
     }
 
     fun onShortcutKeyCombinationSelected(keyEvent: KeyEvent): Boolean {
@@ -156,6 +156,10 @@ constructor(
                 else -> uiState
             }
         }
+    }
+
+    fun clearSelectedKeyCombination() {
+        shortcutCustomizationInteractor.updateUserSelectedKeyCombination(null)
     }
 
     private fun getUiStateWithErrorMessage(

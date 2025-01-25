@@ -78,6 +78,7 @@ fun ShortcutCustomizationDialog(
     onConfirmSetShortcut: () -> Unit,
     onConfirmDeleteShortcut: () -> Unit,
     onConfirmResetShortcut: () -> Unit,
+    onClearSelectedKeyCombination: () -> Unit,
 ) {
     when (uiState) {
         is ShortcutCustomizationUiState.AddShortcutDialog -> {
@@ -87,6 +88,7 @@ fun ShortcutCustomizationDialog(
                 onShortcutKeyCombinationSelected,
                 onCancel,
                 onConfirmSetShortcut,
+                onClearSelectedKeyCombination,
             )
         }
         is ShortcutCustomizationUiState.DeleteShortcutDialog -> {
@@ -108,6 +110,7 @@ private fun AddShortcutDialog(
     onShortcutKeyCombinationSelected: (KeyEvent) -> Boolean,
     onCancel: () -> Unit,
     onConfirmSetShortcut: () -> Unit,
+    onClearSelectedKeyCombination: () -> Unit,
 ) {
     Column(modifier = modifier) {
         Title(uiState.shortcutLabel)
@@ -126,6 +129,7 @@ private fun AddShortcutDialog(
             onShortcutKeyCombinationSelected = onShortcutKeyCombinationSelected,
             pressedKeys = uiState.pressedKeys,
             onConfirmSetShortcut = onConfirmSetShortcut,
+            onClearSelectedKeyCombination = onClearSelectedKeyCombination,
         )
         ErrorMessageContainer(uiState.errorMessage)
         DialogButtons(
@@ -262,6 +266,7 @@ private fun SelectedKeyCombinationContainer(
     onShortcutKeyCombinationSelected: (KeyEvent) -> Boolean,
     pressedKeys: List<ShortcutKey>,
     onConfirmSetShortcut: () -> Unit,
+    onClearSelectedKeyCombination: () -> Unit,
 ) {
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
@@ -282,6 +287,10 @@ private fun SelectedKeyCombinationContainer(
                             when (keyEvent.key) {
                                 Key.Enter -> {
                                     onConfirmSetShortcut()
+                                    return@onPreviewKeyEvent true
+                                }
+                                Key.Backspace -> {
+                                    onClearSelectedKeyCombination()
                                     return@onPreviewKeyEvent true
                                 }
                                 Key.DirectionDown -> {
@@ -357,8 +366,7 @@ private fun ShortcutIconKey(key: ShortcutKey.Icon) {
                 is ShortcutKey.Icon.DrawableIcon -> rememberDrawablePainter(drawable = key.drawable)
             },
         contentDescription = null,
-        modifier =
-        Modifier.height(24.dp),
+        modifier = Modifier.height(24.dp),
         tint = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }

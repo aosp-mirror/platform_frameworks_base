@@ -297,6 +297,19 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
         }
     }
 
+    @Test
+    fun uiState_pressedKeys_resetsToEmpty_onClearSelectedShortcutKeyCombination() {
+        testScope.runTest {
+            val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
+            viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
+            viewModel.onShortcutKeyCombinationSelected(keyDownEventWithActionKeyPressed)
+            viewModel.onShortcutKeyCombinationSelected(keyUpEventWithActionKeyPressed)
+            viewModel.clearSelectedKeyCombination()
+            
+            assertThat((uiState as AddShortcutDialog).pressedKeys).isEmpty()
+        }
+    }
+
     private suspend fun openAddShortcutDialogAndSetShortcut() {
         viewModel.onShortcutCustomizationRequested(allAppsShortcutAddRequest)
 

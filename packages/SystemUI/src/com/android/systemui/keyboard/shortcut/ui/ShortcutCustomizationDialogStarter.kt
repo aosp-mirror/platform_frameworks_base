@@ -101,6 +101,7 @@ constructor(
                 onConfirmResetShortcut = {
                     coroutineScope.launch { viewModel.resetAllCustomShortcuts() }
                 },
+                onClearSelectedKeyCombination = { viewModel.clearSelectedKeyCombination() },
             )
             setDialogProperties(dialog, uiState)
         }
