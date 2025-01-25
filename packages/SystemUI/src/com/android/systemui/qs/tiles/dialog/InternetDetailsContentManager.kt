@@ -57,10 +57,8 @@ import com.android.settingslib.satellite.SatelliteDialogUtils.mayStartSatelliteW
 import com.android.settingslib.wifi.WifiEnterpriseRestrictionUtils
 import com.android.systemui.Prefs
 import com.android.systemui.accessibility.floatingmenu.AnnotationLinkSpan
-import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.qs.flags.QsDetailedView
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -75,11 +73,7 @@ import kotlinx.coroutines.Job
 
 /**
  * View content for the Internet tile details that handles all UI interactions and state management.
- *
- * @param internetDialog non-null if the details should be shown as part of a dialog and null
- *   otherwise.
  */
-// TODO: b/377388104 Make this content for details view only.
 class InternetDetailsContentManager
 @AssistedInject
 constructor(
@@ -88,9 +82,7 @@ constructor(
     @Assisted(CAN_CONFIG_WIFI) private val canConfigWifi: Boolean,
     @Assisted private val coroutineScope: CoroutineScope,
     @Assisted private var context: Context,
-    @Assisted private var internetDialog: SystemUIDialog?,
     private val uiEventLogger: UiEventLogger,
-    private val dialogTransitionAnimator: DialogTransitionAnimator,
     @Main private val handler: Handler,
     @Background private val backgroundExecutor: Executor,
     private val keyguard: KeyguardStateController,
@@ -104,8 +96,6 @@ constructor(
 
     // UI Components
     private lateinit var contentView: View
-    private lateinit var internetDialogTitleView: TextView
-    private lateinit var internetDialogSubTitleView: TextView
     private lateinit var divider: View
     private lateinit var progressBar: ProgressBar
     private lateinit var ethernetLayout: LinearLayout
@@ -132,7 +122,6 @@ constructor(
     private lateinit var shareWifiButton: Button
     private lateinit var airplaneModeButton: Button
     private var alertDialog: AlertDialog? = null
-    private lateinit var doneButton: Button
 
     private val canChangeWifiState =
         WifiEnterpriseRestrictionUtils.isChangeWifiStateAllowed(context)
@@ -153,7 +142,6 @@ constructor(
             @Assisted(CAN_CONFIG_WIFI) canConfigWifi: Boolean,
             coroutineScope: CoroutineScope,
             context: Context,
-            internetDialog: SystemUIDialog?,
         ): InternetDetailsContentManager
     }
 
@@ -209,8 +197,6 @@ constructor(
         }
 
         // Network layouts
-        internetDialogTitleView = contentView.requireViewById(R.id.internet_dialog_title)
-        internetDialogSubTitleView = contentView.requireViewById(R.id.internet_dialog_subtitle)
         divider = contentView.requireViewById(R.id.divider)
         progressBar = contentView.requireViewById(R.id.wifi_searching_progress)
 
@@ -218,15 +204,6 @@ constructor(
         setWifiLayout()
         setMobileLayout()
         ethernetLayout = contentView.requireViewById(R.id.ethernet_layout)
-
-        // Done button is only visible for the dialog view
-        doneButton = contentView.requireViewById(R.id.done_button)
-        if (internetDialog == null) {
-            doneButton.visibility = View.GONE
-        } else {
-            // Set done button if qs details view is not enabled.
-            doneButton.setOnClickListener { internetDialog!!.dismiss() }
-        }
 
         // Share WiFi
         shareWifiButton = contentView.requireViewById(R.id.share_wifi_button)
@@ -251,6 +228,17 @@ constructor(
         // Background drawables
         backgroundOn = context.getDrawable(R.drawable.settingslib_switch_bar_bg_on)
         backgroundOff = context.getDrawable(R.drawable.internet_dialog_selected_effect)
+
+        // Done button is only visible for the dialog view
+        contentView.findViewById<Button>(R.id.done_button).apply { visibility = View.GONE }
+
+        // Title and subtitle will be added in the `TileDetails`
+        contentView.findViewById<TextView>(R.id.internet_dialog_title).apply {
+            visibility = View.GONE
+        }
+        contentView.findViewById<TextView>(R.id.internet_dialog_subtitle).apply {
+            visibility = View.GONE
+        }
     }
 
     private fun setWifiLayout() {
@@ -336,21 +324,19 @@ constructor(
         }
     }
 
-    private fun getDialogTitleText(): CharSequence {
-        return internetDetailsContentController.getDialogTitleText()
+    fun getTitleText(): String {
+        return internetDetailsContentController.getDialogTitleText().toString()
+    }
+
+    fun getSubtitleText(): String {
+        return internetDetailsContentController.getSubtitleText(isProgressBarVisible).toString()
     }
 
     private fun updateDetailsUI(internetContent: InternetContent) {
         if (DEBUG) {
             Log.d(TAG, "updateDetailsUI ")
         }
-        if (QsDetailedView.isEnabled) {
-            internetDialogTitleView.visibility = View.GONE
-            internetDialogSubTitleView.visibility = View.GONE
-        } else {
-            internetDialogTitleView.text = internetContent.internetDialogTitleString
-            internetDialogSubTitleView.text = internetContent.internetDialogSubTitle
-        }
+
         airplaneModeButton.visibility =
             if (internetContent.isAirplaneModeEnabled) View.VISIBLE else View.GONE
 
@@ -361,15 +347,9 @@ constructor(
 
     private fun getStartingInternetContent(): InternetContent {
         return InternetContent(
-            internetDialogTitleString = getDialogTitleText(),
-            internetDialogSubTitle = getSubtitleText(),
             isWifiEnabled = internetDetailsContentController.isWifiEnabled,
             isDeviceLocked = internetDetailsContentController.isDeviceLocked,
         )
-    }
-
-    private fun getSubtitleText(): String {
-        return internetDetailsContentController.getSubtitleText(isProgressBarVisible).toString()
     }
 
     @VisibleForTesting
@@ -393,7 +373,6 @@ constructor(
         progressBar.visibility = if (visible) View.VISIBLE else View.GONE
         progressBar.isIndeterminate = visible
         divider.visibility = if (visible) View.GONE else View.VISIBLE
-        internetDialogSubTitleView.text = getSubtitleText()
     }
 
     private fun showTurnOffAutoDataSwitchDialog(subId: Int) {
@@ -418,12 +397,7 @@ constructor(
         SystemUIDialog.setShowForAllUsers(alertDialog, true)
         SystemUIDialog.registerDismissListener(alertDialog)
         SystemUIDialog.setWindowOnTop(alertDialog, keyguard.isShowing())
-        if (QsDetailedView.isEnabled) {
-            alertDialog!!.show()
-        } else {
-            dialogTransitionAnimator.showFromDialog(alertDialog!!, internetDialog!!, null, false)
-            Log.e(TAG, "Internet dialog is shown with the refactor code")
-        }
+        alertDialog!!.show()
     }
 
     private fun shouldShowMobileDialog(): Boolean {
@@ -466,11 +440,8 @@ constructor(
         SystemUIDialog.setShowForAllUsers(alertDialog, true)
         SystemUIDialog.registerDismissListener(alertDialog)
         SystemUIDialog.setWindowOnTop(alertDialog, keyguard.isShowing())
-        if (QsDetailedView.isEnabled) {
-            alertDialog!!.show()
-        } else {
-            dialogTransitionAnimator.showFromDialog(alertDialog!!, internetDialog!!, null, false)
-        }
+
+        alertDialog!!.show()
     }
 
     private fun onClickConnectedWifi(view: View?) {
@@ -803,7 +774,6 @@ constructor(
         secondaryMobileNetworkLayout?.setOnClickListener(null)
         seeAllLayout.setOnClickListener(null)
         wifiToggle.setOnCheckedChangeListener(null)
-        doneButton.setOnClickListener(null)
         shareWifiButton.setOnClickListener(null)
         airplaneModeButton.setOnClickListener(null)
         internetDetailsContentController.onStop()
@@ -825,8 +795,6 @@ constructor(
     private fun getInternetContent(shouldUpdateMobileNetwork: Boolean): InternetContent {
         return InternetContent(
             shouldUpdateMobileNetwork = shouldUpdateMobileNetwork,
-            internetDialogTitleString = getDialogTitleText(),
-            internetDialogSubTitle = getSubtitleText(),
             activeNetworkIsCellular =
                 if (shouldUpdateMobileNetwork)
                     internetDetailsContentController.activeNetworkIsCellular()
@@ -924,10 +892,7 @@ constructor(
                 if (DEBUG) {
                     Log.d(TAG, "dismissDialog")
                 }
-                if (internetDialog != null) {
-                    internetDialog!!.dismiss()
-                    internetDialog = null
-                }
+                // TODO: b/377388104 Close details view
             }
 
             override fun onAccessPointsChanged(
@@ -967,8 +932,6 @@ constructor(
 
     @VisibleForTesting
     data class InternetContent(
-        val internetDialogTitleString: CharSequence,
-        val internetDialogSubTitle: CharSequence,
         val isAirplaneModeEnabled: Boolean = false,
         val hasEthernet: Boolean = false,
         val shouldUpdateMobileNetwork: Boolean = false,

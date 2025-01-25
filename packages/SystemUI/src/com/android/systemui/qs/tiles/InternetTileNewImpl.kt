@@ -61,6 +61,7 @@ constructor(
     private val internetDialogManager: InternetDialogManager,
     private val wifiStateWorker: WifiStateWorker,
     private val accessPointController: AccessPointController,
+    private val internetDetailsViewModelFactory: InternetDetailsViewModel.Factory,
 ) :
     QSTileImpl<QSTile.BooleanState>(
         host,
@@ -107,7 +108,7 @@ constructor(
     }
 
     override fun getDetailsViewModel(): TileDetailsViewModel {
-        return InternetDetailsViewModel { longClick(null) }
+        return internetDetailsViewModelFactory.create { longClick(null) }
     }
 
     override fun handleSecondaryClick(expandable: Expandable?) {
