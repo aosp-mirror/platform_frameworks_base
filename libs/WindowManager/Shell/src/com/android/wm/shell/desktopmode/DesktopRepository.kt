@@ -926,7 +926,10 @@ class DesktopRepository(
         }
 
         override fun getDesk(deskId: Int): Desk =
-            checkNotNull(deskByDisplayId[deskId]) { "Expected desk $deskId to exist" }
+            // TODO: b/362720497 - consider enforcing that the desk has been created before trying
+            //  to use it. As of now, there are cases where a task may be created faster than a
+            //  desk is, so just create it here if needed. See b/391984373.
+            deskByDisplayId.getOrCreate(deskId)
 
         override fun getActiveDesk(displayId: Int): Desk {
             // TODO: 389787966 - consider migrating to an "active" state instead of checking the

@@ -72,6 +72,11 @@ class DesktopDisplayEventHandler(
             return
         }
         logV("Creating new desk in new display#$displayId")
+        // TODO: b/362720497 - when SystemUI crashes with a freeform task open for any reason, the
+        //  task is recreated and received in [FreeformTaskListener] before this display callback
+        //  is invoked, which results in the repository trying to add the task to a desk before the
+        //  desk has been recreated here, which may result in a crash-loop if the repository is
+        //  checking that the desk exists before adding a task to it. See b/391984373.
         desktopTasksController.createDesk(displayId)
     }
 
