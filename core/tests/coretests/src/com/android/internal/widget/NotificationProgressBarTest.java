@@ -143,8 +143,8 @@ public class NotificationProgressBarTest {
                 parts, drawableParts, segmentMinWidth, pointRadius, (float) progress / progressMax,
                 300, isStyledByProgress, hasTrackerIcon ? 0 : segSegGap);
 
-        // Colors with 40% opacity
-        int fadedRed = 0x66FF0000;
+        // Colors with 50% opacity
+        int fadedRed = 0x80FF0000;
         expectedDrawableParts = new ArrayList<>(
                 List.of(new DrawableSegment(0, 300, fadedRed, true)));
 
@@ -271,8 +271,8 @@ public class NotificationProgressBarTest {
                 parts, drawableParts, segmentMinWidth, pointRadius, (float) progress / progressMax,
                 300, isStyledByProgress, hasTrackerIcon ? 0 : segSegGap);
 
-        // Colors with 40% opacity
-        int fadedBlue = 0x660000FF;
+        // Colors with 50% opacity
+        int fadedBlue = 0x800000FF;
         expectedDrawableParts = new ArrayList<>(
                 List.of(new DrawableSegment(0, 180, Color.BLUE),
                         new DrawableSegment(180, 300, fadedBlue, true)));
@@ -321,8 +321,8 @@ public class NotificationProgressBarTest {
                 parts, drawableParts, segmentMinWidth, pointRadius, (float) progress / progressMax,
                 300, isStyledByProgress, hasTrackerIcon ? 0 : segSegGap);
 
-        // Colors with 40% opacity
-        int fadedGreen = 0x6600FF00;
+        // Colors with 50% opacity
+        int fadedGreen = 0x8000FF00;
         expectedDrawableParts = new ArrayList<>(List.of(new DrawableSegment(0, 146, Color.RED),
                 new DrawableSegment(150, 180, Color.GREEN),
                 new DrawableSegment(180, 300, fadedGreen, true)));
@@ -370,8 +370,8 @@ public class NotificationProgressBarTest {
                 parts, drawableParts, segmentMinWidth, pointRadius, (float) progress / progressMax,
                 300, isStyledByProgress, hasTrackerIcon ? 0 : segSegGap);
 
-        // Colors with 40% opacity
-        int fadedGreen = 0x6600FF00;
+        // Colors with 50% opacity
+        int fadedGreen = 0x8000FF00;
         expectedDrawableParts = new ArrayList<>(List.of(new DrawableSegment(0, 146, Color.RED),
                 new DrawableSegment(150, 176, Color.GREEN),
                 new DrawableSegment(180, 300, fadedGreen, true)));
@@ -439,9 +439,9 @@ public class NotificationProgressBarTest {
                 parts, drawableParts, segmentMinWidth, pointRadius, (float) progress / progressMax,
                 300, isStyledByProgress, hasTrackerIcon ? 0 : segSegGap);
 
-        // Colors with 40% opacity
-        int fadedBlue = 0x660000FF;
-        int fadedYellow = 0x66FFFF00;
+        // Colors with 50% opacity
+        int fadedBlue = 0x800000FF;
+        int fadedYellow = 0x80FFFF00;
         expectedDrawableParts = new ArrayList<>(
                 List.of(new DrawableSegment(0, 34.219177F, Color.BLUE),
                         new DrawablePoint(38.219177F, 50.219177F, Color.RED),
@@ -517,9 +517,9 @@ public class NotificationProgressBarTest {
                 parts, drawableParts, segmentMinWidth, pointRadius, (float) progress / progressMax,
                 300, isStyledByProgress, hasTrackerIcon ? 0 : segSegGap);
 
-        // Colors with 40% opacity
-        int fadedGreen = 0x6600FF00;
-        int fadedYellow = 0x66FFFF00;
+        // Colors with 50% opacity
+        int fadedGreen = 0x8000FF00;
+        int fadedYellow = 0x80FFFF00;
         expectedDrawableParts = new ArrayList<>(
                 List.of(new DrawableSegment(0, 34.095238F, Color.RED),
                         new DrawablePoint(38.095238F, 50.095238F, Color.RED),
@@ -594,9 +594,9 @@ public class NotificationProgressBarTest {
                 parts, drawableParts, segmentMinWidth, pointRadius, (float) progress / progressMax,
                 300, isStyledByProgress, hasTrackerIcon ? 0 : segSegGap);
 
-        // Colors with 40% opacity
-        int fadedGreen = 0x6600FF00;
-        int fadedYellow = 0x66FFFF00;
+        // Colors with 50% opacity
+        int fadedGreen = 0x8000FF00;
+        int fadedYellow = 0x80FFFF00;
         expectedDrawableParts = new ArrayList<>(
                 List.of(new DrawablePoint(0, 12, Color.RED),
                         new DrawableSegment(16, 65, Color.RED),
@@ -675,9 +675,9 @@ public class NotificationProgressBarTest {
                 parts, drawableParts, segmentMinWidth, pointRadius, (float) progress / progressMax,
                 300, isStyledByProgress, hasTrackerIcon ? 0 : segSegGap);
 
-        // Colors with 40% opacity
-        int fadedGreen = 0x6600FF00;
-        int fadedYellow = 0x66FFFF00;
+        // Colors with 50% opacity
+        int fadedGreen = 0x8000FF00;
+        int fadedYellow = 0x80FFFF00;
         expectedDrawableParts = new ArrayList<>(
                 List.of(new DrawableSegment(0, 16, Color.RED),
                         new DrawablePoint(20, 32, Color.RED),
@@ -1039,9 +1039,9 @@ public class NotificationProgressBarTest {
                         isStyledByProgress
                 );
 
-        // Colors with 40% opacity
-        int fadedBlue = 0x660000FF;
-        int fadedYellow = 0x66FFFF00;
+        // Colors with 50% opacity
+        int fadedBlue = 0x800000FF;
+        int fadedYellow = 0x80FFFF00;
         List<DrawablePart> expectedDrawableParts = new ArrayList<>(
                 List.of(new DrawableSegment(0, 34.219177F, Color.BLUE),
                         new DrawablePoint(38.219177F, 50.219177F, Color.RED),
@@ -1089,8 +1089,8 @@ public class NotificationProgressBarTest {
                         isStyledByProgress
                 );
 
-        // Colors with 40% opacity
-        int fadedBlue = 0x660000FF;
+        // Colors with 50%f opacity
+        int fadedBlue = 0x800000FF;
         List<DrawablePart> expectedDrawableParts = new ArrayList<>(
                 List.of(new DrawableSegment(0, 60.000004F, Color.BLUE),
                         new DrawableSegment(60.000004F, 100, fadedBlue, true)));
