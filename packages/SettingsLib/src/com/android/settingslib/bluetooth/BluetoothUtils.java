@@ -1169,4 +1169,38 @@ public class BluetoothUtils {
         String metadataValue = getFastPairCustomizedField(bluetoothDevice, TEMP_BOND_TYPE);
         return Objects.equals(metadataValue, TEMP_BOND_DEVICE_METADATA_VALUE);
     }
+
+    /**
+     * Set temp bond metadata to device
+     *
+     * @param device the BluetoothDevice to be marked as temp bond
+     *
+     * Note: It is a workaround since Bluetooth API is not ready.
+     *       Avoid using this method if possible
+     */
+    public static void setTemporaryBondMetadata(@Nullable BluetoothDevice device) {
+        if (device == null) return;
+        if (!Flags.enableTemporaryBondDevicesUi()) {
+            Log.d(TAG, "Skip setTemporaryBondMetadata, flag is disabled");
+            return;
+        }
+        String fastPairCustomizedMeta = getStringMetaData(device,
+                METADATA_FAST_PAIR_CUSTOMIZED_FIELDS);
+        String fullContentWithTag = generateExpressionWithTag(TEMP_BOND_TYPE,
+                TEMP_BOND_DEVICE_METADATA_VALUE);
+        if (TextUtils.isEmpty(fastPairCustomizedMeta)) {
+            fastPairCustomizedMeta = fullContentWithTag;
+        } else {
+            String oldValue = extraTagValue(TEMP_BOND_TYPE, fastPairCustomizedMeta);
+            if (TextUtils.isEmpty(oldValue)) {
+                fastPairCustomizedMeta += fullContentWithTag;
+            } else {
+                fastPairCustomizedMeta =
+                        fastPairCustomizedMeta.replace(
+                                generateExpressionWithTag(TEMP_BOND_TYPE, oldValue),
+                                fullContentWithTag);
+            }
+        }
+        device.setMetadata(METADATA_FAST_PAIR_CUSTOMIZED_FIELDS, fastPairCustomizedMeta.getBytes());
+    }
 }
