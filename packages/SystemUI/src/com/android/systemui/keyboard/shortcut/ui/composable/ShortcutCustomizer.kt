@@ -59,6 +59,10 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -244,7 +248,10 @@ private fun ErrorMessageContainer(errorMessage: String) {
                 lineHeight = 20.sp,
                 fontWeight = FontWeight.W500,
                 color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(start = 24.dp).width(252.dp),
+                modifier = Modifier.padding(start = 24.dp).width(252.dp).semantics {
+                    contentDescription = errorMessage
+                    liveRegion = LiveRegionMode.Polite
+                },
             )
         }
     }
