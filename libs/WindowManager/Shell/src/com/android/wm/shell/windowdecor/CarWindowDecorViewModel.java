@@ -16,13 +16,17 @@
 package com.android.wm.shell.windowdecor;
 
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.ActivityTaskManager;
+import android.app.IActivityTaskManager;
 import android.content.Context;
 import android.hardware.input.InputManager;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.InputDevice;
+import android.view.InsetsState;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.SurfaceControl;
@@ -33,6 +37,7 @@ import android.window.WindowContainerTransaction;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
@@ -49,7 +54,8 @@ import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHostSuppl
  * Works with decorations that extend {@link CarWindowDecoration}.
  */
 public abstract class CarWindowDecorViewModel
-        implements WindowDecorViewModel, FocusTransitionListener {
+        implements WindowDecorViewModel, FocusTransitionListener,
+        DisplayInsetsController.OnInsetsChangedListener {
     private static final String TAG = "CarWindowDecorViewModel";
 
     private final ShellTaskOrganizer mTaskOrganizer;
@@ -57,31 +63,37 @@ public abstract class CarWindowDecorViewModel
     private final @ShellBackgroundThread ShellExecutor mBgExecutor;
     private final ShellExecutor mMainExecutor;
     private final DisplayController mDisplayController;
+    private final DisplayInsetsController mDisplayInsetsController;
     private final FocusTransitionObserver mFocusTransitionObserver;
     private final SyncTransactionQueue mSyncQueue;
     private final SparseArray<CarWindowDecoration> mWindowDecorByTaskId = new SparseArray<>();
     private final WindowDecorViewHostSupplier<WindowDecorViewHost> mWindowDecorViewHostSupplier;
+    private final IActivityTaskManager mActivityTaskManager;
 
     public CarWindowDecorViewModel(
             Context context,
+            @ShellMainThread ShellExecutor mainExecutor,
             @ShellBackgroundThread ShellExecutor bgExecutor,
-            @ShellMainThread ShellExecutor shellExecutor,
             ShellInit shellInit,
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
+            DisplayInsetsController displayInsetsController,
             SyncTransactionQueue syncQueue,
             FocusTransitionObserver focusTransitionObserver,
             WindowDecorViewHostSupplier<WindowDecorViewHost> windowDecorViewHostSupplier) {
         mContext = context;
-        mMainExecutor = shellExecutor;
+        mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
         mTaskOrganizer = taskOrganizer;
         mDisplayController = displayController;
+        mDisplayInsetsController = displayInsetsController;
         mFocusTransitionObserver = focusTransitionObserver;
         mSyncQueue = syncQueue;
         mWindowDecorViewHostSupplier = windowDecorViewHostSupplier;
+        mActivityTaskManager = ActivityTaskManager.getService();
 
         shellInit.addInitCallback(this::onInit, this);
+        displayInsetsController.addGlobalInsetsChangedListener(this);
     }
 
     private void onInit() {
@@ -185,6 +197,26 @@ public abstract class CarWindowDecorViewModel
         }
 
         decoration.close();
+    }
+
+    @Override
+    public void insetsChanged(int displayId, InsetsState insetsState) {
+        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        try {
+            mActivityTaskManager.getTasks(/* maxNum= */ Integer.MAX_VALUE,
+                            /* filterOnlyVisibleRecents= */ false, /* keepIntentExtra= */ false,
+                            displayId)
+                    .stream().filter(taskInfo -> taskInfo.isVisible && taskInfo.isRunning)
+                    .forEach(taskInfo -> {
+                        final CarWindowDecoration decoration = mWindowDecorByTaskId.get(
+                                taskInfo.taskId);
+                        if (decoration != null) {
+                            decoration.relayout(taskInfo, t, t);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Cannot update decoration on inset change on displayId: " + displayId);
+        }
     }
 
     /**
