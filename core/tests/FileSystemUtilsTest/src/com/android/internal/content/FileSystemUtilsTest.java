@@ -35,6 +35,8 @@ public class FileSystemUtilsTest extends BaseHostJUnit4Test {
     private static final String PAGE_SIZE_COMPAT_DISABLED = "page_size_compat_disabled_app.apk";
     private static final String PAGE_SIZE_COMPAT_ENABLED_COMPRESSED_ELF =
             "app_with_4kb_compressed_elf.apk";
+    private static final String PAGE_SIZE_COMPAT_ENABLED_BY_PLATFORM =
+            "app_with_4kb_elf_no_override.apk";
 
     @Test
     @AppModeFull
@@ -90,5 +92,14 @@ public class FileSystemUtilsTest extends BaseHostJUnit4Test {
         // This test is expected to fail since compat is disabled in manifest
         runPageSizeCompatTest(PAGE_SIZE_COMPAT_DISABLED,
                 "testPageSizeCompat_compatDisabled");
+    }
+
+    @Test
+    @AppModeFull
+    public void runAppWith4KbLib_compatByAlignmentChecks()
+            throws DeviceNotAvailableException, TargetSetupError {
+        // This test is expected to fail since compat is disabled in manifest
+        runPageSizeCompatTest(PAGE_SIZE_COMPAT_ENABLED_BY_PLATFORM,
+                "testPageSizeCompat_compatByAlignmentChecks");
     }
 }

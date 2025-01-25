@@ -19,6 +19,7 @@ package android.test.pagesizecompat;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -43,6 +44,8 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedOnstanceState) {
         super.onCreate(savedOnstanceState);
+        View view = getLayoutInflater().inflate(R.layout.hello, null);
+        setContentView(view);
 
         Intent received =  getIntent();
         int op1 = received.getIntExtra(KEY_OPERAND_1, -1);
