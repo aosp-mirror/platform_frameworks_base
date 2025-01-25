@@ -361,7 +361,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
             controlTarget = mDisplayContent.getImeHostOrFallback(
                     ((InsetsControlTarget) imeInsetsTarget).getWindow());
 
-            if (controlTarget != imeInsetsTarget) {
+            if (controlTarget != null && controlTarget != imeInsetsTarget) {
                 ImeTracker.forLogging().onProgress(statsToken,
                         ImeTracker.PHASE_WM_SET_REMOTE_TARGET_IME_VISIBILITY);
                 controlTarget.setImeInputTargetRequestedVisibility(imeVisible, statsToken);
