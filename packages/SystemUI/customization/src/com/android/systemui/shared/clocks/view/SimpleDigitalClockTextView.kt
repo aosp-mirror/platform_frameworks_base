@@ -34,6 +34,7 @@ import android.view.View.MeasureSpec.EXACTLY
 import android.view.animation.Interpolator
 import android.widget.TextView
 import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.animation.GSFAxes
 import com.android.systemui.animation.TextAnimator
 import com.android.systemui.customization.R
 import com.android.systemui.log.core.Logger
@@ -44,6 +45,7 @@ import com.android.systemui.shared.clocks.DimensionParser
 import com.android.systemui.shared.clocks.FontTextStyle
 import com.android.systemui.shared.clocks.LogUtil
 import java.lang.Thread
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -206,7 +208,10 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
     }
 
     override fun onDraw(canvas: Canvas) {
-        logger.d({ "onDraw(); ls: $str1" }) { str1 = textAnimator.textInterpolator.shapedText }
+        logger.d({ "onDraw(${str1?.replace("\n", "\\n")})" }) {
+            str1 = textAnimator.textInterpolator.shapedText
+        }
+
         val translation = getLocalTranslation()
         canvas.translate(translation.x.toFloat(), translation.y.toFloat())
         digitTranslateAnimator?.let {
@@ -221,8 +226,42 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
         canvas.translate(-translation.x.toFloat(), -translation.y.toFloat())
     }
 
+    override fun setVisibility(visibility: Int) {
+        if (visibility != this.visibility) {
+            logger.d({ "setVisibility(${str1 ?: int1})" }) {
+                int1 = visibility
+                str1 =
+                    when (visibility) {
+                        VISIBLE -> "VISIBLE"
+                        INVISIBLE -> "INVISIBLE"
+                        GONE -> "GONE"
+                        else -> null
+                    }
+            }
+        }
+
+        super.setVisibility(visibility)
+    }
+
+    private var loggedAlpha = 1000f
+
+    override fun setAlpha(alpha: Float) {
+        val delta = if (alpha <= 0f || alpha >= 1f) 0.001f else 0.5f
+        if (abs(loggedAlpha - alpha) >= delta) {
+            loggedAlpha = alpha
+            logger.d({ "setAlpha($double1)" }) { double1 = alpha.toDouble() }
+        }
+        super.setAlpha(alpha)
+    }
+
+    private val isDrawn: Boolean
+        get() = (mPrivateFlags and 0x20 /* PFLAG_DRAWN */) > 0
+
     override fun invalidate() {
-        logger.d("invalidate()")
+        if (isDrawn && visibility == VISIBLE) {
+            logger.d("invalidate()")
+        }
+
         super.invalidate()
         (parent as? FlexClockView)?.invalidate()
     }
@@ -490,22 +529,22 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
             Paint().also { it.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OUT) }
 
         val AOD_COLOR = Color.WHITE
-        val OPTICAL_SIZE_AXIS = ClockFontAxisSetting("opsz", 144f)
+        val OPTICAL_SIZE_AXIS = ClockFontAxisSetting(GSFAxes.OPTICAL_SIZE, 144f)
         val DEFAULT_LS_VARIATION =
             listOf(
                 OPTICAL_SIZE_AXIS,
-                ClockFontAxisSetting("wght", 400f),
-                ClockFontAxisSetting("wdth", 100f),
-                ClockFontAxisSetting("ROND", 0f),
-                ClockFontAxisSetting("slnt", 0f),
+                ClockFontAxisSetting(GSFAxes.WEIGHT, 400f),
+                ClockFontAxisSetting(GSFAxes.WIDTH, 100f),
+                ClockFontAxisSetting(GSFAxes.ROUND, 0f),
+                ClockFontAxisSetting(GSFAxes.SLANT, 0f),
             )
         val DEFAULT_AOD_VARIATION =
             listOf(
                 OPTICAL_SIZE_AXIS,
-                ClockFontAxisSetting("wght", 200f),
-                ClockFontAxisSetting("wdth", 100f),
-                ClockFontAxisSetting("ROND", 0f),
-                ClockFontAxisSetting("slnt", 0f),
+                ClockFontAxisSetting(GSFAxes.WEIGHT, 200f),
+                ClockFontAxisSetting(GSFAxes.WIDTH, 100f),
+                ClockFontAxisSetting(GSFAxes.ROUND, 0f),
+                ClockFontAxisSetting(GSFAxes.SLANT, 0f),
             )
     }
 }

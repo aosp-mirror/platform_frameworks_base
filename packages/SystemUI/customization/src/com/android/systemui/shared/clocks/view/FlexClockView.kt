@@ -139,13 +139,49 @@ class FlexClockView(clockCtx: ClockContext) : FrameLayout(clockCtx.context) {
         digitalClockTextViewMap.forEach { (_, textView) -> textView.refreshText() }
     }
 
+    override fun setVisibility(visibility: Int) {
+        if (visibility != this.visibility) {
+            logger.d({ "setVisibility(${str1 ?: int1})" }) {
+                int1 = visibility
+                str1 =
+                    when (visibility) {
+                        VISIBLE -> "VISIBLE"
+                        INVISIBLE -> "INVISIBLE"
+                        GONE -> "GONE"
+                        else -> null
+                    }
+            }
+        }
+
+        super.setVisibility(visibility)
+    }
+
+    private var loggedAlpha = 1000f
+
+    override fun setAlpha(alpha: Float) {
+        val delta = if (alpha <= 0f || alpha >= 1f) 0.001f else 0.5f
+        if (abs(loggedAlpha - alpha) >= delta) {
+            loggedAlpha = alpha
+            logger.d({ "setAlpha($double1)" }) { double1 = alpha.toDouble() }
+        }
+        super.setAlpha(alpha)
+    }
+
+    private val isDrawn: Boolean
+        get() = (mPrivateFlags and 0x20 /* PFLAG_DRAWN */) > 0
+
     override fun invalidate() {
-        logger.d("invalidate()")
+        if (isDrawn && visibility == VISIBLE) {
+            logger.d("invalidate()")
+        }
+
         super.invalidate()
     }
 
     override fun requestLayout() {
-        logger.d("requestLayout()")
+        if (!isLayoutRequested()) {
+            logger.d("requestLayout()")
+        }
         super.requestLayout()
     }
 
