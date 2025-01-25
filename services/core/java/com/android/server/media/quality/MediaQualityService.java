@@ -803,10 +803,6 @@ public class MediaQualityService extends SystemService {
                 pictureParams.add(PictureParameter.colorTunerLuminanceFlesh(params.getInt(
                         PictureQuality.PARAMETER_COLOR_TUNER_LUMINANCE_FLESH)));
             }
-            if (params.containsKey(PictureQuality.PARAMETER_ACTIVE_PROFILE)) {
-                pictureParams.add(PictureParameter.activeProfile(params.getBoolean(
-                        PictureQuality.PARAMETER_ACTIVE_PROFILE)));
-            }
             if (params.containsKey(PictureQuality.PARAMETER_PICTURE_QUALITY_EVENT_TYPE)) {
                 pictureParams.add(PictureParameter.pictureQualityEventType(
                         (byte) params.getInt(PictureQuality.PARAMETER_PICTURE_QUALITY_EVENT_TYPE)));
@@ -1125,10 +1121,6 @@ public class MediaQualityService extends SystemService {
             if (params.containsKey(SoundQuality.PARAMETER_DOWN_MIX_MODE)) {
                 soundParams.add(SoundParameter.downmixMode((byte) params.getInt(
                         SoundQuality.PARAMETER_DOWN_MIX_MODE)));
-            }
-            if (params.containsKey(SoundQuality.PARAMETER_ACTIVE_PROFILE)) {
-                soundParams.add(SoundParameter.activeProfile(params.getBoolean(
-                        SoundQuality.PARAMETER_ACTIVE_PROFILE)));
             }
             if (params.containsKey(SoundQuality.PARAMETER_SOUND_STYLE)) {
                 soundParams.add(SoundParameter.soundStyle((byte) params.getInt(

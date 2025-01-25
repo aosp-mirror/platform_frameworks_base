@@ -385,7 +385,6 @@ public class MediaQualityContract {
         public static final String PARAMETER_AUTO_SUPER_RESOLUTION_ENABLED =
                 "auto_super_resolution_enabled";
 
-
         /**
          * @hide
          *
@@ -709,12 +708,6 @@ public class MediaQualityContract {
          * @hide
          *
          */
-        public static final String PARAMETER_ACTIVE_PROFILE = "active_profile";
-
-        /**
-         * @hide
-         *
-         */
         public static final String PARAMETER_PICTURE_QUALITY_EVENT_TYPE =
                 "picture_quality_event_type";
 
@@ -973,11 +966,6 @@ public class MediaQualityContract {
          * <p>Type: STRING
          */
         public static final String PARAMETER_DIGITAL_OUTPUT_MODE = "digital_output_mode";
-
-        /**
-         * @hide
-         */
-        public static final String PARAMETER_ACTIVE_PROFILE = "active_profile";
 
         /**
          * @hide
