@@ -81,9 +81,9 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
     /**
      * Private constructor, use static builder methods instead.
      *
-     * <p> Builder methods should create a private copy of the credential bytes and pass in here.
-     * LockscreenCredential will only store the reference internally without copying. This is to
-     * minimize the number of extra copies introduced.
+     * <p> Builder methods should create a private copy of the credential bytes using a non-movable
+     * array and pass it in here.  LockscreenCredential will only store the reference internally
+     * without copying. This is to minimize the number of extra copies introduced.
      */
     private LockscreenCredential(int type, byte[] credential, boolean hasInvalidChars) {
         Objects.requireNonNull(credential);
@@ -141,7 +141,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
      */
     public static LockscreenCredential createUnifiedProfilePassword(@NonNull byte[] password) {
         return new LockscreenCredential(CREDENTIAL_TYPE_PASSWORD,
-                Arrays.copyOf(password, password.length), /* hasInvalidChars= */ false);
+                copyOfArrayNonMovable(password), /* hasInvalidChars= */ false);
     }
 
     /**
@@ -237,7 +237,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
     /** Create a copy of the credential */
     public LockscreenCredential duplicate() {
         return new LockscreenCredential(mType,
-                mCredential != null ? Arrays.copyOf(mCredential, mCredential.length) : null,
+                mCredential != null ? copyOfArrayNonMovable(mCredential) : null,
                 mHasInvalidChars);
     }
 
@@ -249,6 +249,15 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
             LockPatternUtils.zeroize(mCredential);
             mCredential = null;
         }
+    }
+
+    /**
+     * Copies the given array into a new non-movable array.
+     */
+    private static byte[] copyOfArrayNonMovable(byte[] array) {
+        byte[] copy = LockPatternUtils.newNonMovableByteArray(array.length);
+        System.arraycopy(array, 0, copy, 0, array.length);
+        return copy;
     }
 
     /**
@@ -440,7 +449,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
      * @return A byte array representing the input
      */
     private static byte[] charsToBytesTruncating(CharSequence chars) {
-        byte[] bytes = new byte[chars.length()];
+        byte[] bytes = LockPatternUtils.newNonMovableByteArray(chars.length());
         for (int i = 0; i < chars.length(); i++) {
             bytes[i] = (byte) chars.charAt(i);
         }

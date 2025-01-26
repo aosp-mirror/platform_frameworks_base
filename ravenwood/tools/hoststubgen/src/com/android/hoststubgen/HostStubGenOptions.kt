@@ -106,6 +106,8 @@ class HostStubGenOptions(
 
         var cleanUpOnError: SetOnce<Boolean> = SetOnce(false),
 
+        var deleteFinals: SetOnce<Boolean> = SetOnce(false),
+
         var enableClassChecker: SetOnce<Boolean> = SetOnce(false),
         var enablePreTrace: SetOnce<Boolean> = SetOnce(false),
         var enablePostTrace: SetOnce<Boolean> = SetOnce(false),
@@ -218,6 +220,8 @@ class HostStubGenOptions(
                         "--gen-keep-all-file" ->
                             ret.inputJarAsKeepAllFile.set(nextArg())
 
+                        "--delete-finals" -> ret.deleteFinals.set(true)
+
                         // Following options are for debugging.
                         "--enable-class-checker" -> ret.enableClassChecker.set(true)
                         "--no-class-checker" -> ret.enableClassChecker.set(false)
@@ -293,6 +297,7 @@ class HostStubGenOptions(
               defaultMethodCallHook=$defaultMethodCallHook,
               policyOverrideFiles=${policyOverrideFiles.toTypedArray().contentToString()},
               defaultPolicy=$defaultPolicy,
+              deleteFinals=$deleteFinals,
               cleanUpOnError=$cleanUpOnError,
               enableClassChecker=$enableClassChecker,
               enablePreTrace=$enablePreTrace,
