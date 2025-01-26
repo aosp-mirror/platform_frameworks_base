@@ -17,8 +17,8 @@
 package com.android.systemui.navigationbar.views;
 
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
-import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
-import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_VISIBLE;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE;
 import static android.inputmethodservice.InputMethodService.canImeRenderGesturalNavButtons;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
@@ -612,9 +612,9 @@ public class NavigationBarView extends FrameLayout {
         updateRecentsIcon();
 
         // Update IME switcher button visibility, a11y and rotate button always overrides
-        // the appearance
-        boolean isImeSwitcherButtonVisible =
-                (mNavigationIconHints & NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN) != 0
+        // the appearance.
+        final boolean isImeSwitcherButtonVisible =
+                (mNavigationIconHints & NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE) != 0
                         && !isImeRenderingNavButtons();
         mContextualButtonGroup.setButtonVisibility(R.id.ime_switcher, isImeSwitcherButtonVisible);
 
@@ -670,7 +670,7 @@ public class NavigationBarView extends FrameLayout {
     boolean isImeRenderingNavButtons() {
         return mImeDrawsImeNavBar
                 && mImeCanRenderGesturalNavButtons
-                && (mNavigationIconHints & NAVIGATION_HINT_IME_SHOWN) != 0;
+                && (mNavigationIconHints & NAVIGATION_HINT_IME_VISIBLE) != 0;
     }
 
     @VisibleForTesting

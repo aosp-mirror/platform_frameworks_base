@@ -17,8 +17,8 @@
 package com.android.systemui.navigationbar.views;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
-import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
-import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_VISIBLE;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.WindowType;
@@ -43,8 +43,8 @@ import static com.android.systemui.shared.statusbar.phone.BarTransitions.Transit
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SHOWING;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SWITCHER_BUTTON_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_VISIBLE;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SWITCHER_BUTTON_VISIBLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 import static com.android.systemui.shared.system.QuickStepContract.isGesturalMode;
@@ -652,18 +652,18 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             if (!mEdgeBackGestureHandler.isHandlingGestures()) {
                 // We're in 2/3 button mode OR back button force-shown in SUW
                 if (!mImeVisible) {
-                    // IME not showing, take all touches
+                    // IME is not visible, take all touches
                     info.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_FRAME);
                     return;
                 }
                 if (!mView.isImeRenderingNavButtons()) {
-                    // IME showing but not drawing any buttons, take all touches
+                    // IME is visible but not drawing any buttons, take all touches
                     info.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_FRAME);
                     return;
                 }
             }
 
-            // When in gestural and the IME is showing, don't use the nearest region since it will
+            // When in gestural and the IME is visible, don't use the nearest region since it will
             // take gesture space away from the IME
             info.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
             info.touchableRegion.set(
@@ -1138,9 +1138,9 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         if (displayId != mDisplayId) {
             return;
         }
-        boolean imeShown = mNavBarHelper.isImeShown(vis);
-        int hints = Utilities.calculateNavigationIconHints(mNavigationIconHints, backDisposition,
-                imeShown, showImeSwitcher);
+        final boolean isImeVisible = mNavBarHelper.isImeVisible(vis);
+        final int hints = Utilities.calculateNavigationIconHints(mNavigationIconHints,
+                backDisposition, isImeVisible, showImeSwitcher);
         if (hints == mNavigationIconHints) {
             return;
         }
@@ -1684,10 +1684,10 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mSysUiFlagsContainer.setFlag(SYSUI_STATE_A11Y_BUTTON_CLICKABLE, clickable)
                 .setFlag(SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE, longClickable)
                 .setFlag(SYSUI_STATE_NAV_BAR_HIDDEN, !isNavBarWindowVisible())
-                .setFlag(SYSUI_STATE_IME_SHOWING,
-                        (mNavigationIconHints & NAVIGATION_HINT_IME_SHOWN) != 0)
-                .setFlag(SYSUI_STATE_IME_SWITCHER_BUTTON_SHOWING,
-                        (mNavigationIconHints & NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN) != 0)
+                .setFlag(SYSUI_STATE_IME_VISIBLE,
+                        (mNavigationIconHints & NAVIGATION_HINT_IME_VISIBLE) != 0)
+                .setFlag(SYSUI_STATE_IME_SWITCHER_BUTTON_VISIBLE,
+                        (mNavigationIconHints & NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE) != 0)
                 .setFlag(SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY,
                         allowSystemGestureIgnoringBarVisibility())
                 .commitUpdate(mDisplayId);
@@ -1952,7 +1952,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             if (newBackAlt != oldBackAlt) {
                 mView.onBackAltChanged(newBackAlt);
             }
-            mImeVisible = (hints & NAVIGATION_HINT_IME_SHOWN) != 0;
+            mImeVisible = (hints & NAVIGATION_HINT_IME_VISIBLE) != 0;
 
             mView.setNavigationIconHints(hints);
         }

@@ -17,8 +17,8 @@
 package android.inputmethodservice;
 
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
-import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
-import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_VISIBLE;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE;
 import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 
@@ -242,10 +242,10 @@ final class NavigationBarController {
                         NavigationBarView.class::isInstance);
                 if (navigationBarView != null) {
                     // TODO(b/213337792): Support InputMethodService#setBackDisposition().
-                    // TODO(b/213337792): Set NAVIGATION_HINT_IME_SHOWN only when necessary.
-                    final int hints = NAVIGATION_HINT_BACK_ALT | NAVIGATION_HINT_IME_SHOWN
+                    // TODO(b/213337792): Set NAVIGATION_HINT_IME_VISIBLE only when necessary.
+                    final int hints = NAVIGATION_HINT_BACK_ALT | NAVIGATION_HINT_IME_VISIBLE
                             | (mShouldShowImeSwitcherWhenImeIsShown
-                                    ? NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN : 0);
+                                    ? NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE : 0);
                     navigationBarView.setNavigationIconHints(hints);
                     navigationBarView.prepareNavButtons(this);
                 }
@@ -515,10 +515,10 @@ final class NavigationBarController {
                         NavigationBarView.class::isInstance);
                 if (navigationBarView != null) {
                     // TODO(b/213337792): Support InputMethodService#setBackDisposition().
-                    // TODO(b/213337792): Set NAVIGATION_HINT_IME_SHOWN only when necessary.
-                    final int hints = NAVIGATION_HINT_BACK_ALT | NAVIGATION_HINT_IME_SHOWN
+                    // TODO(b/213337792): Set NAVIGATION_HINT_IME_VISIBLE only when necessary.
+                    final int hints = NAVIGATION_HINT_BACK_ALT | NAVIGATION_HINT_IME_VISIBLE
                             | (mShouldShowImeSwitcherWhenImeIsShown
-                                    ? NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN : 0);
+                                    ? NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE : 0);
                     navigationBarView.setNavigationIconHints(hints);
                 }
             } else {

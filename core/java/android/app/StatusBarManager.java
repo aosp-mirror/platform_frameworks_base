@@ -211,13 +211,13 @@ public class StatusBarManager {
      *
      * @hide
      */
-    public static final int NAVIGATION_HINT_IME_SHOWN = 1 << 1;
+    public static final int NAVIGATION_HINT_IME_VISIBLE = 1 << 1;
     /**
      * The IME Switcher button is visible. This only takes effect while the IME is visible.
      *
      * @hide
      */
-    public static final int NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN = 1 << 2;
+    public static final int NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE = 1 << 2;
     /**
      * Navigation bar flags related to the IME state.
      *
@@ -225,8 +225,8 @@ public class StatusBarManager {
      */
     @IntDef(flag = true, prefix = { "NAVIGATION_HINT_" }, value = {
             NAVIGATION_HINT_BACK_ALT,
-            NAVIGATION_HINT_IME_SHOWN,
-            NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN,
+            NAVIGATION_HINT_IME_VISIBLE,
+            NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NavigationHint {}
@@ -1360,11 +1360,11 @@ public class StatusBarManager {
         if ((hints & NAVIGATION_HINT_BACK_ALT) != 0) {
             hintStrings.add("NAVIGATION_HINT_BACK_ALT");
         }
-        if ((hints & NAVIGATION_HINT_IME_SHOWN) != 0) {
-            hintStrings.add("NAVIGATION_HINT_IME_SHOWN");
+        if ((hints & NAVIGATION_HINT_IME_VISIBLE) != 0) {
+            hintStrings.add("NAVIGATION_HINT_IME_VISIBLE");
         }
-        if ((hints & NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN) != 0) {
-            hintStrings.add("NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN");
+        if ((hints & NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE) != 0) {
+            hintStrings.add("NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE");
         }
         return String.join(" | ", hintStrings);
     }
