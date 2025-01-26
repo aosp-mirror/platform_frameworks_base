@@ -33,9 +33,15 @@ import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 
 /**
- * Creates a looper whose message queue can be manipulated
- * This allows testing code that uses a looper to dispatch messages in a deterministic manner
- * Creating a TestLooper will also install it as the looper for the current thread
+ * Creates a looper whose message queue can be manipulated This allows testing code that uses a
+ * looper to dispatch messages in a deterministic manner Creating a TestLooper will also install it
+ * as the looper for the current thread
+ *
+ * @deprecated Use {@link android.os.TestLooperManager} or {@link
+ *     org.robolectric.shadows.ShadowLooper} instead.
+ *     This class is not actively maintained.
+ *     Both of the recommended alternatives allow fine control of execution.
+ *     The Robolectric class also allows advancing time.
  */
 public class TestLooper {
     protected final Looper mLooper;

@@ -42,6 +42,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * and provide an easy annotation for use with tests.
  *
  * @see TestableLooperTest TestableLooperTest for examples.
+ *
+ * @deprecated Use {@link android.os.TestLooperManager} or {@link
+ *     org.robolectric.shadows.ShadowLooper} instead.
+ *     This class is not actively maintained.
+ *     Both of the recommended alternatives allow fine control of execution.
+ *     The Robolectric class also allows advancing time.
  */
 public class TestableLooper {
 
