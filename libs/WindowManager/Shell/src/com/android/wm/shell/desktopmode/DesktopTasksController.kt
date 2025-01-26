@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.annotation.UserIdInt
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.ActivityOptions
@@ -2741,6 +2742,7 @@ class DesktopTasksController(
     // TODO(b/358114479): Move this implementation into a separate class.
     override fun onUnhandledDrag(
         launchIntent: PendingIntent,
+        @UserIdInt userId: Int,
         dragEvent: DragEvent,
         onFinishCallback: Consumer<Boolean>,
     ): Boolean {
@@ -2749,8 +2751,10 @@ class DesktopTasksController(
             // Not currently in desktop mode, ignore the drop
             return false
         }
+
+        // TODO:
         val launchComponent = getComponent(launchIntent)
-        if (!multiInstanceHelper.supportsMultiInstanceSplit(launchComponent)) {
+        if (!multiInstanceHelper.supportsMultiInstanceSplit(launchComponent, userId)) {
             // TODO(b/320797628): Should only return early if there is an existing running task, and
             //                    notify the user as well. But for now, just ignore the drop.
             logV("Dropped intent does not support multi-instance")

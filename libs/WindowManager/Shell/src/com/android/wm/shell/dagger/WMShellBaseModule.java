@@ -417,9 +417,13 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static MultiInstanceHelper provideMultiInstanceHelper(Context context) {
+    static MultiInstanceHelper provideMultiInstanceHelper(
+            Context context,
+            ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler
+    ) {
         return new MultiInstanceHelper(context, context.getPackageManager(),
-                Flags.supportsMultiInstanceSystemUi());
+                shellInit, shellCommandHandler, Flags.supportsMultiInstanceSystemUi());
     }
 
     //

@@ -649,11 +649,12 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
             @Nullable Bundle options, UserHandle user) {
         if (options == null) options = new Bundle();
         final ActivityOptions activityOptions = ActivityOptions.fromBundle(options);
+        final int userId = user.getIdentifier();
 
         if (samePackage(packageName, getPackageName(reverseSplitPosition(position), null),
-                user.getIdentifier(), getUserId(reverseSplitPosition(position), null))) {
+                userId, getUserId(reverseSplitPosition(position), null))) {
             if (mMultiInstanceHelpher.supportsMultiInstanceSplit(
-                    getShortcutComponent(packageName, shortcutId, user, mLauncherApps))) {
+                    getShortcutComponent(packageName, shortcutId, user, mLauncherApps), userId)) {
                 activityOptions.setApplyMultipleTaskFlagForShortcut(true);
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
             } else if (isSplitScreenVisible()) {
@@ -687,7 +688,8 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         final int userId1 = shortcutInfo.getUserId();
         final int userId2 = SplitScreenUtils.getUserId(taskId, mTaskOrganizer);
         if (samePackage(packageName1, packageName2, userId1, userId2)) {
-            if (mMultiInstanceHelpher.supportsMultiInstanceSplit(shortcutInfo.getActivity())) {
+            if (mMultiInstanceHelpher.supportsMultiInstanceSplit(shortcutInfo.getActivity(),
+                    userId1)) {
                 activityOptions.setApplyMultipleTaskFlagForShortcut(true);
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
             } else {
@@ -735,7 +737,8 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         final int userId2 = SplitScreenUtils.getUserId(taskId, mTaskOrganizer);
         boolean setSecondIntentMultipleTask = false;
         if (samePackage(packageName1, packageName2, userId1, userId2)) {
-            if (mMultiInstanceHelpher.supportsMultiInstanceSplit(getComponent(pendingIntent))) {
+            if (mMultiInstanceHelpher.supportsMultiInstanceSplit(getComponent(pendingIntent),
+                    userId1)) {
                 setSecondIntentMultipleTask = true;
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
             } else {
@@ -775,7 +778,8 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
                 ? ActivityOptions.fromBundle(options2) : ActivityOptions.makeBasic();
         boolean setSecondIntentMultipleTask = false;
         if (samePackage(packageName1, packageName2, userId1, userId2)) {
-            if (mMultiInstanceHelpher.supportsMultiInstanceSplit(getComponent(pendingIntent1))) {
+            if (mMultiInstanceHelpher.supportsMultiInstanceSplit(getComponent(pendingIntent1),
+                    userId1)) {
                 fillInIntent1 = new Intent();
                 fillInIntent1.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
                 setSecondIntentMultipleTask = true;
@@ -858,7 +862,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
             return;
         }
         if (samePackage(packageName1, packageName2, userId1, userId2)) {
-            if (mMultiInstanceHelpher.supportsMultiInstanceSplit(getComponent(intent))) {
+            if (mMultiInstanceHelpher.supportsMultiInstanceSplit(getComponent(intent), userId1)) {
                 // Flag with MULTIPLE_TASK if this is launching the same activity into both sides of
                 // the split and there is no reusable background task.
                 fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);

@@ -31,6 +31,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMA
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
@@ -125,6 +126,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
          * drag.
          */
         default boolean onUnhandledDrag(@NonNull PendingIntent launchIntent,
+                @UserIdInt int userId,
                 @NonNull DragEvent dragEvent,
                 @NonNull Consumer<Boolean> onFinishCallback) {
             return false;
@@ -444,8 +446,10 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
             return;
         }
 
+        // TODO(b/391624027): Consider piping through launch intent user if needed later
+        final int userId = launchIntent.getCreatorUserHandle().getIdentifier();
         final boolean handled = notifyListeners(
-                l -> l.onUnhandledDrag(launchIntent, dragEvent, onFinishCallback));
+                l -> l.onUnhandledDrag(launchIntent, userId, dragEvent, onFinishCallback));
         if (!handled) {
             // Nobody handled this, we still have to notify WM
             onFinishCallback.accept(false);

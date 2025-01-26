@@ -5155,7 +5155,8 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
         whenever(mockDragEvent.dragSurface).thenReturn(dragSurface)
         whenever(mockDragEvent.x).thenReturn(inputCoordinate.x)
         whenever(mockDragEvent.y).thenReturn(inputCoordinate.y)
-        whenever(multiInstanceHelper.supportsMultiInstanceSplit(anyOrNull())).thenReturn(true)
+        whenever(multiInstanceHelper.supportsMultiInstanceSplit(anyOrNull(), anyInt()))
+            .thenReturn(true)
         whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
         doReturn(indicatorType)
             .whenever(spyController)
@@ -5169,6 +5170,7 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
 
         spyController.onUnhandledDrag(
             mockPendingIntent,
+            context.userId,
             mockDragEvent,
             mockCallback as Consumer<Boolean>,
         )

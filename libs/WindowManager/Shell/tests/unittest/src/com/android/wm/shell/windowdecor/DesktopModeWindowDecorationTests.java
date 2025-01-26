@@ -280,7 +280,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         mTestableContext = new TestableContext(mContext);
         mTestableContext.ensureTestableResources();
         mContext.setMockPackageManager(mMockPackageManager);
-        when(mMockMultiInstanceHelper.supportsMultiInstanceSplit(any()))
+        when(mMockMultiInstanceHelper.supportsMultiInstanceSplit(any(), anyInt()))
                 .thenReturn(false);
         when(mMockPackageManager.getApplicationLabel(any())).thenReturn("applicationLabel");
         final ActivityInfo activityInfo = createActivityInfo();
@@ -295,7 +295,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(),
                 any(), anyInt(), anyInt(), anyInt(), anyInt()))
                 .thenReturn(mMockHandleMenu);
-        when(mMockMultiInstanceHelper.supportsMultiInstanceSplit(any())).thenReturn(false);
+        when(mMockMultiInstanceHelper.supportsMultiInstanceSplit(any(), anyInt()))
+                .thenReturn(false);
         when(mMockAppHeaderViewHolderFactory.create(any(), any(), any(), any(), any(), any()))
                 .thenReturn(mMockAppHeaderViewHolder);
         when(mMockDesktopUserRepositories.getCurrent()).thenReturn(mDesktopRepository);
