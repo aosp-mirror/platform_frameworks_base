@@ -107,9 +107,11 @@ public class Utilities {
      * Gets the updated navigation icon hints, based on the current ones and the given IME state.
      *
      * @param oldHints        current navigation icon hints.
-     * @param backDisposition the IME back disposition mode.
+     * @param backDisposition the IME back disposition mode. Only takes effect if
+     *                        {@code imeShown} is {@code true}.
      * @param imeShown        whether the IME is currently visible.
-     * @param showImeSwitcher whether the IME Switcher button should be shown.
+     * @param showImeSwitcher whether the IME Switcher button should be shown. Only takes effect if
+     *                        {@code imeShown} is {@code true}.
      */
     @NavigationHint
     public static int calculateNavigationIconHints(@NavigationHint int oldHints,
@@ -134,7 +136,7 @@ public class Utilities {
         } else {
             hints &= ~NAVIGATION_HINT_IME_SHOWN;
         }
-        if (showImeSwitcher) {
+        if (showImeSwitcher && imeShown) {
             hints |= NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN;
         } else {
             hints &= ~NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN;

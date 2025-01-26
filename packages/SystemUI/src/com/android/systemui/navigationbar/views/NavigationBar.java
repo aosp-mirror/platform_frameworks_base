@@ -1139,7 +1139,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             return;
         }
         boolean imeShown = mNavBarHelper.isImeShown(vis);
-        showImeSwitcher = imeShown && showImeSwitcher;
         int hints = Utilities.calculateNavigationIconHints(mNavigationIconHints, backDisposition,
                 imeShown, showImeSwitcher);
         if (hints == mNavigationIconHints) {

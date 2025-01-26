@@ -490,7 +490,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             // Count imperceptible changes as visible so we transition taskbar out quickly.
             imeShown = (vis & InputMethodService.IME_VISIBLE_IMPERCEPTIBLE) != 0;
         }
-        showImeSwitcher = imeShown && showImeSwitcher;
         int hints = Utilities.calculateNavigationIconHints(mNavigationIconHints, backDisposition,
                 imeShown, showImeSwitcher);
         if (hints == mNavigationIconHints) {
