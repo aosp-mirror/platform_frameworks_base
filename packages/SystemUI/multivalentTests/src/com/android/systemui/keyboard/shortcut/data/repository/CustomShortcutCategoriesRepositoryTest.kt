@@ -24,6 +24,7 @@ import android.hardware.input.InputGestureData
 import android.hardware.input.InputGestureData.createKeyTrigger
 import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_DOES_NOT_EXIST
 import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_SUCCESS
+import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_HOME
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION
 import android.hardware.input.fakeInputManager
 import android.platform.test.annotations.DisableFlags
@@ -336,28 +337,6 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
         }
     }
 
-    private suspend fun customizeShortcut(
-        customizationRequest: ShortcutCustomizationRequestInfo,
-        keyCombination: KeyCombination? = null,
-    ): ShortcutCustomizationRequestResult {
-        repo.onCustomizationRequested(customizationRequest)
-        repo.updateUserKeyCombination(keyCombination)
-
-        return when (customizationRequest) {
-            is SingleShortcutCustomization.Add -> {
-                repo.confirmAndSetShortcutCurrentlyBeingCustomized()
-            }
-
-            is SingleShortcutCustomization.Delete -> {
-                repo.deleteShortcutCurrentlyBeingCustomized()
-            }
-
-            else -> {
-                ShortcutCustomizationRequestResult.ERROR_OTHER
-            }
-        }
-    }
-
     @Test
     @EnableFlags(FLAG_ENABLE_CUSTOMIZABLE_INPUT_GESTURES, FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
     fun categories_isUpdatedAfterCustomShortcutsAreReset() {
@@ -387,9 +366,65 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
         }
     }
 
+    @Test
+    fun selectedKeyCombinationIsAvailable_whenTriggerIsNotRegisteredInInputManager() =
+        testScope.runTest {
+            helper.toggle(deviceId = 123)
+            repo.onCustomizationRequested(allAppsShortcutAddRequest)
+            repo.updateUserKeyCombination(standardKeyCombination)
+
+            assertThat(repo.isSelectedKeyCombinationAvailable()).isTrue()
+        }
+
+    @Test
+    fun selectedKeyCombinationIsNotAvailable_whenTriggerIsRegisteredInInputManager() =
+        testScope.runTest {
+            inputManager.addCustomInputGesture(buildInputGestureWithStandardKeyCombination())
+
+            helper.toggle(deviceId = 123)
+            repo.onCustomizationRequested(allAppsShortcutAddRequest)
+            repo.updateUserKeyCombination(standardKeyCombination)
+
+            assertThat(repo.isSelectedKeyCombinationAvailable()).isFalse()
+        }
+
     private fun setApiAppLaunchBookmarks(appLaunchBookmarks: List<InputGestureData>) {
         whenever(inputManager.appLaunchBookmarks).thenReturn(appLaunchBookmarks)
     }
+
+    private suspend fun customizeShortcut(
+        customizationRequest: ShortcutCustomizationRequestInfo,
+        keyCombination: KeyCombination? = null,
+    ): ShortcutCustomizationRequestResult {
+        repo.onCustomizationRequested(customizationRequest)
+        repo.updateUserKeyCombination(keyCombination)
+
+        return when (customizationRequest) {
+            is SingleShortcutCustomization.Add -> {
+                repo.confirmAndSetShortcutCurrentlyBeingCustomized()
+            }
+
+            is SingleShortcutCustomization.Delete -> {
+                repo.deleteShortcutCurrentlyBeingCustomized()
+            }
+
+            else -> {
+                ShortcutCustomizationRequestResult.ERROR_OTHER
+            }
+        }
+    }
+
+    private fun buildInputGestureWithStandardKeyCombination() =
+        InputGestureData.Builder()
+            .setKeyGestureType(KEY_GESTURE_TYPE_HOME)
+            .setTrigger(
+                createKeyTrigger(
+                    /* keycode= */ standardKeyCombination.keyCode!!,
+                    /* modifierState= */ standardKeyCombination.modifiers and
+                        ALL_SUPPORTED_MODIFIERS,
+                )
+            )
+            .build()
 
     private fun simpleInputGestureDataForAppLaunchShortcut(
         keyCode: Int = KEYCODE_A,
