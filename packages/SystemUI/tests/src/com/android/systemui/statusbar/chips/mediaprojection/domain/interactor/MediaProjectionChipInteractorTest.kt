@@ -157,7 +157,7 @@ class MediaProjectionChipInteractorTest : SysuiTestCase() {
                         if (
                             (it.arguments[0] as Intent).`package` == CAST_TO_OTHER_DEVICES_PACKAGE
                         ) {
-                            emptyList()
+                            emptyList<ResolveInfo>()
                         } else {
                             listOf(mock<ResolveInfo>())
                         }
