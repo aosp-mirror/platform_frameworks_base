@@ -52,7 +52,7 @@ class DesktopMixedTransitionHandler(
     private val freeformTaskTransitionHandler: FreeformTaskTransitionHandler,
     private val closeDesktopTaskTransitionHandler: CloseDesktopTaskTransitionHandler,
     private val desktopImmersiveController: DesktopImmersiveController,
-    private val desktopBackNavigationTransitionHandler: DesktopBackNavigationTransitionHandler,
+    private val desktopMinimizationTransitionHandler: DesktopMinimizationTransitionHandler,
     private val interactionJankMonitor: InteractionJankMonitor,
     @ShellMainThread private val handler: Handler,
     shellInit: ShellInit,
@@ -316,8 +316,8 @@ class DesktopMixedTransitionHandler(
             )
         }
 
-        // Animate minimizing desktop task transition with [DesktopBackNavigationTransitionHandler].
-        return desktopBackNavigationTransitionHandler.startAnimation(
+        // Animate minimizing desktop task transition with [DesktopMinimizationTransitionHandler].
+        return desktopMinimizationTransitionHandler.startAnimation(
             transition,
             info,
             startTransaction,

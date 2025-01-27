@@ -31,10 +31,13 @@ import com.android.wm.shell.shared.animation.MinimizeAnimator.create
 import com.android.wm.shell.transition.Transitions
 
 /**
- * The [Transitions.TransitionHandler] that handles transitions for tasks that are closing or going
- * to back as part of back navigation. This handler is used only for animating transitions.
+ * The [Transitions.TransitionHandler] that handles transitions for tasks that are:
+ * - Closing or going to back as part of back navigation
+ * - Going to back as part of minimization button usage.
+ *
+ * Note that this handler is used only for animating transitions.
  */
-class DesktopBackNavigationTransitionHandler(
+class DesktopMinimizationTransitionHandler(
     private val mainExecutor: ShellExecutor,
     private val animExecutor: ShellExecutor,
     private val displayController: DisplayController,
