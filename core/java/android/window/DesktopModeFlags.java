@@ -90,6 +90,7 @@ public enum DesktopModeFlags {
             Flags::enableDesktopAppLaunchTransitionsBugfix, false),
     INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC(
             Flags::includeTopTransparentFullscreenTaskInDesktopHeuristic, true),
+    ENABLE_DESKTOP_WINDOWING_HSUM(Flags::enableDesktopWindowingHsum, true),
     ENABLE_MINIMIZE_BUTTON(Flags::enableMinimizeButton, true),
     ENABLE_RESIZING_METRICS(Flags::enableResizingMetrics, true),
     ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS(Flags::enableTaskResizingKeyboardShortcuts, true),
