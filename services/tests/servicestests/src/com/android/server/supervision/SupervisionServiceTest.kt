@@ -92,6 +92,21 @@ class SupervisionServiceTest {
         simulateUserStarting(USER_ID)
 
         assertThat(service.isSupervisionEnabledForUser(USER_ID)).isTrue()
+        assertThat(service.getActiveSupervisionAppPackage(USER_ID))
+            .isEqualTo(systemSupervisionPackage)
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_SYNC_WITH_DPM)
+    fun onUserStarting_legacyProfileOwnerComponent_enablesSupervision() {
+        whenever(mockDpmInternal.getProfileOwnerAsUser(USER_ID))
+            .thenReturn(supervisionProfileOwnerComponent)
+
+        simulateUserStarting(USER_ID)
+
+        assertThat(service.isSupervisionEnabledForUser(USER_ID)).isTrue()
+        assertThat(service.getActiveSupervisionAppPackage(USER_ID))
+            .isEqualTo(supervisionProfileOwnerComponent.packageName)
     }
 
     @Test
@@ -103,6 +118,7 @@ class SupervisionServiceTest {
         simulateUserStarting(USER_ID, preCreated = true)
 
         assertThat(service.isSupervisionEnabledForUser(USER_ID)).isFalse()
+        assertThat(service.getActiveSupervisionAppPackage(USER_ID)).isNull()
     }
 
     @Test
@@ -114,6 +130,7 @@ class SupervisionServiceTest {
         simulateUserStarting(USER_ID)
 
         assertThat(service.isSupervisionEnabledForUser(USER_ID)).isFalse()
+        assertThat(service.getActiveSupervisionAppPackage(USER_ID)).isNull()
     }
 
     @Test
@@ -125,6 +142,21 @@ class SupervisionServiceTest {
         broadcastProfileOwnerChanged(USER_ID)
 
         assertThat(service.isSupervisionEnabledForUser(USER_ID)).isTrue()
+        assertThat(service.getActiveSupervisionAppPackage(USER_ID))
+            .isEqualTo(systemSupervisionPackage)
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_SYNC_WITH_DPM)
+    fun profileOwnerChanged_legacyProfileOwnerComponent_enablesSupervision() {
+        whenever(mockDpmInternal.getProfileOwnerAsUser(USER_ID))
+            .thenReturn(supervisionProfileOwnerComponent)
+
+        broadcastProfileOwnerChanged(USER_ID)
+
+        assertThat(service.isSupervisionEnabledForUser(USER_ID)).isTrue()
+        assertThat(service.getActiveSupervisionAppPackage(USER_ID))
+            .isEqualTo(supervisionProfileOwnerComponent.packageName)
     }
 
     @Test
@@ -136,13 +168,14 @@ class SupervisionServiceTest {
         broadcastProfileOwnerChanged(USER_ID)
 
         assertThat(service.isSupervisionEnabledForUser(USER_ID)).isFalse()
+        assertThat(service.getActiveSupervisionAppPackage(USER_ID)).isNull()
     }
 
     @Test
     fun isActiveSupervisionApp_supervisionUid_supervisionEnabled_returnsTrue() {
         whenever(mockPackageManager.getPackagesForUid(APP_UID))
             .thenReturn(arrayOf(systemSupervisionPackage))
-        service.setSupervisionEnabledForUser(USER_ID, true)
+        service.mInternal.setSupervisionEnabledForUser(USER_ID, true)
 
         assertThat(service.mInternal.isActiveSupervisionApp(APP_UID)).isTrue()
     }
@@ -151,7 +184,7 @@ class SupervisionServiceTest {
     fun isActiveSupervisionApp_supervisionUid_supervisionNotEnabled_returnsFalse() {
         whenever(mockPackageManager.getPackagesForUid(APP_UID))
             .thenReturn(arrayOf(systemSupervisionPackage))
-        service.setSupervisionEnabledForUser(USER_ID, false)
+        service.mInternal.setSupervisionEnabledForUser(USER_ID, false)
 
         assertThat(service.mInternal.isActiveSupervisionApp(APP_UID)).isFalse()
     }
@@ -167,15 +200,15 @@ class SupervisionServiceTest {
     fun setSupervisionEnabledForUser() {
         assertThat(service.isSupervisionEnabledForUser(USER_ID)).isFalse()
 
-        service.setSupervisionEnabledForUser(USER_ID, true)
+        service.mInternal.setSupervisionEnabledForUser(USER_ID, true)
         assertThat(service.isSupervisionEnabledForUser(USER_ID)).isTrue()
 
-        service.setSupervisionEnabledForUser(USER_ID, false)
+        service.mInternal.setSupervisionEnabledForUser(USER_ID, false)
         assertThat(service.isSupervisionEnabledForUser(USER_ID)).isFalse()
     }
 
     @Test
-    fun supervisionEnabledForUser_internal() {
+    fun setSupervisionEnabledForUser_internal() {
         assertThat(service.isSupervisionEnabledForUser(USER_ID)).isFalse()
 
         service.mInternal.setSupervisionEnabledForUser(USER_ID, true)
@@ -204,6 +237,13 @@ class SupervisionServiceTest {
 
     private val systemSupervisionPackage: String
         get() = context.getResources().getString(R.string.config_systemSupervision)
+
+    private val supervisionProfileOwnerComponent: ComponentName
+        get() =
+            context
+                .getResources()
+                .getString(R.string.config_defaultSupervisionProfileOwnerComponent)
+                .let(ComponentName::unflattenFromString)!!
 
     private fun simulateUserStarting(userId: Int, preCreated: Boolean = false) {
         val userInfo = UserInfo(userId, /* name= */ "tempUser", /* flags= */ 0)
