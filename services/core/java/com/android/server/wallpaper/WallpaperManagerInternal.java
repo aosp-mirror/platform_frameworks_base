@@ -28,6 +28,9 @@ public abstract class WallpaperManagerInternal {
      */
     public abstract void onDisplayReady(int displayId);
 
+    /** Notifies when display stop showing system decorations and wallpaper. */
+    public abstract void onDisplayRemoveSystemDecorations(int displayId);
+
     /** Notifies when the screen finished turning on and is visible to the user. */
     public abstract void onScreenTurnedOn(int displayId);
 

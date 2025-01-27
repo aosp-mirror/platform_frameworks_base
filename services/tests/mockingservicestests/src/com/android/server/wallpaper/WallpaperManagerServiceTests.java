@@ -960,6 +960,74 @@ public class WallpaperManagerServiceTests {
                 .isEqualTo(FLAG_LOCK | FLAG_SYSTEM);
     }
 
+    // Verify a secondary display removes system decorations started
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_CONNECTED_DISPLAYS_WALLPAPER)
+    public void displayRemoveSystemDecorations_sameSystemAndLockWallpaper_shouldDetachWallpaperServiceOnce()
+            throws Exception {
+        // GIVEN the same wallpaper used for the lock and system.
+        final int testUserId = USER_SYSTEM;
+        mService.switchUser(testUserId, null);
+        final WallpaperData wallpaper = mService.getCurrentWallpaperData(FLAG_SYSTEM, testUserId);
+        IWallpaperService mockIWallpaperService = mock(IWallpaperService.class);
+        wallpaper.connection.mService = mockIWallpaperService;
+        // GIVEN there are two displays: DEFAULT_DISPLAY, 2
+        final int testDisplayId = 2;
+        setUpDisplays(List.of(DEFAULT_DISPLAY, testDisplayId));
+        // GIVEN wallpaper connections have been established for displayID, 2.
+        WallpaperManagerInternal wallpaperManagerInternal = LocalServices.getService(
+                WallpaperManagerInternal.class);
+        wallpaperManagerInternal.onDisplayReady(testDisplayId);
+        // Save displayConnector for displayId 2 before display removal.
+        WallpaperManagerService.DisplayConnector displayConnector =
+                wallpaper.connection.getDisplayConnectorOrCreate(testDisplayId);
+
+        // WHEN displayId, 2, is removed.
+        wallpaperManagerInternal.onDisplayRemoveSystemDecorations(testDisplayId);
+
+        // Then the wallpaper connection for displayId, 2, is detached.
+        verify(mockIWallpaperService).detach(eq(displayConnector.mToken));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_CONNECTED_DISPLAYS_WALLPAPER)
+    public void displayRemoveSystemDecorations_differentSystemAndLockWallpapers_shouldDetachWallpaperServiceTwice()
+            throws Exception {
+        // GIVEN different wallpapers used for the lock and system.
+        final int testUserId = USER_SYSTEM;
+        mService.switchUser(testUserId, null);
+        mService.setWallpaperComponent(sImageWallpaperComponentName, sContext.getOpPackageName(),
+                FLAG_LOCK, testUserId);
+        final WallpaperData systemWallpaper = mService.getCurrentWallpaperData(FLAG_SYSTEM,
+                testUserId);
+        final WallpaperData lockWallpaper = mService.getCurrentWallpaperData(FLAG_LOCK,
+                testUserId);
+        IWallpaperService mockIWallpaperService = mock(IWallpaperService.class);
+        systemWallpaper.connection.mService = mockIWallpaperService;
+        lockWallpaper.connection.mService = mockIWallpaperService;
+        // GIVEN there are two displays: DEFAULT_DISPLAY, 2
+        final int testDisplayId = 2;
+        setUpDisplays(List.of(DEFAULT_DISPLAY, testDisplayId));
+        // GIVEN wallpaper connections have been established for displayID, 2.
+        WallpaperManagerInternal wallpaperManagerInternal = LocalServices.getService(
+                WallpaperManagerInternal.class);
+        wallpaperManagerInternal.onDisplayReady(testDisplayId);
+        // Save displayConnectors for displayId 2 before display removal.
+        WallpaperManagerService.DisplayConnector systemWallpaperDisplayConnector =
+                systemWallpaper.connection.getDisplayConnectorOrCreate(testDisplayId);
+        WallpaperManagerService.DisplayConnector lockWallpaperDisplayConnector =
+                lockWallpaper.connection.getDisplayConnectorOrCreate(testDisplayId);
+
+        // WHEN displayId, 2, is removed.
+        wallpaperManagerInternal.onDisplayRemoveSystemDecorations(testDisplayId);
+
+        // Then the system wallpaper connection for displayId, 2, is detached.
+        verify(mockIWallpaperService).detach(eq(systemWallpaperDisplayConnector.mToken));
+        // Then the lock wallpaper connection for displayId, 2, is detached.
+        verify(mockIWallpaperService).detach(eq(lockWallpaperDisplayConnector.mToken));
+    }
+    // Verify a secondary display removes system decorations ended
+
     // Verify that after continue switch user from userId 0 to lastUserId, the wallpaper data for
     // non-current user must not bind to wallpaper service.
     private void verifyNoConnectionBeforeLastUser(int lastUserId) {
