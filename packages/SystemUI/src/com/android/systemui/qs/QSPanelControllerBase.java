@@ -17,7 +17,6 @@
 package com.android.systemui.qs;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import static com.android.systemui.Flags.quickSettingsVisualHapticsLongpress;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -364,12 +363,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     private void addTile(final QSTile tile, boolean collapsedView) {
-        QSLongPressEffect longPressEffect;
-        if (quickSettingsVisualHapticsLongpress()) {
-            longPressEffect = mLongPressEffectProvider.get();
-        } else {
-            longPressEffect = null;
-        }
+        QSLongPressEffect longPressEffect = mLongPressEffectProvider.get();
         final QSTileViewImpl tileView = new QSTileViewImpl(
                 getContext(), collapsedView, longPressEffect);
         final TileRecord r = new TileRecord(tile, tileView);
