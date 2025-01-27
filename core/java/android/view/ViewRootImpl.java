@@ -24,7 +24,6 @@ import static android.graphics.HardwareRenderer.SYNC_CONTEXT_IS_STOPPED;
 import static android.graphics.HardwareRenderer.SYNC_LOST_SURFACE_REWARD_IF_FOUND;
 import static android.os.IInputConstants.INVALID_INPUT_EVENT_ID;
 import static android.os.Trace.TRACE_TAG_VIEW;
-import static android.service.autofill.Flags.improveFillDialogAconfig;
 import static android.util.SequenceUtils.getInitSeq;
 import static android.util.SequenceUtils.isIncomingSeqStale;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -922,8 +921,6 @@ public final class ViewRootImpl implements ViewParent,
     private int mFpsNumFrames;
 
     private boolean mInsetsAnimationRunning;
-
-    private int mInsetsAnimatingTypes = 0;
 
     private long mPreviousFrameDrawnTime = -1;
     // The largest view size percentage to the display size. Used on trace to collect metric.
@@ -2523,49 +2520,17 @@ public final class ViewRootImpl implements ViewParent,
      * Notify the when the running state of a insets animation changed.
      */
     @VisibleForTesting
-    public void notifyInsetsAnimationRunningStateChanged(boolean running,
-            @InsetsController.AnimationType int animationType,
-            @InsetsType int insetsTypes) {
-        @InsetsType int previousInsetsType = mInsetsAnimatingTypes;
-        // If improveFillDialogAconfig is disabled, we notify WindowSession of all the updates we
-        // receive here
-        boolean notifyWindowSession = !improveFillDialogAconfig();
-        if (running) {
-            mInsetsAnimatingTypes |= insetsTypes;
-        } else {
-            mInsetsAnimatingTypes &= ~insetsTypes;
-        }
+    public void notifyInsetsAnimationRunningStateChanged(boolean running) {
         if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                Trace.instant(Trace.TRACE_TAG_VIEW,
+                        TextUtils.formatSimple("notifyInsetsAnimationRunningStateChanged(%s)",
+                        Boolean.toString(running)));
+            }
             mInsetsAnimationRunning = running;
-            // If improveFillDialogAconfig is enabled, we need to confirm other animations aren't
-            // running to maintain the existing behavior. System server were notified previously
-            // only when animation started running or stopped when there were no running animations.
-            if (improveFillDialogAconfig()) {
-                if ((previousInsetsType == 0 && mInsetsAnimatingTypes != 0)
-                        || (previousInsetsType != 0 && mInsetsAnimatingTypes == 0)) {
-                    notifyWindowSession = true;
-                }
-            }
-            if (notifyWindowSession) {
-                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
-                    Trace.instant(Trace.TRACE_TAG_VIEW,
-                            TextUtils.formatSimple("notifyInsetsAnimationRunningStateChanged(%s)",
-                                    Boolean.toString(running)));
-                }
-                try {
-                    mWindowSession.notifyInsetsAnimationRunningStateChanged(mWindow, running);
-                } catch (RemoteException e) {
-                }
-            }
-        }
-        if (improveFillDialogAconfig()) {
-            // Update WindowManager for ImeAnimation
-            if ((insetsTypes & WindowInsets.Type.ime()) != 0) {
-                try {
-                    WindowManagerGlobal.getWindowManagerService()
-                            .notifyImeInsetsAnimationStateChanged(running, animationType);
-                } catch (RemoteException e) {
-                }
+            try {
+                mWindowSession.notifyInsetsAnimationRunningStateChanged(mWindow, running);
+            } catch (RemoteException e) {
             }
         }
     }
