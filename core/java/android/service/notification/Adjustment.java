@@ -66,7 +66,8 @@ public final class Adjustment implements Parcelable {
             KEY_SENSITIVE_CONTENT,
             KEY_RANKING_SCORE,
             KEY_NOT_CONVERSATION,
-            KEY_TYPE
+            KEY_TYPE,
+            KEY_SUMMARIZATION
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Keys {}
@@ -189,7 +190,7 @@ public final class Adjustment implements Parcelable {
             TYPE_PROMOTION,
             TYPE_SOCIAL_MEDIA,
             TYPE_NEWS,
-            TYPE_CONTENT_RECOMMENDATION
+            TYPE_CONTENT_RECOMMENDATION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Types {}
