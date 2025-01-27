@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static android.view.accessibility.AccessibilityEvent.TYPE_VIEW_FOCUSED;
+
 import static com.android.systemui.Flags.pinInputFieldStyledFocusState;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
@@ -164,6 +166,8 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
             layoutParams.height = (int) getResources().getDimension(
                     R.dimen.keyguard_pin_field_height);
         }
+
+        mPasswordEntry.sendAccessibilityEvent(TYPE_VIEW_FOCUSED);
     }
 
     private void setKeyboardBasedFocusOutline(boolean isAnyKeyboardConnected) {
