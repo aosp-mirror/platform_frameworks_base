@@ -16,9 +16,9 @@
 
 package android.inputmethodservice;
 
-import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_DISMISS_IME;
-import static android.app.StatusBarManager.NAVIGATION_HINT_IME_VISIBLE;
-import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE;
+import static android.app.StatusBarManager.NAVBAR_BACK_DISMISS_IME;
+import static android.app.StatusBarManager.NAVBAR_IME_SWITCHER_BUTTON_VISIBLE;
+import static android.app.StatusBarManager.NAVBAR_IME_VISIBLE;
 import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 
@@ -242,11 +242,11 @@ final class NavigationBarController {
                         NavigationBarView.class::isInstance);
                 if (navigationBarView != null) {
                     // TODO(b/213337792): Support InputMethodService#setBackDisposition().
-                    // TODO(b/213337792): Set NAVIGATION_HINT_IME_VISIBLE only when necessary.
-                    final int hints = NAVIGATION_HINT_BACK_DISMISS_IME | NAVIGATION_HINT_IME_VISIBLE
+                    // TODO(b/213337792): Set NAVBAR_IME_VISIBLE only when necessary.
+                    final int flags = NAVBAR_BACK_DISMISS_IME | NAVBAR_IME_VISIBLE
                             | (mShouldShowImeSwitcherWhenImeIsShown
-                                    ? NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE : 0);
-                    navigationBarView.setNavigationIconHints(hints);
+                                    ? NAVBAR_IME_SWITCHER_BUTTON_VISIBLE : 0);
+                    navigationBarView.setNavbarFlags(flags);
                     navigationBarView.prepareNavButtons(this);
                 }
             } else {
@@ -515,11 +515,11 @@ final class NavigationBarController {
                         NavigationBarView.class::isInstance);
                 if (navigationBarView != null) {
                     // TODO(b/213337792): Support InputMethodService#setBackDisposition().
-                    // TODO(b/213337792): Set NAVIGATION_HINT_IME_VISIBLE only when necessary.
-                    final int hints = NAVIGATION_HINT_BACK_DISMISS_IME | NAVIGATION_HINT_IME_VISIBLE
+                    // TODO(b/213337792): Set NAVBAR_IME_VISIBLE only when necessary.
+                    final int flags = NAVBAR_BACK_DISMISS_IME | NAVBAR_IME_VISIBLE
                             | (mShouldShowImeSwitcherWhenImeIsShown
-                                    ? NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE : 0);
-                    navigationBarView.setNavigationIconHints(hints);
+                                    ? NAVBAR_IME_SWITCHER_BUTTON_VISIBLE : 0);
+                    navigationBarView.setNavbarFlags(flags);
                 }
             } else {
                 uninstallNavigationBarFrameIfNecessary();

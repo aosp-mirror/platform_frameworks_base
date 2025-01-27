@@ -205,31 +205,31 @@ public class StatusBarManager {
      *
      * @hide
      */
-    public static final int NAVIGATION_HINT_BACK_DISMISS_IME = 1 << 0;
+    public static final int NAVBAR_BACK_DISMISS_IME = 1 << 0;
     /**
      * The IME is visible.
      *
      * @hide
      */
-    public static final int NAVIGATION_HINT_IME_VISIBLE = 1 << 1;
+    public static final int NAVBAR_IME_VISIBLE = 1 << 1;
     /**
      * The IME Switcher button is visible. This only takes effect while the IME is visible.
      *
      * @hide
      */
-    public static final int NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE = 1 << 2;
+    public static final int NAVBAR_IME_SWITCHER_BUTTON_VISIBLE = 1 << 2;
     /**
-     * Navigation bar flags related to the IME state.
+     * Navigation bar state flags.
      *
      * @hide
      */
-    @IntDef(flag = true, prefix = { "NAVIGATION_HINT_" }, value = {
-            NAVIGATION_HINT_BACK_DISMISS_IME,
-            NAVIGATION_HINT_IME_VISIBLE,
-            NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE,
+    @IntDef(flag = true, prefix = { "NAVBAR_" }, value = {
+            NAVBAR_BACK_DISMISS_IME,
+            NAVBAR_IME_VISIBLE,
+            NAVBAR_IME_SWITCHER_BUTTON_VISIBLE,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface NavigationHint {}
+    public @interface NavbarFlags {}
 
     /** @hide */
     public static final int WINDOW_STATUS_BAR = 1;
@@ -1355,18 +1355,18 @@ public class StatusBarManager {
 
     /** @hide */
     @NonNull
-    public static String navigationHintsToString(@NavigationHint int hints) {
-        final var hintStrings = new ArrayList<String>();
-        if ((hints & NAVIGATION_HINT_BACK_DISMISS_IME) != 0) {
-            hintStrings.add("NAVIGATION_HINT_BACK_DISMISS_IME");
+    public static String navbarFlagsToString(@NavbarFlags int flags) {
+        final var flagStrings = new ArrayList<String>();
+        if ((flags & NAVBAR_BACK_DISMISS_IME) != 0) {
+            flagStrings.add("NAVBAR_BACK_DISMISS_IME");
         }
-        if ((hints & NAVIGATION_HINT_IME_VISIBLE) != 0) {
-            hintStrings.add("NAVIGATION_HINT_IME_VISIBLE");
+        if ((flags & NAVBAR_IME_VISIBLE) != 0) {
+            flagStrings.add("NAVBAR_IME_VISIBLE");
         }
-        if ((hints & NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE) != 0) {
-            hintStrings.add("NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE");
+        if ((flags & NAVBAR_IME_SWITCHER_BUTTON_VISIBLE) != 0) {
+            flagStrings.add("NAVBAR_IME_SWITCHER_BUTTON_VISIBLE");
         }
-        return String.join(" | ", hintStrings);
+        return String.join(" | ", flagStrings);
     }
 
     /** @hide */
