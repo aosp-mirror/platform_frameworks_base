@@ -2253,7 +2253,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private boolean isPanelVisibleBecauseOfHeadsUp() {
-        boolean headsUpVisible = mHeadsUpManager.hasPinnedHeadsUp() || mHeadsUpAnimatingAway;
+        boolean headsUpVisible = (mHeadsUpManager != null && mHeadsUpManager.hasPinnedHeadsUp())
+                || mHeadsUpAnimatingAway;
         return headsUpVisible && mBarState == StatusBarState.SHADE;
     }
 
