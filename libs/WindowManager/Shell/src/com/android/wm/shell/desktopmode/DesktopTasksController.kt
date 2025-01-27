@@ -56,6 +56,7 @@ import android.view.WindowManager.TRANSIT_TO_FRONT
 import android.widget.Toast
 import android.window.DesktopModeFlags
 import android.window.DesktopModeFlags.DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE
+import android.window.DesktopModeFlags.ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER
 import android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
 import android.window.DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
 import android.window.RemoteTransition
@@ -1515,7 +1516,7 @@ class DesktopTasksController(
 
     private fun addWallpaperActivity(displayId: Int, wct: WindowContainerTransaction) {
         logV("addWallpaperActivity")
-        if (Flags.enableDesktopWallpaperActivityForSystemUser()) {
+        if (ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER.isTrue()) {
             val intent = Intent(context, DesktopWallpaperActivity::class.java)
             if (
                 desktopWallpaperActivityTokenProvider.getToken(displayId) == null &&
@@ -1578,7 +1579,7 @@ class DesktopTasksController(
     private fun removeWallpaperActivity(wct: WindowContainerTransaction, displayId: Int) {
         desktopWallpaperActivityTokenProvider.getToken(displayId)?.let { token ->
             logV("removeWallpaperActivity")
-            if (Flags.enableDesktopWallpaperActivityForSystemUser()) {
+            if (ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER.isTrue()) {
                 wct.reorder(token, /* onTop= */ false)
             } else {
                 wct.removeTask(token)
