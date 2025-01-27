@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import android.util.MathUtils
 import com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
@@ -32,6 +33,7 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 /**
  * Breaks down PRIMARY BOUNCER->LOCKSCREEN transition into discrete steps for corresponding views to
@@ -78,7 +80,11 @@ constructor(
     override val windowBlurRadius: Flow<Float> =
         shadeDependentFlows.transitionFlow(
             flowWhenShadeIsExpanded =
-                transitionAnimation.immediatelyTransitionTo(blurConfig.maxBlurRadiusPx),
+                if (Flags.notificationShadeBlur()) {
+                    transitionAnimation.immediatelyTransitionTo(blurConfig.maxBlurRadiusPx)
+                } else {
+                    emptyFlow()
+                },
             flowWhenShadeIsNotExpanded =
                 transitionAnimation.sharedFlow(
                     duration = FromPrimaryBouncerTransitionInteractor.TO_LOCKSCREEN_DURATION,
