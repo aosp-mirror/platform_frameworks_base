@@ -39,6 +39,7 @@ import androidx.annotation.BinderThread;
 import com.android.window.flags.Flags;
 import com.android.wm.shell.common.DisplayChangeController.OnDisplayChangingListener;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.ArrayList;
@@ -91,7 +92,8 @@ public class DisplayController {
                 onDisplayAdded(displayIds[i]);
             }
 
-            if (Flags.enableConnectedDisplaysWindowDrag()) {
+            if (Flags.enableConnectedDisplaysWindowDrag()
+                    && DesktopModeStatus.canEnterDesktopMode(mContext)) {
                 mDisplayManager.registerTopologyListener(mMainExecutor,
                         this::onDisplayTopologyChanged);
                 onDisplayTopologyChanged(mDisplayManager.getDisplayTopology());
