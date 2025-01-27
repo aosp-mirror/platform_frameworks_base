@@ -91,45 +91,6 @@ class ZenModeControllerImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun testAreNotificationsHiddenInShade_zenOffShadeSuppressed() {
-        config.suppressedVisualEffects =
-            NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST
-        controller.updateZenMode(Settings.Global.ZEN_MODE_OFF)
-        controller.updateZenModeConfig()
-        assertThat(controller.areNotificationsHiddenInShade()).isFalse()
-    }
-
-    @Test
-    fun testAreNotificationsHiddenInShade_zenOnShadeNotSuppressed() {
-        val policy =
-            NotificationManager.Policy(
-                0,
-                0,
-                0,
-                NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR,
-            )
-        whenever(mNm.consolidatedNotificationPolicy).thenReturn(policy)
-        controller.updateConsolidatedNotificationPolicy()
-        controller.updateZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS)
-        assertThat(controller.areNotificationsHiddenInShade()).isFalse()
-    }
-
-    @Test
-    fun testAreNotificationsHiddenInShade_zenOnShadeSuppressed() {
-        val policy =
-            NotificationManager.Policy(
-                0,
-                0,
-                0,
-                NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST,
-            )
-        whenever(mNm.consolidatedNotificationPolicy).thenReturn(policy)
-        controller.updateConsolidatedNotificationPolicy()
-        controller.updateZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS)
-        assertThat(controller.areNotificationsHiddenInShade()).isTrue()
-    }
-
-    @Test
     fun testModeChange() =
         testScope.runTest {
             val states =

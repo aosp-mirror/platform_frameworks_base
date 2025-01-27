@@ -36,7 +36,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.statusbar.StatusBarIcon
 import com.android.settingslib.notification.modes.TestModeBuilder
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
@@ -480,8 +479,6 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
 
         override fun getZen(): Int = zen
 
-        override fun getManualRule(): ZenModeConfig.ZenRule = throw NotImplementedError()
-
         override fun getConfig(): ZenModeConfig = throw NotImplementedError()
 
         override fun getConsolidatedPolicy(): NotificationManager.Policy = consolidatedPolicy
@@ -490,14 +487,6 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
 
         override fun isZenAvailable() = throw NotImplementedError()
 
-        override fun getEffectsSuppressor() = throw NotImplementedError()
-
-        override fun isCountdownConditionSupported() = throw NotImplementedError()
-
         override fun getCurrentUser() = throw NotImplementedError()
-
-        override fun isVolumeRestricted() = throw NotImplementedError()
-
-        override fun areNotificationsHiddenInShade() = throw NotImplementedError()
     }
 }
