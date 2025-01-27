@@ -27,12 +27,13 @@ import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.R
-import com.android.systemui.Flags
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
+import com.android.systemui.res.R as SysUIR
 import com.android.systemui.shared.Flags.ambientAod
+import com.android.systemui.shared.Flags.extendedWallpaperEffects
 import com.android.systemui.user.data.model.SelectedUserModel
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
@@ -66,7 +67,7 @@ interface WallpaperRepository {
     /** Set rootView to get its windowToken afterwards */
     var rootView: View?
 
-    /** when we use magic portrait wallpapers, we should always get its bounds from keyguard */
+    /** some wallpapers require bounds to be sent from keyguard */
     val shouldSendFocalArea: StateFlow<Boolean>
 }
 
@@ -80,7 +81,7 @@ constructor(
     userRepository: UserRepository,
     keyguardRepository: KeyguardRepository,
     private val wallpaperManager: WallpaperManager,
-    context: Context,
+    private val context: Context,
 ) : WallpaperRepository {
     private val wallpaperChanged: Flow<Unit> =
         broadcastDispatcher
@@ -125,8 +126,8 @@ constructor(
     override val shouldSendFocalArea =
         wallpaperInfo
             .map {
-                val shouldSendNotificationLayout =
-                    it?.component?.className == MAGIC_PORTRAIT_CLASSNAME
+                val focalAreaTarget = context.resources.getString(SysUIR.string.focal_area_target)
+                val shouldSendNotificationLayout = it?.component?.className == focalAreaTarget
                 if (shouldSendNotificationLayout) {
                     sendLockscreenLayoutJob =
                         scope.launch {
@@ -167,19 +168,13 @@ constructor(
             }
             .stateIn(
                 scope,
-                // Always be listening for wallpaper changes when magic portrait flag is on
-                if (Flags.magicPortraitWallpapers()) SharingStarted.Eagerly else WhileSubscribed(),
-                initialValue = Flags.magicPortraitWallpapers(),
+                if (extendedWallpaperEffects()) SharingStarted.Eagerly else WhileSubscribed(),
+                initialValue = extendedWallpaperEffects(),
             )
 
     private suspend fun getWallpaper(selectedUser: SelectedUserModel): WallpaperInfo? {
         return withContext(bgDispatcher) {
             wallpaperManager.getWallpaperInfoForUser(selectedUser.userInfo.id)
         }
-    }
-
-    companion object {
-        const val MAGIC_PORTRAIT_CLASSNAME =
-            "com.google.android.apps.magicportrait.service.MagicPortraitWallpaperService"
     }
 }

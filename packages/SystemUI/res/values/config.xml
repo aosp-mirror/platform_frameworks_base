@@ -1107,7 +1107,7 @@
     <!-- The dream component used when the device is low light environment. -->
     <string translatable="false" name="config_lowLightDreamComponent"/>
 
-    <!--Whether we should position magic portrait shape effects in the center of lockscreen
-    it's false by default, and only be true in tablet landscape -->
-    <bool name="center_align_magic_portrait_shape">false</bool>
+    <!-- Configuration for wallpaper focal area -->
+    <bool name="center_align_focal_area_shape">false</bool>
+    <string name="focal_area_target" translatable="false" />
 </resources>

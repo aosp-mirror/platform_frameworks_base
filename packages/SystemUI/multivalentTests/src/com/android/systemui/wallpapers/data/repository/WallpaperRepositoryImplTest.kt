@@ -25,16 +25,15 @@ import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardClockRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.res.R as SysUIR
 import com.android.systemui.shared.Flags as SharedFlags
 import com.android.systemui.user.data.model.SelectedUserModel
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.FakeUserRepository
-import com.android.systemui.wallpapers.data.repository.WallpaperRepositoryImpl.Companion.MAGIC_PORTRAIT_CLASSNAME
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -72,9 +71,12 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
         )
     }
 
+    lateinit var focalAreaTarget: String
+
     @Before
     fun setUp() {
         whenever(wallpaperManager.isWallpaperSupported).thenReturn(true)
+        focalAreaTarget = context.resources.getString(SysUIR.string.focal_area_target)
     }
 
     @Test
@@ -248,17 +250,17 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_MAGIC_PORTRAIT_WALLPAPERS)
-    fun shouldSendNotificationLayout_setMagicPortraitWallpaper_launchSendLayoutJob() =
+    @EnableFlags(SharedFlags.FLAG_EXTENDED_WALLPAPER_EFFECTS)
+    fun shouldSendNotificationLayout_setExtendedEffectsWallpaper_launchSendLayoutJob() =
         testScope.runTest {
             val latest by collectLastValue(underTest.shouldSendFocalArea)
-            val magicPortraitWallpaper =
+            val extedendEffectsWallpaper =
                 mock<WallpaperInfo>().apply {
-                    whenever(this.component)
-                        .thenReturn(ComponentName(context, MAGIC_PORTRAIT_CLASSNAME))
+                    whenever(this.component).thenReturn(ComponentName(context, focalAreaTarget))
                 }
+
             whenever(wallpaperManager.getWallpaperInfoForUser(any()))
-                .thenReturn(magicPortraitWallpaper)
+                .thenReturn(extedendEffectsWallpaper)
             fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
                 context,
                 Intent(Intent.ACTION_WALLPAPER_CHANGED),
@@ -269,13 +271,16 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_MAGIC_PORTRAIT_WALLPAPERS)
-    fun shouldSendNotificationLayout_setNotMagicPortraitWallpaper_cancelSendLayoutJob() =
+    @EnableFlags(SharedFlags.FLAG_EXTENDED_WALLPAPER_EFFECTS)
+    fun shouldSendNotificationLayout_setNotExtendedEffectsWallpaper_cancelSendLayoutJob() =
         testScope.runTest {
             val latest by collectLastValue(underTest.shouldSendFocalArea)
-            val magicPortraitWallpaper = MAGIC_PORTRAIT_WP
+            val extendedEffectsWallpaper =
+                mock<WallpaperInfo>().apply {
+                    whenever(this.component).thenReturn(ComponentName("", focalAreaTarget))
+                }
             whenever(wallpaperManager.getWallpaperInfoForUser(any()))
-                .thenReturn(magicPortraitWallpaper)
+                .thenReturn(extendedEffectsWallpaper)
             fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
                 context,
                 Intent(Intent.ACTION_WALLPAPER_CHANGED),
@@ -284,9 +289,7 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
             assertThat(underTest.sendLockscreenLayoutJob).isNotNull()
             assertThat(underTest.sendLockscreenLayoutJob!!.isActive).isEqualTo(true)
 
-            val nonMagicPortraitWallpaper = UNSUPPORTED_WP
-            whenever(wallpaperManager.getWallpaperInfoForUser(any()))
-                .thenReturn(nonMagicPortraitWallpaper)
+            whenever(wallpaperManager.getWallpaperInfoForUser(any())).thenReturn(UNSUPPORTED_WP)
             fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
                 context,
                 Intent(Intent.ACTION_WALLPAPER_CHANGED),
@@ -303,10 +306,5 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
         val USER_WITH_SUPPORTED_WP = UserInfo(/* id= */ 4, /* name= */ "user4", /* flags= */ 0)
         val SUPPORTED_WP =
             mock<WallpaperInfo>().apply { whenever(this.supportsAmbientMode()).thenReturn(true) }
-
-        val MAGIC_PORTRAIT_WP =
-            mock<WallpaperInfo>().apply {
-                whenever(this.component).thenReturn(ComponentName("", MAGIC_PORTRAIT_CLASSNAME))
-            }
     }
 }
