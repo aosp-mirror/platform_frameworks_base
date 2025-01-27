@@ -188,6 +188,7 @@ public class SettingsToPropertiesMapper {
         "dck_framework",
         "desktop_hwsec",
         "desktop_stats",
+        "desktop_wifi",
         "devoptions_settings",
         "game",
         "gpu",
