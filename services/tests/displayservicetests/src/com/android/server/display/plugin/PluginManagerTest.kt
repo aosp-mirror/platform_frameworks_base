@@ -29,6 +29,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 private val TEST_PLUGIN_TYPE = PluginType(Int::class.java, "test_type")
+private val DISPLAY_ID = "display_id"
 
 @SmallTest
 class PluginManagerTest {
@@ -62,18 +63,18 @@ class PluginManagerTest {
     fun testSubscribe() {
         val pluginManager = createPluginManager()
 
-        pluginManager.subscribe(TEST_PLUGIN_TYPE, mockListener)
+        pluginManager.subscribe(TEST_PLUGIN_TYPE, DISPLAY_ID, mockListener)
 
-        verify(testInjector.mockStorage).addListener(TEST_PLUGIN_TYPE, mockListener)
+        verify(testInjector.mockStorage).addListener(TEST_PLUGIN_TYPE, DISPLAY_ID, mockListener)
     }
 
     @Test
     fun testUnsubscribe() {
         val pluginManager = createPluginManager()
 
-        pluginManager.unsubscribe(TEST_PLUGIN_TYPE, mockListener)
+        pluginManager.unsubscribe(TEST_PLUGIN_TYPE, DISPLAY_ID, mockListener)
 
-        verify(testInjector.mockStorage).removeListener(TEST_PLUGIN_TYPE, mockListener)
+        verify(testInjector.mockStorage).removeListener(TEST_PLUGIN_TYPE, DISPLAY_ID, mockListener)
     }
 
     private fun createPluginManager(enabled: Boolean = true): PluginManager {
