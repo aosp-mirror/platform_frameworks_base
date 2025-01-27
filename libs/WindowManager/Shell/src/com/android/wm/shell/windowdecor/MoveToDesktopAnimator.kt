@@ -5,6 +5,7 @@ import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
 import android.graphics.PointF
 import android.graphics.Rect
+import android.view.Choreographer
 import android.view.MotionEvent
 import android.view.SurfaceControl
 import android.view.VelocityTracker
@@ -48,7 +49,7 @@ class MoveToDesktopAnimator @JvmOverloads constructor(
                     t.setScale(taskSurface, scale, scale)
                         .setCornerRadius(taskSurface, cornerRadius)
                         .setScale(taskSurface, scale, scale)
-                        .setCornerRadius(taskSurface, cornerRadius)
+                        .setFrameTimeline(Choreographer.getInstance().vsyncId)
                         .setPosition(taskSurface, position.x, position.y)
                         .apply()
                 }
@@ -96,6 +97,7 @@ class MoveToDesktopAnimator @JvmOverloads constructor(
         setTaskPosition(ev.rawX, ev.rawY)
         val t = transactionFactory()
         t.setPosition(taskSurface, position.x, position.y)
+        t.setFrameTimeline(Choreographer.getInstance().vsyncId)
         t.apply()
     }
 
