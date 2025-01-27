@@ -22,6 +22,14 @@ import android.annotation.Nullable;
  * unavailable
  */
 public interface CollectionsAccess {
+
+    /**
+     * Get the float value in the array at the given index
+     *
+     * @param id the id of the float array
+     * @param index the index of the value
+     * @return
+     */
     float getFloatValue(int id, int index);
 
     /**

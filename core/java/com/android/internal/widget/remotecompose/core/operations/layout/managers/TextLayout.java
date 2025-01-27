@@ -34,6 +34,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.measure.
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
 
 import java.util.List;
 
@@ -331,6 +332,20 @@ public class TextLayout extends LayoutManager implements VariableSupport, Access
         return Operations.LAYOUT_TEXT;
     }
 
+    /**
+     * Write the operation in the buffer
+     *
+     * @param buffer the WireBuffer we write on
+     * @param componentId the component id
+     * @param animationId the animation id (-1 if not set)
+     * @param textId the text id
+     * @param color the text color
+     * @param fontSize the font size
+     * @param fontStyle the font style
+     * @param fontWeight the font weight
+     * @param fontFamilyId the font family id
+     * @param textAlign the alignment rules
+     */
     public static void apply(
             @NonNull WireBuffer buffer,
             int componentId,
@@ -417,5 +432,17 @@ public class TextLayout extends LayoutManager implements VariableSupport, Access
                 mFontWeight,
                 mFontFamilyId,
                 mTextAlign);
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        super.serialize(serializer);
+        serializer.add("textId", mTextId);
+        serializer.add("color", mColor);
+        serializer.add("fontSize", mFontSize);
+        serializer.add("fontStyle", mFontStyle);
+        serializer.add("fontWeight", mFontWeight);
+        serializer.add("fontFamilyId", mFontFamilyId);
+        serializer.add("textAlign", mTextAlign);
     }
 }

@@ -30,6 +30,15 @@ public class ParticleAnimation {
 
     @NonNull PaintBundle mPaint = new PaintBundle();
 
+    /**
+     * Animate the particle animation
+     *
+     * @param context the current paint context
+     * @param component the target component
+     * @param start the component's measure at the end of the animation
+     * @param end the component's measure at the end of the animation
+     * @param progress the current animation progress
+     */
     public void animate(
             @NonNull PaintContext context,
             @NonNull Component component,

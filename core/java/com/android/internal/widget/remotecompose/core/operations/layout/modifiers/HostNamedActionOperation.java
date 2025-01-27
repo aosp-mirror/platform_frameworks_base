@@ -57,6 +57,11 @@ public class HostNamedActionOperation extends Operation implements ActionOperati
         return "HostNamedActionOperation(" + mTextId + " : " + mValueId + ")";
     }
 
+    /**
+     * Name used during serialization
+     *
+     * @return the serialized name for this operation
+     */
     @NonNull
     public String serializedName() {
         return "HOST_NAMED_ACTION";
@@ -105,6 +110,14 @@ public class HostNamedActionOperation extends Operation implements ActionOperati
         context.runNamedAction(mTextId, value);
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param textId the text id of the action
+     * @param type the type of the action
+     * @param valueId the value id associated with the action
+     */
     public static void apply(@NonNull WireBuffer buffer, int textId, int type, int valueId) {
         buffer.start(OP_CODE);
         buffer.writeInt(textId);

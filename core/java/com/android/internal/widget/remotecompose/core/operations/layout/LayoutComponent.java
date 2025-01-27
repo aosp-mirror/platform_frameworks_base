@@ -32,6 +32,7 @@ import com.android.internal.widget.remotecompose.core.operations.MatrixTranslate
 import com.android.internal.widget.remotecompose.core.operations.PaintData;
 import com.android.internal.widget.remotecompose.core.operations.TextData;
 import com.android.internal.widget.remotecompose.core.operations.TouchExpression;
+import com.android.internal.widget.remotecompose.core.operations.layout.animation.AnimationSpec;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentModifiers;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentVisibilityOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.DimensionModifierOperation;
@@ -44,6 +45,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.modifier
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.WidthInModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.WidthModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ZIndexModifierOperation;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
 
 import java.util.ArrayList;
 
@@ -234,6 +236,8 @@ public class LayoutComponent extends Component {
                 mZIndexModifier = (ZIndexModifierOperation) op;
             } else if (op instanceof GraphicsLayerModifierOperation) {
                 mGraphicsLayerModifier = (GraphicsLayerModifierOperation) op;
+            } else if (op instanceof AnimationSpec) {
+                mAnimationSpec = (AnimationSpec) op;
             } else if (op instanceof ScrollDelegate) {
                 ScrollDelegate scrollDelegate = (ScrollDelegate) op;
                 if (scrollDelegate.handlesHorizontalScroll()) {
@@ -256,6 +260,16 @@ public class LayoutComponent extends Component {
         if (heightInConstraints != null) {
             mHeightModifier.setHeightIn(heightInConstraints);
         }
+
+        if (mAnimationSpec != AnimationSpec.DEFAULT) {
+            for (int i = 0; i < mChildrenComponents.size(); i++) {
+                Component c = mChildrenComponents.get(i);
+                if (c != null && c.getAnimationSpec() == AnimationSpec.DEFAULT) {
+                    c.setAnimationSpec(mAnimationSpec);
+                }
+            }
+        }
+
         setWidth(computeModifierDefinedWidth(null));
         setHeight(computeModifierDefinedHeight(null));
     }
@@ -472,5 +486,15 @@ public class LayoutComponent extends Component {
     @NonNull
     public ArrayList<Component> getChildrenComponents() {
         return mChildrenComponents;
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        super.serialize(serializer);
+        serializer.add("children", mChildrenComponents);
+        serializer.add("paddingLeft", mPaddingLeft);
+        serializer.add("paddingRight", mPaddingRight);
+        serializer.add("paddingTop", mPaddingTop);
+        serializer.add("paddingBottom", mPaddingBottom);
     }
 }

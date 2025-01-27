@@ -39,12 +39,20 @@ public class IntMap<T> {
         }
     }
 
+    /** Clear the map */
     public void clear() {
         Arrays.fill(mKeys, NOT_PRESENT);
         mValues.clear();
         mSize = 0;
     }
 
+    /**
+     * Insert the value into the map with the given key
+     *
+     * @param key
+     * @param value
+     * @return
+     */
     @Nullable
     public T put(int key, @NonNull T value) {
         if (key == NOT_PRESENT) throw new IllegalArgumentException("Key cannot be NOT_PRESENT");
@@ -54,6 +62,12 @@ public class IntMap<T> {
         return insert(key, value);
     }
 
+    /**
+     * Return the value associated with the given key
+     *
+     * @param key
+     * @return
+     */
     @Nullable
     public T get(int key) {
         int index = findKey(key);
@@ -62,6 +76,11 @@ public class IntMap<T> {
         } else return mValues.get(index);
     }
 
+    /**
+     * Return the size of the map
+     *
+     * @return
+     */
     public int size() {
         return mSize;
     }
@@ -117,6 +136,12 @@ public class IntMap<T> {
         }
     }
 
+    /**
+     * Remote the key from the map
+     *
+     * @param key
+     * @return
+     */
     @Nullable
     public T remove(int key) {
         int index = hash(key) % mKeys.length;

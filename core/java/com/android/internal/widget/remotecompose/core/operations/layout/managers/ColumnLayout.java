@@ -34,6 +34,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.measure.
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.Size;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HeightInModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.utils.DebugLog;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
 
 import java.util.List;
 
@@ -218,6 +219,8 @@ public class ColumnLayout extends LayoutManager {
         boolean checkWeights = true;
         while (checkWeights) {
             checkWeights = false;
+            childrenWidth = 0f;
+            childrenHeight = 0f;
             boolean hasWeights = false;
             float totalWeights = 0f;
             for (Component child : mChildrenComponents) {
@@ -476,5 +479,36 @@ public class ColumnLayout extends LayoutManager {
                 mHorizontalPositioning,
                 mVerticalPositioning,
                 mSpacedBy);
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        super.serialize(serializer);
+        serializer.add("verticalPositioning", getPositioningString(mVerticalPositioning));
+        serializer.add("horizontalPositioning", getPositioningString(mHorizontalPositioning));
+        serializer.add("spacedBy", mSpacedBy);
+    }
+
+    private String getPositioningString(int pos) {
+        switch (pos) {
+            case START:
+                return "START";
+            case CENTER:
+                return "CENTER";
+            case END:
+                return "END";
+            case TOP:
+                return "TOP";
+            case BOTTOM:
+                return "BOTTOM";
+            case SPACE_BETWEEN:
+                return "SPACE_BETWEEN";
+            case SPACE_EVENLY:
+                return "SPACE_EVENLY";
+            case SPACE_AROUND:
+                return "SPACE_AROUND";
+            default:
+                return "NONE";
+        }
     }
 }

@@ -62,7 +62,7 @@ public class CoreDocument {
 
     // We also keep a more fine-grained BUILD number, exposed as
     // ID_API_LEVEL = DOCUMENT_API_LEVEL + BUILD
-    static final float BUILD = 0.3f;
+    static final float BUILD = 0.4f;
 
     @NonNull ArrayList<Operation> mOperations = new ArrayList<>();
 
@@ -860,15 +860,21 @@ public class CoreDocument {
      *
      * @param id the click area id
      */
-    public void performClick(int id) {
+    public void performClick(@NonNull RemoteContext context, int id) {
         for (ClickAreaRepresentation clickArea : mClickAreas) {
             if (clickArea.mId == id) {
                 warnClickListeners(clickArea);
                 return;
             }
         }
+
         for (IdActionCallback listener : mIdActionListeners) {
             listener.onAction(id, "");
+        }
+
+        Component component = getComponent(id);
+        if (component != null) {
+            component.onClick(context, this, -1, -1);
         }
     }
 

@@ -52,6 +52,13 @@ public class HeightModifierOperation extends DimensionModifierOperation {
         return OP_CODE;
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param type the type of dimension rule (DimensionModifierOperation.Type)
+     * @param value the value of the dimension
+     */
     public static void apply(@NonNull WireBuffer buffer, int type, float value) {
         buffer.start(OP_CODE);
         buffer.writeInt(type);

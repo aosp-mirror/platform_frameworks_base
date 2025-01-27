@@ -31,8 +31,8 @@ import java.util.List;
 /** Base class for commands that take 3 float */
 public abstract class DrawBase2 extends PaintOperation implements VariableSupport {
     @NonNull protected String mName = "DrawRectBase";
-    protected float mV1;
-    protected float mV2;
+    float mV1;
+    float mV2;
     float mValue1;
     float mValue2;
 

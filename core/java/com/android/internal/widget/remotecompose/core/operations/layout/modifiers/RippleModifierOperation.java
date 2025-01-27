@@ -143,19 +143,40 @@ public class RippleModifierOperation extends DecoratorModifierOperation implemen
         serializer.append(indent, "RIPPLE_MODIFIER");
     }
 
+    /**
+     * The operation name
+     *
+     * @return operation name
+     */
     @NonNull
     public static String name() {
         return "RippleModifier";
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     */
     public static void apply(@NonNull WireBuffer buffer) {
         buffer.start(OP_CODE);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         operations.add(new RippleModifierOperation());
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", OP_CODE, name())
                 .description(

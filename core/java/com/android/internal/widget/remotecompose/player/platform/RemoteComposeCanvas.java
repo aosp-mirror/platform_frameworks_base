@@ -147,7 +147,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
                 param.leftMargin = (int) area.getLeft();
                 param.topMargin = (int) area.getTop();
                 viewArea.setOnClickListener(
-                        view1 -> mDocument.getDocument().performClick(area.getId()));
+                        view1 -> mDocument.getDocument().performClick(mARContext, area.getId()));
                 addView(viewArea, param);
             }
             if (!clickAreas.isEmpty()) {
@@ -301,6 +301,10 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
      */
     public void setUseChoreographer(boolean value) {
         mARContext.setUseChoreographer(value);
+    }
+
+    public RemoteContext getRemoteContext() {
+        return mARContext;
     }
 
     public interface ClickCallbacks {

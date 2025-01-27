@@ -176,6 +176,22 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
         return OP_CODE;
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer the WireBuffer
+     * @param x x coordinate of the border rect
+     * @param y y coordinate of the border rect
+     * @param width width of the border rect
+     * @param height height of the border rect
+     * @param borderWidth the width of the border outline
+     * @param roundedCorner rounded corner value in pixels
+     * @param r red component of the border color
+     * @param g green component of the border color
+     * @param b blue component of the border color
+     * @param a alpha component of the border color
+     * @param shapeType the shape type (0 = RECTANGLE, 1 = CIRCLE)
+     */
     public static void apply(
             @NonNull WireBuffer buffer,
             float x,

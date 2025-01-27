@@ -18,6 +18,7 @@ package com.android.internal.widget.remotecompose.core;
 import android.annotation.NonNull;
 
 import com.android.internal.widget.remotecompose.core.operations.BitmapData;
+import com.android.internal.widget.remotecompose.core.operations.BitmapFontData;
 import com.android.internal.widget.remotecompose.core.operations.ClickArea;
 import com.android.internal.widget.remotecompose.core.operations.ClipPath;
 import com.android.internal.widget.remotecompose.core.operations.ClipRect;
@@ -30,6 +31,7 @@ import com.android.internal.widget.remotecompose.core.operations.DataMapIds;
 import com.android.internal.widget.remotecompose.core.operations.DataMapLookup;
 import com.android.internal.widget.remotecompose.core.operations.DrawArc;
 import com.android.internal.widget.remotecompose.core.operations.DrawBitmap;
+import com.android.internal.widget.remotecompose.core.operations.DrawBitmapFontText;
 import com.android.internal.widget.remotecompose.core.operations.DrawBitmapInt;
 import com.android.internal.widget.remotecompose.core.operations.DrawBitmapScaled;
 import com.android.internal.widget.remotecompose.core.operations.DrawCircle;
@@ -45,6 +47,8 @@ import com.android.internal.widget.remotecompose.core.operations.DrawTextOnPath;
 import com.android.internal.widget.remotecompose.core.operations.DrawTweenPath;
 import com.android.internal.widget.remotecompose.core.operations.FloatConstant;
 import com.android.internal.widget.remotecompose.core.operations.FloatExpression;
+import com.android.internal.widget.remotecompose.core.operations.FloatFunctionCall;
+import com.android.internal.widget.remotecompose.core.operations.FloatFunctionDefine;
 import com.android.internal.widget.remotecompose.core.operations.Header;
 import com.android.internal.widget.remotecompose.core.operations.IntegerExpression;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRestore;
@@ -147,12 +151,14 @@ public class Operations {
     public static final int DATA_BITMAP = 101;
     public static final int DATA_SHADER = 45;
     public static final int DATA_TEXT = 102;
+    public static final int DATA_BITMAP_FONT = 167;
 
     ///////////////////////////// =====================
     public static final int CLIP_PATH = 38;
     public static final int CLIP_RECT = 39;
     public static final int PAINT_VALUES = 40;
     public static final int DRAW_RECT = 42;
+    public static final int DRAW_BITMAP_FONT_TEXT_RUN = 48;
     public static final int DRAW_TEXT_RUN = 43;
     public static final int DRAW_CIRCLE = 46;
     public static final int DRAW_LINE = 47;
@@ -196,11 +202,13 @@ public class Operations {
     public static final int PATH_TWEEN = 158;
     public static final int PATH_CREATE = 159;
     public static final int PATH_ADD = 160;
-    public static final int PARTICLE_CREATE = 161;
+    public static final int PARTICLE_DEFINE = 161;
     public static final int PARTICLE_PROCESS = 162;
     public static final int PARTICLE_LOOP = 163;
     public static final int IMPULSE_START = 164;
     public static final int IMPULSE_PROCESS = 165;
+    public static final int FUNCTION_CALL = 166;
+    public static final int FUNCTION_DEFINE = 168;
 
     ///////////////////////////////////////// ======================
 
@@ -276,6 +284,7 @@ public class Operations {
         map.put(HEADER, Header::read);
         map.put(DRAW_BITMAP_INT, DrawBitmapInt::read);
         map.put(DATA_BITMAP, BitmapData::read);
+        map.put(DATA_BITMAP_FONT, BitmapFontData::read);
         map.put(DATA_TEXT, TextData::read);
         map.put(THEME, Theme::read);
         map.put(CLICK_AREA, ClickArea::read);
@@ -292,6 +301,7 @@ public class Operations {
         map.put(DRAW_ROUND_RECT, DrawRoundRect::read);
         map.put(DRAW_TEXT_ON_PATH, DrawTextOnPath::read);
         map.put(DRAW_TEXT_RUN, DrawText::read);
+        map.put(DRAW_BITMAP_FONT_TEXT_RUN, DrawBitmapFontText::read);
         map.put(DRAW_TWEEN_PATH, DrawTweenPath::read);
         map.put(DATA_PATH, PathData::read);
         map.put(PAINT_VALUES, PaintData::read);
@@ -389,8 +399,10 @@ public class Operations {
         map.put(PATH_ADD, PathAppend::read);
         map.put(IMPULSE_START, ImpulseOperation::read);
         map.put(IMPULSE_PROCESS, ImpulseProcess::read);
-        map.put(PARTICLE_CREATE, ParticlesCreate::read);
+        map.put(PARTICLE_DEFINE, ParticlesCreate::read);
         map.put(PARTICLE_LOOP, ParticlesLoop::read);
+        map.put(FUNCTION_CALL, FloatFunctionCall::read);
+        map.put(FUNCTION_DEFINE, FloatFunctionDefine::read);
 
         map.put(ACCESSIBILITY_SEMANTICS, CoreSemantics::read);
         //        map.put(ACCESSIBILITY_CUSTOM_ACTION, CoreSemantics::read);

@@ -39,12 +39,13 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.remotecompose.accessibility.RemoteComposeTouchHelper;
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.RemoteContextAware;
 import com.android.internal.widget.remotecompose.core.operations.NamedVariable;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
 import com.android.internal.widget.remotecompose.player.platform.RemoteComposeCanvas;
 
 /** A view to to display and play RemoteCompose documents */
-public class RemoteComposePlayer extends FrameLayout {
+public class RemoteComposePlayer extends FrameLayout implements RemoteContextAware {
     private RemoteComposeCanvas mInner;
 
     private static final int MAX_SUPPORTED_MAJOR_VERSION = MAJOR_VERSION;
@@ -63,6 +64,11 @@ public class RemoteComposePlayer extends FrameLayout {
     public RemoteComposePlayer(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs, defStyleAttr);
+    }
+
+    @Override
+    public RemoteContext getRemoteContext() {
+        return mInner.getRemoteContext();
     }
 
     /**

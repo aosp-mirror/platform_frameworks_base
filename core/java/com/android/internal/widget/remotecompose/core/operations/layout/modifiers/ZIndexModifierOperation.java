@@ -55,6 +55,12 @@ public class ZIndexModifierOperation extends DecoratorModifierOperation {
         apply(buffer, mValue);
     }
 
+    /**
+     * Serialize the string
+     *
+     * @param indent padding to display
+     * @param serializer append the string
+     */
     // @Override
     public void serializeToString(int indent, StringSerializer serializer) {
         serializer.append(indent, "ZINDEX = [" + mValue + "]");
@@ -99,16 +105,33 @@ public class ZIndexModifierOperation extends DecoratorModifierOperation {
         return OP_CODE;
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param value the z-index value
+     */
     public static void apply(WireBuffer buffer, float value) {
         buffer.start(OP_CODE);
         buffer.writeFloat(value);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(WireBuffer buffer, List<Operation> operations) {
         float value = buffer.readFloat();
         operations.add(new ZIndexModifierOperation(value));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Modifier Operations", OP_CODE, CLASS_NAME)
                 .description("define the Z-Index Modifier")

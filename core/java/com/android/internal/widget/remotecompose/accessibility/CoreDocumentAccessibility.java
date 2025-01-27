@@ -21,6 +21,7 @@ import android.os.Bundle;
 
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
+import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.operations.layout.ClickModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponent;
@@ -45,9 +46,11 @@ import java.util.stream.Stream;
  */
 public class CoreDocumentAccessibility implements RemoteComposeDocumentAccessibility {
     private final CoreDocument mDocument;
+    private final RemoteContext mRemoteContext;
 
-    public CoreDocumentAccessibility(CoreDocument document) {
+    public CoreDocumentAccessibility(CoreDocument document, RemoteContext remoteContext) {
         this.mDocument = document;
+        this.mRemoteContext = remoteContext;
     }
 
     @Nullable
@@ -95,7 +98,7 @@ public class CoreDocumentAccessibility implements RemoteComposeDocumentAccessibi
     @Override
     public boolean performAction(Component component, int action, Bundle arguments) {
         if (action == ACTION_CLICK) {
-            mDocument.performClick(component.getComponentId());
+            mDocument.performClick(mRemoteContext, component.getComponentId());
             return true;
         } else {
             return false;

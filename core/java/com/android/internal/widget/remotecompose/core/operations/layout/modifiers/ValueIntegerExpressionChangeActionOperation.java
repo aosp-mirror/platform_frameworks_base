@@ -50,6 +50,11 @@ public class ValueIntegerExpressionChangeActionOperation extends Operation
         return "ValueIntegerExpressionChangeActionOperation(" + mTargetValueId + ")";
     }
 
+    /**
+     * The name of the operation used during serialization
+     *
+     * @return the operation serialized name
+     */
     @NonNull
     public String serializedName() {
         return "VALUE_INTEGER_EXPRESSION_CHANGE";
@@ -83,6 +88,13 @@ public class ValueIntegerExpressionChangeActionOperation extends Operation
         document.evaluateIntExpression(mValueExpressionId, (int) mTargetValueId, context);
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param valueId the long id pointing to an int value
+     * @param value the value to set (long id)`
+     */
     public static void apply(@NonNull WireBuffer buffer, long valueId, long value) {
         buffer.start(OP_CODE);
         buffer.writeLong(valueId);
