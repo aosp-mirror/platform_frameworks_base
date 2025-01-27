@@ -34,10 +34,6 @@ import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.os.UserHandle.USER_SYSTEM;
-import static android.service.notification.Adjustment.TYPE_CONTENT_RECOMMENDATION;
-import static android.service.notification.Adjustment.TYPE_NEWS;
-import static android.service.notification.Adjustment.TYPE_PROMOTION;
-import static android.service.notification.Adjustment.TYPE_SOCIAL_MEDIA;
 import static android.service.notification.Flags.notificationClassification;
 
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
@@ -1427,20 +1423,6 @@ public class PreferencesHelper implements RankingConfig {
         }
     }
 
-    private @Nullable String getChannelIdForBundleType(@Adjustment.Types int type) {
-        switch (type) {
-            case TYPE_CONTENT_RECOMMENDATION:
-                return RECS_ID;
-            case TYPE_NEWS:
-                return NEWS_ID;
-            case TYPE_PROMOTION:
-                return PROMOTIONS_ID;
-            case TYPE_SOCIAL_MEDIA:
-                return SOCIAL_MEDIA_ID;
-        }
-        return null;
-    }
-
     @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
     public NotificationChannel getReservedChannel(String pkg, int uid,
             @Adjustment.Types int type) {
@@ -1448,7 +1430,7 @@ public class PreferencesHelper implements RankingConfig {
             return null;
         }
         Objects.requireNonNull(pkg);
-        String channelId = getChannelIdForBundleType(type);
+        String channelId = NotificationChannel.getChannelIdForBundleType(type);
         if (channelId == null) {
             return null;
         }
@@ -1468,7 +1450,7 @@ public class PreferencesHelper implements RankingConfig {
         if (r == null) {
             return null;
         }
-        String channelId = getChannelIdForBundleType(type);
+        String channelId = NotificationChannel.getChannelIdForBundleType(type);
         if (channelId == null) {
             return null;
         }

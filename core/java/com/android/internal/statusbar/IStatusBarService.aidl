@@ -244,10 +244,4 @@ interface IStatusBarService
 
     /** Shows rear display educational dialog */
     void showRearDisplayDialog(int currentBaseState);
-
-    /** Unbundle a categorized notification */
-    void unbundleNotification(String key);
-
-    /** Rebundle an (un)categorized notification */
-    void rebundleNotification(String key);
 }

@@ -470,10 +470,6 @@ public final class NotificationRecord {
             }
         }
 
-        if (android.service.notification.Flags.notificationClassification()) {
-            mBundleType = previous.mBundleType;
-        }
-
         // Don't copy importance information or mGlobalSortKey, recompute them.
     }
 
