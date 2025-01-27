@@ -204,36 +204,6 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
-     * Like {@link #setBoundsChangeTransaction} but instead queues up a setPosition/WindowCrop
-     * on a container's surface control. This is useful when a boundsChangeTransaction needs to be
-     * queued up on a Task that won't be organized until the end of this window-container
-     * transaction.
-     *
-     * This requires that, at the end of this transaction, `task` will be organized; otherwise
-     * the server will throw an IllegalArgumentException.
-     *
-     * WARNING: Use this carefully. Whatever is set here should match the expected bounds after
-     *          the transaction completes since it will likely be replaced by it. This call is
-     *          intended to pre-emptively set bounds on a surface in sync with a buffer when
-     *          otherwise the new bounds and the new buffer would update on different frames.
-     *
-     * TODO(b/134365562): remove once TaskOrg drives full-screen or BLAST is enabled.
-     *
-     * @hide
-     */
-    @NonNull
-    public WindowContainerTransaction setBoundsChangeTransaction(
-            @NonNull WindowContainerToken task, @NonNull Rect surfaceBounds) {
-        Change chg = getOrCreateChange(task.asBinder());
-        if (chg.mBoundsChangeSurfaceBounds == null) {
-            chg.mBoundsChangeSurfaceBounds = new Rect();
-        }
-        chg.mBoundsChangeSurfaceBounds.set(surfaceBounds);
-        chg.mChangeMask |= Change.CHANGE_BOUNDS_TRANSACTION_RECT;
-        return this;
-    }
-
-    /**
      * Set the windowing mode of children of a given root task, without changing
      * the windowing mode of the Task itself. This can be used during transitions
      * for example to make the activity render it's fullscreen configuration
@@ -1206,7 +1176,7 @@ public final class WindowContainerTransaction implements Parcelable {
 
     @NonNull
     public static final Creator<WindowContainerTransaction> CREATOR =
-            new Creator<WindowContainerTransaction>() {
+            new Creator<>() {
                 @Override
                 public WindowContainerTransaction createFromParcel(@NonNull Parcel in) {
                     return new WindowContainerTransaction(in);
@@ -1227,19 +1197,17 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int CHANGE_BOUNDS_TRANSACTION = 1 << 1;
         public static final int CHANGE_PIP_CALLBACK = 1 << 2;
         public static final int CHANGE_HIDDEN = 1 << 3;
-        public static final int CHANGE_BOUNDS_TRANSACTION_RECT = 1 << 4;
-        public static final int CHANGE_IGNORE_ORIENTATION_REQUEST = 1 << 5;
-        public static final int CHANGE_FORCE_NO_PIP = 1 << 6;
-        public static final int CHANGE_FORCE_TRANSLUCENT = 1 << 7;
-        public static final int CHANGE_DRAG_RESIZING = 1 << 8;
-        public static final int CHANGE_RELATIVE_BOUNDS = 1 << 9;
+        public static final int CHANGE_IGNORE_ORIENTATION_REQUEST = 1 << 4;
+        public static final int CHANGE_FORCE_NO_PIP = 1 << 5;
+        public static final int CHANGE_FORCE_TRANSLUCENT = 1 << 6;
+        public static final int CHANGE_DRAG_RESIZING = 1 << 7;
+        public static final int CHANGE_RELATIVE_BOUNDS = 1 << 8;
 
         @IntDef(flag = true, prefix = { "CHANGE_" }, value = {
                 CHANGE_FOCUSABLE,
                 CHANGE_BOUNDS_TRANSACTION,
                 CHANGE_PIP_CALLBACK,
                 CHANGE_HIDDEN,
-                CHANGE_BOUNDS_TRANSACTION_RECT,
                 CHANGE_IGNORE_ORIENTATION_REQUEST,
                 CHANGE_FORCE_NO_PIP,
                 CHANGE_FORCE_TRANSLUCENT,
@@ -1262,7 +1230,6 @@ public final class WindowContainerTransaction implements Parcelable {
 
         private Rect mPinnedBounds = null;
         private SurfaceControl.Transaction mBoundsChangeTransaction = null;
-        private Rect mBoundsChangeSurfaceBounds = null;
         @Nullable
         private Rect mRelativeBounds = null;
         private boolean mConfigAtTransitionEnd = false;
@@ -1289,10 +1256,6 @@ public final class WindowContainerTransaction implements Parcelable {
             if ((mChangeMask & Change.CHANGE_BOUNDS_TRANSACTION) != 0) {
                 mBoundsChangeTransaction =
                     SurfaceControl.Transaction.CREATOR.createFromParcel(in);
-            }
-            if ((mChangeMask & Change.CHANGE_BOUNDS_TRANSACTION_RECT) != 0) {
-                mBoundsChangeSurfaceBounds = new Rect();
-                mBoundsChangeSurfaceBounds.readFromParcel(in);
             }
             if ((mChangeMask & Change.CHANGE_RELATIVE_BOUNDS) != 0) {
                 mRelativeBounds = new Rect();
@@ -1341,10 +1304,6 @@ public final class WindowContainerTransaction implements Parcelable {
             }
             if (other.mWindowingMode >= WINDOWING_MODE_UNDEFINED) {
                 mWindowingMode = other.mWindowingMode;
-            }
-            if (other.mBoundsChangeSurfaceBounds != null) {
-                mBoundsChangeSurfaceBounds = transfer ? other.mBoundsChangeSurfaceBounds
-                        : new Rect(other.mBoundsChangeSurfaceBounds);
             }
             if (other.mRelativeBounds != null) {
                 mRelativeBounds = transfer
@@ -1446,11 +1405,6 @@ public final class WindowContainerTransaction implements Parcelable {
         }
 
         @Nullable
-        public Rect getBoundsChangeSurfaceBounds() {
-            return mBoundsChangeSurfaceBounds;
-        }
-
-        @Nullable
         public Rect getRelativeBounds() {
             return mRelativeBounds;
         }
@@ -1528,9 +1482,6 @@ public final class WindowContainerTransaction implements Parcelable {
             }
             if (mBoundsChangeTransaction != null) {
                 mBoundsChangeTransaction.writeToParcel(dest, flags);
-            }
-            if (mBoundsChangeSurfaceBounds != null) {
-                mBoundsChangeSurfaceBounds.writeToParcel(dest, flags);
             }
             if (mRelativeBounds != null) {
                 mRelativeBounds.writeToParcel(dest, flags);
