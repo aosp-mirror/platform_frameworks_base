@@ -205,7 +205,7 @@ public class StatusBarManager {
      *
      * @hide
      */
-    public static final int NAVIGATION_HINT_BACK_ALT = 1 << 0;
+    public static final int NAVIGATION_HINT_BACK_DISMISS_IME = 1 << 0;
     /**
      * The IME is visible.
      *
@@ -224,7 +224,7 @@ public class StatusBarManager {
      * @hide
      */
     @IntDef(flag = true, prefix = { "NAVIGATION_HINT_" }, value = {
-            NAVIGATION_HINT_BACK_ALT,
+            NAVIGATION_HINT_BACK_DISMISS_IME,
             NAVIGATION_HINT_IME_VISIBLE,
             NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE,
     })
@@ -1357,8 +1357,8 @@ public class StatusBarManager {
     @NonNull
     public static String navigationHintsToString(@NavigationHint int hints) {
         final var hintStrings = new ArrayList<String>();
-        if ((hints & NAVIGATION_HINT_BACK_ALT) != 0) {
-            hintStrings.add("NAVIGATION_HINT_BACK_ALT");
+        if ((hints & NAVIGATION_HINT_BACK_DISMISS_IME) != 0) {
+            hintStrings.add("NAVIGATION_HINT_BACK_DISMISS_IME");
         }
         if ((hints & NAVIGATION_HINT_IME_VISIBLE) != 0) {
             hintStrings.add("NAVIGATION_HINT_IME_VISIBLE");

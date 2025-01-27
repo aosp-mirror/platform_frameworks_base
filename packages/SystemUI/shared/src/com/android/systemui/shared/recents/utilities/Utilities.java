@@ -16,7 +16,7 @@
 
 package com.android.systemui.shared.recents.utilities;
 
-import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
+import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_DISMISS_IME;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_VISIBLE;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE;
 
@@ -123,13 +123,13 @@ public class Utilities {
             case InputMethodService.BACK_DISPOSITION_WILL_NOT_DISMISS:
             case InputMethodService.BACK_DISPOSITION_WILL_DISMISS:
                 if (isImeVisible) {
-                    hints |= NAVIGATION_HINT_BACK_ALT;
+                    hints |= NAVIGATION_HINT_BACK_DISMISS_IME;
                 } else {
-                    hints &= ~NAVIGATION_HINT_BACK_ALT;
+                    hints &= ~NAVIGATION_HINT_BACK_DISMISS_IME;
                 }
                 break;
             case InputMethodService.BACK_DISPOSITION_ADJUST_NOTHING:
-                hints &= ~NAVIGATION_HINT_BACK_ALT;
+                hints &= ~NAVIGATION_HINT_BACK_DISMISS_IME;
                 break;
         }
         if (isImeVisible) {
