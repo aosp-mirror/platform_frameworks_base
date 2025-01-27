@@ -188,6 +188,7 @@ public abstract class MediaOutputBaseAdapter extends
             mSubTitleText.setSelected(true);
             mTwoLineTitleText.setTextColor(mController.getColorItemContent());
             mVolumeValueText.setTextColor(mController.getColorItemContent());
+            mIconAreaLayout.setBackground(null);
             mSeekBar.setProgressTintList(
                     ColorStateList.valueOf(mController.getColorSeekbarProgress()));
         }
@@ -216,10 +217,6 @@ public abstract class MediaOutputBaseAdapter extends
             mItemLayout.setBackgroundTintList(
                     ColorStateList.valueOf(isActive ? mController.getColorConnectedItemBackground()
                             : mController.getColorItemBackground()));
-            mIconAreaLayout.setBackgroundTintList(
-                    ColorStateList.valueOf(showSeekBar ? mController.getColorSeekbarProgress()
-                            : showProgressBar ? mController.getColorConnectedItemBackground()
-                                    : mController.getColorItemBackground()));
             mProgressBar.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
             mSeekBar.setAlpha(1);
             mSeekBar.setVisibility(showSeekBar ? View.VISIBLE : View.GONE);
@@ -259,11 +256,6 @@ public abstract class MediaOutputBaseAdapter extends
                     showSeekBar || isFakeActive ? mController.getColorConnectedItemBackground()
                             : mController.getColorItemBackground()
             ));
-            mIconAreaLayout.setBackgroundTintList(
-                    ColorStateList.valueOf(showProgressBar || isFakeActive
-                            ? mController.getColorConnectedItemBackground()
-                            : showSeekBar ? mController.getColorSeekbarProgress()
-                                    : mController.getColorItemBackground()));
             if (showSeekBar) {
                 updateSeekbarProgressBackground();
             }
@@ -443,8 +435,7 @@ public abstract class MediaOutputBaseAdapter extends
             mItemLayout.setBackground(backgroundDrawable);
             mItemLayout.setBackgroundTintList(
                     ColorStateList.valueOf(mController.getColorConnectedItemBackground()));
-            mIconAreaLayout.setBackgroundTintList(
-                    ColorStateList.valueOf(mController.getColorConnectedItemBackground()));
+            mIconAreaLayout.setBackground(null);
         }
 
         private void initAnimator() {
