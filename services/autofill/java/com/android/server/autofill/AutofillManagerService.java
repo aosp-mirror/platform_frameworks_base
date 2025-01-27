@@ -246,8 +246,6 @@ public final class AutofillManagerService
 
     private static final boolean DEFAULT_PCC_USE_FALLBACK = true;
 
-    private static final boolean DBG = false;
-
     public AutofillManagerService(Context context) {
         super(context,
                 new SecureSettingsServiceNameResolver(context, Settings.Secure.AUTOFILL_SERVICE),
@@ -315,59 +313,21 @@ public final class AutofillManagerService
                     new WindowManagerInternal.ImeInsetsAnimationChangeListener() {
                         @Override
                         public void onAnimationStart(
-                                @InsetsController.AnimationType int animationType, int userId) {
-                            if (DBG) {
-                                Slog.e(TAG,
-                                        "onAnimationStart() notifyImeAnimationStart() "
-                                                + "animationType:"
-                                                + String.valueOf(animationType));
-                            }
-                            synchronized (mLock) {
-
-                                // We are mostly interested in animations that show up the IME
-                                if (animationType == InsetsController.ANIMATION_TYPE_HIDE) {
-                                    // IME is going away
-                                    mIsImeShowing = false;
-                                }
-                                if (animationType != InsetsController.ANIMATION_TYPE_SHOW) {
-                                    return;
-                                }
-                                mIsImeShowing = true;
-                                mImeAnimatingWhileShowingUp = true;
-                                final AutofillManagerServiceImpl service =
-                                        peekServiceForUserWithLocalBinderIdentityLocked(userId);
-                                if (service != null) {
-                                    service.notifyImeAnimationStart();
-                                } else if (sVerbose) {
-                                    Slog.v(TAG,
-                                            "notifyImeAnimationStart(): no service for " + userId);
-                                }
+                                @InsetsController.AnimationType int animationType,
+                                int userId) {
+                            // TODO: Add logic
+                            if (sVerbose) {
+                                Slog.e(TAG, "onAnimationStart()");
                             }
                         }
 
                         @Override
                         public void onAnimationEnd(
-                                @InsetsController.AnimationType int animationType, int userId) {
-                            if (DBG) {
-                                Slog.e(TAG,
-                                        "onAnimationEnd() notifyImeAnimationEnd() "
-                                                + "animationType:"
-                                                + String.valueOf(animationType));
-                            }
-                            // We are only interested in animations that show up the IME
-                            if (animationType != InsetsController.ANIMATION_TYPE_SHOW) {
-                                return;
-                            }
-                            mImeAnimatingWhileShowingUp = false;
-                            synchronized (mLock) {
-                                final AutofillManagerServiceImpl service =
-                                        peekServiceForUserWithLocalBinderIdentityLocked(userId);
-                                if (service != null) {
-                                    service.notifyImeAnimationEnd();
-                                } else if (sVerbose) {
-                                    Slog.v(TAG, "notifyImeAnimationEnd(): no service for "
-                                            + userId);
-                                }
+                                @InsetsController.AnimationType int animationType,
+                                int userId) {
+                            // TODO: Add logic
+                            if (sVerbose) {
+                                Slog.e(TAG, "onAnimationEnd()");
                             }
                         }
                     };
@@ -375,9 +335,6 @@ public final class AutofillManagerService
                     imeInsetsAnimationChangeListener);
         }
     }
-
-    public boolean mImeAnimatingWhileShowingUp = false;
-    public boolean mIsImeShowing = false;
 
     @Override // from AbstractMasterSystemService
     protected String getServiceSettingsProperty() {
