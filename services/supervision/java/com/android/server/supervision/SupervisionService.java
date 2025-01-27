@@ -23,6 +23,7 @@ import static com.android.internal.util.Preconditions.checkCallAuthorization;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
@@ -68,17 +69,13 @@ public class SupervisionService extends ISupervisionManager.Stub {
     private final SparseArray<SupervisionUserData> mUserData = new SparseArray<>();
 
     private final Context mContext;
-    private final DevicePolicyManagerInternal mDpmInternal;
-    private final PackageManager mPackageManager;
-    private final UserManagerInternal mUserManagerInternal;
+    private final Injector mInjector;
     final SupervisionManagerInternal mInternal = new SupervisionManagerInternalImpl();
 
     public SupervisionService(Context context) {
         mContext = context.createAttributionContext(LOG_TAG);
-        mDpmInternal = LocalServices.getService(DevicePolicyManagerInternal.class);
-        mPackageManager = context.getPackageManager();
-        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
-        mUserManagerInternal.addUserLifecycleListener(new UserLifecycleListener());
+        mInjector = new Injector(context);
+        mInjector.getUserManagerInternal().addUserLifecycleListener(new UserLifecycleListener());
     }
 
     /**
@@ -133,7 +130,7 @@ public class SupervisionService extends ISupervisionManager.Stub {
             pw.println("SupervisionService state:");
             pw.increaseIndent();
 
-            List<UserInfo> users = mUserManagerInternal.getUsers(false);
+            List<UserInfo> users = mInjector.getUserManagerInternal().getUsers(false);
             synchronized (getLockObject()) {
                 for (var user : users) {
                     getUserDataLocked(user.id).dump(pw);
@@ -174,8 +171,9 @@ public class SupervisionService extends ISupervisionManager.Stub {
 
     /** Ensures that supervision is enabled when the supervision app is the profile owner. */
     private void syncStateWithDevicePolicyManager(@UserIdInt int userId) {
+        final DevicePolicyManagerInternal dpmInternal = mInjector.getDpmInternal();
         final ComponentName po =
-                mDpmInternal != null ? mDpmInternal.getProfileOwnerAsUser(userId) : null;
+                dpmInternal != null ? dpmInternal.getProfileOwnerAsUser(userId) : null;
 
         if (po != null && po.getPackageName().equals(getSystemSupervisionPackage())) {
             setSupervisionEnabledForUser(userId, true, po.getPackageName());
@@ -214,6 +212,41 @@ public class SupervisionService extends ISupervisionManager.Stub {
                 mContext.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED);
     }
 
+    /** Provides local services in a lazy manner. */
+    static class Injector {
+        private final Context mContext;
+        private DevicePolicyManagerInternal mDpmInternal;
+        private PackageManager mPackageManager;
+        private UserManagerInternal mUserManagerInternal;
+
+        Injector(Context context) {
+            mContext = context;
+        }
+
+        @Nullable
+        DevicePolicyManagerInternal getDpmInternal() {
+            if (mDpmInternal == null) {
+                mDpmInternal = LocalServices.getService(DevicePolicyManagerInternal.class);
+            }
+            return mDpmInternal;
+        }
+
+        PackageManager getPackageManager() {
+            if (mPackageManager == null) {
+                mPackageManager = mContext.getPackageManager();
+            }
+            return mPackageManager;
+        }
+
+        UserManagerInternal getUserManagerInternal() {
+            if (mUserManagerInternal == null) {
+                mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
+            }
+            return mUserManagerInternal;
+        }
+    }
+
+    /** Publishes local and binder services and allows the service to act during initialization. */
     public static class Lifecycle extends SystemService {
         private final SupervisionService mSupervisionService;
 
@@ -238,6 +271,7 @@ public class SupervisionService extends ISupervisionManager.Stub {
         }
 
         @VisibleForTesting
+        @SuppressLint("MissingPermission") // not needed for a service
         void registerProfileOwnerListener() {
             IntentFilter poIntentFilter = new IntentFilter();
             poIntentFilter.addAction(DevicePolicyManager.ACTION_PROFILE_OWNER_CHANGED);
@@ -246,7 +280,7 @@ public class SupervisionService extends ISupervisionManager.Stub {
                     .registerReceiverForAllUsers(
                             new ProfileOwnerBroadcastReceiver(),
                             poIntentFilter,
-                            /* brodcastPermission= */ null,
+                            /* broadcastPermission= */ null,
                             /* scheduler= */ null);
         }
 
@@ -265,6 +299,7 @@ public class SupervisionService extends ISupervisionManager.Stub {
         }
     }
 
+    /** Implementation of the local service, API used by other services. */
     private final class SupervisionManagerInternalImpl extends SupervisionManagerInternal {
         @Override
         public boolean isActiveSupervisionApp(int uid) {
@@ -274,7 +309,7 @@ public class SupervisionService extends ISupervisionManager.Stub {
                 return false;
             }
 
-            String[] packages = mPackageManager.getPackagesForUid(uid);
+            String[] packages = mInjector.getPackageManager().getPackagesForUid(uid);
             if (packages != null) {
                 for (var packageName : packages) {
                     if (supervisionAppPackage.equals(packageName)) {
@@ -314,6 +349,7 @@ public class SupervisionService extends ISupervisionManager.Stub {
         }
     }
 
+    /** Deletes user data when the user gets removed. */
     private final class UserLifecycleListener implements UserManagerInternal.UserLifecycleListener {
         @Override
         public void onUserRemoved(UserInfo user) {
