@@ -25,6 +25,7 @@ import com.android.internal.os.MonotonicClock;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Query parameters for the {@link BatteryStatsManager#getBatteryUsageStats()} call.
@@ -77,6 +78,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
     public static final int FLAG_BATTERY_USAGE_STATS_ACCUMULATED = 0x0080;
 
     private static final long DEFAULT_MAX_STATS_AGE_MS = 5 * 60 * 1000;
+    private static final long DEFAULT_PREFERRED_HISTORY_DURATION_MS = TimeUnit.HOURS.toMillis(2);
 
     private final int mFlags;
     @NonNull
@@ -89,6 +91,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
     private long mMonotonicEndTime;
     private final double mMinConsumedPowerThreshold;
     private final @BatteryConsumer.PowerComponentId int[] mPowerComponents;
+    private final long mPreferredHistoryDurationMs;
 
     private BatteryUsageStatsQuery(@NonNull Builder builder) {
         mFlags = builder.mFlags;
@@ -101,6 +104,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         mMonotonicStartTime = builder.mMonotonicStartTime;
         mMonotonicEndTime = builder.mMonotonicEndTime;
         mPowerComponents = builder.mPowerComponents;
+        mPreferredHistoryDurationMs = builder.mPreferredHistoryDurationMs;
     }
 
     @BatteryUsageStatsFlags
@@ -197,6 +201,13 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         return mAggregatedToTimestamp;
     }
 
+    /**
+     * Returns the preferred duration of battery history (tail) to be included in the query result.
+     */
+    public long getPreferredHistoryDurationMs() {
+        return mPreferredHistoryDurationMs;
+    }
+
     @Override
     public String toString() {
         return "BatteryUsageStatsQuery{"
@@ -209,6 +220,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
                 + ", mMonotonicEndTime=" + mMonotonicEndTime
                 + ", mMinConsumedPowerThreshold=" + mMinConsumedPowerThreshold
                 + ", mPowerComponents=" + Arrays.toString(mPowerComponents)
+                + ", mMaxHistoryDurationMs=" + mPreferredHistoryDurationMs
                 + '}';
     }
 
@@ -223,6 +235,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         mAggregatedFromTimestamp = in.readLong();
         mAggregatedToTimestamp = in.readLong();
         mPowerComponents = in.createIntArray();
+        mPreferredHistoryDurationMs = in.readLong();
     }
 
     @Override
@@ -237,6 +250,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         dest.writeLong(mAggregatedFromTimestamp);
         dest.writeLong(mAggregatedToTimestamp);
         dest.writeIntArray(mPowerComponents);
+        dest.writeLong(mPreferredHistoryDurationMs);
     }
 
     @Override
@@ -271,6 +285,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         private long mAggregateToTimestamp;
         private double mMinConsumedPowerThreshold = 0;
         private @BatteryConsumer.PowerComponentId int[] mPowerComponents;
+        private long mPreferredHistoryDurationMs = DEFAULT_PREFERRED_HISTORY_DURATION_MS;
 
         /**
          * Builds a read-only BatteryUsageStatsQuery object.
@@ -307,6 +322,16 @@ public final class BatteryUsageStatsQuery implements Parcelable {
          */
         public Builder includeBatteryHistory() {
             mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_HISTORY;
+            return this;
+        }
+
+        /**
+         * Set the preferred amount of battery history to be included in the result, provided
+         * that `includeBatteryHistory` is also called. The actual amount of history included in
+         * the result may vary for performance reasons and may exceed the specified preference.
+         */
+        public Builder setPreferredHistoryDurationMs(long preferredHistoryDurationMs) {
+            mPreferredHistoryDurationMs = preferredHistoryDurationMs;
             return this;
         }
 
