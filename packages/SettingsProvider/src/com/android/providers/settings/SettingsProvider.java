@@ -4072,7 +4072,7 @@ public class SettingsProvider extends ContentProvider {
 
         @VisibleForTesting
         final class UpgradeController {
-            private static final int SETTINGS_VERSION = 226;
+            private static final int SETTINGS_VERSION = 227;
 
             private final int mUserId;
 
@@ -6264,6 +6264,51 @@ public class SettingsProvider extends ContentProvider {
                         }
                     }
                     currentVersion = 226;
+                }
+
+                // Version 226: Introduces dreaming while postured setting and migrates user from
+                // docked dream trigger to postured dream trigger.
+                if (currentVersion == 226) {
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting dreamOnDock = secureSettings.getSettingLocked(
+                            Secure.SCREENSAVER_ACTIVATE_ON_DOCK);
+                    final Setting dreamsEnabled = secureSettings.getSettingLocked(
+                            Secure.SCREENSAVER_ENABLED);
+                    final boolean dreamOnPosturedDefault = getContext().getResources().getBoolean(
+                            com.android.internal.R.bool.config_dreamsActivatedOnPosturedByDefault);
+                    final boolean dreamsEnabledByDefault = getContext().getResources().getBoolean(
+                            com.android.internal.R.bool.config_dreamsEnabledByDefault);
+
+                    if (dreamOnPosturedDefault && !dreamOnDock.isNull()
+                            && dreamOnDock.getValue().equals("1")) {
+                        // Disable dock activation and enable postured.
+                        secureSettings.insertSettingOverrideableByRestoreLocked(
+                                Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
+                                "0",
+                                null,
+                                true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                        secureSettings.insertSettingOverrideableByRestoreLocked(
+                                Secure.SCREENSAVER_ACTIVATE_ON_POSTURED,
+                                "1",
+                                null,
+                                true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+
+                        // Disable dreams overall, so user doesn't start to unexpectedly see dreams
+                        // enabled when postured.
+                        if (!dreamsEnabledByDefault && !dreamsEnabled.isNull()
+                                && dreamsEnabled.getValue().equals("1")) {
+                            secureSettings.insertSettingOverrideableByRestoreLocked(
+                                    Secure.SCREENSAVER_ENABLED,
+                                    "0",
+                                    null,
+                                    true,
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+
+                    currentVersion = 227;
                 }
 
                 // vXXX: Add new settings above this point.
