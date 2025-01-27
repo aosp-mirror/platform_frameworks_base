@@ -28,6 +28,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.widget.ExploreByTouchHelper;
 import com.android.internal.widget.remotecompose.core.CoreDocument;
+import com.android.internal.widget.remotecompose.core.RemoteContextAware;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.semantics.AccessibilitySemantics;
 import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent.Mode;
@@ -55,7 +56,8 @@ public class PlatformRemoteComposeTouchHelper extends ExploreByTouchHelper {
             View player, @NonNull CoreDocument coreDocument) {
         return new PlatformRemoteComposeTouchHelper(
                 player,
-                new CoreDocumentAccessibility(coreDocument),
+                new CoreDocumentAccessibility(
+                        coreDocument, ((RemoteContextAware) player).getRemoteContext()),
                 new AndroidPlatformSemanticNodeApplier());
     }
 

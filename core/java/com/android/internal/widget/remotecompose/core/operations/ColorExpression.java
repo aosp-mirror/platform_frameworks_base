@@ -38,7 +38,13 @@ public class ColorExpression extends Operation implements VariableSupport {
     private static final int OP_CODE = Operations.COLOR_EXPRESSIONS;
     private static final String CLASS_NAME = "ColorExpression";
     public int mId;
+
+    /**
+     * Mode of the color expression 0 = two colors and a tween 1 = color1 is a colorID. 2 color2 is
+     * a colorID. 3 = color1 & color2 are ids 4 = H S V mode 5 = RGB mode 6 = ARGB mode
+     */
     int mMode;
+
     public int mColor1;
     public int mColor2;
     public float mTween = 0.0f;
@@ -51,11 +57,49 @@ public class ColorExpression extends Operation implements VariableSupport {
     public float mOutValue = 0;
     public int mAlpha = 0xFF; // only used in hsv mode
 
+    private float mArgbAlpha = 0.0f;
+    private float mArgbRed = 0.0f;
+    private float mArgbGreen = 0.0f;
+    private float mArgbBlue = 0.0f;
+
+    private float mOutArgbAlpha = 0.0f;
+    private float mOutArgbRed = 0.0f;
+    private float mOutArgbGreen = 0.0f;
+    private float mOutArgbBlue = 0.0f;
+
     public float mOutTween = 0.0f;
     public int mOutColor1;
     public int mOutColor2;
-    public static final int HSV_MODE = 4;
 
+    /** COLOR_COLOR_INTERPOLATE */
+    public static final byte COLOR_COLOR_INTERPOLATE = 0;
+
+    /** COLOR_ID_INTERPOLATE */
+    public static final byte ID_COLOR_INTERPOLATE = 1;
+
+    /** ID_COLOR_INTERPOLATE */
+    public static final byte COLOR_ID_INTERPOLATE = 2;
+
+    /** ID_ID_INTERPOLATE */
+    public static final byte ID_ID_INTERPOLATE = 3;
+
+    /** H S V mode */
+    public static final byte HSV_MODE = 4;
+
+    /** ARGB mode */
+    public static final byte ARGB_MODE = 5;
+
+    /** ARGB mode with a being an id */
+    public static final byte IDARGB_MODE = 6;
+
+    /**
+     * Create a new ColorExpression object
+     *
+     * @param id the id of the color
+     * @param hue the hue of the color
+     * @param sat the saturation of the color
+     * @param value the value of the color
+     */
     public ColorExpression(int id, float hue, float sat, float value) {
         mMode = HSV_MODE;
         mAlpha = 0xFF;
@@ -67,7 +111,21 @@ public class ColorExpression extends Operation implements VariableSupport {
         mTween = value;
     }
 
-    public ColorExpression(int id, int alpha, float hue, float sat, float value) {
+    /**
+     * Create a new ColorExpression object based on HSV
+     *
+     * @param id id of the color
+     * @param mode the mode of the color
+     * @param alpha the alpha of the color
+     * @param hue the hue of the color
+     * @param sat the saturation of the color
+     * @param value the value (brightness) of the color
+     */
+    public ColorExpression(int id, byte mode, int alpha, float hue, float sat, float value) {
+        if (mode != HSV_MODE) {
+            throw new RuntimeException("Invalid mode " + mode);
+        }
+        mId = id;
         mMode = HSV_MODE;
         mAlpha = alpha;
         mOutHue = mHue = hue;
@@ -78,6 +136,15 @@ public class ColorExpression extends Operation implements VariableSupport {
         mTween = value;
     }
 
+    /**
+     * Create a new ColorExpression object based interpolationg two colors
+     *
+     * @param id the id of the color
+     * @param mode the type of mode (are colors ids or actual values)
+     * @param color1 the first color to use
+     * @param color2 the second color to use
+     * @param tween the value to use to interpolate between the two colors
+     */
     public ColorExpression(int id, int mode, int color1, int color2, float tween) {
         this.mId = id;
         this.mMode = mode & 0xFF;
@@ -95,6 +162,28 @@ public class ColorExpression extends Operation implements VariableSupport {
         this.mOutColor2 = color2;
     }
 
+    /**
+     * Create a new ColorExpression object based on ARGB
+     *
+     * @param id the id of the color
+     * @param mode the mode must be ARGB_MODE
+     * @param alpha the alpha value of the color
+     * @param red the red of component the color
+     * @param green the greej component of the color
+     * @param blue the blue of component the color
+     */
+    public ColorExpression(int id, byte mode, float alpha, float red, float green, float blue) {
+        if (mode != ARGB_MODE) {
+            throw new RuntimeException("Invalid mode " + mode);
+        }
+        mMode = ARGB_MODE;
+        mId = id;
+        mOutArgbAlpha = mArgbAlpha = alpha;
+        mOutArgbRed = mArgbRed = red;
+        mOutArgbGreen = mArgbGreen = green;
+        mOutArgbBlue = mArgbBlue = blue;
+    }
+
     @Override
     public void updateVariables(@NonNull RemoteContext context) {
         if (mMode == 4) {
@@ -106,6 +195,20 @@ public class ColorExpression extends Operation implements VariableSupport {
             }
             if (Float.isNaN(mValue)) {
                 mOutValue = context.getFloat(Utils.idFromNan(mValue));
+            }
+        }
+        if (mMode == ARGB_MODE) {
+            if (Float.isNaN(mArgbAlpha)) {
+                mOutArgbAlpha = context.getFloat(Utils.idFromNan(mArgbAlpha));
+            }
+            if (Float.isNaN(mArgbRed)) {
+                mOutArgbRed = context.getFloat(Utils.idFromNan(mArgbRed));
+            }
+            if (Float.isNaN(mArgbGreen)) {
+                mOutArgbGreen = context.getFloat(Utils.idFromNan(mArgbGreen));
+            }
+            if (Float.isNaN(mArgbBlue)) {
+                mOutArgbBlue = context.getFloat(Utils.idFromNan(mArgbBlue));
             }
         }
         if (Float.isNaN(mTween)) {
@@ -146,13 +249,21 @@ public class ColorExpression extends Operation implements VariableSupport {
 
     @Override
     public void apply(@NonNull RemoteContext context) {
-        if (mMode == 4) {
+        if (mMode == HSV_MODE) {
             context.loadColor(
                     mId, (mAlpha << 24) | (0xFFFFFF & Utils.hsvToRgb(mOutHue, mOutSat, mOutValue)));
             return;
         }
+        if (mMode == ARGB_MODE) {
+            context.loadColor(
+                    mId, Utils.toARGB(mOutArgbAlpha, mOutArgbRed, mOutArgbGreen, mOutArgbBlue));
+            return;
+        }
         if (mOutTween == 0.0) {
-            context.loadColor(mId, mColor1);
+            if ((mMode & 1) == 1) {
+                mOutColor1 = context.getColor(mColor1);
+            }
+            context.loadColor(mId, mOutColor1);
         } else {
             if ((mMode & 1) == 1) {
                 mOutColor1 = context.getColor(mColor1);
@@ -167,14 +278,36 @@ public class ColorExpression extends Operation implements VariableSupport {
 
     @Override
     public void write(@NonNull WireBuffer buffer) {
-        int mode = mMode | (mAlpha << 16);
-        apply(buffer, mId, mode, mColor1, mColor2, mTween);
+        int mode;
+        switch (mMode) {
+            case ARGB_MODE:
+                apply(buffer, mId, mArgbAlpha, mArgbRed, mArgbGreen, mArgbBlue);
+                break;
+
+            case HSV_MODE:
+                mOutValue = mValue;
+                mColor1 = Float.floatToRawIntBits(mHue);
+                mColor2 = Float.floatToRawIntBits(mSat);
+                mode = mMode | (mAlpha << 16);
+                apply(buffer, mId, mode, mColor1, mColor2, mTween);
+
+                break;
+            case COLOR_ID_INTERPOLATE:
+            case ID_COLOR_INTERPOLATE:
+            case ID_ID_INTERPOLATE:
+            case COLOR_COLOR_INTERPOLATE:
+                apply(buffer, mId, mMode, mColor1, mColor2, mTween);
+
+                break;
+            default:
+                throw new RuntimeException("Invalid mode ");
+        }
     }
 
     @NonNull
     @Override
     public String toString() {
-        if (mMode == 4) {
+        if (mMode == HSV_MODE) {
             return "ColorExpression["
                     + mId
                     + "] = hsv ("
@@ -185,7 +318,20 @@ public class ColorExpression extends Operation implements VariableSupport {
                     + Utils.floatToString(mValue)
                     + ")";
         }
-
+        Utils.log(" ColorExpression toString" + mId + " " + mMode);
+        if (mMode == ARGB_MODE) {
+            return "ColorExpression["
+                    + mId
+                    + "] = rgb ("
+                    + Utils.floatToString(mArgbAlpha)
+                    + ", "
+                    + Utils.floatToString(mArgbRed)
+                    + ", "
+                    + Utils.floatToString(mArgbGreen)
+                    + ", "
+                    + Utils.floatToString(mArgbRed)
+                    + ")";
+        }
         String c1 = (mMode & 1) == 1 ? "[" + mColor1 + "]" : Utils.colorInt(mColor1);
         String c2 = (mMode & 2) == 2 ? "[" + mColor2 + "]" : Utils.colorInt(mColor2);
         return "ColorExpression["
@@ -230,12 +376,38 @@ public class ColorExpression extends Operation implements VariableSupport {
      */
     public static void apply(
             @NonNull WireBuffer buffer, int id, int mode, int color1, int color2, float tween) {
+        apply(buffer, id, mode, color1, color2, Float.floatToRawIntBits(tween));
+    }
+
+    /**
+     * Call to write a ColorExpression object on the buffer
+     *
+     * @param buffer
+     * @param id of the ColorExpression object
+     * @param alpha
+     * @param red
+     * @param green
+     * @param blue
+     */
+    public static void apply(
+            @NonNull WireBuffer buffer, int id, float alpha, float red, float green, float blue) {
+        int param1 = (Float.isNaN(alpha)) ? IDARGB_MODE : ARGB_MODE;
+        param1 |=
+                (Float.isNaN(alpha)) ? Utils.idFromNan(alpha) << 16 : ((int) (alpha * 1024)) << 16;
+        int param2 = Float.floatToRawIntBits(red);
+        int param3 = Float.floatToRawIntBits(green);
+        int param4 = Float.floatToRawIntBits(blue);
+        apply(buffer, id, param1, param2, param3, param4);
+    }
+
+    private static void apply(
+            @NonNull WireBuffer buffer, int id, int param1, int param2, int param3, int param4) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
-        buffer.writeInt(mode);
-        buffer.writeInt(color1);
-        buffer.writeInt(color2);
-        buffer.writeFloat(tween);
+        buffer.writeInt(param1);
+        buffer.writeInt(param2);
+        buffer.writeInt(param3);
+        buffer.writeInt(param4);
     }
 
     /**
@@ -246,12 +418,48 @@ public class ColorExpression extends Operation implements VariableSupport {
      */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
-        int mode = buffer.readInt();
-        int color1 = buffer.readInt();
-        int color2 = buffer.readInt();
-        float tween = buffer.readFloat();
-
-        operations.add(new ColorExpression(id, mode, color1, color2, tween));
+        int param1 = buffer.readInt();
+        int param2 = buffer.readInt();
+        int param3 = buffer.readInt();
+        int param4 = buffer.readInt();
+        int mode = param1 & 0xFF;
+        float alpha;
+        float red;
+        float green;
+        float blue;
+        switch (mode) {
+            case IDARGB_MODE:
+                alpha = Utils.asNan(param1 >> 16);
+                red = Float.intBitsToFloat(param2);
+                green = Float.intBitsToFloat(param3);
+                blue = Float.intBitsToFloat(param4);
+                operations.add(new ColorExpression(id, (byte) ARGB_MODE, alpha, red, green, blue));
+                break;
+            case ARGB_MODE:
+                alpha = (param1 >> 16) / 1024.0f;
+                red = Float.intBitsToFloat(param2);
+                green = Float.intBitsToFloat(param3);
+                blue = Float.intBitsToFloat(param4);
+                operations.add(new ColorExpression(id, (byte) ARGB_MODE, alpha, red, green, blue));
+                break;
+            case HSV_MODE:
+                alpha = (param1 >> 16) / 1024.0f;
+                float hue = Float.intBitsToFloat(param2);
+                float sat = Float.intBitsToFloat(param3);
+                float value = Float.intBitsToFloat(param4);
+                operations.add(new ColorExpression(id, HSV_MODE, (param1 >> 16), hue, sat, value));
+                break;
+            case COLOR_ID_INTERPOLATE:
+            case ID_COLOR_INTERPOLATE:
+            case ID_ID_INTERPOLATE:
+            case COLOR_COLOR_INTERPOLATE:
+                operations.add(
+                        new ColorExpression(
+                                id, mode, param2, param3, Float.intBitsToFloat(param4)));
+                break;
+            default:
+                throw new RuntimeException("Invalid mode " + mode);
+        }
     }
 
     /**

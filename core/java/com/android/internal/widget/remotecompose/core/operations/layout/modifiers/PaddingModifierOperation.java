@@ -132,6 +132,15 @@ public class PaddingModifierOperation extends Operation implements ModifierOpera
         return Operations.MODIFIER_PADDING;
     }
 
+    /**
+     * Write operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param left left padding
+     * @param top top padding
+     * @param right right padding
+     * @param bottom bottom padding
+     */
     public static void apply(
             @NonNull WireBuffer buffer, float left, float top, float right, float bottom) {
         buffer.start(Operations.MODIFIER_PADDING);

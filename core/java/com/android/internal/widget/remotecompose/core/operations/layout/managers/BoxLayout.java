@@ -29,6 +29,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.Componen
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.ComponentMeasure;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.MeasurePass;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.Size;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
 
 import java.util.List;
 
@@ -191,6 +192,15 @@ public class BoxLayout extends LayoutManager {
         return Operations.LAYOUT_BOX;
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param componentId the component id
+     * @param animationId the component animation id
+     * @param horizontalPositioning the horizontal positioning rules
+     * @param verticalPositioning the vertical positioning rules
+     */
     public static void apply(
             @NonNull WireBuffer buffer,
             int componentId,
@@ -259,5 +269,29 @@ public class BoxLayout extends LayoutManager {
     @Override
     public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mComponentId, mAnimationId, mHorizontalPositioning, mVerticalPositioning);
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        super.serialize(serializer);
+        serializer.add("verticalPositioning", getPositioningString(mVerticalPositioning));
+        serializer.add("horizontalPositioning", getPositioningString(mHorizontalPositioning));
+    }
+
+    private String getPositioningString(int pos) {
+        switch (pos) {
+            case START:
+                return "START";
+            case CENTER:
+                return "CENTER";
+            case END:
+                return "END";
+            case TOP:
+                return "TOP";
+            case BOTTOM:
+                return "BOTTOM";
+            default:
+                return "NONE";
+        }
     }
 }

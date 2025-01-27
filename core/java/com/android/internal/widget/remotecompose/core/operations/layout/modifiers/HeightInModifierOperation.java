@@ -19,19 +19,26 @@ import android.annotation.NonNull;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
-import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
-import com.android.internal.widget.remotecompose.core.operations.DrawBase2;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 import java.util.List;
 
 /** Set the min / max height dimension on a component */
-public class HeightInModifierOperation extends DrawBase2 implements ModifierOperation {
+public class HeightInModifierOperation extends DimensionInModifierOperation {
     private static final int OP_CODE = Operations.MODIFIER_HEIGHT_IN;
     public static final String CLASS_NAME = "HeightInModifierOperation";
+
+    public HeightInModifierOperation(float min, float max) {
+        super(OP_CODE, min, max);
+    }
+
+    @Override
+    public void write(@NonNull WireBuffer buffer) {
+        apply(buffer, getMin(), getMax());
+    }
 
     /**
      * Read this operation and add it to the list of operations
@@ -40,26 +47,9 @@ public class HeightInModifierOperation extends DrawBase2 implements ModifierOper
      * @param operations the list of operations that will be added to
      */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
-        Maker m = HeightInModifierOperation::new;
-        read(m, buffer, operations);
-    }
-
-    /**
-     * Returns the min value
-     *
-     * @return minimum value
-     */
-    public float getMin() {
-        return mV1;
-    }
-
-    /**
-     * Returns the max value
-     *
-     * @return maximum value
-     */
-    public float getMax() {
-        return mV2;
+        float v1 = buffer.readFloat();
+        float v2 = buffer.readFloat();
+        operations.add(new HeightInModifierOperation(v1, v2));
     }
 
     /**
@@ -81,11 +71,6 @@ public class HeightInModifierOperation extends DrawBase2 implements ModifierOper
         return CLASS_NAME;
     }
 
-    @Override
-    protected void write(@NonNull WireBuffer buffer, float v1, float v2) {
-        apply(buffer, v1, v2);
-    }
-
     /**
      * Populate the documentation with a description of this operation
      *
@@ -98,14 +83,6 @@ public class HeightInModifierOperation extends DrawBase2 implements ModifierOper
                 .field(DocumentedOperation.FLOAT, "max", "The maximum height, -1 if not applied");
     }
 
-    public HeightInModifierOperation(float min, float max) {
-        super(min, max);
-        mName = CLASS_NAME;
-    }
-
-    @Override
-    public void paint(@NonNull PaintContext context) {}
-
     /**
      * Writes out the HeightInModifier to the buffer
      *
@@ -114,7 +91,9 @@ public class HeightInModifierOperation extends DrawBase2 implements ModifierOper
      * @param y1 start y of the DrawOval
      */
     public static void apply(@NonNull WireBuffer buffer, float x1, float y1) {
-        write(buffer, OP_CODE, x1, y1);
+        buffer.start(OP_CODE);
+        buffer.writeFloat(x1);
+        buffer.writeFloat(y1);
     }
 
     @Override

@@ -185,7 +185,7 @@ public class AndroidRemoteContext extends RemoteContext {
 
     @Override
     public void runAction(int id, @NonNull String metadata) {
-        mDocument.performClick(id);
+        mDocument.performClick(this, id);
     }
 
     @Override

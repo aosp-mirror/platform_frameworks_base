@@ -130,6 +130,20 @@ public class BackgroundModifierOperation extends DecoratorModifierOperation {
         return OP_CODE;
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer the WireBuffer
+     * @param x x coordinate of the background rect
+     * @param y y coordinate of the background rect
+     * @param width width of the background rect
+     * @param height height of the background rect
+     * @param r red component of the background color
+     * @param g green component of the background color
+     * @param b blue component of the background color
+     * @param a alpha component of the background color
+     * @param shapeType the shape of the background (RECTANGLE=0, CIRCLE=1)
+     */
     public static void apply(
             @NonNull WireBuffer buffer,
             float x,
@@ -205,6 +219,6 @@ public class BackgroundModifierOperation extends DecoratorModifierOperation {
                 .field(FLOAT, "g", "")
                 .field(FLOAT, "b", "")
                 .field(FLOAT, "a", "")
-                .field(FLOAT, "shapeType", "");
+                .field(FLOAT, "shapeType", "0 for RECTANGLE, 1 for CIRCLE");
     }
 }

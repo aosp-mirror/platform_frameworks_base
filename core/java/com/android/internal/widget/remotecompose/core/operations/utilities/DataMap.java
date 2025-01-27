@@ -28,6 +28,12 @@ public class DataMap {
         mIds = ids;
     }
 
+    /**
+     * Return position for given string
+     *
+     * @param str string
+     * @return position associated with the string
+     */
     public int getPos(@NonNull String str) {
         for (int i = 0; i < mNames.length; i++) {
             String name = mNames[i];
@@ -38,10 +44,22 @@ public class DataMap {
         return -1;
     }
 
+    /**
+     * Return type for given index
+     *
+     * @param pos index
+     * @return type at index
+     */
     public byte getType(int pos) {
         return mTypes[pos];
     }
 
+    /**
+     * Return id for given index
+     *
+     * @param pos index
+     * @return id at index
+     */
     public int getId(int pos) {
         return mIds[pos];
     }

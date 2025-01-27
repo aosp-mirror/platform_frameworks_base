@@ -19,6 +19,7 @@ import android.annotation.NonNull;
 import android.view.View;
 
 import com.android.internal.widget.remotecompose.core.CoreDocument;
+import com.android.internal.widget.remotecompose.core.RemoteContextAware;
 
 /**
  * Trivial wrapper for calling setAccessibilityDelegate on a View. This exists primarily because the
@@ -31,7 +32,8 @@ public class PlatformRemoteComposeAccessibilityRegistrar
             View player, @NonNull CoreDocument coreDocument) {
         return new PlatformRemoteComposeTouchHelper(
                 player,
-                new CoreDocumentAccessibility(coreDocument),
+                new CoreDocumentAccessibility(
+                        coreDocument, ((RemoteContextAware) player).getRemoteContext()),
                 new AndroidPlatformSemanticNodeApplier());
     }
 

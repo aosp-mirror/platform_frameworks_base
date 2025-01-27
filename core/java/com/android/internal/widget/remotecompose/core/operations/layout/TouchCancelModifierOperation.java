@@ -94,6 +94,11 @@ public class TouchCancelModifierOperation extends ListActionsOperation implement
         return "TouchCancelModifier";
     }
 
+    /**
+     * Write the operation on the buffer
+     *
+     * @param buffer a WireBuffer
+     */
     public static void apply(WireBuffer buffer) {
         buffer.start(OP_CODE);
     }
@@ -108,6 +113,11 @@ public class TouchCancelModifierOperation extends ListActionsOperation implement
         operations.add(new TouchCancelModifierOperation());
     }
 
+    /**
+     * Add documentation for this operation
+     *
+     * @param doc a DocumentationBuilder
+     */
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Modifier Operations", OP_CODE, name())
                 .description(

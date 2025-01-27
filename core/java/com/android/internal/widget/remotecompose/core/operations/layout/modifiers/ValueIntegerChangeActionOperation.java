@@ -49,6 +49,11 @@ public class ValueIntegerChangeActionOperation extends Operation implements Acti
         return "ValueChangeActionOperation(" + mTargetValueId + ")";
     }
 
+    /**
+     * The name of the operation used during serialization
+     *
+     * @return the operation serialized name
+     */
     @NonNull
     public String serializedName() {
         return "VALUE_INTEGER_CHANGE";
@@ -81,6 +86,13 @@ public class ValueIntegerChangeActionOperation extends Operation implements Acti
         context.overrideInteger(mTargetValueId, mValue);
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param valueId the value id
+     * @param value the value to set
+     */
     public static void apply(@NonNull WireBuffer buffer, int valueId, int value) {
         buffer.start(OP_CODE);
         buffer.writeInt(valueId);

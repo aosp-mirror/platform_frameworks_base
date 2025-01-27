@@ -28,6 +28,7 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.ComponentMeasure;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.MeasurePass;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
 
 import java.util.List;
 
@@ -91,6 +92,13 @@ public class CanvasLayout extends BoxLayout {
         return Operations.LAYOUT_CANVAS;
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param componentId the component id
+     * @param animationId the component animation id
+     */
     public static void apply(@NonNull WireBuffer buffer, int componentId, int animationId) {
         buffer.start(Operations.LAYOUT_CANVAS);
         buffer.writeInt(componentId);
@@ -141,5 +149,28 @@ public class CanvasLayout extends BoxLayout {
     @Override
     public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mComponentId, mAnimationId);
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        super.serialize(serializer);
+        serializer.add("", mHorizontalPositioning);
+    }
+
+    private String getPositioningString(int pos) {
+        switch (pos) {
+            case START:
+                return "START";
+            case CENTER:
+                return "CENTER";
+            case END:
+                return "END";
+            case TOP:
+                return "TOP";
+            case BOTTOM:
+                return "BOTTOM";
+            default:
+                return "NONE";
+        }
     }
 }

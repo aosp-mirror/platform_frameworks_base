@@ -37,13 +37,15 @@ import com.android.internal.widget.remotecompose.core.operations.layout.measure.
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.MeasurePass;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.Serializable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 
 /** Generic Component class */
 public class Component extends PaintOperation
-        implements Container, Measurable, SerializableToString {
+        implements Container, Measurable, SerializableToString, Serializable {
 
     private static final boolean DEBUG = false;
 
@@ -61,7 +63,7 @@ public class Component extends PaintOperation
     public boolean mNeedsMeasure = true;
     public boolean mNeedsRepaint = false;
     @Nullable public AnimateMeasure mAnimateMeasure;
-    @NonNull public AnimationSpec mAnimationSpec = new AnimationSpec();
+    @NonNull public AnimationSpec mAnimationSpec = AnimationSpec.DEFAULT;
     public boolean mFirstLayout = true;
     @NonNull PaintBundle mPaint = new PaintBundle();
     @NonNull protected HashSet<ComponentValue> mComponentValues = new HashSet<>();
@@ -318,6 +320,14 @@ public class Component extends PaintOperation
         }
     }
 
+    protected AnimationSpec getAnimationSpec() {
+        return mAnimationSpec;
+    }
+
+    protected void setAnimationSpec(@NonNull AnimationSpec animationSpec) {
+        mAnimationSpec = animationSpec;
+    }
+
     public enum Visibility {
         GONE,
         VISIBLE,
@@ -501,16 +511,17 @@ public class Component extends PaintOperation
      *
      * @param context
      * @param document
-     * @param x
-     * @param y
+     * @param x x location on screen or -1 if unconditional click
+     * @param y y location on screen or -1 if unconditional click
      */
     public void onClick(
             @NonNull RemoteContext context, @NonNull CoreDocument document, float x, float y) {
-        if (!contains(x, y)) {
+        boolean isUnconditional = x == -1 & y == -1;
+        if (!isUnconditional && !contains(x, y)) {
             return;
         }
-        float cx = x - getScrollX();
-        float cy = y - getScrollY();
+        float cx = isUnconditional ? -1 : x - getScrollX();
+        float cy = isUnconditional ? -1 : y - getScrollY();
         for (Operation op : mList) {
             if (op instanceof Component) {
                 ((Component) op).onClick(context, document, cx, cy);
@@ -1034,5 +1045,16 @@ public class Component extends PaintOperation
             }
         }
         return null;
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer.add("type", getSerializedName());
+        serializer.add("id", mComponentId);
+        serializer.add("x", mX);
+        serializer.add("y", mY);
+        serializer.add("width", mWidth);
+        serializer.add("height", mHeight);
+        serializer.add("visibility", mVisibility);
     }
 }

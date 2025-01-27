@@ -96,14 +96,30 @@ public class TouchDownModifierOperation extends ListActionsOperation implements 
         return "TouchModifier";
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     */
     public static void apply(WireBuffer buffer) {
         buffer.start(OP_CODE);
     }
 
+    /**
+     * Read the operation from the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param operations the list of operations we read so far
+     */
     public static void read(WireBuffer buffer, List<Operation> operations) {
         operations.add(new TouchDownModifierOperation());
     }
 
+    /**
+     * Add documentation for this operation
+     *
+     * @param doc a DocumentationBuilder
+     */
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Modifier Operations", OP_CODE, name())
                 .description(

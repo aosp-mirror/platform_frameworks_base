@@ -53,6 +53,11 @@ public class ValueStringChangeActionOperation extends Operation implements Actio
         return mTargetValueId;
     }
 
+    /**
+     * The name of the operation used during serialization
+     *
+     * @return the operation serialized name
+     */
     @NonNull
     public String serializedName() {
         return "VALUE_CHANGE";
@@ -85,6 +90,13 @@ public class ValueStringChangeActionOperation extends Operation implements Actio
         context.overrideText(mTargetValueId, mValueId);
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param valueId the string id
+     * @param value the value to set (string id)`
+     */
     public static void apply(@NonNull WireBuffer buffer, int valueId, int value) {
         buffer.start(OP_CODE);
         buffer.writeInt(valueId);

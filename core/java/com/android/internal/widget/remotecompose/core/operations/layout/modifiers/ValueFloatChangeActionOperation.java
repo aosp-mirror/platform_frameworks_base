@@ -49,6 +49,11 @@ public class ValueFloatChangeActionOperation extends Operation implements Action
         return "ValueFloatChangeActionOperation(" + mTargetValueId + ")";
     }
 
+    /**
+     * The name of the operation used during serialization
+     *
+     * @return the operation serialized name
+     */
     public String serializedName() {
         return "VALUE_FLOAT_CHANGE";
     }
@@ -76,18 +81,36 @@ public class ValueFloatChangeActionOperation extends Operation implements Action
         context.overrideFloat(mTargetValueId, mValue);
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param valueId the value id
+     * @param value the value to set
+     */
     public static void apply(WireBuffer buffer, int valueId, float value) {
         buffer.start(OP_CODE);
         buffer.writeInt(valueId);
         buffer.writeFloat(value);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(WireBuffer buffer, List<Operation> operations) {
         int valueId = buffer.readInt();
         float value = buffer.readFloat();
         operations.add(new ValueFloatChangeActionOperation(valueId, value));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Layout Operations", OP_CODE, "ValueFloatChangeActionOperation")
                 .description(

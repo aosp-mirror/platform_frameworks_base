@@ -22,5 +22,11 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 
 /** Represents a modifier */
 public interface ModifierOperation extends OperationInterface {
+    /**
+     * Serialize the string
+     *
+     * @param indent padding to display
+     * @param serializer append the string
+     */
     void serializeToString(int indent, @NonNull StringSerializer serializer);
 }

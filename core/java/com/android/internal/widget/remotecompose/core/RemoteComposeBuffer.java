@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.operations.BitmapData;
+import com.android.internal.widget.remotecompose.core.operations.BitmapFontData;
 import com.android.internal.widget.remotecompose.core.operations.ClickArea;
 import com.android.internal.widget.remotecompose.core.operations.ClipPath;
 import com.android.internal.widget.remotecompose.core.operations.ClipRect;
@@ -33,6 +34,7 @@ import com.android.internal.widget.remotecompose.core.operations.DataMapIds;
 import com.android.internal.widget.remotecompose.core.operations.DataMapLookup;
 import com.android.internal.widget.remotecompose.core.operations.DrawArc;
 import com.android.internal.widget.remotecompose.core.operations.DrawBitmap;
+import com.android.internal.widget.remotecompose.core.operations.DrawBitmapFontText;
 import com.android.internal.widget.remotecompose.core.operations.DrawBitmapInt;
 import com.android.internal.widget.remotecompose.core.operations.DrawBitmapScaled;
 import com.android.internal.widget.remotecompose.core.operations.DrawCircle;
@@ -48,6 +50,8 @@ import com.android.internal.widget.remotecompose.core.operations.DrawTextOnPath;
 import com.android.internal.widget.remotecompose.core.operations.DrawTweenPath;
 import com.android.internal.widget.remotecompose.core.operations.FloatConstant;
 import com.android.internal.widget.remotecompose.core.operations.FloatExpression;
+import com.android.internal.widget.remotecompose.core.operations.FloatFunctionCall;
+import com.android.internal.widget.remotecompose.core.operations.FloatFunctionDefine;
 import com.android.internal.widget.remotecompose.core.operations.Header;
 import com.android.internal.widget.remotecompose.core.operations.IntegerExpression;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRestore;
@@ -557,6 +561,18 @@ public class RemoteComposeBuffer {
     }
 
     /**
+     * Records a bitmap font and returns an ID.
+     *
+     * @param glyphs The glyphs that define the bitmap font
+     * @return id of the BitmapFont
+     */
+    public int addBitmapFont(BitmapFontData.Glyph[] glyphs) {
+        int id = mRemoteComposeState.nextId();
+        BitmapFontData.apply(mBuffer, id, glyphs);
+        return id;
+    }
+
+    /**
      * This defines the name of the bitmap given the id.
      *
      * @param id of the Bitmap
@@ -825,6 +841,22 @@ public class RemoteComposeBuffer {
     }
 
     /**
+     * Draw the text with a bitmap font, with origin at (x,y). The origin is interpreted based on
+     * the Align setting in the paint.
+     *
+     * @param textId The text to be drawn
+     * @param bitmapFontId The id of the bitmap font to draw with
+     * @param start The index of the first character in text to draw
+     * @param end (end - 1) is the index of the last character in text to draw
+     * @param x The x-coordinate of the origin of the text being drawn
+     * @param y The y-coordinate of the baseline of the text being drawn
+     */
+    public void addDrawBitmapFontTextRun(
+            int textId, int bitmapFontId, int start, int end, float x, float y) {
+        DrawBitmapFontText.apply(mBuffer, textId, bitmapFontId, start, end, x, y);
+    }
+
+    /**
      * Draw a text on canvas at relative to position (x, y), offset panX and panY. <br>
      * The panning factors (panX, panY) mapped to the resulting bounding box of the text, in such a
      * way that a panning factor of (0.0, 0.0) would center the text at (x, y)
@@ -1060,6 +1092,14 @@ public class RemoteComposeBuffer {
         return "v1.0";
     }
 
+    /**
+     * Initialize a buffer from a file
+     *
+     * @param path the file path
+     * @param remoteComposeState the associated state
+     * @return the RemoteComposeBuffer
+     * @throws IOException
+     */
     @NonNull
     public static RemoteComposeBuffer fromFile(
             @NonNull String path, @NonNull RemoteComposeState remoteComposeState)
@@ -1134,11 +1174,24 @@ public class RemoteComposeBuffer {
         }
     }
 
+    /**
+     * Read the content of the file into the buffer
+     *
+     * @param file a target file
+     * @param buffer a RemoteComposeBuffer
+     * @throws IOException
+     */
     static void read(@NonNull File file, @NonNull RemoteComposeBuffer buffer) throws IOException {
         FileInputStream fd = new FileInputStream(file);
         read(fd, buffer);
     }
 
+    /**
+     * Initialize a buffer from an input stream
+     *
+     * @param fd the input stream
+     * @param buffer a RemoteComposeBuffer
+     */
     public static void read(@NonNull InputStream fd, @NonNull RemoteComposeBuffer buffer) {
         try {
             byte[] bytes = readAllBytes(fd);
@@ -1150,6 +1203,13 @@ public class RemoteComposeBuffer {
         }
     }
 
+    /**
+     * Load a byte buffer from the input stream
+     *
+     * @param is the input stream
+     * @return a byte buffer containing the input stream content
+     * @throws IOException
+     */
     private static byte[] readAllBytes(@NonNull InputStream is) throws IOException {
         byte[] buff = new byte[32 * 1024]; // moderate size buff to start
         int red = 0;
@@ -1684,7 +1744,27 @@ public class RemoteComposeBuffer {
      * @return id of the color (color ids are short)
      */
     public short addColorExpression(int alpha, float hue, float sat, float value) {
-        ColorExpression c = new ColorExpression(0, alpha, hue, sat, value);
+        ColorExpression c =
+                new ColorExpression(0, ColorExpression.HSV_MODE, alpha, hue, sat, value);
+        short id = (short) mRemoteComposeState.cacheData(c);
+        c.mId = id;
+        c.write(mBuffer);
+        return id;
+    }
+
+    /**
+     * Color calculated by Alpha, Red, Green and Blue. (as floats they can be variables used to
+     * create color transitions)
+     *
+     * @param alpha the alpha value of the color
+     * @param red the red component of the color
+     * @param green the green component of the color
+     * @param blue the blue component of the color
+     * @return id of the color (color ids are short)
+     */
+    public short addColorExpression(float alpha, float red, float green, float blue) {
+        ColorExpression c =
+                new ColorExpression(0, ColorExpression.ARGB_MODE, alpha, red, green, blue);
         short id = (short) mRemoteComposeState.cacheData(c);
         c.mId = id;
         c.write(mBuffer);
@@ -2179,10 +2259,21 @@ public class RemoteComposeBuffer {
                 textAlign);
     }
 
+    /**
+     * Returns the next available id for the given type
+     *
+     * @param type the type of the value
+     * @return a unique id
+     */
     public int createID(int type) {
         return mRemoteComposeState.nextId(type);
     }
 
+    /**
+     * Returns the next available id
+     *
+     * @return a unique id
+     */
     public int nextId() {
         return mRemoteComposeState.nextId();
     }
@@ -2242,5 +2333,28 @@ public class RemoteComposeBuffer {
     /** Closes the particle engine container */
     public void addParticleLoopEnd() {
         ContainerEnd.apply(mBuffer);
+    }
+
+    /**
+     * @param fid The id of the function
+     * @param args The arguments of the function
+     */
+    public void defineFloatFunction(int fid, int[] args) {
+        FloatFunctionDefine.apply(mBuffer, fid, args);
+    }
+
+    /** end the definition of the function */
+    public void addEndFloatFunctionDef() {
+        ContainerEnd.apply(mBuffer);
+    }
+
+    /**
+     * add a function call
+     *
+     * @param id the id of the function to call
+     * @param args the arguments of the function
+     */
+    public void callFloatFunction(int id, float[] args) {
+        FloatFunctionCall.apply(mBuffer, id, args);
     }
 }

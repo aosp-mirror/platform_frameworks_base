@@ -65,6 +65,12 @@ public class OffsetModifierOperation extends DecoratorModifierOperation {
         apply(buffer, mX, mY);
     }
 
+    /**
+     * Serialize the string
+     *
+     * @param indent padding to display
+     * @param serializer append the string
+     */
     // @Override
     public void serializeToString(int indent, StringSerializer serializer) {
         serializer.append(indent, "OFFSET = [" + mX + ", " + mY + "]");
@@ -110,18 +116,36 @@ public class OffsetModifierOperation extends DecoratorModifierOperation {
         return OP_CODE;
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param x x offset
+     * @param y y offset
+     */
     public static void apply(WireBuffer buffer, float x, float y) {
         buffer.start(OP_CODE);
         buffer.writeFloat(x);
         buffer.writeFloat(y);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(WireBuffer buffer, List<Operation> operations) {
         float x = buffer.readFloat();
         float y = buffer.readFloat();
         operations.add(new OffsetModifierOperation(x, y));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Modifier Operations", OP_CODE, CLASS_NAME)
                 .description("define the Offset Modifier")

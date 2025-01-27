@@ -134,6 +134,12 @@ public interface AccessibleComponent extends AccessibilitySemantics {
             return mDescription;
         }
 
+        /**
+         * Map int value to Role enum value
+         *
+         * @param i int value
+         * @return corresponding enum value
+         */
         public static Role fromInt(int i) {
             if (i < UNKNOWN.ordinal()) {
                 return Role.values()[i];

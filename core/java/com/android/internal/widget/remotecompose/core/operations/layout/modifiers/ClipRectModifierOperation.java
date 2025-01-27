@@ -76,6 +76,11 @@ public class ClipRectModifierOperation extends DecoratorModifierOperation {
         return OP_CODE;
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer the WireBuffer
+     */
     public static void apply(@NonNull WireBuffer buffer) {
         buffer.start(OP_CODE);
     }

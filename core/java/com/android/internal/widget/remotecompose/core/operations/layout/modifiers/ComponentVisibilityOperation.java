@@ -52,6 +52,11 @@ public class ComponentVisibilityOperation extends Operation
         return "ComponentVisibilityOperation(" + mVisibilityId + ")";
     }
 
+    /**
+     * Returns the serialized name for this operation
+     *
+     * @return the serialized name
+     */
     @NonNull
     public String serializedName() {
         return "COMPONENT_VISIBILITY";
@@ -74,6 +79,12 @@ public class ComponentVisibilityOperation extends Operation
     @Override
     public void write(@NonNull WireBuffer buffer) {}
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param valueId visibility value
+     */
     public static void apply(@NonNull WireBuffer buffer, int valueId) {
         buffer.start(OP_CODE);
         buffer.writeInt(valueId);

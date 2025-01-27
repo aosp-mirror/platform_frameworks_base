@@ -135,6 +135,12 @@ public class ScrollModifierOperation extends ListActionsOperation
         apply(buffer, mDirection, mPositionExpression, mMax, mNotchMax);
     }
 
+    /**
+     * Serialize the string
+     *
+     * @param indent padding to display
+     * @param serializer append the string
+     */
     // @Override
     public void serializeToString(int indent, StringSerializer serializer) {
         serializer.append(indent, "SCROLL = [" + mDirection + "]");
@@ -190,6 +196,15 @@ public class ScrollModifierOperation extends ListActionsOperation
         return OP_CODE;
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param direction direction of the scroll (HORIZONTAL, VERTICAL)
+     * @param position the current position
+     * @param max the maximum position
+     * @param notchMax the maximum notch
+     */
     public static void apply(
             WireBuffer buffer, int direction, float position, float max, float notchMax) {
         buffer.start(OP_CODE);
@@ -199,6 +214,12 @@ public class ScrollModifierOperation extends ListActionsOperation
         buffer.writeFloat(notchMax);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(WireBuffer buffer, List<Operation> operations) {
         int direction = buffer.readInt();
         float position = buffer.readFloat();
@@ -207,6 +228,11 @@ public class ScrollModifierOperation extends ListActionsOperation
         operations.add(new ScrollModifierOperation(direction, position, max, notchMax));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Modifier Operations", OP_CODE, CLASS_NAME)
                 .description("define a Scroll Modifier")
@@ -300,12 +326,24 @@ public class ScrollModifierOperation extends ListActionsOperation
     public void onTouchCancel(
             RemoteContext context, CoreDocument document, Component component, float x, float y) {}
 
+    /**
+     * Set the horizontal scroll dimension
+     *
+     * @param hostDimension the horizontal host dimension
+     * @param contentDimension the horizontal content dimension
+     */
     public void setHorizontalScrollDimension(float hostDimension, float contentDimension) {
         mHostDimension = hostDimension;
         mContentDimension = contentDimension;
         mMaxScrollX = contentDimension - hostDimension;
     }
 
+    /**
+     * Set the vertical scroll dimension
+     *
+     * @param hostDimension the vertical host dimension
+     * @param contentDimension the vertical content dimension
+     */
     public void setVerticalScrollDimension(float hostDimension, float contentDimension) {
         mHostDimension = hostDimension;
         mContentDimension = contentDimension;
