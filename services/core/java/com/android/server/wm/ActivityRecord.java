@@ -46,6 +46,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
+import static android.app.WindowConfiguration.isFloating;
 import static android.app.admin.DevicePolicyResources.Drawables.Source.PROFILE_SWITCH_ANIMATION;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.OUTLINE;
 import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
@@ -8376,6 +8377,7 @@ final class ActivityRecord extends WindowToken {
         mConfigurationSeq = Math.max(++mConfigurationSeq, 1);
         getResolvedOverrideConfiguration().seq = mConfigurationSeq;
 
+        // TODO(b/392069771): Move to AppCompatSandboxingPolicy.
         // Sandbox max bounds by setting it to the activity bounds, if activity is letterboxed, or
         // has or will have mAppCompatDisplayInsets for size compat. Also forces an activity to be
         // sandboxed or not depending upon the configuration settings.
@@ -8402,6 +8404,20 @@ final class ActivityRecord extends WindowToken {
                         shouldCreateAppCompatDisplayInsets());
             }
             resolvedConfig.windowConfiguration.setMaxBounds(mTmpBounds);
+        }
+
+        // Sandbox activity bounds in freeform to app bounds to force app to display within the
+        // container. This prevents UI cropping when activities can draw below insets which are
+        // normally excluded from appBounds before targetSDK < 35
+        // (see ConfigurationContainer#applySizeOverrideIfNeeded).
+        if (isFloating(parentWindowingMode)) {
+            Rect appBounds = resolvedConfig.windowConfiguration.getAppBounds();
+            if (appBounds == null || appBounds.isEmpty()) {
+                // When there is no override bounds, the activity will inherit the bounds from
+                // parent.
+                appBounds = mResolveConfigHint.mParentAppBoundsOverride;
+            }
+            resolvedConfig.windowConfiguration.setBounds(appBounds);
         }
 
         applySizeOverrideIfNeeded(
