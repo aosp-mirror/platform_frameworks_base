@@ -89,9 +89,13 @@ import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.UserHandle;
+import android.os.WorkSource;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
@@ -199,6 +203,9 @@ public class PowerManagerServiceTest {
     @Rule public TestRule compatChangeRule = new PlatformCompatChangeRule();
 
     @Rule public SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private PowerManagerService mService;
     private ContextWrapper mContextSpy;
@@ -3042,6 +3049,40 @@ public class PowerManagerServiceTest {
         mService.getBinderServiceInstance().releaseWakeLock(token, 0);
         verify(mNotifierMock).onWakeLockReleased(anyInt(), eq(tag), eq(packageName), anyInt(),
                 anyInt(), any(), any(), same(callback), anyInt());
+    }
+
+    /**
+     * Test IPowerManager.updateWakeLockUids() updates the workchain with the new uids
+     */
+    @Test
+    @RequiresFlagsEnabled({Flags.FLAG_WAKELOCK_ATTRIBUTION_VIA_WORKCHAIN})
+    public void test_updateWakelockUids_updatesWorkchain() {
+        createService();
+        startSystem();
+        final String tag = "wakelock1";
+        final String packageName = "pkg.name";
+        final IBinder token = new Binder();
+        int flags = PowerManager.PARTIAL_WAKE_LOCK;
+        final IWakeLockCallback callback1 = Mockito.mock(IWakeLockCallback.class);
+        final IBinder callbackBinder1 = Mockito.mock(Binder.class);
+        when(callback1.asBinder()).thenReturn(callbackBinder1);
+        WorkSource oldWorksource = new WorkSource();
+        oldWorksource.createWorkChain().addNode(1000, null);
+        mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
+                oldWorksource, null /* historyTag */, Display.INVALID_DISPLAY, callback1);
+        verify(mNotifierMock).onWakeLockAcquired(anyInt(), eq(tag), eq(packageName),
+                anyInt(), anyInt(), eq(oldWorksource), any(), same(callback1));
+
+        WorkSource newWorksource = new WorkSource();
+        newWorksource.createWorkChain().addNode(1011, null)
+                .addNode(Binder.getCallingUid(), null);
+        newWorksource.createWorkChain().addNode(1012, null)
+                .addNode(Binder.getCallingUid(), null);
+        mService.getBinderServiceInstance().updateWakeLockUids(token, new int[]{1011, 1012});
+        verify(mNotifierMock).onWakeLockChanging(anyInt(), eq(tag), eq(packageName),
+                anyInt(), anyInt(), eq(oldWorksource), any(), any(),
+                anyInt(), eq(tag), eq(packageName), anyInt(), anyInt(), eq(newWorksource), any(),
+                any());
     }
 
     /**

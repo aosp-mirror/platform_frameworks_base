@@ -1573,6 +1573,13 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+java_aconfig_library {
+    name: "power_flags_lib_host",
+    aconfig_declarations: "power_flags",
+    host_supported: true,
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 // Content
 aconfig_declarations {
     name: "android.content.flags-aconfig",
