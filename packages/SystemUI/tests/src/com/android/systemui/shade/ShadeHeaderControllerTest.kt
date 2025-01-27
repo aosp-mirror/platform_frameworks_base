@@ -71,6 +71,7 @@ import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
+import dagger.Lazy
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -197,7 +198,8 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
                 privacyIconsController,
                 insetsProviderStore,
                 configurationController,
-                kosmos.shadeDisplaysRepository,
+                viewContext,
+                Lazy { kosmos.shadeDisplaysRepository },
                 variableDateViewControllerFactory,
                 batteryMeterViewController,
                 dumpManager,
