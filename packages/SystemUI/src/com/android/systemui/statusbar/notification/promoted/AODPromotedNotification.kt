@@ -78,6 +78,7 @@ private val PromotedNotificationContentModel.layoutResource: Int?
     get() {
         return if (Flags.notificationsRedesignTemplates()) {
             when (style) {
+                Style.Base -> R.layout.notification_2025_template_expanded_base
                 Style.BigPicture -> R.layout.notification_2025_template_expanded_big_picture
                 Style.BigText -> R.layout.notification_2025_template_expanded_big_text
                 Style.Call -> R.layout.notification_2025_template_expanded_call
@@ -86,6 +87,7 @@ private val PromotedNotificationContentModel.layoutResource: Int?
             }
         } else {
             when (style) {
+                Style.Base -> R.layout.notification_template_material_big_base
                 Style.BigPicture -> R.layout.notification_template_material_big_picture
                 Style.BigText -> R.layout.notification_template_material_big_text
                 Style.Call -> R.layout.notification_template_material_big_call
@@ -133,6 +135,7 @@ private class AODPromotedNotificationViewUpdater(root: View) {
 
     fun update(content: PromotedNotificationContentModel) {
         when (content.style) {
+            Style.Base -> updateBase(content)
             Style.BigPicture -> updateBigPicture(content)
             Style.BigText -> updateBigText(content)
             Style.Call -> updateCall(content)
@@ -141,20 +144,24 @@ private class AODPromotedNotificationViewUpdater(root: View) {
         }
     }
 
-    private fun updateBigPicture(content: PromotedNotificationContentModel) {
+    private fun updateBase(
+        content: PromotedNotificationContentModel,
+        textView: ImageFloatingTextView? = null,
+    ) {
         updateHeader(content)
 
         updateTitle(title, content)
-        updateText(text, content)
+        updateText(textView ?: text, content)
+    }
+
+    private fun updateBigPicture(content: PromotedNotificationContentModel) {
+        updateBase(content)
 
         bigPicture?.visibility = GONE
     }
 
     private fun updateBigText(content: PromotedNotificationContentModel) {
-        updateHeader(content)
-
-        updateTitle(title, content)
-        updateText(bigText, content)
+        updateBase(content, textView = bigText)
     }
 
     private fun updateCall(content: PromotedNotificationContentModel) {
@@ -164,10 +171,7 @@ private class AODPromotedNotificationViewUpdater(root: View) {
     }
 
     private fun updateProgress(content: PromotedNotificationContentModel) {
-        updateHeader(content)
-
-        updateTitle(title, content)
-        updateText(text, content)
+        updateBase(content)
 
         updateNewProgressBar(content)
     }
