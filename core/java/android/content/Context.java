@@ -4894,10 +4894,10 @@ public abstract class Context {
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link android.net.TetheringManager}
      * for managing tethering functions.
-     * @hide
+     *
      * @see android.net.TetheringManager
      */
-    @SystemApi
+    @SuppressLint("UnflaggedApi")
     public static final String TETHERING_SERVICE = "tethering";
 
     /**
