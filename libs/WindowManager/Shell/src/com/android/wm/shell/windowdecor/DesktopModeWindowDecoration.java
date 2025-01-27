@@ -734,7 +734,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             // [AppHeaderViewHolder].
             ((AppHeaderViewHolder) mWindowDecorViewHolder).runOnAppChipGlobalLayout(
                     () -> {
-                        notifyAppChipStateChanged();
+                        notifyAppHeaderStateChanged();
                         return Unit.INSTANCE;
                     });
         }
@@ -766,7 +766,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 mResult.mCaptionHeight);
     }
 
-    private void notifyAppChipStateChanged() {
+    private void notifyAppHeaderStateChanged() {
+        if (isAppHandle(mWindowDecorViewHolder) || mWindowDecorViewHolder == null) {
+            return;
+        }
         final Rect appChipPositionInWindow =
                 ((AppHeaderViewHolder) mWindowDecorViewHolder).getAppChipLocationInWindow();
         final Rect taskBounds = mTaskInfo.configuration.windowConfiguration.getBounds();

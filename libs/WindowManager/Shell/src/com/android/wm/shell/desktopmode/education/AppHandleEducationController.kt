@@ -22,6 +22,7 @@ import android.content.Context
 import android.content.res.Resources
 import android.graphics.Point
 import android.os.SystemProperties
+import android.view.View.LAYOUT_DIRECTION_RTL
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.desktopmode.CaptionState
@@ -187,9 +188,14 @@ class AppHandleEducationController(
                 getSize(R.dimen.desktop_mode_handle_menu_pill_spacing_margin)
 
         val appHandleBounds = captionState.globalAppHandleBounds
+        val appHandleCenterX = appHandleBounds.left + appHandleBounds.width() / 2
         val tooltipGlobalCoordinates =
             Point(
-                appHandleBounds.left + appHandleBounds.width() / 2 + appHandleMenuWidth / 2,
+                if (isRtl()) {
+                    appHandleCenterX - appHandleMenuWidth / 2
+                } else {
+                    appHandleCenterX + appHandleMenuWidth / 2
+                },
                 appHandleBounds.top +
                     appHandleMenuMargins +
                     appInfoPillHeight +
@@ -199,7 +205,7 @@ class AppHandleEducationController(
         // tooltip.
         val windowingImageButtonTooltipConfig =
             TooltipEducationViewConfig(
-                tooltipViewLayout = R.layout.desktop_windowing_education_left_arrow_tooltip,
+                tooltipViewLayout = R.layout.desktop_windowing_education_horizontal_arrow_tooltip,
                 tooltipColorScheme =
                     TooltipColorScheme(
                         tertiaryFixedColor,
@@ -210,7 +216,7 @@ class AppHandleEducationController(
                 tooltipText =
                     getString(R.string.windowing_desktop_mode_image_button_education_tooltip),
                 arrowDirection =
-                    DesktopWindowingEducationTooltipController.TooltipArrowDirection.LEFT,
+                    DesktopWindowingEducationTooltipController.TooltipArrowDirection.HORIZONTAL,
                 onEducationClickAction = {
                     toDesktopModeCallback(
                         captionState.runningTaskInfo.taskId,
@@ -233,13 +239,17 @@ class AppHandleEducationController(
         val globalAppChipBounds = captionState.globalAppChipBounds
         val tooltipGlobalCoordinates =
             Point(
-                globalAppChipBounds.right,
+                if (isRtl()) {
+                    globalAppChipBounds.left
+                } else {
+                    globalAppChipBounds.right
+                },
                 globalAppChipBounds.top + globalAppChipBounds.height() / 2,
             )
         // Populate information important to inflate exit desktop mode education tooltip.
         val exitWindowingTooltipConfig =
             TooltipEducationViewConfig(
-                tooltipViewLayout = R.layout.desktop_windowing_education_left_arrow_tooltip,
+                tooltipViewLayout = R.layout.desktop_windowing_education_horizontal_arrow_tooltip,
                 tooltipColorScheme =
                     TooltipColorScheme(
                         tertiaryFixedColor,
@@ -249,7 +259,7 @@ class AppHandleEducationController(
                 tooltipViewGlobalCoordinates = tooltipGlobalCoordinates,
                 tooltipText = getString(R.string.windowing_desktop_mode_exit_education_tooltip),
                 arrowDirection =
-                    DesktopWindowingEducationTooltipController.TooltipArrowDirection.LEFT,
+                    DesktopWindowingEducationTooltipController.TooltipArrowDirection.HORIZONTAL,
                 onDismissAction = {
                     // TODO: b/341320146 - Log previous tooltip was dismissed
                 },
@@ -298,6 +308,8 @@ class AppHandleEducationController(
     }
 
     private fun getString(@StringRes resId: Int): String = context.resources.getString(resId)
+
+    private fun isRtl() = context.resources.configuration.layoutDirection == LAYOUT_DIRECTION_RTL
 
     companion object {
         const val TAG = "AppHandleEducationController"

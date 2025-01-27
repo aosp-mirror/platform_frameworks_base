@@ -154,12 +154,12 @@ class DesktopWindowingEducationTooltipControllerTest : ShellTestCase() {
   }
 
   @Test
-  fun showEducationTooltip_tooltipPointsLeft_verticallyPositionTooltip() {
+  fun showEducationTooltip_tooltipPointsHorizontally_verticallyPositionTooltip() {
     val initialTooltipX = 0
     val initialTooltipY = 0
     val tooltipViewConfig =
         createTooltipConfig(
-            arrowDirection = TooltipArrowDirection.LEFT,
+            arrowDirection = TooltipArrowDirection.HORIZONTAL,
             tooltipViewGlobalCoordinates = Point(initialTooltipX, initialTooltipY))
     val tooltipYArgumentCaptor = argumentCaptor<Int>()
     val tooltipHeightArgumentCaptor = argumentCaptor<Int>()
