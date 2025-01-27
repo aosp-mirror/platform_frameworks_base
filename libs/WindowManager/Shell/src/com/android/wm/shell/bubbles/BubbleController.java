@@ -1433,7 +1433,7 @@ public class BubbleController implements ConfigurationChangeListener,
      * @param info the shortcut info for the bubble.
      */
     public void expandStackAndSelectBubble(ShortcutInfo info) {
-        if (!Flags.enableBubbleAnything()) return;
+        if (!BubbleAnythingFlagHelper.enableCreateAnyBubble()) return;
         Bubble b = mBubbleData.getOrCreateBubble(info); // Removes from overflow
         ProtoLog.v(WM_SHELL_BUBBLES, "expandStackAndSelectBubble - shortcut=%s", info);
         if (b.isInflated()) {
@@ -1450,7 +1450,7 @@ public class BubbleController implements ConfigurationChangeListener,
      * @param intent the intent for the bubble.
      */
     public void expandStackAndSelectBubble(Intent intent, UserHandle user) {
-        if (!Flags.enableBubbleAnything()) return;
+        if (!BubbleAnythingFlagHelper.enableCreateAnyBubble()) return;
         Bubble b = mBubbleData.getOrCreateBubble(intent, user); // Removes from overflow
         ProtoLog.v(WM_SHELL_BUBBLES, "expandStackAndSelectBubble - intent=%s", intent);
         if (b.isInflated()) {
@@ -2516,7 +2516,7 @@ public class BubbleController implements ConfigurationChangeListener,
      * @param entry   the entry to bubble.
      */
     static boolean canLaunchInTaskView(Context context, BubbleEntry entry) {
-        if (Flags.enableBubbleAnything()) return true;
+        if (BubbleAnythingFlagHelper.enableCreateAnyBubble()) return true;
         PendingIntent intent = entry.getBubbleMetadata() != null
                 ? entry.getBubbleMetadata().getIntent()
                 : null;
