@@ -583,3 +583,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "enable_start_launch_transition_from_taskbar_bugfix"
+    namespace: "lse_desktop_experience"
+    description: "Enables starting a launch transition directly from the taskbar if desktop tasks are visible."
+    bug: "361366053"
+    metadata {
+       purpose: PURPOSE_BUGFIX
+    }
+}
