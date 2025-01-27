@@ -32,8 +32,7 @@ import com.android.tools.r8.keepanno.annotations.UsedByReflection;
 // Without this annotation, this class will be treated as unused class and be removed during build
 // time.
 @UsedByReflection(kind = KeepItemKind.CLASS_AND_METHODS)
-// TODO(b/374174952): Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
-@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@TargetApi(Build.VERSION_CODES.BAKLAVA)
 public final class ConnectivityServiceInitializerB extends SystemService {
     private static final String TAG = ConnectivityServiceInitializerB.class.getSimpleName();
     private final VcnManagementService mVcnManagementService;

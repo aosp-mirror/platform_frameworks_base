@@ -165,8 +165,7 @@ import java.util.concurrent.TimeUnit;
  * @hide
  */
 // TODO(b/180451994): ensure all incoming + outgoing calls have a cleared calling identity
-// TODO(b/374174952): Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
-@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@TargetApi(Build.VERSION_CODES.BAKLAVA)
 public class VcnManagementService extends IVcnManagementService.Stub {
     @NonNull private static final String TAG = VcnManagementService.class.getSimpleName();
     @NonNull private static final String CONTEXT_ATTRIBUTION_TAG = "VCN";

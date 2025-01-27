@@ -58,8 +58,7 @@ import java.util.concurrent.Executor;
  */
 // TODO(b/388919146): Implement a more generic solution to prevent concurrent modifications on
 // mListeners and mRequests
-// TODO(b/374174952): Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
-@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@TargetApi(Build.VERSION_CODES.BAKLAVA)
 public class VcnNetworkProvider extends NetworkProvider {
     private static final String TAG = VcnNetworkProvider.class.getSimpleName();
 

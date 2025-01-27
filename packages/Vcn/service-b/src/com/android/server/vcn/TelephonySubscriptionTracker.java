@@ -79,8 +79,7 @@ import java.util.Set;
  *
  * @hide
  */
-// TODO(b/374174952): Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
-@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@TargetApi(Build.VERSION_CODES.BAKLAVA)
 public class TelephonySubscriptionTracker extends BroadcastReceiver {
     @NonNull private static final String TAG = TelephonySubscriptionTracker.class.getSimpleName();
     private static final boolean LOG_DBG = false; // STOPSHIP if true
