@@ -666,14 +666,14 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"काढून टाका"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"अतिथीला रीसेट करत आहे…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"अतिथी सत्र रीसेट करायचे का?"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"हे नवीन अतिथी सत्र सुरू करेल आणि सध्याच्या सत्रातील सर्व अ‍ॅप्स व डेटा हटवेल"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"हे नवीन अतिथी सत्र सुरू करेल आणि सद्य सत्रातील सर्व अ‍ॅप्स व डेटा हटवेल"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"अतिथी मोडमधून बाहेर पडायचे का?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"हे सध्याच्या अतिथी सत्रातील अ‍ॅप्स आणि डेटा हटवेल"</string>
     <string name="grant_admin" msgid="4323199171790522574">"होय, त्यांना ॲडमिन करा"</string>
     <string name="not_grant_admin" msgid="3557849576157702485">"नाही, त्यांना ॲडमिन करू नका"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"बाहेर पडा"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"अतिथी अ‍ॅक्टिव्हिटी सेव्ह करायची का?"</string>
-    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"सध्याच्या सत्रातील अ‍ॅक्टिव्हिटी सेव्ह करू किंवा सर्व अ‍ॅप्स व डेटा हटवू शकता"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"सद्य सत्रातील अ‍ॅक्टिव्हिटी सेव्ह करू शकता किंवा सर्व अ‍ॅप्स व डेटा हटवू शकता"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"हटवा"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"सेव्ह करा"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"अतिथी मोडमधून बाहेर पडा"</string>
@@ -727,7 +727,7 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"इथरनेट डिस्कनेक्ट केले."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"इथरनेट."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"कॉलिंग उपलब्ध नाही."</string>
-    <string name="physical_keyboard_title" msgid="4811935435315835220">"वास्तविक कीबोर्ड"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"प्रत्यक्ष कीबोर्ड"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"किबोर्ड लेआउट निवडा"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"डीफॉल्ट"</string>
     <string name="turn_screen_on_title" msgid="2662312432042116026">"स्क्रीन सुरू करण्यासंबंधित नियंत्रण"</string>

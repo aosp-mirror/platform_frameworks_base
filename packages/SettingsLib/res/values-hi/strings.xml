@@ -250,7 +250,7 @@
     <string name="enable_adb" msgid="8072776357237289039">"यूएसबी डीबग करना"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"डीबग मोड जब यूएसबी कनेक्‍ट किया गया हो"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"यूएसबी डीबग करने की अनुमति रद्द करें"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"वॉयरलेस डीबगिंग"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"वायरलेस डीबगिंग"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"डिवाइस के वाई-फ़ाई से कनेक्ट हाेने पर, डीबग मोड चालू करें"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"गड़बड़ी"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"वॉयरलेस डीबगिंग"</string>
@@ -665,8 +665,8 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"रीसेट करें"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"हटाएं"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"मेहमान के तौर पर ब्राउज़ करने का सेशन रीसेट किया जा रहा है…"</string>
-    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"क्या मेहमान मोड के मौजूदा सेशन को रीसेट करना है?"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"इससे मेहमान के तौर पर ब्राउज़ करने का नया सेशन शुरू हो जाएगा. इसके अलावा, इस्तेमाल किए जा रहे ऐप्लिकेशन पर की गई गतिविधि और मौजूदा सेशन का डेटा मिटा दिया जाएगा"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"क्या मेहमान उपयोगकर्ता के मौजूदा सेशन को रीसेट करना है?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"इससे मेहमान के तौर पर ब्राउज़ करने का नया सेशन शुरू हो जाएगा. इसके अलावा, मौजूदा सेशन में डाउनलोड किए गए ऐप्लिकेशन और सेव किया गया सारा डेटा मिट जाएगा"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"मेहमान मोड से बाहर निकलना है?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"इससे, मेहमान मोड के मौजूदा सेशन का डेटा और इसमें इस्तेमाल हो रहे ऐप्लिकेशन मिट जाएंगे"</string>
     <string name="grant_admin" msgid="4323199171790522574">"हां, इन्हें एडमिन बनाएं"</string>

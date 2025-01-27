@@ -424,7 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"קנה מידה לאנימציית מעבר"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"קנה מידה למשך זמן אנימציה"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"יצירת הדמיה של תצוגות משניות"</string>
-    <string name="shade_display_awareness_title" msgid="8000009404669495876">"מיקום התצוגה של ההצללה"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"מיקום לוח ההתראות"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"אפליקציות"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"ללא שמירת פעילויות"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"השמדת כל פעילות ברגע שהמשתמש עוזב אותה"</string>
@@ -681,7 +681,7 @@
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"יציאה ממצב אורח"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"כל הפעילות תימחק ביציאה"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"אפשר לשמור או למחוק את הפעילות שלך ביציאה"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"ניתן לאפס כדי למחוק את הפעילות מהסשן כעת, או לשמור או למחוק את הפעילות ביציאה"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"אפשר לאפס כדי למחוק עכשיו את הפעילות מהסשן, או לשמור או למחוק את הפעילות ביציאה"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"בחירת תמונה"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"נעשו יותר מדי ניסיונות שגויים. הנתונים במכשיר יימחקו."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"נעשו יותר מדי ניסיונות שגויים. המשתמש הזה יימחק."</string>

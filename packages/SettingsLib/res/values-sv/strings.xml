@@ -288,9 +288,9 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Tillåt att bootloadern låses upp"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Vill du tillåta OEM-upplåsning?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"Varning! Funktionerna för enhetsskydd fungerar inte på enheten när den här inställningen är aktiverad."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Välj app för påhittad plats"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ingen app för påhittad plats har angetts"</string>
-    <string name="mock_location_app_set" msgid="4706722469342913843">"App för påhittad plats: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Välj app för simulerad plats"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ingen app för simulerad plats har angetts"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"App för simulerad plats: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Nätverk"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certifiering för wifi-skärmdelning"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktivera utförlig loggning för wifi"</string>

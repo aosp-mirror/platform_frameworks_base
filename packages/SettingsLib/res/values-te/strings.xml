@@ -358,7 +358,7 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"మెరుగైన కనెక్టివిటీ ఫీచర్‌ను ఎనేబుల్ చేస్తుంది."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"స్థానిక టెర్మినల్"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"స్థానిక షెల్ యాక్సెస్‌ను అందించే టెర్మినల్ యాప్‌ను ప్రారంభించండి"</string>
-    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux డెవలప్మెంట్ ఎన్విరాన్మెంట్"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux డెవలప్‌మెంట్ ఎన్విరాన్‌మెంట్"</string>
     <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(ప్రయోగాత్మకం) Linux టెర్మినల్‌ను Androidలో రన్ చేయండి"</string>
     <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"మీరు డిజేబుల్ చేస్తే, Linux టెర్మినల్ డేటా క్లియర్ అవుతుంది"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP చెకింగ్‌"</string>

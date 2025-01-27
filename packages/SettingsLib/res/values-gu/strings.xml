@@ -672,16 +672,16 @@
     <string name="grant_admin" msgid="4323199171790522574">"હા, તેમને ઍડમિન બનાવો"</string>
     <string name="not_grant_admin" msgid="3557849576157702485">"ના, તેમને ઍડમિન બનાવશો નહીં"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"બહાર નીકળો"</string>
-    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"શું અતિથિ પ્રવૃત્તિ સાચવીએ?"</string>
-    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"તમે હાલના સત્રની પ્રવૃત્તિ સાચવી શકો છો અથવા તમામ ઍપ અને ડેટા ડિલીટ કરી શકો છો"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"શું અતિથિની ઍક્ટિવિટીને સાચવીએ?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"તમે હાલના સત્રની ઍક્ટિવિટીને સાચવી શકો છો અથવા તમામ ઍપ અને ડેટા ડિલીટ કરી શકો છો"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"ડિલીટ કરો"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"સાચવો"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"અતિથિ મોડમાંથી બહાર નીકળો"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"અતિથિ સત્ર રીસેટ કરો"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"અતિથિ મોડમાંથી બહાર નીકળો"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"બહાર નીકળતી વખતે તમામ ઍક્ટિવિટી ડિલીટ કરવામાં આવશે"</string>
-    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"બહાર નીકળતી વખતે તમે પ્રવૃત્તિ સાચવી કે ડિલીટ કરી શકશો"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"સત્રની પ્રવૃત્તિ હમણાં ડિલીટ કરવા માટે રીસેટ કરો અથવા બહાર નીકળતી વખતે તમે પ્રવૃત્તિ સાચવી કે ડિલીટ કરી શકશો"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"બહાર નીકળતી વખતે તમે ઍક્ટિવિટીને સાચવી કે ડિલીટ કરી શકશો"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"સત્રની ઍક્ટિવિટીને હમણાં ડિલીટ કરવા માટે, રીસેટ કરો. અથવા બહાર નીકળતી વખતે તમે ઍક્ટિવિટીને સાચવી કે ડિલીટ કરી શકશો"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ફોટો પસંદ કરો"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"ઘણા બધા ખોટા પ્રયત્નો. આ ડિવાઇસનો ડેટા ડિલીટ કરવામાં આવશે."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"ઘણા બધા ખોટા પ્રયત્નો. આ વપરાશકર્તાને ડિલીટ કરવામાં આવશે."</string>

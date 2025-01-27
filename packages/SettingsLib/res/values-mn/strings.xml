@@ -690,7 +690,7 @@
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Төхөөрөмжийн өгөгдмөл"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Идэвхгүй болгосон"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Идэвхжүүлсэн"</string>
-    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Энэ өөрчлөлтийг хэрэгжүүлэхийн тулд таны төхөөрөмжийг дахин асаах ёстой. Одоо дахин асаах эсвэл цуцлана уу."</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Энэ өөрчлөлтийг хэрэгжүүлэхийн тулд таны төхөөрөмжийг дахин асаах ёстой. Одоо дахин асаах эсвэл цуцална уу."</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Утастай чихэвч"</string>
     <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Утастай аудио"</string>
     <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB аудио"</string>
