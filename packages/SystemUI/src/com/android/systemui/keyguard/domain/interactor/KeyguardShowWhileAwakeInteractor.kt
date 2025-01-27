@@ -26,8 +26,11 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 
-/** The reason we're locking while awake, used for logging. */
-enum class LockWhileAwakeReason(private val logReason: String) {
+/** The reason we're showing lockscreen while awake, used for logging. */
+enum class ShowWhileAwakeReason(private val logReason: String) {
+    FOLDED_WITH_SWIPE_UP_TO_CONTINUE(
+        "Folded with continue using apps on fold set to 'swipe up to continue'."
+    ),
     LOCKDOWN("Lockdown initiated."),
     KEYGUARD_REENABLED(
         "Keyguard was re-enabled. We weren't unlocked when it was disabled, " +
@@ -43,9 +46,13 @@ enum class LockWhileAwakeReason(private val logReason: String) {
 }
 
 /**
- * Logic around cases where the device locks while still awake (transitioning from GONE ->
+ * Logic around cases where the we show the lockscreen while still awake (transition from GONE ->
  * LOCKSCREEN), vs. the more common cases of a power button press or screen timeout, which result in
  * the device going to sleep.
+ *
+ * This does not necessarily mean we lock the device (which does not happen if showing the
+ * lockscreen is triggered by [KeyguardService.showDismissibleKeyguard]). We'll show keyguard here
+ * and authentication logic will decide if that keyguard is dismissible or not.
  *
  * This is possible in the following situations:
  * - The user initiates lockdown from the power menu.
@@ -53,50 +60,53 @@ enum class LockWhileAwakeReason(private val logReason: String) {
  * - The keyguard was disabled while visible, and has now been re-enabled, so it's re-showing.
  * - Someone called WM#lockNow().
  * - The screen timed out, but an activity with FLAG_ALLOW_LOCK_WHILE_SCREEN_ON is on top.
+ * - A foldable is folded with "Continue using apps on fold" set to "Swipe up to continue" (if set
+ *   to "never", then lockscreen will be shown when the device goes to sleep, which is not tnohe
+ *   concern of this interactor).
  */
 @SysUISingleton
-class KeyguardLockWhileAwakeInteractor
+class KeyguardShowWhileAwakeInteractor
 @Inject
 constructor(
     biometricSettingsRepository: BiometricSettingsRepository,
     keyguardEnabledInteractor: KeyguardEnabledInteractor,
-    keyguardServiceLockNowInteractor: KeyguardServiceLockNowInteractor,
+    keyguardServiceShowLockscreenInteractor: KeyguardServiceShowLockscreenInteractor,
 ) {
 
     /** Emits whenever the current user is in lockdown mode. */
-    private val inLockdown: Flow<LockWhileAwakeReason> =
+    private val inLockdown: Flow<ShowWhileAwakeReason> =
         biometricSettingsRepository.isCurrentUserInLockdown
             .distinctUntilChanged()
             .filter { inLockdown -> inLockdown }
-            .map { LockWhileAwakeReason.LOCKDOWN }
+            .map { ShowWhileAwakeReason.LOCKDOWN }
 
     /**
      * Emits whenever the keyguard is re-enabled, and we need to return to lockscreen due to the
      * device being locked when the keyguard was originally disabled.
      */
-    private val keyguardReenabled: Flow<LockWhileAwakeReason> =
+    private val keyguardReenabled: Flow<ShowWhileAwakeReason> =
         keyguardEnabledInteractor.isKeyguardEnabled
             .filter { enabled -> enabled }
             .sample(keyguardEnabledInteractor.showKeyguardWhenReenabled)
             .filter { reshow -> reshow }
-            .map { LockWhileAwakeReason.KEYGUARD_REENABLED }
+            .map { ShowWhileAwakeReason.KEYGUARD_REENABLED }
 
-    /** Emits whenever we should lock while the screen is on, for any reason. */
-    val lockWhileAwakeEvents: Flow<LockWhileAwakeReason> =
+    /** Emits whenever we should show lockscreen while the screen is on, for any reason. */
+    val showWhileAwakeEvents: Flow<ShowWhileAwakeReason> =
         merge(
             // We're in lockdown, and the keyguard is enabled. If the keyguard is disabled, the
             // lockdown button is hidden in the UI, but it's still possible to trigger lockdown in
             // tests.
             inLockdown
                 .filter { keyguardEnabledInteractor.isKeyguardEnabledAndNotSuppressed() }
-                .map { LockWhileAwakeReason.LOCKDOWN },
+                .map { ShowWhileAwakeReason.LOCKDOWN },
             // The keyguard was re-enabled, and it was showing when it was originally disabled.
             // Tests currently expect that if the keyguard is re-enabled, it will show even if it's
             // suppressed, so we don't check for isKeyguardEnabledAndNotSuppressed() on this flow.
-            keyguardReenabled.map { LockWhileAwakeReason.KEYGUARD_REENABLED },
-            // KeyguardService says we need to lock now, and the lockscreen is enabled.
-            keyguardServiceLockNowInteractor.lockNowEvents
-                .filter { keyguardEnabledInteractor.isKeyguardEnabledAndNotSuppressed() }
-                .map { LockWhileAwakeReason.KEYGUARD_TIMEOUT_WHILE_SCREEN_ON },
+            keyguardReenabled.map { ShowWhileAwakeReason.KEYGUARD_REENABLED },
+            // KeyguardService says we need to show now, and the lockscreen is enabled.
+            keyguardServiceShowLockscreenInteractor.showNowEvents.filter {
+                keyguardEnabledInteractor.isKeyguardEnabledAndNotSuppressed()
+            },
         )
 }

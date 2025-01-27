@@ -39,42 +39,39 @@ import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class KeyguardLockWhileAwakeInteractorTest : SysuiTestCase() {
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class KeyguardShowWhileAwakeInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private lateinit var underTest: KeyguardLockWhileAwakeInteractor
+    private lateinit var underTest: KeyguardShowWhileAwakeInteractor
 
     @Before
     fun setup() {
-        underTest = kosmos.keyguardLockWhileAwakeInteractor
+        underTest = kosmos.keyguardShowWhileAwakeInteractor
     }
 
     @Test
     fun emitsMultipleTimeoutEvents() =
         testScope.runTest {
-            val values by collectValues(underTest.lockWhileAwakeEvents)
+            val values by collectValues(underTest.showWhileAwakeEvents)
 
             kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(true)
             runCurrent()
 
-            kosmos.keyguardServiceLockNowInteractor.onKeyguardServiceDoKeyguardTimeout(
-                options = null
-            )
+            kosmos.keyguardServiceShowLockscreenInteractor.onKeyguardServiceDoKeyguardTimeout()
             runCurrent()
 
             assertThat(values)
-                .containsExactly(LockWhileAwakeReason.KEYGUARD_TIMEOUT_WHILE_SCREEN_ON)
+                .containsExactly(ShowWhileAwakeReason.KEYGUARD_TIMEOUT_WHILE_SCREEN_ON)
 
             advanceTimeBy(1000)
-            kosmos.keyguardServiceLockNowInteractor.onKeyguardServiceDoKeyguardTimeout(
-                options = null
-            )
+            kosmos.keyguardServiceShowLockscreenInteractor.onKeyguardServiceDoKeyguardTimeout()
             runCurrent()
 
             assertThat(values)
                 .containsExactly(
-                    LockWhileAwakeReason.KEYGUARD_TIMEOUT_WHILE_SCREEN_ON,
-                    LockWhileAwakeReason.KEYGUARD_TIMEOUT_WHILE_SCREEN_ON,
+                    ShowWhileAwakeReason.KEYGUARD_TIMEOUT_WHILE_SCREEN_ON,
+                    ShowWhileAwakeReason.KEYGUARD_TIMEOUT_WHILE_SCREEN_ON,
                 )
         }
 
@@ -88,7 +85,7 @@ class KeyguardLockWhileAwakeInteractorTest : SysuiTestCase() {
     @Test
     fun emitsWhenKeyguardReenabled_onlyIfShowingWhenDisabled() =
         testScope.runTest {
-            val values by collectValues(underTest.lockWhileAwakeEvents)
+            val values by collectValues(underTest.showWhileAwakeEvents)
 
             kosmos.biometricSettingsRepository.setIsUserInLockdown(false)
             runCurrent()
@@ -101,7 +98,7 @@ class KeyguardLockWhileAwakeInteractorTest : SysuiTestCase() {
             kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(true)
             runCurrent()
 
-            assertThat(values).containsExactly(LockWhileAwakeReason.KEYGUARD_REENABLED)
+            assertThat(values).containsExactly(ShowWhileAwakeReason.KEYGUARD_REENABLED)
 
             kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
@@ -112,7 +109,7 @@ class KeyguardLockWhileAwakeInteractorTest : SysuiTestCase() {
             kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(true)
             runCurrent()
 
-            assertThat(values).containsExactly(LockWhileAwakeReason.KEYGUARD_REENABLED)
+            assertThat(values).containsExactly(ShowWhileAwakeReason.KEYGUARD_REENABLED)
         }
 
     /**
@@ -122,7 +119,7 @@ class KeyguardLockWhileAwakeInteractorTest : SysuiTestCase() {
     @Test
     fun doesNotEmit_keyguardNoLongerSuppressed() =
         testScope.runTest {
-            val values by collectValues(underTest.lockWhileAwakeEvents)
+            val values by collectValues(underTest.showWhileAwakeEvents)
 
             // Enable keyguard and then suppress it.
             kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(true)
@@ -144,14 +141,14 @@ class KeyguardLockWhileAwakeInteractorTest : SysuiTestCase() {
     @Test
     fun doesNotEmit_fromLockdown_orFromLockNow_ifEnabledButSuppressed() =
         testScope.runTest {
-            val values by collectValues(underTest.lockWhileAwakeEvents)
+            val values by collectValues(underTest.showWhileAwakeEvents)
 
             // Set keyguard enabled, but then disable lockscreen (suppress it).
             kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(true)
             whenever(kosmos.lockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(true)
             runCurrent()
 
-            kosmos.keyguardServiceLockNowInteractor.onKeyguardServiceDoKeyguardTimeout(null)
+            kosmos.keyguardServiceShowLockscreenInteractor.onKeyguardServiceDoKeyguardTimeout()
             runCurrent()
 
             kosmos.biometricSettingsRepository.setIsUserInLockdown(true)

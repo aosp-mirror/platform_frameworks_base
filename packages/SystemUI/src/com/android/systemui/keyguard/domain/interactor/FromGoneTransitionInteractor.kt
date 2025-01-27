@@ -34,9 +34,6 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class FromGoneTransitionInteractor
@@ -52,7 +49,7 @@ constructor(
     powerInteractor: PowerInteractor,
     private val communalSceneInteractor: CommunalSceneInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
-    private val keyguardLockWhileAwakeInteractor: KeyguardLockWhileAwakeInteractor,
+    private val keyguardShowWhileAwakeInteractor: KeyguardShowWhileAwakeInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.GONE,
@@ -101,7 +98,7 @@ constructor(
     private fun listenForGoneToLockscreenOrHubOrOccluded() {
         if (KeyguardWmStateRefactor.isEnabled) {
             scope.launch {
-                keyguardLockWhileAwakeInteractor.lockWhileAwakeEvents
+                keyguardShowWhileAwakeInteractor.showWhileAwakeEvents
                     .filterRelevantKeyguardState()
                     .sample(communalSceneInteractor.isIdleOnCommunalNotEditMode, ::Pair)
                     .collect { (lockReason, idleOnCommunal) ->

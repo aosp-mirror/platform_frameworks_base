@@ -42,7 +42,7 @@ val Kosmos.keyguardWakeDirectlyToGoneInteractor by
             fakeSettings,
             selectedUserInteractor,
             keyguardEnabledInteractor,
-            keyguardServiceLockNowInteractor,
+            keyguardServiceShowLockscreenInteractor,
             keyguardInteractor,
         )
     }

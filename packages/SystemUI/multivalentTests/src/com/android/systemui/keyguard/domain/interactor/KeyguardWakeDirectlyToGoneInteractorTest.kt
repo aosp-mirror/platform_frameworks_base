@@ -185,7 +185,7 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
                 canWake,
             )
 
-            kosmos.keyguardServiceLockNowInteractor.onKeyguardServiceDoKeyguardTimeout(null)
+            kosmos.keyguardServiceShowLockscreenInteractor.onKeyguardServiceDoKeyguardTimeout()
             runCurrent()
 
             assertEquals(
@@ -209,7 +209,7 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
                 canWake,
             )
 
-            kosmos.keyguardServiceLockNowInteractor.onKeyguardServiceDoKeyguardTimeout(null)
+            kosmos.keyguardServiceShowLockscreenInteractor.onKeyguardServiceDoKeyguardTimeout()
             runCurrent()
 
             assertEquals(
