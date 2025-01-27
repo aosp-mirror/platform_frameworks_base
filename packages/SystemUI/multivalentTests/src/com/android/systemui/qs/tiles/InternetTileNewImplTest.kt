@@ -37,6 +37,7 @@ import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.flags.QSComposeFragment
 import com.android.systemui.qs.flags.QsDetailedView
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.qs.tiles.dialog.InternetDetailsViewModel
 import com.android.systemui.qs.tiles.dialog.InternetDialogManager
 import com.android.systemui.qs.tiles.dialog.WifiStateWorker
 import com.android.systemui.res.R
@@ -109,6 +110,7 @@ class InternetTileNewImplTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Mock private lateinit var dialogManager: InternetDialogManager
     @Mock private lateinit var wifiStateWorker: WifiStateWorker
     @Mock private lateinit var accessPointController: AccessPointController
+    @Mock private lateinit var internetDetailsViewModelFactory: InternetDetailsViewModel.Factory
 
     @Before
     fun setUp() {
@@ -145,6 +147,7 @@ class InternetTileNewImplTest(flags: FlagsParameterization) : SysuiTestCase() {
                 dialogManager,
                 wifiStateWorker,
                 accessPointController,
+                internetDetailsViewModelFactory
             )
 
         underTest.initialize()

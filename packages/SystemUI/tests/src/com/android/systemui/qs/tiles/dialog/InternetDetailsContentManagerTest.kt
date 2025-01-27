@@ -19,6 +19,7 @@ package com.android.systemui.qs.tiles.dialog
 import android.content.Intent
 import android.os.Handler
 import android.os.fakeExecutorHandler
+import android.platform.test.annotations.EnableFlags
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
 import android.telephony.telephonyManager
@@ -38,8 +39,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.wifi.WifiEnterpriseRestrictionUtils
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogTransitionAnimator
-import com.android.systemui.flags.setFlagValue
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -62,6 +62,8 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
+@EnableSceneContainer
+@EnableFlags(Flags.FLAG_QS_TILE_DETAILED_VIEW, Flags.FLAG_DUAL_SHADE)
 @UiThreadTest
 class InternetDetailsContentManagerTest : SysuiTestCase() {
     private val kosmos = Kosmos()
@@ -74,11 +76,8 @@ class InternetDetailsContentManagerTest : SysuiTestCase() {
     private val internetDetailsContentController: InternetDetailsContentController =
         mock<InternetDetailsContentController>()
     private val keyguard: KeyguardStateController = mock<KeyguardStateController>()
-    private val dialogTransitionAnimator: DialogTransitionAnimator =
-        mock<DialogTransitionAnimator>()
     private val bgExecutor = FakeExecutor(FakeSystemClock())
     private lateinit var internetDetailsContentManager: InternetDetailsContentManager
-    private var subTitle: View? = null
     private var ethernet: LinearLayout? = null
     private var mobileDataLayout: LinearLayout? = null
     private var mobileToggleSwitch: Switch? = null
@@ -96,8 +95,6 @@ class InternetDetailsContentManagerTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        // TODO: b/377388104 enable this flag after integrating with details view.
-        mSetFlagsRule.setFlagValue(Flags.FLAG_QS_TILE_DETAILED_VIEW, false)
         whenever(telephonyManager.createForSubscriptionId(ArgumentMatchers.anyInt()))
             .thenReturn(telephonyManager)
         whenever(internetWifiEntry.title).thenReturn(WIFI_TITLE)
@@ -133,9 +130,7 @@ class InternetDetailsContentManagerTest : SysuiTestCase() {
                 canConfigWifi = true,
                 coroutineScope = scope,
                 context = mContext,
-                internetDialog = null,
                 uiEventLogger = mock<UiEventLogger>(),
-                dialogTransitionAnimator = dialogTransitionAnimator,
                 handler = handler,
                 backgroundExecutor = bgExecutor,
                 keyguard = keyguard,
@@ -146,7 +141,6 @@ class InternetDetailsContentManagerTest : SysuiTestCase() {
         internetDetailsContentManager.connectedWifiEntry = internetWifiEntry
         internetDetailsContentManager.wifiEntriesCount = wifiEntries.size
 
-        subTitle = contentView.requireViewById(R.id.internet_dialog_subtitle)
         ethernet = contentView.requireViewById(R.id.ethernet_layout)
         mobileDataLayout = contentView.requireViewById(R.id.mobile_network_layout)
         mobileToggleSwitch = contentView.requireViewById(R.id.mobile_toggle)
@@ -182,32 +176,6 @@ class InternetDetailsContentManagerTest : SysuiTestCase() {
         assertThat(connectedWifi!!.visibility).isEqualTo(View.GONE)
         assertThat(wifiList!!.visibility).isEqualTo(View.GONE)
         assertThat(seeAll!!.visibility).isEqualTo(View.GONE)
-    }
-
-    @Test
-    fun updateContent_withApmOn_internetDialogSubTitleGone() {
-        whenever(internetDetailsContentController.isAirplaneModeEnabled).thenReturn(true)
-        internetDetailsContentManager.updateContent(true)
-        bgExecutor.runAllReady()
-
-        internetDetailsContentManager.internetContentData.observe(
-            internetDetailsContentManager.lifecycleOwner!!
-        ) {
-            assertThat(subTitle!!.visibility).isEqualTo(View.VISIBLE)
-        }
-    }
-
-    @Test
-    fun updateContent_withApmOff_internetDialogSubTitleVisible() {
-        whenever(internetDetailsContentController.isAirplaneModeEnabled).thenReturn(false)
-        internetDetailsContentManager.updateContent(true)
-        bgExecutor.runAllReady()
-
-        internetDetailsContentManager.internetContentData.observe(
-            internetDetailsContentManager.lifecycleOwner!!
-        ) {
-            assertThat(subTitle!!.visibility).isEqualTo(View.VISIBLE)
-        }
     }
 
     @Test
