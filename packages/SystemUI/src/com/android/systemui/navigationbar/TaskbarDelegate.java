@@ -265,6 +265,20 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         }
     }
 
+    @Override
+    public void onDisplayRemoveSystemDecorations(int displayId) {
+        CommandQueue.Callbacks.super.onDisplayRemoveSystemDecorations(displayId);
+        if (mOverviewProxyService.getProxy() == null) {
+            return;
+        }
+
+        try {
+            mOverviewProxyService.getProxy().onDisplayRemoveSystemDecorations(displayId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "onDisplaySystemDecorationsRemoved() failed", e);
+        }
+    }
+
     // Separated into a method to keep setDependencies() clean/readable.
     private LightBarTransitionsController createLightBarTransitionsController() {
 
