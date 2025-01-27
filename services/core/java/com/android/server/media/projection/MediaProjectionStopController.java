@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyCallback;
@@ -38,6 +39,7 @@ import android.view.Display;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemConfig;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -60,21 +62,35 @@ public class MediaProjectionStopController {
     private final TelephonyManager mTelephonyManager;
     private final AppOpsManager mAppOpsManager;
     private final PackageManager mPackageManager;
-    private final RoleManager mRoleManager;
+    private final RoleHolderProvider mRoleHolderProvider;
     private final ContentResolver mContentResolver;
 
     private boolean mIsInCall;
     private long mLastCallStartTimeMillis;
 
+
+    @VisibleForTesting
+    interface RoleHolderProvider {
+        List<String> getRoleHoldersAsUser(String roleName, UserHandle user);
+    }
+
     public MediaProjectionStopController(Context context, Consumer<Integer> stopReasonConsumer) {
+        this(context, stopReasonConsumer,
+                (roleName, user) -> context.getSystemService(RoleManager.class)
+                        .getRoleHoldersAsUser(roleName, user));
+    }
+
+    @VisibleForTesting
+    MediaProjectionStopController(Context context, Consumer<Integer> stopReasonConsumer,
+            RoleHolderProvider roleHolderProvider) {
         mStopReasonConsumer = stopReasonConsumer;
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mTelecomManager = context.getSystemService(TelecomManager.class);
         mTelephonyManager = context.getSystemService(TelephonyManager.class);
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
         mPackageManager = context.getPackageManager();
-        mRoleManager = context.getSystemService(RoleManager.class);
         mContentResolver = context.getContentResolver();
+        mRoleHolderProvider = roleHolderProvider;
     }
 
     /**
@@ -146,8 +162,9 @@ public class MediaProjectionStopController {
             Slog.v(TAG, "Continuing MediaProjection for package with OP_PROJECT_MEDIA AppOp ");
             return true;
         }
-        if (mRoleManager.getRoleHoldersAsUser(AssociationRequest.DEVICE_PROFILE_APP_STREAMING,
-                projectionGrant.userHandle).contains(projectionGrant.packageName)) {
+        if (mRoleHolderProvider.getRoleHoldersAsUser(
+                AssociationRequest.DEVICE_PROFILE_APP_STREAMING, projectionGrant.userHandle)
+                .contains(projectionGrant.packageName)) {
             Slog.v(TAG, "Continuing MediaProjection for package holding app streaming role.");
             return true;
         }
@@ -177,10 +194,6 @@ public class MediaProjectionStopController {
      */
     public boolean isStartForbidden(
             MediaProjectionManagerService.MediaProjection projectionGrant) {
-        if (!android.companion.virtualdevice.flags.Flags.mediaProjectionKeyguardRestrictions()) {
-            return false;
-        }
-
         if (!mKeyguardManager.isKeyguardLocked()) {
             return false;
         }
@@ -194,9 +207,6 @@ public class MediaProjectionStopController {
     @VisibleForTesting
     void onKeyguardLockedStateChanged(boolean isKeyguardLocked) {
         if (!isKeyguardLocked) return;
-        if (!android.companion.virtualdevice.flags.Flags.mediaProjectionKeyguardRestrictions()) {
-            return;
-        }
         mStopReasonConsumer.accept(STOP_REASON_KEYGUARD);
     }
 

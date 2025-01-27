@@ -18,13 +18,6 @@ flag {
 }
 
 flag {
-     namespace: "virtual_devices"
-     name: "media_projection_keyguard_restrictions"
-     description: "Auto-stop MP when the device locks"
-     bug: "348335290"
-}
-
-flag {
     namespace: "virtual_devices"
     name: "virtual_display_insets"
     description: "APIs for specifying virtual display insets (via cutout)"
