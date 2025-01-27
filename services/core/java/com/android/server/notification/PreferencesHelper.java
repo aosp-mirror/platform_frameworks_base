@@ -92,6 +92,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.notification.NotificationChannelGroupsHelper;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
@@ -1678,18 +1679,8 @@ public class PreferencesHelper implements RankingConfig {
             if (r == null || groupId == null || !r.groups.containsKey(groupId)) {
                 return null;
             }
-            NotificationChannelGroup group = r.groups.get(groupId).clone();
-            group.setChannels(new ArrayList<>());
-            int N = r.channels.size();
-            for (int i = 0; i < N; i++) {
-                final NotificationChannel nc = r.channels.valueAt(i);
-                if (includeDeleted || !nc.isDeleted()) {
-                    if (groupId.equals(nc.getGroup())) {
-                        group.addChannel(nc);
-                    }
-                }
-            }
-            return group;
+            return NotificationChannelGroupsHelper.getGroupWithChannels(groupId,
+                    r.channels.values(), r.groups, includeDeleted);
         }
     }
 
@@ -1706,51 +1697,16 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
-            int uid, boolean includeDeleted, boolean includeNonGrouped, boolean includeEmpty,
-            boolean includeBlocked, Set<String> activeChannelFilter) {
+            int uid, NotificationChannelGroupsHelper.Params params) {
         Objects.requireNonNull(pkg);
-        Map<String, NotificationChannelGroup> groups = new ArrayMap<>();
         synchronized (mLock) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 return ParceledListSlice.emptyList();
             }
-            NotificationChannelGroup nonGrouped = new NotificationChannelGroup(null, null);
-            int N = r.channels.size();
-            for (int i = 0; i < N; i++) {
-                final NotificationChannel nc = r.channels.valueAt(i);
-                boolean includeChannel = (includeDeleted || !nc.isDeleted())
-                        && (activeChannelFilter == null
-                                || (includeBlocked && nc.getImportance() == IMPORTANCE_NONE)
-                                || activeChannelFilter.contains(nc.getId()))
-                        && !SYSTEM_RESERVED_IDS.contains(nc.getId());
-                if (includeChannel) {
-                    if (nc.getGroup() != null) {
-                        if (r.groups.get(nc.getGroup()) != null) {
-                            NotificationChannelGroup ncg = groups.get(nc.getGroup());
-                            if (ncg == null) {
-                                ncg = r.groups.get(nc.getGroup()).clone();
-                                ncg.setChannels(new ArrayList<>());
-                                groups.put(nc.getGroup(), ncg);
-                            }
-                            ncg.addChannel(nc);
-                        }
-                    } else {
-                        nonGrouped.addChannel(nc);
-                    }
-                }
-            }
-            if (includeNonGrouped && nonGrouped.getChannels().size() > 0) {
-                groups.put(null, nonGrouped);
-            }
-            if (includeEmpty) {
-                for (NotificationChannelGroup group : r.groups.values()) {
-                    if (!groups.containsKey(group.getId())) {
-                        groups.put(group.getId(), group);
-                    }
-                }
-            }
-            return new ParceledListSlice<>(new ArrayList<>(groups.values()));
+            return new ParceledListSlice<>(
+                    NotificationChannelGroupsHelper.getGroupsWithChannels(r.channels.values(),
+                            r.groups, params));
         }
     }
 
