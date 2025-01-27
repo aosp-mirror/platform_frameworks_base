@@ -2219,7 +2219,7 @@
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"O Bluetooth permanecerá activado mentres se utilice o modo avión"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Cargando"</string>
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # ficheiro}other{{file_name} + # ficheiros}}"</string>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Non hai recomendacións de persoas coas que compartir contido"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Non hai recomendacións de persoas coas que compartir isto"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista de aplicacións"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Esta aplicación non está autorizada a realizar gravacións, pero podería capturar audio a través deste dispositivo USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Inicio"</string>

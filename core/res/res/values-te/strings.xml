@@ -2109,7 +2109,7 @@
     <string name="time_picker_minute_label" msgid="8307452311269824553">"నిమిషం"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"సమయాన్ని సెట్ చేయండి"</string>
     <string name="time_picker_input_error" msgid="8386271930742451034">"చెల్లుబాటు అయ్యే సమయాన్ని నమోదు చేయండి"</string>
-    <string name="time_picker_prompt_label" msgid="303588544656363889">"సమయంలో టైప్ చేయండి"</string>
+    <string name="time_picker_prompt_label" msgid="303588544656363889">"టైమ్ ఎంట‌ర్ చేయండి"</string>
     <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"సమయాన్ని నమోదు చేయడం కోసం వచన నమోదు మోడ్‌కి మారండి."</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"సమయాన్ని నమోదు చేయడం కోసం గడియారం మోడ్‌కు మారండి."</string>
     <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"స్వీయ పూరింపు ఎంపికలు"</string>

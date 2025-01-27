@@ -1206,7 +1206,7 @@
     <string name="delete" msgid="1514113991712129054">"हटवा"</string>
     <string name="copyUrl" msgid="6229645005987260230">"URL कॉपी करा"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"मजकूर निवडा"</string>
-    <string name="undo" msgid="3175318090002654673">"पूर्ववत करा"</string>
+    <string name="undo" msgid="3175318090002654673">"पहिल्यासारखे करा"</string>
     <string name="redo" msgid="7231448494008532233">"पुन्हा करा"</string>
     <string name="autofill" msgid="511224882647795296">"स्वयं-भरण"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"मजकूर निवड"</string>

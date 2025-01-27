@@ -2110,7 +2110,7 @@
     <string name="time_picker_minute_label" msgid="8307452311269824553">"דקה"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"הגדרת שעה"</string>
     <string name="time_picker_input_error" msgid="8386271930742451034">"יש להזין שעה חוקית"</string>
-    <string name="time_picker_prompt_label" msgid="303588544656363889">"מהי השעה הנכונה"</string>
+    <string name="time_picker_prompt_label" msgid="303588544656363889">"צריך להקליד את השעה הרצויה"</string>
     <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"מעבר לשיטת קלט טקסט כדי להזין את השעה"</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"מעבר למצב שעון לצורך הזנת השעה"</string>
     <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"אפשרויות מילוי אוטומטי"</string>
