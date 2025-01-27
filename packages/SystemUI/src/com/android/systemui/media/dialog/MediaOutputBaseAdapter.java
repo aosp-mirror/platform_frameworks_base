@@ -94,10 +94,6 @@ public abstract class MediaOutputBaseAdapter extends
         mController.setCurrentColorScheme(wallpaperColors, isDarkTheme);
     }
 
-    CharSequence getItemTitle(MediaDevice device) {
-        return device.getName();
-    }
-
     boolean isCurrentlyConnected(MediaDevice device) {
         return TextUtils.equals(device.getId(),
                 mController.getCurrentConnectedMediaDevice().getId())
@@ -232,16 +228,14 @@ public abstract class MediaOutputBaseAdapter extends
                     : mController.getItemMarginEndDefault();
         }
 
-        void setTwoLineLayout(MediaDevice device, boolean showSeekBar,
-                boolean showProgressBar, boolean showSubtitle, boolean showStatus,
-                boolean isFakeActive) {
-            setTwoLineLayout(device, null, showSeekBar, showProgressBar, showSubtitle,
-                    showStatus, false, isFakeActive);
+        void setTwoLineLayout(CharSequence title, boolean showSeekBar,
+                boolean showProgressBar, boolean showSubtitle, boolean showStatus) {
+            setTwoLineLayout(title, showSeekBar, showProgressBar, showSubtitle, showStatus, false);
         }
 
-        void setTwoLineLayout(MediaDevice device, CharSequence title,
+        void setTwoLineLayout(CharSequence title,
                 boolean showSeekBar, boolean showProgressBar, boolean showSubtitle,
-                boolean showStatus , boolean showEndTouchArea, boolean isFakeActive) {
+                boolean showStatus , boolean showEndTouchArea) {
             mTitleText.setVisibility(View.GONE);
             mTwoLineLayout.setVisibility(View.VISIBLE);
             mStatusIcon.setVisibility(showStatus ? View.VISIBLE : View.GONE);
@@ -249,10 +243,10 @@ public abstract class MediaOutputBaseAdapter extends
             mSeekBar.setVisibility(showSeekBar ? View.VISIBLE : View.GONE);
             final Drawable backgroundDrawable;
             backgroundDrawable = mContext.getDrawable(
-                    showSeekBar || isFakeActive ? R.drawable.media_output_item_background_active
+                    showSeekBar ? R.drawable.media_output_item_background_active
                             : R.drawable.media_output_item_background).mutate();
             mItemLayout.setBackgroundTintList(ColorStateList.valueOf(
-                    showSeekBar || isFakeActive ? mController.getColorConnectedItemBackground()
+                    showSeekBar ? mController.getColorConnectedItemBackground()
                             : mController.getColorItemBackground()
             ));
             if (showSeekBar) {
@@ -268,8 +262,7 @@ public abstract class MediaOutputBaseAdapter extends
             mItemLayout.setBackground(backgroundDrawable);
             mProgressBar.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
             mSubTitleText.setVisibility(showSubtitle ? View.VISIBLE : View.GONE);
-            mTwoLineTitleText.setTranslationY(0);
-            mTwoLineTitleText.setText(device == null ? title : getItemTitle(device));
+            mTwoLineTitleText.setText(title);
         }
 
         void updateSeekbarProgressBackground() {
