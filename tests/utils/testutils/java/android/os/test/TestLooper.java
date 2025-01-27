@@ -24,12 +24,16 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
 import android.os.SystemClock;
+import android.os.TestLooperManager;
 import android.util.Log;
+
+import androidx.test.InstrumentationRegistry;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.concurrent.Executor;
 
 /**
@@ -44,17 +48,14 @@ import java.util.concurrent.Executor;
  *     The Robolectric class also allows advancing time.
  */
 public class TestLooper {
-    protected final Looper mLooper;
+    private final Looper mLooper;
+    private final TestLooperManager mTestLooperManager;
+    private final Clock mClock;
 
     private static final Constructor<Looper> LOOPER_CONSTRUCTOR;
     private static final Field THREAD_LOCAL_LOOPER_FIELD;
-    private static final Field MESSAGE_QUEUE_MESSAGES_FIELD;
-    private static final Field MESSAGE_NEXT_FIELD;
-    private static final Field MESSAGE_WHEN_FIELD;
-    private static final Method MESSAGE_MARK_IN_USE_METHOD;
     private static final String TAG = "TestLooper";
 
-    private final Clock mClock;
 
     private AutoDispatchThread mAutoDispatchThread;
 
@@ -64,14 +65,6 @@ public class TestLooper {
             LOOPER_CONSTRUCTOR.setAccessible(true);
             THREAD_LOCAL_LOOPER_FIELD = Looper.class.getDeclaredField("sThreadLocal");
             THREAD_LOCAL_LOOPER_FIELD.setAccessible(true);
-            MESSAGE_QUEUE_MESSAGES_FIELD = MessageQueue.class.getDeclaredField("mMessages");
-            MESSAGE_QUEUE_MESSAGES_FIELD.setAccessible(true);
-            MESSAGE_NEXT_FIELD = Message.class.getDeclaredField("next");
-            MESSAGE_NEXT_FIELD.setAccessible(true);
-            MESSAGE_WHEN_FIELD = Message.class.getDeclaredField("when");
-            MESSAGE_WHEN_FIELD.setAccessible(true);
-            MESSAGE_MARK_IN_USE_METHOD = Message.class.getDeclaredMethod("markInUse");
-            MESSAGE_MARK_IN_USE_METHOD.setAccessible(true);
         } catch (NoSuchFieldException | NoSuchMethodException e) {
             throw new RuntimeException("Failed to initialize TestLooper", e);
         }
@@ -106,6 +99,8 @@ public class TestLooper {
             throw new RuntimeException("Reflection error constructing or accessing looper", e);
         }
 
+        mTestLooperManager =
+            InstrumentationRegistry.getInstrumentation().acquireLooperManager(mLooper);
         mClock = clock;
     }
 
@@ -117,29 +112,48 @@ public class TestLooper {
         return new HandlerExecutor(new Handler(getLooper()));
     }
 
-    private Message getMessageLinkedList() {
-        try {
-            MessageQueue queue = mLooper.getQueue();
-            return (Message) MESSAGE_QUEUE_MESSAGES_FIELD.get(queue);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Access failed in TestLooper: get - MessageQueue.mMessages",
-                    e);
-        }
-    }
-
     public void moveTimeForward(long milliSeconds) {
-        try {
-            Message msg = getMessageLinkedList();
-            while (msg != null) {
-                long updatedWhen = msg.getWhen() - milliSeconds;
-                if (updatedWhen < 0) {
-                    updatedWhen = 0;
-                }
-                MESSAGE_WHEN_FIELD.set(msg, updatedWhen);
-                msg = (Message) MESSAGE_NEXT_FIELD.get(msg);
+        // Drain all Messages from the queue.
+        Queue<Message> messages = new ArrayDeque<>();
+        while (true) {
+            Message message = mTestLooperManager.poll();
+            if (message == null) {
+                break;
             }
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Access failed in TestLooper: set - Message.when", e);
+
+            // Adjust the Message's delivery time.
+            long newWhen = message.when - milliSeconds;
+            if (newWhen < 0) {
+                newWhen = 0;
+            }
+            message.when = newWhen;
+            messages.add(message);
+        }
+
+        // Repost all Messages back to the queuewith a new time.
+        while (true) {
+            Message message = messages.poll();
+            if (message == null) {
+                break;
+            }
+
+            Runnable callback = message.getCallback();
+            Handler handler = message.getTarget();
+            long when = message.getWhen();
+
+            // The Message cannot be re-enqueued because it is marked in use.
+            // Make a copy of the Message and recycle the original.
+            // This resets {@link Message#isInUse()} but retains all other content.
+            {
+                Message newMessage = Message.obtain();
+                newMessage.copyFrom(message);
+                newMessage.setCallback(callback);
+                mTestLooperManager.recycle(message);
+                message = newMessage;
+            }
+
+            // Send the Message back to its Handler to be re-enqueued.
+            handler.sendMessageAtTime(message, when);
         }
     }
 
@@ -147,48 +161,12 @@ public class TestLooper {
         return mClock.uptimeMillis();
     }
 
-    private Message messageQueueNext() {
-        try {
-            long now = currentTime();
-
-            Message prevMsg = null;
-            Message msg = getMessageLinkedList();
-            if (msg != null && msg.getTarget() == null) {
-                // Stalled by a barrier. Find the next asynchronous message in
-                // the queue.
-                do {
-                    prevMsg = msg;
-                    msg = (Message) MESSAGE_NEXT_FIELD.get(msg);
-                } while (msg != null && !msg.isAsynchronous());
-            }
-            if (msg != null) {
-                if (now >= msg.getWhen()) {
-                    // Got a message.
-                    if (prevMsg != null) {
-                        MESSAGE_NEXT_FIELD.set(prevMsg, MESSAGE_NEXT_FIELD.get(msg));
-                    } else {
-                        MESSAGE_QUEUE_MESSAGES_FIELD.set(mLooper.getQueue(),
-                                MESSAGE_NEXT_FIELD.get(msg));
-                    }
-                    MESSAGE_NEXT_FIELD.set(msg, null);
-                    MESSAGE_MARK_IN_USE_METHOD.invoke(msg);
-                    return msg;
-                }
-            }
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException("Access failed in TestLooper", e);
-        }
-
-        return null;
-    }
-
     /**
      * @return true if there are pending messages in the message queue
      */
     public synchronized boolean isIdle() {
-        Message messageList = getMessageLinkedList();
-
-        return messageList != null && currentTime() >= messageList.getWhen();
+        Long when = mTestLooperManager.peekWhen();
+        return when != null && currentTime() >= when;
     }
 
     /**
@@ -196,7 +174,7 @@ public class TestLooper {
      */
     public synchronized Message nextMessage() {
         if (isIdle()) {
-            return messageQueueNext();
+            return mTestLooperManager.poll();
         } else {
             return null;
         }
@@ -208,7 +186,7 @@ public class TestLooper {
      */
     public synchronized void dispatchNext() {
         assertTrue(isIdle());
-        Message msg = messageQueueNext();
+        Message msg = mTestLooperManager.poll();
         if (msg == null) {
             return;
         }
