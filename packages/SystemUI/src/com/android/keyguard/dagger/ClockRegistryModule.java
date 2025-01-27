@@ -62,15 +62,14 @@ public abstract class ClockRegistryModule {
                 scope,
                 mainDispatcher,
                 bgDispatcher,
-                com.android.systemui.Flags.lockscreenCustomClocks()
+                com.android.systemui.shared.Flags.lockscreenCustomClocks()
                         || featureFlags.isEnabled(Flags.LOCKSCREEN_CUSTOM_CLOCKS),
                 /* handleAllUsers= */ true,
                 new DefaultClockProvider(
                         context,
                         layoutInflater,
                         resources,
-
-                        com.android.systemui.Flags.clockReactiveVariants()
+                        com.android.systemui.shared.Flags.clockReactiveVariants()
                 ),
                 context.getString(R.string.lockscreen_clock_id_fallback),
                 clockBuffers,
