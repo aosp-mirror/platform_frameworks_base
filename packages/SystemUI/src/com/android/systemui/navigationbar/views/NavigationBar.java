@@ -36,7 +36,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.HOME_BUTTON_LONG_PRESS_DURATION_MS;
 import static com.android.systemui.navigationbar.NavBarHelper.transitionMode;
-import static com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
+import static com.android.systemui.recents.LauncherProxyService.LauncherProxyListener;
 import static com.android.systemui.shared.recents.utilities.Utilities.isLargeScreen;
 import static com.android.systemui.shared.rotation.RotationButtonController.DEBUG_ROTATION;
 import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_OPAQUE;
@@ -131,7 +131,7 @@ import com.android.systemui.navigationbar.views.buttons.KeyButtonView;
 import com.android.systemui.navigationbar.views.buttons.NavBarButtonClickLogger;
 import com.android.systemui.navigationbar.views.buttons.NavbarOrientationTrackingLogger;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.recents.LauncherProxyService;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.DisplayTracker;
@@ -212,7 +212,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final ShadeViewController mShadeViewController;
     private final PanelExpansionInteractor mPanelExpansionInteractor;
     private final NotificationRemoteInputManager mNotificationRemoteInputManager;
-    private final OverviewProxyService mOverviewProxyService;
+    private final LauncherProxyService mLauncherProxyService;
     private final NavigationModeController mNavigationModeController;
     private final UserTracker mUserTracker;
     private final CommandQueue mCommandQueue;
@@ -283,7 +283,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
      * gesture to indicate to them that they can continue in that orientation without having to
      * rotate the phone
      * The secondary handle will show when we get
-     * {@link OverviewProxyListener#notifyPrioritizedRotation(int)} callback with the
+     * {@link LauncherProxyListener#notifyPrioritizedRotation(int)} callback with the
      * original handle hidden and we'll flip the visibilities once the
      * {@link #mTasksFrozenListener} fires
      */
@@ -387,12 +387,12 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 }
             };
 
-    private final OverviewProxyListener mOverviewProxyListener = new OverviewProxyListener() {
+    private final LauncherProxyListener mLauncherProxyListener = new LauncherProxyListener() {
         @Override
         public void onConnectionChanged(boolean isConnected) {
-            mView.onOverviewProxyConnectionChange(
-                    mOverviewProxyService.isEnabled());
-            mView.setShouldShowSwipeUpUi(mOverviewProxyService.shouldShowSwipeUpUI());
+            mView.onLauncherProxyConnectionChange(
+                    mLauncherProxyService.isEnabled());
+            mView.setShouldShowSwipeUpUi(mLauncherProxyService.shouldShowSwipeUpUI());
             updateScreenPinningGestures();
         }
 
@@ -565,7 +565,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             AccessibilityManager accessibilityManager,
             DeviceProvisionedController deviceProvisionedController,
             MetricsLogger metricsLogger,
-            OverviewProxyService overviewProxyService,
+            LauncherProxyService launcherProxyService,
             NavigationModeController navigationModeController,
             StatusBarStateController statusBarStateController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
@@ -618,7 +618,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mShadeViewController = shadeViewController;
         mPanelExpansionInteractor = panelExpansionInteractor;
         mNotificationRemoteInputManager = notificationRemoteInputManager;
-        mOverviewProxyService = overviewProxyService;
+        mLauncherProxyService = launcherProxyService;
         mNavigationModeController = navigationModeController;
         mUserTracker = userTracker;
         mCommandQueue = commandQueue;
@@ -827,7 +827,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         setNavBarMode(mNavBarMode);
         repositionNavigationBar(mCurrentRotation);
         mView.setUpdateActiveTouchRegionsCallback(
-                () -> mOverviewProxyService.onActiveNavBarRegionChanges(
+                () -> mLauncherProxyService.onActiveNavBarRegionChanges(
                         getButtonLocations(true /* inScreen */, true /* useNearestRegion */)));
 
         mView.getViewTreeObserver().addOnComputeInternalInsetsListener(
@@ -843,7 +843,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
         notifyNavigationBarScreenOn();
 
-        mOverviewProxyService.addCallback(mOverviewProxyListener);
+        mLauncherProxyService.addCallback(mLauncherProxyListener);
         updateSystemUiStateFlags();
 
         // Currently there is no accelerometer sensor on non-default display.
@@ -881,7 +881,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     public void onViewDetached() {
         mView.setUpdateActiveTouchRegionsCallback(null);
         getBarTransitions().destroy();
-        mOverviewProxyService.removeCallback(mOverviewProxyListener);
+        mLauncherProxyService.removeCallback(mLauncherProxyListener);
         mUserTracker.removeCallback(mUserChangedCallback);
         mWakefulnessLifecycle.removeObserver(mWakefulnessObserver);
         if (mOrientationHandle != null) {
@@ -1699,9 +1699,9 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
     private void updateAssistantEntrypoints(boolean assistantAvailable,
             boolean longPressHomeEnabled) {
-        if (mOverviewProxyService.getProxy() != null) {
+        if (mLauncherProxyService.getProxy() != null) {
             try {
-                mOverviewProxyService.getProxy().onAssistantAvailable(assistantAvailable,
+                mLauncherProxyService.getProxy().onAssistantAvailable(assistantAvailable,
                         longPressHomeEnabled);
             } catch (RemoteException e) {
                 Log.w(TAG, "Unable to send assistant availability data to launcher");
@@ -2109,7 +2109,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             if (!canShowSecondaryHandle()) {
                 resetSecondaryHandle();
             }
-            mView.setShouldShowSwipeUpUi(mOverviewProxyService.shouldShowSwipeUpUI());
+            mView.setShouldShowSwipeUpUi(mLauncherProxyService.shouldShowSwipeUpUI());
         }
     };
 

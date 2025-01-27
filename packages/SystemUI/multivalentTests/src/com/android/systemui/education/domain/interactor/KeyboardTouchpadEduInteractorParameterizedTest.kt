@@ -34,7 +34,7 @@ import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType
 import com.android.systemui.inputdevice.tutorial.tutorialSchedulerRepository
 import com.android.systemui.keyboard.data.repository.keyboardRepository
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener
+import com.android.systemui.recents.LauncherProxyService.LauncherProxyListener
 import com.android.systemui.testKosmos
 import com.android.systemui.touchpad.data.repository.touchpadRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
@@ -68,7 +68,7 @@ class KeyboardTouchpadEduInteractorParameterizedTest(private val gestureType: Ge
     private val keyboardRepository = kosmos.keyboardRepository
     private val tutorialSchedulerRepository = kosmos.tutorialSchedulerRepository
     private val userRepository = kosmos.fakeUserRepository
-    private val overviewProxyService = kosmos.mockOverviewProxyService
+    private val launcherProxyService = kosmos.mockLauncherProxyService
 
     private val underTest: KeyboardTouchpadEduInteractor = kosmos.keyboardTouchpadEduInteractor
     private val eduClock = kosmos.fakeEduClock
@@ -519,8 +519,8 @@ class KeyboardTouchpadEduInteractorParameterizedTest(private val gestureType: Ge
     }
 
     private fun updateContextualEduStats(isTrackpadGesture: Boolean, gestureType: GestureType) {
-        val listenerCaptor = argumentCaptor<OverviewProxyListener>()
-        verify(overviewProxyService).addCallback(listenerCaptor.capture())
+        val listenerCaptor = argumentCaptor<LauncherProxyListener>()
+        verify(launcherProxyService).addCallback(listenerCaptor.capture())
         listenerCaptor.firstValue.updateContextualEduStats(isTrackpadGesture, gestureType)
     }
 

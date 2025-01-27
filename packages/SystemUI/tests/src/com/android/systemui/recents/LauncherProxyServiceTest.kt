@@ -40,11 +40,11 @@ import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.navigationbar.NavigationBarController
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.process.ProcessWrapper
-import com.android.systemui.recents.OverviewProxyService.ACTION_QUICKSTEP
+import com.android.systemui.recents.LauncherProxyService.ACTION_QUICKSTEP
 import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.ShadeViewController
-import com.android.systemui.shared.recents.IOverviewProxy
+import com.android.systemui.shared.recents.ILauncherProxy
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_WAKEFULNESS_MASK
 import com.android.systemui.shared.system.QuickStepContract.WAKEFULNESS_ASLEEP
 import com.android.systemui.shared.system.QuickStepContract.WAKEFULNESS_AWAKE
@@ -83,12 +83,12 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-class OverviewProxyServiceTest : SysuiTestCase() {
+class LauncherProxyServiceTest : SysuiTestCase() {
 
     @Main private val executor: Executor = MoreExecutors.directExecutor()
 
     private val kosmos = testKosmos()
-    private lateinit var subject: OverviewProxyService
+    private lateinit var subject: LauncherProxyService
     @Mock private val dumpManager = DumpManager()
     @Mock private val processWrapper = ProcessWrapper()
     private val displayTracker = FakeDisplayTracker(mContext)
@@ -97,10 +97,10 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     private val wakefulnessLifecycle =
         WakefulnessLifecycle(mContext, null, fakeSystemClock, dumpManager)
 
-    @Mock private lateinit var overviewProxy: IOverviewProxy.Stub
+    @Mock private lateinit var launcherProxy: ILauncherProxy.Stub
     @Mock private lateinit var packageManager: PackageManager
 
-    // The following mocks belong to not-yet-tested parts of OverviewProxyService.
+    // The following mocks belong to not-yet-tested parts of LauncherProxyService.
     @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var shellInterface: ShellInterface
     @Mock private lateinit var navBarController: NavigationBarController
@@ -127,18 +127,18 @@ class OverviewProxyServiceTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         val serviceComponent = ComponentName("test_package", "service_provider")
-        context.addMockService(serviceComponent, overviewProxy)
+        context.addMockService(serviceComponent, launcherProxy)
         context.addMockServiceResolver(
             TestableContext.MockServiceResolver {
                 if (it.action == ACTION_QUICKSTEP) serviceComponent else null
             }
         )
-        whenever(overviewProxy.queryLocalInterface(ArgumentMatchers.anyString()))
-            .thenReturn(overviewProxy)
-        whenever(overviewProxy.asBinder()).thenReturn(overviewProxy)
+        whenever(launcherProxy.queryLocalInterface(ArgumentMatchers.anyString()))
+            .thenReturn(launcherProxy)
+        whenever(launcherProxy.asBinder()).thenReturn(launcherProxy)
 
         // packageManager.resolveServiceAsUser has to return non-null for
-        // OverviewProxyService#isEnabled to become true.
+        // LauncherProxyService#isEnabled to become true.
         context.setMockPackageManager(packageManager)
         whenever(packageManager.resolveServiceAsUser(any(), anyInt(), anyInt()))
             .thenReturn(mock(ResolveInfo::class.java))
@@ -147,7 +147,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
 
         // return isSystemUser as true by default.
         `when`(processWrapper.isSystemUser).thenReturn(true)
-        subject = createOverviewProxyService(context)
+        subject = createLauncherProxyService(context)
     }
 
     @After
@@ -159,11 +159,11 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     fun wakefulnessLifecycle_dispatchFinishedWakingUpSetsSysUIflagToAWAKE() {
         // WakefulnessLifecycle is initialized to AWAKE initially, and won't emit a noop.
         wakefulnessLifecycle.dispatchFinishedGoingToSleep()
-        clearInvocations(overviewProxy)
+        clearInvocations(launcherProxy)
 
         wakefulnessLifecycle.dispatchFinishedWakingUp()
 
-        verify(overviewProxy)
+        verify(launcherProxy)
             .onSystemUiStateChanged(
                 longThat { it and SYSUI_STATE_WAKEFULNESS_MASK == WAKEFULNESS_AWAKE }
             )
@@ -173,7 +173,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     fun wakefulnessLifecycle_dispatchStartedWakingUpSetsSysUIflagToWAKING() {
         wakefulnessLifecycle.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN)
 
-        verify(overviewProxy)
+        verify(launcherProxy)
             .onSystemUiStateChanged(
                 longThat { it and SYSUI_STATE_WAKEFULNESS_MASK == WAKEFULNESS_WAKING }
             )
@@ -183,7 +183,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     fun wakefulnessLifecycle_dispatchFinishedGoingToSleepSetsSysUIflagToASLEEP() {
         wakefulnessLifecycle.dispatchFinishedGoingToSleep()
 
-        verify(overviewProxy)
+        verify(launcherProxy)
             .onSystemUiStateChanged(
                 longThat { it and SYSUI_STATE_WAKEFULNESS_MASK == WAKEFULNESS_ASLEEP }
             )
@@ -195,56 +195,56 @@ class OverviewProxyServiceTest : SysuiTestCase() {
             PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON
         )
 
-        verify(overviewProxy)
+        verify(launcherProxy)
             .onSystemUiStateChanged(
                 longThat { it and SYSUI_STATE_WAKEFULNESS_MASK == WAKEFULNESS_GOING_TO_SLEEP }
             )
     }
 
     @Test
-    fun connectToOverviewService_primaryUserNoVisibleBgUsersSupported_expectBindService() {
+    fun connectToLauncherService_primaryUserNoVisibleBgUsersSupported_expectBindService() {
         `when`(processWrapper.isSystemUser).thenReturn(true)
         `when`(userManager.isVisibleBackgroundUsersSupported()).thenReturn(false)
         val spyContext = spy(context)
-        val ops = createOverviewProxyService(spyContext)
+        val ops = createLauncherProxyService(spyContext)
         ops.startConnectionToCurrentUser()
         verify(spyContext, atLeast(1)).bindServiceAsUser(any(), any(), anyInt(), any())
     }
 
     @Test
-    fun connectToOverviewService_nonPrimaryUserNoVisibleBgUsersSupported_expectNoBindService() {
+    fun connectToLauncherService_nonPrimaryUserNoVisibleBgUsersSupported_expectNoBindService() {
         `when`(processWrapper.isSystemUser).thenReturn(false)
         `when`(userManager.isVisibleBackgroundUsersSupported()).thenReturn(false)
         val spyContext = spy(context)
-        val ops = createOverviewProxyService(spyContext)
+        val ops = createLauncherProxyService(spyContext)
         ops.startConnectionToCurrentUser()
         verify(spyContext, times(0)).bindServiceAsUser(any(), any(), anyInt(), any())
     }
 
     @Test
-    fun connectToOverviewService_nonPrimaryBgUserVisibleBgUsersSupported_expectBindService() {
+    fun connectToLauncherService_nonPrimaryBgUserVisibleBgUsersSupported_expectBindService() {
         `when`(processWrapper.isSystemUser).thenReturn(false)
         `when`(userManager.isVisibleBackgroundUsersSupported()).thenReturn(true)
         `when`(userManager.isUserForeground()).thenReturn(false)
         val spyContext = spy(context)
-        val ops = createOverviewProxyService(spyContext)
+        val ops = createLauncherProxyService(spyContext)
         ops.startConnectionToCurrentUser()
         verify(spyContext, atLeast(1)).bindServiceAsUser(any(), any(), anyInt(), any())
     }
 
     @Test
-    fun connectToOverviewService_nonPrimaryFgUserVisibleBgUsersSupported_expectNoBindService() {
+    fun connectToLauncherService_nonPrimaryFgUserVisibleBgUsersSupported_expectNoBindService() {
         `when`(processWrapper.isSystemUser).thenReturn(false)
         `when`(userManager.isVisibleBackgroundUsersSupported()).thenReturn(true)
         `when`(userManager.isUserForeground()).thenReturn(true)
         val spyContext = spy(context)
-        val ops = createOverviewProxyService(spyContext)
+        val ops = createLauncherProxyService(spyContext)
         ops.startConnectionToCurrentUser()
         verify(spyContext, times(0)).bindServiceAsUser(any(), any(), anyInt(), any())
     }
 
-    private fun createOverviewProxyService(ctx: Context): OverviewProxyService {
-        return OverviewProxyService(
+    private fun createLauncherProxyService(ctx: Context): LauncherProxyService {
+        return LauncherProxyService(
             ctx,
             executor,
             commandQueue,

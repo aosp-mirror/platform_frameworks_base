@@ -23,30 +23,30 @@ import android.util.Log;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.shared.recents.IOverviewProxy;
+import com.android.systemui.shared.recents.ILauncherProxy;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
 
 /**
- * An implementation of the Recents interface which proxies to the OverviewProxyService.
+ * An implementation of the Recents interface which proxies to the LauncherProxyService.
  */
 @SysUISingleton
 public class OverviewProxyRecentsImpl implements RecentsImplementation {
 
     private final static String TAG = "OverviewProxyRecentsImpl";
     private Handler mHandler;
-    private final OverviewProxyService mOverviewProxyService;
+    private final LauncherProxyService mLauncherProxyService;
     private final ActivityStarter mActivityStarter;
     private final KeyguardStateController mKeyguardStateController;
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject
     public OverviewProxyRecentsImpl(
-            OverviewProxyService overviewProxyService,
+            LauncherProxyService launcherProxyService,
             ActivityStarter activityStarter,
             KeyguardStateController keyguardStateController) {
-        mOverviewProxyService = overviewProxyService;
+        mLauncherProxyService = launcherProxyService;
         mActivityStarter = activityStarter;
         mKeyguardStateController = keyguardStateController;
     }
@@ -58,10 +58,10 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
 
     @Override
     public void showRecentApps(boolean triggeredFromAltTab) {
-        IOverviewProxy overviewProxy = mOverviewProxyService.getProxy();
-        if (overviewProxy != null) {
+        ILauncherProxy launcherProxy = mLauncherProxyService.getProxy();
+        if (launcherProxy != null) {
             try {
-                overviewProxy.onOverviewShown(triggeredFromAltTab);
+                launcherProxy.onOverviewShown(triggeredFromAltTab);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to send overview show event to launcher.", e);
             }
@@ -70,10 +70,10 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
 
     @Override
     public void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
-        IOverviewProxy overviewProxy = mOverviewProxyService.getProxy();
-        if (overviewProxy != null) {
+        ILauncherProxy launcherProxy = mLauncherProxyService.getProxy();
+        if (launcherProxy != null) {
             try {
-                overviewProxy.onOverviewHidden(triggeredFromAltTab, triggeredFromHomeKey);
+                launcherProxy.onOverviewHidden(triggeredFromAltTab, triggeredFromHomeKey);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to send overview hide event to launcher.", e);
             }
@@ -83,13 +83,13 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
     @Override
     public void toggleRecentApps() {
         // If connected to launcher service, let it handle the toggle logic
-        IOverviewProxy overviewProxy = mOverviewProxyService.getProxy();
-        if (overviewProxy != null) {
+        ILauncherProxy launcherProxy = mLauncherProxyService.getProxy();
+        if (launcherProxy != null) {
             final Runnable toggleRecents = () -> {
                 try {
-                    if (mOverviewProxyService.getProxy() != null) {
-                        mOverviewProxyService.getProxy().onOverviewToggle();
-                        mOverviewProxyService.notifyToggleRecentApps();
+                    if (mLauncherProxyService.getProxy() != null) {
+                        mLauncherProxyService.getProxy().onOverviewToggle();
+                        mLauncherProxyService.notifyToggleRecentApps();
                     }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Cannot send toggle recents through proxy service.", e);

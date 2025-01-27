@@ -50,7 +50,7 @@ import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.recents.LauncherProxyService;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.util.settings.SecureSettings;
@@ -79,7 +79,7 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
     private final Executor mExecutor;
     private final AccessibilityManager mAccessibilityManager;
     private final CommandQueue mCommandQueue;
-    private final OverviewProxyService mOverviewProxyService;
+    private final LauncherProxyService mLauncherProxyService;
     private final DisplayTracker mDisplayTracker;
     private final AccessibilityLogger mA11yLogger;
 
@@ -225,13 +225,13 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
     public MagnificationImpl(Context context,
             @Main Handler mainHandler, @Main Executor executor,
             CommandQueue commandQueue, ModeSwitchesController modeSwitchesController,
-            SysUiState sysUiState, OverviewProxyService overviewProxyService,
+            SysUiState sysUiState, LauncherProxyService launcherProxyService,
             SecureSettings secureSettings, DisplayTracker displayTracker,
             DisplayManager displayManager, AccessibilityLogger a11yLogger,
             IWindowManager iWindowManager, AccessibilityManager accessibilityManager,
             ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
         this(context, mainHandler.getLooper(), executor, commandQueue,
-                modeSwitchesController, sysUiState, overviewProxyService, secureSettings,
+                modeSwitchesController, sysUiState, launcherProxyService, secureSettings,
                 displayTracker, displayManager, a11yLogger, iWindowManager, accessibilityManager,
                 viewCaptureAwareWindowManager);
     }
@@ -239,7 +239,7 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
     @VisibleForTesting
     public MagnificationImpl(Context context, Looper looper, @Main Executor executor,
             CommandQueue commandQueue, ModeSwitchesController modeSwitchesController,
-            SysUiState sysUiState, OverviewProxyService overviewProxyService,
+            SysUiState sysUiState, LauncherProxyService launcherProxyService,
             SecureSettings secureSettings, DisplayTracker displayTracker,
             DisplayManager displayManager, AccessibilityLogger a11yLogger,
             IWindowManager iWindowManager,
@@ -258,7 +258,7 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
         mCommandQueue = commandQueue;
         mModeSwitchesController = modeSwitchesController;
         mSysUiState = sysUiState;
-        mOverviewProxyService = overviewProxyService;
+        mLauncherProxyService = launcherProxyService;
         mDisplayTracker = displayTracker;
         mA11yLogger = a11yLogger;
         mWindowMagnificationControllerSupplier = new WindowMagnificationControllerSupplier(context,
@@ -279,7 +279,7 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
     @Override
     public void start() {
         mCommandQueue.addCallback(this);
-        mOverviewProxyService.addCallback(new OverviewProxyService.OverviewProxyListener() {
+        mLauncherProxyService.addCallback(new LauncherProxyService.LauncherProxyListener() {
             @Override
             public void onConnectionChanged(boolean isConnected) {
                 if (isConnected) {

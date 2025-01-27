@@ -34,8 +34,8 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.plugins.qs.QSContainerController
-import com.android.systemui.recents.OverviewProxyService
-import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener
+import com.android.systemui.recents.LauncherProxyService
+import com.android.systemui.recents.LauncherProxyService.LauncherProxyListener
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.system.QuickStepContract
@@ -57,7 +57,7 @@ class NotificationsQSContainerController
 constructor(
     view: NotificationsQuickSettingsContainer,
     private val navigationModeController: NavigationModeController,
-    private val overviewProxyService: OverviewProxyService,
+    private val launcherProxyService: LauncherProxyService,
     private val shadeHeaderController: ShadeHeaderController,
     private val shadeInteractor: ShadeInteractor,
     private val fragmentService: FragmentService,
@@ -85,8 +85,8 @@ constructor(
 
     private var isGestureNavigation = true
     private var taskbarVisible = false
-    private val taskbarVisibilityListener: OverviewProxyListener =
-        object : OverviewProxyListener {
+    private val taskbarVisibilityListener: LauncherProxyListener =
+        object : LauncherProxyListener {
             override fun onTaskbarStatusUpdated(visible: Boolean, stashed: Boolean) {
                 taskbarVisible = visible
             }
@@ -134,7 +134,7 @@ constructor(
 
     public override fun onViewAttached() {
         updateResources()
-        overviewProxyService.addCallback(taskbarVisibilityListener)
+        launcherProxyService.addCallback(taskbarVisibilityListener)
         mView.setInsetsChangedListener(delayedInsetSetter)
         mView.setQSFragmentAttachedListener { qs: QS -> qs.setContainerController(this) }
         mView.setConfigurationChangedListener { updateResources() }
@@ -142,7 +142,7 @@ constructor(
     }
 
     override fun onViewDetached() {
-        overviewProxyService.removeCallback(taskbarVisibilityListener)
+        launcherProxyService.removeCallback(taskbarVisibilityListener)
         mView.removeOnInsetsChangedListener()
         mView.removeQSFragmentAttachedListener()
         mView.setConfigurationChangedListener(null)

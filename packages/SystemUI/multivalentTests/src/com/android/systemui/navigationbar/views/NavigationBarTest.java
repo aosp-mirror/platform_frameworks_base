@@ -106,7 +106,7 @@ import com.android.systemui.navigationbar.views.buttons.KeyButtonView;
 import com.android.systemui.navigationbar.views.buttons.NavBarButtonClickLogger;
 import com.android.systemui.navigationbar.views.buttons.NavbarOrientationTrackingLogger;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.recents.LauncherProxyService;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.FakeDisplayTracker;
@@ -185,7 +185,7 @@ public class NavigationBarTest extends SysuiTestCase {
     @Mock
     private SystemActions mSystemActions;
     @Mock
-    private OverviewProxyService mOverviewProxyService;
+    private LauncherProxyService mLauncherProxyService;
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
@@ -285,14 +285,14 @@ public class NavigationBarTest extends SysuiTestCase {
         mDependency.injectMockDependency(KeyguardStateController.class);
         mDependency.injectTestDependency(StatusBarStateController.class, mStatusBarStateController);
         mDependency.injectMockDependency(NavigationBarController.class);
-        mDependency.injectTestDependency(OverviewProxyService.class, mOverviewProxyService);
+        mDependency.injectTestDependency(LauncherProxyService.class, mLauncherProxyService);
         mDependency.injectTestDependency(NavigationModeController.class, mNavigationModeController);
         TestableLooper.get(this).runWithLooper(() -> {
             mNavBarHelper = spy(new NavBarHelper(mContext, mock(AccessibilityManager.class),
                     mock(AccessibilityButtonModeObserver.class),
                     mock(AccessibilityButtonTargetsObserver.class),
                     mock(AccessibilityGestureTargetsObserver.class),
-                    mSystemActions, mOverviewProxyService,
+                    mSystemActions, mLauncherProxyService,
                     () -> mock(AssistManager.class), () -> Optional.of(mCentralSurfaces),
                     mKeyguardStateController, mock(NavigationModeController.class),
                     mEdgeBackGestureHandlerFactory, mock(IWindowManager.class),
@@ -700,7 +700,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 mock(AccessibilityManager.class),
                 deviceProvisionedController,
                 new MetricsLogger(),
-                mOverviewProxyService,
+                mLauncherProxyService,
                 mNavigationModeController,
                 mStatusBarStateController,
                 mStatusBarKeyguardViewManager,

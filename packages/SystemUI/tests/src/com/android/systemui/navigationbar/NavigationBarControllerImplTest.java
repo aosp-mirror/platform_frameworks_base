@@ -52,7 +52,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.views.NavigationBar;
-import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.recents.LauncherProxyService;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
@@ -109,7 +109,7 @@ public class NavigationBarControllerImplTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mNavigationBarController = spy(
                 new NavigationBarControllerImpl(mContext,
-                        mock(OverviewProxyService.class),
+                        mock(LauncherProxyService.class),
                         mock(NavigationModeController.class),
                         mock(SysUiState.class),
                         mCommandQueue,

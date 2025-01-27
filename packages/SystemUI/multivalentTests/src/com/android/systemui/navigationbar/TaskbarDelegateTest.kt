@@ -9,7 +9,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.model.SysUiState
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.recents.OverviewProxyService
+import com.android.systemui.recents.LauncherProxyService
 import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.shared.system.QuickStepContract
 import com.android.systemui.shared.system.TaskStackChangeListeners
@@ -49,7 +49,7 @@ class TaskbarDelegateTest : SysuiTestCase() {
     @Mock lateinit var mLightBarControllerFactory: LightBarTransitionsController.Factory
     @Mock lateinit var mLightBarTransitionController: LightBarTransitionsController
     @Mock lateinit var mCommandQueue: CommandQueue
-    @Mock lateinit var mOverviewProxyService: OverviewProxyService
+    @Mock lateinit var mLauncherProxyService: LauncherProxyService
     @Mock lateinit var mNavBarHelper: NavBarHelper
     @Mock lateinit var mNavigationModeController: NavigationModeController
     @Mock lateinit var mSysUiState: SysUiState
@@ -87,7 +87,7 @@ class TaskbarDelegateTest : SysuiTestCase() {
             )
         mTaskbarDelegate.setDependencies(
             mCommandQueue,
-            mOverviewProxyService,
+            mLauncherProxyService,
             mNavBarHelper,
             mNavigationModeController,
             mSysUiState,

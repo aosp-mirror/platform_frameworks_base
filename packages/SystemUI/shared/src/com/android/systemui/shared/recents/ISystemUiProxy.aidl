@@ -69,10 +69,10 @@ interface ISystemUiProxy {
 
     /**
      * Indicates that the given Assist invocation types should be handled by Launcher via
-     * OverviewProxy#onAssistantOverrideInvoked and should not be invoked by SystemUI.
+     * LauncherProxy#onAssistantOverrideInvoked and should not be invoked by SystemUI.
      *
      * @param invocationTypes The invocation types that will henceforth be handled via
-     *         OverviewProxy (Launcher); other invocation types should be handled by SysUI.
+     *         LauncherProxy (Launcher); other invocation types should be handled by SysUI.
      */
     oneway void setAssistantOverridesRequested(in int[] invocationTypes) = 53;
 

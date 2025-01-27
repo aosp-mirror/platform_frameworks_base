@@ -37,8 +37,8 @@ import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.KEYBOARD
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.TOUCHPAD
 import com.android.systemui.inputdevice.tutorial.data.repository.TutorialSchedulerRepository
-import com.android.systemui.recents.OverviewProxyService
-import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener
+import com.android.systemui.recents.LauncherProxyService
+import com.android.systemui.recents.LauncherProxyService.LauncherProxyListener
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import java.time.Clock
 import java.time.Instant
@@ -67,7 +67,7 @@ constructor(
     private val contextualEducationInteractor: ContextualEducationInteractor,
     private val userInputDeviceRepository: UserInputDeviceRepository,
     private val tutorialRepository: TutorialSchedulerRepository,
-    private val overviewProxyService: OverviewProxyService,
+    private val launcherProxyService: LauncherProxyService,
     private val metricsLogger: ContextualEducationMetricsLogger,
     @EduClock private val clock: Clock,
 ) : CoreStartable {
@@ -100,8 +100,8 @@ constructor(
     val educationTriggered = _educationTriggered.asStateFlow()
 
     private val statsUpdateRequests: Flow<StatsUpdateRequest> = conflatedCallbackFlow {
-        val listener: OverviewProxyListener =
-            object : OverviewProxyListener {
+        val listener: LauncherProxyListener =
+            object : LauncherProxyListener {
                 override fun updateContextualEduStats(
                     isTrackpadGesture: Boolean,
                     gestureType: GestureType,
@@ -113,8 +113,8 @@ constructor(
                 }
             }
 
-        overviewProxyService.addCallback(listener)
-        awaitClose { overviewProxyService.removeCallback(listener) }
+        launcherProxyService.addCallback(listener)
+        awaitClose { launcherProxyService.removeCallback(listener) }
     }
 
     private val gestureModelMap: Flow<Map<GestureType, GestureEduModel>> =

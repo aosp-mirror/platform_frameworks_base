@@ -180,7 +180,7 @@ public class NavigationBarView extends FrameLayout {
      */
     private final boolean mImeCanRenderGesturalNavButtons = canImeRenderGesturalNavButtons();
     private Gefingerpoken mTouchHandler;
-    private boolean mOverviewProxyEnabled;
+    private boolean mLauncherProxyEnabled;
     private boolean mShowSwipeUpUi;
     private UpdateActiveTouchRegionsCallback mUpdateActiveTouchRegionsCallback;
 
@@ -644,7 +644,7 @@ public class NavigationBarView extends FrameLayout {
         // When screen pinning, don't hide back and home when connected service or back and
         // recents buttons when disconnected from launcher service in screen pinning mode,
         // as they are used for exiting.
-        if (mOverviewProxyEnabled) {
+        if (mLauncherProxyEnabled) {
             // Force disable recents when not in legacy mode
             disableRecent |= !QuickStepContract.isLegacyMode(mNavBarMode);
             if (mScreenPinningActive && !QuickStepContract.isGesturalMode(mNavBarMode)) {
@@ -767,8 +767,8 @@ public class NavigationBarView extends FrameLayout {
         }
     }
 
-    void onOverviewProxyConnectionChange(boolean enabled) {
-        mOverviewProxyEnabled = enabled;
+    void onLauncherProxyConnectionChange(boolean enabled) {
+        mLauncherProxyEnabled = enabled;
     }
 
     void setShouldShowSwipeUpUi(boolean showSwipeUpUi) {
