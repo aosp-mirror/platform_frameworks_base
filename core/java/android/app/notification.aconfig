@@ -62,13 +62,6 @@ flag {
 }
 
 flag {
-  name: "modes_ui_test"
-  namespace: "systemui"
-  description: "Guards new CTS tests for Modes; dependent on flags modes_api and modes_ui"
-  bug: "360862012"
-}
-
-flag {
   name: "modes_hsum"
   namespace: "systemui"
   description: "Fixes for modes (and DND/Zen in general) with HSUM or secondary users"
