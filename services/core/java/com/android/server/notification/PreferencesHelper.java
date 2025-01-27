@@ -16,8 +16,8 @@
 
 package com.android.server.notification;
 
-import static android.app.Flags.notificationClassificationUi;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
+import static android.app.Flags.notificationClassificationUi;
 import static android.app.NotificationChannel.DEFAULT_CHANNEL_ID;
 import static android.app.NotificationChannel.NEWS_ID;
 import static android.app.NotificationChannel.PLACEHOLDER_CONVERSATION_ID;
@@ -89,9 +89,10 @@ import android.util.SparseBooleanArray;
 import android.util.StatsEvent;
 import android.util.proto.ProtoOutputStream;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags;
 import com.android.internal.logging.MetricsLogger;
@@ -1962,21 +1963,11 @@ public class PreferencesHelper implements RankingConfig {
     @Override
     public ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid,
             boolean includeDeleted, boolean includeBundles) {
-        return getNotificationChannels(pkg, uid, includeDeleted, includeBundles, false);
-    }
-
-    protected ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid,
-            boolean includeDeleted, boolean includeBundles, boolean createPrefsIfNeeded) {
-        if (createPrefsIfNeeded && !android.app.Flags.nmBinderPerfCacheChannels()) {
-            Slog.wtf(TAG,
-                    "getNotificationChannels called with createPrefsIfNeeded=true and flag off");
-            createPrefsIfNeeded = false;
-        }
         Objects.requireNonNull(pkg);
         List<NotificationChannel> channels = new ArrayList<>();
         synchronized (mLock) {
             PackagePreferences r;
-            if (createPrefsIfNeeded) {
+            if (android.app.Flags.nmBinderPerfCacheChannels()) {
                 r = getOrCreatePackagePreferencesLocked(pkg, uid);
             } else {
                 r = getPackagePreferencesLocked(pkg, uid);
@@ -1995,6 +1986,18 @@ public class PreferencesHelper implements RankingConfig {
             }
             return new ParceledListSlice<>(channels);
         }
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    // Gets the entire list of notification channels for this package, with no filtering and
+    // without creating package preferences. For testing only, specifically to confirm the
+    // notification channels of a removed/deleted package.
+    protected List<NotificationChannel> getRemovedPkgNotificationChannels(String pkg, int uid) {
+        PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
+        if (r == null || r.channels == null) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(r.channels.values());
     }
 
     /**

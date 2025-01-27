@@ -260,7 +260,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         return FlagsParameterization.allCombinationsOf(
                 android.app.Flags.FLAG_API_RICH_ONGOING,
                 FLAG_NOTIFICATION_CLASSIFICATION, FLAG_NOTIFICATION_CLASSIFICATION_UI,
-                FLAG_MODES_UI);
+                FLAG_MODES_UI, android.app.Flags.FLAG_NM_BINDER_PERF_CACHE_CHANNELS);
     }
 
     public PreferencesHelperTest(FlagsParameterization flags) {
@@ -3381,13 +3381,12 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // user 0 records remain
         for (int i = 0; i < user0Uids.length; i++) {
             assertEquals(1,
-                    mHelper.getNotificationChannels(PKG_N_MR1, user0Uids[i], false, true)
-                            .getList().size());
+                    mHelper.getRemovedPkgNotificationChannels(PKG_N_MR1, user0Uids[i]).size());
         }
         // user 1 records are gone
         for (int i = 0; i < user1Uids.length; i++) {
-            assertEquals(0, mHelper.getNotificationChannels(PKG_N_MR1, user1Uids[i], false, true)
-                    .getList().size());
+            assertEquals(0,
+                    mHelper.getRemovedPkgNotificationChannels(PKG_N_MR1, user1Uids[i]).size());
         }
     }
 
@@ -3402,8 +3401,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertTrue(mHelper.onPackagesChanged(true, USER_SYSTEM, new String[]{PKG_N_MR1},
                 new int[]{UID_N_MR1}));
 
-        assertEquals(0, mHelper.getNotificationChannels(
-                PKG_N_MR1, UID_N_MR1, true, true).getList().size());
+        assertEquals(0, mHelper.getRemovedPkgNotificationChannels(PKG_N_MR1, UID_N_MR1).size());
 
         // Not deleted
         mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1, true, false,
@@ -3472,7 +3470,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertTrue(mHelper.canShowBadge(PKG_O, UID_O));
         assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
         assertEquals(0, mHelper.getAppLockedFields(PKG_O, UID_O));
-        assertEquals(0, mHelper.getNotificationChannels(PKG_O, UID_O, true, true).getList().size());
+        assertEquals(0, mHelper.getRemovedPkgNotificationChannels(PKG_O, UID_O).size());
         assertEquals(0, mHelper.getNotificationChannelGroups(PKG_O, UID_O).size());
 
         NotificationChannel channel = getChannel();
@@ -6836,38 +6834,11 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_NM_BINDER_PERF_CACHE_CHANNELS)
-    public void testGetNotificationChannels_createIfNeeded() {
-        // Test setup hasn't created any channels or read package preferences yet.
-        // If we ask for notification channels _without_ creating, we should get no result.
-        ParceledListSlice<NotificationChannel> channels = mHelper.getNotificationChannels(PKG_N_MR1,
-                UID_N_MR1, false, false, /* createPrefsIfNeeded= */ false);
-        assertThat(channels.getList().size()).isEqualTo(0);
-
-        // If we ask it to create package preferences, we expect the default channel to be created
-        // for N_MR1.
-        channels = mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, false,
-                false, /* createPrefsIfNeeded= */ true);
-        assertThat(channels.getList().size()).isEqualTo(1);
-        assertThat(channels.getList().getFirst().getId()).isEqualTo(
-                NotificationChannel.DEFAULT_CHANNEL_ID);
-    }
-
-    @Test
     @DisableFlags(android.app.Flags.FLAG_NM_BINDER_PERF_CACHE_CHANNELS)
     public void testGetNotificationChannels_neverCreatesWhenFlagOff() {
-        ParceledListSlice<NotificationChannel> channels;
-        try {
-            channels = mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, false,
-                    false, /* createPrefsIfNeeded= */ true);
-        } catch (Exception e) {
-            // Slog.wtf kicks in, presumably
-        } finally {
-            channels = mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, false,
-                    false, /* createPrefsIfNeeded= */ false);
-            assertThat(channels.getList().size()).isEqualTo(0);
-        }
-
+        ParceledListSlice<NotificationChannel> channels = mHelper.getNotificationChannels(PKG_N_MR1,
+                UID_N_MR1, false, false);
+        assertThat(channels.getList().size()).isEqualTo(0);
     }
 
     // Test version of PreferencesHelper whose only functional difference is that it does not
