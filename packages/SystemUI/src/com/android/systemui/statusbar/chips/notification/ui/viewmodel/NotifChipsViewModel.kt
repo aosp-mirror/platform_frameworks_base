@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNoti
 import com.android.systemui.statusbar.notification.domain.model.TopPinnedState
 import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -73,17 +74,24 @@ constructor(
                 OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon(this.key)
             }
         val colors = this.promotedContent.toCustomColorsModel()
-        val onClickListener =
-            View.OnClickListener {
-                // The notification pipeline needs everything to run on the main thread, so keep
-                // this event on the main thread.
-                applicationScope.launch {
-                    notifChipsInteractor.onPromotedNotificationChipTapped(
-                        this@toActivityChipModel.key
-                    )
-                }
+
+        val clickListener: () -> Unit = {
+            // The notification pipeline needs everything to run on the main thread, so keep
+            // this event on the main thread.
+            applicationScope.launch {
+                notifChipsInteractor.onPromotedNotificationChipTapped(this@toActivityChipModel.key)
             }
-        val clickBehavior = OngoingActivityChipModel.ClickBehavior.None
+        }
+        val onClickListenerLegacy =
+            View.OnClickListener {
+                StatusBarChipsModernization.assertInLegacyMode()
+                clickListener.invoke()
+            }
+        val clickBehavior =
+            OngoingActivityChipModel.ClickBehavior.ShowHeadsUpNotification({
+                StatusBarChipsModernization.assertInNewMode()
+                clickListener.invoke()
+            })
 
         val isShowingHeadsUpFromChipTap =
             headsUpState is TopPinnedState.Pinned &&
@@ -95,7 +103,7 @@ constructor(
             return OngoingActivityChipModel.Shown.IconOnly(
                 icon,
                 colors,
-                onClickListener,
+                onClickListenerLegacy,
                 clickBehavior,
             )
         }
@@ -105,7 +113,7 @@ constructor(
                 icon,
                 colors,
                 this.promotedContent.shortCriticalText,
-                onClickListener,
+                onClickListenerLegacy,
                 clickBehavior,
             )
         }
@@ -121,7 +129,7 @@ constructor(
             return OngoingActivityChipModel.Shown.IconOnly(
                 icon,
                 colors,
-                onClickListener,
+                onClickListenerLegacy,
                 clickBehavior,
             )
         }
@@ -130,7 +138,7 @@ constructor(
             return OngoingActivityChipModel.Shown.IconOnly(
                 icon,
                 colors,
-                onClickListener,
+                onClickListenerLegacy,
                 clickBehavior,
             )
         }
@@ -140,7 +148,7 @@ constructor(
                     icon,
                     colors,
                     time = this.promotedContent.time.time,
-                    onClickListener,
+                    onClickListenerLegacy,
                     clickBehavior,
                 )
             }
@@ -149,7 +157,7 @@ constructor(
                     icon,
                     colors,
                     startTimeMs = this.promotedContent.time.time,
-                    onClickListener,
+                    onClickListenerLegacy,
                     clickBehavior,
                 )
             }
@@ -159,7 +167,7 @@ constructor(
                     icon,
                     colors,
                     startTimeMs = this.promotedContent.time.time,
-                    onClickListener,
+                    onClickListenerLegacy,
                     clickBehavior,
                 )
             }
