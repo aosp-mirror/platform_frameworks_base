@@ -535,10 +535,10 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"लॉक स्‍क्रीन विजेट"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"विजेट वापरून अ‍ॅप उघडण्यासाठी, तुम्हाला हे तुम्हीच असल्याची पडताळणी करावी लागेल. तसेच, लक्षात ठेवा, तुमचा टॅबलेट लॉक असतानादेखील कोणीही ती पाहू शकते. काही विजेट कदाचित तुमच्या लॉक स्‍क्रीनसाठी नाहीत आणि ती इथे जोडणे असुरक्षित असू शकते."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"समजले"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"विजेट"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\"विजेट\" शॉर्टकट जोडण्यासाठी, सेटिंग्जमध्ये \"लॉक स्‍क्रीनवर विजेट दाखवा\" सुरू असल्याची खात्री करा."</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"सेटिंग्ज"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"स्क्रीनसेव्हर दाखवा बटण"</string>
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"हब मोड एक्सप्लोर करा"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"चार्ज करत असताना तुमचे आवडते विजेट आणि स्क्रीन सेव्हर अ‍ॅक्सेस करा."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"चला सुरू करू या"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"वापरकर्ता स्विच करा"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"पुलडाउन मेनू"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"या सत्रातील सर्व अ‍ॅप्स आणि डेटा हटवला जाईल."</string>
@@ -750,8 +750,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"अपडेट करत आहे"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"कार्य प्रोफाईल"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"विमान मोड"</string>
-    <!-- no translation found for status_bar_supervision (6735015942701134125) -->
-    <skip />
+    <string name="status_bar_supervision" msgid="6735015942701134125">"पालक नियंत्रणे"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"तुम्ही तुमचा <xliff:g id="WHEN">%1$s</xliff:g> वाजता होणारा पुढील अलार्म ऐकणार नाही"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> वाजता"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g> रोजी"</string>
@@ -802,6 +801,10 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"संभाषण सूचनांच्या वरती आणि लॉक स्क्रीनवरील प्रोफाइल फोटो म्हणून दिसते, बबल म्हणून दिसते, व्यत्यय आणू नका यामध्ये अडथळा आणते"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राधान्य"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> हे संभाषण वैशिष्ट्यांना सपोर्ट करत नाही"</string>
+    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
+    <skip />
+    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"या सूचनांमध्ये सुधारणा केली जाऊ शकत नाही."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"कॉलशी संबंधित सूचनांमध्ये फेरबदल केला जाऊ शकत नाही."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"या सूचनांचा संच येथे कॉन्फिगर केला जाऊ शकत नाही"</string>
@@ -883,7 +886,7 @@
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ॲप्सची सूची उघडा"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"सेटिंग्ज उघडा"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistant उघडा"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"लॉक स्क्रीन"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"स्क्रीन लॉक करा"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"नोंद घ्या"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"मल्टिटास्किंग"</string>
     <string name="system_multitasking_rhs" msgid="8779289852395243004">"ॲप उजवीकडे ठेवून स्प्लिट स्क्रीन वापरा"</string>
@@ -912,6 +915,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"कॅलेंडर"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Calculator"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
+    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"व्यत्यय आणू नका"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"आवाजाच्या बटणांचा शार्टकट"</string>
     <string name="battery" msgid="769686279459897127">"बॅटरी"</string>
@@ -1432,8 +1445,7 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"सिस्टीम अ‍ॅप्स"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"मल्टिटास्किंग"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"स्प्लिट स्क्रीन"</string>
-    <!-- no translation found for shortcutHelper_category_accessibility (8068337792277570938) -->
-    <skip />
+    <string name="shortcutHelper_category_accessibility" msgid="8068337792277570938">"अ‍ॅक्सेसिबिलिटी"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"इनपुट"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"अ‍ॅप शॉर्टकट"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"सध्याचे अ‍ॅप"</string>
@@ -1497,12 +1509,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"तुम्ही अलीकडील ॲप्स पाहण्याचे जेश्चर पूर्ण केले आहे."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"अलीकडील अ‍ॅप्स पाहण्यासाठी, तुमच्या टचपॅडवर तीन बोटांनी वर स्वाइप करून धरून ठेवा"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"अ‍ॅप्स स्विच करा"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2751565200937541667) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"तुमच्या टचपॅडवर चार बोटांनी उजवीकडे स्‍वाइप करा"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"उत्तम कामगिरी!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"तुम्ही अ‍ॅप्स स्विच करणे जेश्चर पूर्ण केले आहे."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5508381152326379652) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"अ‍ॅप्सदरम्यान स्विच करण्यासाठी तुमच्या टचपॅडवर चार बोटांनी उजवीकडे स्‍वाइप करा"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"सर्व अ‍ॅप्स पहा"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"तुमच्या कीबोर्डवर अ‍ॅक्शन की प्रेस करा"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"खूप छान!"</string>

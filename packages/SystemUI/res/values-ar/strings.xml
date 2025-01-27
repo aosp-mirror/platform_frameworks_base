@@ -535,10 +535,13 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"التطبيقات المصغّرة المصمَّمة لشاشة القفل"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"لفتح تطبيق باستخدام تطبيق مصغَّر، عليك إثبات هويتك. يُرجى ملاحظة أنّ أي شخص يمكنه الاطّلاع محتوى التطبيقات المصغَّرة، حتى وإن كان جهازك اللوحي مُقفلاً. بعض التطبيقات المصغّرة قد لا تكون مُصمَّمة لإضافتها إلى شاشة القفل، وقد يكون هذا الإجراء غير آمن."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"حسنًا"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"التطبيقات المصغَّرة"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"لإضافة اختصار \"التطبيقات المصغّرة\"، يجب تفعيل خيار \"عرض التطبيقات المصغّرة على شاشة القفل\" من خلال الإعدادات."</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"الإعدادات"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"زر \"إظهار شاشة الاستراحة\""</string>
+    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
+    <skip />
+    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
+    <skip />
+    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"تبديل المستخدم"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"القائمة المنسدلة"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"سيتم حذف كل التطبيقات والبيانات في هذه الجلسة."</string>
@@ -802,6 +805,10 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"تظهر في أعلى إشعارات المحادثات وكصورة ملف شخصي على شاشة القفل وتظهر على شكل فقاعة لمقاطعة ميزة \"عدم الإزعاج\"."</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"الأولوية"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"لا يدعم تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> ميزات المحادثات."</string>
+    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
+    <skip />
+    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"يتعذّر تعديل هذه الإشعارات."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"لا يمكن تعديل إشعارات المكالمات."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"يتعذّر ضبط مجموعة الإشعارات هذه هنا."</string>
@@ -912,6 +919,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"‏تقويم Google"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"الآلة الحاسبة"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"‏خرائط Google"</string>
+    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"عدم الإزعاج"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"اختصار أزرار مستوى الصوت"</string>
     <string name="battery" msgid="769686279459897127">"البطارية"</string>
@@ -1497,11 +1514,11 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"لقد أكملْت التدريب على إيماءة عرض التطبيقات المستخدَمة مؤخرًا."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"لعرض التطبيقات المستخدَمة مؤخرًا، يُرجى التمرير سريعًا للأعلى مع الاستمرار باستخدام ثلاثة أصابع على لوحة اللمس"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"التبديل بين التطبيقات"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2751565200937541667) -->
+    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
     <skip />
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"أحسنت صنعًا."</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"أكملت التدريب على إيماءة التبديل بين التطبيقات."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5508381152326379652) -->
+    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
     <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"عرض جميع التطبيقات"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"اضغط على مفتاح الإجراء في لوحة المفاتيح"</string>

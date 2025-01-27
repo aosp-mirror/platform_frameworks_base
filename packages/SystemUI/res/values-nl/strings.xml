@@ -535,10 +535,10 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Widgets op het vergrendelscherm"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Als je een app wilt openen met een widget, moet je verifiëren dat jij het bent. Houd er ook rekening mee dat iedereen ze kan bekijken, ook als je tablet vergrendeld is. Bepaalde widgets zijn misschien niet bedoeld voor je vergrendelscherm en kunnen hier niet veilig worden toegevoegd."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widgets"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Als je de snelkoppeling Widgets wilt toevoegen, zorg je dat Widgets tonen op het vergrendelingsscherm aanstaat in de instellingen."</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Instellingen"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Knop Screensaver tonen"</string>
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"Hub-modus verkennen"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"Krijg toegang tot je favoriete widgets en screensavers terwijl je apparaat wordt opgeladen."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Aan de slag"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Gebruiker wijzigen"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"pull-downmenu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle apps en gegevens in deze sessie worden verwijderd."</string>
@@ -750,8 +750,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Updaten"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Werkprofiel"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Vliegtuig­modus"</string>
-    <!-- no translation found for status_bar_supervision (6735015942701134125) -->
-    <skip />
+    <string name="status_bar_supervision" msgid="6735015942701134125">"Ouderlijk toezicht"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Je hoort je volgende wekker niet <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"om <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"op <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -802,6 +801,10 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Wordt getoond bovenaan gespreksmeldingen en als profielfoto op het vergrendelscherm, verschijnt als bubbel, onderbreekt Niet storen"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteit"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ondersteunt geen gespreksfuncties"</string>
+    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
+    <skip />
+    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Deze meldingen kunnen niet worden aangepast."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Gespreksmeldingen kunnen niet worden aangepast."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Deze groep meldingen kan hier niet worden ingesteld"</string>
@@ -912,6 +915,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Agenda"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Rekenmachine"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
+    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Niet storen"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Volumeknoppen als sneltoets"</string>
     <string name="battery" msgid="769686279459897127">"Batterij"</string>
@@ -1432,8 +1445,7 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Systeem-apps"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Multitasking"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Gesplitst scherm"</string>
-    <!-- no translation found for shortcutHelper_category_accessibility (8068337792277570938) -->
-    <skip />
+    <string name="shortcutHelper_category_accessibility" msgid="8068337792277570938">"Toegankelijkheid"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Invoer"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"App-sneltoetsen"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Huidige app"</string>
@@ -1497,12 +1509,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Je weet nu hoe je het gebaar Recente apps bekijken maakt."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Als je recente apps wilt bekijken, swipe je met 3 vingers omhoog op de touchpad en houd je vast"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"Wisselen tussen apps"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2751565200937541667) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"Swipe met 4 vingers naar rechts op de touchpad"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"Goed werk!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"Je weet nu hoe je het gebaar om van app te wisselen maakt."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5508381152326379652) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"Swipe met 4 vingers naar rechts op de touchpad om van app te wisselen"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Alle apps bekijken"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Druk op de actietoets op het toetsenbord"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Goed gedaan!"</string>

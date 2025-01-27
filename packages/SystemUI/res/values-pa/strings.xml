@@ -535,10 +535,10 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ਲਾਕ ਸਕ੍ਰੀਨ ਵਿਜੇਟ"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ਵਿਜੇਟ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਐਪ ਖੋਲ੍ਹਣ ਲਈ, ਤੁਹਾਨੂੰ ਇਹ ਪੁਸ਼ਟੀ ਕਰਨ ਦੀ ਲੋੜ ਪਵੇਗੀ ਕਿ ਇਹ ਤੁਸੀਂ ਹੀ ਹੋ। ਨਾਲ ਹੀ, ਇਹ ਵੀ ਧਿਆਨ ਵਿੱਚ ਰੱਖੋ ਕਿ ਕੋਈ ਵੀ ਉਨ੍ਹਾਂ ਨੂੰ ਦੇਖ ਸਕਦਾ ਹੈ, ਭਾਵੇਂ ਤੁਹਾਡਾ ਟੈਬਲੈੱਟ ਲਾਕ ਹੋਵੇ। ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਕੁਝ ਵਿਜੇਟ ਤੁਹਾਡੀ ਲਾਕ ਸਕ੍ਰੀਨ ਲਈ ਨਾ ਬਣੇ ਹੋਣ ਅਤੇ ਉਨ੍ਹਾਂ ਨੂੰ ਇੱਥੇ ਸ਼ਾਮਲ ਕਰਨਾ ਅਸੁਰੱਖਿਅਤ ਹੋਵੇ।"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"ਸਮਝ ਲਿਆ"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"ਵਿਜੇਟ"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\"ਵਿਜੇਟ\" ਸ਼ਾਰਟਕੱਟ ਨੂੰ ਸ਼ਾਮਲ ਕਰਨ ਲਈ, ਪੱਕਾ ਕਰੋ ਕਿ ਸੈਟਿੰਗਾਂ ਵਿੱਚ \"ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਵਿਜੇਟ ਦਿਖਾਓ\" ਚਾਲੂ ਹੈ।"</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"\'ਸਕ੍ਰੀਨ-ਸੇਵਰ ਦਿਖਾਓ\' ਬਟਨ"</string>
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"ਹੱਬ ਮੋਡ ਦੀ ਪੜਚੋਲ ਕਰੋ"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"ਚਾਰਜ ਕਰਨ ਵੇਲੇ ਆਪਣੇ ਮਨਪਸੰਦ ਵਿਜੇਟਾਂ ਅਤੇ ਸਕ੍ਰੀਨ ਸੇਵਰਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰੋ।"</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"ਚਲੋ ਸ਼ੁਰੂ ਕਰੀਏ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ਵਰਤੋਂਕਾਰ ਸਵਿੱਚ ਕਰੋ"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ਪੁੱਲਡਾਊਨ ਮੀਨੂ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ਇਸ ਸੈਸ਼ਨ ਵਿਚਲੀਆਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟੇ ਨੂੰ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
@@ -750,8 +750,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"ਅੱਪਡੇਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ਹਵਾਈ-ਜਹਾਜ਼ ਮੋਡ"</string>
-    <!-- no translation found for status_bar_supervision (6735015942701134125) -->
-    <skip />
+    <string name="status_bar_supervision" msgid="6735015942701134125">"ਮਾਪਿਆਂ ਦੇ ਕੰਟਰੋਲ"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"ਤੁਸੀਂ <xliff:g id="WHEN">%1$s</xliff:g> ਵਜੇ ਆਪਣਾ ਅਗਲਾ ਅਲਾਰਮ ਨਹੀਂ ਸੁਣੋਗੇ"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> ਵਜੇ"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g> ਵਜੇ"</string>
@@ -802,6 +801,10 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"ਗੱਲਬਾਤ ਸੂਚਨਾਵਾਂ ਦੇ ਸਿਖਰ \'ਤੇ ਅਤੇ ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ ਵਜੋਂ ਦਿਖਾਈਆਂ ਜਾਂਦੀਆਂ ਹਨ, ਜੋ ਕਿ ਬਬਲ ਵਜੋਂ ਦਿਸਦੀਆਂ ਹਨ ਅਤੇ \'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਸੁਵਿਧਾ ਵਿੱਚ ਵਿਘਨ ਵੀ ਪਾ ਸਕਦੀਆਂ ਹਨ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ਤਰਜੀਹ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਐਪ ਗੱਲਬਾਤ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ"</string>
+    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
+    <skip />
+    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਸੋਧਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ।"</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"ਕਾਲ ਸੰਬੰਧੀ ਸੂਚਨਾਵਾਂ ਨੂੰ ਸੋਧਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ।"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ਇਹ ਸੂਚਨਾਵਾਂ ਦਾ ਗਰੁੱਪ ਇੱਥੇ ਸੰਰੂਪਿਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
@@ -912,6 +915,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Calculator"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"ਨਕਸ਼ੇ"</string>
+    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ਵੌਲਿਊਮ ਬਟਨ ਸ਼ਾਰਟਕੱਟ"</string>
     <string name="battery" msgid="769686279459897127">"ਬੈਟਰੀ"</string>
@@ -1432,8 +1445,7 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"ਸਿਸਟਮ ਐਪਾਂ"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"ਮਲਟੀਟਾਸਕਿੰਗ"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"ਸਪਲਿਟ ਸਕ੍ਰੀਨ"</string>
-    <!-- no translation found for shortcutHelper_category_accessibility (8068337792277570938) -->
-    <skip />
+    <string name="shortcutHelper_category_accessibility" msgid="8068337792277570938">"ਪਹੁੰਚਯੋਗਤਾ"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ਇਨਪੁੱਟ"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"ਐਪ ਸ਼ਾਰਟਕੱਟ"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"ਮੌਜੂਦਾ ਐਪ"</string>
@@ -1497,12 +1509,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"ਤੁਸੀਂ \'ਹਾਲੀਆ ਐਪਾਂ ਦੇਖੋ\' ਦਾ ਇਸ਼ਾਰਾ ਪੂਰਾ ਕੀਤਾ ਹੈ।"</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"ਹਾਲੀਆ ਐਪਾਂ ਦੇਖਣ ਲਈ, ਆਪਣੇ ਟੱਚਪੈਡ \'ਤੇ ਤਿੰਨ ਉਂਗਲਾਂ ਵਰਤ ਕੇ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਰੋਕ ਕੇ ਰੱਖੋ"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"ਐਪਾਂ ਵਿਚਕਾਰ ਸਵਿੱਚ ਕਰੋ"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2751565200937541667) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"ਆਪਣੇ ਟੱਚਪੈਡ \'ਤੇ ਚਾਰ ਉਂਗਲਾਂ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਸੱਜੇ ਪਾਸੇ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"ਬਹੁਤ ਵਧੀਆ!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"ਤੁਸੀਂ ਐਪ ਸਵਿੱਚ ਦਾ ਇਸ਼ਾਰਾ ਪੂਰਾ ਕੀਤਾ।"</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5508381152326379652) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"ਐਪਾਂ ਬਦਲਣ ਲਈ ਆਪਣੇ ਟੱਚਪੈਡ \'ਤੇ ਚਾਰ ਉਂਗਲਾਂ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਸੱਜੇ ਪਾਸੇ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"ਸਾਰੀਆਂ ਐਪਾਂ ਦੇਖੋ"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"ਆਪਣੇ ਕੀ-ਬੋਰਡ \'ਤੇ ਕਾਰਵਾਈ ਕੁੰਜੀ ਨੂੰ ਦਬਾਓ"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"ਬਹੁਤ ਵਧੀਆ!"</string>

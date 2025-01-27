@@ -535,10 +535,10 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Užrakinimo ekrano valdikliai"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Kad galėtumėte atidaryti programą naudodami valdiklį, turėsite patvirtinti savo tapatybę. Be to, atminkite, kad bet kas gali peržiūrėti valdiklius net tada, kai planšetinis kompiuteris užrakintas. Kai kurie valdikliai gali būti neskirti jūsų užrakinimo ekranui ir gali būti nesaugu juos čia pridėti."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Supratau"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Valdikliai"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Jei norite pridėti valdiklių šaukinį, patikrinkite, ar nustatymuose įgalinta parinktis „Rodyti valdiklius užrakinimo ekrane“."</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Nustatymai"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Mygtukas „Rodyti ekrano užsklandą“"</string>
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"Naršymas centro režimu"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"Įkraudami pasiekite mėgstamiausius valdiklius ir ekrano užsklandas."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Pirmyn"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Perjungti naudotoją"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"išplečiamasis meniu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Bus ištrintos visos šios sesijos programos ir duomenys."</string>
@@ -750,8 +750,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Atnaujinama"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Darbo profilis"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Lėktuvo režimas"</string>
-    <!-- no translation found for status_bar_supervision (6735015942701134125) -->
-    <skip />
+    <string name="status_bar_supervision" msgid="6735015942701134125">"Tėvų kontrolė"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Negirdėsite kito signalo <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -802,6 +801,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Rodoma pokalbių pranešimų viršuje ir kaip profilio nuotrauka užrakinimo ekrane, burbule, pertraukia netrukdymo režimą"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritetiniai"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Programa „<xliff:g id="APP_NAME">%1$s</xliff:g>“ nepalaiko pokalbių funkcijų"</string>
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"Uždaryti"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"Neberodyti"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Šių pranešimų keisti negalima."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Skambučių pranešimų keisti negalima."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Šios grupės pranešimai čia nekonfigūruojami"</string>
@@ -912,6 +913,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Kalendorius"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Skaičiuotuvas"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Žemėlapiai"</string>
+    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Netrukdymo režimas"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Garsumo mygtukų spartusis klavišas"</string>
     <string name="battery" msgid="769686279459897127">"Akumuliatorius"</string>
@@ -1432,8 +1443,7 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Sistemos programos"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Kelių užduočių atlikimas"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Išskaidyto ekrano režimas"</string>
-    <!-- no translation found for shortcutHelper_category_accessibility (8068337792277570938) -->
-    <skip />
+    <string name="shortcutHelper_category_accessibility" msgid="8068337792277570938">"Pritaikomumas"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Įvestis"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Programos spartieji klavišai"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Esama programa"</string>
@@ -1497,12 +1507,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Atlikote naujausių programų peržiūros gestą."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Peržiūrėkite naujausias programas, jutiklinėje dalyje perbraukę aukštyn trimis pirštais ir palaikę"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"Perjungti programas"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2751565200937541667) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"Braukite dešinėn keturiais pirštais jutiklinėje dalyje"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"Puiku!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"Atlikote programų perjungimo gestą."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5508381152326379652) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"Braukite dešinėn keturiais pirštais jutiklinėje dalyje, kad perjungtumėte programas"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Žr. visas programas"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Paspauskite klaviatūros veiksmų klavišą"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Puikiai padirbėta!"</string>

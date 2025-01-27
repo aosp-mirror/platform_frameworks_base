@@ -535,10 +535,13 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Tiện ích trên màn hình khoá"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Để dùng tiện ích mở một ứng dụng, bạn cần xác minh danh tính của mình. Ngoài ra, hãy lưu ý rằng bất kỳ ai cũng có thể xem các tiện ích này, ngay cả khi máy tính bảng của bạn được khoá. Một số tiện ích có thể không dành cho màn hình khoá và không an toàn khi thêm vào đây."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Tôi hiểu"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Tiện ích"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Để thêm phím tắt \"Tiện ích\", hãy nhớ bật tuỳ chọn \"Hiện tiện ích trên màn hình khoá\" trong phần cài đặt."</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Cài đặt"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Hiện nút trình bảo vệ màn hình"</string>
+    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
+    <skip />
+    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
+    <skip />
+    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Chuyển đổi người dùng"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"trình đơn kéo xuống"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Tất cả ứng dụng và dữ liệu trong phiên này sẽ bị xóa."</string>
@@ -750,8 +753,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Đang cập nhật"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Hồ sơ công việc"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Chế độ trên máy bay"</string>
-    <!-- no translation found for status_bar_supervision (6735015942701134125) -->
-    <skip />
+    <string name="status_bar_supervision" msgid="6735015942701134125">"Chế độ kiểm soát của cha mẹ"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Bạn sẽ không nghe thấy chuông báo tiếp theo lúc <xliff:g id="WHEN">%1$s</xliff:g> của mình"</string>
     <string name="alarm_template" msgid="2234991538018805736">"lúc <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"vào <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -802,6 +804,10 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Hiện ở đầu phần thông báo cuộc trò chuyện và ở dạng ảnh hồ sơ trên màn hình khóa, xuất hiện ở dạng bong bóng, làm gián đoạn chế độ Không làm phiền"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Mức độ ưu tiên"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> không hỗ trợ các tính năng trò chuyện"</string>
+    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
+    <skip />
+    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Không thể sửa đổi các thông báo này."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Không thể sửa đổi các thông báo cuộc gọi."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Không thể định cấu hình nhóm thông báo này tại đây"</string>
@@ -912,6 +918,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Lịch"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Máy tính"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Bản đồ"</string>
+    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Không làm phiền"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Phím tắt các nút âm lượng"</string>
     <string name="battery" msgid="769686279459897127">"Pin"</string>
@@ -1432,8 +1448,7 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Ứng dụng hệ thống"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Đa nhiệm"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Chia đôi màn hình"</string>
-    <!-- no translation found for shortcutHelper_category_accessibility (8068337792277570938) -->
-    <skip />
+    <string name="shortcutHelper_category_accessibility" msgid="8068337792277570938">"Hỗ trợ tiếp cận"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Phương thức nhập"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Phím tắt cho ứng dụng"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Ứng dụng hiện tại"</string>
@@ -1497,11 +1512,11 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Bạn đã hoàn tất cử chỉ xem ứng dụng gần đây."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Để xem các ứng dụng gần đây, hãy dùng 3 ngón tay vuốt lên và giữ trên bàn di chuột"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"Chuyển đổi ứng dụng"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2751565200937541667) -->
+    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
     <skip />
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"Tuyệt vời!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"Bạn đã thực hiện xong cử chỉ chuyển đổi ứng dụng."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5508381152326379652) -->
+    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
     <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Xem tất cả các ứng dụng"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Nhấn phím hành động trên bàn phím"</string>

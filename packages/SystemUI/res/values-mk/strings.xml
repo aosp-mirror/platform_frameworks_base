@@ -535,10 +535,13 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Виџети на заклучен екран"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"За да отворите апликација со помош на виџет, ќе треба да потврдите дека сте вие. Покрај тоа, имајте предвид дека секој може да ги гледа виџетите, дури и кога вашиот таблет е заклучен. Некои виџети можеби не се наменети за вашиот заклучен екран, па можеби не е безбедно да се додадат овде."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Сфатив"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Виџети"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"За да ја додадете кратенката „Виџети“, погрижете се да биде овозможен „Прикажување виџети на заклучен екран“ во „Поставки“."</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Поставки"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Копче за прикажување на штедачот на екран"</string>
+    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
+    <skip />
+    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
+    <skip />
+    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Промени го корисникот"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"паѓачко мени"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Сите апликации и податоци во сесијава ќе се избришат."</string>
@@ -750,8 +753,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Се ажурира"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Работен профил"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Авионски режим"</string>
-    <!-- no translation found for status_bar_supervision (6735015942701134125) -->
-    <skip />
+    <string name="status_bar_supervision" msgid="6735015942701134125">"Родителски контроли"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Нема да го слушнете следниот аларм <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"во <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"во <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -802,6 +804,10 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Се прикажува најгоре во известувањата за разговор и како профилна слика на заклучен екран, се појавува како балонче, го прекинува „Не вознемирувај“"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритетно"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не поддржува функции за разговор"</string>
+    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
+    <skip />
+    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Овие известувања не може да се изменат"</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Известувањата за повици не може да се изменат."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Оваа група известувања не може да се конфигурира тука"</string>
@@ -912,6 +918,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Календар"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Калкулатор"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Карти"</string>
+    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Не вознемирувај"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Кратенка за копчињата за јачина на звук"</string>
     <string name="battery" msgid="769686279459897127">"Батерија"</string>
@@ -1432,8 +1448,7 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Системски апликации"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Мултитаскинг"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Поделен екран"</string>
-    <!-- no translation found for shortcutHelper_category_accessibility (8068337792277570938) -->
-    <skip />
+    <string name="shortcutHelper_category_accessibility" msgid="8068337792277570938">"Пристапност"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Внесување"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Кратенки за апликации"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Тековна апликација"</string>
@@ -1497,11 +1512,11 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Го завршивте движењето за прегледување на неодамнешните апликации."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Повлечете нагоре со три прста на допирната подлога и задржете за да ги видите неодамнешните апликации"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"Сменете ги апликациите"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2751565200937541667) -->
+    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
     <skip />
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"Одлично!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"Го завршивте движењето за менување апликации."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5508381152326379652) -->
+    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
     <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Прегледајте ги сите апликации"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Притиснете го копчето за дејство на тастатурата"</string>
