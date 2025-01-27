@@ -27,8 +27,19 @@ import android.widget.DateTimeView
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.isVisible
 import com.android.app.tracing.traceSection
@@ -41,6 +52,8 @@ import com.android.internal.widget.NotificationProgressBar
 import com.android.internal.widget.NotificationRowIconView
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.res.R as systemuiR
+import com.android.systemui.statusbar.notification.promoted.AodPromotedNotificationColor.PrimaryText
+import com.android.systemui.statusbar.notification.promoted.AodPromotedNotificationColor.SecondaryText
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.Style
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.When
@@ -59,29 +72,53 @@ fun AODPromotedNotification(viewModelFactory: AODPromotedNotificationViewModel.F
     key(content.identity) {
         val layoutResource = content.layoutResource ?: return
 
-        AndroidView(
-            factory = { context ->
-                traceSection("$TAG.inflate") {
-                        LayoutInflater.from(context).inflate(layoutResource, /* root= */ null)
-                    }
-                    .apply {
-                        setTag(
-                            viewUpdaterTagId,
-                            traceSection("$TAG.findViews") {
-                                AODPromotedNotificationViewUpdater(this)
-                            },
-                        )
-                    }
-            },
-            update = { view ->
-                traceSection("$TAG.update") {
-                    (view.getTag(viewUpdaterTagId) as AODPromotedNotificationViewUpdater).update(
-                        content
-                    )
-                }
-            },
-        )
+        val topPadding = dimensionResource(systemuiR.dimen.below_clock_padding_start_icons)
+        val sidePaddings = dimensionResource(systemuiR.dimen.notification_side_paddings)
+        val paddingValues =
+            PaddingValues(top = topPadding, start = sidePaddings, end = sidePaddings, bottom = 0.dp)
+
+        val borderStroke = BorderStroke(1.dp, SecondaryText.brush)
+
+        val borderRadius = dimensionResource(systemuiR.dimen.notification_corner_radius)
+        val borderShape = RoundedCornerShape(borderRadius)
+
+        Box(modifier = Modifier.padding(paddingValues)) {
+            AODPromotedNotificationView(
+                layoutResource = layoutResource,
+                content = content,
+                modifier = Modifier.border(borderStroke, borderShape),
+            )
+        }
     }
+}
+
+@Composable
+fun AODPromotedNotificationView(
+    layoutResource: Int,
+    content: PromotedNotificationContentModel,
+    modifier: Modifier = Modifier,
+) {
+    AndroidView(
+        factory = { context ->
+            val view =
+                traceSection("$TAG.inflate") {
+                    LayoutInflater.from(context).inflate(layoutResource, /* root= */ null)
+                }
+
+            val updater =
+                traceSection("$TAG.findViews") { AODPromotedNotificationViewUpdater(view) }
+
+            view.setTag(viewUpdaterTagId, updater)
+
+            view
+        },
+        update = { view ->
+            val updater = view.getTag(viewUpdaterTagId) as AODPromotedNotificationViewUpdater
+
+            traceSection("$TAG.update") { updater.update(content) }
+        },
+        modifier = modifier,
+    )
 }
 
 private val PromotedNotificationContentModel.layoutResource: Int?
@@ -262,12 +299,12 @@ private class AODPromotedNotificationViewUpdater(root: View) {
     }
 
     private fun updateTitle(titleView: TextView?, content: PromotedNotificationContentModel) {
-        updateTextView(titleView, content.title, color = Color.PrimaryText)
+        updateTextView(titleView, content.title, color = PrimaryText)
     }
 
     private fun updateTimeAndChronometer(content: PromotedNotificationContentModel) {
-        setTextViewColor(time, Color.SecondaryText)
-        setTextViewColor(chronometer, Color.SecondaryText)
+        setTextViewColor(time, SecondaryText)
+        setTextViewColor(chronometer, SecondaryText)
 
         val timeValue = content.time
 
@@ -309,7 +346,7 @@ private class AODPromotedNotificationViewUpdater(root: View) {
     private fun updateTextView(
         view: TextView?,
         text: CharSequence?,
-        color: Color = Color.SecondaryText,
+        color: AodPromotedNotificationColor = SecondaryText,
     ) {
         setTextViewColor(view, color)
 
@@ -322,15 +359,19 @@ private class AODPromotedNotificationViewUpdater(root: View) {
         }
     }
 
-    private fun setTextViewColor(view: TextView?, color: Color) {
-        view?.setTextColor(color.color.toInt())
+    private fun setTextViewColor(view: TextView?, color: AodPromotedNotificationColor) {
+        view?.setTextColor(color.colorInt)
     }
+}
 
-    private enum class Color(val color: UInt) {
-        Background(0x00000000u),
-        PrimaryText(0xFFFFFFFFu),
-        SecondaryText(0xFFCCCCCCu),
-    }
+private enum class AodPromotedNotificationColor(colorUInt: UInt) {
+    Background(0x00000000u),
+    PrimaryText(0xFFFFFFFFu),
+    SecondaryText(0xFFCCCCCCu);
+
+    val colorInt = colorUInt.toInt()
+    val color = Color(colorInt)
+    val brush = SolidColor(color)
 }
 
 private val viewUpdaterTagId = systemuiR.id.aod_promoted_notification_view_updater_tag
