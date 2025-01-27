@@ -1325,10 +1325,13 @@ flag {
 }
 
 flag {
-  name: "media_controls_drawables_reuse"
+  name: "media_controls_drawables_reuse_bugfix"
   namespace: "systemui"
   description: "Re-use created media drawables for media controls"
   bug: "358402034"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
