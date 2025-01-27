@@ -81,13 +81,13 @@ public enum DesktopModeFlags {
     ENABLE_DESKTOP_WINDOWING_PERSISTENCE(Flags::enableDesktopWindowingPersistence, false),
     ENABLE_HANDLE_INPUT_FIX(Flags::enableHandleInputFix, true),
     ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS_BUGFIX(
-            Flags::enableDesktopWindowingEnterTransitionBugfix, false),
+            Flags::enableDesktopWindowingEnterTransitionBugfix, true),
     ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS_BUGFIX(
-            Flags::enableDesktopWindowingExitTransitionsBugfix, false),
+            Flags::enableDesktopWindowingExitTransitionsBugfix, true),
     ENABLE_DESKTOP_APP_LAUNCH_ALTTAB_TRANSITIONS_BUGFIX(
-            Flags::enableDesktopAppLaunchAlttabTransitionsBugfix, false),
+            Flags::enableDesktopAppLaunchAlttabTransitionsBugfix, true),
     ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX(
-            Flags::enableDesktopAppLaunchTransitionsBugfix, false),
+            Flags::enableDesktopAppLaunchTransitionsBugfix, true),
     INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC(
             Flags::includeTopTransparentFullscreenTaskInDesktopHeuristic, true),
     ENABLE_DESKTOP_WINDOWING_HSUM(Flags::enableDesktopWindowingHsum, true),
@@ -95,7 +95,10 @@ public enum DesktopModeFlags {
     ENABLE_RESIZING_METRICS(Flags::enableResizingMetrics, true),
     ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS(Flags::enableTaskResizingKeyboardShortcuts, true),
     ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER(
-        Flags::enableDesktopWallpaperActivityForSystemUser, true);
+        Flags::enableDesktopWallpaperActivityForSystemUser, true),
+    ENABLE_DESKTOP_RECENTS_TRANSITIONS_CORNERS_BUGFIX(
+            Flags::enableDesktopRecentsTransitionsCornersBugfix, false),
+    ENABLE_DESKTOP_SYSTEM_DIALOGS_TRANSITIONS(Flags::enableDesktopSystemDialogsTransitions, true);
 
     /**
      * Flag class, to be used in case the enum cannot be used because the flag is not accessible.
