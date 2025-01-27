@@ -607,7 +607,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mLock,
                 mContext,
                 new MagnificationScaleProvider(mContext),
-                Executors.newSingleThreadExecutor()
+                Executors.newSingleThreadExecutor(),
+                mContext.getMainLooper()
         );
         mMagnificationProcessor = new MagnificationProcessor(mMagnificationController);
         mCaptioningManagerImpl = new CaptioningManagerImpl(mContext);
