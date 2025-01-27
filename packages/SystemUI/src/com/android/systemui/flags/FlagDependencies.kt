@@ -32,7 +32,6 @@ import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyS
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionRefactor
 import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUi
 import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUiAod
-import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUiForceExpanded
 import com.android.systemui.statusbar.notification.shared.NotificationAvalancheSuppression
 import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
@@ -54,8 +53,6 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
         PriorityPeopleSection.token dependsOn SortBySectionTimeFlag.token
         NotificationMinimalism.token dependsOn NotificationThrottleHun.token
         ModesEmptyShadeFix.token dependsOn modesUi
-
-        PromotedNotificationUiForceExpanded.token dependsOn PromotedNotificationUi.token
 
         PromotedNotificationUiAod.token dependsOn PromotedNotificationUi.token
 
