@@ -1680,26 +1680,27 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * Sets the specified orientation of this container. It percolates this change upward along the
      * hierarchy to let each level of the hierarchy a chance to respond to it.
      *
-     * @param orientation the specified orientation. Needs to be one of {@link ScreenOrientation}.
+     * @param requestedOrientation the specified orientation. Needs to be one of
+     *                             {@link ScreenOrientation}.
      * @param requestingContainer the container which orientation request has changed. Mostly used
      *                            to ensure it gets correct configuration.
      * @return the resolved override orientation of this window container.
      */
     @ScreenOrientation
-    int setOrientation(@ScreenOrientation int orientation,
+    int setOrientation(@ScreenOrientation int requestedOrientation,
             @Nullable WindowContainer requestingContainer) {
-        if (getOverrideOrientation() == orientation) {
-            return orientation;
+        if (getOverrideOrientation() == requestedOrientation) {
+            return requestedOrientation;
         }
-        setOverrideOrientation(orientation);
+        setOverrideOrientation(requestedOrientation);
         final WindowContainer parent = getParent();
         if (parent == null) {
-            return orientation;
+            return requestedOrientation;
         }
         // The derived class can return a result that is different from the given orientation.
-        final int resolvedOrientation = getOverrideOrientation();
+        final int actualOverrideOrientation = getOverrideOrientation();
         if (getConfiguration().orientation != getRequestedConfigurationOrientation(
-                false /* forDisplay */, resolvedOrientation)
+                false /* forDisplay */, actualOverrideOrientation)
                 // Update configuration directly only if the change won't be dispatched from
                 // ancestor. This prevents from computing intermediate configuration when the
                 // parent also needs to be updated from the ancestor. E.g. the app requests
@@ -1707,12 +1708,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 // the task can be updated to portrait first so the configuration can be
                 // computed in a consistent environment.
                 && (inMultiWindowMode()
-                        || !handlesOrientationChangeFromDescendant(orientation))) {
+                        || !handlesOrientationChangeFromDescendant(requestedOrientation))) {
             // Resolve the requested orientation.
             onConfigurationChanged(parent.getConfiguration());
         }
         onDescendantOrientationChanged(requestingContainer);
-        return resolvedOrientation;
+        return actualOverrideOrientation;
     }
 
     @ScreenOrientation
