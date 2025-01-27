@@ -815,7 +815,9 @@ public abstract class WMShellModule {
             ReturnToDragStartAnimator returnToDragStartAnimator,
             @DynamicOverride DesktopUserRepositories desktopUserRepositories,
             DesktopModeEventLogger desktopModeEventLogger,
-            WindowDecorTaskResourceLoader windowDecorTaskResourceLoader) {
+            WindowDecorTaskResourceLoader windowDecorTaskResourceLoader,
+            FocusTransitionObserver focusTransitionObserver,
+            @ShellMainThread ShellExecutor mainExecutor) {
         return new DesktopTilingDecorViewModel(
                 context,
                 mainDispatcher,
@@ -829,7 +831,9 @@ public abstract class WMShellModule {
                 returnToDragStartAnimator,
                 desktopUserRepositories,
                 desktopModeEventLogger,
-                windowDecorTaskResourceLoader
+                windowDecorTaskResourceLoader,
+                focusTransitionObserver,
+                mainExecutor
         );
     }
 

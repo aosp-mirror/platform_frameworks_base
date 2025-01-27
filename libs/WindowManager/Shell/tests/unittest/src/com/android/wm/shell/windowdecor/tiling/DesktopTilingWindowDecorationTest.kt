@@ -33,6 +33,7 @@ import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
+import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
@@ -42,6 +43,7 @@ import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFreeformTask
 import com.android.wm.shell.desktopmode.DesktopUserRepositories
 import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler
+import com.android.wm.shell.transition.FocusTransitionObserver
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
 import com.android.wm.shell.windowdecor.DragResizeWindowGeometry
@@ -105,6 +107,8 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
     private val mainDispatcher: MainCoroutineDispatcher = mock()
     private val bgScope: CoroutineScope = mock()
     private val taskResourceLoader: WindowDecorTaskResourceLoader = mock()
+    private val focusTransitionObserver: FocusTransitionObserver = mock()
+    private val mainExecutor: ShellExecutor = mock()
     private lateinit var tilingDecoration: DesktopTilingWindowDecoration
 
     private val split_divider_width = 10
@@ -129,6 +133,8 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
                 returnToDragStartAnimator,
                 userRepositories,
                 desktopModeEventLogger,
+                focusTransitionObserver,
+                mainExecutor
             )
         whenever(context.createContextAsUser(any(), any())).thenReturn(context)
         whenever(userRepositories.current).thenReturn(desktopRepository)
@@ -242,7 +248,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
             BOUNDS,
         )
 
-        assertThat(tilingDecoration.moveTiledPairToFront(task2)).isFalse()
+        assertThat(tilingDecoration.moveTiledPairToFront(task2.taskId, false)).isFalse()
         verify(transitions, never()).startTransition(any(), any(), any())
     }
 
@@ -272,7 +278,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
             BOUNDS,
         )
 
-        assertThat(tilingDecoration.moveTiledPairToFront(task3)).isFalse()
+        assertThat(tilingDecoration.moveTiledPairToFront(task3.taskId, false)).isFalse()
         verify(transitions, never()).startTransition(any(), any(), any())
     }
 
@@ -304,7 +310,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
         )
         task1.isFocused = true
 
-        assertThat(tilingDecoration.moveTiledPairToFront(task1, isTaskFocused = true)).isTrue()
+        assertThat(tilingDecoration.moveTiledPairToFront(task1.taskId, isFocusedOnDisplay = true)).isTrue()
         verify(transitions, times(1)).startTransition(eq(TRANSIT_TO_FRONT), any(), eq(null))
     }
 
@@ -336,8 +342,8 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
         task1.isFocused = true
         task3.isFocused = true
 
-        assertThat(tilingDecoration.moveTiledPairToFront(task3)).isFalse()
-        assertThat(tilingDecoration.moveTiledPairToFront(task1)).isTrue()
+        assertThat(tilingDecoration.moveTiledPairToFront(task3.taskId, true)).isFalse()
+        assertThat(tilingDecoration.moveTiledPairToFront(task1.taskId, true)).isTrue()
         verify(transitions, times(1)).startTransition(eq(TRANSIT_TO_FRONT), any(), eq(null))
     }
 
@@ -367,8 +373,8 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
             BOUNDS,
         )
 
-        assertThat(tilingDecoration.moveTiledPairToFront(task3, isTaskFocused = true)).isFalse()
-        assertThat(tilingDecoration.moveTiledPairToFront(task1, isTaskFocused = true)).isTrue()
+        assertThat(tilingDecoration.moveTiledPairToFront(task3.taskId, isFocusedOnDisplay = true)).isFalse()
+        assertThat(tilingDecoration.moveTiledPairToFront(task1.taskId, isFocusedOnDisplay = true)).isTrue()
         verify(transitions, times(1)).startTransition(eq(TRANSIT_TO_FRONT), any(), eq(null))
     }
 
