@@ -137,14 +137,15 @@ class BubbleOverflow(private val context: Context, private val positioner: Bubbl
         // Update bitmap
         val fg = InsetDrawable(overflowBtn?.iconDrawable, overflowIconInset)
         val drawable = AdaptiveIconDrawable(ColorDrawable(colorAccent), fg)
-        bitmap = iconFactory.createBadgedIconBitmap(drawable).icon
+        val bubbleBitmapScale = FloatArray(1)
+        bitmap = iconFactory.getBubbleBitmap(drawable, bubbleBitmapScale)
 
         // Update dot path
         dotPath =
             PathParser.createPathFromPathData(
                 res.getString(com.android.internal.R.string.config_icon_mask)
             )
-        val scale = iconFactory.normalizer.getScale(iconView!!.iconDrawable)
+        val scale = bubbleBitmapScale[0]
         val radius = BadgedImageView.DEFAULT_PATH_SIZE / 2f
         val matrix = Matrix()
         matrix.setScale(
