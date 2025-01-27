@@ -124,6 +124,7 @@ public class NotificationChildrenContainer extends ViewGroup
     private NotificationGroupingUtil mGroupingUtil;
     private ViewState mHeaderViewState;
     private ViewState mTopLineViewState;
+    private ViewState mExpandButtonViewState;
     private int mClipBottomAmount;
     private boolean mIsMinimized;
     private OnClickListener mHeaderClickListener;
@@ -867,10 +868,7 @@ public class NotificationChildrenContainer extends ViewGroup
             }
         }
         if (mGroupHeader != null) {
-            if (mHeaderViewState == null) {
-                mHeaderViewState = new ViewState();
-            }
-            mHeaderViewState.initFrom(mGroupHeader);
+            mHeaderViewState = initStateForGroupHeader(mHeaderViewState);
 
             if (mContainingNotification.hasExpandingChild()) {
                 // Not modifying translationZ during expand animation.
@@ -882,20 +880,33 @@ public class NotificationChildrenContainer extends ViewGroup
             }
             mHeaderViewState.setYTranslation(mCurrentHeaderTranslation);
             mHeaderViewState.setAlpha(mHeaderVisibleAmount);
-            // The hiding is done automatically by the alpha, otherwise we'll pick it up again
-            // in the next frame with the initFrom call above and have an invisible header
-            mHeaderViewState.hidden = false;
 
             if (notificationsRedesignTemplates()) {
-                if (mTopLineViewState == null) {
-                    mTopLineViewState = new ViewState();
-                }
-                mTopLineViewState.initFrom(mGroupHeader);
+                mTopLineViewState = initStateForGroupHeader(mTopLineViewState);
                 mTopLineViewState.setYTranslation(
                         mGroupHeader.getTopLineTranslation() * expandFactor);
-                mTopLineViewState.hidden = false;
+
+                mExpandButtonViewState = initStateForGroupHeader(mExpandButtonViewState);
+                mExpandButtonViewState.setYTranslation(
+                        mGroupHeader.getExpandButtonTranslation() * expandFactor);
             }
         }
+    }
+
+    /**
+     * Initialise a new ViewState for the group header or its children, or update and return
+     * {@code existingState} if not null.
+     */
+    private ViewState initStateForGroupHeader(ViewState existingState) {
+        ViewState viewState = existingState;
+        if (viewState == null) {
+            viewState = new ViewState();
+        }
+        viewState.initFrom(mGroupHeader);
+        // The hiding is done automatically by the alpha, otherwise we'll pick it up again
+        // in the next frame with the initFrom call above and have an invisible header
+        viewState.hidden = false;
+        return viewState;
     }
 
     /**
@@ -987,8 +998,13 @@ public class NotificationChildrenContainer extends ViewGroup
         if (mHeaderViewState != null) {
             mHeaderViewState.applyToView(mGroupHeader);
         }
-        if (notificationsRedesignTemplates() && mTopLineViewState != null) {
-            mTopLineViewState.applyToView(mGroupHeader.getTopLineView());
+        if (notificationsRedesignTemplates()) {
+            if (mTopLineViewState != null) {
+                mTopLineViewState.applyToView(mGroupHeader.getTopLineView());
+            }
+            if (mExpandButtonViewState != null) {
+                mExpandButtonViewState.applyToView(mGroupHeader.getExpandButton());
+            }
         }
         updateChildrenClipping();
     }

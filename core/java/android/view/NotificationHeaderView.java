@@ -62,6 +62,7 @@ public class NotificationHeaderView extends RelativeLayout {
     private boolean mExpandOnlyOnButton;
     private boolean mAcceptAllTouches;
     private float mTopLineTranslation;
+    private float mExpandButtonTranslation;
 
     ViewOutlineProvider mProvider = new ViewOutlineProvider() {
         @Override
@@ -212,32 +213,45 @@ public class NotificationHeaderView extends RelativeLayout {
         return mTopLineView;
     }
 
+    /** The view containing the button to expand the notification. */
+    public NotificationExpandButton getExpandButton() {
+        return mExpandButton;
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        measureTopLineTranslation();
+
+        if (notificationsRedesignTemplates()) {
+            mTopLineTranslation = measureCenterTranslation(mTopLineView);
+            mExpandButtonTranslation = measureCenterTranslation(mExpandButton);
+        }
     }
 
-    private void measureTopLineTranslation() {
-        if (!notificationsRedesignTemplates()) {
-            return;
-        }
-
-        // When the top line is centered (see centerTopLine), its height is MATCH_PARENT
+    private float measureCenterTranslation(View view) {
+        // When the view is centered (see centerTopLine), its height is MATCH_PARENT
         int parentHeight = getMeasuredHeight();
-        // When the top line is top-aligned, its height is WRAP_CONTENT
-        float wrapContentHeight = mTopLineView.getMeasuredHeight();
+        // When the view is top-aligned, its height is WRAP_CONTENT
+        float wrapContentHeight = view.getMeasuredHeight();
         // Calculate the translation needed between the two alignments
-        final MarginLayoutParams lp = (MarginLayoutParams) mTopLineView.getLayoutParams();
-        mTopLineTranslation = abs((parentHeight - wrapContentHeight) / 2f - lp.topMargin);
+        final MarginLayoutParams lp = (MarginLayoutParams) view.getLayoutParams();
+        return abs((parentHeight - wrapContentHeight) / 2f - lp.topMargin);
     }
 
     /**
      * The vertical translation necessary between the two positions of the top line, to be used in
-     * the animation. See also {@link this#centerTopLine(boolean)}.
+     * the animation. See also {@link NotificationHeaderView#centerTopLine(boolean)}.
      */
     public float getTopLineTranslation() {
         return mTopLineTranslation;
+    }
+
+    /**
+     * The vertical translation necessary between the two positions of the expander, to be used in
+     * the animation. See also {@link NotificationHeaderView#centerTopLine(boolean)}.
+     */
+    public float getExpandButtonTranslation() {
+        return mExpandButtonTranslation;
     }
 
     /**

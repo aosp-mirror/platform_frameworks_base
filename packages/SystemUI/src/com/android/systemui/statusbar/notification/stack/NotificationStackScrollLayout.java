@@ -6679,6 +6679,7 @@ public class NotificationStackScrollLayout
         NotificationHeaderView header = childrenContainer.getGroupHeader();
         if (header != null) {
             resetYTranslation(header.getTopLineView());
+            resetYTranslation(header.getExpandButton());
             header.centerTopLine(expanded);
         }
     }
