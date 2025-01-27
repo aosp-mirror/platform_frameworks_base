@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2025 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!-- SeekBar drawable for volume rows. This contains a background layer (with a solid round rect,
+     and a bottom-aligned icon) and a progress layer (with an accent-colored round rect and icon)
+     that moves up and down with the progress value. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:autoMirrored="true">
+    <item android:id="@+id/rear_display_dialog_progress_solid">
+        <shape>
+            <size android:height="@dimen/rear_display_dialog_slider_height" />
+            <solid android:color="?android:attr/colorAccent" />
+            <corners android:radius="@dimen/rear_display_dialog_slider_corner_radius"/>
+        </shape>
+    </item>
+    <item
+        android:id="@+id/rear_display_dialog_seekbar_progress_icon"
+        android:gravity="center_vertical|right"
+        android:height="@dimen/rounded_slider_icon_size"
+        android:width="@dimen/rounded_slider_icon_size"
+        android:right="@dimen/rear_display_dialog_slider_icon_inset">
+        <com.android.systemui.util.AlphaTintDrawableWrapper
+            android:drawable="@drawable/ic_rear_display_slider"
+            android:tint="?androidprv:attr/colorAccentPrimaryVariant" />
+    </item>
+</layer-list>
