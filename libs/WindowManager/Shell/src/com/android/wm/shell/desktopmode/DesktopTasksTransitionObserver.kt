@@ -27,6 +27,7 @@ import android.view.WindowManager.TRANSIT_PIP
 import android.view.WindowManager.TRANSIT_TO_BACK
 import android.view.WindowManager.TRANSIT_TO_FRONT
 import android.window.DesktopModeFlags
+import android.window.DesktopModeFlags.ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER
 import android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
 import android.window.TransitionInfo
 import android.window.WindowContainerTransaction
@@ -275,7 +276,7 @@ class DesktopTasksTransitionObserver(
             desktopWallpaperActivityTokenProvider
                 .getToken(lastSeenTransitionToCloseWallpaper.displayId)
                 ?.let { wallpaperActivityToken ->
-                    if (Flags.enableDesktopWallpaperActivityForSystemUser()) {
+                    if (ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER.isTrue()) {
                         transitions.startTransition(
                             TRANSIT_TO_BACK,
                             WindowContainerTransaction()

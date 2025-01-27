@@ -35,10 +35,6 @@ import java.util.function.BooleanSupplier;
  * windowing features which are aiming for developer preview before their release. It allows
  * developer option to override the default behavior of these flags.
  *
- * <p> The flags here will be controlled by either {@link
- * Settings.Global#DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES} or the {@code
- * persyst.wm.debug.desktop_experience_devopts} system property.
- *
  * <p>NOTE: Flags should only be added to this enum when they have received Product and UX
  * alignment that the feature is ready for developer preview, otherwise just do a flag check.
  *
@@ -96,7 +92,9 @@ public enum DesktopModeFlags {
             Flags::includeTopTransparentFullscreenTaskInDesktopHeuristic, true),
     ENABLE_MINIMIZE_BUTTON(Flags::enableMinimizeButton, true),
     ENABLE_RESIZING_METRICS(Flags::enableResizingMetrics, true),
-    ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS(Flags::enableTaskResizingKeyboardShortcuts, true);
+    ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS(Flags::enableTaskResizingKeyboardShortcuts, true),
+    ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER(
+        Flags::enableDesktopWallpaperActivityForSystemUser, true);
 
     /**
      * Flag class, to be used in case the enum cannot be used because the flag is not accessible.
@@ -116,7 +114,7 @@ public enum DesktopModeFlags {
 
         /**
          * Determines state of flag based on the actual flag and desktop mode developer option
-         * or desktop experience developer option overrides.
+         * overrides.
          */
         public boolean isTrue() {
             return isFlagTrue(mFlagFunction, mShouldOverrideByDevOption);
