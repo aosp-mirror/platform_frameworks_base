@@ -372,8 +372,10 @@ public final class Choreographer {
 
     /**
      * @hide
+     * @deprecated Use vsync IDs with the regular Choreographer instead.
      */
     @UnsupportedAppUsage
+    @Deprecated
     public static Choreographer getSfInstance() {
         return sSfThreadInstance.get();
     }
