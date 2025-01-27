@@ -89,8 +89,11 @@ object SceneContainerFlag {
     @JvmStatic
     fun requirementDescription(): String {
         return buildString {
-            getAllRequirements().forEach { requirement ->
-                append('\n')
+            getAllRequirements().forEachIndexed { index, requirement ->
+                if (index > 0) {
+                    append('\n')
+                }
+
                 append(if (requirement.isEnabled) "    [MET]" else "[NOT MET]")
                 append(" ${requirement.name}")
             }
