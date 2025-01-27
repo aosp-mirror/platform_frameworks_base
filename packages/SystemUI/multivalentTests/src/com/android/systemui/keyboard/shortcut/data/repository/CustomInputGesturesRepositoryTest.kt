@@ -19,6 +19,7 @@ package com.android.systemui.keyboard.shortcut.data.repository
 import android.content.Context
 import android.content.Context.INPUT_SERVICE
 import android.content.Intent
+import android.hardware.input.FakeInputManager
 import android.hardware.input.InputGestureData
 import android.hardware.input.InputManager
 import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_SUCCESS
@@ -57,13 +58,14 @@ class CustomInputGesturesRepositoryTest : SysuiTestCase() {
     private val secondaryUserContext: Context = mock()
     private var activeUserContext: Context = primaryUserContext
 
-    private val kosmos = testKosmos().also {
-        it.userTracker = FakeUserTracker(onCreateCurrentUserContext = { activeUserContext })
-    }
+    private val kosmos =
+        testKosmos().also {
+            it.userTracker = FakeUserTracker(onCreateCurrentUserContext = { activeUserContext })
+        }
 
     private val inputManager = kosmos.fakeInputManager.inputManager
     private val broadcastDispatcher = kosmos.broadcastDispatcher
-    private val inputManagerForSecondaryUser: InputManager = mock()
+    private val inputManagerForSecondaryUser: InputManager = FakeInputManager().inputManager
     private val testScope = kosmos.testScope
     private val testHelper = kosmos.shortcutHelperTestHelper
     private val customInputGesturesRepository = kosmos.customInputGesturesRepository
@@ -94,9 +96,10 @@ class CustomInputGesturesRepositoryTest : SysuiTestCase() {
     fun customInputGestures_initialValueReturnsDataFromAPI() {
         testScope.runTest {
             val customInputGestures = listOf(allAppsInputGestureData)
-            whenever(
-                inputManager.getCustomInputGestures(/* filter= */ InputGestureData.Filter.KEY)
-            ).then { return@then customInputGestures }
+            whenever(inputManager.getCustomInputGestures(/* filter= */ InputGestureData.Filter.KEY))
+                .then {
+                    return@then customInputGestures
+                }
 
             val inputGestures by collectLastValue(customInputGesturesRepository.customInputGestures)
 
@@ -108,9 +111,10 @@ class CustomInputGesturesRepositoryTest : SysuiTestCase() {
     fun customInputGestures_isUpdatedToMostRecentDataAfterNewGestureIsAdded() {
         testScope.runTest {
             var customInputGestures = listOf<InputGestureData>()
-            whenever(
-                inputManager.getCustomInputGestures(/* filter= */ InputGestureData.Filter.KEY)
-            ).then { return@then customInputGestures }
+            whenever(inputManager.getCustomInputGestures(/* filter= */ InputGestureData.Filter.KEY))
+                .then {
+                    return@then customInputGestures
+                }
             whenever(inputManager.addCustomInputGesture(any())).then { invocation ->
                 val inputGesture = invocation.getArgument<InputGestureData>(0)
                 customInputGestures = customInputGestures + inputGesture
@@ -129,10 +133,10 @@ class CustomInputGesturesRepositoryTest : SysuiTestCase() {
     fun retrieveCustomInputGestures_retrievesMostRecentData() {
         testScope.runTest {
             var customInputGestures = listOf<InputGestureData>()
-            whenever(
-                inputManager.getCustomInputGestures(/* filter= */ InputGestureData.Filter.KEY)
-            ).then { return@then customInputGestures }
-
+            whenever(inputManager.getCustomInputGestures(/* filter= */ InputGestureData.Filter.KEY))
+                .then {
+                    return@then customInputGestures
+                }
 
             assertThat(customInputGesturesRepository.retrieveCustomInputGestures()).isEmpty()
 
@@ -143,24 +147,38 @@ class CustomInputGesturesRepositoryTest : SysuiTestCase() {
         }
     }
 
+    @Test
+    fun getInputGestureByTrigger_returnsInputGestureFromInputManager() =
+        testScope.runTest {
+            inputManager.addCustomInputGesture(allAppsInputGestureData)
+
+            val inputGestureData =
+                customInputGesturesRepository.getInputGestureByTrigger(
+                    allAppsInputGestureData.trigger
+                )
+
+            assertThat(inputGestureData).isEqualTo(allAppsInputGestureData)
+        }
+
     private fun setCustomInputGesturesForPrimaryUser(vararg inputGesture: InputGestureData) {
-        whenever(
-            inputManager.getCustomInputGestures(/* filter= */ InputGestureData.Filter.KEY)
-        ).thenReturn(inputGesture.toList())
+        whenever(inputManager.getCustomInputGestures(/* filter= */ InputGestureData.Filter.KEY))
+            .thenReturn(inputGesture.toList())
     }
 
     private fun setCustomInputGesturesForSecondaryUser(vararg inputGesture: InputGestureData) {
         whenever(
-            inputManagerForSecondaryUser.getCustomInputGestures(/* filter= */ InputGestureData.Filter.KEY)
-        ).thenReturn(inputGesture.toList())
+                inputManagerForSecondaryUser.getCustomInputGestures(
+                    /* filter= */ InputGestureData.Filter.KEY
+                )
+            )
+            .thenReturn(inputGesture.toList())
     }
 
     private fun switchToSecondaryUser() {
         activeUserContext = secondaryUserContext
         broadcastDispatcher.sendIntentToMatchingReceiversOnly(
             context,
-            Intent(Intent.ACTION_USER_SWITCHED)
+            Intent(Intent.ACTION_USER_SWITCHED),
         )
     }
-
 }

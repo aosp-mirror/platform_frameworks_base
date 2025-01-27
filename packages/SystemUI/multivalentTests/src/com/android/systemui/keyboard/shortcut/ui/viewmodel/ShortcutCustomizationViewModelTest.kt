@@ -18,11 +18,15 @@ package com.android.systemui.keyboard.shortcut.ui.viewmodel
 
 import android.content.Context
 import android.content.Context.INPUT_SERVICE
-import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_ALREADY_EXISTS
+import android.hardware.input.InputGestureData
+import android.hardware.input.InputGestureData.createKeyTrigger
 import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER
 import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_RESERVED_GESTURE
-import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_SUCCESS
+import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_HOME
 import android.hardware.input.fakeInputManager
+import android.view.KeyEvent.KEYCODE_A
+import android.view.KeyEvent.META_CTRL_ON
+import android.view.KeyEvent.META_META_ON
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -30,7 +34,6 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.allAppsInputGestureData
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.allAppsShortcutAddRequest
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.allAppsShortcutDeleteRequest
-import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.goHomeInputGestureData
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.keyDownEventWithActionKeyPressed
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.keyDownEventWithoutActionKeyPressed
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.keyUpEventWithActionKeyPressed
@@ -44,16 +47,17 @@ import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiSt
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState.DeleteShortcutDialog
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState.ResetShortcutDialog
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.userTracker
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
@@ -63,7 +67,7 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
 
     private val mockUserContext: Context = mock()
     private val kosmos =
-        testKosmos().also {
+        testKosmos().useUnconfinedTestDispatcher().also {
             it.userTracker = FakeUserTracker(onCreateCurrentUserContext = { mockUserContext })
         }
     private val testScope = kosmos.testScope
@@ -75,6 +79,7 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     fun setup() {
         helper.showFromActivity()
         whenever(mockUserContext.getSystemService(INPUT_SERVICE)).thenReturn(inputManager)
+        testScope.backgroundScope.launch { viewModel.activate() }
     }
 
     @Test
@@ -146,8 +151,6 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     fun uiState_becomeInactiveAfterSuccessfullySettingShortcut() {
         testScope.runTest {
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
-            whenever(inputManager.addCustomInputGesture(any()))
-                .thenReturn(CUSTOM_INPUT_GESTURE_RESULT_SUCCESS)
 
             openAddShortcutDialogAndSetShortcut()
 
@@ -166,11 +169,38 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun uiState_errorMessage_isKeyCombinationInUse_whenKeyCombinationAlreadyExists() {
+    fun uiState_errorMessage_onKeyPressed_isKeyCombinationInUse_whenKeyCombinationAlreadyExists() {
+        testScope.runTest {
+            inputManager.addCustomInputGesture(buildSimpleInputGestureWithMetaCtrlATrigger())
+            val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
+
+            openAddShortcutDialogAndPressKeyCombination()
+
+            assertThat((uiState as AddShortcutDialog).errorMessage)
+                .isEqualTo(
+                    context.getString(
+                        R.string.shortcut_customizer_key_combination_in_use_error_message
+                    )
+                )
+        }
+    }
+
+    @Test
+    fun uiState_errorMessage_onKeyPressed_isEmpty_whenKeyCombinationIsAvailable() {
         testScope.runTest {
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
-            whenever(inputManager.addCustomInputGesture(any()))
-                .thenReturn(CUSTOM_INPUT_GESTURE_RESULT_ERROR_ALREADY_EXISTS)
+
+            openAddShortcutDialogAndPressKeyCombination()
+
+            assertThat((uiState as AddShortcutDialog).errorMessage).isEmpty()
+        }
+    }
+
+    @Test
+    fun uiState_errorMessage_onSetShortcut_isKeyCombinationInUse_whenKeyCombinationAlreadyExists() {
+        testScope.runTest {
+            inputManager.addCustomInputGesture(buildSimpleInputGestureWithMetaCtrlATrigger())
+            val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
 
             openAddShortcutDialogAndSetShortcut()
 
@@ -184,11 +214,12 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun uiState_errorMessage_isKeyCombinationInUse_whenKeyCombinationIsReserved() {
+    fun uiState_errorMessage_onSetShortcut_isKeyCombinationInUse_whenKeyCombinationIsReserved() {
         testScope.runTest {
+            inputManager.addCustomInputGesture(buildSimpleInputGestureWithMetaCtrlATrigger())
+            kosmos.fakeInputManager.addCustomInputGestureErrorCode =
+                CUSTOM_INPUT_GESTURE_RESULT_ERROR_RESERVED_GESTURE
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
-            whenever(inputManager.addCustomInputGesture(any()))
-                .thenReturn(CUSTOM_INPUT_GESTURE_RESULT_ERROR_RESERVED_GESTURE)
 
             openAddShortcutDialogAndSetShortcut()
 
@@ -202,11 +233,12 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun uiState_errorMessage_isGenericError_whenErrorIsUnknown() {
+    fun uiState_errorMessage_onSetShortcut_isGenericError_whenErrorIsUnknown() {
         testScope.runTest {
+            inputManager.addCustomInputGesture(buildSimpleInputGestureWithMetaCtrlATrigger())
+            kosmos.fakeInputManager.addCustomInputGestureErrorCode =
+                CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
-            whenever(inputManager.addCustomInputGesture(any()))
-                .thenReturn(CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER)
 
             openAddShortcutDialogAndSetShortcut()
 
@@ -219,10 +251,7 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     fun uiState_becomesInactiveAfterSuccessfullyDeletingShortcut() {
         testScope.runTest {
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
-            whenever(inputManager.getCustomInputGestures(any()))
-                .thenReturn(listOf(goHomeInputGestureData, allAppsInputGestureData))
-            whenever(inputManager.removeCustomInputGesture(any()))
-                .thenReturn(CUSTOM_INPUT_GESTURE_RESULT_SUCCESS)
+            inputManager.addCustomInputGesture(allAppsInputGestureData)
 
             openDeleteShortcutDialogAndDeleteShortcut()
 
@@ -234,7 +263,6 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     fun uiState_becomesInactiveAfterSuccessfullyResettingShortcuts() {
         testScope.runTest {
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
-            whenever(inputManager.getCustomInputGestures(any())).thenReturn(emptyList())
 
             openResetShortcutDialogAndResetAllCustomShortcuts()
 
@@ -297,24 +325,42 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
         }
     }
 
-    private suspend fun openAddShortcutDialogAndSetShortcut() {
-        viewModel.onShortcutCustomizationRequested(allAppsShortcutAddRequest)
+    @Test
+    fun uiState_pressedKeys_resetsToEmpty_onClearSelectedShortcutKeyCombination() {
+        testScope.runTest {
+            val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
+            viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
+            viewModel.onShortcutKeyCombinationSelected(keyDownEventWithActionKeyPressed)
+            viewModel.onShortcutKeyCombinationSelected(keyUpEventWithActionKeyPressed)
+            viewModel.clearSelectedKeyCombination()
+            assertThat((uiState as AddShortcutDialog).pressedKeys).isEmpty()
+        }
+    }
 
+    private suspend fun openAddShortcutDialogAndSetShortcut() {
+        openAddShortcutDialogAndPressKeyCombination()
+        viewModel.onSetShortcut()
+    }
+
+    private fun openAddShortcutDialogAndPressKeyCombination() {
+        viewModel.onShortcutCustomizationRequested(allAppsShortcutAddRequest)
         viewModel.onShortcutKeyCombinationSelected(keyDownEventWithActionKeyPressed)
         viewModel.onShortcutKeyCombinationSelected(keyUpEventWithActionKeyPressed)
-
-        viewModel.onSetShortcut()
     }
 
     private suspend fun openDeleteShortcutDialogAndDeleteShortcut() {
         viewModel.onShortcutCustomizationRequested(allAppsShortcutDeleteRequest)
-
         viewModel.deleteShortcutCurrentlyBeingCustomized()
     }
 
     private suspend fun openResetShortcutDialogAndResetAllCustomShortcuts() {
         viewModel.onShortcutCustomizationRequested(ShortcutCustomizationRequestInfo.Reset)
-
         viewModel.resetAllCustomShortcuts()
     }
+
+    private fun buildSimpleInputGestureWithMetaCtrlATrigger() =
+        InputGestureData.Builder()
+            .setKeyGestureType(KEY_GESTURE_TYPE_HOME)
+            .setTrigger(createKeyTrigger(KEYCODE_A, META_CTRL_ON or META_META_ON))
+            .build()
 }

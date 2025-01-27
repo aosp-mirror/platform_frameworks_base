@@ -28,16 +28,17 @@ import com.android.systemui.keyboard.shared.model.ShortcutCustomizationRequestRe
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutCustomizationInteractor
 import com.android.systemui.keyboard.shortcut.shared.model.KeyCombination
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState.AddShortcutDialog
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState.DeleteShortcutDialog
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState.ResetShortcutDialog
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.res.R
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 class ShortcutCustomizationViewModel
@@ -45,26 +46,12 @@ class ShortcutCustomizationViewModel
 constructor(
     private val context: Context,
     private val shortcutCustomizationInteractor: ShortcutCustomizationInteractor,
-) {
+) : ExclusiveActivatable() {
     private var keyDownEventCache: KeyEvent? = null
     private val _shortcutCustomizationUiState =
         MutableStateFlow<ShortcutCustomizationUiState>(ShortcutCustomizationUiState.Inactive)
 
-    val shortcutCustomizationUiState =
-        shortcutCustomizationInteractor.pressedKeys
-            .map { keys ->
-                // Note that Action Key is excluded as it's already displayed on the UI
-                keys.filter {
-                    it != shortcutCustomizationInteractor.getDefaultCustomShortcutModifierKey()
-                }
-            }
-            .combine(_shortcutCustomizationUiState) { keys, uiState ->
-                if (uiState is AddShortcutDialog) {
-                    uiState.copy(pressedKeys = keys)
-                } else {
-                    uiState
-                }
-            }
+    val shortcutCustomizationUiState = _shortcutCustomizationUiState.asStateFlow()
 
     fun onShortcutCustomizationRequested(requestInfo: ShortcutCustomizationRequestInfo) {
         shortcutCustomizationInteractor.onCustomizationRequested(requestInfo)
@@ -92,7 +79,7 @@ constructor(
     fun onDialogDismissed() {
         _shortcutCustomizationUiState.value = ShortcutCustomizationUiState.Inactive
         shortcutCustomizationInteractor.onCustomizationRequested(null)
-        shortcutCustomizationInteractor.updateUserSelectedKeyCombination(null)
+        clearSelectedKeyCombination()
     }
 
     fun onShortcutKeyCombinationSelected(keyEvent: KeyEvent): Boolean {
@@ -112,7 +99,6 @@ constructor(
 
     suspend fun onSetShortcut() {
         val result = shortcutCustomizationInteractor.confirmAndSetShortcutCurrentlyBeingCustomized()
-
         _shortcutCustomizationUiState.update { uiState ->
             when (result) {
                 ShortcutCustomizationRequestResult.SUCCESS -> ShortcutCustomizationUiState.Inactive
@@ -158,6 +144,10 @@ constructor(
         }
     }
 
+    fun clearSelectedKeyCombination() {
+        shortcutCustomizationInteractor.updateUserSelectedKeyCombination(null)
+    }
+
     private fun getUiStateWithErrorMessage(
         uiState: ShortcutCustomizationUiState,
         errorMessage: String,
@@ -180,10 +170,40 @@ constructor(
         keyDownEventCache = null
     }
 
+    private suspend fun isSelectedKeyCombinationAvailable() =
+        shortcutCustomizationInteractor.isSelectedKeyCombinationAvailable()
+
     @AssistedFactory
     interface Factory {
         fun create(): ShortcutCustomizationViewModel
     }
+
+    override suspend fun onActivated(): Nothing {
+        shortcutCustomizationInteractor.pressedKeys.collect {
+            val keys = filterDefaultCustomShortcutModifierKey(it)
+            val errorMessage = getErrorMessageForPressedKeys(keys)
+
+            _shortcutCustomizationUiState.update { uiState ->
+                if (uiState is AddShortcutDialog) {
+                    uiState.copy(pressedKeys = keys, errorMessage = errorMessage)
+                } else {
+                    uiState
+                }
+            }
+        }
+    }
+
+    private suspend fun getErrorMessageForPressedKeys(keys: List<ShortcutKey>): String {
+        return if (keys.isEmpty() or isSelectedKeyCombinationAvailable()) {
+            ""
+        }
+        else {
+            context.getString(R.string.shortcut_customizer_key_combination_in_use_error_message)
+        }
+    }
+
+    private fun filterDefaultCustomShortcutModifierKey(keys: List<ShortcutKey>) =
+        keys.filter { it != shortcutCustomizationInteractor.getDefaultCustomShortcutModifierKey() }
 
     companion object {
         private val SUPPORTED_MODIFIERS =

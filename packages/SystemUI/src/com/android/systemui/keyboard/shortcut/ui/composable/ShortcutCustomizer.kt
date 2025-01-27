@@ -18,14 +18,10 @@ package com.android.systemui.keyboard.shortcut.ui.composable
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -40,13 +36,15 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
@@ -57,6 +55,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -81,6 +80,7 @@ fun ShortcutCustomizationDialog(
     onConfirmSetShortcut: () -> Unit,
     onConfirmDeleteShortcut: () -> Unit,
     onConfirmResetShortcut: () -> Unit,
+    onClearSelectedKeyCombination: () -> Unit,
 ) {
     when (uiState) {
         is ShortcutCustomizationUiState.AddShortcutDialog -> {
@@ -90,6 +90,7 @@ fun ShortcutCustomizationDialog(
                 onShortcutKeyCombinationSelected,
                 onCancel,
                 onConfirmSetShortcut,
+                onClearSelectedKeyCombination,
             )
         }
         is ShortcutCustomizationUiState.DeleteShortcutDialog -> {
@@ -111,6 +112,7 @@ private fun AddShortcutDialog(
     onShortcutKeyCombinationSelected: (KeyEvent) -> Boolean,
     onCancel: () -> Unit,
     onConfirmSetShortcut: () -> Unit,
+    onClearSelectedKeyCombination: () -> Unit,
 ) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Title(uiState.shortcutLabel)
@@ -126,6 +128,7 @@ private fun AddShortcutDialog(
             onShortcutKeyCombinationSelected = onShortcutKeyCombinationSelected,
             pressedKeys = uiState.pressedKeys,
             onConfirmSetShortcut = onConfirmSetShortcut,
+            onClearSelectedKeyCombination = onClearSelectedKeyCombination,
         )
         ErrorMessageContainer(uiState.errorMessage)
         DialogButtons(
@@ -249,10 +252,11 @@ private fun ErrorMessageContainer(errorMessage: String) {
                 lineHeight = 20.sp,
                 fontWeight = FontWeight.W500,
                 color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(start = 24.dp).width(252.dp).semantics {
-                    contentDescription = errorMessage
-                    liveRegion = LiveRegionMode.Polite
-                },
+                modifier =
+                    Modifier.padding(start = 24.dp).width(252.dp).semantics {
+                        contentDescription = errorMessage
+                        liveRegion = LiveRegionMode.Polite
+                    },
             )
         }
     }
@@ -264,72 +268,82 @@ private fun SelectedKeyCombinationContainer(
     onShortcutKeyCombinationSelected: (KeyEvent) -> Boolean,
     pressedKeys: List<ShortcutKey>,
     onConfirmSetShortcut: () -> Unit,
+    onClearSelectedKeyCombination: () -> Unit,
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-    val outlineColor =
-        if (!isFocused) MaterialTheme.colorScheme.outline
-        else if (shouldShowError) MaterialTheme.colorScheme.error
-        else MaterialTheme.colorScheme.primary
     val focusRequester = remember { FocusRequester() }
-
+    val focusManager = LocalFocusManager.current
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
-    ClickableShortcutSurface(
-        onClick = {},
-        color = Color.Transparent,
-        shape = RoundedCornerShape(50.dp),
+    OutlinedInputField(
         modifier =
             Modifier.padding(all = 16.dp)
                 .sizeIn(minWidth = 332.dp, minHeight = 56.dp)
-                .border(width = 2.dp, color = outlineColor, shape = RoundedCornerShape(50.dp))
+                .focusRequester(focusRequester)
+                .focusProperties { canFocus = true }
                 .onPreviewKeyEvent { keyEvent ->
                     val keyEventProcessed = onShortcutKeyCombinationSelected(keyEvent)
-                    if (
-                        !keyEventProcessed &&
-                            keyEvent.key == Key.Enter &&
-                            keyEvent.type == KeyEventType.KeyUp
-                    ) {
-                        onConfirmSetShortcut()
+                    if (keyEventProcessed) {
                         true
-                    } else keyEventProcessed
-                }
-                .focusProperties { canFocus = true } // enables keyboard focus when in touch mode
-                .focusRequester(focusRequester),
-        interactionSource = interactionSource,
-    ) {
-        Row(
-            modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 16.dp, bottom = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (pressedKeys.isEmpty()) {
-                PressKeyPrompt()
+                    } else {
+                        if (keyEvent.type == KeyEventType.KeyUp) {
+                            when (keyEvent.key) {
+                                Key.Enter -> {
+                                    onConfirmSetShortcut()
+                                    return@onPreviewKeyEvent true
+                                }
+                                Key.Backspace -> {
+                                    onClearSelectedKeyCombination()
+                                    return@onPreviewKeyEvent true
+                                }
+                                Key.DirectionDown -> {
+                                    focusManager.moveFocus(FocusDirection.Down)
+                                    return@onPreviewKeyEvent true
+                                }
+                                else -> return@onPreviewKeyEvent false
+                            }
+                        } else false
+                    }
+                },
+        trailingIcon = { ErrorIcon(shouldShowError) },
+        isError = shouldShowError,
+        placeholder = { PressKeyPrompt() },
+        content =
+            if (pressedKeys.isNotEmpty()) {
+                { PressedKeysTextContainer(pressedKeys) }
             } else {
-                PressedKeysTextContainer(pressedKeys)
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            if (shouldShowError) {
-                Icon(
-                    imageVector = Icons.Default.ErrorOutline,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.error,
-                )
-            }
-        }
+                null
+            },
+    )
+}
+
+@Composable
+private fun ErrorIcon(shouldShowError: Boolean) {
+    if (shouldShowError) {
+        Icon(
+            imageVector = Icons.Default.ErrorOutline,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.error,
+        )
     }
 }
 
 @Composable
-private fun RowScope.PressedKeysTextContainer(pressedKeys: List<ShortcutKey>) {
-    pressedKeys.forEachIndexed { keyIndex, key ->
-        if (keyIndex > 0) {
-            ShortcutKeySeparator()
-        }
-        if (key is ShortcutKey.Text) {
-            ShortcutTextKey(key)
-        } else if (key is ShortcutKey.Icon) {
-            ShortcutIconKey(key)
+private fun PressedKeysTextContainer(pressedKeys: List<ShortcutKey>) {
+    Row(
+        modifier =
+            Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        pressedKeys.forEachIndexed { keyIndex, key ->
+            if (keyIndex > 0) {
+                ShortcutKeySeparator()
+            }
+            if (key is ShortcutKey.Text) {
+                ShortcutTextKey(key)
+            } else if (key is ShortcutKey.Icon) {
+                ShortcutIconKey(key)
+            }
         }
     }
 }
@@ -346,7 +360,7 @@ private fun ShortcutKeySeparator() {
 }
 
 @Composable
-private fun RowScope.ShortcutIconKey(key: ShortcutKey.Icon) {
+private fun ShortcutIconKey(key: ShortcutKey.Icon) {
     Icon(
         painter =
             when (key) {
@@ -354,7 +368,7 @@ private fun RowScope.ShortcutIconKey(key: ShortcutKey.Icon) {
                 is ShortcutKey.Icon.DrawableIcon -> rememberDrawablePainter(drawable = key.drawable)
             },
         contentDescription = null,
-        modifier = Modifier.align(Alignment.CenterVertically).height(24.dp),
+        modifier = Modifier.height(24.dp),
         tint = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }
@@ -405,7 +419,7 @@ private fun Description(text: String) {
                 .width(316.dp)
                 .wrapContentSize(Alignment.Center),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
     )
 }
 
@@ -471,5 +485,33 @@ private fun PlusIconContainer() {
         contentDescription =
             stringResource(id = R.string.shortcut_helper_content_description_plus_icon),
         modifier = Modifier.padding(vertical = 12.dp).size(24.dp).wrapContentSize(Alignment.Center),
+    )
+}
+
+@Composable
+private fun OutlinedInputField(
+    content: @Composable (() -> Unit)?,
+    placeholder: @Composable () -> Unit,
+    trailingIcon: @Composable () -> Unit,
+    isError: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    OutlinedTextField(
+        value = "",
+        onValueChange = {},
+        placeholder = if (content == null) placeholder else null,
+        prefix = content,
+        singleLine = true,
+        modifier = modifier,
+        trailingIcon = trailingIcon,
+        colors =
+            OutlinedTextFieldDefaults.colors()
+                .copy(
+                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                    unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
+                    errorIndicatorColor = MaterialTheme.colorScheme.error,
+                ),
+        shape = RoundedCornerShape(50.dp),
+        isError = isError,
     )
 }

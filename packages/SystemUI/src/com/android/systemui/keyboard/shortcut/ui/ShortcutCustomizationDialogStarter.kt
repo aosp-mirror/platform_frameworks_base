@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.phone.create
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 class ShortcutCustomizationDialogStarter
@@ -57,20 +58,25 @@ constructor(
     private val viewModel = viewModelFactory.create()
 
     override suspend fun onActivated(): Nothing {
-        viewModel.shortcutCustomizationUiState.collect { uiState ->
-            when (uiState) {
-                is AddShortcutDialog,
-                is DeleteShortcutDialog,
-                is ResetShortcutDialog -> {
-                    if (dialog == null) {
-                        dialog = createDialog().also { it.show() }
+        coroutineScope {
+            launch {
+                viewModel.shortcutCustomizationUiState.collect { uiState ->
+                    when (uiState) {
+                        is AddShortcutDialog,
+                        is DeleteShortcutDialog,
+                        is ResetShortcutDialog -> {
+                            if (dialog == null) {
+                                dialog = createDialog().also { it.show() }
+                            }
+                        }
+                        is ShortcutCustomizationUiState.Inactive -> {
+                            dialog?.dismiss()
+                            dialog = null
+                        }
                     }
                 }
-                is ShortcutCustomizationUiState.Inactive -> {
-                    dialog?.dismiss()
-                    dialog = null
-                }
             }
+            launch { viewModel.activate() }
         }
         awaitCancellation()
     }
@@ -101,6 +107,7 @@ constructor(
                 onConfirmResetShortcut = {
                     coroutineScope.launch { viewModel.resetAllCustomShortcuts() }
                 },
+                onClearSelectedKeyCombination = { viewModel.clearSelectedKeyCombination() },
             )
             setDialogProperties(dialog, uiState)
         }
