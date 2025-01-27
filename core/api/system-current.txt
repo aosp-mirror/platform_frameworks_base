@@ -3800,7 +3800,6 @@ package android.content {
     field public static final String STATS_MANAGER = "stats";
     field public static final String SYSTEM_CONFIG_SERVICE = "system_config";
     field public static final String SYSTEM_UPDATE_SERVICE = "system_update";
-    field public static final String TETHERING_SERVICE = "tethering";
     field @FlaggedApi("com.android.net.thread.platform.flags.thread_enabled_platform") public static final String THREAD_NETWORK_SERVICE = "thread_network";
     field public static final String TIME_MANAGER_SERVICE = "time_manager";
     field public static final String TRANSLATION_MANAGER_SERVICE = "translation";
