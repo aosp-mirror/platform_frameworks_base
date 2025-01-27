@@ -58,6 +58,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:focusable="false"
+                android:contentDescription="@null"
                 android:importantForAccessibility="no"
                 android:animateLayoutChanges="true"
                 android:layout_gravity="center"/>
