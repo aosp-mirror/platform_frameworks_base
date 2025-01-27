@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification.emptyshade.ui.viewmodel
 
 import android.app.Flags
 import android.app.NotificationManager.Policy
+import android.content.res.Configuration
+import android.os.LocaleList
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
@@ -27,6 +29,7 @@ import androidx.test.filters.SmallTest
 import com.android.settingslib.notification.data.repository.updateNotificationPolicy
 import com.android.settingslib.notification.modes.TestModeBuilder
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.kosmos.testScope
@@ -36,9 +39,12 @@ import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyS
 import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
@@ -53,6 +59,10 @@ class EmptyShadeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val zenModeRepository = kosmos.zenModeRepository
     private val activeNotificationListRepository = kosmos.activeNotificationListRepository
     private val fakeSecureSettingsRepository = kosmos.fakeSecureSettingsRepository
+    private val fakeConfigurationRepository = kosmos.fakeConfigurationRepository
+
+    /** Backup of the current locales, to be restored at the end of the test if they are changed. */
+    private lateinit var originalLocales: LocaleList
 
     private val underTest by lazy { kosmos.emptyShadeViewModel }
 
@@ -66,6 +76,18 @@ class EmptyShadeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     init {
         mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
+    @Before
+    fun setUp() {
+        originalLocales = context.resources.configuration.locales
+        updateLocales(LocaleList(Locale.US))
+    }
+
+    @After
+    fun tearDown() {
+        // Make sure we restore the original locale even if a test fails after changing it
+        updateLocales(originalLocales)
     }
 
     @Test
@@ -140,6 +162,29 @@ class EmptyShadeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             runCurrent()
 
             assertThat(text).isEqualTo("Notifications paused by Do Not Disturb")
+        }
+
+    @Test
+    @EnableFlags(ModesEmptyShadeFix.FLAG_NAME, Flags.FLAG_MODES_UI, Flags.FLAG_MODES_API)
+    fun text_changesWhenLocaleChanges() =
+        testScope.runTest {
+            val text by collectLastValue(underTest.text)
+
+            zenModeRepository.updateNotificationPolicy(
+                suppressedVisualEffects = Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST
+            )
+            zenModeRepository.updateZenMode(Settings.Global.ZEN_MODE_OFF)
+            runCurrent()
+
+            assertThat(text).isEqualTo("No notifications")
+
+            updateLocales(LocaleList(Locale.GERMAN))
+            runCurrent()
+
+            assertThat(text).isEqualTo("Keine Benachrichtigungen")
+
+            // Make sure we restore the original locales
+            updateLocales(originalLocales)
         }
 
     @Test
@@ -285,4 +330,11 @@ class EmptyShadeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             assertThat(onClick?.targetIntent?.action).isEqualTo(Settings.ACTION_ZEN_MODE_SETTINGS)
             assertThat(onClick?.backStack).isEmpty()
         }
+
+    private fun updateLocales(locales: LocaleList) {
+        val configuration = Configuration()
+        configuration.setLocales(locales)
+        context.resources.updateConfiguration(configuration, context.resources.displayMetrics)
+        fakeConfigurationRepository.onConfigurationChange(configuration)
+    }
 }
