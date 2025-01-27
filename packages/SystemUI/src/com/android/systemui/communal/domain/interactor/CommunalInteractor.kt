@@ -541,10 +541,16 @@ constructor(
         }
 
     /** CTA tile to be displayed in the glanceable hub (view mode). */
-    val ctaTileContent: Flow<List<CommunalContentModel.CtaTileInViewMode>> =
-        communalPrefsInteractor.isCtaDismissed.map { isDismissed ->
-            if (isDismissed) emptyList() else listOf(CommunalContentModel.CtaTileInViewMode())
+    val ctaTileContent: Flow<List<CommunalContentModel.CtaTileInViewMode>> by lazy {
+        if (communalSettingsInteractor.isV2FlagEnabled()) {
+            flowOf(listOf<CommunalContentModel.CtaTileInViewMode>())
+        } else {
+            communalPrefsInteractor.isCtaDismissed.map { isDismissed ->
+                if (isDismissed) listOf<CommunalContentModel.CtaTileInViewMode>()
+                else listOf(CommunalContentModel.CtaTileInViewMode())
+            }
         }
+    }
 
     /** A list of tutorial content to be displayed in the communal hub in tutorial mode. */
     val tutorialContent: List<CommunalContentModel.Tutorial> =
