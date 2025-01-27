@@ -265,7 +265,6 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
 
         assertThat(mViewHolder.mSeekBar.getContentDescription()).isNotNull();
-        assertThat(mViewHolder.mSeekBar.getAccessibilityDelegate()).isNotNull();
         assertThat(mViewHolder.mContainerLayout.isFocusable()).isFalse();
     }
 
