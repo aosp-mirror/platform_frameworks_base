@@ -132,6 +132,8 @@ public final class NotificationProgressDrawable extends Drawable {
         final float centerY = (float) getBounds().centerY();
 
         final int numParts = mParts.size();
+        final float pointTop = Math.round(centerY - pointRadius);
+        final float pointBottom = Math.round(centerY + pointRadius);
         for (int iPart = 0; iPart < numParts; iPart++) {
             final DrawablePart part = mParts.get(iPart);
             final float start = left + part.mStart;
@@ -146,12 +148,13 @@ public final class NotificationProgressDrawable extends Drawable {
 
                 mFillPaint.setColor(segment.mColor);
 
-                mSegRectF.set(start, centerY - radiusY, end, centerY + radiusY);
+                mSegRectF.set(Math.round(start), Math.round(centerY - radiusY), Math.round(end),
+                        Math.round(centerY + radiusY));
                 canvas.drawRoundRect(mSegRectF, cornerRadius, cornerRadius, mFillPaint);
             } else if (part instanceof DrawablePoint point) {
                 // TODO: b/367804171 - actually use a vector asset for the default point
                 //  rather than drawing it as a box?
-                mPointRectF.set(start, centerY - pointRadius, end, centerY + pointRadius);
+                mPointRectF.set(Math.round(start), pointTop, Math.round(end), pointBottom);
                 final float inset = mState.mPointRectInset;
                 final float cornerRadius = mState.mPointRectCornerRadius;
                 mPointRectF.inset(inset, inset);
