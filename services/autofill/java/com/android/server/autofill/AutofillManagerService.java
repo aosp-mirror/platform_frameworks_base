@@ -19,7 +19,6 @@ package com.android.server.autofill;
 import static android.Manifest.permission.MANAGE_AUTO_FILL;
 import static android.content.Context.AUTOFILL_MANAGER_SERVICE;
 import static android.service.autofill.Flags.fixGetAutofillComponent;
-import static android.service.autofill.Flags.improveFillDialogAconfig;
 import static android.view.autofill.AutofillManager.MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS;
 import static android.view.autofill.AutofillManager.getSmartSuggestionModeToString;
 
@@ -71,7 +70,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
-import android.view.InsetsController;
 import android.view.autofill.AutofillFeatureFlags;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
@@ -98,7 +96,6 @@ import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
 import com.android.server.infra.SecureSettingsServiceNameResolver;
-import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -303,36 +300,6 @@ public final class AutofillManagerService
         } else {
             mCredentialAutofillService = null;
             Slog.w(TAG, "Invalid CredentialAutofillService");
-        }
-
-        if (improveFillDialogAconfig()) {
-            WindowManagerInternal windowManagerInternal = LocalServices.getService(
-                    WindowManagerInternal.class);
-            WindowManagerInternal.ImeInsetsAnimationChangeListener
-                    imeInsetsAnimationChangeListener =
-                    new WindowManagerInternal.ImeInsetsAnimationChangeListener() {
-                        @Override
-                        public void onAnimationStart(
-                                @InsetsController.AnimationType int animationType,
-                                int userId) {
-                            // TODO: Add logic
-                            if (sVerbose) {
-                                Slog.e(TAG, "onAnimationStart()");
-                            }
-                        }
-
-                        @Override
-                        public void onAnimationEnd(
-                                @InsetsController.AnimationType int animationType,
-                                int userId) {
-                            // TODO: Add logic
-                            if (sVerbose) {
-                                Slog.e(TAG, "onAnimationEnd()");
-                            }
-                        }
-                    };
-            windowManagerInternal.setImeInsetsAnimationChangeListener(
-                    imeInsetsAnimationChangeListener);
         }
     }
 

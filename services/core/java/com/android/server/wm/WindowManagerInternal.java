@@ -41,7 +41,6 @@ import android.view.Display;
 import android.view.IInputFilter;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IWindow;
-import android.view.InsetsController;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationTarget;
 import android.view.Surface;
@@ -468,24 +467,6 @@ public abstract class WindowManagerInternal {
      * @param magnificationRegion the current magnification region
      */
     public abstract void getMagnificationRegion(int displayId, @NonNull Region magnificationRegion);
-
-    /**
-     * Set by the autofill service to observe changes in the ime animations.
-     *
-     * @param listener The callbacks to invoke.
-     */
-    public abstract void setImeInsetsAnimationChangeListener(
-            @Nullable ImeInsetsAnimationChangeListener listener);
-
-    /** Listener for changes in ime insets animation */
-    public interface ImeInsetsAnimationChangeListener {
-
-        /** Notify on start of animation */
-        void onAnimationStart(@InsetsController.AnimationType int animationType, int userId);
-
-        /** Notify on end of animation */
-        void onAnimationEnd(@InsetsController.AnimationType int animationType, int userId);
-    }
 
     /**
      * Sets a callback for observing which windows are touchable for the purposes

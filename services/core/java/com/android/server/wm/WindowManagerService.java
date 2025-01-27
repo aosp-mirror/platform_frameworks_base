@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.service.autofill.Flags.improveFillDialogAconfig;
 import static android.Manifest.permission.ACCESS_SURFACE_FLINGER;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.INPUT_CONSUMER;
@@ -278,7 +277,6 @@ import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputWindowHandle;
-import android.view.InsetsController;
 import android.view.InsetsFrameProvider;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -793,9 +791,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final TrustedPresentationListenerController mTrustedPresentationListenerController =
             new TrustedPresentationListenerController();
-
-    private WindowManagerInternal.ImeInsetsAnimationChangeListener
-            mImeInsetsAnimationChangeListener;
 
     @VisibleForTesting
     final class SettingsObserver extends ContentObserver {
@@ -8607,14 +8602,6 @@ public class WindowManagerService extends IWindowManager.Stub
             // WMS.takeAssistScreenshot takes care of the locking.
             return WindowManagerService.this.takeAssistScreenshot(windowTypesToExclude);
         }
-
-        @Override
-        public void setImeInsetsAnimationChangeListener(
-                @Nullable WindowManagerInternal.ImeInsetsAnimationChangeListener listener) {
-            synchronized (mGlobalLock) {
-                mImeInsetsAnimationChangeListener = listener;
-            }
-        }
     }
 
     private final class ImeTargetVisibilityPolicyImpl extends ImeTargetVisibilityPolicy {
@@ -10169,24 +10156,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mAtmService.enforceTaskPermission("setUnhandledDragListener");
         synchronized (mGlobalLock) {
             mDragDropController.setGlobalDragListener(listener);
-        }
-    }
-
-    @Override
-    public void notifyImeInsetsAnimationStateChanged(
-            boolean running, @InsetsController.AnimationType int animationType) {
-        if (improveFillDialogAconfig()) {
-            synchronized (mGlobalLock) {
-                if (mImeInsetsAnimationChangeListener == null) {
-                    return;
-                }
-                if (running) {
-                    mImeInsetsAnimationChangeListener.onAnimationStart(
-                            animationType, mCurrentUserId);
-                } else {
-                    mImeInsetsAnimationChangeListener.onAnimationEnd(animationType, mCurrentUserId);
-                }
-            }
         }
     }
 
