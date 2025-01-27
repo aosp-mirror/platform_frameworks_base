@@ -8505,6 +8505,9 @@ public class NotificationManagerService extends SystemService {
                 (userId == USER_ALL) ? USER_SYSTEM : userId);
         Notification.addFieldsFromContext(ai, notification);
 
+        // can't be set by an app
+        notification.extras.remove(Notification.EXTRA_SUMMARIZED_CONTENT);
+
         if (notification.isForegroundService() && fgsPolicy == NOT_FOREGROUND_SERVICE) {
             notification.flags &= ~FLAG_FOREGROUND_SERVICE;
         }

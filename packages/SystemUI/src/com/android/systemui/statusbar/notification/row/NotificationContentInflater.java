@@ -217,7 +217,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                             messagingStyle,
                             builder,
                             row.getContext(),
-                            false
+                            false,
+                            entry.getRanking().getSummarization()
                     );
             // If the messagingStyle is null, we want to inflate the normal view
             isConversation = viewModel.isConversation();
@@ -239,7 +240,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                                 messagingStyle,
                                 builder,
                                 row.getContext(),
-                                true);
+                                true,
+                                entry.getRanking().getSummarization());
             } else {
                 result.mPublicInflatedSingleLineViewModel =
                         SingleLineViewInflater.inflateRedactedSingleLineViewModel(
@@ -1318,7 +1320,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                                 messagingStyle,
                                 recoveredBuilder,
                                 mContext,
-                                false
+                                false,
+                                mEntry.getRanking().getSummarization()
                         );
                 result.mInflatedSingleLineView =
                         SingleLineViewInflater.inflatePrivateSingleLineView(
@@ -1338,7 +1341,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                                     messagingStyle,
                                     recoveredBuilder,
                                     mContext,
-                                    true
+                                    true,
+                                    null
                             );
                 } else {
                     result.mPublicInflatedSingleLineViewModel =

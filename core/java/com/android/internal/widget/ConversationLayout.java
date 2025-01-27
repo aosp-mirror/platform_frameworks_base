@@ -105,6 +105,7 @@ public class ConversationLayout extends FrameLayout
     private ArrayList<MessagingGroup> mAddedGroups = new ArrayList<>();
     private Person mUser;
     private CharSequence mNameReplacement;
+    private CharSequence mSummarizedContent;
     private boolean mIsCollapsed;
     private ImageResolver mImageResolver;
     private CachingIconView mConversationIconView;
@@ -397,12 +398,21 @@ public class ConversationLayout extends FrameLayout
      *
      * @param isCollapsed is it collapsed
      */
-    @RemotableViewMethod
+    @RemotableViewMethod(asyncImpl = "setIsCollapsedAsync")
     public void setIsCollapsed(boolean isCollapsed) {
         mIsCollapsed = isCollapsed;
         mMessagingLinearLayout.setMaxDisplayedLines(isCollapsed ? 1 : Integer.MAX_VALUE);
         updateExpandButton();
         updateContentEndPaddings();
+    }
+
+    /**
+     * setDataAsync needs to do different stuff for the collapsed vs expanded view, so store the
+     * collapsed state early.
+     */
+    public Runnable setIsCollapsedAsync(boolean isCollapsed) {
+        mIsCollapsed = isCollapsed;
+        return () -> setIsCollapsed(isCollapsed);
     }
 
     /**
@@ -439,8 +449,16 @@ public class ConversationLayout extends FrameLayout
                 extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
         int unreadCount = extras.getInt(Notification.EXTRA_CONVERSATION_UNREAD_MESSAGE_COUNT);
 
-        final List<MessagingMessage> newMessagingMessages =
-                createMessages(newMessages, /* isHistoric= */false, usePrecomputedText);
+        List<MessagingMessage> newMessagingMessages;
+        mSummarizedContent = extras.getCharSequence(Notification.EXTRA_SUMMARIZED_CONTENT);
+        if (mSummarizedContent != null && mIsCollapsed) {
+            Notification.MessagingStyle.Message summary =
+                    new Notification.MessagingStyle.Message(mSummarizedContent,  0, "");
+            newMessagingMessages = createMessages(List.of(summary), false, usePrecomputedText);
+        } else {
+            newMessagingMessages =
+                    createMessages(newMessages, /* isHistoric= */false, usePrecomputedText);
+        }
         final List<MessagingMessage> newHistoricMessagingMessages =
                 createMessages(newHistoricMessages, /* isHistoric= */true, usePrecomputedText);
 
@@ -463,7 +481,7 @@ public class ConversationLayout extends FrameLayout
 
         return new MessagingData(user, showSpinner, unreadCount,
                 newHistoricMessagingMessages, newMessagingMessages, groups, senders,
-                conversationHeaderData);
+                conversationHeaderData, mSummarizedContent);
     }
 
     /**
@@ -1622,6 +1640,9 @@ public class ConversationLayout extends FrameLayout
 
     @Nullable
     public CharSequence getConversationText() {
+        if (mSummarizedContent != null) {
+            return mSummarizedContent;
+        }
         if (mMessages.isEmpty()) {
             return null;
         }

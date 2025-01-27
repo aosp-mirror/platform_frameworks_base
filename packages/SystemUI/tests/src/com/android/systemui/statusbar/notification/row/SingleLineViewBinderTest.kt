@@ -19,10 +19,12 @@ import android.app.Notification
 import android.app.Person
 import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper
+import android.view.View.GONE
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.RankingBuilder
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_SINGLE_LINE
 import com.android.systemui.statusbar.notification.row.SingleLineViewInflater.inflatePrivateSingleLineView
@@ -90,6 +92,7 @@ class SingleLineViewBinderTest : SysuiTestCase() {
                 builder = notificationBuilder,
                 systemUiContext = context,
                 redactText = false,
+                summarization = null
             )
 
         // WHEN: binds the viewHolder
@@ -151,6 +154,7 @@ class SingleLineViewBinderTest : SysuiTestCase() {
                 builder = notificationBuilder,
                 systemUiContext = context,
                 redactText = false,
+                summarization = null
             )
         // WHEN: binds the view
         SingleLineViewBinder.bind(viewModel, view)
@@ -200,6 +204,7 @@ class SingleLineViewBinderTest : SysuiTestCase() {
                 builder = notificationBuilder,
                 systemUiContext = context,
                 redactText = false,
+                summarization = null
             )
         // WHEN: binds the view with the view model
         SingleLineViewBinder.bind(viewModel, view)
@@ -211,6 +216,70 @@ class SingleLineViewBinderTest : SysuiTestCase() {
         assertNull(viewModel.conversationData)
     }
 
+    @Test
+    @EnableFlags(AsyncHybridViewInflation.FLAG_NAME, android.app.Flags.FLAG_NM_SUMMARIZATION_UI,
+        android.app.Flags.FLAG_NM_SUMMARIZATION)
+    fun bindSummarizedGroupConversationSingleLineView() {
+        // GIVEN a row with a group conversation notification
+        val user =
+            Person.Builder()
+                .setName(USER_NAME)
+                .build()
+        val style =
+            Notification.MessagingStyle(user)
+                .addMessage(MESSAGE_TEXT, System.currentTimeMillis(), user)
+                .addMessage(
+                    "How about lunch?",
+                    System.currentTimeMillis(),
+                    Person.Builder().setName("user2").build(),
+                )
+                .setGroupConversation(true)
+        notificationBuilder.setStyle(style).setShortcutId(SHORTCUT_ID)
+        val notification = notificationBuilder.build()
+        val row = helper.createRow(notification)
+        val rb = RankingBuilder(row.entry.ranking)
+        rb.setSummarization("summary!")
+        row.entry.ranking = rb.build()
+
+        val view =
+            inflatePrivateSingleLineView(
+                isConversation = true,
+                reinflateFlags = FLAG_CONTENT_VIEW_SINGLE_LINE,
+                entry = row.entry,
+                context = context,
+                logger = mock(),
+            )
+                    as HybridConversationNotificationView
+
+        val publicView =
+            inflatePublicSingleLineView(
+                isConversation = true,
+                reinflateFlags = FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE,
+                entry = row.entry,
+                context = context,
+                logger = mock(),
+            )
+                    as HybridConversationNotificationView
+        assertNotNull(publicView)
+
+        val viewModel =
+            SingleLineViewInflater.inflateSingleLineViewModel(
+                notification = notification,
+                messagingStyle = style,
+                builder = notificationBuilder,
+                systemUiContext = context,
+                redactText = false,
+                summarization = "summary"
+            )
+        // WHEN: binds the view
+        SingleLineViewBinder.bind(viewModel, view)
+
+        // THEN: the single-line conversation view should only include summarization content
+        assertEquals(viewModel.conversationData?.summarization, view.textView.text)
+        assertEquals("", view.conversationSenderNameView.text)
+        assertEquals(GONE, view.conversationSenderNameView.visibility)
+    }
+
     private companion object {
         const val CHANNEL_ID = "CHANNEL_ID"
         const val CONTENT_TITLE = "A Cool New Feature"
@@ -218,5 +287,6 @@ class SingleLineViewBinderTest : SysuiTestCase() {
         const val USER_NAME = "USER_NAME"
         const val MESSAGE_TEXT = "MESSAGE_TEXT"
         const val SHORTCUT_ID = "Shortcut"
+        const val SUMMARIZATION = "summarization"
     }
 }
