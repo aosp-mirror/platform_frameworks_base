@@ -1305,11 +1305,13 @@ public final class PinnerService extends SystemService {
                     mConfiguredMaxPinnedMemoryPercentage);
             pw.format("   Maximum Pinner quota: %d bytes (%.2f MB)\n", mConfiguredMaxPinnedMemory,
                     mConfiguredMaxPinnedMemory / bytesPerMB);
-            pw.format("   Max Home App Pin Bytes (without deps): %d\n", mConfiguredHomePinBytes);
-            pw.format("   Max Assistant App Pin Bytes (without deps): %d\n",
-                    mConfiguredAssistantPinBytes);
+            pw.format("   Max Home App Pin Bytes (without deps): %d (%.2f MB)\n",
+                    mConfiguredHomePinBytes, mConfiguredHomePinBytes / bytesPerMB);
+            pw.format("   Max Assistant App Pin Bytes (without deps): %d (%.2f MB)\n",
+                    mConfiguredAssistantPinBytes, mConfiguredAssistantPinBytes / bytesPerMB);
             pw.format(
-                    "   Max Camera App Pin Bytes (without deps): %d\n", mConfiguredCameraPinBytes);
+                    "   Max Camera App Pin Bytes (without deps): %d (%.2f MB)\n",
+                    mConfiguredCameraPinBytes, mConfiguredCameraPinBytes / bytesPerMB);
             pw.format("\nPinned Files:\n");
             synchronized (PinnerService.this) {
                 long totalSize = 0;
