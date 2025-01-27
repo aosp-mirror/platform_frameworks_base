@@ -44,8 +44,7 @@ import java.util.concurrent.Executor;
  *
  * <p>This class is flag gated by "network_metric_monitor"
  */
-// TODO(b/374174952): Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
-@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@TargetApi(Build.VERSION_CODES.BAKLAVA)
 public abstract class NetworkMetricMonitor implements AutoCloseable {
     private static final String TAG = NetworkMetricMonitor.class.getSimpleName();
 

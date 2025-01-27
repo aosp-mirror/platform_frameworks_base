@@ -61,8 +61,7 @@ import java.util.concurrent.TimeUnit;
  *
  * <p>This class is flag gated by "network_metric_monitor" and "ipsec_tramsform_state"
  */
-// TODO(b/374174952) Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
-@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@TargetApi(Build.VERSION_CODES.BAKLAVA)
 public class IpSecPacketLossDetector extends NetworkMetricMonitor {
     private static final String TAG = IpSecPacketLossDetector.class.getSimpleName();
 
