@@ -588,7 +588,7 @@ public final class MessageQueue {
     private static final AtomicLong mMessagesDelivered = new AtomicLong();
     private boolean mMessageDirectlyQueued;
 
-    private Message nextMessage(boolean peek) {
+    private Message nextMessage(boolean peek, boolean returnEarliest) {
         int i = 0;
 
         while (true) {
@@ -665,7 +665,7 @@ public final class MessageQueue {
              * If we have a barrier we should return the async node (if it exists and is ready)
              */
             if (msgNode != null && msgNode.isBarrier()) {
-                if (asyncMsgNode != null && now >= asyncMsgNode.getWhen()) {
+                if (asyncMsgNode != null && (returnEarliest || now >= asyncMsgNode.getWhen())) {
                     found = asyncMsgNode;
                 } else {
                     next = asyncMsgNode;
@@ -679,7 +679,7 @@ public final class MessageQueue {
                 earliest = pickEarliestNode(msgNode, asyncMsgNode);
 
                 if (earliest != null) {
-                    if (now >= earliest.getWhen()) {
+                    if (returnEarliest || now >= earliest.getWhen()) {
                         found = earliest;
                     } else {
                         next = earliest;
@@ -784,7 +784,7 @@ public final class MessageQueue {
             mMessageDirectlyQueued = false;
             nativePollOnce(ptr, mNextPollTimeoutMillis);
 
-            Message msg = nextMessage(false);
+            Message msg = nextMessage(false, false);
             if (msg != null) {
                 msg.markInUse();
                 return msg;
@@ -1089,7 +1089,7 @@ public final class MessageQueue {
      */
     Long peekWhenForTest() {
         throwIfNotTest();
-        Message ret = nextMessage(true);
+        Message ret = nextMessage(true, true);
         return ret != null ? ret.when : null;
     }
 
@@ -1102,7 +1102,7 @@ public final class MessageQueue {
     @Nullable
     Message pollForTest() {
         throwIfNotTest();
-        return nextMessage(false);
+        return nextMessage(false, true);
     }
 
     /**
@@ -1116,7 +1116,7 @@ public final class MessageQueue {
         throwIfNotTest();
 
         // Call nextMessage to get the stack drained into our priority queues
-        nextMessage(true);
+        nextMessage(true, false);
 
         Iterator<MessageNode> queueIter = mPriorityQueue.iterator();
         MessageNode queueNode = iterateNext(queueIter);

@@ -759,27 +759,27 @@ public final class MessageQueue {
                 if (now >= msg.when) {
                     // Got a message.
                     mBlocked = false;
-                    if (prevMsg != null) {
-                        prevMsg.next = msg.next;
-                        if (prevMsg.next == null) {
-                            mLast = prevMsg;
-                        }
-                    } else {
-                        mMessages = msg.next;
-                        if (msg.next == null) {
-                            mLast = null;
-                        }
-                    }
-                    msg.next = null;
-                    msg.markInUse();
-                    if (msg.isAsynchronous()) {
-                        mAsyncMessageCount--;
-                    }
-                    if (TRACE) {
-                        Trace.setCounter("MQ.Delivered", mMessagesDelivered.incrementAndGet());
-                    }
-                    return msg;
                 }
+                if (prevMsg != null) {
+                    prevMsg.next = msg.next;
+                    if (prevMsg.next == null) {
+                        mLast = prevMsg;
+                    }
+                } else {
+                    mMessages = msg.next;
+                    if (msg.next == null) {
+                        mLast = null;
+                    }
+                }
+                msg.next = null;
+                msg.markInUse();
+                if (msg.isAsynchronous()) {
+                    mAsyncMessageCount--;
+                }
+                if (TRACE) {
+                    Trace.setCounter("MQ.Delivered", mMessagesDelivered.incrementAndGet());
+                }
+                return msg;
             }
         }
         return null;
