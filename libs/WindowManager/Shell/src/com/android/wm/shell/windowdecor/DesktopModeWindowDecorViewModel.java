@@ -1225,12 +1225,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                         mDragPointerId = e.getPointerId(0);
                     }
                     final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
-                    // Position of the task is calculated by subtracting the raw location of the
-                    // motion event (the location of the motion relative to the display) by the
-                    // location of the motion event relative to the task's bounds
-                    final Point position = new Point(
-                            (int) (e.getRawX(dragPointerIdx) - e.getX(dragPointerIdx)),
-                            (int) (e.getRawY(dragPointerIdx) - e.getY(dragPointerIdx)));
                     final Rect newTaskBounds = mDragPositioningCallback.onDragPositioningEnd(
                             e.getDisplayId(),
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
@@ -1238,7 +1232,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                     // DesktopTasksController to allow secondary transformations (i.e. snap resizing
                     // or transforming to fullscreen) before setting new task bounds.
                     mDesktopTasksController.onDragPositioningEnd(
-                            taskInfo, decoration.mTaskSurface, position,
+                            taskInfo, decoration.mTaskSurface,
                             new PointF(e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx)),
                             newTaskBounds, decoration.calculateValidDragArea(),
                             new Rect(mOnDragStartInitialBounds), e,

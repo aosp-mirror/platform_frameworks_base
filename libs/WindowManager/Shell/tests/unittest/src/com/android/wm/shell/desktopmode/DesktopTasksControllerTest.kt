@@ -3707,7 +3707,6 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
         spyController.onDragPositioningEnd(
             task,
             mockSurface,
-            position = Point(100, -100),
             inputCoordinate = PointF(200f, -200f),
             currentDragBounds = Rect(100, -100, 500, 1000),
             validDragArea = Rect(0, 50, 2000, 2000),
@@ -3746,7 +3745,6 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
         spyController.onDragPositioningEnd(
             task,
             mockSurface,
-            position = Point(100, 200),
             inputCoordinate = PointF(200f, 300f),
             currentDragBounds = currentDragBounds,
             validDragArea = Rect(0, 50, 2000, 2000),
@@ -3787,7 +3785,6 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
         spyController.onDragPositioningEnd(
             task,
             mockSurface,
-            position = Point(100, 200),
             inputCoordinate = PointF(200f, 300f),
             currentDragBounds,
             validDragArea = Rect(0, 50, 2000, 2000),
@@ -3829,7 +3826,6 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
         spyController.onDragPositioningEnd(
             task,
             mockSurface,
-            position = Point(100, 50),
             inputCoordinate = PointF(200f, 300f),
             currentDragBounds = Rect(100, 50, 500, 1000),
             validDragArea = Rect(0, 50, 2000, 2000),
@@ -3868,7 +3864,6 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
         spyController.onDragPositioningEnd(
             task,
             mockSurface,
-            position = Point(100, 50),
             inputCoordinate = PointF(200f, 300f),
             currentDragBounds,
             validDragArea = Rect(0, 50, 2000, 2000),
@@ -3925,7 +3920,6 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
         spyController.onDragPositioningEnd(
             task,
             mockSurface,
-            position = Point(100, 50),
             inputCoordinate = PointF(200f, 300f),
             currentDragBounds = currentDragBounds,
             validDragArea = Rect(0, 50, 2000, 2000),
