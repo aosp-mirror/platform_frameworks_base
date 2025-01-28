@@ -31,6 +31,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyFloat
+import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -56,6 +57,7 @@ class WindowAnimatorTest {
         whenever(change.endAbsBounds).thenReturn(END_BOUNDS)
         whenever(transaction.setPosition(any(), anyFloat(), anyFloat())).thenReturn(transaction)
         whenever(transaction.setScale(any(), anyFloat(), anyFloat())).thenReturn(transaction)
+        whenever(transaction.setFrameTimeline(anyLong())).thenReturn(transaction)
         whenever(
             transaction.setPosition(
                 any(),
