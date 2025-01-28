@@ -251,7 +251,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"Modo de depuração com USB ligado"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Revogar autorizações de depur. USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Depuração sem fios"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Modo de depuração quando o Wi-Fi está ligado"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Modo de depuração com Wi-Fi ligado"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Erro."</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Depuração sem fios"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Para ver e utilizar dispositivos disponíveis, ative a depuração sem fios."</string>
@@ -279,7 +279,7 @@
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Estabeleça ligação a uma rede Wi-Fi."</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, depurar, programador"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Atalho para relatório de erro"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Mostrar um botão no menu ligar/desligar para criar um relatório de erro"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Acrescente um botão ao menu ligar/desligar para criar um relatório de erro"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Manter ativo"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"O ecrã nunca entrará em suspensão durante o carregamento"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Ativar registo de monitorização Bluetooth HCI"</string>
@@ -288,8 +288,8 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Permitir o desbloqueio do carregador de arranque"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Permitir o desbloqueio de OEM?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"AVISO: as funcionalidades de proteção do dispositivo não funcionam neste dispositivo enquanto esta definição estiver ativada."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Selecionar app de localização fictícia"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Aplicação de localização fictícia não definida"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Selecionar app de localização de teste"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"App de localização de teste não definida"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Aplicação de localização fictícia: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Redes"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificação de display sem fios"</string>
@@ -359,7 +359,7 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Ativar aplicação terminal que oferece acesso local à shell"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Ambiente de programação Linux"</string>
-    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Experimental) Executar terminal do Linux no Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Experimental) Execute o terminal do Linux no Android"</string>
     <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Se desativar a app, os dados do terminal do Linux são limpos"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Verificação HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Definir o comportamento da verificação HDCP"</string>
@@ -412,19 +412,19 @@
     <string name="track_frame_time" msgid="522674651937771106">"Renderização HWUI do perfil"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Ativar camadas de depuração GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permite carregamento de camadas de depuração de GPU para apps de depuração"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Ativ. registo do fornecedor"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Inclua registos adicionais de fornecedores específicos de dispositivos em relatórios de erros, que podem conter informações privadas, utilizar mais bateria e/ou utilizar mais armazenamento."</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Ativar registo verboso de fornecedor"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Inclua registos adicionais de fornecedores específicos de dispositivos em relatórios de erro, que podem conter informações privadas, usar mais bateria e/ou mais armazenamento."</string>
     <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"Desativar após um dia"</string>
     <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"O registo verboso de fornecedor terminou"</string>
     <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"Ativado durante um dia"</string>
     <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"Ativar durante mais um dia"</string>
     <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"É desativado após um dia"</string>
     <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"Ativado indefinidamente"</string>
-    <string name="window_animation_scale_title" msgid="5236381298376812508">"Escala de animação de transição"</string>
+    <string name="window_animation_scale_title" msgid="5236381298376812508">"Escala de animação de janelas"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Escala de animação de transição"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Escala de duração de animação"</string>
-    <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simular apresentações secundárias"</string>
-    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Posição da sombra no ecrã"</string>
+    <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simular ecrãs secundários"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Posição do painel no ecrã"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Apps"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Não manter atividades"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Destruir atividades assim que o utilizador sair"</string>
@@ -615,7 +615,7 @@
     <string name="help_label" msgid="3528360748637781274">"Ajuda e feedback"</string>
     <string name="storage_category" msgid="2287342585424631813">"Armazenamento"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Dados partilhados"</string>
-    <string name="shared_data_summary" msgid="5516326713822885652">"Ver e modificar dados partilhados"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Veja e modifique dados partilhados"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Não existem dados partilhados para este utilizador."</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Ocorreu um erro ao obter os dados partilhados. Tente novamente."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"ID de dados partilhados: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>

@@ -569,7 +569,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmak eta gogorarazpenak"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Eman alarmak ezartzeko eta denbora-muga duten ekintzak programatzeko baimena aplikazioari. Hala, aplikazioak atzeko planoan funtzionatuko du, eta litekeena da bateria gehiago kontsumitzea.\n\nBaimen hori ematen ez baduzu, ez dute funtzionatuko aplikazio honen bidez programatutako alarmek eta denbora-muga duten ekintzek."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programazioa, alarma, gogorarazpena, erlojua"</string>
-    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Ez molestatzeko"</string>
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Ez molestatzeko modua"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"Ez molestatzeko modua"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktibatu"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Aktibatu ez molestatzeko modua"</string>

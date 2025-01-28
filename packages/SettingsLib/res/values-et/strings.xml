@@ -424,7 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Ülemineku animatsioonimastaap"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animaatori kestuse mastaap"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Modelleeri teisi ekraane"</string>
-    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Menüü kuvamise asukoht"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Varju kuvamise asukoht"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Rakendused"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Ära hoia tegevusi alles"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Hävita kõik tegevused kohe, kui kasutaja neist lahkub"</string>

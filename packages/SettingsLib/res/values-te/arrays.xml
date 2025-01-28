@@ -296,7 +296,7 @@
   <string-array name="shade_display_awareness_summaries">
     <item msgid="2964753205732912921">"షేడ్‌ను పరికర డిస్‌ప్లేలో మాత్రమే చూపండి"</item>
     <item msgid="7795034287069726554">"పరికరాన్ని ఒక ఎక్స్‌టర్నల్ డిస్‌ప్లేలో మాత్రమే చూపండి"</item>
-    <item msgid="5280431949814340475">"పరికరాన్ని ఫోకస్ చేసిన చివరి డిస్‌ప్లేలో మాత్రమే చూపండి"</item>
+    <item msgid="5280431949814340475">"పరికరాన్ని చివరగా యాక్టివ్‌గా ఉన్న స్క్రీన్‌లో చూపండి"</item>
   </string-array>
   <string-array name="shade_display_awareness_values">
     <item msgid="3055776101992426514">"default_display"</item>
