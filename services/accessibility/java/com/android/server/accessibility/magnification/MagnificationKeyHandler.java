@@ -46,10 +46,8 @@ public class MagnificationKeyHandler extends BaseEventStreamTransformation {
          * arrows had been pressed at the same time (e.g. diagonal panning).
          *
          * @param displayId The logical display ID
-         * @param direction The direction in which panning stopped
          */
-        void onPanMagnificationStop(int displayId,
-                @MagnificationController.PanDirection int direction);
+        void onPanMagnificationStop(int displayId);
 
         /**
          * Called when a keyboard shortcut to scale magnification in direction `direction` is
@@ -65,14 +63,18 @@ public class MagnificationKeyHandler extends BaseEventStreamTransformation {
          * Called when a keyboard shortcut to scale magnification in direction `direction` is
          * unpressed by a user.
          *
-         * @param displayId The logical display ID
          * @param direction The direction in which scaling stopped
          */
-        void onScaleMagnificationStop(int displayId,
-                @MagnificationController.ZoomDirection int direction);
+        void onScaleMagnificationStop(@MagnificationController.ZoomDirection int direction);
+
+        /**
+         * Called when all keyboard interaction with magnification should be stopped.
+         */
+        void onKeyboardInteractionStop();
     }
 
     protected final MagnificationKeyHandler.Callback mCallback;
+    private boolean mIsKeyboardInteracting = false;
 
     public MagnificationKeyHandler(Callback callback) {
         mCallback = callback;
@@ -88,6 +90,12 @@ public class MagnificationKeyHandler extends BaseEventStreamTransformation {
         boolean modifiersPressed = event.isAltPressed() && event.isMetaPressed();
         if (!modifiersPressed) {
             super.onKeyEvent(event, policyFlags);
+            if (mIsKeyboardInteracting) {
+                // When modifier keys are no longer pressed, ensure that scaling and
+                // panning are fully stopped.
+                mCallback.onKeyboardInteractionStop();
+                mIsKeyboardInteracting = false;
+            }
             return;
         }
         boolean isDown = event.getAction() == KeyEvent.ACTION_DOWN;
@@ -102,8 +110,9 @@ public class MagnificationKeyHandler extends BaseEventStreamTransformation {
             };
             if (isDown) {
                 mCallback.onPanMagnificationStart(getDisplayId(event), panDirection);
+                mIsKeyboardInteracting = true;
             } else {
-                mCallback.onPanMagnificationStop(getDisplayId(event), panDirection);
+                mCallback.onPanMagnificationStop(panDirection);
             }
             return;
         } else if (keyCode == KeyEvent.KEYCODE_EQUALS || keyCode == KeyEvent.KEYCODE_MINUS) {
@@ -113,8 +122,9 @@ public class MagnificationKeyHandler extends BaseEventStreamTransformation {
             }
             if (isDown) {
                 mCallback.onScaleMagnificationStart(getDisplayId(event), zoomDirection);
+                mIsKeyboardInteracting = true;
             } else {
-                mCallback.onScaleMagnificationStop(getDisplayId(event), zoomDirection);
+                mCallback.onScaleMagnificationStop(zoomDirection);
             }
             return;
         }
