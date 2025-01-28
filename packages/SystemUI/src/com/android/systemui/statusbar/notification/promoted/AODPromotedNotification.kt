@@ -57,11 +57,13 @@ fun AODPromotedNotification(viewModelFactory: AODPromotedNotificationViewModel.F
     val content = viewModel.content ?: return
 
     key(content.identity) {
+        val layoutResource = content.layoutResource ?: return
+
         AndroidView(
             factory = { context ->
-                LayoutInflater.from(context)
-                    .inflate(content.layoutResource, /* root= */ null)
-                    .apply { setTag(viewUpdaterTagId, AODPromotedNotificationViewUpdater(this)) }
+                LayoutInflater.from(context).inflate(layoutResource, /* root= */ null).apply {
+                    setTag(viewUpdaterTagId, AODPromotedNotificationViewUpdater(this))
+                }
             },
             update = { view ->
                 (view.getTag(viewUpdaterTagId) as AODPromotedNotificationViewUpdater).update(
@@ -72,7 +74,7 @@ fun AODPromotedNotification(viewModelFactory: AODPromotedNotificationViewModel.F
     }
 }
 
-private val PromotedNotificationContentModel.layoutResource: Int
+private val PromotedNotificationContentModel.layoutResource: Int?
     get() {
         return if (Flags.notificationsRedesignTemplates()) {
             when (style) {
@@ -80,7 +82,7 @@ private val PromotedNotificationContentModel.layoutResource: Int
                 Style.BigText -> R.layout.notification_2025_template_expanded_big_text
                 Style.Call -> R.layout.notification_2025_template_expanded_call
                 Style.Progress -> R.layout.notification_2025_template_expanded_progress
-                Style.Ineligible -> 0
+                Style.Ineligible -> null
             }
         } else {
             when (style) {
@@ -88,7 +90,7 @@ private val PromotedNotificationContentModel.layoutResource: Int
                 Style.BigText -> R.layout.notification_template_material_big_text
                 Style.Call -> R.layout.notification_template_material_big_call
                 Style.Progress -> R.layout.notification_template_material_progress
-                Style.Ineligible -> 0
+                Style.Ineligible -> null
             }
         }
     }
