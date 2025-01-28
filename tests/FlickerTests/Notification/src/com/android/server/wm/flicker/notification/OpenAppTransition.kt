@@ -16,10 +16,10 @@
 
 package com.android.server.wm.flicker.notification
 
-import android.platform.test.annotations.Presubmit
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.traces.component.ComponentNameMatcher
+import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import org.junit.Test
@@ -41,7 +41,7 @@ abstract class OpenAppTransition(flicker: LegacyFlickerTest) : BaseTest(flicker)
      * Checks that the [testApp] layer doesn't exist or is invisible at the start of the transition,
      * but is created and/or becomes visible during the transition.
      */
-    @Presubmit
+    @FlakyTest(bugId = 384046002)
     @Test
     open fun appLayerBecomesVisible() {
         appLayerBecomesVisible_coldStart()
@@ -80,7 +80,7 @@ abstract class OpenAppTransition(flicker: LegacyFlickerTest) : BaseTest(flicker)
      * The `isAppWindowInvisible` step is optional because we log once per frame, upon logging, the
      * window may be visible or not depending on what was processed until that moment.
      */
-    @Presubmit @Test open fun appWindowBecomesVisible() = appWindowBecomesVisible_coldStart()
+    @FlakyTest(bugId = 384046002) @Test open fun appWindowBecomesVisible() = appWindowBecomesVisible_coldStart()
 
     protected fun appWindowBecomesVisible_coldStart() {
         flicker.assertWm {
@@ -108,7 +108,7 @@ abstract class OpenAppTransition(flicker: LegacyFlickerTest) : BaseTest(flicker)
      * Checks that [testApp] window is not on top at the start of the transition, and then becomes
      * the top visible window until the end of the transition.
      */
-    @Presubmit
+    @FlakyTest(bugId = 384046002)
     @Test
     open fun appWindowBecomesTopWindow() {
         flicker.assertWm {
@@ -124,7 +124,7 @@ abstract class OpenAppTransition(flicker: LegacyFlickerTest) : BaseTest(flicker)
      * Checks that [testApp] window is not on top at the start of the transition, and then becomes
      * the top visible window until the end of the transition.
      */
-    @Presubmit
+    @FlakyTest(bugId = 384046002)
     @Test
     open fun appWindowIsTopWindowAtEnd() {
         flicker.assertWmEnd { this.isAppWindowOnTop(testApp) }
