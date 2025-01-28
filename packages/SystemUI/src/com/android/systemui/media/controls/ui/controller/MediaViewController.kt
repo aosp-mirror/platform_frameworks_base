@@ -225,6 +225,12 @@ constructor(
                 if (isSeekBarEnabled == enabled) return
                 isSeekBarEnabled = enabled
                 MediaControlViewBinder.updateSeekBarVisibility(expandedLayout, isSeekBarEnabled)
+                mainExecutor.execute {
+                    if (!metadataAnimationHandler.isRunning) {
+                        // Trigger a state refresh so that we immediately update visibilities.
+                        refreshState()
+                    }
+                }
             }
         }
 
@@ -899,7 +905,11 @@ constructor(
             // If the view isn't bound, we can drop the animation, otherwise we'll execute it
             animateNextStateChange = false
             if (transitionLayout == null) {
-                logger.logMediaLocation("setCurrentState: view not bound", startLocation, endLocation)
+                logger.logMediaLocation(
+                    "setCurrentState: view not bound",
+                    startLocation,
+                    endLocation,
+                )
                 return
             }
 
