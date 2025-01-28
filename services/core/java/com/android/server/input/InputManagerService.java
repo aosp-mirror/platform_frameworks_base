@@ -1261,6 +1261,15 @@ public class InputManagerService extends IInputManager.Stub
 
     @EnforcePermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
     @Override // Binder call
+    public void setKeyboardLayoutOverrideForInputDevice(InputDeviceIdentifier identifier,
+            String keyboardLayoutDescriptor) {
+        super.setKeyboardLayoutOverrideForInputDevice_enforcePermission();
+        mKeyboardLayoutManager.setKeyboardLayoutOverrideForInputDevice(identifier,
+                keyboardLayoutDescriptor);
+    }
+
+    @EnforcePermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
+    @Override // Binder call
     public void setKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
             @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
             @Nullable InputMethodSubtype imeSubtype, String keyboardLayoutDescriptor) {

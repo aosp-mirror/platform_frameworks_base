@@ -106,6 +106,12 @@ interface IInputManager {
     @EnforcePermission("SET_KEYBOARD_LAYOUT")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.SET_KEYBOARD_LAYOUT)")
+    void setKeyboardLayoutOverrideForInputDevice(in InputDeviceIdentifier identifier,
+            String keyboardLayoutDescriptor);
+
+    @EnforcePermission("SET_KEYBOARD_LAYOUT")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.SET_KEYBOARD_LAYOUT)")
     void setKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier, int userId,
             in InputMethodInfo imeInfo, in InputMethodSubtype imeSubtype,
             String keyboardLayoutDescriptor);
