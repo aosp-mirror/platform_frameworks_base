@@ -599,24 +599,35 @@ public class IntentForwarderActivity extends Activity  {
                 Intent.FLAG_ACTIVITY_FORWARD_RESULT | Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
         sanitizeIntent(forwardIntent);
 
-        Intent intentToCheck = forwardIntent;
-        if (Intent.ACTION_CHOOSER.equals(forwardIntent.getAction())) {
+        if (!canForwardInner(forwardIntent, sourceUserId, targetUserId, packageManager,
+                contentResolver)) {
             return null;
         }
         if (forwardIntent.getSelector() != null) {
-            intentToCheck = forwardIntent.getSelector();
+            sanitizeIntent(forwardIntent.getSelector());
+            if (!canForwardInner(forwardIntent.getSelector(), sourceUserId, targetUserId,
+                    packageManager, contentResolver)) {
+                return null;
+            }
         }
-        String resolvedType = intentToCheck.resolveTypeIfNeeded(contentResolver);
-        sanitizeIntent(intentToCheck);
+        return forwardIntent;
+    }
+
+    private static boolean canForwardInner(Intent intent, int sourceUserId, int targetUserId,
+            IPackageManager packageManager, ContentResolver contentResolver) {
+        if (Intent.ACTION_CHOOSER.equals(intent.getAction())) {
+            return false;
+        }
+        String resolvedType = intent.resolveTypeIfNeeded(contentResolver);
         try {
             if (packageManager.canForwardTo(
-                    intentToCheck, resolvedType, sourceUserId, targetUserId)) {
-                return forwardIntent;
+                    intent, resolvedType, sourceUserId, targetUserId)) {
+                return true;
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "PackageManagerService is dead?");
         }
-        return null;
+        return false;
     }
 
     /**
