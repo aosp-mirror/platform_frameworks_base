@@ -195,7 +195,6 @@ constructor(
             .distinctUntilChanged()
             .logDiffsForTable(
                 tableLogBuffer = tableLogger,
-                columnPrefix = "",
                 columnName = COL_LOCK_TO_OCCLUDED,
                 initialValue = false,
             )
@@ -228,7 +227,6 @@ constructor(
             .distinctUntilChanged()
             .logDiffsForTable(
                 tableLogBuffer = tableLogger,
-                columnPrefix = "",
                 columnName = COL_ALLOWED_BY_SCENE,
                 initialValue = false,
             )
@@ -248,7 +246,6 @@ constructor(
             }
             .logDiffsForTable(
                 tableLogBuffer = tableLogger,
-                columnPrefix = "",
                 columnName = COL_NOTIF_LIGHTS_OUT,
                 initialValue = false,
             )
@@ -306,7 +303,6 @@ constructor(
             .distinctUntilChanged()
             .logDiffsForTable(
                 tableLogBuffer = tableLogger,
-                columnPrefix = "",
                 columnName = COL_VISIBLE,
                 initialValue = false,
             )
@@ -350,7 +346,6 @@ constructor(
             .distinctUntilChanged()
             .logDiffsForTable(
                 tableLogBuffer = tableLogger,
-                columnPrefix = "",
                 columnName = COL_SHOW_OPERATOR_NAME,
                 initialValue = false,
             )

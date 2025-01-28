@@ -63,12 +63,7 @@ constructor(
                 flowOf(false)
             }
             .distinctUntilChanged()
-            .logDiffsForTable(
-                tableLog,
-                columnPrefix = "",
-                columnName = COL_ALLOWED,
-                initialValue = false,
-            )
+            .logDiffsForTable(tableLog, columnName = COL_ALLOWED, initialValue = false)
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     /** See [SatelliteConnectionState] for relevant states */
@@ -80,11 +75,7 @@ constructor(
                 flowOf(SatelliteConnectionState.Off)
             }
             .distinctUntilChanged()
-            .logDiffsForTable(
-                tableLog,
-                columnPrefix = "",
-                initialValue = SatelliteConnectionState.Off,
-            )
+            .logDiffsForTable(tableLog, initialValue = SatelliteConnectionState.Off)
             .stateIn(scope, SharingStarted.WhileSubscribed(), SatelliteConnectionState.Off)
 
     /** 0-4 description of the connection strength */
@@ -95,7 +86,7 @@ constructor(
                 flowOf(0)
             }
             .distinctUntilChanged()
-            .logDiffsForTable(tableLog, columnPrefix = "", columnName = COL_LEVEL, initialValue = 0)
+            .logDiffsForTable(tableLog, columnName = COL_LEVEL, initialValue = 0)
             .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
 
     val isSatelliteProvisioned = repo.isSatelliteProvisioned
@@ -119,12 +110,7 @@ constructor(
                 isOosAndNotEmergencyAndNotSatellite.all { it }
             }
             .distinctUntilChanged()
-            .logDiffsForTable(
-                tableLog,
-                columnPrefix = "",
-                columnName = COL_ALL_OOS,
-                initialValue = true,
-            )
+            .logDiffsForTable(tableLog, columnName = COL_ALL_OOS, initialValue = true)
 
     /** When all connections are considered OOS, satellite connectivity is potentially valid */
     val areAllConnectionsOutOfService =
@@ -152,12 +138,7 @@ constructor(
                 flowOf(false)
             }
             .distinctUntilChanged()
-            .logDiffsForTable(
-                tableLog,
-                columnPrefix = "",
-                columnName = COL_FULL_OOS,
-                initialValue = true,
-            )
+            .logDiffsForTable(tableLog, columnName = COL_FULL_OOS, initialValue = true)
             .stateIn(scope, SharingStarted.WhileSubscribed(), true)
 
     /** True if any known mobile network is currently using a non terrestrial network */

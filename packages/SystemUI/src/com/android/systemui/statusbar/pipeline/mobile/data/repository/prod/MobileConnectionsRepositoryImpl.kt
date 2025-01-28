@@ -380,7 +380,6 @@ constructor(
             .distinctUntilChanged()
             .logDiffsForTable(
                 tableLogger,
-                columnPrefix = "",
                 columnName = "defaultConnectionIsValidated",
                 initialValue = false,
             )
