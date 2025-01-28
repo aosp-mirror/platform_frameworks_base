@@ -37,9 +37,9 @@ import android.view.Display;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.accessibility.AccessibilityManager;
+import android.window.DesktopModeFlags;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayController.OnDisplaysChangedListener;
@@ -873,6 +873,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
         }
         boolean isDesktopModeShowing = mDesktopUserRepositories.get().getCurrent()
                 .getVisibleTaskCount(taskInfo.displayId) > 0;
-        return Flags.skipCompatUiEducationInDesktopMode() && isDesktopModeShowing;
+        return DesktopModeFlags.ENABLE_DESKTOP_SKIP_COMPAT_UI_EDUCATION_IN_DESKTOP_MODE_BUGFIX
+                .isTrue() && isDesktopModeShowing;
     }
 }
