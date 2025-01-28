@@ -3286,8 +3286,9 @@ public final class ProcessList {
                 uidRec.updateHasInternetPermission();
                 mActiveUids.put(proc.uid, uidRec);
                 EventLogTags.writeAmUidRunning(uidRec.getUid());
-                mService.noteUidProcessState(uidRec.getUid(), uidRec.getCurProcState(),
+                mService.noteUidProcessStateAndCapability(uidRec.getUid(), uidRec.getCurProcState(),
                         uidRec.getCurCapability());
+                mService.noteUidProcessState(uidRec.getUid(), uidRec.getCurProcState());
             }
             proc.setUidRecord(uidRec);
             uidRec.addProcess(proc);
@@ -3489,8 +3490,11 @@ public final class ProcessList {
                         EventLogTags.writeAmUidStopped(uid);
                         mActiveUids.remove(uid);
                         mService.mFgsStartTempAllowList.removeUid(record.info.uid);
-                        mService.noteUidProcessState(uid, ActivityManager.PROCESS_STATE_NONEXISTENT,
+                        mService.noteUidProcessStateAndCapability(uid,
+                                ActivityManager.PROCESS_STATE_NONEXISTENT,
                                 ActivityManager.PROCESS_CAPABILITY_NONE);
+                        mService.noteUidProcessState(uid, ActivityManager.PROCESS_STATE_NONEXISTENT
+                        );
                     }
                     record.setUidRecord(null);
                 }

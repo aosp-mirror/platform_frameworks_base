@@ -15113,10 +15113,24 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    void noteUidProcessState(final int uid, final int state,
-                final @ProcessCapability int capability) {
-        mBatteryStatsService.noteUidProcessState(uid, state);
+    /**
+     * Called by {@link OomAdjuster} whenever either the ProcessState or Capability of a uid has
+     * changed.
+     * NOTE: Use {@link #noteUidProcessState(int, int)} instead of this method for listeners
+     * interested in only ProcessState changes.
+     */
+    void noteUidProcessStateAndCapability(final int uid, final int state,
+            final @ProcessCapability int capability) {
         mAppOpsService.updateUidProcState(uid, state, capability);
+    }
+
+    /**
+     * Called by {@link OomAdjuster} whenever either the ProcessState of a uid has changed.
+     * NOTE: Use {@link #noteUidProcessStateAndCapability(int, int, int)} instead of this method
+     * for listeners interested in both ProcessState and Capability changes.
+     */
+    void noteUidProcessState(final int uid, final int state) {
+        mBatteryStatsService.noteUidProcessState(uid, state);
         if (StatsPullAtomService.ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER) {
             try {
                 if (mStatsPullAtomServiceInternal == null) {

@@ -1681,8 +1681,11 @@ public class OomAdjuster {
                     }
                     if ((uidChange & UidRecord.CHANGE_PROCSTATE) != 0
                             || (uidChange & UidRecord.CHANGE_CAPABILITY) != 0) {
-                        mService.noteUidProcessState(uidRec.getUid(), uidRec.getCurProcState(),
-                                uidRec.getCurCapability());
+                        mService.noteUidProcessStateAndCapability(uidRec.getUid(),
+                                uidRec.getCurProcState(), uidRec.getCurCapability());
+                    }
+                    if ((uidChange & UidRecord.CHANGE_PROCSTATE) != 0) {
+                        mService.noteUidProcessState(uidRec.getUid(), uidRec.getCurProcState());
                     }
                     if (uidRec.hasForegroundServices()) {
                         mService.mServices.foregroundServiceProcStateChangedLocked(uidRec);
