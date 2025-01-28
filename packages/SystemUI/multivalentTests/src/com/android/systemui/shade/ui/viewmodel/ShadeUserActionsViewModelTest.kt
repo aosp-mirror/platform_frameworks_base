@@ -16,7 +16,6 @@
 
 package com.android.systemui.shade.ui.viewmodel
 
-import android.platform.test.annotations.DisableFlags
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -39,16 +38,16 @@ import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticati
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.qs.ui.adapter.fakeQSSceneAdapter
-import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
-import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.domain.interactor.disableDualShade
+import com.android.systemui.shade.domain.interactor.enableSingleShade
+import com.android.systemui.shade.domain.interactor.enableSplitShade
 import com.android.systemui.shade.domain.startable.shadeStartable
-import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
@@ -66,13 +65,11 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @EnableSceneContainer
-@DisableFlags(DualShade.FLAG_NAME)
 class ShadeUserActionsViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
-    private val shadeRepository by lazy { kosmos.shadeRepository }
     private val qsSceneAdapter by lazy { kosmos.fakeQSSceneAdapter }
 
     private val underTest: ShadeUserActionsViewModel by lazy { kosmos.shadeUserActionsViewModel }
@@ -80,6 +77,7 @@ class ShadeUserActionsViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         kosmos.sceneContainerStartable.start()
+        kosmos.disableDualShade()
         underTest.activateIn(testScope)
     }
 
@@ -164,7 +162,7 @@ class ShadeUserActionsViewModelTest : SysuiTestCase() {
     fun upTransitionKey_splitShadeEnabled_isGoneToSplitShade() =
         testScope.runTest {
             val actions by collectLastValue(underTest.actions)
-            shadeRepository.setShadeLayoutWide(true)
+            kosmos.enableSplitShade()
             runCurrent()
 
             assertThat(actions?.get(Swipe.Up)?.transitionKey).isEqualTo(ToSplitShade)
@@ -174,7 +172,7 @@ class ShadeUserActionsViewModelTest : SysuiTestCase() {
     fun upTransitionKey_splitShadeDisable_isNull() =
         testScope.runTest {
             val actions by collectLastValue(underTest.actions)
-            shadeRepository.setShadeLayoutWide(false)
+            kosmos.enableSingleShade()
             runCurrent()
 
             assertThat(actions?.get(Swipe.Up)?.transitionKey).isNull()
@@ -183,7 +181,7 @@ class ShadeUserActionsViewModelTest : SysuiTestCase() {
     @Test
     fun downTransitionSceneKey_inSplitShade_null() =
         testScope.runTest {
-            overrideResource(R.bool.config_use_split_notification_shade, true)
+            kosmos.enableSplitShade()
             kosmos.shadeStartable.start()
             val actions by collectLastValue(underTest.actions)
             assertThat((actions?.get(Swipe.Down) as? UserActionResult.ChangeScene)?.toScene)
@@ -193,7 +191,7 @@ class ShadeUserActionsViewModelTest : SysuiTestCase() {
     @Test
     fun downTransitionSceneKey_notSplitShade_quickSettings() =
         testScope.runTest {
-            overrideResource(R.bool.config_use_split_notification_shade, false)
+            kosmos.enableSingleShade()
             kosmos.shadeStartable.start()
             val actions by collectLastValue(underTest.actions)
             assertThat((actions?.get(Swipe.Down) as? UserActionResult.ChangeScene)?.toScene)

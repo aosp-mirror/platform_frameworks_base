@@ -19,8 +19,6 @@
 package com.android.systemui.statusbar
 
 import android.animation.ObjectAnimator
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
@@ -53,8 +51,9 @@ import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.domain.interactor.disableDualShade
+import com.android.systemui.shade.domain.interactor.enableDualShade
 import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.testKosmos
 import com.android.systemui.util.kotlin.JavaAdapter
@@ -246,9 +245,9 @@ class StatusBarStateControllerImplTest(flags: FlagsParameterization) : SysuiTest
 
     @Test
     @EnableSceneContainer
-    @DisableFlags(DualShade.FLAG_NAME)
     fun start_hydratesStatusBarState_whileLocked() =
         testScope.runTest {
+            kosmos.disableDualShade()
             var statusBarState = underTest.state
             val listener =
                 object : StatusBarStateController.StateListener {
@@ -303,9 +302,9 @@ class StatusBarStateControllerImplTest(flags: FlagsParameterization) : SysuiTest
 
     @Test
     @EnableSceneContainer
-    @DisableFlags(DualShade.FLAG_NAME)
     fun start_hydratesStatusBarState_withAlternateBouncer() =
         testScope.runTest {
+            kosmos.disableDualShade()
             var statusBarState = underTest.state
             val listener =
                 object : StatusBarStateController.StateListener {
@@ -349,9 +348,9 @@ class StatusBarStateControllerImplTest(flags: FlagsParameterization) : SysuiTest
 
     @Test
     @EnableSceneContainer
-    @EnableFlags(DualShade.FLAG_NAME)
     fun start_hydratesStatusBarState_dualShade_whileLocked() =
         testScope.runTest {
+            kosmos.enableDualShade()
             var statusBarState = underTest.state
             val listener =
                 object : StatusBarStateController.StateListener {

@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.ui.viewmodel
 
-import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -36,9 +35,8 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.domain.interactor.enableDualShade
 import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationScrollViewModel
@@ -57,7 +55,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @EnableSceneContainer
-@EnableFlags(DualShade.FLAG_NAME)
 class QuickSettingsShadeOverlayContentViewModelTest : SysuiTestCase() {
 
     private val kosmos =
@@ -72,6 +69,7 @@ class QuickSettingsShadeOverlayContentViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         kosmos.sceneContainerStartable.start()
+        kosmos.enableDualShade()
         underTest.activateIn(testScope)
     }
 
@@ -131,7 +129,7 @@ class QuickSettingsShadeOverlayContentViewModelTest : SysuiTestCase() {
     @Test
     fun showHeader_showsOnNarrowScreen() =
         testScope.runTest {
-            kosmos.shadeRepository.setShadeLayoutWide(false)
+            kosmos.enableDualShade(wideLayout = false)
             runCurrent()
 
             assertThat(underTest.showHeader).isTrue()
@@ -140,7 +138,7 @@ class QuickSettingsShadeOverlayContentViewModelTest : SysuiTestCase() {
     @Test
     fun showHeader_hidesOnWideScreen() =
         testScope.runTest {
-            kosmos.shadeRepository.setShadeLayoutWide(true)
+            kosmos.enableDualShade(wideLayout = true)
             runCurrent()
 
             assertThat(underTest.showHeader).isFalse()

@@ -103,8 +103,9 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
+import com.android.systemui.shade.domain.interactor.disableDualShade
+import com.android.systemui.shade.domain.interactor.enableDualShade
 import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shared.system.QuickStepContract
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
@@ -187,9 +188,9 @@ class SceneContainerStartableTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(DualShade.FLAG_NAME)
     fun hydrateVisibility() =
         testScope.runTest {
+            kosmos.disableDualShade()
             val currentDesiredSceneKey by collectLastValue(sceneInteractor.currentScene)
             val isVisible by collectLastValue(sceneInteractor.isVisible)
             val transitionStateFlow =
@@ -248,9 +249,9 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
     fun hydrateVisibility_dualShade() =
         testScope.runTest {
+            kosmos.enableDualShade()
             val currentDesiredSceneKey by collectLastValue(sceneInteractor.currentScene)
             val currentDesiredOverlays by collectLastValue(sceneInteractor.currentOverlays)
             val isVisible by collectLastValue(sceneInteractor.isVisible)
@@ -1739,9 +1740,9 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(DualShade.FLAG_NAME)
     fun hydrateInteractionState_whileLocked() =
         testScope.runTest {
+            kosmos.disableDualShade()
             val transitionStateFlow = prepareState(initialSceneKey = Scenes.Lockscreen)
             underTest.start()
             runCurrent()
@@ -1826,9 +1827,9 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(DualShade.FLAG_NAME)
     fun hydrateInteractionState_whileUnlocked() =
         testScope.runTest {
+            kosmos.disableDualShade()
             val transitionStateFlow =
                 prepareState(
                     authenticationMethod = AuthenticationMethodModel.Pin,
@@ -1915,9 +1916,9 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
     fun hydrateInteractionState_dualShade_whileLocked() =
         testScope.runTest {
+            kosmos.enableDualShade()
             val currentDesiredOverlays by collectLastValue(sceneInteractor.currentOverlays)
             val transitionStateFlow = prepareState(initialSceneKey = Scenes.Lockscreen)
             underTest.start()
@@ -2004,9 +2005,9 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
     fun hydrateInteractionState_dualShade_whileUnlocked() =
         testScope.runTest {
+            kosmos.enableDualShade()
             val currentDesiredOverlays by collectLastValue(sceneInteractor.currentOverlays)
             val transitionStateFlow =
                 prepareState(
