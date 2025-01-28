@@ -1522,7 +1522,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_MEDIA_CONTROLS_DRAWABLES_REUSE)
+    @EnableFlags(Flags.FLAG_MEDIA_CONTROLS_DRAWABLES_REUSE_BUGFIX)
     fun postWithPlaybackActions_drawablesReused() {
         whenever(notificationLockscreenUserManager.isCurrentProfile(USER_ID)).thenReturn(true)
         whenever(notificationLockscreenUserManager.isProfileAvailable(USER_ID)).thenReturn(true)
@@ -1555,7 +1555,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_DRAWABLES_REUSE)
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_DRAWABLES_REUSE_BUGFIX)
     fun postWithPlaybackActions_drawablesNotReused() {
         whenever(notificationLockscreenUserManager.isCurrentProfile(USER_ID)).thenReturn(true)
         whenever(notificationLockscreenUserManager.isProfileAvailable(USER_ID)).thenReturn(true)
