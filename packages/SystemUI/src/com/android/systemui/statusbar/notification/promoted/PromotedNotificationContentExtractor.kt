@@ -98,8 +98,7 @@ constructor(
                 primaryTextColor = colorsFromNotif.primaryTextColor,
             )
 
-        recoveredBuilder.style?.extractContent(contentBuilder)
-            ?: run { contentBuilder.style = Style.Ineligible }
+        recoveredBuilder.extractStyleContent(contentBuilder)
 
         return contentBuilder.build().also { logger.logExtractionSucceeded(entry, it) }
     }
@@ -140,28 +139,32 @@ private fun Notification.extractWhen(): When? {
     }
 }
 
-private fun Notification.Style.extractContent(
+private fun Notification.Builder.extractStyleContent(
     contentBuilder: PromotedNotificationContentModel.Builder
 ) {
+    val style = this.style
+
     contentBuilder.style =
-        when (this) {
+        when (style) {
+            null -> Style.Base
+
             is BigPictureStyle -> {
-                extractContent(contentBuilder)
+                style.extractContent(contentBuilder)
                 Style.BigPicture
             }
 
             is BigTextStyle -> {
-                extractContent(contentBuilder)
+                style.extractContent(contentBuilder)
                 Style.BigText
             }
 
             is CallStyle -> {
-                extractContent(contentBuilder)
+                style.extractContent(contentBuilder)
                 Style.Call
             }
 
             is ProgressStyle -> {
-                extractContent(contentBuilder)
+                style.extractContent(contentBuilder)
                 Style.Progress
             }
 

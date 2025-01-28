@@ -173,6 +173,17 @@ class PromotedNotificationContentExtractorImplTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
+    fun extractsContent_fromBaseStyle() {
+        val entry = createEntry { setStyle(null) }
+
+        val content = extractContent(entry)
+
+        assertThat(content).isNotNull()
+        assertThat(content?.style).isEqualTo(Style.Base)
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
     fun extractsContent_fromBigPictureStyle() {
         val entry = createEntry { setStyle(BigPictureStyle()) }
 

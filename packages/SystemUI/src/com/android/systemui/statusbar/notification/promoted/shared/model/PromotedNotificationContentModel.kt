@@ -131,6 +131,7 @@ data class PromotedNotificationContentModel(
 
     /** The promotion-eligible style of a notification, or [Style.Ineligible] if not. */
     enum class Style {
+        Base, // style == null
         BigPicture,
         BigText,
         Call,
