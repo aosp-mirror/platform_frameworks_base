@@ -18,15 +18,20 @@ package com.android.systemui.statusbar.chips.ui.viewmodel
 
 import android.content.DialogInterface
 import android.content.packageManager
+import android.content.res.Configuration
+import android.content.res.mainResources
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Expandable
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.display.data.repository.displayStateRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
@@ -48,21 +53,21 @@ import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsVie
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsScreenRecordChip
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsShareToAppChip
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.getStopActionFromDialog
-import com.android.systemui.statusbar.commandline.commandRegistry
+import com.android.systemui.statusbar.core.StatusBarRootModernization
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
+import com.android.systemui.statusbar.notification.shared.CallType
 import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.inCallModel
 import com.android.systemui.testKosmos
 import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import java.io.PrintWriter
-import java.io.StringWriter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -85,14 +90,11 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val testScope = kosmos.testScope
     private val systemClock = kosmos.fakeSystemClock
-    private val commandRegistry = kosmos.commandRegistry
 
     private val screenRecordState = kosmos.screenRecordRepository.screenRecordState
     private val mediaProjectionState = kosmos.fakeMediaProjectionRepository.mediaProjectionState
     private val callRepo = kosmos.ongoingCallRepository
     private val activeNotificationListRepository = kosmos.activeNotificationListRepository
-
-    private val pw = PrintWriter(StringWriter())
 
     private val mockSystemUIDialog = mock<SystemUIDialog>()
     private val chipBackgroundView = mock<ChipBackgroundContainer>()
@@ -199,6 +201,152 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
             assertIsScreenRecordChip(latest!!.primary)
             assertIsCallChip(latest!!.secondary, callNotificationKey)
+        }
+
+    @Test
+    fun chips_oneChip_notSquished() =
+        testScope.runTest {
+            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34, notificationKey = "call"))
+
+            val latest by collectLastValue(underTest.chips)
+
+            // The call chip isn't squished (squished chips would be icon only)
+            assertThat(latest!!.primary)
+                .isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
+        }
+
+    @Test
+    @DisableFlags(StatusBarChipsModernization.FLAG_NAME, StatusBarRootModernization.FLAG_NAME)
+    fun chips_twoTimerChips_isSmallPortrait_andChipsModernizationDisabled_bothSquished() =
+        testScope.runTest {
+            screenRecordState.value = ScreenRecordModel.Recording
+            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34, notificationKey = "call"))
+
+            val latest by collectLastValue(underTest.chips)
+
+            // Squished chips are icon only
+            assertThat(latest!!.primary)
+                .isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
+            assertThat(latest!!.secondary)
+                .isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
+        }
+
+    @Test
+    @DisableFlags(StatusBarChipsModernization.FLAG_NAME, StatusBarRootModernization.FLAG_NAME)
+    fun chips_countdownChipAndTimerChip_countdownNotSquished_butTimerSquished() =
+        testScope.runTest {
+            screenRecordState.value = ScreenRecordModel.Starting(millisUntilStarted = 2000)
+            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34, notificationKey = "call"))
+
+            val latest by collectLastValue(underTest.chips)
+
+            // The screen record countdown isn't squished to icon-only
+            assertThat(latest!!.primary)
+                .isInstanceOf(OngoingActivityChipModel.Shown.Countdown::class.java)
+            // But the call chip *is* squished
+            assertThat(latest!!.secondary)
+                .isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
+        }
+
+    @Test
+    @DisableFlags(StatusBarChipsModernization.FLAG_NAME, StatusBarRootModernization.FLAG_NAME)
+    fun chips_numberOfChipsChanges_chipsGetSquishedAndUnsquished() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chips)
+
+            // WHEN there's only one chip
+            screenRecordState.value = ScreenRecordModel.Recording
+            callRepo.setOngoingCallState(OngoingCallModel.NoCall)
+
+            // The screen record isn't squished because it's the only one
+            assertThat(latest!!.primary)
+                .isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
+            assertThat(latest!!.secondary).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+
+            // WHEN there's 2 chips
+            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34, notificationKey = "call"))
+
+            // THEN they both become squished
+            assertThat(latest!!.primary)
+                .isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
+            // But the call chip *is* squished
+            assertThat(latest!!.secondary)
+                .isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
+
+            // WHEN we go back down to 1 chip
+            screenRecordState.value = ScreenRecordModel.DoingNothing
+
+            // THEN the remaining chip unsquishes
+            assertThat(latest!!.primary)
+                .isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
+            assertThat(latest!!.secondary).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+        }
+
+    @Test
+    @DisableFlags(StatusBarChipsModernization.FLAG_NAME, StatusBarRootModernization.FLAG_NAME)
+    fun chips_twoChips_isLandscape_notSquished() =
+        testScope.runTest {
+            screenRecordState.value = ScreenRecordModel.Recording
+            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34, notificationKey = "call"))
+
+            // WHEN we're in landscape
+            val config =
+                Configuration(kosmos.mainResources.configuration).apply {
+                    orientation = Configuration.ORIENTATION_LANDSCAPE
+                }
+            kosmos.fakeConfigurationRepository.onConfigurationChange(config)
+
+            val latest by collectLastValue(underTest.chips)
+
+            // THEN the chips aren't squished (squished chips would be icon only)
+            assertThat(latest!!.primary)
+                .isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
+            assertThat(latest!!.secondary)
+                .isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
+        }
+
+    @Test
+    @DisableFlags(StatusBarChipsModernization.FLAG_NAME, StatusBarRootModernization.FLAG_NAME)
+    fun chips_twoChips_isLargeScreen_notSquished() =
+        testScope.runTest {
+            screenRecordState.value = ScreenRecordModel.Recording
+            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34, notificationKey = "call"))
+
+            // WHEN we're on a large screen
+            kosmos.displayStateRepository.setIsLargeScreen(true)
+
+            val latest by collectLastValue(underTest.chips)
+
+            // THEN the chips aren't squished (squished chips would be icon only)
+            assertThat(latest!!.primary)
+                .isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
+            assertThat(latest!!.secondary)
+                .isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
+        }
+
+    @Test
+    @EnableFlags(StatusBarChipsModernization.FLAG_NAME, StatusBarRootModernization.FLAG_NAME)
+    fun chips_twoChips_chipsModernizationEnabled_notSquished() =
+        testScope.runTest {
+            screenRecordState.value = ScreenRecordModel.Recording
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = "call",
+                        statusBarChipIcon = createStatusBarIconViewOrNull(),
+                        callType = CallType.Ongoing,
+                        whenTime = 499,
+                    )
+                )
+            )
+
+            val latest by collectLastValue(underTest.chips)
+
+            // Squished chips would be icon only
+            assertThat(latest!!.primary)
+                .isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
+            assertThat(latest!!.secondary)
+                .isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
         }
 
     @Test
