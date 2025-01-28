@@ -90,7 +90,7 @@ class LauncherProxyServiceTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private lateinit var subject: LauncherProxyService
     @Mock private val dumpManager = DumpManager()
-    @Mock private val processWrapper = ProcessWrapper()
+    @Mock private lateinit var processWrapper: ProcessWrapper
     private val displayTracker = FakeDisplayTracker(mContext)
     private val fakeSystemClock = FakeSystemClock()
     private val sysUiState = SysUiState(displayTracker, kosmos.sceneContainerPlugin)
