@@ -2459,7 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"பாதுகாப்பிற்காக, திரைப் பகிர்வில் இருந்து ஆப்ஸ் உள்ளடக்கம் மறைக்கப்பட்டுள்ளது"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"சாட்டிலைட்டுடன் தானாக இணைக்கப்பட்டது"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"மொபைல்/வைஃபை நெட்வொர்க் இல்லாமல் நீங்கள் மெசேஜ்களை அனுப்பலாம் பெறலாம்"</string>
-    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"சாட்டிலைட் மூலம் நீங்கள் மெசேஜ்களை அனுப்பலாம் பெறலாம், வரம்பிடப்பட்ட டேட்டாவைப் பயன்படுத்தலாம்"</string>
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"சாட்டிலைட் மூலம் நீங்கள் மெசேஜ் அனுப்பலாம் பெறலாம், குறிப்பிட்ட அளவு டேட்டாவைப் பயன்படுத்தலாம்"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"சாட்டிலைட் மெசேஜிங்கைப் பயன்படுத்தவா?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"மொபைல்/வைஃபை நெட்வொர்க் இல்லாமல் மெசேஜ்களை அனுப்பலாம், பெறலாம்"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ஆப்ஸைத் திறக்கவும்"</string>

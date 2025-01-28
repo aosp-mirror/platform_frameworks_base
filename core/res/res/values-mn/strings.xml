@@ -2109,7 +2109,7 @@
     <string name="time_picker_minute_label" msgid="8307452311269824553">"минут"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"Цаг тохируулах"</string>
     <string name="time_picker_input_error" msgid="8386271930742451034">"Цагийг зөв оруулна уу"</string>
-    <string name="time_picker_prompt_label" msgid="303588544656363889">"Хугацааг бичнэ үү"</string>
+    <string name="time_picker_prompt_label" msgid="303588544656363889">"Цагийг бичиж оруулна уу"</string>
     <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"Цагийг оруулахын тулд текст оруулах горимд шилжүүлнэ үү."</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"Цагийг оруулахын тулд цагийн горимд шилжүүлнэ үү."</string>
     <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"Автоматаар бөглөх хэсгийн сонголт"</string>

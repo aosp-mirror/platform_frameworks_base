@@ -620,8 +620,8 @@
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"允许该应用向附近的 WLAN 设备进行广播、连接到这些设备以及确定这些设备的相对位置"</string>
     <string name="permlab_ranging" msgid="2854543350668593390">"确定附近的设备之间的相对位置"</string>
     <string name="permdesc_ranging" msgid="6703905535621521710">"允许应用确定附近的设备之间的相对位置"</string>
-    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"首选 NFC 付款服务信息"</string>
-    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"允许应用获取首选 NFC 付款服务信息，例如注册的应用标识符和路线目的地。"</string>
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"首选 NFC 支付服务信息"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"允许应用获取首选 NFC 支付服务信息，例如注册的应用标识符和路线目的地。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"控制近距离通信"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"允许应用与近距离无线通信(NFC)标签、卡和读取器通信。"</string>
     <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"安全元件事务事件"</string>

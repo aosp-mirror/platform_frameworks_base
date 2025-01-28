@@ -1069,19 +1069,19 @@
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="2931364927622563465">"تمت إضافة الخلية <xliff:g id="CELL_INDEX">%1$s</xliff:g>"</string>
     <string name="lockscreen_access_pattern_detected" msgid="3931150554035194012">"اكتمل النمط"</string>
     <string name="lockscreen_access_pattern_area" msgid="1288780416685002841">"منطقة النقش."</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"‏%1$s. الأداة %2$d من %3$d."</string>
-    <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"إضافة أداة."</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"‏%1$s. التطبيق المصغَّر %2$d من %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"إضافة تطبيق مصغَّر."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="544239307077644480">"فارغة"</string>
     <string name="keyguard_accessibility_unlock_area_expanded" msgid="7768634718706488951">"تم توسيع منطقة فتح القفل."</string>
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="4729922043778400434">"تم تصغير منطقة فتح القفل."</string>
-    <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"أداة <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
+    <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"التطبيق المصغَّر <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"محدد المستخدم"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"الحالة"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"الكاميرا"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"أدوات التحكم في الوسائط"</string>
-    <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"بدأت إعادة ترتيب الأدوات."</string>
-    <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"انتهت إعادة ترتيب الأدوات."</string>
-    <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"تم حذف أداة <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"بدأت إعادة ترتيب التطبيقات المصغَّرة."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"انتهت إعادة ترتيب التطبيقات المصغَّرة."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"تم حذف التطبيق المصغَّر <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"توسيع منطقة فتح القفل."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"فتح القفل باستخدام التمرير."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"فتح القفل باستخدام النقش."</string>
@@ -1536,7 +1536,7 @@
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"البحث في كل الحِزم"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"يسمح هذا الإذن للتطبيق بعرض كل الحِزم المثبّتة."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"اضغط مرتين للتحكم في التكبير أو التصغير"</string>
-    <string name="gadget_host_error_inflating" msgid="2449961590495198720">"تعذرت إضافة أداة."</string>
+    <string name="gadget_host_error_inflating" msgid="2449961590495198720">"تعذرت إضافة تطبيق مصغَّر."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"تنفيذ"</string>
     <string name="ime_action_search" msgid="4501435960587287668">"بحث"</string>
     <string name="ime_action_send" msgid="8456843745664334138">"إرسال"</string>
