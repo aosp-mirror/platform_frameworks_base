@@ -593,3 +593,10 @@ flag {
        purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "enable_non_default_display_split"
+    namespace: "lse_desktop_experience"
+    description: "Enables split screen on non default displays"
+    bug: "384999213"
+}

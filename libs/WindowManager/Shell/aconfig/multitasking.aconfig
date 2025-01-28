@@ -177,10 +177,3 @@ flag {
     description: "Factor task-view state tracking out of taskviewtransitions"
     bug: "384976265"
 }
-
-flag {
-    name: "enable_non_default_display_split"
-    namespace: "multitasking"
-    description: "Enables split screen on non default displays"
-    bug: "384999213"
-}
