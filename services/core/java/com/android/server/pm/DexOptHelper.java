@@ -851,7 +851,8 @@ public final class DexOptHelper {
     private static boolean shouldSkipDexopt(InstallRequest installRequest) {
         PackageSetting ps = installRequest.getScannedPackageSetting();
         AndroidPackage pkg = ps.getPkg();
-        return pkg == null || pkg.isDebuggable();
+        boolean onIncremental = isIncrementalPath(ps.getPathString());
+        return pkg == null || pkg.isDebuggable() || onIncremental;
     }
 
     /**
@@ -866,7 +867,6 @@ public final class DexOptHelper {
         final boolean instantApp = ((installRequest.getScanFlags() & SCAN_AS_INSTANT_APP) != 0);
         final PackageSetting ps = installRequest.getScannedPackageSetting();
         final AndroidPackage pkg = ps.getPkg();
-        final boolean onIncremental = isIncrementalPath(ps.getPathString());
         final boolean performDexOptForRollback =
                 !(installRequest.isRollback()
                         && installRequest
@@ -877,7 +877,7 @@ public final class DexOptHelper {
         // THINK TWICE when you add a new condition here. You probably want to add a condition to
         // `shouldSkipDexopt` instead. In that way, ART Service will be called with the "skip"
         // compiler filter and it will have the chance to decide whether to skip dexopt.
-        return !instantApp && pkg != null && !onIncremental && !isApex && performDexOptForRollback;
+        return !instantApp && pkg != null && !isApex && performDexOptForRollback;
     }
 
     private static class StagedApexObserver extends IStagedApexObserver.Stub {
