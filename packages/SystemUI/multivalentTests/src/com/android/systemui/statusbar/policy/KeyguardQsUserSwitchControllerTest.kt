@@ -100,7 +100,9 @@ class KeyguardQsUserSwitchControllerTest : SysuiTestCase() {
 
     @After
     fun tearDown() {
-        ViewUtils.detachView(view)
+        if (::view.isInitialized) {
+            ViewUtils.detachView(view)
+        }
     }
 
     @Test
