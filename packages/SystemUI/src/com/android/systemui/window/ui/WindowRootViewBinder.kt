@@ -43,7 +43,7 @@ object WindowRootViewBinder {
         blurUtils: BlurUtils?,
         choreographer: Choreographer?,
     ) {
-        if (!Flags.bouncerUiRevamp()) return
+        if (!Flags.bouncerUiRevamp() && !Flags.glanceableHubBlurredBackground()) return
         if (blurUtils == null || choreographer == null) return
 
         view.repeatWhenAttached {

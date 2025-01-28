@@ -28,12 +28,14 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.Flags.communalResponsiveGrid
+import com.android.systemui.Flags.glanceableHubBlurredBackground
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
 import com.android.systemui.communal.data.repository.CommunalSmartspaceRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.domain.model.CommunalContentModel.WidgetContent
+import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalContentSize.FixedSize.FULL
 import com.android.systemui.communal.shared.model.CommunalContentSize.FixedSize.HALF
@@ -302,6 +304,25 @@ constructor(
                 columnName = "isCommunalShowing",
                 initialValue = false,
             )
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
+            )
+
+    /**
+     * Flow that emits {@code true} whenever communal is influencing the shown background on the
+     * screen. This happens when the background for communal is set to blur and communal is visible.
+     * This is used by other components to determine when blur-related emitted values for communal
+     * should be considered.
+     */
+    val isCommunalBlurring: StateFlow<Boolean> =
+        communalSceneInteractor.isCommunalVisible
+            .combine(communalSettingsInteractor.communalBackground) { showing, background ->
+                showing &&
+                    background == CommunalBackgroundType.BLUR &&
+                    glanceableHubBlurredBackground()
+            }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,

@@ -1207,6 +1207,13 @@ flag {
 }
 
 flag {
+  name: "glanceable_hub_blurred_background"
+  namespace: "systemui"
+  description: "Allow blurred background on glanceable hub"
+  bug: "389788272"
+}
+
+flag {
   name: "communal_widget_resizing"
   namespace: "systemui"
   description: "Allow resizing of widgets on glanceable hub"

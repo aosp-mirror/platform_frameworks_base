@@ -22,21 +22,22 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
-import com.android.systemui.coroutines.collectValues
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.keyguard.ui.transitions.blurConfig
+import com.android.systemui.kosmos.collectValues
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
@@ -53,7 +54,7 @@ class LockscreenToGlanceableHubTransitionViewModelTest : SysuiTestCase() {
 
     @Test
     fun lockscreenFadeOut() =
-        testScope.runTest {
+        kosmos.runTest {
             val values by collectValues(underTest.keyguardAlpha)
             assertThat(values).isEmpty()
 
@@ -82,10 +83,10 @@ class LockscreenToGlanceableHubTransitionViewModelTest : SysuiTestCase() {
 
     @Test
     fun lockscreenTranslationX() =
-        testScope.runTest {
+        kosmos.runTest {
             configurationRepository.setDimensionPixelSize(
                 R.dimen.lockscreen_to_hub_transition_lockscreen_translation_x,
-                -100
+                -100,
             )
             val configuration = mock<Configuration>()
             whenever(configuration.layoutDirection).thenReturn(LayoutDirection.LTR)
@@ -108,16 +109,40 @@ class LockscreenToGlanceableHubTransitionViewModelTest : SysuiTestCase() {
             values.forEach { assertThat(it.value).isIn(Range.closed(-100f, 0f)) }
         }
 
+    @Test
+    @DisableSceneContainer
+    fun blurBecomesMaxValueImmediately() =
+        kosmos.runTest {
+            val values by collectValues(underTest.windowBlurRadius)
+
+            keyguardWindowBlurTestUtil.assertTransitionToBlurRadius(
+                transitionProgress = listOf(0.0f, 0.2f, 0.3f, 0.65f, 0.7f, 1.0f),
+                startValue = blurConfig.minBlurRadiusPx,
+                endValue = blurConfig.maxBlurRadiusPx,
+                actualValuesProvider = { values },
+                transitionFactory = { step, transitionState ->
+                    TransitionStep(
+                        from = KeyguardState.LOCKSCREEN,
+                        to = KeyguardState.GLANCEABLE_HUB,
+                        value = step,
+                        transitionState = transitionState,
+                        ownerName = "LockscreenToGlanceableHubTransitionViewModelTest",
+                    )
+                },
+                checkInterpolatedValues = false,
+            )
+        }
+
     private fun step(
         value: Float,
-        state: TransitionState = TransitionState.RUNNING
+        state: TransitionState = TransitionState.RUNNING,
     ): TransitionStep {
         return TransitionStep(
             from = KeyguardState.LOCKSCREEN,
             to = KeyguardState.GLANCEABLE_HUB,
             value = value,
             transitionState = state,
-            ownerName = this::class.java.simpleName
+            ownerName = this::class.java.simpleName,
         )
     }
 }

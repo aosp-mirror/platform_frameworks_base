@@ -16,18 +16,20 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_BLURRED_BACKGROUND
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.ui.transitions.blurConfig
-import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.collectValues
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.testKosmos
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -36,19 +38,19 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class PrimaryBouncerToGlanceableHubTransitionViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
-    private val testScope = kosmos.testScope
     private val underTest by lazy { kosmos.primaryBouncerToGlanceableHubTransitionViewModel }
 
     @Test
     @DisableSceneContainer
+    @DisableFlags(FLAG_GLANCEABLE_HUB_BLURRED_BACKGROUND)
     fun blurBecomesMinValueImmediately() =
-        testScope.runTest {
+        kosmos.runTest {
             val values by collectValues(underTest.windowBlurRadius)
 
-            kosmos.keyguardWindowBlurTestUtil.assertTransitionToBlurRadius(
+            keyguardWindowBlurTestUtil.assertTransitionToBlurRadius(
                 transitionProgress = listOf(0.0f, 0.2f, 0.3f, 0.65f, 0.7f, 1.0f),
-                startValue = kosmos.blurConfig.minBlurRadiusPx,
-                endValue = kosmos.blurConfig.minBlurRadiusPx,
+                startValue = blurConfig.maxBlurRadiusPx,
+                endValue = blurConfig.minBlurRadiusPx,
                 actualValuesProvider = { values },
                 transitionFactory = { step, transitionState ->
                     TransitionStep(
@@ -60,6 +62,28 @@ class PrimaryBouncerToGlanceableHubTransitionViewModelTest : SysuiTestCase() {
                     )
                 },
                 checkInterpolatedValues = false,
+            )
+        }
+
+    @Test
+    @DisableSceneContainer
+    @EnableFlags(FLAG_GLANCEABLE_HUB_BLURRED_BACKGROUND)
+    fun noBlurTransitionWithBlurredGlanceableHub() =
+        kosmos.runTest {
+            val values by collectValues(underTest.windowBlurRadius)
+
+            keyguardWindowBlurTestUtil.assertNoBlurRadiusTransition(
+                transitionProgress = listOf(0.0f, 0.2f, 0.3f, 0.65f, 0.7f, 1.0f),
+                actualValuesProvider = { values },
+                transitionFactory = { step, transitionState ->
+                    TransitionStep(
+                        from = KeyguardState.PRIMARY_BOUNCER,
+                        to = KeyguardState.GLANCEABLE_HUB,
+                        value = step,
+                        transitionState = transitionState,
+                        ownerName = "PrimaryBouncerToGlanceableHubTransitionViewModelTest",
+                    )
+                },
             )
         }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal.shared.model
+package com.android.systemui.keyguard.ui.transitions
 
-/** Models the types of background that can be shown on the hub. */
-enum class CommunalBackgroundType(val value: Int) {
-    STATIC(0),
-    STATIC_GRADIENT(1),
-    ANIMATED(2),
-    NONE(3),
-    BLUR(4),
+import kotlinx.coroutines.flow.MutableStateFlow
+
+class FakeGlanceableHubTransition : GlanceableHubTransition {
+    override val windowBlurRadius: MutableStateFlow<Float> = MutableStateFlow(0.0f)
 }

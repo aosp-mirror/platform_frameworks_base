@@ -16,6 +16,7 @@
 
 package com.android.systemui.window.domain.interactor
 
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
@@ -28,6 +29,7 @@ val Kosmos.windowRootViewBlurInteractor by
             repository = windowRootViewBlurRepository,
             keyguardInteractor = keyguardInteractor,
             keyguardTransitionInteractor = keyguardTransitionInteractor,
+            communalInteractor = communalInteractor,
             applicationScope = applicationCoroutineScope,
         )
     }

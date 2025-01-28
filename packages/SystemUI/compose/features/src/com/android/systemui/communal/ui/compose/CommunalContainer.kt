@@ -256,6 +256,7 @@ fun ContentScope.CommunalScene(
             CommunalBackgroundType.STATIC_GRADIENT -> StaticLinearGradient()
             CommunalBackgroundType.ANIMATED -> AnimatedLinearGradient()
             CommunalBackgroundType.NONE -> BackgroundTopScrim()
+            CommunalBackgroundType.BLUR -> Background()
         }
 
         with(content) {
@@ -313,6 +314,9 @@ private fun BoxScope.BackgroundTopScrim() {
     val scrimOnTopColor = if (darkTheme) Color.Black else Color.White
     Box(Modifier.matchParentSize().alpha(0.34f).background(scrimOnTopColor))
 }
+
+/** Transparent (nothing) composable for when the background is blurred. */
+@Composable private fun BoxScope.Background() {}
 
 /** The duration to use for the gradient background animation. */
 private const val ANIMATION_DURATION_MS = 10_000

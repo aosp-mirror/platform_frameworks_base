@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,37 +23,26 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
-import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.keyguard.ui.transitions.GlanceableHubTransition
 import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 
 @SysUISingleton
-class DozingToGlanceableHubTransitionViewModel
+class GlanceableHubToDozingTransitionViewModel
 @Inject
 constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
-    private val blurFactory: GlanceableHubBlurComponent.Factory,
-) : DeviceEntryIconTransition, GlanceableHubTransition {
+    private val blurComponentFactory: GlanceableHubBlurComponent.Factory,
+) : GlanceableHubTransition {
     private val transitionAnimation =
         animationFlow
             .setup(
                 duration = TO_GLANCEABLE_HUB_DURATION,
                 edge = Edge.create(DOZING, Scenes.Communal),
             )
-            .setupWithoutSceneContainer(edge = Edge.create(DOZING, GLANCEABLE_HUB))
-
-    override val deviceEntryParentViewAlpha: Flow<Float> =
-        transitionAnimation.immediatelyTransitionTo(1f)
-
-    /**
-     * Hide notifications when transitioning directly from dozing to hub, such as when pressing
-     * power button when dozing and docked.
-     */
-    val notificationAlpha: Flow<Float> = flowOf(0f)
+            .setupWithoutSceneContainer(edge = Edge.create(GLANCEABLE_HUB, DOZING))
 
     override val windowBlurRadius: Flow<Float> =
-        blurFactory.create(transitionAnimation).getBlurProvider().enterBlurRadius
+        blurComponentFactory.create(transitionAnimation).getBlurProvider().exitBlurRadius
 }
