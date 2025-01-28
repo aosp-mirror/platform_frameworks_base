@@ -535,10 +535,10 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ロック画面ウィジェット"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ウィジェットを使用してアプリを起動するには、本人確認が必要です。タブレットがロックされた状態でも他のユーザーにウィジェットが表示されますので、注意してください。一部のウィジェットについてはロック画面での使用を想定していないため、ロック画面への追加は危険な場合があります。"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"ウィジェット"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"[ウィジェット] ショートカットを追加するには、設定で [ロック画面でのウィジェットの表示] が有効になっていることを確認してください。"</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"設定"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"スクリーンセーバー表示ボタン"</string>
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"ハブモードの詳細を見る"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"充電中にお気に入りのウィジェットやスクリーン セーバーにアクセスできます。"</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"使ってみる"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ユーザーを切り替える"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"プルダウン メニュー"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"このセッションでのアプリとデータはすべて削除されます。"</string>
@@ -750,8 +750,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"更新しています"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"仕事用プロファイル"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"機内モード"</string>
-    <!-- no translation found for status_bar_supervision (6735015942701134125) -->
-    <skip />
+    <string name="status_bar_supervision" msgid="6735015942701134125">"保護者による使用制限"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"次回のアラーム（<xliff:g id="WHEN">%1$s</xliff:g>）は鳴りません"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -802,6 +801,10 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"会話通知の一番上に表示されると同時に、ロック画面にプロフィール写真として表示されるほか、バブルとして表示され、サイレント モードが中断されます"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"優先"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>は会話機能に対応していません"</string>
+    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
+    <skip />
+    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"これらの通知は変更できません。"</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"着信通知は変更できません。"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"このグループの通知はここでは設定できません"</string>
@@ -912,6 +915,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"カレンダー"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"電卓"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"マップ"</string>
+    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"サイレント モード"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"音量ボタンのショートカット"</string>
     <string name="battery" msgid="769686279459897127">"バッテリー"</string>
@@ -1432,8 +1445,7 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"システムアプリ"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"マルチタスク"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"分割画面"</string>
-    <!-- no translation found for shortcutHelper_category_accessibility (8068337792277570938) -->
-    <skip />
+    <string name="shortcutHelper_category_accessibility" msgid="8068337792277570938">"ユーザー補助"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"入力"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"アプリのショートカット"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"現在のアプリ"</string>
@@ -1497,12 +1509,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"「最近使ったアプリを表示する」ジェスチャーを学習しました。"</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"最近使ったアプリを表示するには、3 本の指でタッチパッドを上にスワイプして長押しします"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"アプリの切り替え"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2751565200937541667) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"タッチパッドを 4 本の指で右にスワイプします"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"よくできました！"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"アプリを切り替えるジェスチャーを学習しました。"</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5508381152326379652) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"アプリを切り替えるには、タッチパッドを 4 本の指で右にスワイプします"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"すべてのアプリを表示"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"キーボードのアクションキーを押します"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"完了です！"</string>

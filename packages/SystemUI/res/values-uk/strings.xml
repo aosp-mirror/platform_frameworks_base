@@ -535,10 +535,13 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Віджети для заблокованого екрана"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Щоб відкрити додаток за допомогою віджета, вам потрібно буде підтвердити особу. Пам’ятайте також, що бачити віджети можуть усі, навіть коли планшет заблоковано. Можливо, деякі віджети не призначені для заблокованого екрана, і додавати їх на нього може бути небезпечно."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Віджети"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Щоб додати ярлик \"Віджети\", переконайтеся, що в налаштуваннях увімкнено опцію \"Показувати віджети на заблокованому екрані\"."</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Налаштування"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Кнопка \"Показати заставку\""</string>
+    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
+    <skip />
+    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
+    <skip />
+    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Змінити користувача"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"спадне меню"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Усі додатки й дані з цього сеансу буде видалено."</string>
@@ -802,6 +805,10 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"З’являється вгорі сповіщень про розмови і як зображення профілю на заблокованому екрані, відображається як спливаючий чат, перериває режим \"Не турбувати\""</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Пріоритет"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не підтримує функції розмов"</string>
+    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
+    <skip />
+    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ці сповіщення не можна змінити."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Сповіщення про виклик не можна змінити."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Цю групу сповіщень не можна налаштувати тут"</string>
@@ -912,6 +919,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Календар"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Калькулятор"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Карти"</string>
+    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Не турбувати"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Кнопки гучності на корпусі"</string>
     <string name="battery" msgid="769686279459897127">"Акумулятор"</string>
@@ -1497,11 +1514,11 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Ви виконали жест для перегляду нещодавно відкритих додатків."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Щоб переглянути останні додатки, проведіть трьома пальцями вгору й утримуйте їх на сенсорній панелі"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"Перемикання між додатками"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2751565200937541667) -->
+    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
     <skip />
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"Чудово!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"Ви виконали жест перемикання додатків."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5508381152326379652) -->
+    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
     <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Переглянути всі додатки"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Натисніть клавішу дії на клавіатурі"</string>

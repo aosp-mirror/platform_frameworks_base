@@ -535,10 +535,10 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ലോക്ക് സ്‌ക്രീൻ വിജറ്റുകൾ"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"വിജറ്റ് ഉപയോഗിച്ച് ഒരു ആപ്പ് തുറക്കാൻ, ഇത് നിങ്ങൾ തന്നെയാണെന്ന് പരിശോധിച്ചുറപ്പിക്കേണ്ടതുണ്ട്. നിങ്ങളുടെ ടാബ്‌ലെറ്റ് ലോക്കായിരിക്കുമ്പോഴും എല്ലാവർക്കും അത് കാണാനാകുമെന്നതും ഓർക്കുക. ചില വിജറ്റുകൾ നിങ്ങളുടെ ലോക്ക് സ്‌ക്രീനിന് ഉള്ളതായിരിക്കില്ല, അവ ഇവിടെ ചേർക്കുന്നത് സുരക്ഷിതവുമായിരിക്കില്ല."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"മനസ്സിലായി"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"വിജറ്റുകൾ"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\"വിജറ്റുകൾ\" കുറുക്കുവഴി ചേർക്കാൻ, ക്രമീകരണത്തിൽ \"ലോക്ക് സ്‌ക്രീനിൽ വിജറ്റുകൾ കാണിക്കുക\" പ്രവർത്തനക്ഷമമാക്കിയെന്ന് ഉറപ്പാക്കുക."</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"ക്രമീകരണം"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"സ്‌ക്രീൻ സേവർ കാണിക്കുക ബട്ടൺ"</string>
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"ഹബ് മോഡ് അടുത്തറിയുക"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"ചാർജ് ചെയ്യുമ്പോൾ നിങ്ങളുടെ പ്രിയപ്പെട്ട വിജറ്റുകളും സ്‌ക്രീൻ സേവറുകളും ആക്‌സസ് ചെയ്യുക."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"തുടങ്ങാം"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ഉപയോക്താവ് മാറുക"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"പുൾഡൗൺ മെനു"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ഈ സെഷനിലെ എല്ലാ ആപ്പുകളും ഡാറ്റയും ഇല്ലാതാക്കും."</string>
@@ -750,8 +750,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"അപ്ഡേറ്റ് ചെയ്യുന്നു"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"ഔദ്യോഗിക പ്രൊഫൈൽ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ഫ്ലൈറ്റ് മോഡ്"</string>
-    <!-- no translation found for status_bar_supervision (6735015942701134125) -->
-    <skip />
+    <string name="status_bar_supervision" msgid="6735015942701134125">"രക്ഷാകർതൃ നിയന്ത്രണങ്ങൾ"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"<xliff:g id="WHEN">%1$s</xliff:g>-നുള്ള നിങ്ങളുടെ അടുത്ത അലാറം കേൾക്കില്ല"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g>-ന്"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>-ന്"</string>
@@ -802,6 +801,10 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"സംഭാഷണ അറിയിപ്പുകളുടെ മുകളിലും സ്ക്രീൻ ലോക്കായിരിക്കുമ്പോൾ ഒരു പ്രൊഫൈൽ ചിത്രമായും ബബിൾ രൂപത്തിൽ ദൃശ്യമാകുന്നു, ശല്യപ്പെടുത്തരുത് മോഡ് തടസ്സപ്പെടുത്തുന്നു"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"മുൻഗണന"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"സംഭാഷണ ഫീച്ചറുകളെ <xliff:g id="APP_NAME">%1$s</xliff:g> പിന്തുണയ്‌ക്കുന്നില്ല"</string>
+    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
+    <skip />
+    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ഈ അറിയിപ്പുകൾ പരിഷ്ക്കരിക്കാനാവില്ല."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"കോൾ അറിയിപ്പുകൾ പരിഷ്‌കരിക്കാനാകുന്നില്ല."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"അറിയിപ്പുകളുടെ ഈ ഗ്രൂപ്പ് ഇവിടെ കോണ്‍ഫിഗര്‍ ചെയ്യാൻ കഴിയില്ല"</string>
@@ -912,6 +915,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"കാൽക്കുലേറ്റർ"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
+    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ശല്യപ്പെടുത്തരുത്"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"വോളിയം ബട്ടൺ കുറുക്കുവഴി"</string>
     <string name="battery" msgid="769686279459897127">"ബാറ്ററി"</string>
@@ -1432,8 +1445,7 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"സിസ്‌റ്റം ആപ്പുകൾ"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"മൾട്ടിടാസ്‌കിംഗ്"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"സ്‌ക്രീൻ വിഭജന മോഡ്"</string>
-    <!-- no translation found for shortcutHelper_category_accessibility (8068337792277570938) -->
-    <skip />
+    <string name="shortcutHelper_category_accessibility" msgid="8068337792277570938">"ഉപയോഗസഹായി"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ഇൻപുട്ട്"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"ആപ്പ് കുറുക്കുവഴികൾ"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"നിലവിലെ ആപ്പ്"</string>
@@ -1497,12 +1509,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"അടുത്തിടെയുള്ള ആപ്പുകൾ കാണുക എന്ന ജെസ്ച്ചർ നിങ്ങൾ പൂർത്തിയാക്കി."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"സമീപകാല ആപ്പുകൾ കാണുന്നതിന്, നിങ്ങളുടെ ടച്ച്പാഡിൽ മൂന്ന് വിരലുകൾ ഉപയോഗിച്ച് മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്‌ത് പിടിക്കുക"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"ആപ്പുകൾ മാറുക"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2751565200937541667) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"നിങ്ങളുടെ ടച്ച്‌പാഡിൽ നാല് വിരലുകൾ കൊണ്ട് വലത്തേക്ക് സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"കൊള്ളാം!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"ആപ്പുകൾ മാറൽ ജെസ്ച്ചർ നിങ്ങൾ പൂർത്തിയാക്കി."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5508381152326379652) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"ആപ്പുകൾ മാറാൻ നിങ്ങളുടെ ടച്ച്പാഡിൽ നാല് വിരലുകൾ കൊണ്ട് വലത്തേക്ക് സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"എല്ലാ ആപ്പുകളും കാണുക"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"നിങ്ങളുടെ കീബോർഡിലെ ആക്ഷൻ കീ അമർത്തുക"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"അഭിനന്ദനങ്ങൾ!"</string>

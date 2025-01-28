@@ -535,10 +535,13 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"잠금 화면 위젯"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"위젯을 사용하여 앱을 열려면 본인 인증을 해야 합니다. 또한 태블릿이 잠겨 있더라도 누구나 볼 수 있다는 점을 유의해야 합니다. 일부 위젯은 잠금 화면에 적합하지 않고 여기에 추가하기에 안전하지 않을 수 있습니다."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"확인"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"위젯"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\'위젯\' 바로가기를 추가하려면 설정에서 \'잠금 화면에 위젯 표시\'가 사용 설정되어 있어야 합니다."</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"설정"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"화면 보호기 버튼 표시"</string>
+    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
+    <skip />
+    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
+    <skip />
+    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"사용자 전환"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"풀다운 메뉴"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"이 세션에 있는 모든 앱과 데이터가 삭제됩니다."</string>
@@ -750,8 +753,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"업데이트 중"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"직장 프로필"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"비행기 모드"</string>
-    <!-- no translation found for status_bar_supervision (6735015942701134125) -->
-    <skip />
+    <string name="status_bar_supervision" msgid="6735015942701134125">"자녀 보호 기능"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"<xliff:g id="WHEN">%1$s</xliff:g>에 다음 알람을 들을 수 없습니다."</string>
     <string name="alarm_template" msgid="2234991538018805736">"시간: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"일시: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -761,7 +763,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"위성, 연결 상태 양호"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"위성, 연결 가능"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"위성 긴급 SOS"</string>
-    <string name="satellite_emergency_only_carrier_text" msgid="9103913890116841786">"긴급 전화 또는 SOS만 허용"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="9103913890116841786">"긴급 전화 또는 SOS만"</string>
     <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
     <string name="accessibility_no_signal" msgid="7052827511409250167">"신호가 없습니다"</string>
     <string name="accessibility_one_bar" msgid="5342012847647834506">"신호 막대가 1개입니다"</string>
@@ -802,6 +804,10 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"대화 알림 상단에 표시, 잠금 화면에 프로필 사진으로 표시, 대화창으로 표시, 방해 금지 모드를 무시함"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"우선순위"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱은 대화 기능을 지원하지 않습니다."</string>
+    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
+    <skip />
+    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"이 알림은 수정할 수 없습니다."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"전화 알림은 수정할 수 없습니다."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"이 알림 그룹은 여기에서 설정할 수 없습니다."</string>
@@ -912,6 +918,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"계산기"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"지도"</string>
+    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"방해 금지 모드"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"볼륨 버튼 단축키"</string>
     <string name="battery" msgid="769686279459897127">"배터리"</string>
@@ -1432,8 +1448,7 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"시스템 앱"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"멀티태스킹"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"화면 분할"</string>
-    <!-- no translation found for shortcutHelper_category_accessibility (8068337792277570938) -->
-    <skip />
+    <string name="shortcutHelper_category_accessibility" msgid="8068337792277570938">"접근성"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"입력"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"앱 단축키"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"현재 앱"</string>
@@ -1497,11 +1512,11 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"최근 앱 보기 동작을 완료했습니다."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"최근 앱을 보려면 터치패드에서 세 손가락을 사용해 위로 스와이프한 채로 유지하세요."</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"앱 전환"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2751565200937541667) -->
+    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
     <skip />
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"잘하셨습니다"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"앱 전환 동작을 완료했습니다."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5508381152326379652) -->
+    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
     <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"모든 앱 보기"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"키보드의 작업 키를 누르세요."</string>

@@ -535,10 +535,13 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Түгжээтэй дэлгэцийн виджет"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Виджет ашиглан аппыг нээхийн тулд та өөрийгөө мөн болохыг баталгаажуулах шаардлагатай болно. Мөн таны таблет түгжээтэй байсан ч тэдгээрийг дурын хүн үзэж болохыг санаарай. Зарим виджет таны түгжээтэй дэлгэцэд зориулагдаагүй байж магадгүй ба энд нэмэхэд аюултай байж болзошгүй."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Ойлголоо"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Виджет"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\"Виджет\"-ийн товчлол нэмэхийн тулд \"Түгжээтэй дэлгэц дээр виджет харуулах\"-ыг тохиргоонд идэвхжүүлсэн эсэхийг нягтална уу."</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Тохиргоо"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Дэлгэц амраагчийг харуулах товч"</string>
+    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
+    <skip />
+    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
+    <skip />
+    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Хэрэглэгчийг сэлгэх"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"эвхмэл цэс"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Энэ харилцан үйлдлийн бүх апп болон дата устах болно."</string>
@@ -553,7 +556,7 @@
     <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Зөвхөн нэг хэрэглэгч үүсгэх боломжтой.}other{Та # хүртэлх хэрэглэгч нэмж болно.}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"Хэрэглэгчийг устгах уу?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Энэ хэрэглэгчийн бүх апп болон мэдээлэл устах болно."</string>
-    <string name="user_remove_user_remove" msgid="8387386066949061256">"Арилгах"</string>
+    <string name="user_remove_user_remove" msgid="8387386066949061256">"Хасах"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>-тай бичлэг хийж эсвэл дамжуулж эхлэх үү?"</string>
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> нь бичлэг хийх эсвэл дамжуулах үед таны дэлгэцэд харуулсан эсвэл таны төхөөрөмжөөс тоглуулсан бүх мэдээлэлд хандах эрхтэй байна. Үүнд нууц үг, төлбөрийн дэлгэрэнгүй, зураг, мессеж болон таны тоглуулдаг аудио зэрэг мэдээлэл багтана."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Бичлэг хийж эсвэл дамжуулж эхлэх үү?"</string>
@@ -750,8 +753,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Шинэчилж байна"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Ажлын профайл"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Нислэгийн горим"</string>
-    <!-- no translation found for status_bar_supervision (6735015942701134125) -->
-    <skip />
+    <string name="status_bar_supervision" msgid="6735015942701134125">"Эцэг эхийн хяналт"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"<xliff:g id="WHEN">%1$s</xliff:g>-т та дараагийн сэрүүлгээ сонсохгүй"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> цагт"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>-т"</string>
@@ -802,6 +804,10 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Харилцан ярианы мэдэгдлийн дээд талд болон түгжигдсэн дэлгэц дээр профайл зураг байдлаар харуулах бөгөөд бөмбөлөг хэлбэрээр харагдана. Бүү саад бол горимыг тасалдуулна"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Чухал"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> нь харилцан ярианы онцлогуудыг дэмждэггүй"</string>
+    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
+    <skip />
+    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Эдгээр мэдэгдлийг өөрчлөх боломжгүй."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Дуудлагын мэдэгдлийг өөрчлөх боломжгүй."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Энэ бүлэг мэдэгдлийг энд тохируулах боломжгүй байна"</string>
@@ -883,7 +889,7 @@
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Аппуудын жагсаалтыг нээх"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Тохиргоог нээх"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Туслахыг нээх"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"Түгжээтэй дэлгэц"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Дэлгэц түгжих"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Тэмдэглэл хөтлөх"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Олон ажил зэрэг хийх"</string>
     <string name="system_multitasking_rhs" msgid="8779289852395243004">"Аппыг баруун талд байгаагаар дэлгэцийг хуваахыг ашиглах"</string>
@@ -912,6 +918,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Календарь"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Тооны машин"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Газрын зураг"</string>
+    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Бүү саад бол"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Дууны түвшний товчлуурын товчлол"</string>
     <string name="battery" msgid="769686279459897127">"Батарей"</string>
@@ -1432,8 +1448,7 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Системийн аппууд"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Олон ажил зэрэг хийх"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Дэлгэцийг хуваах"</string>
-    <!-- no translation found for shortcutHelper_category_accessibility (8068337792277570938) -->
-    <skip />
+    <string name="shortcutHelper_category_accessibility" msgid="8068337792277570938">"Хандалт"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Оролт"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Аппын товчлол"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Одоогийн апп"</string>
@@ -1497,11 +1512,11 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Та саяхны аппуудыг харах зангааг гүйцэтгэсэн."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Саяхны аппуудыг харахын тулд мэдрэгч самбар дээрээ гурван хуруугаараа дээш шудраад, удаан дарна уу"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"Апп сэлгэх"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2751565200937541667) -->
+    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
     <skip />
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"Үнэхээр сайн ажиллалаа!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"Та апп хооронд сэлгэх зангааг гүйцэтгэлээ."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5508381152326379652) -->
+    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
     <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Бүх аппыг харах"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Гар дээрх тусгай товчлуурыг дарна уу"</string>

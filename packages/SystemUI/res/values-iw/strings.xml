@@ -225,7 +225,7 @@
     <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"הפעולה הזו נדרשת כדי לשפר את האבטחה והביצועים"</string>
     <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"הגדרה חוזרת של \'ביטול הנעילה בטביעת אצבע\'"</string>
     <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"פתיחה בטביעת אצבע"</string>
-    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"הגדרת \'ביטול הנעילה בטביעת אצבע\'"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"הגדרת \"פתיחה בטביעת אצבע\""</string>
     <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"כדי להגדיר שוב את התכונה \'ביטול הנעילה בטביעת אצבע\', עליך למחוק את התבניות והמודלים הנוכחיים של טביעת האצבע.\n\nאחרי המחיקה יהיה צורך להגדיר שוב את \'ביטול הנעילה בטביעת אצבע\' כדי להשתמש בטביעת האצבע לביטול הנעילה של הטלפון ולאמת את זהותך."</string>
     <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"כדי להגדיר שוב את התכונה \'ביטול הנעילה בטביעת אצבע\', עליך למחוק את התבניות והמודל הנוכחיים של טביעת האצבע.\n\nאחרי המחיקה יהיה צורך להגדיר שוב את \'ביטול הנעילה בטביעת אצבע\' כדי להשתמש בטביעת האצבע לביטול הנעילה של הטלפון ולאמת את זהותך."</string>
     <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"לא ניתן להגדיר ביטול נעילה בטביעת אצבע. יש לעבור להגדרות כדי לנסות שוב."</string>
@@ -535,10 +535,13 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ווידג\'טים במסך הנעילה"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"כדי לפתוח אפליקציה באמצעות ווידג\'ט, עליך לאמת את זהותך. בנוסף, כדאי לזכור שכל אחד יכול לראות את הווידג\'טים גם כשהטאבלט שלך נעול. יכול להיות שחלק מהווידג\'טים לא נועדו למסך הנעילה ושלא בטוח להוסיף אותם לכאן."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"הבנתי"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"ווידג\'טים"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"כדי להוסיף את קיצור הדרך \"ווידג\'טים\", צריך לוודא שהאפשרות \"ווידג\'טים במסך הנעילה\" מופעלת בהגדרות."</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"הגדרות"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"כפתור להצגת שומר המסך"</string>
+    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
+    <skip />
+    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
+    <skip />
+    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"החלפת משתמש"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"תפריט במשיכה למטה"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"כל האפליקציות והנתונים בסשן הזה יימחקו."</string>
@@ -750,8 +753,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"מתבצע עדכון"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"פרופיל עבודה"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"מצב טיסה"</string>
-    <!-- no translation found for status_bar_supervision (6735015942701134125) -->
-    <skip />
+    <string name="status_bar_supervision" msgid="6735015942701134125">"אמצעי בקרת הורים"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"לא ניתן יהיה לשמוע את השעון המעורר הבא שלך <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"בשעה <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"ב-<xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -802,6 +804,10 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"מוצגת בחלק העליון של קטע התראות השיחה וכתמונת פרופיל במסך הנעילה, מופיעה בבועה צפה ומפריעה במצב \'נא לא להפריע\'"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"בעדיפות גבוהה"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> לא תומכת בתכונות השיחה"</string>
+    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
+    <skip />
+    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"לא ניתן לשנות את ההתראות האלה."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"לא ניתן לשנות את התראות השיחה."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"לא ניתן להגדיר כאן את קבוצת ההתראות הזו"</string>
@@ -912,6 +918,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"יומן"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"מחשבון"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"מפות"</string>
+    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"נא לא להפריע"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"קיצור דרך לכפתורי עוצמת קול"</string>
     <string name="battery" msgid="769686279459897127">"סוללה"</string>
@@ -1428,12 +1444,11 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"בשימוש על ידי <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"נעשה שימוש לאחרונה על ידי <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"מערכת"</string>
-    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"הגדרות המערכת"</string>
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"שליטה במערכת"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"אפליקציות מערכת"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"ריבוי משימות"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"מסך מפוצל"</string>
-    <!-- no translation found for shortcutHelper_category_accessibility (8068337792277570938) -->
-    <skip />
+    <string name="shortcutHelper_category_accessibility" msgid="8068337792277570938">"נגישות"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"קלט"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"מקשי קיצור לאפליקציות"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"האפליקציה הנוכחית"</string>
@@ -1478,8 +1493,7 @@
     <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"חזרה"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"חזרה לדף הבית"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"הצגת האפליקציות האחרונות"</string>
-    <!-- no translation found for touchpad_tutorial_switch_apps_gesture_button (7768255095423767779) -->
-    <skip />
+    <string name="touchpad_tutorial_switch_apps_gesture_button" msgid="7768255095423767779">"מעבר בין אפליקציות"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"סיום"</string>
     <string name="gesture_error_title" msgid="469064941635578511">"צריך לנסות שוב."</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"חזרה"</string>
@@ -1497,15 +1511,12 @@
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"מעולה!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"סיימת לתרגל את התנועה להצגת האפליקציות האחרונות."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"כדי לראות את האפליקציות האחרונות, צריך להחליק למעלה וללחוץ לחיצה ארוכה עם שלוש אצבעות על לוח המגע"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_action_title (6835222344612924512) -->
+    <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"מעבר בין אפליקציות"</string>
+    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
     <skip />
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2751565200937541667) -->
-    <skip />
-    <!-- no translation found for touchpad_switch_apps_gesture_success_title (4894947244328032458) -->
-    <skip />
-    <!-- no translation found for touchpad_switch_apps_gesture_success_body (8151089866035126312) -->
-    <skip />
-    <!-- no translation found for touchpad_switch_gesture_error_body (5508381152326379652) -->
+    <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"מעולה!"</string>
+    <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"השלמת את תנועת המעבר בין האפליקציות."</string>
+    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
     <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"צפייה בכל האפליקציות"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"צריך להקיש על מקש הפעולה במקלדת"</string>

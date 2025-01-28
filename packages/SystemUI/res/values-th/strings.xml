@@ -535,10 +535,10 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"วิดเจ็ตในหน้าจอล็อก"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"หากต้องการเปิดแอปโดยใช้วิดเจ็ต คุณจะต้องยืนยันตัวตนของคุณ นอกจากนี้ โปรดทราบว่าผู้อื่นจะดูวิดเจ็ตเหล่านี้ได้แม้ว่าแท็บเล็ตจะล็อกอยู่ก็ตาม วิดเจ็ตบางอย่างอาจไม่ได้มีไว้สำหรับหน้าจอล็อกของคุณ และอาจไม่ปลอดภัยที่จะเพิ่มที่นี่"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"รับทราบ"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"วิดเจ็ต"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"หากต้องการเพิ่มทางลัด \"วิดเจ็ต\" โปรดตรวจสอบว่าได้เปิดใช้ \"แสดงวิดเจ็ตในหน้าจอล็อก\" แล้วในการตั้งค่า"</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"การตั้งค่า"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"ปุ่มแสดงภาพพักหน้าจอ"</string>
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"สำรวจโหมดฮับ"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"เข้าถึงวิดเจ็ตและภาพพักหน้าจอโปรดขณะชาร์จ"</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"มาเริ่มกันเลย"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"สลับผู้ใช้"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"เมนูแบบเลื่อนลง"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ระบบจะลบแอปและข้อมูลทั้งหมดในเซสชันนี้"</string>
@@ -750,8 +750,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"กำลังอัปเดต"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"โปรไฟล์งาน"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"โหมดบนเครื่องบิน"</string>
-    <!-- no translation found for status_bar_supervision (6735015942701134125) -->
-    <skip />
+    <string name="status_bar_supervision" msgid="6735015942701134125">"การควบคุมโดยผู้ปกครอง"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"คุณจะไม่ได้ยินเสียงปลุกครั้งถัดไปในเวลา <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"เวลา <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"ในวันที่ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -802,6 +801,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"แสดงที่ด้านบนของการแจ้งเตือนการสนทนาและเป็นรูปโปรไฟล์บนหน้าจอล็อก ปรากฏเป็นบับเบิล แสดงในโหมดห้ามรบกวน"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"สำคัญ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ไม่รองรับฟีเจอร์การสนทนา"</string>
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"ปิด"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"ไม่ต้องแสดงอีก"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"แก้ไขการแจ้งเตือนเหล่านี้ไม่ได้"</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"แก้ไขการแจ้งเตือนสายเรียกเข้าไม่ได้"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"การแจ้งเตือนกลุ่มนี้กำหนดค่าที่นี่ไม่ได้"</string>
@@ -912,6 +913,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"ปฏิทิน"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"เครื่องคิดเลข"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"แผนที่"</string>
+    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ห้ามรบกวน"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ทางลัดปุ่มปรับระดับเสียง"</string>
     <string name="battery" msgid="769686279459897127">"แบตเตอรี่"</string>
@@ -1432,8 +1443,7 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"แอประบบ"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"การทํางานหลายอย่างพร้อมกัน"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"แยกหน้าจอ"</string>
-    <!-- no translation found for shortcutHelper_category_accessibility (8068337792277570938) -->
-    <skip />
+    <string name="shortcutHelper_category_accessibility" msgid="8068337792277570938">"การช่วยเหลือพิเศษ"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"อินพุต"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"แป้นพิมพ์ลัดของแอป"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"แอปปัจจุบัน"</string>
@@ -1497,12 +1507,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"คุณทำท่าทางสัมผัสเพื่อดูแอปล่าสุดสำเร็จแล้ว"</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"หากต้องการดูแอปล่าสุด ให้ใช้ 3 นิ้วปัดขึ้นแล้วค้างไว้บนทัชแพด"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"เปลี่ยนแอป"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2751565200937541667) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"ใช้ 4 นิ้วปัดไปทางขวาบนทัชแพด"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"เก่งมาก"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"คุณทำท่าทางสัมผัสเพื่อสลับแอปเสร็จแล้ว"</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5508381152326379652) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"ใช้ 4 นิ้วปัดไปทางขวาบนทัชแพดเพื่อเปลี่ยนแอป"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"ดูแอปทั้งหมด"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"กดปุ่มดำเนินการบนแป้นพิมพ์"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"ยอดเยี่ยม"</string>

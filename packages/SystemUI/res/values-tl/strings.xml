@@ -535,10 +535,10 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Mga widget ng lock screen"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Para magbukas ng app gamit ang isang widget, kakailanganin mong i-verify na ikaw iyan. Bukod pa rito, tandaang puwedeng tingnan ng kahit na sino ang mga ito, kahit na naka-lock ang iyong tablet. Posibleng hindi para sa iyong lock screen ang ilang widget at posibleng hindi ligtas ang mga ito na idagdag dito."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Mga Widget"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Para idagdag ang shortcut na \"Mga Widget,\" tiyaking naka-enable ang \"Ipakita ang mga widget sa lock screen\" sa mga setting."</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Mga Setting"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Button na ipakita ang screensaver"</string>
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"I-explore ang hub mode"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"I-access ang mga paborito mong widget at screen saver habang nagcha-charge."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Tara na"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Magpalit ng user"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"pulldown menu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Ide-delete ang lahat ng app at data sa session na ito."</string>
@@ -750,8 +750,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Ina-update"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Profile sa trabaho"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Airplane mode"</string>
-    <!-- no translation found for status_bar_supervision (6735015942701134125) -->
-    <skip />
+    <string name="status_bar_supervision" msgid="6735015942701134125">"Parental controls"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Hindi mo maririnig ang iyong susunod na alarm ng <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"ng <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"sa <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -802,6 +801,10 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Makikita sa itaas ng mga notification ng pag-uusap at bilang larawan sa profile sa lock screen, lumalabas bilang bubble, naaabala ang Huwag Istorbohin"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priyoridad"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Hindi sinusuportahan ng <xliff:g id="APP_NAME">%1$s</xliff:g> ang mga feature ng pag-uusap"</string>
+    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
+    <skip />
+    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Hindi puwedeng baguhin ang mga notification na ito."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Hindi mabago ang mga notification ng tawag."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Hindi mako-configure dito ang pangkat na ito ng mga notification"</string>
@@ -912,6 +915,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Calculator"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Mga mapa"</string>
+    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Huwag Istorbohin"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Shortcut ng mga button ng volume"</string>
     <string name="battery" msgid="769686279459897127">"Baterya"</string>
@@ -1432,8 +1445,7 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Mga system app"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Pag-multitask"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Split screen"</string>
-    <!-- no translation found for shortcutHelper_category_accessibility (8068337792277570938) -->
-    <skip />
+    <string name="shortcutHelper_category_accessibility" msgid="8068337792277570938">"Accessibility"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Input"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Mga shortcut ng app"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Kasalukuyang App"</string>
@@ -1497,12 +1509,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Nakumpleto mo ang galaw sa pag-view ng mga kamakailang app."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Para tingnan ang mga kamakailang app, mag-swipe pataas at i-hold gamit ang tatlong daliri sa iyong touchpad"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"Lumipat ng app"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2751565200937541667) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"Mag-swipe pakanan gamit ang apat na daliri sa iyong touchpad"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"Magaling!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"Nakumpleto mo na ang galaw para magpalipat-lipat sa mga app."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5508381152326379652) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"Mag-swipe pakanan gamit ang apat na daliri sa iyong touchpad para lumipat ng app"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Tingnan ang lahat ng app"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Pindutin ang action key sa iyong keyboard"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Magaling!"</string>

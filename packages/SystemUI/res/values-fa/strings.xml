@@ -535,10 +535,10 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ابزاره‌های صفحه قفل"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"برای باز کردن برنامه بااستفاده از ابزاره، باید هویت خودتان را به‌تأیید برسانید. همچنین، به‌خاطر داشته باشید که همه می‌توانند آن‌ها را مشاهده کنند، حتی وقتی رایانه لوحی‌تان قفل است. برخی‌از ابزاره‌ها ممکن است برای صفحه قفل درنظر گرفته نشده باشند و ممکن است اضافه کردن آن‌ها در اینجا ناامن باشد."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"متوجهم"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"ابزاره‌ها"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"برای افزودن میان‌بر «ابزاره‌ها»، مطمئن شوید «نمایش ابزاره‌ها در صفحه قفل» در تنظیمات فعال باشد."</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"تنظیمات"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"دکمه نمایش دادن محافظ صفحه‌نمایش"</string>
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"کاوش کردن حالت متصل"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"در حین شارژ، به ابزاره‌ها و محافظ‌های صفحه‌نمایش دلخواهتان دسترسی داشته باشید."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"بیایید شروع کنیم"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"تغییر کاربر"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"منوی پایین‌پر"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"همه برنامه‌ها و داده‌های این جلسه حذف خواهد شد."</string>
@@ -750,8 +750,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"درحال به‌روزرسانی"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"نمایه کاری"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"حالت هواپیما"</string>
-    <!-- no translation found for status_bar_supervision (6735015942701134125) -->
-    <skip />
+    <string name="status_bar_supervision" msgid="6735015942701134125">"کنترل‌های والدین"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"در ساعت <xliff:g id="WHEN">%1$s</xliff:g>، دیگر صدای زنگ ساعت را نمی‌شنوید"</string>
     <string name="alarm_template" msgid="2234991538018805736">"در <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"در <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -802,6 +801,10 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"در بالای اعلان‌های مکالمه و به‌صورت عکس نمایه در صفحه قفل نشان داده می‌شود، به‌صورت حبابک ظاهر می‌شود، در حالت «مزاحم نشوید» وقفه ایجاد می‌کند"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"اولویت"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> از ویژگی‌های مکالمه پشتیبانی نمی‌کند"</string>
+    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
+    <skip />
+    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"این اعلان‌ها قابل اصلاح نیستند."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"این اعلان‌ها قابل‌اصلاح نیستند."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"نمی‌توانید این گروه اعلان‌ها را در اینجا پیکربندی کنید"</string>
@@ -912,6 +915,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"تقویم"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"ماشین‌حساب"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
+    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
+    <skip />
+    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"مزاحم نشوید"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"میان‌بر دکمه‌های صدا"</string>
     <string name="battery" msgid="769686279459897127">"باتری"</string>
@@ -1432,8 +1445,7 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"برنامه‌های سیستم"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"چندوظیفگی"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"صفحهٔ دونیمه"</string>
-    <!-- no translation found for shortcutHelper_category_accessibility (8068337792277570938) -->
-    <skip />
+    <string name="shortcutHelper_category_accessibility" msgid="8068337792277570938">"دسترس‌پذیری"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ورودی"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"میان‌برهای برنامه"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"برنامه فعلی"</string>
@@ -1497,12 +1509,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"اشاره «مشاهده برنامه‌های اخیر» را تمام کردید"</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"برای مشاهده برنامه‌های اخیر، با سه انگشت روی صفحه لمسی تند به‌بالا بکشید و نگه دارید"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"جابه‌جایی بین برنامه‌ها"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2751565200937541667) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"با چهار انگشت روی صفحه لمسی تند به چپ بکشید"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"عالی است!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"اشاره جابه‌جایی بین برنامه‌ها را تکمیل کردید."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5508381152326379652) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"برای جابه‌جا شدن بین برنامه‌ها، با چهار انگشت روی صفحه لمسی تند به چپ بکشید"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"مشاهده همه برنامه‌ها"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"دکمه کنش را روی صفحه لمسی فشار دهید"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"عالی بود!"</string>
