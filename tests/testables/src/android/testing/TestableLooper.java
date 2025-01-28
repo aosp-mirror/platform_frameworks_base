@@ -16,13 +16,11 @@ package android.testing;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.Instrumentation;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
-import android.os.SystemClock;
 import android.os.TestLooperManager;
 import android.util.ArrayMap;
 
@@ -34,7 +32,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.LinkedList;
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -58,6 +56,9 @@ public class TestableLooper {
      * catch crashes.
      */
     public static final boolean HOLD_MAIN_THREAD = false;
+    private static final Field MESSAGE_QUEUE_MESSAGES_FIELD;
+    private static final Field MESSAGE_NEXT_FIELD;
+    private static final Field MESSAGE_WHEN_FIELD;
 
     private Looper mLooper;
     private MessageQueue mQueue;
@@ -65,6 +66,19 @@ public class TestableLooper {
 
     private Handler mHandler;
     private TestLooperManager mQueueWrapper;
+
+    static {
+        try {
+            MESSAGE_QUEUE_MESSAGES_FIELD = MessageQueue.class.getDeclaredField("mMessages");
+            MESSAGE_QUEUE_MESSAGES_FIELD.setAccessible(true);
+            MESSAGE_NEXT_FIELD = Message.class.getDeclaredField("next");
+            MESSAGE_NEXT_FIELD.setAccessible(true);
+            MESSAGE_WHEN_FIELD = Message.class.getDeclaredField("when");
+            MESSAGE_WHEN_FIELD.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException("Failed to initialize TestableLooper", e);
+        }
+    }
 
     public TestableLooper(Looper l) throws Exception {
         this(acquireLooperManager(l), l);
@@ -208,17 +222,29 @@ public class TestableLooper {
     }
 
     public void moveTimeForward(long milliSeconds) {
-        long futureWhen = SystemClock.uptimeMillis() + milliSeconds;
-        // Find messages in the queue enqueued within the future time, and execute them now.
-        while (true) {
-            Long peekWhen = mQueueWrapper.peekWhen();
-            if (peekWhen == null || peekWhen > futureWhen) {
-                break;
+        try {
+            Message msg = getMessageLinkedList();
+            while (msg != null) {
+                long updatedWhen = msg.getWhen() - milliSeconds;
+                if (updatedWhen < 0) {
+                    updatedWhen = 0;
+                }
+                MESSAGE_WHEN_FIELD.set(msg, updatedWhen);
+                msg = (Message) MESSAGE_NEXT_FIELD.get(msg);
             }
-            Message message = mQueueWrapper.poll();
-            if (message != null) {
-                mQueueWrapper.execute(message);
-            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Access failed in TestableLooper: set - Message.when", e);
+        }
+    }
+
+    private Message getMessageLinkedList() {
+        try {
+            MessageQueue queue = mLooper.getQueue();
+            return (Message) MESSAGE_QUEUE_MESSAGES_FIELD.get(queue);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(
+                    "Access failed in TestableLooper: get - MessageQueue.mMessages",
+                    e);
         }
     }
 
