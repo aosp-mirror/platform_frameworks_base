@@ -19,6 +19,7 @@ package android.app.ondeviceintelligence;
 import static android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE;
 
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.DurationMillisLong;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
@@ -50,8 +51,9 @@ public final class InferenceInfo implements Parcelable {
      */
     private final long endTimeMs;
 
-    /**
-     * Suspended time in milliseconds.
+   /**
+     * The total duration of the period(s) during which the inference was
+     * suspended (i.e. not running), in milliseconds.
      */
     private final long suspendedTimeMs;
 
@@ -61,7 +63,7 @@ public final class InferenceInfo implements Parcelable {
      * @param uid             Uid for the caller app.
      * @param startTimeMs     Inference start time (milliseconds from the epoch time).
      * @param endTimeMs       Inference end time (milliseconds from the epoch time).
-     * @param suspendedTimeMs Suspended time in milliseconds.
+     * @param suspendedTimeMs Suspended duration, in milliseconds.
      */
     InferenceInfo(int uid, long startTimeMs, long endTimeMs,
             long suspendedTimeMs) {
@@ -128,11 +130,12 @@ public final class InferenceInfo implements Parcelable {
     }
 
     /**
-     * Returns the suspended time in milliseconds.
+     * Returns the suspended duration, in milliseconds.
      *
-     * @return the suspended time in milliseconds.
+     * @return the total duration of the period(s) during which the inference
+     *         was suspended (i.e. not running), in milliseconds.
      */
-    @CurrentTimeMillisLong
+    @DurationMillisLong
     public long getSuspendedTimeMillis() {
         return suspendedTimeMs;
     }
@@ -197,12 +200,14 @@ public final class InferenceInfo implements Parcelable {
         }
 
         /**
-         * Sets the suspended time in milliseconds.
+         * Sets the suspended duration, in milliseconds.
          *
-         * @param suspendedTimeMs the suspended time in milliseconds.
+         * @param suspendedTimeMs the total duration of the period(s) in which
+         *                        the request was suspended (i.e. not running),
+        *                         in milliseconds.
          * @return the Builder instance.
          */
-        public @NonNull Builder setSuspendedTimeMillis(@CurrentTimeMillisLong long suspendedTimeMs) {
+        public @NonNull Builder setSuspendedTimeMillis(@DurationMillisLong long suspendedTimeMs) {
             this.suspendedTimeMs = suspendedTimeMs;
             return this;
         }
