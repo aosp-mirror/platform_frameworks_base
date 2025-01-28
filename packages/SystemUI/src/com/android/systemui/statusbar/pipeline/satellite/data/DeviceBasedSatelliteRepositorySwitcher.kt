@@ -27,7 +27,6 @@ import com.android.systemui.statusbar.pipeline.satellite.shared.model.SatelliteC
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -51,7 +50,6 @@ import kotlinx.coroutines.flow.stateIn
  * DemoRepository
  * ```
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class DeviceBasedSatelliteRepositorySwitcher
 @Inject

@@ -29,7 +29,6 @@ import com.android.systemui.util.kotlin.FlowDumperImpl
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.combineTransform
@@ -44,7 +43,6 @@ import kotlinx.coroutines.flow.onStart
  * particular, there are extra guards for whether device entry error and successes haptics should
  * play when the physical fingerprint sensor is located on the power button.
  */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class DeviceEntryHapticsInteractor
 @Inject

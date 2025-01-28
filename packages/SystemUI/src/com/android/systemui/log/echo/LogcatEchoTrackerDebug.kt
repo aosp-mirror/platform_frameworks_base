@@ -26,7 +26,6 @@ import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
@@ -39,7 +38,6 @@ import com.android.app.tracing.coroutines.launchTraced as launch
  * Note that some log messages may fail to be echoed while the systemui process is first starting
  * up, before we load the echo settings.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class LogcatEchoTrackerDebug
 @Inject
 constructor(

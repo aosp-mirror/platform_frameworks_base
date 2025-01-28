@@ -27,7 +27,6 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shared.recents.utilities.Utilities.clamp
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
@@ -37,7 +36,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
 /** Models the UI state for the UDFPS icon view in the alternate bouncer view. */
-@ExperimentalCoroutinesApi
 class AlternateBouncerUdfpsIconViewModel
 @Inject
 constructor(

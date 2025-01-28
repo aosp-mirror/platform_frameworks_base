@@ -15,10 +15,8 @@ import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
 import com.android.systemui.statusbar.phone.BiometricUnlockController.WakeAndUnlockMode
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.StateFlow
 
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class BiometricUnlockInteractor
 @Inject

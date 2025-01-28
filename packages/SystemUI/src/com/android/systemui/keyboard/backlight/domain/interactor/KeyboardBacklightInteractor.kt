@@ -21,7 +21,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyboard.data.repository.KeyboardRepository
 import com.android.systemui.keyboard.shared.model.BacklightModel
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -35,7 +34,6 @@ constructor(
 ) {
 
     /** Emits current backlight level as [BacklightModel] or null if keyboard is not connected */
-    @ExperimentalCoroutinesApi
     val backlight: Flow<BacklightModel?> =
         keyboardRepository.isAnyKeyboardConnected.flatMapLatest { connected ->
             if (connected) keyboardRepository.backlight else flowOf(null)

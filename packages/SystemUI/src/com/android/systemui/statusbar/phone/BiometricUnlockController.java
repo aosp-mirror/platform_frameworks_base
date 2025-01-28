@@ -71,8 +71,6 @@ import com.android.systemui.util.time.SystemClock;
 
 import dagger.Lazy;
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi;
-
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -86,7 +84,6 @@ import javax.inject.Inject;
 /**
  * Controller which coordinates all the biometric unlocking actions with the UI.
  */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 public class BiometricUnlockController extends KeyguardUpdateMonitorCallback implements Dumpable {
     private static final long BIOMETRIC_WAKELOCK_TIMEOUT_MS = 15 * 1000;

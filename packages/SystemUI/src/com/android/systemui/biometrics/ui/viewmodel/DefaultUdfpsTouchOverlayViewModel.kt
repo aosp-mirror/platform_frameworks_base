@@ -20,7 +20,6 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.hideAffordancesRequest
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
@@ -31,7 +30,6 @@ import kotlinx.coroutines.flow.combine
  * - shade is fully or partially expanded
  * - any SysUI dialogs are obscuring the display
  */
-@ExperimentalCoroutinesApi
 class DefaultUdfpsTouchOverlayViewModel
 @Inject
 constructor(

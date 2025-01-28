@@ -94,14 +94,12 @@ import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 
 import kotlinx.coroutines.CoroutineDispatcher;
-import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 import java.util.concurrent.Executor;
 
 /**
  * Dagger Module providing keyguard.
  */
-@ExperimentalCoroutinesApi
 @Module(subcomponents = {
         KeyguardQsUserSwitchComponent.class,
         KeyguardStatusBarViewComponent.class},

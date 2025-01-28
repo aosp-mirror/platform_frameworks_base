@@ -27,7 +27,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.emptyFlow
@@ -63,7 +62,6 @@ interface AudioSharingInteractor {
 }
 
 @SysUISingleton
-@OptIn(ExperimentalCoroutinesApi::class)
 open class AudioSharingInteractorImpl
 @Inject
 constructor(

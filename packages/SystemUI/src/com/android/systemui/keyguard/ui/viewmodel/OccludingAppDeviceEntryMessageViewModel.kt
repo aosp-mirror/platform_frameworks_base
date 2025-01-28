@@ -21,11 +21,9 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.OccludingAppDeviceEntryInteractor
 import com.android.systemui.deviceentry.shared.model.BiometricMessage
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
 /** Shows authentication messages over occcluding apps over the lockscreen. */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class OccludingAppDeviceEntryMessageViewModel
 @Inject

@@ -48,7 +48,6 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -127,7 +126,6 @@ constructor(
             mapOf(BACK to back, HOME to home, OVERVIEW to overview, ALL_APPS to allApps)
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun start() {
         backgroundScope.launch {
             contextualEducationInteractor.eduDeviceConnectionTimeFlow

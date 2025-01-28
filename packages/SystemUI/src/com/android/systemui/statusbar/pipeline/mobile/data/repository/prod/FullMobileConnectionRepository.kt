@@ -28,7 +28,6 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConn
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -46,7 +45,6 @@ import kotlinx.coroutines.flow.stateIn
  * carrier merged (see [setIsCarrierMerged]).
  */
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-@OptIn(ExperimentalCoroutinesApi::class)
 class FullMobileConnectionRepository(
     override val subId: Int,
     startingIsCarrierMerged: Boolean,

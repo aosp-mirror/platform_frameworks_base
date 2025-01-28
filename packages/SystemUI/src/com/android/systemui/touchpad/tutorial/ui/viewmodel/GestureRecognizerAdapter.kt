@@ -25,7 +25,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.util.function.Consumer
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -43,7 +42,6 @@ constructor(
 
     private var gestureRecognizer: GestureRecognizer? = null
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val gestureState: Flow<GestureState> =
         provider.recognizer.flatMapLatest {
             gestureRecognizer = it

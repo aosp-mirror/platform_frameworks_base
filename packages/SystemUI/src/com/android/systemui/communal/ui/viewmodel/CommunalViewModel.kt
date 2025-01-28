@@ -53,7 +53,6 @@ import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
@@ -73,7 +72,6 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
 /** The default view model used for showing the communal hub. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class CommunalViewModel
 @Inject
@@ -136,7 +134,6 @@ constructor(
             }
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val latestCommunalContent: Flow<List<CommunalContentModel>> =
         tutorialInteractor.isTutorialAvailable
             .flatMapLatest { isTutorialMode ->

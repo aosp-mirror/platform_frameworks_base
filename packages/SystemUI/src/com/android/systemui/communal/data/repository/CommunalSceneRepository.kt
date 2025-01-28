@@ -27,7 +27,6 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.scene.shared.model.SceneDataSource
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -61,7 +60,6 @@ interface CommunalSceneRepository {
     fun setTransitionState(transitionState: Flow<ObservableTransitionState>?)
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class CommunalSceneRepositoryImpl
 @Inject

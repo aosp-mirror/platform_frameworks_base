@@ -40,7 +40,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoSet
 import dagger.multibindings.Multibinds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * Base module that defines the [PrimaryBouncerTransition] multibinding. All variants of SystemUI
@@ -70,7 +69,6 @@ interface PrimaryBouncerTransitionModule {
  * Module that installs all the implementations of [PrimaryBouncerTransition] from different
  * keyguard states to and away from the primary bouncer.
  */
-@ExperimentalCoroutinesApi
 @Module
 interface PrimaryBouncerTransitionImplModule {
     @Binds

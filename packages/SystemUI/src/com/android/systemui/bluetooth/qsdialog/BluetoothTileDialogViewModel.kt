@@ -87,7 +87,6 @@ constructor(
      *
      * @param view The view from which the dialog is shown.
      */
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun showDialog(expandable: Expandable?) {
         cancelJob()
 

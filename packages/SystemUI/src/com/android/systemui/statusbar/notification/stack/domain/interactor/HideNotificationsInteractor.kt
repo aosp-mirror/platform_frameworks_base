@@ -30,7 +30,6 @@ import com.android.systemui.util.kotlin.area
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.race
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -41,7 +40,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withTimeout
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class HideNotificationsInteractor
 @Inject

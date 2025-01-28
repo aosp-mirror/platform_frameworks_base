@@ -26,7 +26,6 @@ import com.android.systemui.volume.dialog.sliders.shared.model.SliderInputEvent
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.sign
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -38,7 +37,6 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.transform
 
 @VolumeDialogSliderScope
-@OptIn(ExperimentalCoroutinesApi::class)
 class VolumeDialogOverscrollViewModel
 @Inject
 constructor(

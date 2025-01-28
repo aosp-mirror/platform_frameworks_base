@@ -55,10 +55,8 @@ import java.util.Optional
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Binds keyguard views on startup, and also exposes methods to allow rebinding if views change */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class KeyguardViewConfigurator
 @Inject

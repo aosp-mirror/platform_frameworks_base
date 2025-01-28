@@ -38,7 +38,6 @@ import com.android.systemui.wallet.controller.QuickAccessWalletController
 import com.android.systemui.wallet.util.getPaymentCards
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -63,7 +62,6 @@ constructor(
 
     override val pickerIconResourceId = R.drawable.ic_wallet_lockscreen
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState> =
         conflatedCallbackFlow {
                 val callback =

@@ -46,7 +46,6 @@ import java.time.Duration
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.flow.filter
@@ -81,7 +80,6 @@ constructor(
     private val isAodEnabled: Boolean
         get() = keyguardInteractor.isAodAvailable.value
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun start() {
         if (!isDeviceFoldable(context.resources, deviceStateManager)) {
             return

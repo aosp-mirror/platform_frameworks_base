@@ -39,14 +39,12 @@ import com.android.systemui.keyguard.domain.interactor.DeviceEntrySideFpsOverlay
 import com.android.systemui.res.R
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 /** Models UI of the side fingerprint sensor indicator view. */
-@OptIn(ExperimentalCoroutinesApi::class)
 class SideFpsOverlayViewModel
 @Inject
 constructor(

@@ -153,7 +153,6 @@ import com.android.systemui.res.R
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 
 object TileType
@@ -293,7 +292,6 @@ fun DefaultEditTileGrid(
     }
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 private fun AutoScrollGrid(
     listState: EditTileListState,

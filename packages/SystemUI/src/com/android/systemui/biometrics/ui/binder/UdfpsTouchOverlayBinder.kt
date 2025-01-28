@@ -24,10 +24,8 @@ import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.biometrics.ui.view.UdfpsTouchOverlay
 import com.android.systemui.biometrics.ui.viewmodel.UdfpsTouchOverlayViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import com.android.app.tracing.coroutines.launchTraced as launch
 
-@ExperimentalCoroutinesApi
 object UdfpsTouchOverlayBinder {
 
     /**

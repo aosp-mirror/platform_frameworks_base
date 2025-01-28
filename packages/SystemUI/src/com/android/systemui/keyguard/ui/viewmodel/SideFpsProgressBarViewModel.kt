@@ -45,7 +45,6 @@ import com.android.systemui.statusbar.phone.DozeServiceHost
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -62,7 +61,6 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onCompletion
 import com.android.app.tracing.coroutines.launchTraced as launch
 
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class SideFpsProgressBarViewModel
 @Inject

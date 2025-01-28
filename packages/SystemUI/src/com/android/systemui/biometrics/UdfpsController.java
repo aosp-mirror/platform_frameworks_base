@@ -61,7 +61,6 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.OptIn;
 
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.R;
@@ -113,7 +112,6 @@ import dagger.Lazy;
 import kotlin.Unit;
 
 import kotlinx.coroutines.CoroutineScope;
-import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -264,7 +262,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     }
 
     public class UdfpsOverlayController extends IUdfpsOverlayController.Stub {
-        @OptIn(markerClass = ExperimentalCoroutinesApi.class)
         @Override
         public void showUdfpsOverlay(long requestId, int sensorId, int reason,
                 @NonNull IUdfpsOverlayControllerCallback callback) {

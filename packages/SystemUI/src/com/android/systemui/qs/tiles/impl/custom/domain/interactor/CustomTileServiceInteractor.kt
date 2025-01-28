@@ -36,7 +36,6 @@ import com.android.systemui.user.data.repository.UserRepository
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.produce
@@ -49,7 +48,6 @@ import com.android.app.tracing.coroutines.launchTraced as launch
  * Communicates with [TileService] via [TileServiceManager] and [IQSTileService]. This interactor is
  * also responsible for the binding to the [TileService].
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @QSTileScope
 class CustomTileServiceInteractor
 @Inject

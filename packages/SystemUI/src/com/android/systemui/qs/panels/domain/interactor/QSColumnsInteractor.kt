@@ -23,7 +23,6 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -37,7 +36,6 @@ constructor(
     repo: QSColumnsRepository,
     shadeInteractor: ShadeInteractor,
 ) {
-    @OptIn(ExperimentalCoroutinesApi::class)
     val columns: StateFlow<Int> =
         shadeInteractor.shadeMode
             .flatMapLatest {

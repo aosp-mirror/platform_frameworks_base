@@ -33,7 +33,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
-@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class SelectedComponentRepositoryImpl
 @Inject

@@ -49,10 +49,8 @@ import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Includes the device entry icon. */
-@ExperimentalCoroutinesApi
 class DefaultDeviceEntrySection
 @Inject
 constructor(

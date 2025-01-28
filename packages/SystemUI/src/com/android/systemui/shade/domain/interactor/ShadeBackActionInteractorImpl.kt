@@ -22,10 +22,8 @@ import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Implementation of ShadeBackActionInteractor backed by scenes. */
-@OptIn(ExperimentalCoroutinesApi::class)
 class ShadeBackActionInteractorImpl
 @Inject
 constructor(

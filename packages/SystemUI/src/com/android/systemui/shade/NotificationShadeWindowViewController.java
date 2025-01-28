@@ -87,7 +87,6 @@ import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.window.ui.WindowRootViewBinder;
 import com.android.systemui.window.ui.viewmodel.WindowRootViewModel;
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi;
 import kotlinx.coroutines.flow.Flow;
 
 import java.io.PrintWriter;
@@ -165,7 +164,6 @@ public class NotificationShadeWindowViewController implements Dumpable {
             };
     private final SystemClock mClock;
 
-    @ExperimentalCoroutinesApi
     @Inject
     public NotificationShadeWindowViewController(
             BlurUtils blurUtils,

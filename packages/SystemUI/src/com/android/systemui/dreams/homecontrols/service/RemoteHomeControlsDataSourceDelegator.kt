@@ -30,7 +30,6 @@ import com.android.systemui.util.service.ObservableServiceConnection
 import com.android.systemui.util.service.PersistentConnectionManager
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -45,7 +44,6 @@ import kotlinx.coroutines.flow.onEach
  * Queries a remote service for [HomeControlsComponentInfo] necessary to show the home controls
  * dream.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class RemoteHomeControlsDataSourceDelegator
 @Inject

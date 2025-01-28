@@ -43,7 +43,6 @@ import com.android.systemui.volume.dialog.ui.utils.suspendAnimate
 import javax.inject.Inject
 import kotlin.properties.Delegates
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
@@ -54,7 +53,6 @@ private const val CLOSE_DRAWER_DELAY = 300L
 // Ensure roundness and color of button is updated when progress is changed by a minimum fraction.
 private const val BUTTON_MIN_VISIBLE_CHANGE = 0.05F
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @VolumeDialogScope
 class VolumeDialogRingerViewBinder
 @Inject

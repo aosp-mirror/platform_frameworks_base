@@ -31,7 +31,6 @@ import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.screenrecord.domain.model.ScreenRecordChipModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -43,7 +42,6 @@ import kotlinx.coroutines.launch
 
 /** Interactor for the screen recording chip shown in the status bar. */
 @SysUISingleton
-@OptIn(ExperimentalCoroutinesApi::class)
 class ScreenRecordChipInteractor
 @Inject
 constructor(

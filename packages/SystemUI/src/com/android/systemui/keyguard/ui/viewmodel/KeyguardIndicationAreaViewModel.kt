@@ -33,7 +33,6 @@ import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -75,7 +74,6 @@ constructor(
             }
             .distinctUntilChanged()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val burnIn: Flow<BurnInModel> =
         combine(
                 burnInInteractor.burnIn(

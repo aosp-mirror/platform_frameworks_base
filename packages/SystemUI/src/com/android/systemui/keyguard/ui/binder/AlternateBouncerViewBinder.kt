@@ -47,7 +47,6 @@ import com.android.systemui.scrim.ScrimView
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * When necessary, adds the alternate bouncer window above most other windows (including the
@@ -56,7 +55,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
  *
  * For devices that support UDFPS, this view includes a UDFPS view.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class AlternateBouncerViewBinder
 @Inject

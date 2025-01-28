@@ -20,7 +20,6 @@ import android.annotation.SuppressLint
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -41,7 +40,6 @@ import com.android.app.tracing.coroutines.launchTraced as launch
  * this class helps us immediately hide the chip as soon as the user clicks "Stop" in the dialog.
  * See b/353249803#comment4.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class ChipTransitionHelper(@Application private val scope: CoroutineScope) {
     /** A flow that emits each time the user has clicked "Stop" on the dialog. */
     @SuppressLint("SharedFlowCreation")

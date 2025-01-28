@@ -33,7 +33,6 @@ import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
@@ -44,7 +43,6 @@ import kotlinx.coroutines.flow.merge
  * Breaks down OCCLUDED->LOCKSCREEN transition into discrete steps for corresponding views to
  * consume.
  */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class OccludedToLockscreenTransitionViewModel
 @Inject

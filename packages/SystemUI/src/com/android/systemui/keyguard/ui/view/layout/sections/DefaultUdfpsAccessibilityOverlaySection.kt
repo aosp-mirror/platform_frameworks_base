@@ -27,10 +27,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Positions the UDFPS accessibility overlay on the bottom half of the keyguard. */
-@ExperimentalCoroutinesApi
 class DefaultUdfpsAccessibilityOverlaySection
 @Inject
 constructor(

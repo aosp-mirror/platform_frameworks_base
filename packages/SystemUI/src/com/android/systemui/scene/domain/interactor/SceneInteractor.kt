@@ -35,7 +35,6 @@ import com.android.systemui.scene.shared.model.Scenes
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -56,7 +55,6 @@ import kotlinx.coroutines.flow.update
  * other feature modules should depend on and call into this class when their parts of the
  * application state change.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class SceneInteractor
 @Inject
@@ -149,7 +147,6 @@ constructor(
      * their finger to transition between scenes, this value will be true while their finger is on
      * the screen, then false for the rest of the transition.
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
     val isTransitionUserInputOngoing: StateFlow<Boolean> =
         transitionState
             .flatMapLatest {

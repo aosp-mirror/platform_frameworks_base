@@ -27,7 +27,6 @@ import com.android.systemui.res.R
 import com.android.systemui.retail.data.repository.RetailModeRepository
 import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -87,7 +86,6 @@ interface TileSpecRepository {
  * If the device is in retail mode, the tiles are fixed to the value of
  * [R.string.quick_settings_tiles_retail_mode].
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class TileSpecSettingsRepository
 @Inject

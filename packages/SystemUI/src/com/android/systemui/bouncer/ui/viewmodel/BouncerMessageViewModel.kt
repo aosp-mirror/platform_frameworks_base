@@ -48,7 +48,6 @@ import dagger.assisted.AssistedInject
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
@@ -64,7 +63,6 @@ import kotlinx.coroutines.flow.map
 import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Holds UI state for the 2-line status message shown on the bouncer. */
-@OptIn(ExperimentalCoroutinesApi::class)
 class BouncerMessageViewModel
 @AssistedInject
 constructor(

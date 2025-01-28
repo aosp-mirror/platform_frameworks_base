@@ -27,7 +27,6 @@ import com.android.systemui.statusbar.notification.shared.ActiveNotificationMode
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -45,7 +44,6 @@ import kotlinx.coroutines.flow.map
  *
  * @property creationTime the time when the notification first appeared as promoted.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class SingleNotificationChipInteractor
 @AssistedInject
 constructor(

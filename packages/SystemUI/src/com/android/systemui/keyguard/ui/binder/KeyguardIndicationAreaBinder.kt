@@ -30,7 +30,6 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.util.kotlin.DisposableHandles
 import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
@@ -43,7 +42,6 @@ import kotlinx.coroutines.flow.map
  * view-binding, binding each view only once. It is okay and expected for the same instance of the
  * view-model to be reused for multiple view/view-binder bindings.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 object KeyguardIndicationAreaBinder {
 
     /** Binds the view to the view-model, continuing to update the former based on the latter. */
