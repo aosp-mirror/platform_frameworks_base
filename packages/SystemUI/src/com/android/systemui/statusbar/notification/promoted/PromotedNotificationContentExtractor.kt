@@ -26,9 +26,11 @@ import android.app.Notification.EXTRA_TEXT
 import android.app.Notification.EXTRA_TITLE
 import android.app.Notification.ProgressStyle
 import android.content.Context
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.promoted.AutomaticPromotionCoordinator.Companion.EXTRA_AUTOMATICALLY_EXTRACTED_SHORT_CRITICAL_TEXT
 import com.android.systemui.statusbar.notification.promoted.AutomaticPromotionCoordinator.Companion.EXTRA_WAS_AUTOMATICALLY_PROMOTED
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.Companion.isPromotedForStatusBarChip
@@ -113,7 +115,13 @@ private fun Notification.shortCriticalText(): String? {
     if (!android.app.Flags.apiRichOngoing()) {
         return null
     }
-    return this.shortCriticalText
+    if (this.shortCriticalText != null) {
+        return this.shortCriticalText
+    }
+    if (Flags.promoteNotificationsAutomatically()) {
+        return this.extras?.getString(EXTRA_AUTOMATICALLY_EXTRACTED_SHORT_CRITICAL_TEXT)
+    }
+    return null
 }
 
 private fun Notification.chronometerCountDown(): Boolean =
