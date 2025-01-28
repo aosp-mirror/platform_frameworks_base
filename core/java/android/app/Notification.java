@@ -4426,8 +4426,7 @@ public class Notification implements Parcelable
      * notification) out of the actions in this notification.
      */
     public @NonNull List<Notification.Action> getContextualActions() {
-        if (actions == null) return Collections.emptyList();
-
+        if (actions == null || isPromotedOngoing()) return Collections.emptyList();
         List<Notification.Action> contextualActions = new ArrayList<>();
         for (Notification.Action action : actions) {
             if (action.isContextual()) {
