@@ -26,6 +26,7 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.res.R
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.promoted.AODPromotedNotification
 import com.android.systemui.statusbar.notification.promoted.PromotedNotificationLogger
 import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUiAod
@@ -36,6 +37,7 @@ class AodPromotedNotificationSection
 @Inject
 constructor(
     private val viewModelFactory: AODPromotedNotificationViewModel.Factory,
+    private val shadeInteractor: ShadeInteractor,
     private val logger: PromotedNotificationLogger,
 ) : KeyguardSection() {
     var view: ComposeView? = null
@@ -77,9 +79,12 @@ constructor(
         checkNotNull(view)
 
         constraintSet.apply {
+            val isShadeLayoutWide = shadeInteractor.isShadeLayoutWide.value
+            val endGuidelineId = if (isShadeLayoutWide) R.id.split_shade_guideline else PARENT_ID
+
             connect(viewId, TOP, R.id.smart_space_barrier_bottom, BOTTOM, 0)
             connect(viewId, START, PARENT_ID, START, 0)
-            connect(viewId, END, PARENT_ID, END, 0)
+            connect(viewId, END, endGuidelineId, END, 0)
 
             constrainWidth(viewId, ConstraintSet.MATCH_CONSTRAINT)
             constrainHeight(viewId, ConstraintSet.WRAP_CONTENT)

@@ -61,6 +61,7 @@ val Kosmos.defaultKeyguardBlueprint by
             defaultSettingsPopupMenuSection = mock(),
             defaultStatusBarSection = mock(),
             defaultNotificationStackScrollLayoutSection = mock(),
+            aodPromotedNotificationSection = mock(),
             aodNotificationIconsSection = mock(),
             aodBurnInSection = mock(),
             clockSection = keyguardClockSection,
@@ -68,7 +69,6 @@ val Kosmos.defaultKeyguardBlueprint by
             keyguardSliceViewSection = mock(),
             udfpsAccessibilityOverlaySection = mock(),
             accessibilityActionsSection = mock(),
-            aodPromotedNotificationSection = mock(),
         )
     }
 
@@ -83,6 +83,7 @@ val Kosmos.splitShadeBlueprint by
             defaultStatusBarSection = mock(),
             splitShadeNotificationStackScrollLayoutSection = mock(),
             splitShadeGuidelines = mock(),
+            aodPromotedNotificationSection = mock(),
             aodNotificationIconsSection = mock(),
             aodBurnInSection = mock(),
             clockSection = keyguardClockSection,
