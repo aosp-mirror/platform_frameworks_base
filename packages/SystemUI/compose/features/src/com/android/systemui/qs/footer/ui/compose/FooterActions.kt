@@ -142,6 +142,7 @@ fun FooterActions(
         mutableStateOf<FooterActionsForegroundServicesButtonViewModel?>(null)
     }
     var userSwitcher by remember { mutableStateOf<FooterActionsButtonViewModel?>(null) }
+    var power by remember { mutableStateOf<FooterActionsButtonViewModel?>(null) }
 
     LaunchedEffect(
         context,
@@ -161,6 +162,7 @@ fun FooterActions(
             launch { viewModel.security.collect { security = it } }
             launch { viewModel.foregroundServices.collect { foregroundServices = it } }
             launch { viewModel.userSwitcher.collect { userSwitcher = it } }
+            launch { viewModel.power.collect { power = it } }
         }
     }
 
@@ -220,7 +222,7 @@ fun FooterActions(
             foregroundServices?.let { ForegroundServicesButton(it) }
             userSwitcher?.let { IconButton(it, Modifier.sysuiResTag("multi_user_switch")) }
             IconButton(viewModel.settings, Modifier.sysuiResTag("settings_button_container"))
-            viewModel.power?.let { IconButton(it, Modifier.sysuiResTag("pm_lite")) }
+            power?.let { IconButton(it, Modifier.sysuiResTag("pm_lite")) }
         }
     }
 }
