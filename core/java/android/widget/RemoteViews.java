@@ -159,6 +159,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -719,6 +720,11 @@ public class RemoteViews implements Parcelable, Filter {
             // Nothing to visit by default.
         }
 
+        /** See {@link RemoteViews#visitIcons(Consumer)}. **/
+        public void visitIcons(@NonNull Consumer<Icon> visitor) {
+            // Nothing to visit by default.
+        }
+
         public abstract void writeToParcel(Parcel dest, int flags);
 
         /**
@@ -845,6 +851,29 @@ public class RemoteViews implements Parcelable, Filter {
         }
         if (mPortrait != null) {
             mPortrait.visitUris(visitor);
+        }
+    }
+
+    /**
+     * Note all {@link Icon} that are referenced internally.
+     * @hide
+     */
+    public void visitIcons(@NonNull Consumer<Icon> visitor) {
+        if (mActions != null) {
+            for (int i = 0; i < mActions.size(); i++) {
+                mActions.get(i).visitIcons(visitor);
+            }
+        }
+        if (mSizedRemoteViews != null) {
+            for (int i = 0; i < mSizedRemoteViews.size(); i++) {
+                mSizedRemoteViews.get(i).visitIcons(visitor);
+            }
+        }
+        if (mLandscape != null) {
+            mLandscape.visitIcons(visitor);
+        }
+        if (mPortrait != null) {
+            mPortrait.visitIcons(visitor);
         }
     }
 
@@ -1309,6 +1338,19 @@ public class RemoteViews implements Parcelable, Filter {
             }
 
             mItems.visitUris(visitor);
+        }
+
+        @Override
+        public void visitIcons(Consumer<Icon> visitor) {
+            if (mItems == null) {
+                RemoteCollectionItems cachedItems = mCollectionCache.getItemsForId(mIntentId);
+                if (cachedItems != null) {
+                    cachedItems.visitIcons(visitor);
+                }
+                return;
+            }
+
+            mItems.visitIcons(visitor);
         }
 
         @Override
@@ -2385,7 +2427,7 @@ public class RemoteViews implements Parcelable, Filter {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         ArrayList<Bitmap> mBitmaps;
         SparseIntArray mBitmapHashes;
-        int mBitmapMemory = -1;
+        long mBitmapMemory = -1;
 
         public BitmapCache() {
             mBitmaps = new ArrayList<>();
@@ -2449,7 +2491,7 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
-        public int getBitmapMemory() {
+        public long getBitmapMemory() {
             if (mBitmapMemory < 0) {
                 mBitmapMemory = 0;
                 int count = mBitmaps.size();
@@ -2733,6 +2775,13 @@ public class RemoteViews implements Parcelable, Filter {
                     if (icon != null) visitIconUri(icon, visitor);
                     break;
                 // TODO(b/281044385): Should we do anything about type BUNDLE?
+            }
+        }
+
+        @Override
+        public void visitIcons(@NonNull Consumer<Icon> visitor) {
+            if (mType == ICON && getParameterValue(null) instanceof Icon icon) {
+                visitor.accept(icon);
             }
         }
     }
@@ -4136,6 +4185,11 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public void visitUris(@NonNull Consumer<Uri> visitor) {
             mNestedViews.visitUris(visitor);
+        }
+
+        @Override
+        public void visitIcons(@NonNull Consumer<Icon> visitor) {
+            mNestedViews.visitIcons(visitor);
         }
 
         @Override
@@ -6392,12 +6446,40 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Returns an estimate of the bitmap heap memory usage for this RemoteViews.
+     * Returns an estimate of the bitmap heap memory usage by setBitmap and setImageViewBitmap in
+     * this RemoteViews.
+     *
+     * @hide
      */
-    /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public int estimateMemoryUsage() {
+    public long estimateMemoryUsage() {
         return mBitmapCache.getBitmapMemory();
+    }
+
+    /**
+     * Returns an estimate of bitmap heap memory usage by setIcon and setImageViewIcon in this
+     * RemoteViews. Note that this function will count duplicate Icons in its estimate.
+     *
+     * @hide
+     */
+    public long estimateIconMemoryUsage() {
+        AtomicLong total = new AtomicLong(0);
+        visitIcons(icon -> {
+            if (icon.getType() == Icon.TYPE_BITMAP || icon.getType() == Icon.TYPE_ADAPTIVE_BITMAP) {
+                total.addAndGet(icon.getBitmap().getAllocationByteCount());
+            }
+        });
+        return total.get();
+    }
+
+    /**
+     * Returns an estimate of the bitmap heap memory usage for all Icon and Bitmap actions in this
+     * RemoteViews.
+     *
+     * @hide
+     */
+    public long estimateTotalBitmapMemoryUsage() {
+        return estimateMemoryUsage() + estimateIconMemoryUsage();
     }
 
     /**
@@ -9766,6 +9848,15 @@ public class RemoteViews implements Parcelable, Filter {
         private void visitUris(@NonNull Consumer<Uri> visitor) {
             for (RemoteViews view : mViews) {
                 view.visitUris(visitor);
+            }
+        }
+
+        /**
+         * See {@link RemoteViews#visitIcons(Consumer)}.
+         */
+        private void visitIcons(@NonNull Consumer<Icon> visitor) {
+            for (RemoteViews view : mViews) {
+                view.visitIcons(visitor);
             }
         }
     }
