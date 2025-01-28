@@ -16,9 +16,9 @@
 
 package com.android.server;
 
-import static android.app.Flags.modesApi;
 import static android.app.Flags.enableCurrentModeTypeBinderCache;
 import static android.app.Flags.enableNightModeBinderCache;
+import static android.app.Flags.modesApi;
 import static android.app.UiModeManager.ContrastUtils.CONTRAST_DEFAULT_VALUE;
 import static android.app.UiModeManager.DEFAULT_PRIORITY;
 import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_OFF;
@@ -1967,6 +1967,14 @@ final class UiModeManagerService extends SystemService {
         sendConfigurationAndStartDreamOrDockAppLocked(category);
     }
 
+    private boolean shouldStartDockApp(Context context, Intent homeIntent) {
+        if (mWatch && !mSetupWizardComplete) {
+            // Do not ever start dock app when setup is not complete on a watch.
+            return false;
+        }
+        return Sandman.shouldStartDockApp(context, homeIntent);
+    }
+
     private void sendConfigurationAndStartDreamOrDockAppLocked(String category) {
         // Update the configuration but don't send it yet.
         mHoldingConfiguration = false;
@@ -1983,7 +1991,7 @@ final class UiModeManagerService extends SystemService {
             // activity manager take care of both the start and config
             // change.
             Intent homeIntent = buildHomeIntent(category);
-            if (Sandman.shouldStartDockApp(getContext(), homeIntent)) {
+            if (shouldStartDockApp(getContext(), homeIntent)) {
                 try {
                     int result = ActivityTaskManager.getService().startActivityWithConfig(
                             null, getContext().getBasePackageName(),
