@@ -198,6 +198,13 @@ flag {
 }
 
 flag {
+     name: "disable_madvise_artfile_default"
+     namespace: "system_performance"
+     description: "Disables madvise of .art files by default during app start."
+     bug: "382110550"
+}
+
+flag {
     name: "disallow_cellular_null_ciphers_restriction"
     namespace: "cellular_security"
     description: "Guards a new UserManager user restriction that admins can use to require cellular encryption on their managed devices."
