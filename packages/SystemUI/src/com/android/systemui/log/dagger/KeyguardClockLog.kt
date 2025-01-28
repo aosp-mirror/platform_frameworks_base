@@ -24,6 +24,12 @@ import javax.inject.Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 annotation class KeyguardClockLog
 
+/** A [com.android.systemui.log.LogBuffer] for keyguard blueprint logs. */
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class KeyguardBlueprintLog
+
 /** A [com.android.systemui.log.LogBuffer] for small keyguard clock logs. */
 @Qualifier
 @MustBeDocumented

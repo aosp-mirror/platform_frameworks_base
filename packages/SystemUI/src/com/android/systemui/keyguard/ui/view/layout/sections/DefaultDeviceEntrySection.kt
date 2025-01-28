@@ -21,7 +21,6 @@ import android.content.Context
 import android.graphics.Point
 import android.graphics.Rect
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.WindowManager
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -39,6 +38,8 @@ import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LongPressHandlingViewLogger
+import com.android.systemui.log.core.Logger
+import com.android.systemui.log.dagger.KeyguardBlueprintLog
 import com.android.systemui.log.dagger.LongPressTouchLog
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
@@ -66,7 +67,9 @@ constructor(
     private val falsingManager: Lazy<FalsingManager>,
     private val vibratorHelper: Lazy<VibratorHelper>,
     @LongPressTouchLog private val logBuffer: LogBuffer,
+    @KeyguardBlueprintLog blueprintLogBuffer: LogBuffer,
 ) : KeyguardSection() {
+    private val blueprintLogger = Logger(blueprintLogBuffer, TAG)
     private val deviceEntryIconViewId = R.id.device_entry_icon_view
     private var disposableHandle: DisposableHandle? = null
 
@@ -99,11 +102,8 @@ constructor(
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        Log.d(
-            "DefaultDeviceEntrySection",
-            "isUdfpsSupported=${deviceEntryIconViewModel.get().isUdfpsSupported.value}",
-        )
         val isUdfpsSupported = deviceEntryIconViewModel.get().isUdfpsSupported.value
+        blueprintLogger.d({ "isUdfpsSupported=$bool1" }) { bool1 = isUdfpsSupported }
 
         val scaleFactor: Float = authController.scaleFactor
         val mBottomPaddingPx =
@@ -124,12 +124,13 @@ constructor(
 
         if (isUdfpsSupported) {
             deviceEntryIconViewModel.get().udfpsLocation.value?.let { udfpsLocation ->
-                Log.d(
-                    "DeviceEntrySection",
-                    "udfpsLocation=$udfpsLocation, " +
-                        "scaledLocation=(${udfpsLocation.centerX},${udfpsLocation.centerY}), " +
-                        "unusedAuthController=${authController.udfpsLocation}",
-                )
+                blueprintLogger.d({
+                    "udfpsLocation=$str1, scaledLocation=$str2, unusedAuthController=$str3"
+                }) {
+                    str1 = "$udfpsLocation"
+                    str2 = "(${udfpsLocation.centerX}, ${udfpsLocation.centerY})"
+                    str3 = "${authController.udfpsLocation}"
+                }
                 centerIcon(
                     Point(udfpsLocation.centerX.toInt(), udfpsLocation.centerY.toInt()),
                     udfpsLocation.radius,

@@ -22,7 +22,6 @@ import android.annotation.DrawableRes
 import android.annotation.SuppressLint
 import android.graphics.Point
 import android.graphics.Rect
-import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.InputDevice
 import android.view.MotionEvent
@@ -65,6 +64,9 @@ import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessage
 import com.android.systemui.keyguard.ui.viewmodel.TransitionData
 import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.Logger
+import com.android.systemui.log.dagger.KeyguardBlueprintLog
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -115,6 +117,7 @@ object KeyguardRootViewBinder {
         statusBarKeyguardViewManager: StatusBarKeyguardViewManager?,
         mainImmediateDispatcher: CoroutineDispatcher,
         msdlPlayer: MSDLPlayer?,
+        @KeyguardBlueprintLog blueprintLog: LogBuffer,
     ): DisposableHandle {
         val disposables = DisposableHandles()
         val childViews = mutableMapOf<Int, View>()
@@ -404,6 +407,7 @@ object KeyguardRootViewBinder {
                     clockViewModel,
                     childViews,
                     burnInParams,
+                    Logger(blueprintLog, TAG),
                 )
             )
 
@@ -461,6 +465,7 @@ object KeyguardRootViewBinder {
         private val clockViewModel: KeyguardClockViewModel,
         private val childViews: Map<Int, View>,
         private val burnInParams: MutableStateFlow<BurnInParameters>,
+        private val logger: Logger,
     ) : OnLayoutChangeListener {
         var prevTransition: TransitionData? = null
 
@@ -481,7 +486,7 @@ object KeyguardRootViewBinder {
                 val transition = blueprintViewModel.currentTransition.value
                 val shouldAnimate = transition != null && transition.config.type.animateNotifChanges
                 if (prevTransition == transition && shouldAnimate) {
-                    if (DEBUG) Log.w(TAG, "Skipping; layout during transition")
+                    logger.w("Skipping; layout during transition")
                     return
                 }
 
@@ -571,5 +576,4 @@ object KeyguardRootViewBinder {
     private const val ID = "occluding_app_device_entry_unlock_msg"
     private const val AOD_ICONS_APPEAR_DURATION: Long = 200
     private const val TAG = "KeyguardRootViewBinder"
-    private const val DEBUG = false
 }

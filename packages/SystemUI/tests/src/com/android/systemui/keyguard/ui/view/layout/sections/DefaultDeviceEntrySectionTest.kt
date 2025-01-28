@@ -81,6 +81,7 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
                 { falsingManager },
                 { mock(VibratorHelper::class.java) },
                 logcatLogBuffer(),
+                logcatLogBuffer("blueprints"),
             )
     }
 

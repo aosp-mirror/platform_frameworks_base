@@ -22,11 +22,13 @@ import com.android.systemui.keyguard.ui.view.layout.sections.transitions.ClockSi
 import com.android.systemui.keyguard.ui.view.layout.sections.transitions.DefaultClockSteppingTransition
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
+import com.android.systemui.log.LogBuffer
 
 class IntraBlueprintTransition(
     config: IntraBlueprintTransition.Config,
     clockViewModel: KeyguardClockViewModel,
     smartspaceViewModel: KeyguardSmartspaceViewModel,
+    logBuffer: LogBuffer,
 ) : TransitionSet() {
 
     enum class Type(val priority: Int, val animateNotifChanges: Boolean) {
@@ -63,7 +65,7 @@ class IntraBlueprintTransition(
                 addTransition(
                     clockViewModel.currentClock.value?.let { DefaultClockSteppingTransition(it) }
                 )
-            else -> addTransition(ClockSizeTransition(config, clockViewModel))
+            else -> addTransition(ClockSizeTransition(config, clockViewModel, logBuffer))
         }
     }
 }

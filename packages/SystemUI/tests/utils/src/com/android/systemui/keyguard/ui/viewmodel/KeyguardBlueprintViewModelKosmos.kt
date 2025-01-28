@@ -20,6 +20,7 @@ import android.os.fakeExecutorHandler
 import com.android.systemui.keyguard.domain.interactor.keyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.log.logcatLogBuffer
 
 val Kosmos.keyguardBlueprintViewModel by
     Kosmos.Fixture {
@@ -27,5 +28,6 @@ val Kosmos.keyguardBlueprintViewModel by
             fakeExecutorHandler,
             keyguardBlueprintInteractor,
             keyguardTransitionInteractor,
+            blueprintLog = logcatLogBuffer("blueprints"),
         )
     }

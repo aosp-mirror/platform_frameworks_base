@@ -23,6 +23,7 @@ import com.android.systemui.log.core.MessageBuffer
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockFontAxis
 import com.android.systemui.plugins.clocks.ClockFontAxisSetting
+import com.android.systemui.plugins.clocks.ClockLogger
 import com.android.systemui.plugins.clocks.ClockMessageBuffers
 import com.android.systemui.plugins.clocks.ClockMetadata
 import com.android.systemui.plugins.clocks.ClockPickerConfig
@@ -62,7 +63,7 @@ class DefaultClockProvider(
         }
 
         return if (isClockReactiveVariantsEnabled) {
-            val buffers = messageBuffers ?: ClockMessageBuffers(LogUtil.DEFAULT_MESSAGE_BUFFER)
+            val buffers = messageBuffers ?: ClockMessageBuffers(ClockLogger.DEFAULT_MESSAGE_BUFFER)
             val fontAxes = ClockFontAxis.merge(FlexClockController.FONT_AXES, settings.axes)
             val clockSettings = settings.copy(axes = fontAxes.map { it.toSetting() })
             val typefaceCache =

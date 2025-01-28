@@ -37,15 +37,13 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.animation.GSFAxes
 import com.android.systemui.animation.TextAnimator
 import com.android.systemui.customization.R
-import com.android.systemui.log.core.Logger
 import com.android.systemui.plugins.clocks.ClockFontAxisSetting
+import com.android.systemui.plugins.clocks.ClockLogger
 import com.android.systemui.shared.clocks.ClockContext
 import com.android.systemui.shared.clocks.DigitTranslateAnimator
 import com.android.systemui.shared.clocks.DimensionParser
 import com.android.systemui.shared.clocks.FontTextStyle
-import com.android.systemui.shared.clocks.LogUtil
 import java.lang.Thread
-import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -95,8 +93,8 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
     private val prevTextBounds = Rect()
     // targetTextBounds holds the state we are interpolating to
     private val targetTextBounds = Rect()
-    protected val logger = Logger(clockCtx.messageBuffer, this::class.simpleName!!)
-        get() = field ?: LogUtil.FALLBACK_INIT_LOGGER
+    protected val logger = ClockLogger(this, clockCtx.messageBuffer, this::class.simpleName!!)
+        get() = field ?: ClockLogger.INIT_LOGGER
 
     private var aodDozingInterpolator: Interpolator? = null
 
@@ -147,7 +145,7 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        logger.d("onMeasure()")
+        logger.onMeasure()
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
 
         val layout = this.layout
@@ -208,9 +206,7 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
     }
 
     override fun onDraw(canvas: Canvas) {
-        logger.d({ "onDraw(${str1?.replace("\n", "\\n")})" }) {
-            str1 = textAnimator.textInterpolator.shapedText
-        }
+        logger.onDraw(textAnimator.textInterpolator.shapedText)
 
         val translation = getLocalTranslation()
         canvas.translate(translation.x.toFloat(), translation.y.toFloat())
@@ -227,47 +223,23 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
     }
 
     override fun setVisibility(visibility: Int) {
-        if (visibility != this.visibility) {
-            logger.d({ "setVisibility(${str1 ?: int1})" }) {
-                int1 = visibility
-                str1 =
-                    when (visibility) {
-                        VISIBLE -> "VISIBLE"
-                        INVISIBLE -> "INVISIBLE"
-                        GONE -> "GONE"
-                        else -> null
-                    }
-            }
-        }
-
+        logger.setVisibility(visibility)
         super.setVisibility(visibility)
     }
 
-    private var loggedAlpha = 1000f
-
     override fun setAlpha(alpha: Float) {
-        val delta = if (alpha <= 0f || alpha >= 1f) 0.001f else 0.5f
-        if (abs(loggedAlpha - alpha) >= delta) {
-            loggedAlpha = alpha
-            logger.d({ "setAlpha($double1)" }) { double1 = alpha.toDouble() }
-        }
+        logger.setAlpha(alpha)
         super.setAlpha(alpha)
     }
 
-    private val isDrawn: Boolean
-        get() = (mPrivateFlags and 0x20 /* PFLAG_DRAWN */) > 0
-
     override fun invalidate() {
-        if (isDrawn && visibility == VISIBLE) {
-            logger.d("invalidate()")
-        }
-
+        logger.invalidate()
         super.invalidate()
         (parent as? FlexClockView)?.invalidate()
     }
 
     fun refreshTime() {
-        logger.d("refreshTime()")
+        logger.refreshTime()
         refreshText()
     }
 
@@ -472,7 +444,7 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
         maxSingleDigitWidth = 0
 
         for (i in 0..9) {
-            lockScreenPaint.getTextBounds(i.toString(), 0, 1, rectForCalculate)
+            lockScreenPaint.getTextBounds("$i", 0, 1, rectForCalculate)
             maxSingleDigitHeight = max(maxSingleDigitHeight, rectForCalculate.height())
             maxSingleDigitWidth = max(maxSingleDigitWidth, rectForCalculate.width())
         }
