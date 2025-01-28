@@ -26,13 +26,13 @@ import android.content.om.OverlayInfo;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.CollectionUtils;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
@@ -49,7 +49,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 /**
  * Data structure representing the current state of all overlay packages in the
@@ -358,26 +357,29 @@ final class OverlayManagerSettings {
     }
 
     void dump(@NonNull final PrintWriter p, @NonNull DumpState dumpState) {
-        // select items to display
-        Stream<SettingsItem> items = mItems.stream();
-        if (dumpState.getUserId() != UserHandle.USER_ALL) {
-            items = items.filter(item -> item.mUserId == dumpState.getUserId());
-        }
-        if (dumpState.getPackageName() != null) {
-            items = items.filter(item -> item.mOverlay.getPackageName()
-                    .equals(dumpState.getPackageName()));
-        }
-        if (dumpState.getOverlayName() != null) {
-            items = items.filter(item -> item.mOverlay.getOverlayName()
-                    .equals(dumpState.getOverlayName()));
-        }
+        final int userId = dumpState.getUserId();
+        final String packageName = dumpState.getPackageName();
+        final String overlayName = dumpState.getOverlayName();
+        final String field = dumpState.getField();
+        final var pw = new IndentingPrintWriter(p, "  ");
 
-        // display items
-        final IndentingPrintWriter pw = new IndentingPrintWriter(p, "  ");
-        if (dumpState.getField() != null) {
-            items.forEach(item -> dumpSettingsItemField(pw, item, dumpState.getField()));
-        } else {
-            items.forEach(item -> dumpSettingsItem(pw, item));
+        for (int i = 0; i < mItems.size(); i++) {
+            final var item = mItems.get(i);
+            if (userId != UserHandle.USER_ALL && userId != item.mUserId) {
+                continue;
+            }
+            if (packageName != null && !packageName.equals(item.mOverlay.getPackageName())) {
+                continue;
+            }
+            if (overlayName != null && !overlayName.equals(item.mOverlay.getOverlayName())) {
+                continue;
+            }
+
+            if (field != null) {
+                dumpSettingsItemField(pw, item, field);
+            } else {
+                dumpSettingsItem(pw, item);
+            }
         }
     }
 
