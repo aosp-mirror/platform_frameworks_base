@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.isVisible
+import com.android.app.tracing.traceSection
 import com.android.internal.R
 import com.android.internal.widget.BigPictureNotificationImageView
 import com.android.internal.widget.CachingIconView
@@ -51,8 +52,7 @@ fun AODPromotedNotification(viewModelFactory: AODPromotedNotificationViewModel.F
         return
     }
 
-    val viewModel =
-        rememberViewModel(traceName = "AODPromotedNotification") { viewModelFactory.create() }
+    val viewModel = rememberViewModel(traceName = "$TAG.viewModel") { viewModelFactory.create() }
 
     val content = viewModel.content ?: return
 
@@ -61,14 +61,24 @@ fun AODPromotedNotification(viewModelFactory: AODPromotedNotificationViewModel.F
 
         AndroidView(
             factory = { context ->
-                LayoutInflater.from(context).inflate(layoutResource, /* root= */ null).apply {
-                    setTag(viewUpdaterTagId, AODPromotedNotificationViewUpdater(this))
-                }
+                traceSection("$TAG.inflate") {
+                        LayoutInflater.from(context).inflate(layoutResource, /* root= */ null)
+                    }
+                    .apply {
+                        setTag(
+                            viewUpdaterTagId,
+                            traceSection("$TAG.findViews") {
+                                AODPromotedNotificationViewUpdater(this)
+                            },
+                        )
+                    }
             },
             update = { view ->
-                (view.getTag(viewUpdaterTagId) as AODPromotedNotificationViewUpdater).update(
-                    content
-                )
+                traceSection("$TAG.update") {
+                    (view.getTag(viewUpdaterTagId) as AODPromotedNotificationViewUpdater).update(
+                        content
+                    )
+                }
             },
         )
     }
@@ -324,3 +334,5 @@ private class AODPromotedNotificationViewUpdater(root: View) {
 }
 
 private val viewUpdaterTagId = systemuiR.id.aod_promoted_notification_view_updater_tag
+
+private const val TAG = "AODPromotedNotification"
