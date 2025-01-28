@@ -46,6 +46,7 @@ import com.android.systemui.scene.session.shared.shadeSessionStorage
 import com.android.systemui.scene.shared.logger.sceneLogger
 import com.android.systemui.settings.displayTracker
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.notificationShadeWindowController
 import com.android.systemui.statusbar.phone.centralSurfacesOptional
@@ -87,5 +88,6 @@ val Kosmos.sceneContainerStartable by Fixture {
         msdlPlayer = msdlPlayer,
         disabledContentInteractor = disabledContentInteractor,
         activityTransitionAnimator = activityTransitionAnimator,
+        shadeModeInteractor = shadeModeInteractor,
     )
 }
