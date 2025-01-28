@@ -57,16 +57,6 @@ flag {
 }
 
 flag {
-    namespace: "input_native"
-    name: "keyboard_layout_manager_multi_user_ime_setup"
-    description: "Update KeyboardLayoutManager to work correctly with multi-user IME setup"
-    bug: "354333072"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "modifier_shortcut_dump"
     namespace: "input"
     description: "Dump keyboard shortcuts in dumpsys window"
