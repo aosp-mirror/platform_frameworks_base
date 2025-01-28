@@ -468,10 +468,6 @@ public class StackStateAnimator {
                 if (isFullySwipedOut) {
                     changingView.removeFromTransientContainer();
                 }
-            } else if (event.animationType == NotificationStackScrollLayout
-                    .AnimationEvent.ANIMATION_TYPE_GROUP_EXPANSION_CHANGED) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) event.mChangingView;
-                row.prepareExpansionChanged();
             } else if (event.animationType == ANIMATION_TYPE_HEADS_UP_CYCLING_IN) {
                 mHeadsUpAppearChildren.add(changingView);
 
