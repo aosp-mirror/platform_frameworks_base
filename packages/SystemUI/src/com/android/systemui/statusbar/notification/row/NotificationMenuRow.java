@@ -264,6 +264,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         NotificationEntry entry = mParent.getEntry();
         int personNotifType = mPeopleNotificationIdentifier.getPeopleNotificationType(entry);
         if (android.app.Flags.notificationClassificationUi()
+                && entry.getChannel() != null
                 && SYSTEM_RESERVED_IDS.contains(entry.getChannel().getId())) {
             // Bundled notification; create bundle-specific guts.
             mInfoItem = createBundleItem(mContext);
