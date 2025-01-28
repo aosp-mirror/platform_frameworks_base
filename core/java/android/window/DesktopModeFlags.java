@@ -87,6 +87,8 @@ public enum DesktopModeFlags {
     ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS(Flags::enableTaskResizingKeyboardShortcuts, true),
     ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER(
         Flags::enableDesktopWallpaperActivityForSystemUser, true),
+    ENABLE_TOP_VISIBLE_ROOT_TASK_PER_USER_TRACKING(
+        Flags::enableTopVisibleRootTaskPerUserTracking, true),
     ENABLE_DESKTOP_RECENTS_TRANSITIONS_CORNERS_BUGFIX(
             Flags::enableDesktopRecentsTransitionsCornersBugfix, false),
     ENABLE_DESKTOP_SYSTEM_DIALOGS_TRANSITIONS(Flags::enableDesktopSystemDialogsTransitions, true);
