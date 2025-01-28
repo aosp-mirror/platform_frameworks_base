@@ -84,17 +84,8 @@ public class TestLooperManager {
      * interactions with it have completed.
      */
     public Message next() {
-        // Wait for the looper block to come up, to make sure we don't accidentally get
-        // the message for the block.
-        while (!mLooperIsMyLooper && !mLooperBlocked) {
-            synchronized (this) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                }
-            }
-        }
         checkReleased();
+        waitForLooperHolder();
         return mQueue.next();
     }
 
@@ -110,6 +101,7 @@ public class TestLooperManager {
     @Nullable
     public Message poll() {
         checkReleased();
+        waitForLooperHolder();
         return mQueue.pollForTest();
     }
 
@@ -124,6 +116,7 @@ public class TestLooperManager {
     @Nullable
     public Long peekWhen() {
         checkReleased();
+        waitForLooperHolder();
         return mQueue.peekWhenForTest();
     }
 
@@ -133,6 +126,7 @@ public class TestLooperManager {
     @FlaggedApi(Flags.FLAG_MESSAGE_QUEUE_TESTABILITY)
     public boolean isBlockedOnSyncBarrier() {
         checkReleased();
+        waitForLooperHolder();
         return mQueue.isBlockedOnSyncBarrier();
     }
 
@@ -218,6 +212,23 @@ public class TestLooperManager {
     private void checkReleased() {
         if (mReleased) {
             throw new RuntimeException("release() has already be called");
+        }
+    }
+
+    /**
+     * Waits until the Looper is blocked by the LooperHolder, if one was posted.
+     *
+     * After this method returns, it's guaranteed that the LooperHolder Message
+     * is not in the underlying queue.
+     */
+    private void waitForLooperHolder() {
+        while (!mLooperIsMyLooper && !mLooperBlocked) {
+            synchronized (this) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                }
+            }
         }
     }
 
