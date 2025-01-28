@@ -178,6 +178,15 @@ public interface BiometricConstants {
     @FlaggedApi(Flags.FLAG_IDENTITY_CHECK_API)
     int BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS = 21;
 
+
+    /**
+     * The user pressed the more options button on prompt content. This is a placeholder that is
+     * currently only used by the support library.
+     *
+     * @hide
+     */
+    int BIOMETRIC_ERROR_CONTENT_VIEW_MORE_OPTIONS_BUTTON = 22;
+
     /**
      * This constant is only used by SystemUI. It notifies SystemUI that authentication was paused
      * because the authentication attempt was unsuccessful.
@@ -209,6 +218,7 @@ public interface BiometricConstants {
             BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
             BIOMETRIC_ERROR_IDENTITY_CHECK_NOT_ACTIVE,
             BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS,
+            BIOMETRIC_ERROR_CONTENT_VIEW_MORE_OPTIONS_BUTTON,
             BIOMETRIC_PAUSED_REJECTED})
     @Retention(RetentionPolicy.SOURCE)
     @interface Errors {}

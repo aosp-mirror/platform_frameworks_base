@@ -803,6 +803,9 @@ public final class AuthSession implements IBinder.DeathRecipient {
                 case BiometricPrompt.DISMISSED_REASON_USER_CANCEL:
                     error = BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED;
                     break;
+                case BiometricPrompt.DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS:
+                    error = BiometricConstants.BIOMETRIC_ERROR_CONTENT_VIEW_MORE_OPTIONS_BUTTON;
+                    break;
                 default:
             }
 
