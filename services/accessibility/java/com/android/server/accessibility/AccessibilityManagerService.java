@@ -36,6 +36,7 @@ import static android.accessibilityservice.AccessibilityTrace.FLAGS_PACKAGE_BROA
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_USER_BROADCAST_RECEIVER;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAGER_INTERNAL;
 import static android.content.Context.DEVICE_ID_DEFAULT;
+import static android.hardware.input.InputSettings.isRepeatKeysFeatureFlagEnabled;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
@@ -156,6 +157,7 @@ import android.view.KeyEvent;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
+import android.view.ViewConfiguration;
 import android.view.WindowInfo;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
@@ -3494,6 +3496,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         somethingChanged |= readMagnificationFollowTypingLocked(userState);
         somethingChanged |= readAlwaysOnMagnificationLocked(userState);
         somethingChanged |= readMouseKeysEnabledLocked(userState);
+        somethingChanged |= readRepeatKeysSettingsLocked(userState);
         return somethingChanged;
     }
 
@@ -5771,6 +5774,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private final Uri mUserSetupCompleteUri = Settings.Secure.getUriFor(
                 Settings.Secure.USER_SETUP_COMPLETE);
 
+        private final Uri mRepeatKeysEnabledUri = Settings.Secure.getUriFor(
+                Settings.Secure.KEY_REPEAT_ENABLED);
+
+        private final Uri mRepeatKeysTimeoutMsUri = Settings.Secure.getUriFor(
+                Settings.Secure.KEY_REPEAT_TIMEOUT_MS);
+
         public AccessibilityContentObserver(Handler handler) {
             super(handler);
         }
@@ -5827,6 +5836,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     mNavigationModeUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mUserSetupCompleteUri, false, this, UserHandle.USER_ALL);
+            if (isRepeatKeysFeatureFlagEnabled() && Flags.enableMagnificationKeyboardControl()) {
+                contentResolver.registerContentObserver(
+                        mRepeatKeysEnabledUri, false, this, UserHandle.USER_ALL);
+                contentResolver.registerContentObserver(
+                        mRepeatKeysTimeoutMsUri, false, this, UserHandle.USER_ALL);
+            }
         }
 
         @Override
@@ -5917,6 +5932,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                 } else if (mNavigationModeUri.equals(uri) || mUserSetupCompleteUri.equals(uri)) {
                     updateShortcutsForCurrentNavigationMode();
+                } else if (mRepeatKeysEnabledUri.equals(uri)
+                        || mRepeatKeysTimeoutMsUri.equals(uri)) {
+                    readRepeatKeysSettingsLocked(userState);
                 }
             }
         }
@@ -6052,6 +6070,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mMagnificationController.setAlwaysOnMagnificationEnabled(isAlwaysOnEnabled);
             return true;
         }
+        return false;
+    }
+
+    boolean readRepeatKeysSettingsLocked(AccessibilityUserState userState) {
+        if (!isRepeatKeysFeatureFlagEnabled() || !Flags.enableMagnificationKeyboardControl()) {
+            return false;
+        }
+        final boolean isRepeatKeysEnabled = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.KEY_REPEAT_ENABLED,
+                1, userState.mUserId) == 1;
+        final int repeatKeysTimeoutMs = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(), Settings.Secure.KEY_REPEAT_TIMEOUT_MS,
+                ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT, userState.mUserId);
+        mMagnificationController.setRepeatKeysEnabled(isRepeatKeysEnabled);
+        mMagnificationController.setRepeatKeysTimeoutMs(repeatKeysTimeoutMs);
+
+        // No need to update any other state, so always return false.
         return false;
     }
 
