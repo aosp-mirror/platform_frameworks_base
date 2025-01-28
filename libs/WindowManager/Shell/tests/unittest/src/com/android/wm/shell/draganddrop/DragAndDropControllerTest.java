@@ -47,6 +47,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.bubbles.bar.BubbleBarDragListener;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -59,6 +60,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import dagger.Lazy;
 
 /**
  * Tests for the drag and drop controller.
@@ -91,6 +94,8 @@ public class DragAndDropControllerTest extends ShellTestCase {
     private Transitions mTransitions;
     @Mock
     private GlobalDragListener mGlobalDragListener;
+    @Mock
+    private Lazy<BubbleBarDragListener> mBubbleBarDragControllerLazy;
 
     private DragAndDropController mController;
 
@@ -99,7 +104,8 @@ public class DragAndDropControllerTest extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mController = new DragAndDropController(mContext, mShellInit, mShellController,
                 mShellCommandHandler, mShellTaskOrganizer, mDisplayController, mUiEventLogger,
-                mIconProvider, mGlobalDragListener, mTransitions, mMainExecutor);
+                mIconProvider, mGlobalDragListener, mTransitions, mBubbleBarDragControllerLazy,
+                mMainExecutor);
         mController.onInit();
     }
 
