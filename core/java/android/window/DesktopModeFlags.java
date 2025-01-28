@@ -97,7 +97,9 @@ public enum DesktopModeFlags {
             Flags::enableDesktopRecentsTransitionsCornersBugfix, false),
     ENABLE_DESKTOP_SYSTEM_DIALOGS_TRANSITIONS(Flags::enableDesktopSystemDialogsTransitions, true),
     ENABLE_DESKTOP_WINDOWING_MULTI_INSTANCE_FEATURES(
-        Flags::enableDesktopWindowingMultiInstanceFeatures, true);
+        Flags::enableDesktopWindowingMultiInstanceFeatures, true),
+    ENABLE_DESKTOP_WINDOWING_EXIT_BY_MINIMIZE_TRANSITION_BUGFIX(
+            Flags::enableDesktopWindowingExitByMinimizeTransitionBugfix, false);
 
     /**
      * Flag class, to be used in case the enum cannot be used because the flag is not accessible.
