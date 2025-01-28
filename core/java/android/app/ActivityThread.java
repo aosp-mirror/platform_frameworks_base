@@ -3959,10 +3959,20 @@ public final class ActivityThread extends ClientTransactionHandler
 
     /** Converts a process state to a VM process state. */
     private static int toVmProcessState(int processState) {
-        final int state = ActivityManager.isProcStateJankPerceptible(processState)
-                ? VM_PROCESS_STATE_JANK_PERCEPTIBLE
-                : VM_PROCESS_STATE_JANK_IMPERCEPTIBLE;
-        return state;
+        if (ActivityManager.isProcStateJankPerceptible(processState)) {
+            return VM_PROCESS_STATE_JANK_PERCEPTIBLE;
+        }
+
+        if (Flags.jankPerceptibleNarrow()) {
+            // Unlike other persistent processes, system server is often on
+            // the critical path for application startup. Mark it explicitly
+            // as jank perceptible regardless of processState.
+            if (isSystem()) {
+                return VM_PROCESS_STATE_JANK_PERCEPTIBLE;
+            }
+        }
+
+        return VM_PROCESS_STATE_JANK_IMPERCEPTIBLE;
     }
 
     /** Update VM state based on ActivityManager.PROCESS_STATE_* constants. */
