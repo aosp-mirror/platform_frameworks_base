@@ -161,6 +161,18 @@ class SupervisionServiceTest {
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_ENABLE_SYNC_WITH_DPM)
+    fun profileOwnerChanged_supervisionAppIsNotProfileOwner_doesNotDisableSupervision() {
+        service.mInternal.setSupervisionEnabledForUser(USER_ID, true)
+        whenever(mockDpmInternal.getProfileOwnerAsUser(USER_ID))
+            .thenReturn(ComponentName("other.package", "MainActivity"))
+
+        broadcastProfileOwnerChanged(USER_ID)
+
+        assertThat(service.isSupervisionEnabledForUser(USER_ID)).isTrue()
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_SYNC_WITH_DPM)
     fun profileOwnerChanged_supervisionAppIsNotProfileOwner_doesNotEnableSupervision() {
         whenever(mockDpmInternal.getProfileOwnerAsUser(USER_ID))
             .thenReturn(ComponentName("other.package", "MainActivity"))
@@ -258,7 +270,7 @@ class SupervisionServiceTest {
 
     private companion object {
         const val USER_ID = 100
-        val APP_UID = USER_ID * UserHandle.PER_USER_RANGE
+        const val APP_UID = USER_ID * UserHandle.PER_USER_RANGE
     }
 }
 

@@ -177,23 +177,24 @@ public class SupervisionService extends ISupervisionManager.Stub {
         }
     }
 
-    /** Ensures that supervision is enabled when the supervision app is the profile owner. */
+    /**
+     * Ensures that supervision is enabled when the supervision app is the profile owner.
+     *
+     * <p>The state syncing with the DevicePolicyManager can only enable supervision and never
+     * disable. Supervision can only be disabled explicitly via calls to the
+     * {@link #setSupervisionEnabledForUser} method.
+     */
     private void syncStateWithDevicePolicyManager(@UserIdInt int userId) {
         final DevicePolicyManagerInternal dpmInternal = mInjector.getDpmInternal();
         final ComponentName po =
                 dpmInternal != null ? dpmInternal.getProfileOwnerAsUser(userId) : null;
 
         if (po != null && po.getPackageName().equals(getSystemSupervisionPackage())) {
-            setSupervisionEnabledForUserInternal(userId, true, po.getPackageName());
+            setSupervisionEnabledForUserInternal(userId, true, getSystemSupervisionPackage());
         } else if (po != null && po.equals(getSupervisionProfileOwnerComponent())) {
             // TODO(b/392071637): Consider not enabling supervision in case profile owner is given
             // to the legacy supervision profile owner component.
             setSupervisionEnabledForUserInternal(userId, true, po.getPackageName());
-        } else {
-            // TODO(b/381428475): Avoid disabling supervision when the app is not the profile owner.
-            // This might only be possible after introducing specific and public APIs to enable
-            // and disable supervision.
-            setSupervisionEnabledForUserInternal(userId, false, /* supervisionAppPackage= */ null);
         }
     }
 
@@ -279,7 +280,7 @@ public class SupervisionService extends ISupervisionManager.Stub {
         }
 
         @VisibleForTesting
-        @SuppressLint("MissingPermission") // not needed for a service
+        @SuppressLint("MissingPermission")  // not needed for a system service
         void registerProfileOwnerListener() {
             IntentFilter poIntentFilter = new IntentFilter();
             poIntentFilter.addAction(DevicePolicyManager.ACTION_PROFILE_OWNER_CHANGED);
