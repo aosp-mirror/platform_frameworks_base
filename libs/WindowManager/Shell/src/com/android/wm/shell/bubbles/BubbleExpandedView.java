@@ -689,11 +689,6 @@ public class BubbleExpandedView extends LinearLayout {
         }
     }
 
-    /** Sets the alpha for the pointer. */
-    public void setPointerAlpha(float alpha) {
-        mPointerView.setAlpha(alpha);
-    }
-
     /**
      * Get alpha from underlying {@code TaskView} if this view is for a bubble.
      * Or get alpha for the overflow view if this view is for overflow.
@@ -794,24 +789,6 @@ public class BubbleExpandedView extends LinearLayout {
     public void setBottomClip(int clip) {
         mBottomClip = clip;
         onContainerClipUpdate();
-    }
-
-    /**
-     * Sets the clipping for the view.
-     */
-    public void setTaskViewClip(Rect rect) {
-        mLeftClip = rect.left;
-        mTopClip = rect.top;
-        mRightClip = rect.right;
-        mBottomClip = rect.bottom;
-        onContainerClipUpdate();
-    }
-
-    /**
-     * Returns a rect representing the clipping for the view.
-     */
-    public Rect getTaskViewClip() {
-        return new Rect(mLeftClip, mTopClip, mRightClip, mBottom);
     }
 
     private void onContainerClipUpdate() {
@@ -1121,13 +1098,6 @@ public class BubbleExpandedView extends LinearLayout {
      */
     public boolean isShowingRightPointer() {
         return mCurrentPointer == mRightPointer;
-    }
-
-    /**
-     * Return width of the current pointer
-     */
-    public int getPointerWidth() {
-        return mPointerWidth;
     }
 
     /**
