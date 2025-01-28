@@ -440,6 +440,12 @@ public class OomAdjuster {
     @GuardedBy("mService")
     private long mNextFollowUpUpdateUptimeMs = NO_FOLLOW_UP_TIME;
 
+    /**
+     * The oom score a client needs to be to raise a service with UI out of cache.
+     */
+    private static final int CACHING_UI_SERVICE_CLIENT_ADJ_THRESHOLD =
+            Flags.raiseBoundUiServiceThreshold() ? SERVICE_ADJ : PERCEPTIBLE_APP_ADJ;
+
     @VisibleForTesting
     public static class Injector {
         boolean isChangeEnabled(@CachedCompatChangeId int cachedCompatChangeId,
@@ -2878,15 +2884,12 @@ public class OomAdjuster {
                 }
             }
             if (adj > clientAdj) {
-                // If this process has recently shown UI, and
-                // the process that is binding to it is less
-                // important than being visible, then we don't
-                // care about the binding as much as we care
-                // about letting this process get into the LRU
-                // list to be killed and restarted if needed for
-                // memory.
+                // If this process has recently shown UI, and the process that is binding to it
+                // is less important than a state that can be actively running, then we don't
+                // care about the binding as much as we care about letting this process get into
+                // the LRU list to be killed and restarted if needed for memory.
                 if (state.hasShownUi() && !state.getCachedIsHomeProcess()
-                        && clientAdj > PERCEPTIBLE_APP_ADJ) {
+                        && clientAdj > CACHING_UI_SERVICE_CLIENT_ADJ_THRESHOLD) {
                     if (adj >= CACHED_APP_MIN_ADJ) {
                         adjType = "cch-bound-ui-services";
                     }

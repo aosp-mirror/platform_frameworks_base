@@ -308,3 +308,14 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "raise_bound_ui_service_threshold"
+    namespace: "backstage_power"
+    is_fixed_read_only: true
+    description: "Raise the threshold OomAdjuster will drop a service with UI to cached."
+    bug: "391691057"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
