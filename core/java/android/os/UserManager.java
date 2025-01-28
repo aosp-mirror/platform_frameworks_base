@@ -3796,9 +3796,9 @@ public class UserManager {
     @UnsupportedAppUsage
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
-    @CachedProperty(modsFlagOnOrNone = {}, api = "is_user_unlocked")
+    @CachedProperty(api = "is_user_unlocked")
     public boolean isUserUnlocked(@UserIdInt int userId) {
-        return ((UserManagerCache) mIpcDataCache).isUserUnlocked(mService::isUserUnlocked, userId);
+        return UserManagerCache.isUserUnlocked(mService::isUserUnlocked, userId);
     }
 
     /** @hide */
@@ -3834,9 +3834,9 @@ public class UserManager {
     /** @hide */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
-    @CachedProperty(modsFlagOnOrNone = {}, api = "is_user_unlocked")
+    @CachedProperty(api = "is_user_unlocked")
     public boolean isUserUnlockingOrUnlocked(@UserIdInt int userId) {
-        return ((UserManagerCache) mIpcDataCache)
+        return UserManagerCache
                 .isUserUnlockingOrUnlocked(mService::isUserUnlockingOrUnlocked, userId);
     }
 
