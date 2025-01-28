@@ -354,6 +354,8 @@ class ArgIterator(
  * Scan the arguments, and if any of them starts with an `@`, then load from the file
  * and use its content as arguments.
  *
+ * In order to pass an argument that starts with an '@', use '@@' instead.
+ *
  * In this file, each line is treated as a single argument.
  *
  * The file can contain '#' as comments.
@@ -362,7 +364,10 @@ private fun expandAtFiles(args: Array<String>): List<String> {
     val ret = mutableListOf<String>()
 
     args.forEach { arg ->
-        if (!arg.startsWith('@')) {
+        if (arg.startsWith("@@")) {
+            ret += arg.substring(1)
+            return@forEach
+        } else if (!arg.startsWith('@')) {
             ret += arg
             return@forEach
         }
