@@ -31,7 +31,6 @@ import android.window.TransitionInfo.Change
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
 import androidx.annotation.VisibleForTesting
-import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.protolog.ProtoLog
 import com.android.window.flags.Flags
@@ -208,7 +207,6 @@ class DesktopMixedTransitionHandler(
             return dispatchCloseLastDesktopTaskAnimation(
                 transition,
                 info,
-                closeChange,
                 startTransaction,
                 finishTransaction,
                 finishCallback,
@@ -352,18 +350,10 @@ class DesktopMixedTransitionHandler(
     private fun dispatchCloseLastDesktopTaskAnimation(
         transition: IBinder,
         info: TransitionInfo,
-        change: TransitionInfo.Change,
         startTransaction: SurfaceControl.Transaction,
         finishTransaction: SurfaceControl.Transaction,
         finishCallback: TransitionFinishCallback,
     ): Boolean {
-        // Starting the jank trace if closing the last window in desktop mode.
-        interactionJankMonitor.begin(
-            change.leash,
-            context,
-            handler,
-            CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE,
-        )
         // Dispatch the last desktop task closing animation.
         return dispatchToLeftoverHandler(
             transition = transition,
@@ -371,10 +361,6 @@ class DesktopMixedTransitionHandler(
             startTransaction = startTransaction,
             finishTransaction = finishTransaction,
             finishCallback = finishCallback,
-            doOnFinishCallback = {
-                // Finish the jank trace when closing the last window in desktop mode.
-                interactionJankMonitor.end(CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE)
-            },
         )
     }
 

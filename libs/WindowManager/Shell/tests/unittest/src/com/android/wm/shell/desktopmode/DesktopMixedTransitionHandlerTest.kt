@@ -42,7 +42,6 @@ import android.window.TransitionInfo
 import android.window.WindowContainerToken
 import android.window.WindowContainerTransaction
 import androidx.test.filters.SmallTest
-import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.window.flags.Flags
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
@@ -265,13 +264,6 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
                 any(),
                 any(),
                 eq(mixedHandler),
-            )
-        verify(interactionJankMonitor)
-            .begin(
-                closingTaskLeash,
-                context,
-                mockHandler,
-                CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE,
             )
     }
 
