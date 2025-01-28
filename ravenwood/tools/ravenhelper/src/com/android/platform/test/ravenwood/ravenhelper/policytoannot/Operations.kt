@@ -24,6 +24,8 @@ package com.android.platform.test.ravenwood.ravenhelper.policytoannot
 import com.android.hoststubgen.log
 import java.io.BufferedWriter
 import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
 
 enum class SourceOperationType {
     /** Insert a line */
@@ -198,4 +200,26 @@ private fun toSedScript(ops: List<SourceOperation>, writer: BufferedWriter) {
             }
         }
     }
+}
+
+fun createShellScript(ops: SourceOperations, scriptFile: String?): Boolean {
+    if (ops.size == 0) {
+        log.i("No files need to be updated.")
+        return false
+    }
+
+    val scriptWriter = BufferedWriter(
+        OutputStreamWriter(
+            scriptFile?.let { file ->
+            FileOutputStream(file)
+        } ?: System.out
+    ))
+
+    scriptWriter.use { writer ->
+        scriptFile?.let {
+            log.i("Creating script file at $it ...")
+        }
+        createShellScript(ops, writer)
+    }
+    return true
 }
