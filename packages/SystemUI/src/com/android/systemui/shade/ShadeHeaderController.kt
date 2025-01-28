@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter
 import android.annotation.IdRes
 import android.app.PendingIntent
 import android.app.StatusBarManager
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Insets
@@ -58,6 +59,7 @@ import com.android.systemui.shade.ShadeViewProviderModule.Companion.SHADE_HEADER
 import com.android.systemui.shade.carrier.ShadeCarrierGroup
 import com.android.systemui.shade.carrier.ShadeCarrierGroupController
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
+import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.StatusIconContainer
@@ -70,6 +72,7 @@ import com.android.systemui.statusbar.policy.NextAlarmController
 import com.android.systemui.statusbar.policy.VariableDateView
 import com.android.systemui.statusbar.policy.VariableDateViewController
 import com.android.systemui.util.ViewController
+import dagger.Lazy
 import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Named
@@ -93,7 +96,8 @@ constructor(
     private val privacyIconsController: HeaderPrivacyIconsController,
     private val statusBarContentInsetsProviderStore: StatusBarContentInsetsProviderStore,
     @ShadeDisplayAware private val configurationController: ConfigurationController,
-    private val shadeDisplaysRepository: ShadeDisplaysRepository,
+    @ShadeDisplayAware private val context: Context,
+    private val shadeDisplaysRepositoryLazy: Lazy<ShadeDisplaysRepository>,
     private val variableDateViewControllerFactory: VariableDateViewController.Factory,
     @Named(SHADE_HEADER) private val batteryMeterViewController: BatteryMeterViewController,
     private val dumpManager: DumpManager,
@@ -108,7 +112,15 @@ constructor(
 
     private val statusBarContentInsetsProvider
         get() =
-            statusBarContentInsetsProviderStore.forDisplay(shadeDisplaysRepository.displayId.value)
+            statusBarContentInsetsProviderStore.forDisplay(
+                if (ShadeWindowGoesAround.isEnabled) {
+                    // ShadeDisplaysRepository is the source of truth for display id when
+                    // ShadeWindowGoesAround.isEnabled
+                    shadeDisplaysRepositoryLazy.get().displayId.value
+                } else {
+                    context.displayId
+                }
+            )
 
     companion object {
         /** IDs for transitions and constraints for the [MotionLayout]. */
