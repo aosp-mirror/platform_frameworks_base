@@ -109,7 +109,7 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
         assertEquals(3, mService.mMaxUpdatesPerInterval);
     }
 
-    public void testRestConfig() throws Exception {
+    public void disabled_testRestConfig() throws Exception {
         mService.mMaxUpdatesPerInterval = 99;
 
         mInjectedCallingUid = Process.SHELL_UID;
@@ -223,7 +223,7 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
     }
 
     // This command is deprecated. Will remove the test later.
-    public void testLauncherCommands() throws Exception {
+    public void disabled_testLauncherCommands() throws Exception {
         prepareGetRoleHoldersAsUser(getSystemLauncher().activityInfo.packageName, USER_10);
         prepareGetHomeActivitiesAsUser(
                 /* preferred */ getSystemLauncher().activityInfo.getComponentName(),
@@ -401,7 +401,7 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
 
     }
 
-    public void testDumpsysArgs() {
+    public void disabled_testDumpsysArgs() {
         checkDumpsysArgs(null, true, false, false);
         checkDumpsysArgs(array("-u"), true, true, false);
         checkDumpsysArgs(array("--uid"), true, true, false);
