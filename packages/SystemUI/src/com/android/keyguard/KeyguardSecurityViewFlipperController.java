@@ -111,7 +111,9 @@ public class KeyguardSecurityViewFlipperController
 
         // Prevent multiple inflations for the same security mode. Instead, add callback to a list
         // and then notify each in order when the view is inflated.
-        mOnViewInflatedListeners.add(onViewInflatedCallback);
+        synchronized (mOnViewInflatedListeners) {
+            mOnViewInflatedListeners.add(onViewInflatedCallback);
+        }
         if (!mSecurityModeInProgress.contains(securityMode)) {
             mSecurityModeInProgress.add(securityMode);
             asynchronouslyInflateView(securityMode, keyguardSecurityCallback);
@@ -145,10 +147,14 @@ public class KeyguardSecurityViewFlipperController
                         childController.init();
                         mChildren.add(childController);
 
-                        for (OnViewInflatedCallback callback : mOnViewInflatedListeners) {
+                        List<OnViewInflatedCallback> callbacks;
+                        synchronized (mOnViewInflatedListeners) {
+                            callbacks = new ArrayList<>(mOnViewInflatedListeners);
+                            mOnViewInflatedListeners.clear();
+                        }
+                        for (OnViewInflatedCallback callback : callbacks) {
                             callback.onViewInflated(childController);
                         }
-                        mOnViewInflatedListeners.clear();
 
                         // Single bouncer constrains are default
                         if (mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE)) {
