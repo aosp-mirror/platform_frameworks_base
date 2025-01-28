@@ -193,7 +193,10 @@ constructor(
         if (SceneContainerFlag.isEnabled) return
         scope.launch("$TAG#listenForAodToPrimaryBouncer") {
             keyguardInteractor.primaryBouncerShowing
-                .filterRelevantKeyguardStateAnd { primaryBouncerShowing -> primaryBouncerShowing }
+                .filterRelevantKeyguardStateAnd { primaryBouncerShowing ->
+                    !isWakeAndUnlock(keyguardInteractor.biometricUnlockState.value.mode) &&
+                        primaryBouncerShowing
+                }
                 .collect { startTransitionTo(KeyguardState.PRIMARY_BOUNCER) }
         }
     }
