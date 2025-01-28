@@ -32,11 +32,7 @@ import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
 import androidx.annotation.VisibleForTesting
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
@@ -120,6 +116,7 @@ import com.android.systemui.qs.composefragment.ui.GridAnchor
 import com.android.systemui.qs.composefragment.ui.NotificationScrimClipParams
 import com.android.systemui.qs.composefragment.ui.notificationScrimClip
 import com.android.systemui.qs.composefragment.ui.quickQuickSettingsToQuickSettings
+import com.android.systemui.qs.composefragment.ui.toEditMode
 import com.android.systemui.qs.composefragment.viewmodel.QSFragmentComposeViewModel
 import com.android.systemui.qs.flags.QSComposeFragment
 import com.android.systemui.qs.footer.ui.compose.FooterActions
@@ -144,6 +141,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -273,36 +271,7 @@ constructor(
                                 // by the composables.
                                 .gesturesDisabled(viewModel.showingMirror)
                     ) {
-                        val isEditing by
-                            viewModel.containerViewModel.editModeViewModel.isEditing
-                                .collectAsStateWithLifecycle()
-                        val animationSpecEditMode = tween<Float>(EDIT_MODE_TIME_MILLIS)
-                        AnimatedContent(
-                            targetState = isEditing,
-                            transitionSpec = {
-                                fadeIn(animationSpecEditMode) togetherWith
-                                    fadeOut(animationSpecEditMode)
-                            },
-                            label = "EditModeAnimatedContent",
-                        ) { editing ->
-                            if (editing) {
-                                val qqsPadding = viewModel.qqsHeaderHeight
-                                EditMode(
-                                    viewModel = viewModel.containerViewModel.editModeViewModel,
-                                    modifier =
-                                        Modifier.fillMaxWidth()
-                                            .padding(top = { qqsPadding })
-                                            .padding(
-                                                horizontal = {
-                                                    QuickSettingsShade.Dimensions.Padding
-                                                        .roundToPx()
-                                                }
-                                            ),
-                                )
-                            } else {
-                                CollapsableQuickSettingsSTL()
-                            }
-                        }
+                        CollapsableQuickSettingsSTL()
                     }
                 }
             }
@@ -324,12 +293,17 @@ constructor(
                         from(QuickQuickSettings, QuickSettings) {
                             quickQuickSettingsToQuickSettings(viewModel::animateTilesExpansion::get)
                         }
+                        to(SceneKeys.EditMode) {
+                            spec = tween(durationMillis = EDIT_MODE_TIME_MILLIS)
+                            toEditMode()
+                        }
                     },
             )
 
         LaunchedEffect(Unit) {
             synchronizeQsState(
                 sceneState,
+                viewModel.containerViewModel.editModeViewModel.isEditing,
                 snapshotFlow { viewModel.expansionState }.map { it.progress },
             )
         }
@@ -342,7 +316,15 @@ constructor(
 
             scene(QuickQuickSettings) {
                 LaunchedEffect(Unit) { viewModel.onQQSOpen() }
-                QuickQuickSettingsElement()
+                // Cannot pass the element modifier in because the top element has a `testTag`
+                // and this would overwrite it.
+                Box(Modifier.element(QuickQuickSettings.rootElementKey)) {
+                    QuickQuickSettingsElement()
+                }
+            }
+
+            scene(SceneKeys.EditMode) {
+                EditModeElement(Modifier.element(SceneKeys.EditMode.rootElementKey))
             }
         }
     }
@@ -582,7 +564,7 @@ constructor(
     }
 
     @Composable
-    private fun ContentScope.QuickQuickSettingsElement() {
+    private fun ContentScope.QuickQuickSettingsElement(modifier: Modifier = Modifier) {
         val qqsPadding = viewModel.qqsHeaderHeight
         val bottomPadding = viewModel.qqsBottomPadding
         DisposableEffect(Unit) {
@@ -595,7 +577,7 @@ constructor(
                 .squishiness
                 .collectAsStateWithLifecycle()
 
-        Column(modifier = Modifier.sysuiResTag(ResIdTags.quickQsPanel)) {
+        Column(modifier = modifier.sysuiResTag(ResIdTags.quickQsPanel)) {
             Box(
                 modifier =
                     Modifier.fillMaxWidth()
@@ -666,12 +648,12 @@ constructor(
     }
 
     @Composable
-    private fun ContentScope.QuickSettingsElement() {
+    private fun ContentScope.QuickSettingsElement(modifier: Modifier = Modifier) {
         val qqsPadding = viewModel.qqsHeaderHeight
         val qsExtraPadding = dimensionResource(R.dimen.qs_panel_padding_top)
         Column(
             modifier =
-                Modifier.collapseExpandSemanticAction(
+                modifier.collapseExpandSemanticAction(
                     stringResource(id = R.string.accessibility_quick_settings_collapse)
                 )
         ) {
@@ -776,6 +758,18 @@ constructor(
         }
     }
 
+    @Composable
+    private fun EditModeElement(modifier: Modifier = Modifier) {
+        // No need for top padding, the Scaffold inside takes care of the correct insets
+        EditMode(
+            viewModel = viewModel.containerViewModel.editModeViewModel,
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = { QuickSettingsShade.Dimensions.Padding.roundToPx() }),
+        )
+    }
+
     private fun Modifier.collapseExpandSemanticAction(label: String): Modifier {
         return viewModel.collapseExpandAccessibilityAction?.let {
             semantics {
@@ -863,6 +857,7 @@ private val instanceProvider =
 object SceneKeys {
     val QuickQuickSettings = SceneKey("QuickQuickSettingsScene")
     val QuickSettings = SceneKey("QuickSettingsScene")
+    val EditMode = SceneKey("EditModeScene")
 
     fun QSFragmentComposeViewModel.QSExpansionState.toIdleSceneKey(): SceneKey {
         return when {
@@ -880,7 +875,11 @@ object SceneKeys {
         }
 }
 
-suspend fun synchronizeQsState(state: MutableSceneTransitionLayoutState, expansion: Flow<Float>) {
+private suspend fun synchronizeQsState(
+    state: MutableSceneTransitionLayoutState,
+    editMode: Flow<Boolean>,
+    expansion: Flow<Float>,
+) {
     coroutineScope {
         val animationScope = this
 
@@ -891,23 +890,30 @@ suspend fun synchronizeQsState(state: MutableSceneTransitionLayoutState, expansi
             currentTransition = null
         }
 
-        expansion.collectLatest { progress ->
-            when (progress) {
-                0f -> snapTo(QuickQuickSettings)
-                1f -> snapTo(QuickSettings)
-                else -> {
-                    val transition = currentTransition
-                    if (transition != null) {
-                        transition.progress = progress
-                        return@collectLatest
-                    }
+        editMode.combine(expansion, ::Pair).collectLatest { (editMode, progress) ->
+            if (editMode && state.currentScene != SceneKeys.EditMode) {
+                state.setTargetScene(SceneKeys.EditMode, animationScope)?.second?.join()
+            } else if (!editMode && state.currentScene == SceneKeys.EditMode) {
+                state.setTargetScene(SceneKeys.QuickSettings, animationScope)?.second?.join()
+            }
+            if (!editMode) {
+                when (progress) {
+                    0f -> snapTo(QuickQuickSettings)
+                    1f -> snapTo(QuickSettings)
+                    else -> {
+                        val transition = currentTransition
+                        if (transition != null) {
+                            transition.progress = progress
+                            return@collectLatest
+                        }
 
-                    val newTransition =
-                        ExpansionTransition(progress).also { currentTransition = it }
-                    state.startTransitionImmediately(
-                        animationScope = animationScope,
-                        transition = newTransition,
-                    )
+                        val newTransition =
+                            ExpansionTransition(progress).also { currentTransition = it }
+                        state.startTransitionImmediately(
+                            animationScope = animationScope,
+                            transition = newTransition,
+                        )
+                    }
                 }
             }
         }
