@@ -321,6 +321,10 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         return mStageCoordinator;
     }
 
+    public SplitMultiDisplayProvider getMultiDisplayProvider() {
+        return mStageCoordinator;
+    }
+
     @Nullable
     public ActivityManager.RunningTaskInfo getTaskInfo(@SplitPosition int splitPosition) {
         if (!isSplitScreenVisible() || splitPosition == SPLIT_POSITION_UNDEFINED) {

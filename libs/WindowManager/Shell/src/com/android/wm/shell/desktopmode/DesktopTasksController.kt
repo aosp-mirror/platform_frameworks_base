@@ -1015,6 +1015,23 @@ class DesktopTasksController(
         }
 
         val wct = WindowContainerTransaction()
+
+        // check if the task is part of splitscreen
+        if (
+            Flags.enableNonDefaultDisplaySplit() &&
+                Flags.enableMoveToNextDisplayShortcut() &&
+                splitScreenController.isTaskInSplitScreen(task.taskId)
+        ) {
+            val stageCoordinatorRootTaskToken =
+                splitScreenController.multiDisplayProvider.getDisplayRootForDisplayId(
+                    DEFAULT_DISPLAY
+                )
+
+            wct.reparent(stageCoordinatorRootTaskToken, displayAreaInfo.token, true /* onTop */)
+            transitions.startTransition(TRANSIT_CHANGE, wct, /* handler= */ null)
+            return
+        }
+
         if (!task.isFreeform) {
             addMoveToDesktopChanges(wct, task, displayId)
         } else if (Flags.enableMoveToNextDisplayShortcut()) {
