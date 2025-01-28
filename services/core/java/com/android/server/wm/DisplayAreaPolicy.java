@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
@@ -164,7 +165,8 @@ public abstract class DisplayAreaPolicy {
                                 FEATURE_APP_ZOOM_OUT)
                                 .all()
                                 .except(TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL,
-                                        TYPE_STATUS_BAR, TYPE_NOTIFICATION_SHADE, TYPE_WALLPAPER)
+                                        TYPE_STATUS_BAR, TYPE_NOTIFICATION_SHADE,
+                                        TYPE_KEYGUARD_DIALOG, TYPE_WALLPAPER)
                                 .build());
             }
             if (USE_DISPLAY_AREA_FOR_FULLSCREEN_MAGNIFICATION) {
