@@ -342,7 +342,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     /**
      * Flushes the buffered events to the service.
      */
-    abstract void internalFlush(@FlushReason int reason);
+    abstract void flush(@FlushReason int reason);
 
     /**
      * Sets the {@link ContentCaptureContext} associated with the session.

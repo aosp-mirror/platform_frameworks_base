@@ -375,7 +375,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     void onDestroy() {
         clearAndRunOnContentCaptureThread(() -> {
             try {
-                internalFlush(FLUSH_REASON_SESSION_FINISHED);
+                flush(FLUSH_REASON_SESSION_FINISHED);
             } finally {
                 destroySession();
             }
@@ -623,7 +623,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                 flushReason = forceFlush ? FLUSH_REASON_FORCE_FLUSH : FLUSH_REASON_FULL;
         }
 
-        internalFlush(flushReason);
+        flush(flushReason);
     }
 
     private boolean hasStarted() {
@@ -687,18 +687,15 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             if (sVerbose) Log.v(TAG, "Nothing to flush");
             return;
         }
-        internalFlush(reason);
+        flush(reason);
     }
 
-    /**
-     * Internal API to flush the buffered events to the service.
-     *
-     * Do not confuse this with the public API {@link #flush()}.
-     *
-     * @hide */
+    /** @hide */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     @Override
-    public void internalFlush(@FlushReason int reason) {
+    public void flush(@FlushReason int reason) {
+        // TODO: b/380381249 renaming the internal APIs to prevent confusions between this and the
+        // public API.
         runOnContentCaptureThread(() -> flushImpl(reason));
     }
 
