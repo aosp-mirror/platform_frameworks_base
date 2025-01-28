@@ -15,14 +15,3 @@ flag {
     bug: "380381249"
     is_exported: true
 }
-
-flag {
-    name: "post_create_android_bg_thread"
-    namespace: "pixel_state_server"
-    description: "Feature flag to post create the bg thread when an app is in the allowlist"
-    bug: "376468525"
-    is_fixed_read_only: true
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
