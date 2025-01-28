@@ -24,7 +24,6 @@ import static android.view.Surface.ROTATION_90;
 import static com.android.wm.shell.pip.PipTransitionController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.pip.PipTransitionController.ANIM_TYPE_BOUNDS;
 
-import android.animation.AnimationHandler;
 import android.animation.Animator;
 import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
@@ -42,7 +41,6 @@ import android.view.SurfaceControl;
 import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.common.pip.PipUtils;
@@ -109,13 +107,6 @@ public class PipAnimationController {
     }
 
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
-
-    private final ThreadLocal<AnimationHandler> mSfAnimationHandlerThreadLocal =
-            ThreadLocal.withInitial(() -> {
-                AnimationHandler handler = new AnimationHandler();
-                handler.setProvider(new SfVsyncFrameCallbackProvider());
-                return handler;
-            });
 
     private PipTransitionAnimator mCurrentAnimator;
     @PipTransitionController.AnimationType
@@ -210,7 +201,6 @@ public class PipAnimationController {
         animator.setSurfaceTransactionHelper(mSurfaceTransactionHelper);
         animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         animator.setFloatValues(FRACTION_START, FRACTION_END);
-        animator.setAnimationHandler(mSfAnimationHandlerThreadLocal.get());
         return animator;
     }
 
