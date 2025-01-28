@@ -24,6 +24,7 @@ import com.android.systemui.log.dagger.NotificationLog
 import com.android.systemui.log.dagger.NotificationRenderLog
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.logKey
+import com.android.systemui.statusbar.notification.stack.MagneticNotificationRowManagerImpl
 import javax.inject.Inject
 
 class NotificationRowLogger
@@ -201,6 +202,21 @@ constructor(
                 bool2 = cancelled
             },
             { "onAppearAnimationFinished childKey: $str1 isAppear:$bool1 cancelled:$bool2" },
+        )
+    }
+
+    fun logMagneticAndRoundableTargetsNotSet(
+        state: MagneticNotificationRowManagerImpl.State,
+        entry: NotificationEntry,
+    ) {
+        buffer.log(
+            TAG,
+            LogLevel.ERROR,
+            {
+                str1 = entry.logKey
+                str2 = state.name
+            },
+            { "Failed to set magnetic and roundable targets for $str1 on state $str2." },
         )
     }
 }
