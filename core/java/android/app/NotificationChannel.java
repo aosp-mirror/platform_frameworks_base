@@ -15,6 +15,10 @@
  */
 package android.app;
 
+import static android.service.notification.Adjustment.TYPE_CONTENT_RECOMMENDATION;
+import static android.service.notification.Adjustment.TYPE_NEWS;
+import static android.service.notification.Adjustment.TYPE_PROMOTION;
+import static android.service.notification.Adjustment.TYPE_SOCIAL_MEDIA;
 import static android.service.notification.Flags.FLAG_NOTIFICATION_CONVERSATION_CHANNEL_MANAGEMENT;
 
 import android.annotation.FlaggedApi;
@@ -37,6 +41,7 @@ import android.os.VibrationEffect;
 import android.os.vibrator.persistence.VibrationXmlParser;
 import android.os.vibrator.persistence.VibrationXmlSerializer;
 import android.provider.Settings;
+import android.service.notification.Adjustment;
 import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
 import android.util.Log;
@@ -1604,6 +1609,26 @@ public final class NotificationChannel implements Parcelable {
             sb.append(values[values.length - 1]);
         }
         return sb.toString();
+    }
+
+    /**
+     * Get the reserved bundle channel ID for an Adjustment type
+     * @param the Adjustment type
+     * @return the channel ID, or null if type is invalid
+     * @hide
+     */
+    public static @Nullable String getChannelIdForBundleType(@Adjustment.Types int type) {
+        switch (type) {
+            case TYPE_CONTENT_RECOMMENDATION:
+                return RECS_ID;
+            case TYPE_NEWS:
+                return NEWS_ID;
+            case TYPE_PROMOTION:
+                return PROMOTIONS_ID;
+            case TYPE_SOCIAL_MEDIA:
+                return SOCIAL_MEDIA_ID;
+        }
+        return null;
     }
 
     public static final @android.annotation.NonNull Creator<NotificationChannel> CREATOR =

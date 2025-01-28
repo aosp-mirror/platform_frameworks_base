@@ -290,6 +290,7 @@ import android.permission.PermissionManager;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.service.notification.Adjustment;
+import android.service.notification.Adjustment.Types;
 import android.service.notification.Condition;
 import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.DeviceEffectsApplier;
@@ -417,6 +418,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /** {@hide} */
@@ -1865,74 +1867,183 @@ public class NotificationManagerService extends SystemService {
                 mAssistants.notifyAssistantFeedbackReceived(r, feedback);
             }
         }
-
-        @Override
-        public void unbundleNotification(String key) {
-            if (!(notificationClassification() && notificationRegroupOnClassification())) {
-                return;
-            }
-            synchronized (mNotificationLock) {
-                NotificationRecord r = mNotificationsByKey.get(key);
-                if (r == null) {
-                    return;
-                }
-
-                if (DBG) {
-                    Slog.v(TAG, "unbundleNotification: " + r);
-                }
-
-                boolean hasOriginalSummary = false;
-                if (r.getSbn().isAppGroup() && r.getNotification().isGroupChild()) {
-                    final String oldGroupKey = GroupHelper.getFullAggregateGroupKey(
-                            r.getSbn().getPackageName(), r.getOriginalGroupKey(), r.getUserId());
-                    NotificationRecord groupSummary = mSummaryByGroupKey.get(oldGroupKey);
-                    // We only care about app-provided valid groups
-                    hasOriginalSummary = (groupSummary != null
-                            && !GroupHelper.isAggregatedGroup(groupSummary));
-                }
-
-                // Only NotificationRecord's mChannel is updated when bundled, the Notification
-                // mChannelId will always be the original channel.
-                String origChannelId = r.getNotification().getChannelId();
-                NotificationChannel originalChannel = mPreferencesHelper.getNotificationChannel(
-                        r.getSbn().getPackageName(), r.getUid(), origChannelId, false);
-                if (originalChannel != null && !origChannelId.equals(r.getChannel().getId())) {
-                    r.updateNotificationChannel(originalChannel);
-                    mGroupHelper.onNotificationUnbundled(r, hasOriginalSummary);
-                }
-            }
-        }
-
-        @Override
-        public void rebundleNotification(String key) {
-            if (!(notificationClassification() && notificationRegroupOnClassification())) {
-                return;
-            }
-            synchronized (mNotificationLock) {
-                NotificationRecord r = mNotificationsByKey.get(key);
-                if (r == null) {
-                    return;
-                }
-
-                if (DBG) {
-                    Slog.v(TAG, "rebundleNotification: " + r);
-                }
-
-                if (r.getBundleType() != Adjustment.TYPE_OTHER) {
-                    final Bundle classifBundle = new Bundle();
-                    classifBundle.putInt(KEY_TYPE, r.getBundleType());
-                    Adjustment adj = new Adjustment(r.getSbn().getPackageName(), r.getKey(),
-                            classifBundle, "rebundle", r.getUserId());
-                    applyAdjustmentLocked(r, adj, /* isPosted= */ true);
-                    mRankingHandler.requestSort();
-                } else {
-                    if (DBG) {
-                        Slog.w(TAG, "Can't rebundle. No valid bundle type for: " + r);
-                    }
-                }
-            }
-        }
     };
+
+    private void unclassifyNotificationsForUser(final int userId) {
+        if (DBG) {
+            Slog.v(TAG, "unclassifyForUser: " + userId);
+        }
+        unclassifyNotificationsFiltered((r) -> r.getUserId() == userId);
+    }
+
+    private void unclassifyNotificationsForUid(final int userId, @NonNull final String pkg) {
+        if (DBG) {
+            Slog.v(TAG, "unclassifyForUid userId: " + userId + " pkg: " + pkg);
+        }
+        unclassifyNotificationsFiltered((r) ->
+                r.getUserId() == userId
+                && Objects.equals(r.getSbn().getPackageName(), pkg));
+    }
+
+    private void unclassifyNotificationsForUserAndType(final int userId,
+            final @Types int bundleType) {
+        if (DBG) {
+            Slog.v(TAG,
+                    "unclassifyForUserAndType userId: " + userId + " bundleType: " + bundleType);
+        }
+        final String bundleChannelId = NotificationChannel.getChannelIdForBundleType(bundleType);
+        unclassifyNotificationsFiltered((r) ->
+                r.getUserId() == userId
+                && r.getChannel() != null
+                && Objects.equals(bundleChannelId, r.getChannel().getId()));
+    }
+
+    private void unclassifyNotificationsFiltered(Predicate<NotificationRecord> filter) {
+        if (!(notificationClassificationUi() && notificationRegroupOnClassification())) {
+            return;
+        }
+        synchronized (mNotificationLock) {
+            for (int i = 0; i < mEnqueuedNotifications.size(); i++) {
+                final NotificationRecord r = mEnqueuedNotifications.get(i);
+                if (filter.test(r)) {
+                    unclassifyNotificationLocked(r);
+                }
+            }
+
+            for (int i = 0; i < mNotificationList.size(); i++) {
+                final NotificationRecord r = mNotificationList.get(i);
+                if (filter.test(r)) {
+                    unclassifyNotificationLocked(r);
+                }
+            }
+        }
+    }
+
+    @GuardedBy("mNotificationLock")
+    private void unclassifyNotificationLocked(@NonNull final NotificationRecord r) {
+        if (DBG) {
+            Slog.v(TAG, "unclassifyNotification: " + r);
+        }
+
+        boolean hasOriginalSummary = false;
+        if (r.getSbn().isAppGroup() && r.getNotification().isGroupChild()) {
+            final String oldGroupKey = GroupHelper.getFullAggregateGroupKey(
+                    r.getSbn().getPackageName(), r.getOriginalGroupKey(), r.getUserId());
+            NotificationRecord groupSummary = mSummaryByGroupKey.get(oldGroupKey);
+            // We only care about app-provided valid groups
+            hasOriginalSummary = (groupSummary != null
+                    && !GroupHelper.isAggregatedGroup(groupSummary));
+        }
+
+        // Only NotificationRecord's mChannel is updated when bundled, the Notification
+        // mChannelId will always be the original channel.
+        String origChannelId = r.getNotification().getChannelId();
+        NotificationChannel originalChannel = mPreferencesHelper.getNotificationChannel(
+                r.getSbn().getPackageName(), r.getUid(), origChannelId, false);
+        String currChannelId = r.getChannel().getId();
+        boolean isBundled = NotificationChannel.SYSTEM_RESERVED_IDS.contains(currChannelId);
+        if (originalChannel != null && !origChannelId.equals(currChannelId) && isBundled) {
+            r.updateNotificationChannel(originalChannel);
+            mGroupHelper.onNotificationUnbundled(r, hasOriginalSummary);
+        }
+    }
+
+    @VisibleForTesting
+    void unclassifyNotification(final String key) {
+        if (!(notificationClassificationUi() && notificationRegroupOnClassification())) {
+            return;
+        }
+        synchronized (mNotificationLock) {
+            NotificationRecord r = mNotificationsByKey.get(key);
+            if (r == null) {
+                return;
+            }
+            unclassifyNotificationLocked(r);
+        }
+    }
+
+    @VisibleForTesting
+    void reclassifyNotification(String key) {
+        if (!(notificationClassificationUi() && notificationRegroupOnClassification())) {
+            return;
+        }
+        synchronized (mNotificationLock) {
+            NotificationRecord r = mNotificationsByKey.get(key);
+            if (r == null) {
+                return;
+            }
+            reclassifyNotificationLocked(r, true);
+        }
+    }
+
+    private void reclassifyNotificationsFiltered(Predicate<NotificationRecord> filter) {
+        if (!(notificationClassificationUi() && notificationRegroupOnClassification())) {
+            return;
+        }
+        synchronized (mNotificationLock) {
+            for (int i = 0; i < mEnqueuedNotifications.size(); i++) {
+                final NotificationRecord r = mEnqueuedNotifications.get(i);
+                if (filter.test(r)) {
+                    reclassifyNotificationLocked(r, false);
+                }
+            }
+
+            for (int i = 0; i < mNotificationList.size(); i++) {
+                final NotificationRecord r = mNotificationList.get(i);
+                if (filter.test(r)) {
+                    reclassifyNotificationLocked(r, true);
+                }
+            }
+        }
+    }
+
+    private void reclassifyNotificationsForUserAndType(final int userId,
+            final @Types int bundleType) {
+        if (DBG) {
+            Slog.v(TAG, "reclassifyNotificationsForUserAndType userId: " + userId + " bundleType: "
+                    + bundleType);
+        }
+        reclassifyNotificationsFiltered(
+                (r) -> r.getUserId() == userId && r.getBundleType() == bundleType);
+    }
+
+    private void reclassifyNotificationsForUid(final int userId, final String pkg) {
+        if (DBG) {
+            Slog.v(TAG, "reclassifyNotificationsForUid userId: " + userId + " pkg: " + pkg);
+        }
+        reclassifyNotificationsFiltered((r) ->
+                r.getUserId() == userId && Objects.equals(r.getSbn().getPackageName(), pkg));
+    }
+
+    private void reclassifyNotificationsForUser(final int userId) {
+        if (DBG) {
+            Slog.v(TAG, "reclassifyAllNotificationsForUser: " + userId);
+        }
+        reclassifyNotificationsFiltered((r) -> r.getUserId() == userId);
+    }
+
+    @GuardedBy("mNotificationLock")
+    private void reclassifyNotificationLocked(@NonNull final NotificationRecord r,
+            final boolean isPosted) {
+        if (DBG) {
+            Slog.v(TAG, "reclassifyNotification: " + r);
+        }
+
+        boolean isBundled = NotificationChannel.SYSTEM_RESERVED_IDS.contains(
+                r.getChannel().getId());
+        if (r.getBundleType() != Adjustment.TYPE_OTHER && !isBundled) {
+            final Bundle classifBundle = new Bundle();
+            classifBundle.putInt(KEY_TYPE, r.getBundleType());
+            Adjustment adj = new Adjustment(r.getSbn().getPackageName(), r.getKey(),
+                    classifBundle, "reclassify", r.getUserId());
+            applyAdjustmentLocked(r, adj, isPosted);
+            mRankingHandler.requestSort();
+        } else {
+            if (DBG) {
+                Slog.w(TAG, "Can't reclassify. No valid bundle type or already bundled: " + r);
+            }
+        }
+    }
 
     NotificationManagerPrivate mNotificationManagerPrivate = new NotificationManagerPrivate() {
         @Nullable
@@ -4370,7 +4481,11 @@ public class NotificationManagerService extends SystemService {
         public void allowAssistantAdjustment(String adjustmentType) {
             checkCallerIsSystemOrSystemUiOrShell();
             mAssistants.allowAdjustmentType(adjustmentType);
-
+            if ((notificationClassificationUi() && notificationRegroupOnClassification())) {
+                if (KEY_TYPE.equals(adjustmentType)) {
+                    reclassifyNotificationsForUser(UserHandle.getUserId(Binder.getCallingUid()));
+                }
+            }
             handleSavePolicyFile();
         }
 
@@ -4379,7 +4494,11 @@ public class NotificationManagerService extends SystemService {
         public void disallowAssistantAdjustment(String adjustmentType) {
             checkCallerIsSystemOrSystemUiOrShell();
             mAssistants.disallowAdjustmentType(adjustmentType);
-
+            if ((notificationClassificationUi() && notificationRegroupOnClassification())) {
+                if (KEY_TYPE.equals(adjustmentType)) {
+                    unclassifyNotificationsForUser(UserHandle.getUserId(Binder.getCallingUid()));
+                }
+            }
             handleSavePolicyFile();
         }
 
@@ -4424,7 +4543,15 @@ public class NotificationManagerService extends SystemService {
         public void setAssistantAdjustmentKeyTypeState(int type, boolean enabled) {
             checkCallerIsSystemOrSystemUiOrShell();
             mAssistants.setAssistantAdjustmentKeyTypeState(type, enabled);
-
+            if ((notificationClassificationUi() && notificationRegroupOnClassification())) {
+                if (enabled) {
+                    reclassifyNotificationsForUserAndType(
+                            UserHandle.getUserId(Binder.getCallingUid()), type);
+                } else {
+                    unclassifyNotificationsForUserAndType(
+                            UserHandle.getUserId(Binder.getCallingUid()), type);
+                }
+            }
             handleSavePolicyFile();
         }
 
@@ -4440,7 +4567,15 @@ public class NotificationManagerService extends SystemService {
         public void setTypeAdjustmentForPackageState(String pkg, boolean enabled) {
             checkCallerIsSystemOrSystemUiOrShell();
             mAssistants.setTypeAdjustmentForPackageState(pkg, enabled);
-
+            if ((notificationClassificationUi() && notificationRegroupOnClassification())) {
+                if (enabled) {
+                    reclassifyNotificationsForUid(UserHandle.getUserId(Binder.getCallingUid()),
+                            pkg);
+                } else {
+                    unclassifyNotificationsForUid(UserHandle.getUserId(Binder.getCallingUid()),
+                            pkg);
+                }
+            }
             handleSavePolicyFile();
         }
 
@@ -7238,6 +7373,10 @@ public class NotificationManagerService extends SystemService {
         if (adjustment.getSignals() != null) {
             final Bundle adjustments = adjustment.getSignals();
             Bundle.setDefusable(adjustments, true);
+            // Save classification even if the adjustment is disabled, in case user enables it later
+            if (notificationClassification() && adjustments.containsKey(KEY_TYPE)) {
+                r.setBundleType(adjustments.getInt(KEY_TYPE));
+            }
             List<String> toRemove = new ArrayList<>();
             for (String potentialKey : adjustments.keySet()) {
                 if (!mAssistants.isAdjustmentAllowed(potentialKey)) {
@@ -7267,9 +7406,7 @@ public class NotificationManagerService extends SystemService {
                     int classification = adjustments.getInt(KEY_TYPE);
                     // swap app provided type with the real thing
                     adjustments.putParcelable(KEY_TYPE, newChannel);
-
                     logClassificationChannelAdjustmentReceived(r, isPosted, classification);
-                    r.setBundleType(classification);
                 }
             }
             r.addAdjustment(adjustment);
