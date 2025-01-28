@@ -29,8 +29,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,10 +43,8 @@ import com.android.compose.animation.Expandable
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.chips.ui.compose.modifiers.neverDecreaseWidth
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
-import com.android.systemui.statusbar.chips.ui.viewmodel.rememberChronometerState
 
 @Composable
 fun OngoingActivityChip(model: OngoingActivityChipModel.Shown, modifier: Modifier = Modifier) {
@@ -123,32 +119,8 @@ private fun ChipBody(
             model.icon?.let { ChipIcon(viewModel = it, colors = model.colors) }
 
             val isIconOnly = model is OngoingActivityChipModel.Shown.IconOnly
-            val isTextOnly = model.icon == null
             if (!isIconOnly) {
-                ChipContent(
-                    viewModel = model,
-                    modifier =
-                        Modifier.padding(
-                            start =
-                                if (isTextOnly || hasEmbeddedIcon) {
-                                    0.dp
-                                } else {
-                                    dimensionResource(
-                                        id = R.dimen.ongoing_activity_chip_icon_text_padding
-                                    )
-                                },
-                            end =
-                                if (hasEmbeddedIcon) {
-                                    dimensionResource(
-                                        id =
-                                            R.dimen
-                                                .ongoing_activity_chip_text_end_padding_for_embedded_padding_icon
-                                    )
-                                } else {
-                                    0.dp
-                                },
-                        ),
-                )
+                ChipContent(viewModel = model)
             }
         }
     }
@@ -192,46 +164,6 @@ private fun ChipIcon(
         // TODO(b/372657935): Add recommended architecture implementation for
         // StatusBarNotificationIcons
         is OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon -> {}
-    }
-}
-
-@Composable
-private fun ChipContent(viewModel: OngoingActivityChipModel.Shown, modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    when (viewModel) {
-        is OngoingActivityChipModel.Shown.Timer -> {
-            val timerState = rememberChronometerState(startTimeMillis = viewModel.startTimeMs)
-            Text(
-                text = timerState.currentTimeText,
-                style = MaterialTheme.typography.labelLarge,
-                color = Color(viewModel.colors.text(context)),
-                modifier = modifier.neverDecreaseWidth(),
-            )
-        }
-
-        is OngoingActivityChipModel.Shown.Countdown -> {
-            ChipText(
-                text = viewModel.secondsUntilStarted.toString(),
-                color = Color(viewModel.colors.text(context)),
-                style = MaterialTheme.typography.labelLarge,
-                modifier = modifier.neverDecreaseWidth(),
-                backgroundColor = Color(viewModel.colors.background(context).defaultColor),
-            )
-        }
-
-        is OngoingActivityChipModel.Shown.Text -> {
-            ChipText(
-                text = viewModel.text,
-                color = Color(viewModel.colors.text(context)),
-                style = MaterialTheme.typography.labelLarge,
-                modifier = modifier,
-                backgroundColor = Color(viewModel.colors.background(context).defaultColor),
-            )
-        }
-
-        is OngoingActivityChipModel.Shown.ShortTimeDelta -> {
-            // TODO(b/372657935): Implement ShortTimeDelta content in compose.
-        }
     }
 }
 
