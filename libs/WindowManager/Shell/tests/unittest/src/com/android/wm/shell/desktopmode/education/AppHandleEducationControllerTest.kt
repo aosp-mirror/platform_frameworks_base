@@ -29,6 +29,7 @@ import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.desktopmode.CaptionState
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository
 import com.android.wm.shell.desktopmode.education.AppHandleEducationController.Companion.APP_HANDLE_EDUCATION_DELAY_MILLIS
+import com.android.wm.shell.desktopmode.education.AppHandleEducationController.Companion.TOOLTIP_VISIBLE_DURATION_MILLIS
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
@@ -124,6 +125,23 @@ class AppHandleEducationControllerTest : ShellTestCase() {
             verify(mockTooltipController, times(1)).showEducationTooltip(any(), any())
             verify(mockDataStoreRepository, times(1))
                 .updateAppHandleHintViewedTimestampMillis(eq(true))
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    fun init_appHandleEducationVisible_afterDelayTooltipShouldBeDismissed() =
+        testScope.runTest {
+            // App handle is visible. Should show education tooltip.
+            setShouldShowDesktopModeEducation(true)
+            // Simulate app handle visible.
+            testCaptionStateFlow.value = createAppHandleState()
+            // Wait for first tooltip to showup.
+            waitForBufferDelay()
+
+            // Wait until tooltip gets dismissed
+            waitForBufferDelay(TOOLTIP_VISIBLE_DURATION_MILLIS + 1000L)
+
+            verify(mockTooltipController, times(1)).hideEducationTooltip()
         }
 
     @Test
@@ -368,8 +386,10 @@ class AppHandleEducationControllerTest : ShellTestCase() {
      * Class under test waits for some time before showing education, simulate advance time before
      * verifying or moving forward
      */
-    private fun TestScope.waitForBufferDelay() {
-        advanceTimeBy(APP_HANDLE_EDUCATION_DELAY_BUFFER_MILLIS)
+    private fun TestScope.waitForBufferDelay(
+        delay: Long = APP_HANDLE_EDUCATION_DELAY_BUFFER_MILLIS
+    ) {
+        advanceTimeBy(delay)
         runCurrent()
     }
 

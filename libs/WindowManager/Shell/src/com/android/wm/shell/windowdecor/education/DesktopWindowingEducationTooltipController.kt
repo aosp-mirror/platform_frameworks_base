@@ -53,7 +53,6 @@ class DesktopWindowingEducationTooltipController(
     private val additionalSystemViewContainerFactory: AdditionalSystemViewContainer.Factory,
     private val displayController: DisplayController,
 ) : OnDisplayChangingListener {
-  // TODO: b/369384567 - Set tooltip color scheme to match LT/DT of app theme
   private var tooltipView: View? = null
   private var animator: PhysicsAnimator<View>? = null
   private val springConfig by lazy {
@@ -90,7 +89,7 @@ class DesktopWindowingEducationTooltipController(
   }
 
   /** Hide the current education view if visible */
-  private fun hideEducationTooltip() = animateHideTooltipTransition { cleanUp() }
+  fun hideEducationTooltip() = animateHideTooltipTransition { cleanUp() }
 
   /** Create education view by inflating layout provided. */
   private fun createEducationTooltipView(

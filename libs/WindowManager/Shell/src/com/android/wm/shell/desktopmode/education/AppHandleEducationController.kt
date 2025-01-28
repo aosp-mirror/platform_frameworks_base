@@ -37,6 +37,7 @@ import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationToolt
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController.TooltipEducationViewConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainCoroutineDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
@@ -89,6 +90,8 @@ class AppHandleEducationController(
                         showEducation(captionState)
                         appHandleEducationDatastoreRepository
                             .updateAppHandleHintViewedTimestampMillis(true)
+                        delay(TOOLTIP_VISIBLE_DURATION_MILLIS)
+                        windowingEducationViewController.hideEducationTooltip()
                     }
             }
 
@@ -110,6 +113,8 @@ class AppHandleEducationController(
                         showWindowingImageButtonTooltip(captionState as CaptionState.AppHandle)
                         appHandleEducationDatastoreRepository
                             .updateEnterDesktopModeHintViewedTimestampMillis(true)
+                        delay(TOOLTIP_VISIBLE_DURATION_MILLIS)
+                        windowingEducationViewController.hideEducationTooltip()
                     }
             }
 
@@ -131,6 +136,8 @@ class AppHandleEducationController(
                         showExitWindowingTooltip(captionState as CaptionState.AppHeader)
                         appHandleEducationDatastoreRepository
                             .updateExitDesktopModeHintViewedTimestampMillis(true)
+                        delay(TOOLTIP_VISIBLE_DURATION_MILLIS)
+                        windowingEducationViewController.hideEducationTooltip()
                     }
             }
         }
@@ -145,8 +152,6 @@ class AppHandleEducationController(
         val appHandleBounds = (captionState as CaptionState.AppHandle).globalAppHandleBounds
         val tooltipGlobalCoordinates =
             Point(appHandleBounds.left + appHandleBounds.width() / 2, appHandleBounds.bottom)
-        // TODO: b/370546801 - Differentiate between user dismissing the tooltip vs following the
-        // cue.
         // Populate information important to inflate app handle education tooltip.
         val appHandleTooltipConfig =
             TooltipEducationViewConfig(
@@ -322,6 +327,9 @@ class AppHandleEducationController(
                     "persist.windowing_enter_desktop_mode_education_timeout",
                     400L,
                 )
+
+        val TOOLTIP_VISIBLE_DURATION_MILLIS: Long
+            get() = SystemProperties.getLong("persist.windowing_tooltip_visible_duration", 12000L)
 
         val FORCE_SHOW_DESKTOP_MODE_EDUCATION: Boolean
             get() =
