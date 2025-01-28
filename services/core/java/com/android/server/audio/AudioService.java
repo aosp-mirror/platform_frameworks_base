@@ -826,6 +826,7 @@ public class AudioService extends IAudioService.Stub
 
     private final Executor mAudioServerLifecycleExecutor;
     private long mSysPropListenerNativeHandle;
+    private CacheWatcher mCacheWatcher;
     private final List<Future> mScheduledPermissionTasks = new ArrayList();
 
     private IMediaProjectionManager mProjectionService; // to validate projection token
@@ -11035,31 +11036,26 @@ public class AudioService extends IAudioService.Stub
                     }, UPDATE_DELAY_MS, TimeUnit.MILLISECONDS));
                 }
             };
-            mSysPropListenerNativeHandle = mAudioSystem.listenForSystemPropertyChange(
-                    PermissionManager.CACHE_KEY_PACKAGE_INFO_NOTIFY,
-                    task);
+            if (PropertyInvalidatedCache.separatePermissionNotificationsEnabled()) {
+                mCacheWatcher = new CacheWatcher(task);
+                mCacheWatcher.start();
+            } else {
+                mSysPropListenerNativeHandle = mAudioSystem.listenForSystemPropertyChange(
+                        PermissionManager.CACHE_KEY_PACKAGE_INFO_NOTIFY,
+                        task);
+            }
         } else {
             mAudioSystem.listenForSystemPropertyChange(
                     PermissionManager.CACHE_KEY_PACKAGE_INFO_NOTIFY,
                     () -> mAudioServerLifecycleExecutor.execute(
                                 mPermissionProvider::onPermissionStateChanged));
         }
-
-        if (PropertyInvalidatedCache.separatePermissionNotificationsEnabled()) {
-            new PackageInfoTransducer().start();
-        }
     }
 
     /**
-     * A transducer that converts high-speed changes in the CACHE_KEY_PACKAGE_INFO_CACHE
-     * PropertyInvalidatedCache into low-speed changes in the CACHE_KEY_PACKAGE_INFO_NOTIFY system
-     * property.  This operates on the popcorn principle: changes in the source are done when the
-     * source has been quiet for the soak interval.
-     *
-     * TODO(b/381097912) This is a temporary measure to support migration away from sysprop
-     * sniffing.  It should be cleaned up.
+     * Listens for CACHE_KEY_PACKAGE_INFO_CACHE invalidations to trigger permission syncing
      */
-    private static class PackageInfoTransducer extends Thread {
+    private static class CacheWatcher extends Thread {
 
         // The run/stop signal.
         private final AtomicBoolean mRunning = new AtomicBoolean(false);
@@ -11067,81 +11063,33 @@ public class AudioService extends IAudioService.Stub
         // The source of change information.
         private final PropertyInvalidatedCache.NonceWatcher mWatcher;
 
-        // The handler for scheduling delayed reactions to changes.
-        private final Handler mHandler;
+        // Task to trigger when cache changes
+        private final Runnable mTask;
 
-        // How long to soak changes: 50ms is the legacy choice.
-        private final static long SOAK_TIME_MS = 50;
-
-        // The ubiquitous lock.
-        private final Object mLock = new Object();
-
-        // If positive, this is the soak expiration time.
-        @GuardedBy("mLock")
-        private long mSoakDeadlineMs = -1;
-
-        // A source of unique long values.
-        @GuardedBy("mLock")
-        private long mToken = 0;
-
-        PackageInfoTransducer() {
-            mWatcher = PropertyInvalidatedCache
-                       .getNonceWatcher(PermissionManager.CACHE_KEY_PACKAGE_INFO_CACHE);
-            mHandler = new Handler(BackgroundThread.getHandler().getLooper()) {
-                    @Override
-                    public void handleMessage(Message msg) {
-                        PackageInfoTransducer.this.handleMessage(msg);
-                    }};
+        public CacheWatcher(Runnable r) {
+            mWatcher = PropertyInvalidatedCache.getNonceWatcher(
+                    PermissionManager.CACHE_KEY_PACKAGE_INFO_CACHE);
+            mTask = r;
         }
 
         public void run() {
             mRunning.set(true);
             while (mRunning.get()) {
+                doCheck();
                 try {
-                    final int changes = mWatcher.waitForChange();
-                    if (changes == 0 || !mRunning.get()) {
-                        continue;
-                    }
+                    mWatcher.waitForChange();
                 } catch (InterruptedException e) {
+                    Log.wtf(TAG, "Unexpected Interrupt", e);
                     // We don't know why the exception occurred but keep running until told to
                     // stop.
                     continue;
                 }
-                trigger();
             }
         }
 
-        @GuardedBy("mLock")
-        private void updateLocked() {
-            String n = Long.toString(mToken++);
-            SystemPropertySetter.setWithRetry(PermissionManager.CACHE_KEY_PACKAGE_INFO_NOTIFY, n);
-        }
-
-        private void trigger() {
-            synchronized (mLock) {
-                boolean alreadyQueued = mSoakDeadlineMs >= 0;
-                final long nowMs = SystemClock.uptimeMillis();
-                mSoakDeadlineMs = nowMs + SOAK_TIME_MS;
-                if (!alreadyQueued) {
-                    mHandler.sendEmptyMessageAtTime(0, mSoakDeadlineMs);
-                    updateLocked();
-                }
-            }
-        }
-
-        private void handleMessage(Message msg) {
-            synchronized (mLock) {
-                if (mSoakDeadlineMs < 0) {
-                    return;  // ???
-                }
-                final long nowMs = SystemClock.uptimeMillis();
-                if (mSoakDeadlineMs > nowMs) {
-                    mSoakDeadlineMs = nowMs + SOAK_TIME_MS;
-                    mHandler.sendEmptyMessageAtTime(0, mSoakDeadlineMs);
-                    return;
-                }
-                mSoakDeadlineMs = -1;
-                updateLocked();
+        public synchronized void doCheck() {
+            if (mWatcher.isChanged()) {
+                mTask.run();
             }
         }
 
@@ -15317,7 +15265,11 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#permissionUpdateBarrier() */
     public void permissionUpdateBarrier() {
         if (!audioserverPermissions()) return;
-        mAudioSystem.triggerSystemPropertyUpdate(mSysPropListenerNativeHandle);
+        if (PropertyInvalidatedCache.separatePermissionNotificationsEnabled()) {
+            mCacheWatcher.doCheck();
+        } else {
+            mAudioSystem.triggerSystemPropertyUpdate(mSysPropListenerNativeHandle);
+        }
         List<Future> snapshot;
         synchronized (mScheduledPermissionTasks) {
             snapshot = List.copyOf(mScheduledPermissionTasks);
