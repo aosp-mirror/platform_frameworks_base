@@ -31,10 +31,7 @@ import com.android.platform.test.ravenwood.ravenhelper.sourcemap.AllClassInfo
 import com.android.platform.test.ravenwood.ravenhelper.sourcemap.ClassInfo
 import com.android.platform.test.ravenwood.ravenhelper.sourcemap.MethodInfo
 import com.android.platform.test.ravenwood.ravenhelper.sourcemap.SourceLoader
-import java.io.BufferedWriter
-import java.io.FileOutputStream
 import java.io.FileReader
-import java.io.OutputStreamWriter
 import java.util.regex.Pattern
 
 /**
@@ -55,25 +52,7 @@ class PtaProcessor : SubcommandHandler {
         )
         converter.process()
 
-        val ops = converter.resultOperations
-
-        if (ops.size == 0) {
-            log.i("No files need to be updated.")
-            return
-        }
-
-        val scriptWriter = BufferedWriter(OutputStreamWriter(
-            options.outputScriptFile.get?.let { file ->
-                FileOutputStream(file)
-            } ?: System.out
-        ))
-
-        scriptWriter.use { writer ->
-            options.outputScriptFile.get?.let {
-                log.i("Creating script file at $it ...")
-            }
-            createShellScript(ops, writer)
-        }
+        createShellScript(converter.resultOperations, options.outputScriptFile.get)
     }
 }
 
@@ -424,7 +403,7 @@ private class TextPolicyToAnnotationConverter(
 
             if (methodsAndAnnot == null) {
                 classHasMember = true
-                return // This policy can't converted.
+                return // This policy can't be converted.
             }
             val methods = methodsAndAnnot.first
             val annot = methodsAndAnnot.second
