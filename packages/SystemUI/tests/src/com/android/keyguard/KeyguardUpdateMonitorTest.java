@@ -18,7 +18,6 @@ package com.android.keyguard;
 
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.hardware.biometrics.BiometricAuthenticator.TYPE_ANY_BIOMETRIC;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT;
@@ -2717,7 +2716,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     () -> mAlternateBouncerInteractor,
                     () -> mJavaAdapter,
                     () -> mSceneInteractor,
-                    mCommunalSceneInteractor);
+                    () -> mCommunalSceneInteractor);
             setAlternateBouncerVisibility(false);
             setPrimaryBouncerVisibility(false);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
