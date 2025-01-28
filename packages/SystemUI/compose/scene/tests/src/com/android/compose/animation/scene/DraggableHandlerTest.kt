@@ -773,6 +773,36 @@ class DraggableHandlerTest {
     }
 
     @Test
+    fun startSwipeAnimationFromBound() = runGestureTest {
+        // Swipe down to go to SceneC.
+        mutableUserActionsA = mapOf(Swipe.Down to SceneC)
+
+        val dragController =
+            onDragStarted(
+                position = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f),
+                // Swipe up.
+                overSlop = up(0.5f),
+                // Should be ignored.
+                expectedConsumedOverSlop = 0f,
+            )
+
+        val transition = assertThat(transitionState).isSceneTransition()
+        assertThat(transition).hasFromScene(SceneA)
+        assertThat(transition).hasToScene(SceneC)
+        assertThat(transition).hasProgress(0f)
+
+        // Swipe down, but not enough to go to SceneC.
+        dragController.onDragStoppedAnimateNow(
+            velocity = velocityThreshold - 0.01f,
+            onAnimationStart = {
+                assertTransition(fromScene = SceneA, toScene = SceneC, progress = 0f)
+            },
+        )
+
+        assertIdle(SceneA)
+    }
+
+    @Test
     fun requireFullDistanceSwipe() = runGestureTest {
         mutableUserActionsA +=
             Swipe.Up to UserActionResult(SceneB, requiresFullDistanceSwipe = true)

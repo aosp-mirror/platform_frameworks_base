@@ -403,11 +403,14 @@ internal class SwipeAnimation<T : ContentKey>(
                 initialValue = initialOffset,
             )
 
+        // The decay animation should only play if decayOffset exceeds targetOffset.
+        val lowerBound = checkNotNull(animatable.lowerBound) { "No lower bound" }
+        val upperBound = checkNotNull(animatable.upperBound) { "No upper bound" }
         val willDecayReachBounds =
-            when {
-                targetOffset > initialOffset -> decayOffset >= targetOffset
-                targetOffset < initialOffset -> decayOffset <= targetOffset
-                else -> true
+            when (targetOffset) {
+                lowerBound -> decayOffset <= lowerBound
+                upperBound -> decayOffset >= upperBound
+                else -> error("Target $targetOffset should be $lowerBound or $upperBound")
             }
 
         if (willDecayReachBounds) {
@@ -421,6 +424,10 @@ internal class SwipeAnimation<T : ContentKey>(
                     appendLine("  targetOffset=$targetOffset")
                     appendLine("  initialVelocity=$initialVelocity")
                     appendLine("  decayOffset=$decayOffset")
+                    appendLine(
+                        "  animateDecay result: reason=${result.endReason} " +
+                            "value=${result.endState.value} velocity=${result.endState.velocity}"
+                    )
                 }
             }
             return initialVelocity - result.endState.velocity
