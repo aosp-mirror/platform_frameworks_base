@@ -175,7 +175,7 @@ class SupervisionServiceTest {
     fun isActiveSupervisionApp_supervisionUid_supervisionEnabled_returnsTrue() {
         whenever(mockPackageManager.getPackagesForUid(APP_UID))
             .thenReturn(arrayOf(systemSupervisionPackage))
-        service.mInternal.setSupervisionEnabledForUser(USER_ID, true)
+        service.setSupervisionEnabledForUser(USER_ID, true)
 
         assertThat(service.mInternal.isActiveSupervisionApp(APP_UID)).isTrue()
     }
@@ -184,7 +184,7 @@ class SupervisionServiceTest {
     fun isActiveSupervisionApp_supervisionUid_supervisionNotEnabled_returnsFalse() {
         whenever(mockPackageManager.getPackagesForUid(APP_UID))
             .thenReturn(arrayOf(systemSupervisionPackage))
-        service.mInternal.setSupervisionEnabledForUser(USER_ID, false)
+        service.setSupervisionEnabledForUser(USER_ID, false)
 
         assertThat(service.mInternal.isActiveSupervisionApp(APP_UID)).isFalse()
     }
@@ -200,10 +200,10 @@ class SupervisionServiceTest {
     fun setSupervisionEnabledForUser() {
         assertThat(service.isSupervisionEnabledForUser(USER_ID)).isFalse()
 
-        service.mInternal.setSupervisionEnabledForUser(USER_ID, true)
+        service.setSupervisionEnabledForUser(USER_ID, true)
         assertThat(service.isSupervisionEnabledForUser(USER_ID)).isTrue()
 
-        service.mInternal.setSupervisionEnabledForUser(USER_ID, false)
+        service.setSupervisionEnabledForUser(USER_ID, false)
         assertThat(service.isSupervisionEnabledForUser(USER_ID)).isFalse()
     }
 
