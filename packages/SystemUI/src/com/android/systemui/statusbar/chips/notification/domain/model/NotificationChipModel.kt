@@ -22,6 +22,8 @@ import com.android.systemui.statusbar.notification.promoted.shared.model.Promote
 /** Modeling all the data needed to render a status bar notification chip. */
 data class NotificationChipModel(
     val key: String,
+    /** The user-readable name of the app that posted the call notification. */
+    val appName: String,
     val statusBarChipIconView: StatusBarIconView?,
     val promotedContent: PromotedNotificationContentModel,
 )

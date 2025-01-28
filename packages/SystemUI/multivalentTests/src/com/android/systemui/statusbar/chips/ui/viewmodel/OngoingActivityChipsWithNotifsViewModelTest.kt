@@ -311,7 +311,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                 )
             )
 
-            assertIsNotifChip(latest!!.primary, icon, "notif")
+            assertIsNotifChip(latest!!.primary, context, icon, "notif")
             assertThat(latest!!.secondary).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
         }
 
@@ -339,8 +339,8 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                 )
             )
 
-            assertIsNotifChip(latest!!.primary, firstIcon, "firstNotif")
-            assertIsNotifChip(latest!!.secondary, secondIcon, "secondNotif")
+            assertIsNotifChip(latest!!.primary, context, firstIcon, "firstNotif")
+            assertIsNotifChip(latest!!.secondary, context, secondIcon, "secondNotif")
         }
 
     @Test
@@ -374,8 +374,8 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                 )
             )
 
-            assertIsNotifChip(latest!!.primary, firstIcon, "firstNotif")
-            assertIsNotifChip(latest!!.secondary, secondIcon, "secondNotif")
+            assertIsNotifChip(latest!!.primary, context, firstIcon, "firstNotif")
+            assertIsNotifChip(latest!!.secondary, context, secondIcon, "secondNotif")
         }
 
     @Test
@@ -407,7 +407,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
             )
 
             assertIsCallChip(latest!!.primary, callNotificationKey)
-            assertIsNotifChip(latest!!.secondary, firstIcon, "firstNotif")
+            assertIsNotifChip(latest!!.secondary, context, firstIcon, "firstNotif")
         }
 
     @Test
@@ -456,7 +456,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
             val latest by collectLastValue(underTest.primaryChip)
 
-            assertIsNotifChip(latest, notifIcon, "notif")
+            assertIsNotifChip(latest, context, notifIcon, "notif")
 
             // WHEN the higher priority call chip is added
             callRepo.setOngoingCallState(
@@ -527,7 +527,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
 
             // THEN the lower priority notif is used
-            assertIsNotifChip(latest, notifIcon, "notif")
+            assertIsNotifChip(latest, context, notifIcon, "notif")
         }
 
     @Test
@@ -552,7 +552,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
             val latest by collectLastValue(underTest.chips)
 
-            assertIsNotifChip(latest!!.primary, notifIcon, "notif")
+            assertIsNotifChip(latest!!.primary, context, notifIcon, "notif")
             assertThat(latest!!.secondary).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
 
             // WHEN the higher priority call chip is added
@@ -563,7 +563,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
             // THEN the higher priority call chip is used as primary and notif is demoted to
             // secondary
             assertIsCallChip(latest!!.primary, callNotificationKey)
-            assertIsNotifChip(latest!!.secondary, notifIcon, "notif")
+            assertIsNotifChip(latest!!.secondary, context, notifIcon, "notif")
 
             // WHEN the higher priority media projection chip is added
             mediaProjectionState.value =
@@ -590,13 +590,13 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
             // THEN media projection and notif remain
             assertIsShareToAppChip(latest!!.primary)
-            assertIsNotifChip(latest!!.secondary, notifIcon, "notif")
+            assertIsNotifChip(latest!!.secondary, context, notifIcon, "notif")
 
             // WHEN media projection is dropped
             mediaProjectionState.value = MediaProjectionState.NotProjecting
 
             // THEN notif is promoted to primary
-            assertIsNotifChip(latest!!.primary, notifIcon, "notif")
+            assertIsNotifChip(latest!!.primary, context, notifIcon, "notif")
             assertThat(latest!!.secondary).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
         }
 

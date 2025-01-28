@@ -26,6 +26,8 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.UiThread
+import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.ui.binder.ContentDescriptionViewBinder
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
@@ -187,7 +189,13 @@ object OngoingActivityChipBinder {
             }
             is OngoingActivityChipModel.ChipIcon.StatusBarView -> {
                 StatusBarConnectedDisplays.assertInLegacyMode()
-                setStatusBarIconView(defaultIconView, icon.impl, iconTint, backgroundView)
+                setStatusBarIconView(
+                    defaultIconView,
+                    icon.impl,
+                    icon.contentDescription,
+                    iconTint,
+                    backgroundView,
+                )
             }
             is OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon -> {
                 StatusBarConnectedDisplays.assertInNewMode()
@@ -196,7 +204,13 @@ object OngoingActivityChipBinder {
                     // This means that the notification key doesn't exist anymore.
                     return
                 }
-                setStatusBarIconView(defaultIconView, iconView, iconTint, backgroundView)
+                setStatusBarIconView(
+                    defaultIconView,
+                    iconView,
+                    icon.contentDescription,
+                    iconTint,
+                    backgroundView,
+                )
             }
         }
     }
@@ -215,6 +229,7 @@ object OngoingActivityChipBinder {
     private fun setStatusBarIconView(
         defaultIconView: ImageView,
         iconView: StatusBarIconView,
+        iconContentDescription: ContentDescription,
         iconTint: Int,
         backgroundView: ChipBackgroundContainer,
     ) {
@@ -224,9 +239,12 @@ object OngoingActivityChipBinder {
         // 1. Set up the right visual params.
         with(iconView) {
             id = CUSTOM_ICON_VIEW_ID
-            // TODO(b/354930838): For RON chips, use the app name for the content description.
-            contentDescription =
-                context.resources.getString(R.string.ongoing_call_content_description)
+            if (StatusBarNotifChips.isEnabled) {
+                ContentDescriptionViewBinder.bind(iconContentDescription, this)
+            } else {
+                contentDescription =
+                    context.resources.getString(R.string.ongoing_call_content_description)
+            }
             tintView(iconTint)
         }
 

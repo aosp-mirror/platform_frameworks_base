@@ -24,9 +24,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Expandable
+import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.res.R
@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernizat
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.inCallModel
+import com.android.systemui.testKosmos
 import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
@@ -60,7 +61,7 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CallChipViewModelTest : SysuiTestCase() {
-    private val kosmos = Kosmos()
+    private val kosmos = testKosmos()
     private val notificationListRepository = kosmos.activeNotificationListRepository
     private val testScope = kosmos.testScope
     private val repo = kosmos.ongoingCallRepository
@@ -162,25 +163,34 @@ class CallChipViewModelTest : SysuiTestCase() {
 
     @Test
     @DisableFlags(StatusBarConnectedDisplays.FLAG_NAME)
-    fun chip_zeroStartTime_cdFlagOff_iconIsNotifIcon() =
+    fun chip_zeroStartTime_cdFlagOff_iconIsNotifIcon_withContentDescription() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
             val notifIcon = createStatusBarIconViewOrNull()
-            repo.setOngoingCallState(inCallModel(startTimeMs = 0, notificationIcon = notifIcon))
+            repo.setOngoingCallState(
+                inCallModel(
+                    startTimeMs = 0,
+                    notificationIcon = notifIcon,
+                    appName = "Fake app name",
+                )
+            )
 
             assertThat((latest as OngoingActivityChipModel.Shown).icon)
                 .isInstanceOf(OngoingActivityChipModel.ChipIcon.StatusBarView::class.java)
             val actualIcon =
-                (((latest as OngoingActivityChipModel.Shown).icon)
-                        as OngoingActivityChipModel.ChipIcon.StatusBarView)
-                    .impl
-            assertThat(actualIcon).isEqualTo(notifIcon)
+                (latest as OngoingActivityChipModel.Shown).icon
+                    as OngoingActivityChipModel.ChipIcon.StatusBarView
+            assertThat(actualIcon.impl).isEqualTo(notifIcon)
+            assertThat(actualIcon.contentDescription.loadContentDescription(context))
+                .contains("Ongoing call")
+            assertThat(actualIcon.contentDescription.loadContentDescription(context))
+                .contains("Fake app name")
         }
 
     @Test
     @EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
-    fun chip_zeroStartTime_cdFlagOn_iconIsNotifKeyIcon() =
+    fun chip_zeroStartTime_cdFlagOn_iconIsNotifKeyIcon_withContentDescription() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
@@ -189,11 +199,22 @@ class CallChipViewModelTest : SysuiTestCase() {
                     startTimeMs = 0,
                     notificationIcon = createStatusBarIconViewOrNull(),
                     notificationKey = "notifKey",
+                    appName = "Fake app name",
                 )
             )
 
             assertThat((latest as OngoingActivityChipModel.Shown).icon)
-                .isEqualTo(OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon("notifKey"))
+                .isInstanceOf(
+                    OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon::class.java
+                )
+            val actualIcon =
+                (latest as OngoingActivityChipModel.Shown).icon
+                    as OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon
+            assertThat(actualIcon.notificationKey).isEqualTo("notifKey")
+            assertThat(actualIcon.contentDescription.loadContentDescription(context))
+                .contains("Ongoing call")
+            assertThat(actualIcon.contentDescription.loadContentDescription(context))
+                .contains("Fake app name")
         }
 
     @Test
@@ -216,7 +237,7 @@ class CallChipViewModelTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
-    fun chip_notifIconFlagOn_butNullNotifIcon_iconNotifKey() =
+    fun chip_notifIconFlagOn_butNullNotifIcon_cdFlagOn_iconIsNotifKeyIcon_withContentDescription() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
@@ -225,11 +246,22 @@ class CallChipViewModelTest : SysuiTestCase() {
                     startTimeMs = 1000,
                     notificationIcon = null,
                     notificationKey = "notifKey",
+                    appName = "Fake app name",
                 )
             )
 
             assertThat((latest as OngoingActivityChipModel.Shown).icon)
-                .isEqualTo(OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon("notifKey"))
+                .isInstanceOf(
+                    OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon::class.java
+                )
+            val actualIcon =
+                (latest as OngoingActivityChipModel.Shown).icon
+                    as OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon
+            assertThat(actualIcon.notificationKey).isEqualTo("notifKey")
+            assertThat(actualIcon.contentDescription.loadContentDescription(context))
+                .contains("Ongoing call")
+            assertThat(actualIcon.contentDescription.loadContentDescription(context))
+                .contains("Fake app name")
         }
 
     @Test

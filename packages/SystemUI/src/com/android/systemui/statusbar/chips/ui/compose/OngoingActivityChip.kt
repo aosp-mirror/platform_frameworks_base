@@ -37,11 +37,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.Expandable
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.ui.compose.Icon
+import com.android.systemui.common.ui.compose.load
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
@@ -82,11 +85,25 @@ private fun ChipBody(
     val isClickable = onClick != {}
     val hasEmbeddedIcon = model.icon is OngoingActivityChipModel.ChipIcon.StatusBarView
 
+    val contentDescription =
+        when (val icon = model.icon) {
+            is OngoingActivityChipModel.ChipIcon.StatusBarView -> icon.contentDescription.load()
+            is OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon ->
+                icon.contentDescription.load()
+            is OngoingActivityChipModel.ChipIcon.SingleColorIcon -> null
+            null -> null
+        }
+
     // Use a Box with `fillMaxHeight` to create a larger click surface for the chip. The visible
     // height of the chip is determined by the height of the background of the Row below.
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxHeight().clickable(enabled = isClickable, onClick = onClick),
+        modifier =
+            modifier.fillMaxHeight().clickable(enabled = isClickable, onClick = onClick).semantics {
+                if (contentDescription != null) {
+                    this.contentDescription = contentDescription
+                }
+            },
     ) {
         Row(
             horizontalArrangement = Arrangement.Center,

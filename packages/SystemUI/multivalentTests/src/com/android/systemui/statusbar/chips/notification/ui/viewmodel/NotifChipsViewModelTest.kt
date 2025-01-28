@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.notification.ui.viewmodel
 
+import android.content.Context
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.view.View
@@ -23,6 +24,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.kosmos.collectLastValue
@@ -125,7 +127,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
 
     @Test
     @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
-    fun chips_onePromotedNotif_statusBarIconViewMatches() =
+    fun chips_onePromotedNotif_connectedDisplaysFlagDisabled_statusBarIconViewMatches() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
 
@@ -134,6 +136,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
                 listOf(
                     activeNotificationModel(
                         key = "notif",
+                        appName = "Fake App Name",
                         statusBarChipIcon = icon,
                         promotedContent = PromotedNotificationContentModel.Builder("notif").build(),
                     )
@@ -142,7 +145,13 @@ class NotifChipsViewModelTest : SysuiTestCase() {
 
             assertThat(latest).hasSize(1)
             val chip = latest!![0]
-            assertIsNotifChip(chip, icon, "notif")
+            assertIsNotifChip(
+                chip,
+                context,
+                icon,
+                expectedNotificationKey = "notif",
+                expectedContentDescriptionSubstrings = listOf("Ongoing", "Fake App Name"),
+            )
         }
 
     @Test
@@ -157,6 +166,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
                 listOf(
                     activeNotificationModel(
                         key = notifKey,
+                        appName = "Fake App Name",
                         statusBarChipIcon = null,
                         promotedContent = PromotedNotificationContentModel.Builder(notifKey).build(),
                     )
@@ -165,9 +175,13 @@ class NotifChipsViewModelTest : SysuiTestCase() {
 
             assertThat(latest).hasSize(1)
             val chip = latest!![0]
-            assertThat(chip).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            assertThat(chip.icon)
-                .isEqualTo(OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon(notifKey))
+            assertIsNotifChip(
+                chip,
+                context,
+                expectedIcon = null,
+                expectedNotificationKey = "notif",
+                expectedContentDescriptionSubstrings = listOf("Ongoing", "Fake App Name"),
+            )
         }
 
     @Test
@@ -230,8 +244,8 @@ class NotifChipsViewModelTest : SysuiTestCase() {
             )
 
             assertThat(latest).hasSize(2)
-            assertIsNotifChip(latest!![0], firstIcon, "notif1")
-            assertIsNotifChip(latest!![1], secondIcon, "notif2")
+            assertIsNotifChip(latest!![0], context, firstIcon, "notif1")
+            assertIsNotifChip(latest!![1], context, secondIcon, "notif2")
         }
 
     @Test
@@ -590,7 +604,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
             // THEN the "notif" chip keeps showing time
             val chip = latest!![0]
             assertThat(chip).isInstanceOf(OngoingActivityChipModel.Shown.ShortTimeDelta::class.java)
-            assertIsNotifChip(chip, icon, "notif")
+            assertIsNotifChip(chip, context, icon, "notif")
         }
 
     @Test
@@ -705,24 +719,41 @@ class NotifChipsViewModelTest : SysuiTestCase() {
     companion object {
         fun assertIsNotifChip(
             latest: OngoingActivityChipModel?,
+            context: Context,
             expectedIcon: StatusBarIconView?,
-            notificationKey: String,
+            expectedNotificationKey: String,
+            expectedContentDescriptionSubstrings: List<String> = emptyList(),
         ) {
             val shown = latest as OngoingActivityChipModel.Shown
             if (StatusBarConnectedDisplays.isEnabled) {
                 assertThat(shown.icon)
-                    .isEqualTo(
-                        OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon(notificationKey)
+                    .isInstanceOf(
+                        OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon::class.java
                     )
+                val icon = shown.icon as OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon
+
+                assertThat(icon.notificationKey).isEqualTo(expectedNotificationKey)
+                expectedContentDescriptionSubstrings.forEach {
+                    assertThat(icon.contentDescription.loadContentDescription(context)).contains(it)
+                }
             } else {
-                assertThat(latest.icon)
-                    .isEqualTo(OngoingActivityChipModel.ChipIcon.StatusBarView(expectedIcon!!))
+                assertThat(shown.icon)
+                    .isInstanceOf(OngoingActivityChipModel.ChipIcon.StatusBarView::class.java)
+                val icon = shown.icon as OngoingActivityChipModel.ChipIcon.StatusBarView
+                assertThat(icon.impl).isEqualTo(expectedIcon!!)
+                expectedContentDescriptionSubstrings.forEach {
+                    assertThat(icon.contentDescription.loadContentDescription(context)).contains(it)
+                }
             }
         }
 
         fun assertIsNotifKey(latest: OngoingActivityChipModel?, expectedKey: String) {
-            assertThat((latest as OngoingActivityChipModel.Shown).icon)
-                .isEqualTo(OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon(expectedKey))
+            assertThat(
+                    ((latest as OngoingActivityChipModel.Shown).icon
+                            as OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon)
+                        .notificationKey
+                )
+                .isEqualTo(expectedKey)
         }
     }
 }

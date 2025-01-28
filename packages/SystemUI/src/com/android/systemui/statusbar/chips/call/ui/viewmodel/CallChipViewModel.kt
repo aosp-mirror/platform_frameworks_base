@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.call.ui.viewmodel
 
+import android.content.Context
 import android.view.View
 import com.android.internal.jank.Cuj
 import com.android.systemui.animation.ActivityTransitionAnimator
@@ -23,6 +24,7 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.plugins.ActivityStarter
@@ -52,6 +54,7 @@ import kotlinx.coroutines.flow.stateIn
 open class CallChipViewModel
 @Inject
 constructor(
+    @Main private val context: Context,
     @Application private val scope: CoroutineScope,
     interactor: CallChipInteractor,
     systemClock: SystemClock,
@@ -65,15 +68,18 @@ constructor(
                     is OngoingCallModel.NoCall,
                     is OngoingCallModel.InCallWithVisibleApp -> OngoingActivityChipModel.Hidden()
                     is OngoingCallModel.InCall -> {
+                        val contentDescription = getContentDescription(state.appName)
                         val icon =
                             if (state.notificationIconView != null) {
                                 StatusBarConnectedDisplays.assertInLegacyMode()
                                 OngoingActivityChipModel.ChipIcon.StatusBarView(
-                                    state.notificationIconView
+                                    state.notificationIconView,
+                                    contentDescription,
                                 )
                             } else if (StatusBarConnectedDisplays.isEnabled) {
                                 OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon(
-                                    state.notificationKey
+                                    state.notificationKey,
+                                    contentDescription,
                                 )
                             } else {
                                 OngoingActivityChipModel.ChipIcon.SingleColorIcon(phoneIcon)
@@ -154,6 +160,17 @@ constructor(
                 }
             )
         }
+
+    private fun getContentDescription(appName: String): ContentDescription {
+        val ongoingCallDescription = context.getString(R.string.ongoing_call_content_description)
+        return ContentDescription.Loaded(
+            context.getString(
+                R.string.accessibility_desc_notification_icon,
+                appName,
+                ongoingCallDescription,
+            )
+        )
+    }
 
     companion object {
         private val phoneIcon =

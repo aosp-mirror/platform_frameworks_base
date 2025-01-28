@@ -26,5 +26,14 @@ fun inCallModel(
     notificationIcon: StatusBarIconView? = null,
     intent: PendingIntent? = null,
     notificationKey: String = "test",
+    appName: String = "",
     promotedContent: PromotedNotificationContentModel? = null,
-) = OngoingCallModel.InCall(startTimeMs, notificationIcon, intent, notificationKey, promotedContent)
+) =
+    OngoingCallModel.InCall(
+        startTimeMs,
+        notificationIcon,
+        intent,
+        notificationKey,
+        appName,
+        promotedContent,
+    )

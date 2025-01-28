@@ -160,6 +160,7 @@ constructor(
                 notificationIconView = currentInfo.notificationIconView,
                 intent = currentInfo.intent,
                 notificationKey = currentInfo.key,
+                appName = currentInfo.appName,
                 promotedContent = currentInfo.promotedContent,
             )
         } else {
@@ -217,6 +218,7 @@ constructor(
                     notifModel.statusBarChipIconView,
                     notifModel.contentIntent,
                     notifModel.uid,
+                    notifModel.appName,
                     notifModel.promotedContent,
                     isOngoing = true,
                     statusBarSwipedAway = callNotificationInfo?.statusBarSwipedAway ?: false,
@@ -337,6 +339,7 @@ constructor(
         val notificationIconView: StatusBarIconView?,
         val intent: PendingIntent?,
         val uid: Int,
+        val appName: String,
         /**
          * If the call notification also meets promoted notification criteria, this field is filled
          * in with the content related to promotion. Otherwise null.

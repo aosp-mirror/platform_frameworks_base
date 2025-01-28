@@ -42,6 +42,7 @@ sealed interface OngoingCallModel {
      * @property notificationIconView the [android.app.Notification.getSmallIcon] that's set on the
      *   call notification. We may use this icon in the chip instead of the default phone icon.
      * @property intent the intent associated with the call notification.
+     * @property appName the user-readable name of the app that posted the call notification.
      * @property promotedContent if the call notification also meets promoted notification criteria,
      *   this field is filled in with the content related to promotion. Otherwise null.
      */
@@ -50,6 +51,7 @@ sealed interface OngoingCallModel {
         val notificationIconView: StatusBarIconView?,
         val intent: PendingIntent?,
         val notificationKey: String,
+        val appName: String,
         val promotedContent: PromotedNotificationContentModel?,
     ) : OngoingCallModel
 }

@@ -16,10 +16,14 @@
 
 package com.android.systemui.statusbar.chips.notification.ui.viewmodel
 
+import android.content.Context
 import android.view.View
 import com.android.systemui.Flags
+import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.chips.notification.domain.interactor.StatusBarNotificationChipsInteractor
 import com.android.systemui.statusbar.chips.notification.domain.model.NotificationChipModel
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
@@ -43,6 +47,7 @@ import kotlinx.coroutines.launch
 class NotifChipsViewModel
 @Inject
 constructor(
+    @Main private val context: Context,
     @Application private val applicationScope: CoroutineScope,
     private val notifChipsInteractor: StatusBarNotificationChipsInteractor,
     headsUpNotificationInteractor: HeadsUpNotificationInteractor,
@@ -65,13 +70,20 @@ constructor(
         headsUpState: TopPinnedState
     ): OngoingActivityChipModel.Shown {
         StatusBarNotifChips.assertInNewMode()
+        val contentDescription = getContentDescription(this.appName)
         val icon =
             if (this.statusBarChipIconView != null) {
                 StatusBarConnectedDisplays.assertInLegacyMode()
-                OngoingActivityChipModel.ChipIcon.StatusBarView(this.statusBarChipIconView)
+                OngoingActivityChipModel.ChipIcon.StatusBarView(
+                    this.statusBarChipIconView,
+                    contentDescription,
+                )
             } else {
                 StatusBarConnectedDisplays.assertInNewMode()
-                OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon(this.key)
+                OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon(
+                    this.key,
+                    contentDescription,
+                )
             }
         val colors = this.promotedContent.toCustomColorsModel()
 
@@ -79,6 +91,7 @@ constructor(
             // The notification pipeline needs everything to run on the main thread, so keep
             // this event on the main thread.
             applicationScope.launch {
+                // TODO(b/364653005): Move accessibility focus to the HUN when chip is tapped.
                 notifChipsInteractor.onPromotedNotificationChipTapped(this@toActivityChipModel.key)
             }
         }
@@ -172,5 +185,17 @@ constructor(
                 )
             }
         }
+    }
+
+    private fun getContentDescription(appName: String): ContentDescription {
+        val ongoingDescription =
+            context.getString(R.string.ongoing_notification_extra_content_description)
+        return ContentDescription.Loaded(
+            context.getString(
+                R.string.accessibility_desc_notification_icon,
+                appName,
+                ongoingDescription,
+            )
+        )
     }
 }

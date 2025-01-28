@@ -49,6 +49,7 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
             val startingNotif =
                 activeNotificationModel(
                     key = "notif1",
+                    appName = "Fake Name",
                     statusBarChipIcon = icon,
                     promotedContent = PROMOTED_CONTENT,
                 )
@@ -58,6 +59,7 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
             val latest by collectLastValue(underTest.notificationChip)
 
             assertThat(latest!!.key).isEqualTo("notif1")
+            assertThat(latest!!.appName).isEqualTo("Fake Name")
             assertThat(latest!!.statusBarChipIconView).isEqualTo(icon)
             assertThat(latest!!.promotedContent).isEqualTo(PROMOTED_CONTENT)
         }
@@ -70,6 +72,7 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
                 factory.create(
                     activeNotificationModel(
                         key = "notif1",
+                        appName = "Fake Name",
                         statusBarChipIcon = originalIconView,
                         promotedContent = PROMOTED_CONTENT,
                     ),
@@ -82,12 +85,14 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
             underTest.setNotification(
                 activeNotificationModel(
                     key = "notif1",
+                    appName = "New Name",
                     statusBarChipIcon = newIconView,
                     promotedContent = PROMOTED_CONTENT,
                 )
             )
 
             assertThat(latest!!.key).isEqualTo("notif1")
+            assertThat(latest!!.appName).isEqualTo("New Name")
             assertThat(latest!!.statusBarChipIconView).isEqualTo(newIconView)
         }
 

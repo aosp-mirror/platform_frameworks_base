@@ -21,10 +21,12 @@ import android.app.Notification.CallStyle.CALL_TYPE_SCREENING
 import android.app.Notification.CallStyle.CALL_TYPE_UNKNOWN
 import android.app.Notification.EXTRA_CALL_TYPE
 import android.app.PendingIntent
+import android.content.Context
 import android.graphics.drawable.Icon
 import android.service.notification.StatusBarNotification
 import android.util.ArrayMap
 import com.android.app.tracing.traceSection
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
@@ -50,6 +52,7 @@ class RenderNotificationListInteractor
 constructor(
     private val repository: ActiveNotificationListRepository,
     private val sectionStyleProvider: SectionStyleProvider,
+    @Main private val context: Context,
 ) {
     /**
      * Sets the current list of rendered notification entries as displayed in the notification list.
@@ -57,7 +60,7 @@ constructor(
     fun setRenderedList(entries: List<ListEntry>) {
         traceSection("RenderNotificationListInteractor.setRenderedList") {
             repository.activeNotifications.update { existingModels ->
-                buildActiveNotificationsStore(existingModels, sectionStyleProvider) {
+                buildActiveNotificationsStore(existingModels, sectionStyleProvider, context) {
                     entries.forEach(::addListEntry)
                     setRankingsMap(entries)
                 }
@@ -69,13 +72,17 @@ constructor(
 private fun buildActiveNotificationsStore(
     existingModels: ActiveNotificationsStore,
     sectionStyleProvider: SectionStyleProvider,
+    context: Context,
     block: ActiveNotificationsStoreBuilder.() -> Unit,
 ): ActiveNotificationsStore =
-    ActiveNotificationsStoreBuilder(existingModels, sectionStyleProvider).apply(block).build()
+    ActiveNotificationsStoreBuilder(existingModels, sectionStyleProvider, context)
+        .apply(block)
+        .build()
 
 private class ActiveNotificationsStoreBuilder(
     private val existingModels: ActiveNotificationsStore,
     private val sectionStyleProvider: SectionStyleProvider,
+    private val context: Context,
 ) {
     private val builder = ActiveNotificationsStore.Builder()
 
@@ -154,6 +161,7 @@ private class ActiveNotificationsStoreBuilder(
             statusBarChipIconView = icons.statusBarChipIcon,
             uid = sbn.uid,
             packageName = sbn.packageName,
+            appName = sbn.notification.loadHeaderAppName(context),
             contentIntent = sbn.notification.contentIntent,
             instanceId = sbn.instanceId?.id,
             isGroupSummary = sbn.notification.isGroupSummary,
@@ -180,6 +188,7 @@ private fun ActiveNotificationsStore.createOrReuse(
     statusBarChipIconView: StatusBarIconView?,
     uid: Int,
     packageName: String,
+    appName: String,
     contentIntent: PendingIntent?,
     instanceId: Int?,
     isGroupSummary: Boolean,
@@ -206,6 +215,7 @@ private fun ActiveNotificationsStore.createOrReuse(
             instanceId = instanceId,
             isGroupSummary = isGroupSummary,
             packageName = packageName,
+            appName = appName,
             contentIntent = contentIntent,
             bucket = bucket,
             callType = callType,
@@ -230,6 +240,7 @@ private fun ActiveNotificationsStore.createOrReuse(
             instanceId = instanceId,
             isGroupSummary = isGroupSummary,
             packageName = packageName,
+            appName = appName,
             contentIntent = contentIntent,
             bucket = bucket,
             callType = callType,
@@ -253,6 +264,7 @@ private fun ActiveNotificationModel.isCurrent(
     statusBarChipIconView: StatusBarIconView?,
     uid: Int,
     packageName: String,
+    appName: String,
     contentIntent: PendingIntent?,
     instanceId: Int?,
     isGroupSummary: Boolean,
@@ -278,6 +290,7 @@ private fun ActiveNotificationModel.isCurrent(
         instanceId != this.instanceId -> false
         isGroupSummary != this.isGroupSummary -> false
         packageName != this.packageName -> false
+        appName != this.appName -> false
         contentIntent != this.contentIntent -> false
         bucket != this.bucket -> false
         callType != this.callType -> false

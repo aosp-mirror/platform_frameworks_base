@@ -47,7 +47,7 @@ class RenderNotificationsListInteractorTest : SysuiTestCase() {
     private val notifsRepository = kosmos.activeNotificationListRepository
     private val notifsInteractor = kosmos.activeNotificationsInteractor
     private val underTest =
-        RenderNotificationListInteractor(notifsRepository, sectionStyleProvider = mock())
+        RenderNotificationListInteractor(notifsRepository, sectionStyleProvider = mock(), context)
 
     @Test
     fun setRenderedList_preservesOrdering() =
