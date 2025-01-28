@@ -95,6 +95,10 @@ fun ChipContent(viewModel: OngoingActivityChipModel.Shown, modifier: Modifier = 
         is OngoingActivityChipModel.Shown.ShortTimeDelta -> {
             // TODO(b/372657935): Implement ShortTimeDelta content in compose.
         }
+
+        is OngoingActivityChipModel.Shown.IconOnly -> {
+            throw IllegalStateException("ChipContent should only be used if the chip shows text")
+        }
     }
 }
 

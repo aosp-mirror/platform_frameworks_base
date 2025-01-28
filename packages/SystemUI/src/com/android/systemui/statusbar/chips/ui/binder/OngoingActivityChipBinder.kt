@@ -418,6 +418,7 @@ object OngoingActivityChipBinder {
             }
             is OngoingActivityChipModel.Shown.Timer,
             is OngoingActivityChipModel.Shown.Text,
+            is OngoingActivityChipModel.Shown.ShortTimeDelta,
             is OngoingActivityChipModel.Shown.IconOnly -> {
                 chipView.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_NONE
             }

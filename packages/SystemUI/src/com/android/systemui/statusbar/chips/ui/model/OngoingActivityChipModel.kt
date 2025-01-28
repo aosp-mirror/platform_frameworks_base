@@ -40,7 +40,7 @@ sealed class OngoingActivityChipModel {
     }
 
     /** This chip should be shown with the given information. */
-    abstract class Shown(
+    sealed class Shown(
         /** The icon to show on the chip. If null, no icon will be shown. */
         open val icon: ChipIcon?,
         /** What colors to use for the chip. */
