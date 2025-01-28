@@ -122,16 +122,11 @@ public class HubEndpoint {
                         HubEndpointInfo initiator,
                         @Nullable String serviceDescriptor)
                         throws RemoteException {
-                    boolean sessionExists;
-                    synchronized (mLock) {
-                        sessionExists = mActiveSessions.contains(sessionId);
-                        // TODO(b/378974199): Consider refactor these assertions
-                        if (sessionExists) {
-                            Log.w(
-                                    TAG,
-                                    "onSessionOpenComplete: session already exists, id="
-                                            + sessionId);
-                        }
+                    boolean sessionExists = getActiveSession(sessionId) != null;
+                    if (sessionExists) {
+                        Log.w(
+                                TAG,
+                                "onSessionOpenComplete: session already exists, id=" + sessionId);
                     }
 
                     if (!sessionExists && mLifecycleCallback != null) {
@@ -150,13 +145,7 @@ public class HubEndpoint {
 
                 @Override
                 public void onSessionOpenComplete(int sessionId) throws RemoteException {
-                    final HubEndpointSession activeSession;
-
-                    // Retrieve the active session
-                    synchronized (mLock) {
-                        activeSession = mActiveSessions.get(sessionId);
-                    }
-                    // TODO(b/378974199): Consider refactor these assertions
+                    final HubEndpointSession activeSession = getActiveSession(sessionId);
                     if (activeSession == null) {
                         Log.w(
                                 TAG,
@@ -179,13 +168,7 @@ public class HubEndpoint {
 
                 @Override
                 public void onSessionClosed(int sessionId, int reason) throws RemoteException {
-                    final HubEndpointSession activeSession;
-
-                    // Retrieve the active session
-                    synchronized (mLock) {
-                        activeSession = mActiveSessions.get(sessionId);
-                    }
-                    // TODO(b/378974199): Consider refactor these assertions
+                    final HubEndpointSession activeSession = getActiveSession(sessionId);
                     if (activeSession == null) {
                         Log.w(TAG, "onSessionClosed: session not active, id=" + sessionId);
                     }
@@ -211,12 +194,7 @@ public class HubEndpoint {
                 @Override
                 public void onMessageReceived(int sessionId, HubMessage message)
                         throws RemoteException {
-                    final HubEndpointSession activeSession;
-
-                    // Retrieve the active session
-                    synchronized (mLock) {
-                        activeSession = mActiveSessions.get(sessionId);
-                    }
+                    final HubEndpointSession activeSession = getActiveSession(sessionId);
                     if (activeSession == null) {
                         Log.w(TAG, "onMessageReceived: session not active, id=" + sessionId);
                     }
@@ -230,6 +208,12 @@ public class HubEndpoint {
                                     mMessageCallback.onMessageReceived(activeSession, message);
                                     sendMessageDeliveryStatus(sessionId, message, ErrorCode.OK);
                                 });
+                    }
+                }
+
+                private HubEndpointSession getActiveSession(int sessionId) {
+                    synchronized (mLock) {
+                        return mActiveSessions.get(sessionId);
                     }
                 }
 
