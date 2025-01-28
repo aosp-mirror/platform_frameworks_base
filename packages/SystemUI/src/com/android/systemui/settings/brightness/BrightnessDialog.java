@@ -16,6 +16,8 @@
 
 package com.android.systemui.settings.brightness;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.Intent.EXTRA_BRIGHTNESS_DIALOG_IS_FULL_WIDTH;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -157,6 +159,7 @@ public class BrightnessDialog extends Activity {
     }
 
     void setBrightnessDialogViewAttributes(View container) {
+        Configuration configuration = getResources().getConfiguration();
         // The brightness mirror container is INVISIBLE by default.
         container.setVisibility(View.VISIBLE);
         ViewGroup.MarginLayoutParams lp =
@@ -171,9 +174,16 @@ public class BrightnessDialog extends Activity {
                         R.dimen.notification_guts_option_vertical_padding);
 
         lp.topMargin = verticalMargin;
+        // If in multi-window or freeform, increase the top margin so the brightness dialog
+        // doesn't get cut off.
+        final int windowingMode = configuration.windowConfiguration.getWindowingMode();
+        if (windowingMode == WINDOWING_MODE_MULTI_WINDOW
+                || windowingMode == WINDOWING_MODE_FREEFORM) {
+            lp.topMargin += 50;
+        }
+
         lp.bottomMargin = verticalMargin;
 
-        Configuration configuration = getResources().getConfiguration();
         int orientation = configuration.orientation;
         int windowWidth = getWindowAvailableWidth();
 
