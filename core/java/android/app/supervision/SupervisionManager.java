@@ -101,6 +101,35 @@ public class SupervisionManager {
     }
 
     /**
+     * Sets whether the device is supervised for the current user.
+     *
+     * @hide
+     */
+    @UserHandleAware
+    public void setSupervisionEnabled(boolean enabled) {
+        setSupervisionEnabledForUser(mContext.getUserId(), enabled);
+    }
+
+    /**
+     * Sets whether the device is supervised for a given user.
+     *
+     * <p>The caller must be from the same user as the target or hold the {@link
+     * android.Manifest.permission#INTERACT_ACROSS_USERS} permission.
+     *
+     * @hide
+     */
+    @RequiresPermission(
+            value = android.Manifest.permission.INTERACT_ACROSS_USERS,
+            conditional = true)
+    public void setSupervisionEnabledForUser(@UserIdInt int userId, boolean enabled) {
+        try {
+            mService.setSupervisionEnabledForUser(userId, enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns the package name of the app that is acting as the active supervision app or null if
      * supervision is disabled.
      *

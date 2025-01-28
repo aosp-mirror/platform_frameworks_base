@@ -94,6 +94,14 @@ public class SupervisionService extends ISupervisionManager.Stub {
         }
     }
 
+    @Override
+    public void setSupervisionEnabledForUser(@UserIdInt int userId, boolean enabled) {
+        if (UserHandle.getUserId(Binder.getCallingUid()) != userId) {
+            enforcePermission(INTERACT_ACROSS_USERS);
+        }
+        setSupervisionEnabledForUserInternal(userId, enabled, getSystemSupervisionPackage());
+    }
+
     /**
      * Returns the package name of the active supervision app or null if supervision is disabled.
      */
@@ -160,7 +168,7 @@ public class SupervisionService extends ISupervisionManager.Stub {
      * Sets supervision as enabled or disabled for the given user and, in case supervision is being
      * enabled, the package of the active supervision app.
      */
-    private void setSupervisionEnabledForUser(
+    private void setSupervisionEnabledForUserInternal(
             @UserIdInt int userId, boolean enabled, @Nullable String supervisionAppPackage) {
         synchronized (getLockObject()) {
             SupervisionUserData data = getUserDataLocked(userId);
@@ -176,16 +184,16 @@ public class SupervisionService extends ISupervisionManager.Stub {
                 dpmInternal != null ? dpmInternal.getProfileOwnerAsUser(userId) : null;
 
         if (po != null && po.getPackageName().equals(getSystemSupervisionPackage())) {
-            setSupervisionEnabledForUser(userId, true, po.getPackageName());
+            setSupervisionEnabledForUserInternal(userId, true, po.getPackageName());
         } else if (po != null && po.equals(getSupervisionProfileOwnerComponent())) {
             // TODO(b/392071637): Consider not enabling supervision in case profile owner is given
             // to the legacy supervision profile owner component.
-            setSupervisionEnabledForUser(userId, true, po.getPackageName());
+            setSupervisionEnabledForUserInternal(userId, true, po.getPackageName());
         } else {
             // TODO(b/381428475): Avoid disabling supervision when the app is not the profile owner.
             // This might only be possible after introducing specific and public APIs to enable
             // and disable supervision.
-            setSupervisionEnabledForUser(userId, false, /* supervisionAppPackage= */ null);
+            setSupervisionEnabledForUserInternal(userId, false, /* supervisionAppPackage= */ null);
         }
     }
 
@@ -327,8 +335,7 @@ public class SupervisionService extends ISupervisionManager.Stub {
 
         @Override
         public void setSupervisionEnabledForUser(@UserIdInt int userId, boolean enabled) {
-            SupervisionService.this.setSupervisionEnabledForUser(
-                    userId, enabled, getSystemSupervisionPackage());
+            SupervisionService.this.setSupervisionEnabledForUser(userId, enabled);
         }
 
         @Override

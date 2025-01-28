@@ -22,5 +22,6 @@ package android.app.supervision;
  */
 interface ISupervisionManager {
     boolean isSupervisionEnabledForUser(int userId);
+    void setSupervisionEnabledForUser(int userId, boolean enabled);
     String getActiveSupervisionAppPackage(int userId);
 }
