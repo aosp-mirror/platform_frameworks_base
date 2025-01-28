@@ -2321,12 +2321,14 @@ public class PropertyInvalidatedCache<Query, Result> {
         @GuardedBy("mLock")
         private int mBlockHash = 0;
 
-        // The number of nonces that the native layer can hold.  This is maintained for debug and
-        // logging.
-        private final int mMaxNonce;
+        // The number of nonces that the native layer can hold.  This is maintained for debug,
+        // logging, and testing.
+        @VisibleForTesting
+        public final int mMaxNonce;
 
         // The size of the native byte block.
-        private final int mMaxByte;
+        @VisibleForTesting
+        public final int mMaxByte;
 
         /** @hide */
         @VisibleForTesting
@@ -2483,18 +2485,20 @@ public class PropertyInvalidatedCache<Query, Result> {
             }
         }
 
-        static final AtomicLong sStoreCount = new AtomicLong();
-
-
         // Add a string to the local copy of the block and write the block to shared memory.
         // Return the index of the new string.  If the string has already been recorded, the
-        // shared memory is not updated but the index of the existing string is returned.
+        // shared memory is not updated but the index of the existing string is returned.  Only
+        // mMaxNonce strings can be stored; if mMaxNonce strings have already been allocated,
+        // the method throws.
         public int storeName(@NonNull String str) {
             synchronized (mLock) {
                 Integer handle = mStringHandle.get(str);
                 if (handle == null) {
                     throwIfImmutable();
                     throwIfBadString(str);
+                    if (mHighestIndex + 1 >= mMaxNonce) {
+                        throw new RuntimeException("nonce limit exceeded");
+                    }
                     byte[] block = new byte[mMaxByte];
                     nativeGetByteBlock(mPtr, 0, block);
                     appendStringToMapLocked(str, block);

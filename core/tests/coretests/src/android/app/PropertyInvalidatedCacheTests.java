@@ -37,8 +37,10 @@ import android.app.PropertyInvalidatedCache.Args;
 import android.app.PropertyInvalidatedCache.NonceWatcher;
 import android.app.PropertyInvalidatedCache.NonceStore;
 import android.os.Binder;
+import android.util.Log;
 import com.android.internal.os.ApplicationSharedMemory;
 
+import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
@@ -410,8 +412,7 @@ public class PropertyInvalidatedCacheTests {
 
     // Verify that invalidating the cache from an app process would fail due to lack of permissions.
     @Test
-    @android.platform.test.annotations.DisabledOnRavenwood(
-            reason = "SystemProperties doesn't have permission check")
+    @DisabledOnRavenwood(reason = "SystemProperties doesn't have permission check")
     public void testPermissionFailure() {
         // Create a cache that will write a system nonce.
         TestCache sysCache = new TestCache(MODULE_SYSTEM, "mode1");
@@ -556,8 +557,7 @@ public class PropertyInvalidatedCacheTests {
     // storing nonces in shared memory.
     @RequiresFlagsEnabled(FLAG_APPLICATION_SHARED_MEMORY_ENABLED)
     @Test
-    @android.platform.test.annotations.DisabledOnRavenwood(
-            reason = "PIC doesn't use SharedMemory on Ravenwood")
+    @DisabledOnRavenwood(reason = "PIC doesn't use SharedMemory on Ravenwood")
     public void testSharedMemoryStorage() {
         // Fetch a shared memory instance for testing.
         ApplicationSharedMemory shmem = ApplicationSharedMemory.create();
@@ -598,6 +598,49 @@ public class PropertyInvalidatedCacheTests {
 
         // The names are different, so the indices must be different.
         assertNotEquals(index1, index2);
+
+        shmem.close();
+    }
+
+    // Verify that the configured number of nonce slots is actually available.  This test
+    // hard-codes the configured number of slots, which means that this test must be changed
+    // whenever the shared memory configuration changes.
+    @RequiresFlagsEnabled(FLAG_APPLICATION_SHARED_MEMORY_ENABLED)
+    @Test
+    @DisabledOnRavenwood(reason = "PIC doesn't use SharedMemory on Ravenwood")
+    public void testSharedMemoryNonceConfig() {
+        // The two configured constants.  These are private to this method since they are only
+        // used here.
+        // LINT.IfChange(system_nonce_config)
+        final int maxNonce = 128;
+        final int maxByte = 8192;
+        // LINT.ThenChange(/core/jni/android_app_PropertyInvalidatedCache.h:system_nonce_config)
+
+        // Fetch a shared memory instance for testing.
+        ApplicationSharedMemory shmem = ApplicationSharedMemory.create();
+
+        // Create a server-side store.
+        NonceStore server = new NonceStore(shmem.getSystemNonceBlock(), true);
+
+        // Verify that the configured limits are as expected.
+        assertEquals(server.mMaxNonce, maxNonce);
+        assertEquals(server.mMaxByte, maxByte);
+
+        // Create mMaxNonce nonces.  These all succeed.
+        for (int i = 0; i < server.mMaxNonce; i++) {
+            String name = String.format("name_%03d", i);
+            assertEquals(i, server.storeName(name));
+        }
+
+        // Verify that we cannot create a nonce over the limit.
+        try {
+          int i = server.mMaxNonce;
+          String name = String.format("name_%03d", i);
+          server.storeName(name);
+          fail("expected a RuntimeException");
+        } catch (RuntimeException e) {
+          // Okay
+        }
 
         shmem.close();
     }
