@@ -2140,6 +2140,7 @@ package android.media.audiofx {
     method public void setParameterListener(android.media.audiofx.AudioEffect.OnParameterChangeListener);
     method public static byte[] shortToByteArray(short);
     field public static final java.util.UUID EFFECT_TYPE_NULL;
+    field @NonNull public static final java.util.UUID EFFECT_TYPE_SPATIALIZER;
   }
 
   public static class AudioEffect.Descriptor {
