@@ -4270,6 +4270,7 @@ public abstract class Context {
             //@hide: STATUS_BAR_SERVICE,
             THREAD_NETWORK_SERVICE,
             CONNECTIVITY_SERVICE,
+            TETHERING_SERVICE,
             PAC_PROXY_SERVICE,
             VCN_MANAGEMENT_SERVICE,
             //@hide: IP_MEMORY_STORE_SERVICE,
