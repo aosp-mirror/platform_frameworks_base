@@ -83,10 +83,7 @@ class DesktopMixedTransitionHandler(
 
     /** Starts close transition and handles or delegates desktop task close animation. */
     override fun startRemoveTransition(wct: WindowContainerTransaction?): IBinder {
-        if (
-            !DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS.isTrue &&
-                !DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS_BUGFIX.isTrue
-        ) {
+        if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS_BUGFIX.isTrue) {
             return freeformTaskTransitionHandler.startRemoveTransition(wct)
         }
         requireNotNull(wct)
@@ -110,7 +107,6 @@ class DesktopMixedTransitionHandler(
     ): IBinder {
         if (
             !Flags.enableFullyImmersiveInDesktop() &&
-                !DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS.isTrue &&
                 !DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX.isTrue
         ) {
             return transitions.startTransition(transitionType, wct, /* handler= */ null)
@@ -259,10 +255,7 @@ class DesktopMixedTransitionHandler(
             minimizeChange?.taskInfo?.taskId,
             immersiveExitChange?.taskInfo?.taskId,
         )
-        if (
-            DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS.isTrue ||
-                DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX.isTrue
-        ) {
+        if (DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX.isTrue) {
             // Only apply minimize change reparenting here if we implement the new app launch
             // transitions, otherwise this reparenting is handled in the default handler.
             minimizeChange?.let {
