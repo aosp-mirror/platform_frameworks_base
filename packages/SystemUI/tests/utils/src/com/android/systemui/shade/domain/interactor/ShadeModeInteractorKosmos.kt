@@ -21,6 +21,7 @@ import android.provider.Settings
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.res.R
 import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.data.repository.shadeRepository
@@ -31,6 +32,7 @@ val Kosmos.shadeModeInteractor by Fixture {
         applicationScope = applicationCoroutineScope,
         repository = shadeRepository,
         secureSettingsRepository = fakeSecureSettingsRepository,
+        tableLogBuffer = logcatTableLogBuffer(this, "sceneFrameworkTableLogBuffer"),
     )
 }
 

@@ -18,11 +18,16 @@ package com.android.systemui.scene.domain.interactor
 
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.table.Diffable
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.TableRowLogger
 import com.android.systemui.scene.data.model.SceneStack
+import com.android.systemui.scene.data.model.asIterable
 import com.android.systemui.scene.data.model.peek
 import com.android.systemui.scene.data.model.pop
 import com.android.systemui.scene.data.model.push
 import com.android.systemui.scene.data.model.sceneStackOf
+import com.android.systemui.scene.domain.SceneFrameworkTableLog
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import javax.inject.Inject
@@ -39,6 +44,7 @@ class SceneBackInteractor
 constructor(
     private val logger: SceneLogger,
     private val sceneContainerConfig: SceneContainerConfig,
+    @SceneFrameworkTableLog private val tableLogBuffer: TableLogBuffer,
 ) {
     private val _backStack = MutableStateFlow(sceneStackOf())
     val backStack: StateFlow<SceneStack> = _backStack.asStateFlow()
@@ -58,6 +64,7 @@ constructor(
     fun onSceneChange(from: SceneKey, to: SceneKey) {
         check(from != to) { "from == to, from=${from.debugName}, to=${to.debugName}" }
 
+        val prevVal = backStack.value
         _backStack.update { stack ->
             when (stackOperation(from, to, stack)) {
                 null -> stack
@@ -68,12 +75,21 @@ constructor(
             }
         }
         logger.logSceneBackStack(backStack.value)
+        tableLogBuffer.logDiffs(
+            prevVal = DiffableSceneStack(prevVal),
+            newVal = DiffableSceneStack(backStack.value),
+        )
     }
 
     /** Applies the given [transform] to the back stack. */
     fun updateBackStack(transform: (SceneStack) -> SceneStack) {
+        val prevVal = backStack.value
         _backStack.update { stack -> transform(stack) }
         logger.logSceneBackStack(backStack.value)
+        tableLogBuffer.logDiffs(
+            prevVal = DiffableSceneStack(prevVal),
+            newVal = DiffableSceneStack(backStack.value),
+        )
     }
 
     private fun stackOperation(from: SceneKey, to: SceneKey, stack: SceneStack): StackOperation? {
@@ -106,4 +122,15 @@ constructor(
     private data object Push : StackOperation
 
     private data object Pop : StackOperation
+
+    private class DiffableSceneStack(private val sceneStack: SceneStack) :
+        Diffable<DiffableSceneStack> {
+
+        override fun logDiffs(prevVal: DiffableSceneStack, row: TableRowLogger) {
+            row.logChange(
+                columnName = "backStack",
+                value = sceneStack.asIterable().joinToString { it.debugName },
+            )
+        }
+    }
 }

@@ -25,7 +25,10 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
 import com.android.systemui.keyguard.DismissCallbackRegistry
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.scene.data.model.asIterable
+import com.android.systemui.scene.domain.SceneFrameworkTableLog
 import com.android.systemui.scene.domain.interactor.SceneBackInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
@@ -33,9 +36,11 @@ import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.utils.coroutines.flow.mapLatestConflated
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -43,6 +48,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * Hosts application business logic related to device entry.
@@ -62,6 +68,7 @@ constructor(
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
     private val dismissCallbackRegistry: DismissCallbackRegistry,
     sceneBackInteractor: SceneBackInteractor,
+    @SceneFrameworkTableLog private val tableLogBuffer: TableLogBuffer,
 ) {
     /**
      * Whether the device is unlocked.
@@ -147,6 +154,11 @@ constructor(
             ) { enteredDirectly, enteredOnBackStack ->
                 enteredOnBackStack || enteredDirectly
             }
+            .logDiffsForTable(
+                tableLogBuffer = tableLogBuffer,
+                columnName = "isDeviceEntered",
+                initialValue = false,
+            )
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
@@ -184,6 +196,11 @@ constructor(
                         deviceUnlockStatus.deviceUnlockSource?.dismissesLockscreen == false)) &&
                     !isDeviceEntered
             }
+            .logDiffsForTable(
+                tableLogBuffer = tableLogBuffer,
+                columnName = "canSwipeToEnter",
+                initialValue = false,
+            )
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
@@ -270,5 +287,30 @@ constructor(
     /** Locks the device instantly. */
     fun lockNow() {
         deviceUnlockedInteractor.lockNow()
+    }
+
+    suspend fun hydrateTableLogBuffer(tableLogBuffer: TableLogBuffer) {
+        coroutineScope {
+            launch {
+                isDeviceEntered
+                    .logDiffsForTable(
+                        tableLogBuffer = tableLogBuffer,
+                        columnName = "isDeviceEntered",
+                        initialValue = isDeviceEntered.value,
+                    )
+                    .collect()
+            }
+
+            launch {
+                canSwipeToEnter
+                    .map { it?.toString() ?: "" }
+                    .logDiffsForTable(
+                        tableLogBuffer = tableLogBuffer,
+                        columnName = "canSwipeToEnter",
+                        initialValue = canSwipeToEnter.value?.toString() ?: "",
+                    )
+                    .collect()
+            }
+        }
     }
 }

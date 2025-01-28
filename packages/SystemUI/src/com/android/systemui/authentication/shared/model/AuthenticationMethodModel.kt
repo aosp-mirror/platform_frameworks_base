@@ -16,6 +16,9 @@
 
 package com.android.systemui.authentication.shared.model
 
+import com.android.systemui.log.table.Diffable
+import com.android.systemui.log.table.TableRowLogger
+
 /** Enumerates all known authentication methods. */
 sealed class AuthenticationMethodModel(
     /**
@@ -24,8 +27,8 @@ sealed class AuthenticationMethodModel(
      * "Secure" authentication methods require authentication to unlock the device. Non-secure auth
      * methods simply require user dismissal.
      */
-    open val isSecure: Boolean,
-) {
+    open val isSecure: Boolean
+) : Diffable<AuthenticationMethodModel> {
     /**
      * Device doesn't use a secure authentication method. Either there is no lockscreen or the lock
      * screen can be swiped away when displayed.
@@ -39,4 +42,8 @@ sealed class AuthenticationMethodModel(
     data object Pattern : AuthenticationMethodModel(isSecure = true)
 
     data object Sim : AuthenticationMethodModel(isSecure = true)
+
+    override fun logDiffs(prevVal: AuthenticationMethodModel, row: TableRowLogger) {
+        row.logChange(columnName = "authenticationMethod", value = toString())
+    }
 }

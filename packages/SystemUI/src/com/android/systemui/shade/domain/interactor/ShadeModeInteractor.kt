@@ -19,6 +19,9 @@ package com.android.systemui.shade.domain.interactor
 import android.provider.Settings
 import androidx.annotation.FloatRange
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
+import com.android.systemui.scene.domain.SceneFrameworkTableLog
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shade.shared.model.ShadeMode
@@ -81,8 +84,9 @@ class ShadeModeInteractorImpl
 @Inject
 constructor(
     @Application applicationScope: CoroutineScope,
-    repository: ShadeRepository,
+    private val repository: ShadeRepository,
     secureSettingsRepository: SecureSettingsRepository,
+    @SceneFrameworkTableLog private val tableLogBuffer: TableLogBuffer,
 ) : ShadeModeInteractor {
 
     private val isDualShadeEnabled: Flow<Boolean> =
@@ -93,17 +97,17 @@ constructor(
 
     override val isShadeLayoutWide: StateFlow<Boolean> = repository.isShadeLayoutWide
 
+    private val shadeModeInitialValue: ShadeMode
+        get() =
+            determineShadeMode(
+                isDualShadeEnabled = DUAL_SHADE_ENABLED_DEFAULT,
+                isShadeLayoutWide = repository.isShadeLayoutWide.value,
+            )
+
     override val shadeMode: StateFlow<ShadeMode> =
         combine(isDualShadeEnabled, repository.isShadeLayoutWide, ::determineShadeMode)
-            .stateIn(
-                applicationScope,
-                SharingStarted.Eagerly,
-                initialValue =
-                    determineShadeMode(
-                        isDualShadeEnabled = DUAL_SHADE_ENABLED_DEFAULT,
-                        isShadeLayoutWide = repository.isShadeLayoutWide.value,
-                    ),
-            )
+            .logDiffsForTable(tableLogBuffer = tableLogBuffer, initialValue = shadeModeInitialValue)
+            .stateIn(applicationScope, SharingStarted.Eagerly, initialValue = shadeModeInitialValue)
 
     @FloatRange(from = 0.0, to = 1.0) override fun getTopEdgeSplitFraction(): Float = 0.5f
 
