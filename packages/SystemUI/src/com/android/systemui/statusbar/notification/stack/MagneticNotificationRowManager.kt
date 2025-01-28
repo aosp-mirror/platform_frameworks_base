@@ -96,4 +96,35 @@ interface MagneticNotificationRowManager {
      * [onMagneticInteractionEnd] will not be called from the lifecycle of the user gesture.
      */
     fun reset()
+
+    companion object {
+        /** Detaching threshold in dp */
+        const val MAGNETIC_DETACH_THRESHOLD_DP = 56
+
+        /* An empty implementation of a manager */
+        @JvmStatic
+        val Empty: MagneticNotificationRowManager
+            get() =
+                object : MagneticNotificationRowManager {
+                    override fun setSwipeThresholdPx(thresholdPx: Float) {}
+
+                    override fun setMagneticAndRoundableTargets(
+                        swipingRow: ExpandableNotificationRow,
+                        stackScrollLayout: NotificationStackScrollLayout,
+                        sectionsManager: NotificationSectionsManager,
+                    ) {}
+
+                    override fun setMagneticRowTranslation(
+                        row: ExpandableNotificationRow,
+                        translation: Float,
+                    ): Boolean = false
+
+                    override fun onMagneticInteractionEnd(
+                        row: ExpandableNotificationRow,
+                        velocity: Float?,
+                    ) {}
+
+                    override fun reset() {}
+                }
+    }
 }

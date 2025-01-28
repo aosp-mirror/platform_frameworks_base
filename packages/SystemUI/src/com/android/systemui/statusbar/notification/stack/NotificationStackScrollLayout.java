@@ -24,6 +24,7 @@ import static android.view.MotionEvent.ACTION_UP;
 import static com.android.app.tracing.TrackGroupUtils.trackGroup;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SHADE_CLEAR_ALL;
+import static com.android.systemui.Flags.magneticNotificationSwipes;
 import static com.android.systemui.Flags.notificationOverExpansionClippingFix;
 import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
@@ -5787,17 +5788,21 @@ public class NotificationStackScrollLayout
                 getChildrenWithBackground()
         );
 
-        RoundableTargets targets = mController.getNotificationTargetsHelper().findRoundableTargets(
-                (ExpandableNotificationRow) viewSwiped,
-                this,
-                mSectionsManager
-        );
+        if (!magneticNotificationSwipes()) {
+            RoundableTargets targets = mController
+                    .getNotificationTargetsHelper()
+                    .findRoundableTargets(
+                            (ExpandableNotificationRow) viewSwiped,
+                            this,
+                            mSectionsManager);
 
-        mController.getNotificationRoundnessManager()
-                .setViewsAffectedBySwipe(
-                        targets.getBefore(),
-                        targets.getSwiped(),
-                        targets.getAfter());
+            mController.getNotificationRoundnessManager()
+                    .setViewsAffectedBySwipe(
+                            targets.getBefore(),
+                            targets.getSwiped(),
+                            targets.getAfter());
+
+        }
 
         updateFirstAndLastBackgroundViews();
         requestDisallowInterceptTouchEvent(true);

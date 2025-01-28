@@ -1962,13 +1962,10 @@ flag {
 }
 
 flag {
-   name: "magnetic_notification_horizontal_swipe"
+   name: "magnetic_notification_swipes"
    namespace: "systemui"
    description: "Add support for magnetic behavior on horizontal notification swipes."
    bug: "390179908"
-   metadata {
-        purpose: PURPOSE_BUGFIX
-   }
 }
 
 flag {
