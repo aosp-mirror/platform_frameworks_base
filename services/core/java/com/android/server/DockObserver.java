@@ -79,6 +79,8 @@ final class DockObserver extends SystemService {
     private final List<ExtconStateConfig> mExtconStateConfigs;
     private DeviceProvisionedObserver mDeviceProvisionedObserver;
 
+    private final DockObserverLocalService mDockObserverLocalService;
+
     static final class ExtconStateProvider {
         private final Map<String, String> mState;
 
@@ -193,13 +195,21 @@ final class DockObserver extends SystemService {
         } else {
             Slog.i(TAG, "No extcon dock device found in this kernel.");
         }
+
+        mDockObserverLocalService = new DockObserverLocalService();
+        LocalServices.addService(DockObserverInternal.class, mDockObserverLocalService);
+    }
+
+    public class DockObserverLocalService extends DockObserverInternal {
+        @Override
+        public int getActualDockState() {
+            return mActualDockState;
+        }
     }
 
     @Override
     public void onStart() {
         publishBinderService(TAG, new BinderService());
-        // Logs dock state after setDockStateFromProviderLocked sets mReportedDockState
-        FrameworkStatsLog.write(FrameworkStatsLog.DOCK_STATE_CHANGED, mReportedDockState);
     }
 
     @Override
@@ -230,6 +240,9 @@ final class DockObserver extends SystemService {
     private void setDockStateLocked(int newState) {
         if (newState != mReportedDockState) {
             mReportedDockState = newState;
+            // Here is the place mReportedDockState is updated. Logs dock state for
+            // mReportedDockState here so we can report the dock state.
+            FrameworkStatsLog.write(FrameworkStatsLog.DOCK_STATE_CHANGED, mReportedDockState);
             if (mSystemReady) {
                 // Wake up immediately when docked or undocked unless prohibited from doing so.
                 if (allowWakeFromDock()) {
