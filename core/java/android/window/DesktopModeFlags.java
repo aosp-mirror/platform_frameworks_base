@@ -79,6 +79,8 @@ public enum DesktopModeFlags {
             Flags::enableDesktopAppLaunchAlttabTransitionsBugfix, true),
     ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX(
             Flags::enableDesktopAppLaunchTransitionsBugfix, true),
+    ENABLE_DESKTOP_COMPAT_UI_VISIBILITY_STATUS(
+            Flags::enableCompatUiVisibilityStatus, true),
     INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC(
             Flags::includeTopTransparentFullscreenTaskInDesktopHeuristic, true),
     ENABLE_DESKTOP_WINDOWING_HSUM(Flags::enableDesktopWindowingHsum, true),
