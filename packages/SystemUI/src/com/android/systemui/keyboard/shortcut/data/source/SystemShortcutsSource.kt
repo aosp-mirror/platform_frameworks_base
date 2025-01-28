@@ -155,9 +155,9 @@ constructor(@Main private val resources: Resources, private val inputManager: In
                 command(META_META_ON, KEYCODE_DPAD_LEFT)
             },
             // Take a full screenshot:
-            //  - Meta + Ctrl + S
+            //  - Meta + S
             shortcutInfo(resources.getString(R.string.group_system_full_screenshot)) {
-                command(META_META_ON or META_CTRL_ON, KEYCODE_S)
+                command(META_META_ON, KEYCODE_S)
             },
             // Access list of system / apps shortcuts:
             //  - Meta + /

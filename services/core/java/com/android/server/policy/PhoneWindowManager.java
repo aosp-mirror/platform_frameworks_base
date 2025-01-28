@@ -3664,7 +3664,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_S:
-                if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
+                if (firstDown && event.isMetaPressed()) {
                     interceptScreenshotChord(SCREENSHOT_KEY_OTHER, 0 /*pressDelay*/);
                     notifyKeyGestureCompleted(event,
                             KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT);
