@@ -194,7 +194,6 @@ private class CellularIconViewModel(
             .distinctUntilChanged()
             .logDiffsForTable(
                 iconInteractor.tableLogBuffer,
-                columnPrefix = "",
                 columnName = "visible",
                 initialValue = false,
             )
@@ -252,7 +251,6 @@ private class CellularIconViewModel(
             .distinctUntilChanged()
             .logDiffsForTable(
                 iconInteractor.tableLogBuffer,
-                columnPrefix = "",
                 columnName = "showNetworkTypeIcon",
                 initialValue = false,
             )
@@ -296,7 +294,6 @@ private class CellularIconViewModel(
         iconInteractor.isRoaming
             .logDiffsForTable(
                 iconInteractor.tableLogBuffer,
-                columnPrefix = "",
                 columnName = "roaming",
                 initialValue = false,
             )

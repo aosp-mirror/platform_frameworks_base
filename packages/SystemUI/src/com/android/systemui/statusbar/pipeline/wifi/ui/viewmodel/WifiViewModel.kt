@@ -89,7 +89,7 @@ constructor(
                     else -> WifiIcon.Hidden
                 }
             }
-            .logDiffsForTable(wifiTableLogBuffer, columnPrefix = "", initialValue = WifiIcon.Hidden)
+            .logDiffsForTable(wifiTableLogBuffer, initialValue = WifiIcon.Hidden)
             .stateIn(
                 scope,
                 started = SharingStarted.WhileSubscribed(),

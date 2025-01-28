@@ -65,7 +65,7 @@ interface Diffable<T> {
  */
 fun <T : Diffable<T>> Flow<T>.logDiffsForTable(
     tableLogBuffer: TableLogBuffer,
-    columnPrefix: String,
+    columnPrefix: String = "",
     initialValue: T,
 ): Flow<T> {
     // Fully log the initial value to the table.
@@ -87,7 +87,7 @@ fun <T : Diffable<T>> Flow<T>.logDiffsForTable(
 /** See [logDiffsForTable(TableLogBuffer, String, T)]. */
 fun Flow<Boolean>.logDiffsForTable(
     tableLogBuffer: TableLogBuffer,
-    columnPrefix: String,
+    columnPrefix: String = "",
     columnName: String,
     initialValue: Boolean,
 ): Flow<Boolean> {
@@ -106,7 +106,7 @@ fun Flow<Boolean>.logDiffsForTable(
 /** See [logDiffsForTable(TableLogBuffer, String, T)]. */
 fun Flow<Int>.logDiffsForTable(
     tableLogBuffer: TableLogBuffer,
-    columnPrefix: String,
+    columnPrefix: String = "",
     columnName: String,
     initialValue: Int,
 ): Flow<Int> {
@@ -125,7 +125,7 @@ fun Flow<Int>.logDiffsForTable(
 /** See [logDiffsForTable(TableLogBuffer, String, T)]. */
 fun Flow<Int?>.logDiffsForTable(
     tableLogBuffer: TableLogBuffer,
-    columnPrefix: String,
+    columnPrefix: String = "",
     columnName: String,
     initialValue: Int?,
 ): Flow<Int?> {
@@ -144,7 +144,7 @@ fun Flow<Int?>.logDiffsForTable(
 /** See [logDiffsForTable(TableLogBuffer, String, T)]. */
 fun Flow<String?>.logDiffsForTable(
     tableLogBuffer: TableLogBuffer,
-    columnPrefix: String,
+    columnPrefix: String = "",
     columnName: String,
     initialValue: String?,
 ): Flow<String?> {
@@ -163,7 +163,7 @@ fun Flow<String?>.logDiffsForTable(
 /** See [logDiffsForTable(TableLogBuffer, String, T)]. */
 fun <T> Flow<List<T>>.logDiffsForTable(
     tableLogBuffer: TableLogBuffer,
-    columnPrefix: String,
+    columnPrefix: String = "",
     columnName: String,
     initialValue: List<T>,
 ): Flow<List<T>> {
