@@ -731,7 +731,7 @@ public class WallpaperManagerServiceTests {
         // WHEN display ID, 2, is ready.
         WallpaperManagerInternal wallpaperManagerInternal = LocalServices.getService(
                 WallpaperManagerInternal.class);
-        wallpaperManagerInternal.onDisplayReady(testDisplayId);
+        wallpaperManagerInternal.onDisplayAddSystemDecorations(testDisplayId);
 
         // Then there is a connection established for the system & lock wallpaper for display ID, 2.
         verify(mockIWallpaperService).attach(
@@ -771,7 +771,7 @@ public class WallpaperManagerServiceTests {
         // WHEN display ID, 2, is ready.
         WallpaperManagerInternal wallpaperManagerInternal = LocalServices.getService(
                 WallpaperManagerInternal.class);
-        wallpaperManagerInternal.onDisplayReady(testDisplayId);
+        wallpaperManagerInternal.onDisplayAddSystemDecorations(testDisplayId);
 
         // Then there is a connection established for the system wallpaper for display ID, 2.
         verify(mockIWallpaperService).attach(
@@ -818,7 +818,7 @@ public class WallpaperManagerServiceTests {
         // WHEN display ID, 2, is ready.
         WallpaperManagerInternal wallpaperManagerInternal = LocalServices.getService(
                 WallpaperManagerInternal.class);
-        wallpaperManagerInternal.onDisplayReady(testDisplayId);
+        wallpaperManagerInternal.onDisplayAddSystemDecorations(testDisplayId);
 
         // Then there is a connection established for the fallback wallpaper for display ID, 2.
         verify(mockIWallpaperService).attach(
@@ -856,7 +856,7 @@ public class WallpaperManagerServiceTests {
         // GIVEN wallpaper connections have been established for display ID, 2.
         WallpaperManagerInternal wallpaperManagerInternal = LocalServices.getService(
                 WallpaperManagerInternal.class);
-        wallpaperManagerInternal.onDisplayReady(testDisplayId);
+        wallpaperManagerInternal.onDisplayAddSystemDecorations(testDisplayId);
         // Save displayConnector for displayId 2 before display removal.
         WallpaperManagerService.DisplayConnector displayConnector =
                 wallpaper.connection.getDisplayConnectorOrCreate(testDisplayId);
@@ -894,7 +894,7 @@ public class WallpaperManagerServiceTests {
         // GIVEN wallpaper connections have been established for display ID, 2.
         WallpaperManagerInternal wallpaperManagerInternal = LocalServices.getService(
                 WallpaperManagerInternal.class);
-        wallpaperManagerInternal.onDisplayReady(testDisplayId);
+        wallpaperManagerInternal.onDisplayAddSystemDecorations(testDisplayId);
         // Save displayConnectors for display ID, 2, before display removal.
         WallpaperManagerService.DisplayConnector systemWallpaperDisplayConnector =
                 systemWallpaper.connection.getDisplayConnectorOrCreate(testDisplayId);
@@ -930,7 +930,7 @@ public class WallpaperManagerServiceTests {
         // GIVEN wallpaper connections have been established for display ID, 2.
         WallpaperManagerInternal wallpaperManagerInternal = LocalServices.getService(
                 WallpaperManagerInternal.class);
-        wallpaperManagerInternal.onDisplayReady(testDisplayId);
+        wallpaperManagerInternal.onDisplayAddSystemDecorations(testDisplayId);
         // Save fallback wallpaper displayConnector for display ID, 2, before display removal.
         WallpaperManagerService.DisplayConnector fallbackWallpaperConnector =
                 mService.mFallbackWallpaper.connection.getDisplayConnectorOrCreate(testDisplayId);
@@ -977,7 +977,7 @@ public class WallpaperManagerServiceTests {
         // GIVEN wallpaper connections have been established for displayID, 2.
         WallpaperManagerInternal wallpaperManagerInternal = LocalServices.getService(
                 WallpaperManagerInternal.class);
-        wallpaperManagerInternal.onDisplayReady(testDisplayId);
+        wallpaperManagerInternal.onDisplayAddSystemDecorations(testDisplayId);
         // Save displayConnector for displayId 2 before display removal.
         WallpaperManagerService.DisplayConnector displayConnector =
                 wallpaper.connection.getDisplayConnectorOrCreate(testDisplayId);
@@ -1011,7 +1011,7 @@ public class WallpaperManagerServiceTests {
         // GIVEN wallpaper connections have been established for displayID, 2.
         WallpaperManagerInternal wallpaperManagerInternal = LocalServices.getService(
                 WallpaperManagerInternal.class);
-        wallpaperManagerInternal.onDisplayReady(testDisplayId);
+        wallpaperManagerInternal.onDisplayAddSystemDecorations(testDisplayId);
         // Save displayConnectors for displayId 2 before display removal.
         WallpaperManagerService.DisplayConnector systemWallpaperDisplayConnector =
                 systemWallpaper.connection.getDisplayConnectorOrCreate(testDisplayId);

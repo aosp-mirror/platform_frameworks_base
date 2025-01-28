@@ -1636,8 +1636,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     private final class LocalService extends WallpaperManagerInternal {
         @Override
-        public void onDisplayReady(int displayId) {
-            onDisplayReadyInternal(displayId);
+        public void onDisplayAddSystemDecorations(int displayId) {
+            onDisplayAddSystemDecorationsInternal(displayId);
         }
 
         @Override
@@ -3944,7 +3944,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         return (wallpaper != null) ? wallpaper.allowBackup : false;
     }
 
-    private void onDisplayReadyInternal(int displayId) {
+    private void onDisplayAddSystemDecorationsInternal(int displayId) {
         synchronized (mLock) {
             if (mLastWallpaper == null) {
                 return;

@@ -26,7 +26,7 @@ public abstract class WallpaperManagerInternal {
     /**
      * Notifies the display is ready for adding wallpaper on it.
      */
-    public abstract void onDisplayReady(int displayId);
+    public abstract void onDisplayAddSystemDecorations(int displayId);
 
     /** Notifies when display stop showing system decorations and wallpaper. */
     public abstract void onDisplayRemoveSystemDecorations(int displayId);
