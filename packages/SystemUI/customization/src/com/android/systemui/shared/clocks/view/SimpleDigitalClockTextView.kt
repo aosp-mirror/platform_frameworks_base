@@ -69,8 +69,8 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
     lateinit var textStyle: FontTextStyle
     lateinit var aodStyle: FontTextStyle
 
-    private var lsFontVariation = ClockFontAxisSetting.toFVar(DEFAULT_LS_VARIATION)
-    private var aodFontVariation = ClockFontAxisSetting.toFVar(DEFAULT_AOD_VARIATION)
+    private var lsFontVariation = ClockFontAxisSetting.toFVar(DEFAULT_LS_AXES)
+    private var aodFontVariation = ClockFontAxisSetting.toFVar(DEFAULT_AOD_AXES)
     private val parser = DimensionParser(clockCtx.context)
     var maxSingleDigitHeight = -1
     var maxSingleDigitWidth = -1
@@ -129,8 +129,15 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
         invalidate()
     }
 
-    fun updateAxes(axes: List<ClockFontAxisSetting>) {
-        lsFontVariation = ClockFontAxisSetting.toFVar(axes + OPTICAL_SIZE_AXIS)
+    fun updateAxes(lsAxes: List<ClockFontAxisSetting>) {
+        val aodAxes = ClockFontAxisSetting.replace(lsAxes, AOD_FIXED_AXES)
+        lsFontVariation = ClockFontAxisSetting.toFVar(lsAxes)
+        aodFontVariation = ClockFontAxisSetting.toFVar(aodAxes)
+        logger.i({ "updateAxes(LS = $str1, AOD = $str2)" }) {
+            str1 = lsFontVariation
+            str2 = aodFontVariation
+        }
+
         lockScreenPaint.typeface = typefaceCache.getTypefaceForVariant(lsFontVariation)
         typeface = lockScreenPaint.typeface
 
@@ -501,22 +508,14 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
             Paint().also { it.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OUT) }
 
         val AOD_COLOR = Color.WHITE
-        val OPTICAL_SIZE_AXIS = ClockFontAxisSetting(GSFAxes.OPTICAL_SIZE, 144f)
-        val DEFAULT_LS_VARIATION =
-            listOf(
-                OPTICAL_SIZE_AXIS,
-                ClockFontAxisSetting(GSFAxes.WEIGHT, 400f),
-                ClockFontAxisSetting(GSFAxes.WIDTH, 100f),
-                ClockFontAxisSetting(GSFAxes.ROUND, 0f),
-                ClockFontAxisSetting(GSFAxes.SLANT, 0f),
-            )
-        val DEFAULT_AOD_VARIATION =
-            listOf(
-                OPTICAL_SIZE_AXIS,
-                ClockFontAxisSetting(GSFAxes.WEIGHT, 200f),
-                ClockFontAxisSetting(GSFAxes.WIDTH, 100f),
-                ClockFontAxisSetting(GSFAxes.ROUND, 0f),
-                ClockFontAxisSetting(GSFAxes.SLANT, 0f),
-            )
+        val LS_WEIGHT_AXIS = ClockFontAxisSetting(GSFAxes.WEIGHT, 400f)
+        val AOD_WEIGHT_AXIS = ClockFontAxisSetting(GSFAxes.WEIGHT, 200f)
+        val WIDTH_AXIS = ClockFontAxisSetting(GSFAxes.WIDTH, 85f)
+        val ROUND_AXIS = ClockFontAxisSetting(GSFAxes.ROUND, 0f)
+        val SLANT_AXIS = ClockFontAxisSetting(GSFAxes.SLANT, 0f)
+
+        val DEFAULT_LS_AXES = listOf(LS_WEIGHT_AXIS, WIDTH_AXIS, ROUND_AXIS, SLANT_AXIS)
+        val AOD_FIXED_AXES = listOf(AOD_WEIGHT_AXIS, WIDTH_AXIS)
+        val DEFAULT_AOD_AXES = AOD_FIXED_AXES + listOf(ROUND_AXIS, SLANT_AXIS)
     }
 }

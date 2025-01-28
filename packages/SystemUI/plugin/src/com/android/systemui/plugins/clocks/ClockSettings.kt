@@ -106,5 +106,13 @@ data class ClockFontAxisSetting(
             }
             return sb.toString()
         }
+
+        fun replace(
+            list: List<ClockFontAxisSetting>,
+            replacements: List<ClockFontAxisSetting>,
+        ): List<ClockFontAxisSetting> {
+            var remaining = list.filterNot { lhs -> replacements.any { rhs -> lhs.key == rhs.key } }
+            return remaining + replacements
+        }
     }
 }

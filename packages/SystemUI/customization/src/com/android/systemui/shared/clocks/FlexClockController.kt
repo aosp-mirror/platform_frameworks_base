@@ -135,7 +135,7 @@ class FlexClockController(private val clockCtx: ClockContext) : ClockController 
                     key = GSFAxes.WIDTH,
                     type = AxisType.Float,
                     minValue = 25f,
-                    currentValue = 100f,
+                    currentValue = 85f,
                     maxValue = 151f,
                     name = "Width",
                     description = "Glyph Width",
