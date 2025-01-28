@@ -383,15 +383,14 @@ class KeyGestureControllerTests {
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
-                "META + CTRL + S -> Take Screenshot",
+                "META + S -> Take Screenshot",
                 intArrayOf(
                     KeyEvent.KEYCODE_META_LEFT,
-                    KeyEvent.KEYCODE_CTRL_LEFT,
                     KeyEvent.KEYCODE_S
                 ),
                 KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT,
                 intArrayOf(KeyEvent.KEYCODE_S),
-                KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON,
+                KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(

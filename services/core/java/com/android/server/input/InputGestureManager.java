@@ -152,7 +152,7 @@ final class InputGestureManager {
                 ),
                 createKeyGesture(
                         KeyEvent.KEYCODE_S,
-                        KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
+                        KeyEvent.META_META_ON,
                         KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT
                 ),
                 createKeyGesture(
