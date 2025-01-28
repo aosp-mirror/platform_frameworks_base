@@ -588,7 +588,7 @@ public class BubbleController implements ConfigurationChangeListener,
      * <p>If bubble bar is supported, bubble views will be updated to switch to bar mode.
      */
     public void registerBubbleStateListener(Bubbles.BubbleStateListener listener) {
-        if (canShowAsBubbleBar() && listener != null) {
+        if (Flags.enableBubbleBar() && mBubblePositioner.isLargeScreen() && listener != null) {
             // Only set the listener if we can show the bubble bar.
             mBubbleStateListener = listener;
             setUpBubbleViewsForMode();
@@ -762,14 +762,11 @@ public class BubbleController implements ConfigurationChangeListener,
         }
     }
 
-    /** Whether bubbles are showing in the bubble bar. */
+    /** Whether bubbles would be shown with the bubble bar UI. */
     public boolean isShowingAsBubbleBar() {
-        return canShowAsBubbleBar() && mBubbleStateListener != null;
-    }
-
-    /** Whether the current configuration supports showing as bubble bar. */
-    private boolean canShowAsBubbleBar() {
-        return Flags.enableBubbleBar() && mBubblePositioner.isLargeScreen();
+        return Flags.enableBubbleBar()
+                && mBubblePositioner.isLargeScreen()
+                && mBubbleStateListener != null;
     }
 
     /**
@@ -778,7 +775,7 @@ public class BubbleController implements ConfigurationChangeListener,
      */
     @Nullable
     public BubbleBarLocation getBubbleBarLocation() {
-        if (canShowAsBubbleBar()) {
+        if (isShowingAsBubbleBar()) {
             return mBubblePositioner.getBubbleBarLocation();
         }
         return null;
@@ -789,7 +786,7 @@ public class BubbleController implements ConfigurationChangeListener,
      */
     public void setBubbleBarLocation(BubbleBarLocation bubbleBarLocation,
             @BubbleBarLocation.UpdateSource int source) {
-        if (canShowAsBubbleBar()) {
+        if (isShowingAsBubbleBar()) {
             BubbleBarLocation previousLocation = mBubblePositioner.getBubbleBarLocation();
             mBubblePositioner.setBubbleBarLocation(bubbleBarLocation);
             if (mLayerView != null && !mLayerView.isExpandedViewDragged()) {
@@ -841,7 +838,7 @@ public class BubbleController implements ConfigurationChangeListener,
      * {@link #setBubbleBarLocation(BubbleBarLocation, int)}.
      */
     public void animateBubbleBarLocation(BubbleBarLocation bubbleBarLocation) {
-        if (canShowAsBubbleBar()) {
+        if (isShowingAsBubbleBar()) {
             mBubbleStateListener.animateBubbleBarLocation(bubbleBarLocation);
         }
     }
