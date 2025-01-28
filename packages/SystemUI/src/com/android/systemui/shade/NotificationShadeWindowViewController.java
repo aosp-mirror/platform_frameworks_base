@@ -45,6 +45,7 @@ import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags;
 import com.android.systemui.bouncer.ui.binder.BouncerViewBinder;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
@@ -87,6 +88,8 @@ import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.window.ui.WindowRootViewBinder;
 import com.android.systemui.window.ui.viewmodel.WindowRootViewModel;
 
+import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
 import kotlinx.coroutines.flow.Flow;
 
 import java.io.PrintWriter;
@@ -119,6 +122,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
     private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     private final AlternateBouncerInteractor mAlternateBouncerInteractor;
     private final QuickSettingsController mQuickSettingsController;
+    private final CoroutineDispatcher mMainDispatcher;
     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private final GlanceableHubContainerController
             mGlanceableHubContainerController;
@@ -204,7 +208,8 @@ public class NotificationShadeWindowViewController implements Dumpable {
             AlternateBouncerInteractor alternateBouncerInteractor,
             BouncerViewBinder bouncerViewBinder,
             @ShadeDisplayAware Provider<ConfigurationForwarder> configurationForwarder,
-            BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor) {
+            BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor,
+            @Main CoroutineDispatcher mainDispatcher) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
         mStatusBarStateController = statusBarStateController;
@@ -232,6 +237,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mQuickSettingsController = quickSettingsController;
+        mMainDispatcher = mainDispatcher;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -286,7 +292,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
         if (SceneContainerFlag.isEnabled()) return;
 
         WindowRootViewBinder.INSTANCE.bind(mView, windowRootViewModelFactory, blurUtils,
-                choreographer);
+                choreographer, mMainDispatcher);
     }
 
     private void bindBouncer(BouncerViewBinder bouncerViewBinder) {

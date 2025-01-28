@@ -26,6 +26,7 @@ import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.statusbar.BlurUtils
 import com.android.systemui.window.ui.viewmodel.WindowRootViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
@@ -42,11 +43,12 @@ object WindowRootViewBinder {
         viewModelFactory: WindowRootViewModel.Factory,
         blurUtils: BlurUtils?,
         choreographer: Choreographer?,
+        mainDispatcher: CoroutineDispatcher,
     ) {
         if (!Flags.bouncerUiRevamp() && !Flags.glanceableHubBlurredBackground()) return
         if (blurUtils == null || choreographer == null) return
 
-        view.repeatWhenAttached {
+        view.repeatWhenAttached(mainDispatcher) {
             Log.d(TAG, "Binding root view")
             var frameCallbackPendingExecution: FrameCallback? = null
             view.viewModel(
