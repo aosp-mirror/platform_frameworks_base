@@ -39,6 +39,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
+import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -85,11 +87,13 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
 
     private lateinit var powerInteractor: PowerInteractor
     private lateinit var transitionRepository: FakeKeyguardTransitionRepository
+    private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
 
     @Before
     fun setup() {
         powerInteractor = kosmos.powerInteractor
         transitionRepository = kosmos.fakeKeyguardTransitionRepositorySpy
+        bouncerRepository = kosmos.fakeKeyguardBouncerRepository
         underTest = kosmos.fromAodTransitionInteractor
 
         underTest.start()
@@ -289,6 +293,29 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
             kosmos.fakeKeyguardRepository.setBiometricUnlockState(
                 BiometricUnlockMode.WAKE_AND_UNLOCK
             )
+            powerInteractor.setAwakeForTest()
+            runCurrent()
+
+            // Waking up from wake and unlock should not start any transitions, we'll wait for the
+            // dismiss call.
+            assertThat(transitionRepository).noTransitionsStarted()
+
+            underTest.dismissAod()
+            advanceTimeBy(100) // account for debouncing
+
+            assertThat(transitionRepository)
+                .startedTransition(from = KeyguardState.AOD, to = KeyguardState.GONE)
+        }
+
+    @Test
+    fun testWakeAndUnlock_transitionsToGone_evenIfBouncerShows() =
+        testScope.runTest {
+            kosmos.fakeKeyguardRepository.setBiometricUnlockState(
+                BiometricUnlockMode.WAKE_AND_UNLOCK
+            )
+            runCurrent()
+            bouncerRepository.setPrimaryShow(true)
+            runCurrent()
             powerInteractor.setAwakeForTest()
             runCurrent()
 
