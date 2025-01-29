@@ -652,9 +652,16 @@ public class TaskViewTransitions implements Transitions.TransitionHandler, TaskV
                     }
                     continue;
                 }
-                startTransaction.reparent(chg.getLeash(), tv.getSurfaceControl());
-                finishTransaction.reparent(chg.getLeash(), tv.getSurfaceControl())
-                        .setPosition(chg.getLeash(), 0, 0);
+                final Rect boundsOnScreen = tv.prepareOpen(chg.getTaskInfo(), chg.getLeash());
+                if (boundsOnScreen != null) {
+                    if (wct == null) wct = new WindowContainerTransaction();
+                    updateBounds(tv, boundsOnScreen, startTransaction, finishTransaction,
+                            chg.getTaskInfo(), chg.getLeash(), wct);
+                } else {
+                    startTransaction.reparent(chg.getLeash(), tv.getSurfaceControl());
+                    finishTransaction.reparent(chg.getLeash(), tv.getSurfaceControl())
+                            .setPosition(chg.getLeash(), 0, 0);
+                }
                 changesHandled++;
             }
         }
@@ -683,30 +690,8 @@ public class TaskViewTransitions implements Transitions.TransitionHandler, TaskV
             WindowContainerTransaction wct) {
         final Rect boundsOnScreen = taskView.prepareOpen(taskInfo, leash);
         if (boundsOnScreen != null) {
-            final SurfaceControl tvSurface = taskView.getSurfaceControl();
-            // Surface is ready, so just reparent the task to this surface control
-            startTransaction.reparent(leash, tvSurface)
-                    .show(leash);
-            // Also reparent on finishTransaction since the finishTransaction will reparent back
-            // to its "original" parent by default.
-            if (finishTransaction != null) {
-                finishTransaction.reparent(leash, tvSurface)
-                        .setPosition(leash, 0, 0)
-                        // TODO: maybe once b/280900002 is fixed this will be unnecessary
-                        .setWindowCrop(leash, boundsOnScreen.width(), boundsOnScreen.height());
-            }
-            if (useRepo()) {
-                final TaskViewRepository.TaskViewState state = mTaskViewRepo.byTaskView(taskView);
-                if (state != null) {
-                    state.mBounds.set(boundsOnScreen);
-                    state.mVisible = true;
-                }
-            } else {
-                updateBoundsState(taskView, boundsOnScreen);
-                updateVisibilityState(taskView, true /* visible */);
-            }
-            wct.setBounds(taskInfo.token, boundsOnScreen);
-            taskView.applyCaptionInsetsIfNeeded();
+            updateBounds(taskView, boundsOnScreen, startTransaction, finishTransaction, taskInfo,
+                    leash, wct);
         } else {
             // The surface has already been destroyed before the task has appeared,
             // so go ahead and hide the task entirely
@@ -728,6 +713,36 @@ public class TaskViewTransitions implements Transitions.TransitionHandler, TaskV
         wct.setTaskTrimmableFromRecents(taskInfo.token, false /* isTrimmableFromRecents */);
 
         taskView.notifyAppeared(newTask);
+    }
+
+    private void updateBounds(TaskViewTaskController taskView, Rect boundsOnScreen,
+            SurfaceControl.Transaction startTransaction,
+            SurfaceControl.Transaction finishTransaction,
+            ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash,
+            WindowContainerTransaction wct) {
+        final SurfaceControl tvSurface = taskView.getSurfaceControl();
+        // Surface is ready, so just reparent the task to this surface control
+        startTransaction.reparent(leash, tvSurface)
+                .show(leash);
+        // Also reparent on finishTransaction since the finishTransaction will reparent back
+        // to its "original" parent by default.
+        if (finishTransaction != null) {
+            finishTransaction.reparent(leash, tvSurface)
+                    .setPosition(leash, 0, 0)
+                    .setWindowCrop(leash, boundsOnScreen.width(), boundsOnScreen.height());
+        }
+        if (useRepo()) {
+            final TaskViewRepository.TaskViewState state = mTaskViewRepo.byTaskView(taskView);
+            if (state != null) {
+                state.mBounds.set(boundsOnScreen);
+                state.mVisible = true;
+            }
+        } else {
+            updateBoundsState(taskView, boundsOnScreen);
+            updateVisibilityState(taskView, true /* visible */);
+        }
+        wct.setBounds(taskInfo.token, boundsOnScreen);
+        taskView.applyCaptionInsetsIfNeeded();
     }
 
     /** Interface for running an external transition in this object's pending queue. */
