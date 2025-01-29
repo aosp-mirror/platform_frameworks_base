@@ -51,8 +51,8 @@ constructor(
             instrumentation.targetContext.contentResolver,
             Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
             0,
-            UserHandle.USER_CURRENT
-        );
+            UserHandle.USER_CURRENT_OR_SELF
+        )
     }
 
     private val logTag = this::class.java.simpleName
