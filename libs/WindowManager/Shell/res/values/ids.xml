@@ -46,4 +46,9 @@
     <item type="id" name="action_move_bubble_bar_right"/>
 
     <item type="id" name="dismiss_view"/>
+
+    <!-- Accessibility actions for desktop windowing. -->
+    <item type="id" name="action_snap_left"/>
+    <item type="id" name="action_snap_right"/>
+    <item type="id" name="action_maximize_restore"/>
 </resources>

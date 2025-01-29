@@ -44,6 +44,8 @@ import android.window.SurfaceSyncGroup
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK
 import androidx.core.view.isGone
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
@@ -55,8 +57,8 @@ import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewContainer
 import com.android.wm.shell.windowdecor.common.DecorThemeUtil
-import com.android.wm.shell.windowdecor.common.calculateMenuPosition
 import com.android.wm.shell.windowdecor.common.WindowDecorTaskResourceLoader
+import com.android.wm.shell.windowdecor.common.calculateMenuPosition
 import com.android.wm.shell.windowdecor.extension.isFullscreen
 import com.android.wm.shell.windowdecor.extension.isMultiWindow
 import com.android.wm.shell.windowdecor.extension.isPinned
@@ -535,6 +537,20 @@ class HandleMenu(
                     return@setOnTouchListener false
                 }
                 return@setOnTouchListener true
+            }
+
+            with(context.resources) {
+                // Update a11y read out to say "double tap to enter desktop windowing mode"
+                ViewCompat.replaceAccessibilityAction(
+                    desktopBtn, ACTION_CLICK,
+                    getString(R.string.app_handle_menu_talkback_desktop_mode_button_text), null
+                )
+
+                // Update a11y read out to say "double tap to enter split screen mode"
+                ViewCompat.replaceAccessibilityAction(
+                    splitscreenBtn, ACTION_CLICK,
+                    getString(R.string.app_handle_menu_talkback_split_screen_mode_button_text), null
+                )
             }
         }
 

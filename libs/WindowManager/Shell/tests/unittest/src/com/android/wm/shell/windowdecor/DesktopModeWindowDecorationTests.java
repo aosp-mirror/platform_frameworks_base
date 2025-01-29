@@ -297,7 +297,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 .thenReturn(mMockHandleMenu);
         when(mMockMultiInstanceHelper.supportsMultiInstanceSplit(any(), anyInt()))
                 .thenReturn(false);
-        when(mMockAppHeaderViewHolderFactory.create(any(), any(), any(), any(), any(), any()))
+        when(mMockAppHeaderViewHolderFactory
+                .create(any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(mMockAppHeaderViewHolder);
         when(mMockDesktopUserRepositories.getCurrent()).thenReturn(mDesktopRepository);
         when(mMockDesktopUserRepositories.getProfile(anyInt())).thenReturn(mDesktopRepository);
