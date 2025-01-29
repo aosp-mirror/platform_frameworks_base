@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -82,18 +83,29 @@ fun TutorialSelectionScreen(
                     }
                 ),
     ) {
-        val padding = if (hasCompactWindowSize()) 24.dp else 60.dp
+        val isCompactWindow = hasCompactWindowSize()
+        val padding = if (isCompactWindow) 24.dp else 60.dp
         val configuration = LocalConfiguration.current
         when (configuration.orientation) {
             Configuration.ORIENTATION_LANDSCAPE -> {
-                HorizontalSelectionButtons(
-                    onBackTutorialClicked = onBackTutorialClicked,
-                    onHomeTutorialClicked = onHomeTutorialClicked,
-                    onRecentAppsTutorialClicked = onRecentAppsTutorialClicked,
-                    onSwitchAppsTutorialClicked = onSwitchAppsTutorialClicked,
-                    modifier = Modifier.weight(1f).padding(padding),
-                    lastSelectedScreen,
-                )
+                if (isCompactWindow)
+                    HorizontalCompactSelectionButtons(
+                        onBackTutorialClicked = onBackTutorialClicked,
+                        onHomeTutorialClicked = onHomeTutorialClicked,
+                        onRecentAppsTutorialClicked = onRecentAppsTutorialClicked,
+                        onSwitchAppsTutorialClicked = onSwitchAppsTutorialClicked,
+                        lastSelectedScreen,
+                        modifier = Modifier.weight(1f).padding(padding),
+                    )
+                else
+                    HorizontalSelectionButtons(
+                        onBackTutorialClicked = onBackTutorialClicked,
+                        onHomeTutorialClicked = onHomeTutorialClicked,
+                        onRecentAppsTutorialClicked = onRecentAppsTutorialClicked,
+                        onSwitchAppsTutorialClicked = onSwitchAppsTutorialClicked,
+                        lastSelectedScreen,
+                        modifier = Modifier.weight(1f).padding(padding),
+                    )
             }
             else -> {
                 VerticalSelectionButtons(
@@ -101,8 +113,8 @@ fun TutorialSelectionScreen(
                     onHomeTutorialClicked = onHomeTutorialClicked,
                     onRecentAppsTutorialClicked = onRecentAppsTutorialClicked,
                     onSwitchAppsTutorialClicked = onSwitchAppsTutorialClicked,
-                    modifier = Modifier.weight(1f).padding(padding),
                     lastSelectedScreen,
+                    modifier = Modifier.weight(1f).padding(padding),
                 )
             }
         }
@@ -120,11 +132,99 @@ private fun HorizontalSelectionButtons(
     onHomeTutorialClicked: () -> Unit,
     onRecentAppsTutorialClicked: () -> Unit,
     onSwitchAppsTutorialClicked: () -> Unit,
-    modifier: Modifier = Modifier,
     lastSelectedScreen: Screen,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        TwoByTwoTutorialButtons(
+            onBackTutorialClicked,
+            onHomeTutorialClicked,
+            onRecentAppsTutorialClicked,
+            onSwitchAppsTutorialClicked,
+            lastSelectedScreen,
+            modifier = Modifier.weight(1f).fillMaxSize(),
+        )
+    }
+}
+
+@Composable
+private fun TwoByTwoTutorialButtons(
+    onBackTutorialClicked: () -> Unit,
+    onHomeTutorialClicked: () -> Unit,
+    onRecentAppsTutorialClicked: () -> Unit,
+    onSwitchAppsTutorialClicked: () -> Unit,
+    lastSelectedScreen: Screen,
+    modifier: Modifier = Modifier,
+) {
+    val homeFocusRequester = remember { FocusRequester() }
+    val backFocusRequester = remember { FocusRequester() }
+    val recentAppsFocusRequester = remember { FocusRequester() }
+    val switchAppsFocusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        when (lastSelectedScreen) {
+            Screen.HOME_GESTURE -> homeFocusRequester.requestFocus()
+            Screen.BACK_GESTURE -> backFocusRequester.requestFocus()
+            Screen.RECENT_APPS_GESTURE -> recentAppsFocusRequester.requestFocus()
+            Screen.SWITCH_APPS_GESTURE -> switchAppsFocusRequester.requestFocus()
+            else -> {} // No-Op.
+        }
+    }
+    Column {
+        Row(Modifier.weight(1f)) {
+            TutorialButton(
+                text = stringResource(R.string.touchpad_tutorial_home_gesture_button),
+                icon = ImageVector.vectorResource(id = R.drawable.touchpad_tutorial_home_icon),
+                iconColor = MaterialTheme.colorScheme.onPrimary,
+                onClick = onHomeTutorialClicked,
+                backgroundColor = MaterialTheme.colorScheme.primary,
+                modifier = modifier.focusRequester(homeFocusRequester).focusable().fillMaxSize(),
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            TutorialButton(
+                text = stringResource(R.string.touchpad_tutorial_back_gesture_button),
+                icon = Icons.AutoMirrored.Outlined.ArrowBack,
+                iconColor = MaterialTheme.colorScheme.onTertiary,
+                onClick = onBackTutorialClicked,
+                backgroundColor = MaterialTheme.colorScheme.tertiary,
+                modifier = modifier.focusRequester(backFocusRequester).focusable().fillMaxSize(),
+            )
+        }
+        Spacer(modifier = Modifier.size(16.dp))
+        Row(Modifier.weight(1f)) {
+            TutorialButton(
+                text = stringResource(R.string.touchpad_tutorial_recent_apps_gesture_button),
+                icon = ImageVector.vectorResource(id = R.drawable.touchpad_tutorial_recents_icon),
+                iconColor = MaterialTheme.colorScheme.onSecondary,
+                onClick = onRecentAppsTutorialClicked,
+                backgroundColor = MaterialTheme.colorScheme.secondary,
+                modifier =
+                    modifier.focusRequester(recentAppsFocusRequester).focusable().fillMaxSize(),
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            TutorialButton(
+                text = stringResource(R.string.touchpad_tutorial_switch_apps_gesture_button),
+                icon = ImageVector.vectorResource(id = R.drawable.touchpad_tutorial_apps_icon),
+                iconColor = MaterialTheme.colorScheme.primary,
+                onClick = onSwitchAppsTutorialClicked,
+                backgroundColor = MaterialTheme.colorScheme.onPrimary,
+                modifier =
+                    modifier.focusRequester(switchAppsFocusRequester).focusable().fillMaxSize(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun HorizontalCompactSelectionButtons(
+    onBackTutorialClicked: () -> Unit,
+    onHomeTutorialClicked: () -> Unit,
+    onRecentAppsTutorialClicked: () -> Unit,
+    onSwitchAppsTutorialClicked: () -> Unit,
+    lastSelectedScreen: Screen,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(20.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier,
     ) {
@@ -133,8 +233,8 @@ private fun HorizontalSelectionButtons(
             onHomeTutorialClicked,
             onRecentAppsTutorialClicked,
             onSwitchAppsTutorialClicked,
-            modifier = Modifier.weight(1f).fillMaxSize(),
             lastSelectedScreen,
+            modifier = Modifier.weight(1f).fillMaxSize(),
         )
     }
 }
@@ -145,8 +245,8 @@ private fun VerticalSelectionButtons(
     onHomeTutorialClicked: () -> Unit,
     onRecentAppsTutorialClicked: () -> Unit,
     onSwitchAppsTutorialClicked: () -> Unit,
-    modifier: Modifier = Modifier,
     lastSelectedScreen: Screen,
+    modifier: Modifier = Modifier,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -158,8 +258,8 @@ private fun VerticalSelectionButtons(
             onHomeTutorialClicked,
             onRecentAppsTutorialClicked,
             onSwitchAppsTutorialClicked,
-            modifier = Modifier.weight(1f).fillMaxSize(),
             lastSelectedScreen,
+            modifier = Modifier.weight(1f).fillMaxSize(),
         )
     }
 }
@@ -170,8 +270,8 @@ private fun FourTutorialButtons(
     onHomeTutorialClicked: () -> Unit,
     onRecentAppsTutorialClicked: () -> Unit,
     onSwitchAppsTutorialClicked: () -> Unit,
-    modifier: Modifier = Modifier,
     lastSelectedScreen: Screen,
+    modifier: Modifier = Modifier,
 ) {
     val homeFocusRequester = remember { FocusRequester() }
     val backFocusRequester = remember { FocusRequester() }
