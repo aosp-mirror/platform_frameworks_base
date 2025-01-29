@@ -23,8 +23,10 @@ import android.icu.text.DateFormat
 import android.icu.text.DisplayContext
 import android.os.UserHandle
 import android.provider.Settings
+import android.view.ViewGroup
 import androidx.compose.runtime.getValue
 import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.Hydrator
@@ -40,6 +42,10 @@ import com.android.systemui.shade.domain.interactor.PrivacyChipInteractor
 import com.android.systemui.shade.domain.interactor.ShadeHeaderClockInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder
+import com.android.systemui.statusbar.phone.StatusBarLocation
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController
+import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
 import dagger.assisted.AssistedFactory
@@ -67,27 +73,46 @@ constructor(
     val mobileIconsViewModel: MobileIconsViewModel,
     private val privacyChipInteractor: PrivacyChipInteractor,
     private val clockInteractor: ShadeHeaderClockInteractor,
+    private val tintedIconManagerFactory: TintedIconManager.Factory,
+    private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
+    val statusBarIconController: StatusBarIconController,
+    val notificationIconContainerStatusBarViewBinder: NotificationIconContainerStatusBarViewBinder,
     private val broadcastDispatcher: BroadcastDispatcher,
 ) : ExclusiveActivatable() {
     private val hydrator = Hydrator("ShadeHeaderViewModel.hydrator")
 
-    val highlightNotificationIcons: Boolean by
+    val createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager =
+        tintedIconManagerFactory::create
+
+    val createBatteryMeterViewController:
+        (ViewGroup, StatusBarLocation) -> BatteryMeterViewController =
+        batteryMeterViewControllerFactory::create
+
+    val notificationsChipHighlight: HeaderChipHighlight by
         hydrator.hydratedStateOf(
-            traceName = "highlightNotificationIcons",
-            initialValue = false,
+            traceName = "notificationsChipHighlight",
+            initialValue = HeaderChipHighlight.None,
             source =
                 sceneInteractor.currentOverlays.map { overlays ->
-                    Overlays.NotificationsShade in overlays
+                    when {
+                        Overlays.NotificationsShade in overlays -> HeaderChipHighlight.Strong
+                        Overlays.QuickSettingsShade in overlays -> HeaderChipHighlight.Weak
+                        else -> HeaderChipHighlight.None
+                    }
                 },
         )
 
-    val highlightQuickSettingsIcons: Boolean by
+    val quickSettingsChipHighlight: HeaderChipHighlight by
         hydrator.hydratedStateOf(
-            traceName = "highlightQuickSettingsIcons",
-            initialValue = false,
+            traceName = "quickSettingsChipHighlight",
+            initialValue = HeaderChipHighlight.None,
             source =
                 sceneInteractor.currentOverlays.map { overlays ->
-                    Overlays.QuickSettingsShade in overlays
+                    when {
+                        Overlays.QuickSettingsShade in overlays -> HeaderChipHighlight.Strong
+                        Overlays.NotificationsShade in overlays -> HeaderChipHighlight.Weak
+                        else -> HeaderChipHighlight.None
+                    }
                 },
         )
 
@@ -223,6 +248,15 @@ constructor(
             Intent(Settings.ACTION_WIRELESS_SETTINGS),
             0,
         )
+    }
+
+    /** Represents the background highlight of a header icons chip. */
+    sealed interface HeaderChipHighlight {
+        data object None : HeaderChipHighlight
+
+        data object Weak : HeaderChipHighlight
+
+        data object Strong : HeaderChipHighlight
     }
 
     private fun updateDateTexts(invalidateFormats: Boolean) {

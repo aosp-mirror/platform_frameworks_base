@@ -58,29 +58,31 @@ import com.android.systemui.res.R
 /** Renders a lightweight shade UI container, as an overlay. */
 @Composable
 fun ContentScope.OverlayShade(
-    isShadeLayoutWide: Boolean,
     panelAlignment: Alignment,
     onScrimClicked: () -> Unit,
     modifier: Modifier = Modifier,
     header: @Composable () -> Unit,
     content: @Composable () -> Unit,
 ) {
+    val isFullWidth = isFullWidthShade()
     Box(modifier) {
         Scrim(onClicked = onScrimClicked)
 
-        Box(modifier = Modifier.fillMaxSize().panelPadding(), contentAlignment = panelAlignment) {
+        Box(
+            modifier = Modifier.fillMaxSize().panelContainerPadding(isFullWidth),
+            contentAlignment = panelAlignment,
+        ) {
             Panel(
-                isShadeLayoutWide = isShadeLayoutWide,
                 modifier =
                     Modifier.overscroll(verticalOverscrollEffect)
                         .element(OverlayShade.Elements.Panel)
-                        .panelSize(),
-                header = header,
+                        .panelWidth(isFullWidth),
+                header = header.takeIf { isFullWidth },
                 content = content,
             )
         }
 
-        if (isShadeLayoutWide) {
+        if (!isFullWidth) {
             header()
         }
     }
@@ -100,9 +102,8 @@ private fun ContentScope.Scrim(onClicked: () -> Unit, modifier: Modifier = Modif
 
 @Composable
 private fun ContentScope.Panel(
-    isShadeLayoutWide: Boolean,
     modifier: Modifier = Modifier,
-    header: @Composable () -> Unit,
+    header: (@Composable () -> Unit)?,
     content: @Composable () -> Unit,
 ) {
     Box(modifier = modifier.clip(OverlayShade.Shapes.RoundedCornerPanel)) {
@@ -117,9 +118,7 @@ private fun ContentScope.Panel(
         )
 
         Column {
-            if (!isShadeLayoutWide) {
-                header()
-            }
+            header?.invoke()
 
             // This content is intentionally rendered as a separate element from the background in
             // order to allow for more flexibility when defining transitions.
@@ -129,14 +128,12 @@ private fun ContentScope.Panel(
 }
 
 @Composable
-private fun Modifier.panelSize(): Modifier {
-    return this.then(
-        if (isFullWidthShade()) {
-            Modifier.fillMaxWidth()
-        } else {
-            Modifier.width(dimensionResource(id = R.dimen.shade_panel_width))
-        }
-    )
+private fun Modifier.panelWidth(isFullWidthPanel: Boolean): Modifier {
+    return if (isFullWidthPanel) {
+        fillMaxWidth()
+    } else {
+        width(dimensionResource(id = R.dimen.shade_panel_width))
+    }
 }
 
 @Composable
@@ -146,27 +143,23 @@ internal fun isFullWidthShade(): Boolean {
 }
 
 @Composable
-private fun Modifier.panelPadding(): Modifier {
-    val widthSizeClass = LocalWindowSizeClass.current.widthSizeClass
+private fun Modifier.panelContainerPadding(isFullWidthPanel: Boolean): Modifier {
+    if (isFullWidthPanel) {
+        return this
+    }
     val systemBars = WindowInsets.systemBarsIgnoringVisibility
     val displayCutout = WindowInsets.displayCutout
     val waterfall = WindowInsets.waterfall
     val horizontalPadding =
         PaddingValues(horizontal = dimensionResource(id = R.dimen.shade_panel_margin_horizontal))
-
-    val combinedPadding =
+    return padding(
         combinePaddings(
             systemBars.asPaddingValues(),
             displayCutout.asPaddingValues(),
             waterfall.asPaddingValues(),
             horizontalPadding,
         )
-
-    return if (widthSizeClass == WindowWidthSizeClass.Compact) {
-        padding(bottom = combinedPadding.calculateBottomPadding())
-    } else {
-        padding(combinedPadding)
-    }
+    )
 }
 
 /** Creates a union of [paddingValues] by using the max padding of each edge. */

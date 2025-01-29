@@ -45,7 +45,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
-import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.brightness.ui.compose.BrightnessSliderContainer
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
@@ -67,13 +66,10 @@ import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.shade.ui.composable.OverlayShadeHeader
 import com.android.systemui.shade.ui.composable.QuickSettingsOverlayHeader
 import com.android.systemui.shade.ui.composable.SingleShadeMeasurePolicy
-import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
-import com.android.systemui.statusbar.phone.ui.StatusBarIconController
-import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -84,11 +80,7 @@ class QuickSettingsShadeOverlay
 constructor(
     private val actionsViewModelFactory: QuickSettingsShadeOverlayActionsViewModel.Factory,
     private val contentViewModelFactory: QuickSettingsShadeOverlayContentViewModel.Factory,
-    private val tintedIconManagerFactory: TintedIconManager.Factory,
-    private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
-    private val statusBarIconController: StatusBarIconController,
-    private val notificationIconContainerStatusBarViewBinder:
-        NotificationIconContainerStatusBarViewBinder,
+    private val quickSettingsContainerViewModelFactory: QuickSettingsContainerViewModel.Factory,
     private val notificationStackScrollView: Lazy<NotificationScrollView>,
     private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
 ) : Overlay {
@@ -107,35 +99,35 @@ constructor(
 
     @Composable
     override fun ContentScope.Content(modifier: Modifier) {
-        val viewModel =
-            rememberViewModel("QuickSettingsShadeOverlay") { contentViewModelFactory.create() }
+        val contentViewModel =
+            rememberViewModel("QuickSettingsShadeOverlayContent") {
+                contentViewModelFactory.create()
+            }
+        val quickSettingsContainerViewModel =
+            rememberViewModel("QuickSettingsShadeOverlayContainer") {
+                // TODO(b/393054014): Add support for brightness mirroring.
+                quickSettingsContainerViewModelFactory.create(supportsBrightnessMirroring = false)
+            }
         val panelCornerRadius =
             with(LocalDensity.current) { OverlayShade.Dimensions.PanelCornerRadius.toPx().toInt() }
 
-        // set the bounds to null when the QuickSettings overlay disappears
-        DisposableEffect(Unit) { onDispose { viewModel.onPanelShapeChanged(null) } }
+        // Set the bounds to null when the QuickSettings overlay disappears.
+        DisposableEffect(Unit) { onDispose { contentViewModel.onPanelShapeChanged(null) } }
 
         Box(modifier = modifier) {
             SnoozeableHeadsUpNotificationSpace(
                 stackScrollView = notificationStackScrollView.get(),
                 viewModel =
-                    rememberViewModel("QuickSettingsShadeOverlay") {
+                    rememberViewModel("QuickSettingsShadeOverlayPlaceholder") {
                         notificationsPlaceholderViewModelFactory.create()
                     },
             )
             OverlayShade(
-                isShadeLayoutWide = viewModel.isShadeLayoutWide,
                 panelAlignment = Alignment.TopEnd,
-                onScrimClicked = viewModel::onScrimClicked,
+                onScrimClicked = contentViewModel::onScrimClicked,
                 header = {
                     OverlayShadeHeader(
-                        viewModelFactory = viewModel.shadeHeaderViewModelFactory,
-                        createTintedIconManager = tintedIconManagerFactory::create,
-                        createBatteryMeterViewController =
-                            batteryMeterViewControllerFactory::create,
-                        statusBarIconController = statusBarIconController,
-                        notificationIconContainerStatusBarViewBinder =
-                            notificationIconContainerStatusBarViewBinder,
+                        viewModel = quickSettingsContainerViewModel.shadeHeaderViewModel,
                         modifier =
                             Modifier.element(NotificationsShade.Elements.StatusBar)
                                 .layoutId(SingleShadeMeasurePolicy.LayoutId.ShadeHeader),
@@ -143,7 +135,7 @@ constructor(
                 },
             ) {
                 ShadeBody(
-                    viewModel = viewModel.quickSettingsContainerViewModel,
+                    viewModel = quickSettingsContainerViewModel,
                     modifier =
                         Modifier.onPlaced { coordinates ->
                             val boundsInWindow = coordinates.boundsInWindow()
@@ -160,14 +152,12 @@ constructor(
                                     topRadius = 0,
                                     bottomRadius = panelCornerRadius,
                                 )
-                            viewModel.onPanelShapeChanged(shape)
+                            contentViewModel.onPanelShapeChanged(shape)
                         },
                     header = {
-                        if (viewModel.isShadeLayoutWide) {
+                        if (quickSettingsContainerViewModel.showHeader) {
                             QuickSettingsOverlayHeader(
-                                viewModelFactory = viewModel.shadeHeaderViewModelFactory,
-                                createBatteryMeterViewController =
-                                    batteryMeterViewControllerFactory::create,
+                                viewModel = quickSettingsContainerViewModel.shadeHeaderViewModel,
                                 modifier =
                                     Modifier.padding(top = QuickSettingsShade.Dimensions.Padding),
                             )

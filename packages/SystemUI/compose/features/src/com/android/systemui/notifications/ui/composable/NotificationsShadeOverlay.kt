@@ -29,7 +29,6 @@ import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
-import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.blueprint.rememberBurnIn
@@ -44,10 +43,7 @@ import com.android.systemui.scene.ui.composable.Overlay
 import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.shade.ui.composable.OverlayShadeHeader
 import com.android.systemui.shade.ui.composable.SingleShadeMeasurePolicy
-import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
-import com.android.systemui.statusbar.phone.ui.StatusBarIconController
-import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -58,11 +54,6 @@ class NotificationsShadeOverlay
 constructor(
     private val actionsViewModelFactory: NotificationsShadeOverlayActionsViewModel.Factory,
     private val contentViewModelFactory: NotificationsShadeOverlayContentViewModel.Factory,
-    private val tintedIconManagerFactory: TintedIconManager.Factory,
-    private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
-    private val statusBarIconController: StatusBarIconController,
-    private val notificationIconContainerStatusBarViewBinder:
-        NotificationIconContainerStatusBarViewBinder,
     private val shadeSession: SaveableSession,
     private val stackScrollView: Lazy<NotificationScrollView>,
     private val clockSection: DefaultClockSection,
@@ -94,18 +85,16 @@ constructor(
             }
 
         OverlayShade(
-            isShadeLayoutWide = viewModel.isShadeLayoutWide,
             panelAlignment = Alignment.TopStart,
             modifier = modifier,
             onScrimClicked = viewModel::onScrimClicked,
             header = {
+                val headerViewModel =
+                    rememberViewModel("NotificationsShadeOverlayHeader") {
+                        viewModel.shadeHeaderViewModelFactory.create()
+                    }
                 OverlayShadeHeader(
-                    viewModelFactory = viewModel.shadeHeaderViewModelFactory,
-                    createTintedIconManager = tintedIconManagerFactory::create,
-                    createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
-                    statusBarIconController = statusBarIconController,
-                    notificationIconContainerStatusBarViewBinder =
-                        notificationIconContainerStatusBarViewBinder,
+                    viewModel = headerViewModel,
                     modifier =
                         Modifier.element(NotificationsShade.Elements.StatusBar)
                             .layoutId(SingleShadeMeasurePolicy.LayoutId.ShadeHeader),
@@ -114,7 +103,7 @@ constructor(
         ) {
             Box {
                 Column {
-                    if (viewModel.showHeader) {
+                    if (viewModel.showClock) {
                         val burnIn = rememberBurnIn(clockInteractor)
 
                         with(clockSection) {
@@ -140,8 +129,7 @@ constructor(
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                // Communicates the bottom position of the drawable area within the shade to
-                // NSSL.
+                // Communicates the bottom position of the drawable area within the shade to NSSL.
                 NotificationStackCutoffGuideline(
                     stackScrollView = stackScrollView.get(),
                     viewModel = placeholderViewModel,

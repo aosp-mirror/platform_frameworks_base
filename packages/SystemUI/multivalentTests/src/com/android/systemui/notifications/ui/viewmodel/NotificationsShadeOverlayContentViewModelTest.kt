@@ -124,35 +124,35 @@ class NotificationsShadeOverlayContentViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun showHeader_showsOnNarrowScreen() =
+    fun showClock_showsOnNarrowScreen() =
         testScope.runTest {
             kosmos.shadeRepository.setShadeLayoutWide(false)
 
             // Shown when notifications are present.
             kosmos.activeNotificationListRepository.setActiveNotifs(1)
             runCurrent()
-            assertThat(underTest.showHeader).isTrue()
+            assertThat(underTest.showClock).isTrue()
 
             // Hidden when notifications are not present.
             kosmos.activeNotificationListRepository.setActiveNotifs(0)
             runCurrent()
-            assertThat(underTest.showHeader).isFalse()
+            assertThat(underTest.showClock).isFalse()
         }
 
     @Test
-    fun showHeader_hidesOnWideScreen() =
+    fun showClock_hidesOnWideScreen() =
         testScope.runTest {
             kosmos.shadeRepository.setShadeLayoutWide(true)
 
             // Hidden when notifications are present.
             kosmos.activeNotificationListRepository.setActiveNotifs(1)
             runCurrent()
-            assertThat(underTest.showHeader).isFalse()
+            assertThat(underTest.showClock).isFalse()
 
             // Hidden when notifications are not present.
             kosmos.activeNotificationListRepository.setActiveNotifs(0)
             runCurrent()
-            assertThat(underTest.showHeader).isFalse()
+            assertThat(underTest.showClock).isFalse()
         }
 
     private fun TestScope.lockDevice() {

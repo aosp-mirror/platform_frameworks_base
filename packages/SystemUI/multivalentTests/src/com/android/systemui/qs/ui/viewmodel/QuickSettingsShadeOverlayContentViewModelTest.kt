@@ -127,24 +127,6 @@ class QuickSettingsShadeOverlayContentViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun showHeader_showsOnNarrowScreen() =
-        testScope.runTest {
-            kosmos.enableDualShade(wideLayout = false)
-            runCurrent()
-
-            assertThat(underTest.showHeader).isTrue()
-        }
-
-    @Test
-    fun showHeader_hidesOnWideScreen() =
-        testScope.runTest {
-            kosmos.enableDualShade(wideLayout = true)
-            runCurrent()
-
-            assertThat(underTest.showHeader).isFalse()
-        }
-
-    @Test
     fun onPanelShapeChanged() =
         testScope.runTest {
             var actual: ShadeScrimShape? = null
