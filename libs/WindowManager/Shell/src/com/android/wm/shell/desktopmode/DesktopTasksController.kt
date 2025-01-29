@@ -775,6 +775,12 @@ class DesktopTasksController(
         val wct = WindowContainerTransaction()
         addMoveToFullscreenChanges(wct, task)
 
+        // We are moving a freeform task to fullscreen, put the home task under the fullscreen task.
+        if (!forceEnterDesktop(task.displayId)) {
+            moveHomeTask(wct, toTop = true, task.displayId)
+            wct.reorder(task.token, /* onTop= */ true)
+        }
+
         exitDesktopTaskTransitionHandler.startTransition(
             transitionSource,
             wct,
