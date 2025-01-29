@@ -71,7 +71,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 /**
