@@ -64,6 +64,8 @@ public enum DesktopModeFlags {
     ENABLE_WINDOWING_SCALED_RESIZING(Flags::enableWindowingScaledResizing, true),
     ENABLE_DESKTOP_WINDOWING_TASK_LIMIT(Flags::enableDesktopWindowingTaskLimit, true),
     ENABLE_DESKTOP_WINDOWING_APP_TO_WEB(Flags::enableDesktopWindowingAppToWeb, true),
+    ENABLE_DESKTOP_WINDOWING_APP_TO_WEB_EDUCATION(
+            Flags::enableDesktopWindowingAppToWebEducation, true),
     ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION(Flags::enableDesktopWindowingBackNavigation, true),
     ENABLE_WINDOWING_EDGE_DRAG_RESIZE(Flags::enableWindowingEdgeDragResize, true),
     ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS(
