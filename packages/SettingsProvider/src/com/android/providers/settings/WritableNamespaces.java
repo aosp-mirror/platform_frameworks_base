@@ -43,6 +43,7 @@ final class WritableNamespaces {
                     "netd_native",
                     "network_security",
                     "on_device_personalization",
+                    "testing",
                     "tethering",
                     "tethering_u_or_later_native",
                     "thread_network"
