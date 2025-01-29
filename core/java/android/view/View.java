@@ -16654,6 +16654,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Window is obscured, drop this touch.
             return false;
         }
+        if (android.view.accessibility.Flags.preventA11yNontoolFromInjectingIntoSensitiveViews()) {
+            if (event.isInjectedFromAccessibilityService()
+                    // If the event came from an Accessibility Service that does *not* declare
+                    // itself as AccessibilityServiceInfo#isAccessibilityTool and this View is
+                    // declared sensitive then drop the event.
+                    // Only Accessibility Tools are allowed to interact with sensitive Views.
+                    && !event.isInjectedFromAccessibilityTool() && isAccessibilityDataSensitive()) {
+                return false;
+            }
+        }
         return true;
     }
 

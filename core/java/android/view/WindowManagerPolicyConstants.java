@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.os.IInputConstants.POLICY_FLAG_INJECTED_FROM_ACCESSIBILITY;
+import static android.os.IInputConstants.POLICY_FLAG_INJECTED_FROM_ACCESSIBILITY_TOOL;
 import static android.os.IInputConstants.POLICY_FLAG_KEY_GESTURE_TRIGGERED;
 
 import android.annotation.IntDef;
@@ -37,6 +38,7 @@ public interface WindowManagerPolicyConstants {
     int FLAG_VIRTUAL = 0x00000002;
 
     int FLAG_INJECTED_FROM_ACCESSIBILITY = POLICY_FLAG_INJECTED_FROM_ACCESSIBILITY;
+    int FLAG_INJECTED_FROM_ACCESSIBILITY_TOOL = POLICY_FLAG_INJECTED_FROM_ACCESSIBILITY_TOOL;
     int FLAG_KEY_GESTURE_TRIGGERED = POLICY_FLAG_KEY_GESTURE_TRIGGERED;
     int FLAG_INJECTED = 0x01000000;
     int FLAG_TRUSTED = 0x02000000;

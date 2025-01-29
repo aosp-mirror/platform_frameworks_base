@@ -20,8 +20,7 @@ import static android.view.KeyCharacterMap.VIRTUAL_KEYBOARD;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_HOVER_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
-import static android.view.WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY;
-import static android.view.WindowManagerPolicyConstants.FLAG_PASS_TO_USER;
+import static android.view.accessibility.Flags.FLAG_PREVENT_A11Y_NONTOOL_FROM_INJECTING_INTO_SENSITIVE_VIEWS;
 
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.anyOf;
@@ -48,10 +47,14 @@ import android.graphics.Point;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.Display;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.WindowManagerPolicyConstants;
 import android.view.accessibility.AccessibilityEvent;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -64,6 +67,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -77,7 +81,7 @@ import java.util.List;
  */
 @RunWith(AndroidJUnit4.class)
 public class MotionEventInjectorTest {
-    private static final String LOG_TAG = "MotionEventInjectorTest";
+
     private static final Matcher<MotionEvent> IS_ACTION_DOWN =
             new MotionEventActionMatcher(ACTION_DOWN);
     private static final Matcher<MotionEvent> IS_ACTION_POINTER_DOWN =
@@ -119,6 +123,9 @@ public class MotionEventInjectorTest {
     private static final int EDGEFLAGS = 0;
     private static final float POINTER_SIZE = 1;
     private static final int METASTATE = 0;
+
+    @Rule
+    public SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     MotionEventInjector mMotionEventInjector;
     IAccessibilityServiceClient mServiceInterface;
@@ -201,7 +208,8 @@ public class MotionEventInjectorTest {
         verifyNoMoreInteractions(next);
         mMessageCapturingHandler.sendOneMessage(); // Send a motion event
 
-        final int expectedFlags = FLAG_PASS_TO_USER | FLAG_INJECTED_FROM_ACCESSIBILITY;
+        final int expectedFlags = WindowManagerPolicyConstants.FLAG_PASS_TO_USER
+                | WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY;
         verify(next).onMotionEvent(mCaptor1.capture(), mCaptor2.capture(), eq(expectedFlags));
         verify(next).onMotionEvent(argThat(mIsLineStart), argThat(mIsLineStart), eq(expectedFlags));
         verifyNoMoreInteractions(next);
@@ -224,6 +232,21 @@ public class MotionEventInjectorTest {
 
         verify(mServiceInterface).onPerformGestureResult(LINE_SEQUENCE, true);
         verifyNoMoreInteractions(mServiceInterface);
+    }
+
+    @Test
+    @EnableFlags(FLAG_PREVENT_A11Y_NONTOOL_FROM_INJECTING_INTO_SENSITIVE_VIEWS)
+    public void testInjectEvents_fromAccessibilityTool_providesToolPolicyFlag() {
+        EventStreamTransformation next = attachMockNext(mMotionEventInjector);
+        injectEventsSync(mLineList, mServiceInterface, LINE_SEQUENCE,
+                /*fromAccessibilityTool=*/true);
+
+        mMessageCapturingHandler.sendOneMessage(); // Send a motion event
+        verify(next).onMotionEvent(
+                argThat(mIsLineStart), argThat(mIsLineStart),
+                eq(WindowManagerPolicyConstants.FLAG_PASS_TO_USER
+                        | WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY
+                        | WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY_TOOL));
     }
 
     @Test
@@ -251,14 +274,28 @@ public class MotionEventInjectorTest {
     }
 
     @Test
-    public void testRegularEvent_afterGestureComplete_shouldPassToNext() {
+    @DisableFlags(FLAG_PREVENT_A11Y_NONTOOL_FROM_INJECTING_INTO_SENSITIVE_VIEWS)
+    public void testRegularEvent_afterGestureComplete_shouldPassToNext_withFlagInjectedFromA11y() {
         EventStreamTransformation next = attachMockNext(mMotionEventInjector);
         injectEventsSync(mLineList, mServiceInterface, LINE_SEQUENCE);
         mMessageCapturingHandler.sendAllMessages(); // Send all motion events
         reset(next);
         mMotionEventInjector.onMotionEvent(mClickDownEvent, mClickDownEvent, 0);
         verify(next).onMotionEvent(argThat(mIsClickDown), argThat(mIsClickDown),
-                eq(FLAG_INJECTED_FROM_ACCESSIBILITY));
+                eq(WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY));
+    }
+
+    @Test
+    @EnableFlags(FLAG_PREVENT_A11Y_NONTOOL_FROM_INJECTING_INTO_SENSITIVE_VIEWS)
+    public void testRegularEvent_afterGestureComplete_shouldPassToNext_withNoPolicyFlagChanges() {
+        EventStreamTransformation next = attachMockNext(mMotionEventInjector);
+        injectEventsSync(mLineList, mServiceInterface, LINE_SEQUENCE);
+        mMessageCapturingHandler.sendAllMessages(); // Send all motion events
+        reset(next);
+        mMotionEventInjector.onMotionEvent(mClickDownEvent, mClickDownEvent, 0);
+        verify(next).onMotionEvent(argThat(mIsClickDown), argThat(mIsClickDown),
+                // The regular event passing through the filter should have no policy flag changes
+                eq(0));
     }
 
     @Test
@@ -275,7 +312,8 @@ public class MotionEventInjectorTest {
         mMessageCapturingHandler.sendOneMessage(); // Send a motion event
         verify(next).onMotionEvent(
                 argThat(mIsLineStart), argThat(mIsLineStart),
-                eq(FLAG_PASS_TO_USER | FLAG_INJECTED_FROM_ACCESSIBILITY));
+                eq(WindowManagerPolicyConstants.FLAG_PASS_TO_USER
+                        | WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY));
     }
 
     @Test
@@ -307,10 +345,12 @@ public class MotionEventInjectorTest {
 
         mMessageCapturingHandler.sendOneMessage(); // Send a motion event
         verify(next).onMotionEvent(mCaptor1.capture(), mCaptor2.capture(),
-                eq(FLAG_PASS_TO_USER | FLAG_INJECTED_FROM_ACCESSIBILITY));
+                eq(WindowManagerPolicyConstants.FLAG_PASS_TO_USER
+                        | WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY));
         verify(next).onMotionEvent(
                 argThat(mIsLineStart), argThat(mIsLineStart),
-                eq(FLAG_PASS_TO_USER | FLAG_INJECTED_FROM_ACCESSIBILITY));
+                eq(WindowManagerPolicyConstants.FLAG_PASS_TO_USER
+                        | WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY));
     }
 
     @Test
@@ -731,8 +771,14 @@ public class MotionEventInjectorTest {
 
     private void injectEventsSync(List<GestureStep> gestureSteps,
             IAccessibilityServiceClient serviceInterface, int sequence) {
+        injectEventsSync(gestureSteps, serviceInterface, sequence, false);
+    }
+
+    private void injectEventsSync(List<GestureStep> gestureSteps,
+            IAccessibilityServiceClient serviceInterface, int sequence,
+            boolean fromAccessibilityTool) {
         mMotionEventInjector.injectEvents(gestureSteps, serviceInterface, sequence,
-                Display.DEFAULT_DISPLAY);
+                Display.DEFAULT_DISPLAY, fromAccessibilityTool);
         // Dispatch the message sent by the injector. Our simple handler doesn't guarantee stuff
         // happens in order.
         mMessageCapturingHandler.sendLastMessage();
