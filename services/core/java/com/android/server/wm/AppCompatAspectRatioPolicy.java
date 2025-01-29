@@ -295,9 +295,14 @@ class AppCompatAspectRatioPolicy {
                 // {@link ActivityRecord#shouldCreateAppCompatDisplayInsets()} will be false for
                 // both activities that are naturally resizeable and activities that have been
                 // forced resizeable.
+                // Camera compat mode is an exception to this, where the activity is letterboxed
+                // to an aspect ratio commonly found on phones, e.g. 16:9, to avoid issues like
+                // stretching of the camera preview.
                 || (Flags.ignoreAspectRatioRestrictionsForResizeableFreeformActivities()
                     && task.getWindowingMode() == WINDOWING_MODE_FREEFORM
-                    && !mActivityRecord.shouldCreateAppCompatDisplayInsets())) {
+                    && !mActivityRecord.shouldCreateAppCompatDisplayInsets()
+                    && !AppCompatCameraPolicy.shouldCameraCompatControlAspectRatio(
+                            mActivityRecord))) {
             return false;
         }
 
