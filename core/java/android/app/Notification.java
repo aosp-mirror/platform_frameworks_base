@@ -5995,8 +5995,10 @@ public class Notification implements Parcelable
             setHeaderlessVerticalMargins(contentView, p, hasSecondLine);
 
             // Update margins to leave space for the top line (but not for headerless views like
-            // HUNS, which use a different layout that already accounts for that).
-            if (Flags.notificationsRedesignTemplates() && !p.mHeaderless) {
+            // HUNS, which use a different layout that already accounts for that). Templates that
+            // have content that will be displayed under the small icon also use a different margin.
+            if (Flags.notificationsRedesignTemplates()
+                    && !p.mHeaderless && !p.mHasContentInLeftMargin) {
                 int margin = getContentMarginTop(mContext,
                         R.dimen.notification_2025_content_margin_top);
                 contentView.setViewLayoutMargin(R.id.notification_main_column,
@@ -9498,7 +9500,8 @@ public class Notification implements Parcelable
                     .text(null)
                     .hideLeftIcon(isOneToOne)
                     .hideRightIcon(hideRightIcons || isOneToOne)
-                    .headerTextSecondary(isHeaderless ? null : conversationTitle);
+                    .headerTextSecondary(isHeaderless ? null : conversationTitle)
+                    .hasContentInLeftMargin(true);
             RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
                     isConversationLayout
                             ? mBuilder.getConversationLayoutResource()
@@ -14669,6 +14672,7 @@ public class Notification implements Parcelable
         Icon mPromotedPicture;
         boolean mCallStyleActions;
         boolean mAllowTextWithProgress;
+        boolean mHasContentInLeftMargin;
         int mTitleViewId;
         int mTextViewId;
         @Nullable CharSequence mTitle;
@@ -14694,6 +14698,7 @@ public class Notification implements Parcelable
             mPromotedPicture = null;
             mCallStyleActions = false;
             mAllowTextWithProgress = false;
+            mHasContentInLeftMargin = false;
             mTitleViewId = R.id.title;
             mTextViewId = R.id.text;
             mTitle = null;
@@ -14757,6 +14762,11 @@ public class Notification implements Parcelable
 
         final StandardTemplateParams allowTextWithProgress(boolean allowTextWithProgress) {
             this.mAllowTextWithProgress = allowTextWithProgress;
+            return this;
+        }
+
+        public StandardTemplateParams hasContentInLeftMargin(boolean hasContentInLeftMargin) {
+            mHasContentInLeftMargin = hasContentInLeftMargin;
             return this;
         }
 
