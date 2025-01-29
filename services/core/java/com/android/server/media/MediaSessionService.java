@@ -196,16 +196,6 @@ public class MediaSessionService extends SystemService implements Monitor {
     @GuardedBy("mLock")
     private final Map<Integer, Set<StatusBarNotification>> mMediaNotifications = new HashMap<>();
 
-    /**
-     * Holds all {@link MediaSessionRecordImpl} which we've reported as being {@link
-     * ActivityManagerInternal#startForegroundServiceDelegate user engaged}.
-     *
-     * <p>This map simply prevents invoking {@link
-     * ActivityManagerInternal#startForegroundServiceDelegate} more than once per session.
-     */
-    @GuardedBy("mLock")
-    private final Set<MediaSessionRecordImpl> mFgsAllowedMediaSessionRecords = new HashSet<>();
-
     // The FullUserRecord of the current users. (i.e. The foreground user that isn't a profile)
     // It's always not null after the MediaSessionService is started.
     private FullUserRecord mCurrentFullUserRecord;
@@ -759,9 +749,6 @@ public class MediaSessionService extends SystemService implements Monitor {
     @GuardedBy("mLock")
     private void setFgsActiveLocked(MediaSessionRecordImpl mediaSessionRecord,
             StatusBarNotification sbn) {
-        if (!mFgsAllowedMediaSessionRecords.add(mediaSessionRecord)) {
-            return; // This record already is FGS-activated.
-        }
         final long token = Binder.clearCallingIdentity();
         try {
             final String packageName = sbn.getPackageName();
@@ -826,10 +813,6 @@ public class MediaSessionService extends SystemService implements Monitor {
     @GuardedBy("mLock")
     private void setFgsInactiveLocked(MediaSessionRecordImpl mediaSessionRecord,
             StatusBarNotification sbn) {
-        if (!mFgsAllowedMediaSessionRecords.remove(mediaSessionRecord)) {
-            return; // This record is not FGS-active. No need to set inactive.
-        }
-
         final long token = Binder.clearCallingIdentity();
         try {
             final String packageName = sbn.getPackageName();
@@ -3273,6 +3256,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         public void onNotificationPosted(StatusBarNotification sbn) {
             super.onNotificationPosted(sbn);
             int uid = sbn.getUid();
+            int userId = sbn.getUser().getIdentifier();
             final Notification postedNotification = sbn.getNotification();
             if (!postedNotification.isMediaNotification()) {
                 return;
@@ -3280,12 +3264,16 @@ public class MediaSessionService extends SystemService implements Monitor {
             synchronized (mLock) {
                 mMediaNotifications.putIfAbsent(uid, new HashSet<>());
                 mMediaNotifications.get(uid).add(sbn);
-                for (MediaSessionRecordImpl mediaSessionRecord :
-                        mUserEngagedSessionsForFgs.getOrDefault(uid, Set.of())) {
-                    if (mediaSessionRecord.isLinkedToNotification(postedNotification)) {
-                        setFgsActiveLocked(mediaSessionRecord, sbn);
-                        return;
-                    }
+                MediaSessionRecordImpl userEngagedRecord =
+                        getUserEngagedMediaSessionRecordForNotification(uid, postedNotification);
+                if (userEngagedRecord != null) {
+                    setFgsActiveLocked(userEngagedRecord, sbn);
+                    return;
+                }
+                MediaSessionRecordImpl notificationRecord =
+                        getAnyMediaSessionRecordForNotification(uid, userId, postedNotification);
+                if (notificationRecord != null) {
+                    setFgsInactiveIfNoSessionIsLinkedToNotification(notificationRecord);
                 }
             }
         }
@@ -3308,7 +3296,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
 
                 MediaSessionRecordImpl notificationRecord =
-                        getLinkedMediaSessionRecord(uid, removedNotification);
+                        getUserEngagedMediaSessionRecordForNotification(uid, removedNotification);
 
                 if (notificationRecord == null) {
                     return;
@@ -3317,12 +3305,31 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
         }
 
-        private MediaSessionRecordImpl getLinkedMediaSessionRecord(
+        private MediaSessionRecordImpl getUserEngagedMediaSessionRecordForNotification(
                 int uid, Notification notification) {
             synchronized (mLock) {
                 for (MediaSessionRecordImpl mediaSessionRecord :
                         mUserEngagedSessionsForFgs.getOrDefault(uid, Set.of())) {
                     if (mediaSessionRecord.isLinkedToNotification(notification)) {
+                        return mediaSessionRecord;
+                    }
+                }
+            }
+            return null;
+        }
+
+        private MediaSessionRecordImpl getAnyMediaSessionRecordForNotification(
+                int uid, int userId, Notification notification) {
+            synchronized (mLock) {
+                FullUserRecord userRecord = getFullUserRecordLocked(userId);
+                if (userRecord == null) {
+                    return null;
+                }
+                List<MediaSessionRecord> allUserSessions =
+                        userRecord.mPriorityStack.getPriorityList(/* activeOnly= */ false, userId);
+                for (MediaSessionRecordImpl mediaSessionRecord : allUserSessions) {
+                    if (mediaSessionRecord.getUid() == uid
+                            && mediaSessionRecord.isLinkedToNotification(notification)) {
                         return mediaSessionRecord;
                     }
                 }
