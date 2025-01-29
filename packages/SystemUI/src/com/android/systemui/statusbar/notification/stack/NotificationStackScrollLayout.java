@@ -6683,8 +6683,21 @@ public class NotificationStackScrollLayout
         }
         NotificationHeaderView header = childrenContainer.getGroupHeader();
         if (header != null) {
+            resetYTranslation(header.getTopLineView());
+            resetYTranslation(header.getExpandButton());
             header.centerTopLine(expanded);
         }
+    }
+
+    /**
+     * Reset the y translation of the {@code view} via the {@link ViewState}, to ensure that the
+     * animation state is updated correctly.
+     */
+    private static void resetYTranslation(View view) {
+        ViewState viewState = new ViewState();
+        viewState.initFrom(view);
+        viewState.setYTranslation(0);
+        viewState.applyToView(view);
     }
 
     private final ExpandHelper.Callback mExpandHelperCallback = new ExpandHelper.Callback() {

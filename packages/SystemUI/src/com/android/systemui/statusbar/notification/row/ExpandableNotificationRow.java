@@ -1247,15 +1247,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     /**
-     * Prepares expansion changed.
-     */
-    public void prepareExpansionChanged() {
-        if (mIsSummaryWithChildren) {
-            mChildrenContainer.prepareExpansionChanged();
-        }
-    }
-
-    /**
      * Starts child animations.
      */
     public void startChildAnimation(AnimationProperties properties) {
@@ -1569,7 +1560,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         // Let's update our childrencontainer. This is intentionally not guarded with
         // mIsSummaryWithChildren since we might have had children but not anymore.
         if (mChildrenContainer != null) {
-            mChildrenContainer.reInflateViews(mExpandClickListener, mEntry.getSbn());
+            mChildrenContainer.reInflateViews(mExpandClickListener);
         }
         if (mGuts != null) {
             NotificationGuts oldGuts = mGuts;
