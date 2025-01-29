@@ -128,7 +128,7 @@ public final class UiAutomation {
     private static final String LOG_TAG = UiAutomation.class.getSimpleName();
 
     private static final boolean DEBUG = false;
-    private static final boolean VERBOSE = false;
+    private static final boolean VERBOSE = Build.IS_DEBUGGABLE;
 
     private static final int CONNECTION_ID_UNDEFINED = -1;
 
