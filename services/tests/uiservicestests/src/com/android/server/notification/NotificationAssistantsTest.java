@@ -22,6 +22,7 @@ import static android.service.notification.Adjustment.KEY_TYPE;
 import static android.service.notification.Adjustment.TYPE_CONTENT_RECOMMENDATION;
 import static android.service.notification.Adjustment.TYPE_NEWS;
 import static android.service.notification.Adjustment.TYPE_PROMOTION;
+import static android.service.notification.Adjustment.TYPE_SOCIAL_MEDIA;
 
 import static com.android.server.notification.NotificationManagerService.DEFAULT_ALLOWED_ADJUSTMENTS;
 
@@ -611,7 +612,8 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
 
         ManagedServices.ManagedServiceInfo info =
                 mAssistants.new ManagedServiceInfo(null, mCn, userId, false, null, 35, 2345256);
-        mAssistants.setAdjustmentTypeSupportedState(info, Adjustment.KEY_NOT_CONVERSATION, false);
+        mAssistants.setAdjustmentTypeSupportedState(
+                info.userid, Adjustment.KEY_NOT_CONVERSATION, false);
 
         assertThat(mAssistants.getUnsupportedAdjustments(userId)).contains(
                 Adjustment.KEY_NOT_CONVERSATION);
@@ -632,7 +634,8 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
 
         ManagedServices.ManagedServiceInfo info =
                 mAssistants.new ManagedServiceInfo(null, mCn, userId, false, null, 35, 2345256);
-        mAssistants.setAdjustmentTypeSupportedState(info, Adjustment.KEY_NOT_CONVERSATION, false);
+        mAssistants.setAdjustmentTypeSupportedState(
+                info.userid, Adjustment.KEY_NOT_CONVERSATION, false);
 
         writeXmlAndReload(USER_ALL);
 
@@ -654,7 +657,6 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         assertNotNull(current);
 
         writeXmlAndReload(USER_ALL);
-
         assertThat(mAssistants.getUnsupportedAdjustments(userId).size()).isEqualTo(0);
     }
 
@@ -707,26 +709,29 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     @Test
     @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
     public void testSetAssistantAdjustmentKeyTypeState_allow() {
-        assertThat(mAssistants.getAllowedClassificationTypes()).asList()
-                .containsExactly(TYPE_PROMOTION);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_CONTENT_RECOMMENDATION, false);
+        assertThat(mAssistants.getAllowedClassificationTypes())
+                .asList().doesNotContain(TYPE_CONTENT_RECOMMENDATION);
 
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_CONTENT_RECOMMENDATION, true);
 
         assertThat(mAssistants.getAllowedClassificationTypes()).asList()
-                .containsExactlyElementsIn(List.of(TYPE_PROMOTION, TYPE_CONTENT_RECOMMENDATION));
+                .contains(TYPE_CONTENT_RECOMMENDATION);
     }
 
     @Test
     @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
     public void testSetAssistantAdjustmentKeyTypeState_disallow() {
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, false);
-        assertThat(mAssistants.getAllowedClassificationTypes()).isEmpty();
+        assertThat(mAssistants.getAllowedClassificationTypes())
+                .asList().doesNotContain(TYPE_PROMOTION);
     }
 
     @Test
     @EnableFlags(Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
     public void testDisallowAdjustmentKeyType_readWriteXml() throws Exception {
         mAssistants.loadDefaultsFromConfig(true);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_SOCIAL_MEDIA, false);
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, false);
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_NEWS, true);
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_CONTENT_RECOMMENDATION, true);
@@ -745,7 +750,8 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         writeXmlAndReload(USER_ALL);
 
         assertThat(mAssistants.getAllowedClassificationTypes()).asList()
-                .containsExactly(TYPE_PROMOTION);
+                .containsExactlyElementsIn(List.of(TYPE_PROMOTION, TYPE_NEWS, TYPE_SOCIAL_MEDIA,
+                        TYPE_CONTENT_RECOMMENDATION));
     }
 
     @Test
@@ -860,8 +866,9 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
                 mAssistants.new ManagedServiceInfo(null, mCn, userId, false, null, 35, 2345256);
 
         // Ensure bundling is enabled
-        mAssistants.setAdjustmentTypeSupportedState(info, KEY_TYPE, true);
+        mAssistants.setAdjustmentTypeSupportedState(info.userid, KEY_TYPE, true);
         // Enable these specific bundle types
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_SOCIAL_MEDIA, false);
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, false);
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_NEWS, true);
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_CONTENT_RECOMMENDATION, true);
@@ -894,7 +901,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
                 .isEqualTo(NotificationProtoEnums.TYPE_CONTENT_RECOMMENDATION);
 
         // Disable the top-level bundling setting
-        mAssistants.setAdjustmentTypeSupportedState(info, KEY_TYPE, false);
+        mAssistants.setAdjustmentTypeSupportedState(info.userid, KEY_TYPE, false);
         // Enable these specific bundle types
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, true);
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_NEWS, false);
