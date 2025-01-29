@@ -224,6 +224,12 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
     }
 
+    /** Hides the IME for Bubbles when the device is locked. */
+    public void hideImeForBubblesWhenLocked(int displayId) {
+        PerDisplay pd = mImePerDisplay.get(displayId);
+        pd.setImeInputTargetRequestedVisibility(false, pd.getImeSourceControl().getImeStatsToken());
+    }
+
     /** An implementation of {@link IDisplayWindowInsetsController} for a given display id. */
     public class PerDisplay implements DisplayInsetsController.OnInsetsChangedListener {
         final int mDisplayId;

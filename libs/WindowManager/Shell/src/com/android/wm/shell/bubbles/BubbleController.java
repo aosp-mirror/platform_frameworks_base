@@ -640,6 +640,14 @@ public class BubbleController implements ConfigurationChangeListener,
         mOnImeHidden = onImeHidden;
         mBubblePositioner.setImeVisible(false /* visible */, 0 /* height */);
         int displayId = mWindowManager.getDefaultDisplay().getDisplayId();
+        // if the device is locked we can't use the status bar service to hide the IME because
+        // the IME state is frozen and it will lead to internal IME state going out of sync. This
+        // will make the IME visible when the device is unlocked. Instead we use
+        // DisplayImeController directly to make sure the state is correct when the device unlocks.
+        if (isDeviceLocked()) {
+            mDisplayImeController.hideImeForBubblesWhenLocked(displayId);
+            return;
+        }
         try {
             mBarService.hideCurrentInputMethodForBubbles(displayId);
         } catch (RemoteException e) {
@@ -679,8 +687,20 @@ public class BubbleController implements ConfigurationChangeListener,
                         ? mNotifEntryToExpandOnShadeUnlock.getKey() : "null"));
         mIsStatusBarShade = isShade;
         if (!mIsStatusBarShade && didChange) {
-            // Only collapse stack on change
-            collapseStack();
+            if (mBubbleData.isExpanded()) {
+                // If the IME is visible, hide it first and then collapse.
+                if (mBubblePositioner.isImeVisible()) {
+                    hideCurrentInputMethod(this::collapseStack);
+                } else {
+                    collapseStack();
+                }
+            } else if (mOnImeHidden != null) {
+                // a request to collapse started before we're notified that the device is locking.
+                // we're currently waiting for the IME to collapse, before mOnImeHidden can be
+                // executed, which may not happen since the screen may already be off. hide the IME
+                // immediately now that we're locked and pass the same runnable so it can complete.
+                hideCurrentInputMethod(mOnImeHidden);
+            }
         }
 
         if (mNotifEntryToExpandOnShadeUnlock != null) {
@@ -2481,6 +2501,10 @@ public class BubbleController implements ConfigurationChangeListener,
         ProtoLog.v(WM_SHELL_BUBBLES, "showBubblesFromShortcut: select and open %s",
                 bubbleToSelect.getKey());
         mBubbleData.setSelectedBubbleAndExpandStack(bubbleToSelect);
+    }
+
+    private boolean isDeviceLocked() {
+        return !mIsStatusBarShade;
     }
 
     /**
