@@ -25,6 +25,7 @@ import android.os.UserHandle
 import android.service.quicksettings.IQSTileService
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.external.CustomTileInterface
 import com.android.systemui.qs.external.TileServiceManager
@@ -42,7 +43,6 @@ import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Communicates with [TileService] via [TileServiceManager] and [IQSTileService]. This interactor is
@@ -72,6 +72,7 @@ constructor(
 
     val callingAppIds: Flow<Int>
         get() = tileReceivingInterface.mutableCallingAppIds
+
     val refreshEvents: Flow<Unit>
         get() = tileReceivingInterface.mutableRefreshEvents
 
@@ -144,6 +145,7 @@ constructor(
 
     private fun getTileServiceManager(): TileServiceManager =
         synchronized(tileServices) {
+            qsTileLogger.logInfo(tileSpec, "getTileServiceManager called")
             if (tileServiceManager == null) {
                 tileServices
                     .getTileWrapper(tileReceivingInterface)
@@ -173,8 +175,10 @@ constructor(
 
         override val user: Int
             get() = currentUser.identifier
+
         override val qsTile: Tile
             get() = customTileInteractor.getTile(currentUser)
+
         override val component: ComponentName = tileSpec.componentName
 
         val mutableCallingAppIds = MutableStateFlow(Process.INVALID_UID)
