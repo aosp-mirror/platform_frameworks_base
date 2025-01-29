@@ -125,7 +125,7 @@ constructor(
         repository.transitions
             .pairwise()
             .filter { it.newValue.transitionState == TransitionState.STARTED }
-            .shareIn(scope, SharingStarted.Eagerly)
+            .shareIn(scope, SharingStarted.Eagerly, replay = 1)
 
     init {
         // Collect non-canceled steps and emit transition values.

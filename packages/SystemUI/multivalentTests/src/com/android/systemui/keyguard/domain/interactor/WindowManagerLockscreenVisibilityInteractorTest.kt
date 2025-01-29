@@ -794,6 +794,122 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
                 TransitionStep(
                     transitionState = TransitionState.STARTED,
                     from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                )
+            )
+            runCurrent()
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.RUNNING,
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                )
+            )
+            runCurrent()
+
+            assertEquals(
+                listOf(
+                    true,
+                    // Still not visible during GONE -> LOCKSCREEN.
+                    false,
+                ),
+                values,
+            )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.FINISHED,
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                )
+            )
+            runCurrent()
+
+            assertEquals(
+                listOf(
+                    true,
+                    false,
+                    // Visible now that we're FINISHED in LOCKSCREEN.
+                    true,
+                ),
+                values,
+            )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.STARTED,
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                )
+            )
+            runCurrent()
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.RUNNING,
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                )
+            )
+            runCurrent()
+
+            assertEquals(
+                listOf(
+                    true,
+                    false,
+                    // Remains true until the transition ends.
+                    true,
+                ),
+                values,
+            )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.FINISHED,
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                )
+            )
+
+            runCurrent()
+            assertEquals(
+                listOf(
+                    true,
+                    false,
+                    true,
+                    // Until we're finished in GONE again.
+                    false,
+                ),
+                values,
+            )
+        }
+
+    @Test
+    @DisableSceneContainer
+    fun testLockscreenVisibility_falseDuringWakeAndUnlockToGone_fromNotCanceledGone() =
+        testScope.runTest {
+            val values by collectValues(underTest.value.lockscreenVisibility)
+
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope,
+            )
+
+            runCurrent()
+            assertEquals(
+                listOf(
+                    true,
+                    // Not visible when finished in GONE.
+                    false,
+                ),
+                values,
+            )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.STARTED,
+                    from = KeyguardState.GONE,
                     to = KeyguardState.AOD,
                 )
             )
@@ -857,8 +973,9 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
                 listOf(
                     true,
                     false,
-                    // Remains visible from AOD during transition.
                     true,
+                    // Becomes false immediately since we're wake and unlocking.
+                    false,
                 ),
                 values,
             )
