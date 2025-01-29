@@ -27,7 +27,6 @@ import android.os.Handler
 import android.os.IBinder
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.SurfaceControl
@@ -57,7 +56,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
@@ -81,8 +79,6 @@ import org.mockito.kotlin.whenever
 @RunWithLooper
 @RunWith(AndroidTestingRunner::class)
 class DesktopMixedTransitionHandlerTest : ShellTestCase() {
-
-    @JvmField @Rule val setFlagsRule = SetFlagsRule()
 
     @Mock lateinit var transitions: Transitions
     @Mock lateinit var userRepositories: DesktopUserRepositories

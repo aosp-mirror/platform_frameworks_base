@@ -20,7 +20,6 @@ import android.graphics.Rect
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
-import android.platform.test.flag.junit.SetFlagsRule
 import android.util.ArraySet
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.Display.INVALID_DISPLAY
@@ -47,7 +46,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -70,8 +68,6 @@ import platform.test.runner.parameterized.Parameters
 @RunWith(ParameterizedAndroidJunit4::class)
 @ExperimentalCoroutinesApi
 class DesktopRepositoryTest(flags: FlagsParameterization) : ShellTestCase() {
-
-    @JvmField @Rule val setFlagsRule = SetFlagsRule(flags)
 
     private lateinit var repo: DesktopRepository
     private lateinit var shellInit: ShellInit

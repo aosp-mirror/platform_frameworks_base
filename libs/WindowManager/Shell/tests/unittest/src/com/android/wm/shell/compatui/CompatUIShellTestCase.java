@@ -16,24 +16,10 @@
 
 package com.android.wm.shell.compatui;
 
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
-import android.platform.test.flag.junit.SetFlagsRule;
-
 import com.android.wm.shell.ShellTestCase;
-
-import org.junit.Rule;
 
 /**
  * Base class for CompatUI tests.
  */
 public class CompatUIShellTestCase extends ShellTestCase {
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
-
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
-
 }

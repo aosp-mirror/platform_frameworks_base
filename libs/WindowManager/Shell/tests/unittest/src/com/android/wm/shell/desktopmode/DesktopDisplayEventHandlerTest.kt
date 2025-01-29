@@ -23,7 +23,6 @@ import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.content.ContentResolver
 import android.os.Binder
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import android.provider.Settings
 import android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS
 import android.testing.AndroidTestingRunner
@@ -51,7 +50,6 @@ import com.android.wm.shell.transition.Transitions
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.isNull
@@ -74,9 +72,6 @@ import org.mockito.quality.Strictness
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class DesktopDisplayEventHandlerTest : ShellTestCase() {
-
-    @JvmField @Rule val setFlagsRule = SetFlagsRule()
-
     @Mock lateinit var testExecutor: ShellExecutor
     @Mock lateinit var transitions: Transitions
     @Mock lateinit var displayController: DisplayController

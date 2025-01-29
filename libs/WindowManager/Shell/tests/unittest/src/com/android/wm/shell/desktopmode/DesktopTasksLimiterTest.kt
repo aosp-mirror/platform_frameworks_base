@@ -24,7 +24,6 @@ import android.os.IBinder
 import android.os.UserManager
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.SurfaceControl
@@ -66,7 +65,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -87,8 +85,6 @@ import org.mockito.quality.Strictness
 @RunWith(AndroidTestingRunner::class)
 @ExperimentalCoroutinesApi
 class DesktopTasksLimiterTest : ShellTestCase() {
-
-    @JvmField @Rule val setFlagsRule = SetFlagsRule()
 
     @Mock lateinit var shellTaskOrganizer: ShellTaskOrganizer
     @Mock lateinit var transitions: Transitions

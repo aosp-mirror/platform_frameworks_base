@@ -25,7 +25,6 @@ import android.graphics.Rect
 import android.os.Binder
 import android.os.UserManager
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.view.Display.DEFAULT_DISPLAY
 import android.window.WindowContainerTransaction
@@ -62,7 +61,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -89,8 +87,6 @@ import org.mockito.quality.Strictness
 @ExperimentalCoroutinesApi
 @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE, FLAG_RESPECT_ORIENTATION_CHANGE_FOR_UNRESIZEABLE)
 class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
-    @JvmField @Rule val setFlagsRule = SetFlagsRule()
-
     @Mock lateinit var testExecutor: ShellExecutor
     @Mock lateinit var shellTaskOrganizer: ShellTaskOrganizer
     @Mock lateinit var transitions: Transitions

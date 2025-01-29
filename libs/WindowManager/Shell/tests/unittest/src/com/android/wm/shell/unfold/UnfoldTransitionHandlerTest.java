@@ -43,6 +43,7 @@ import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestSyncExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.shared.TransactionPool;
@@ -61,7 +62,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-public class UnfoldTransitionHandlerTest {
+public class UnfoldTransitionHandlerTest extends ShellTestCase {
 
     private UnfoldTransitionHandler mUnfoldTransitionHandler;
 

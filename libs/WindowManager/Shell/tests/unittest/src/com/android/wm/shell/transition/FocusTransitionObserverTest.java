@@ -35,8 +35,6 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.os.RemoteException;
 import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.TransitionInfo.TransitionMode;
@@ -50,7 +48,6 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.shared.FocusTransitionListener;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -67,8 +64,6 @@ public class FocusTransitionObserverTest extends ShellTestCase {
 
     static final int SECONDARY_DISPLAY_ID = 1;
 
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
     private FocusTransitionListener mListener;
     private final TestShellExecutor mShellExecutor = new TestShellExecutor();
     private FocusTransitionObserver mFocusTransitionObserver;

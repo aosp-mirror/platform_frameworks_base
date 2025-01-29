@@ -26,7 +26,6 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.Display
@@ -60,7 +59,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
@@ -81,10 +79,6 @@ import org.mockito.kotlin.whenever
 @TestableLooper.RunWithLooper
 @RunWith(AndroidTestingRunner::class)
 class HandleMenuTest : ShellTestCase() {
-    @JvmField
-    @Rule
-    val setFlagsRule: SetFlagsRule = SetFlagsRule()
-
     @Mock
     private lateinit var mockDesktopWindowDecoration: DesktopModeWindowDecoration
     @Mock

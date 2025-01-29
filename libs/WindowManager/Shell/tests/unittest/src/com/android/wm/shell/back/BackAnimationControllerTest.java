@@ -60,7 +60,6 @@ import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.platform.test.annotations.EnableFlags;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.IRemoteAnimationRunner;
@@ -91,7 +90,6 @@ import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -151,9 +149,6 @@ public class BackAnimationControllerTest extends ShellTestCase {
     private Rect mTouchableRegion;
 
     private BackAnimationController.BackTransitionHandler mBackTransitionHandler;
-
-    @Rule
-    public SetFlagsRule mSetflagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() throws Exception {

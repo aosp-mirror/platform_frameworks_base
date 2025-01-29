@@ -41,7 +41,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.window.TransitionInfo;
@@ -55,7 +54,6 @@ import com.google.testing.junit.testparameterinjector.TestParameter;
 import com.google.testing.junit.testparameterinjector.TestParameterInjector;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -72,9 +70,6 @@ import java.util.Arrays;
 @SmallTest
 @RunWith(TestParameterInjector.class)
 public class ActivityEmbeddingAnimationRunnerTests extends ActivityEmbeddingAnimationTestBase {
-
-    @Rule
-    public SetFlagsRule mRule = new SetFlagsRule();
 
     @Before
     public void setup() {

@@ -19,7 +19,6 @@ package com.android.wm.shell.desktopmode.education
 import android.os.SystemProperties
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.testing.TestableContext
 import androidx.test.filters.SmallTest
@@ -75,7 +74,6 @@ class AppHandleEducationControllerTest : ShellTestCase() {
             .mockStatic(DesktopModeStatus::class.java)
             .mockStatic(SystemProperties::class.java)
             .build()!!
-    @JvmField @Rule val setFlagsRule = SetFlagsRule()
 
     private lateinit var educationController: AppHandleEducationController
     private lateinit var testableContext: TestableContext

@@ -38,6 +38,7 @@ import android.app.ActivityManager;
 import android.app.TaskInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.testing.AndroidTestingRunner;
 import android.util.Pair;
@@ -394,8 +395,8 @@ public class CompatUIWindowManagerTest extends CompatUIShellTestCase {
 
     @Test
     @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
+    @EnableFlags(Flags.FLAG_ALLOW_HIDE_SCM_BUTTON)
     public void testShouldShowSizeCompatRestartButton() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_ALLOW_HIDE_SCM_BUTTON);
         doReturn(85).when(mCompatUIConfiguration).getHideSizeCompatRestartButtonTolerance();
         mWindowManager = new CompatUIWindowManager(mContext, mTaskInfo, mSyncTransactionQueue,
                 mCallback, mTaskListener, mDisplayLayout, new CompatUIHintsState(),

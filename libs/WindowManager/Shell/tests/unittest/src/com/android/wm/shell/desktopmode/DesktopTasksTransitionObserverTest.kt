@@ -25,7 +25,6 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.WindowManager
 import android.view.WindowManager.TRANSIT_CLOSE
@@ -77,9 +76,6 @@ import org.mockito.kotlin.whenever
  * Build/Install/Run: atest WMShellUnitTests:DesktopTasksTransitionObserverTest
  */
 class DesktopTasksTransitionObserverTest {
-
-    @JvmField @Rule val setFlagsRule = SetFlagsRule()
-
     @JvmField
     @Rule
     val extendedMockitoRule =
