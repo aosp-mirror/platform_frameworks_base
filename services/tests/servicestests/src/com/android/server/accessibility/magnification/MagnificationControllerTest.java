@@ -885,66 +885,142 @@ public class MagnificationControllerTest {
     }
 
     @Test
-    public void magnificationCallbacks_panMagnificationContinuous() throws RemoteException {
+    public void magnificationCallbacks_scaleMagnificationContinuous() throws RemoteException {
         setMagnificationEnabled(MODE_FULLSCREEN);
-        mMagnificationController.onPerformScaleAction(TEST_DISPLAY, 8.0f, false);
+        float currentScale = 2.0f;
+        mMagnificationController.onPerformScaleAction(TEST_DISPLAY, currentScale, false);
         reset(mScreenMagnificationController);
-
-        DisplayMetrics metrics = new DisplayMetrics();
-        mDisplay.getMetrics(metrics);
-        float expectedStep = 27 * metrics.density;
 
         float currentCenterX = mScreenMagnificationController.getCenterX(TEST_DISPLAY);
         float currentCenterY = mScreenMagnificationController.getCenterY(TEST_DISPLAY);
 
-        // Start moving right using keyboard callbacks.
+        // Start zooming in using keyboard callbacks.
+        mMagnificationController.onScaleMagnificationStart(TEST_DISPLAY,
+                MagnificationController.ZOOM_DIRECTION_IN);
+
+        // The center is unchanged.
+        float newCenterX = mScreenMagnificationController.getCenterX(TEST_DISPLAY);
+        float newCenterY = mScreenMagnificationController.getCenterY(TEST_DISPLAY);
+        expect.that(currentCenterX).isWithin(1.0f).of(newCenterX);
+        expect.that(currentCenterY).isEqualTo(newCenterY);
+
+        // The scale is increased.
+        float newScale = mScreenMagnificationController.getScale(TEST_DISPLAY);
+        expect.that(currentScale).isLessThan(newScale);
+        currentScale = newScale;
+
+        // Wait for the initial delay to occur.
+        advanceTime(mMagnificationController.getInitialKeyboardRepeatIntervalMs() + 1);
+
+        // It should have scaled again after the handler was triggered.
+        newScale = mScreenMagnificationController.getScale(TEST_DISPLAY);
+        expect.that(currentScale).isLessThan(newScale);
+        currentScale = newScale;
+
+        for (int i = 0; i < 3; i++) {
+            // Wait for repeat delay to occur.
+            advanceTime(MagnificationController.KEYBOARD_REPEAT_INTERVAL_MS + 1);
+
+            // It should have scaled another time.
+            newScale = mScreenMagnificationController.getScale(TEST_DISPLAY);
+            expect.that(currentScale).isLessThan(newScale);
+            currentScale = newScale;
+        }
+
+        // Stop magnification scale.
+        mMagnificationController.onScaleMagnificationStop(TEST_DISPLAY,
+                MagnificationController.ZOOM_DIRECTION_IN);
+
+        // It should not scale again, even after the appropriate delay.
+        advanceTime(MagnificationController.KEYBOARD_REPEAT_INTERVAL_MS + 1);
+
+        newScale = mScreenMagnificationController.getScale(TEST_DISPLAY);
+        expect.that(currentScale).isEqualTo(newScale);
+    }
+
+    @Test
+    public void magnificationCallbacks_panMagnificationContinuous_repeatKeysTimeout200()
+            throws RemoteException {
+        // Shorter than default.
+        testMagnificationContinuousPanningWithTimeout(200);
+    }
+
+    @Test
+    public void magnificationCallbacks_panMagnificationContinuous_repeatKeysTimeout1000()
+            throws RemoteException {
+        // Longer than default.
+        testMagnificationContinuousPanningWithTimeout(1000);
+    }
+
+    @Test
+    public void magnificationCallbacks_panMagnification_notContinuousWithRepeatKeysDisabled()
+            throws RemoteException {
+        mMagnificationController.setRepeatKeysEnabled(false);
+        setMagnificationEnabled(MODE_FULLSCREEN);
+        mMagnificationController.onPerformScaleAction(TEST_DISPLAY, 4.0f, false);
+        reset(mScreenMagnificationController);
+
+        float currentCenterX = mScreenMagnificationController.getCenterX(TEST_DISPLAY);
+        float currentCenterY = mScreenMagnificationController.getCenterY(TEST_DISPLAY);
+
+        // Start moving down using keyboard callbacks.
         mMagnificationController.onPanMagnificationStart(TEST_DISPLAY,
-                MagnificationController.PAN_DIRECTION_RIGHT);
+                MagnificationController.PAN_DIRECTION_DOWN);
 
         float newCenterX = mScreenMagnificationController.getCenterX(TEST_DISPLAY);
         float newCenterY = mScreenMagnificationController.getCenterY(TEST_DISPLAY);
-        expect.that(currentCenterX).isLessThan(newCenterX);
-        expect.that(newCenterX - currentCenterX).isWithin(0.01f).of(expectedStep);
-        expect.that(currentCenterY).isEqualTo(newCenterY);
+        expect.that(currentCenterY).isLessThan(newCenterY);
+        expect.that(currentCenterX).isEqualTo(newCenterX);
 
         currentCenterX = newCenterX;
         currentCenterY = newCenterY;
 
-        // Wait for the initial delay to occur.
-        advanceTime(MagnificationController.INITIAL_KEYBOARD_REPEAT_INTERVAL_MS + 1);
+        for (int i = 0; i < 3; i++) {
+            // Wait for the initial delay to occur.
+            advanceTime(mMagnificationController.getInitialKeyboardRepeatIntervalMs() + 1);
 
-        // It should have moved again after the handler was triggered.
-        newCenterX = mScreenMagnificationController.getCenterX(TEST_DISPLAY);
-        newCenterY = mScreenMagnificationController.getCenterY(TEST_DISPLAY);
-        expect.that(currentCenterX).isLessThan(newCenterX);
-        expect.that(newCenterX - currentCenterX).isWithin(0.01f).of(expectedStep);
-        expect.that(currentCenterY).isEqualTo(newCenterY);
-        currentCenterX = newCenterX;
-        currentCenterY = newCenterY;
+            // It should not have moved again because repeat keys is disabled.
+            newCenterX = mScreenMagnificationController.getCenterX(TEST_DISPLAY);
+            newCenterY = mScreenMagnificationController.getCenterY(TEST_DISPLAY);
+            expect.that(currentCenterX).isEqualTo(newCenterX);
+            expect.that(currentCenterY).isEqualTo(newCenterY);
+            currentCenterX = newCenterX;
+            currentCenterY = newCenterY;
+        }
 
-        // Wait for repeat delay to occur.
-        advanceTime(MagnificationController.KEYBOARD_REPEAT_INTERVAL_MS + 1);
-
-        // It should have moved a third time.
-        newCenterX = mScreenMagnificationController.getCenterX(TEST_DISPLAY);
-        newCenterY = mScreenMagnificationController.getCenterY(TEST_DISPLAY);
-        expect.that(currentCenterX).isLessThan(newCenterX);
-        expect.that(newCenterX - currentCenterX).isWithin(0.01f).of(expectedStep);
-        expect.that(currentCenterY).isEqualTo(newCenterY);
-        currentCenterX = newCenterX;
-        currentCenterY = newCenterY;
-
-        // Stop magnification pan.
         mMagnificationController.onPanMagnificationStop(TEST_DISPLAY,
-                MagnificationController.PAN_DIRECTION_RIGHT);
+                MagnificationController.PAN_DIRECTION_DOWN);
+    }
 
-        // It should not move again, even after the appropriate delay.
-        advanceTime(MagnificationController.KEYBOARD_REPEAT_INTERVAL_MS + 1);
+    @Test
+    public void magnificationCallbacks_scaleMagnification_notContinuousWithRepeatKeysDisabled()
+            throws RemoteException {
+        mMagnificationController.setRepeatKeysEnabled(false);
+        setMagnificationEnabled(MODE_FULLSCREEN);
+        float currentScale = 8.0f;
+        mMagnificationController.onPerformScaleAction(TEST_DISPLAY, currentScale, false);
+        reset(mScreenMagnificationController);
 
-        newCenterX = mScreenMagnificationController.getCenterX(TEST_DISPLAY);
-        newCenterY = mScreenMagnificationController.getCenterY(TEST_DISPLAY);
-        expect.that(newCenterX).isEqualTo(currentCenterX);
-        expect.that(newCenterY).isEqualTo(currentCenterY);
+        // Start scaling out using keyboard callbacks.
+        mMagnificationController.onScaleMagnificationStart(TEST_DISPLAY,
+                MagnificationController.ZOOM_DIRECTION_OUT);
+
+        float newScale = mScreenMagnificationController.getScale(TEST_DISPLAY);
+        expect.that(currentScale).isGreaterThan(newScale);
+
+        currentScale = newScale;
+
+        for (int i = 0; i < 3; i++) {
+            // Wait for the initial delay to occur.
+            advanceTime(mMagnificationController.getInitialKeyboardRepeatIntervalMs() + 1);
+
+            // It should not have scaled again because repeat keys is disabled.
+            newScale = mScreenMagnificationController.getScale(TEST_DISPLAY);
+            expect.that(currentScale).isEqualTo(newScale);
+        }
+
+        mMagnificationController.onScaleMagnificationStop(TEST_DISPLAY,
+                MagnificationController.ZOOM_DIRECTION_OUT);
     }
 
     @Test
@@ -1734,6 +1810,75 @@ public class MagnificationControllerTest {
                 eq(0.0f), floatThat(step -> Math.abs(expectedStep - step) < 0.0001));
         mMagnificationController.onPanMagnificationStop(TEST_DISPLAY,
                 MagnificationController.PAN_DIRECTION_UP);
+    }
+
+    private void
+            testMagnificationContinuousPanningWithTimeout(int timeoutMs) throws RemoteException {
+        mMagnificationController.setRepeatKeysTimeoutMs(timeoutMs);
+        expect.that(timeoutMs).isEqualTo(
+                mMagnificationController.getInitialKeyboardRepeatIntervalMs());
+
+        setMagnificationEnabled(MODE_FULLSCREEN);
+        mMagnificationController.onPerformScaleAction(TEST_DISPLAY, 8.0f, false);
+        reset(mScreenMagnificationController);
+
+        DisplayMetrics metrics = new DisplayMetrics();
+        mDisplay.getMetrics(metrics);
+        float expectedStep = 27 * metrics.density;
+
+        float currentCenterX = mScreenMagnificationController.getCenterX(TEST_DISPLAY);
+        float currentCenterY = mScreenMagnificationController.getCenterY(TEST_DISPLAY);
+
+        // Start moving right using keyboard callbacks.
+        mMagnificationController.onPanMagnificationStart(TEST_DISPLAY,
+                MagnificationController.PAN_DIRECTION_RIGHT);
+
+        float newCenterX = mScreenMagnificationController.getCenterX(TEST_DISPLAY);
+        float newCenterY = mScreenMagnificationController.getCenterY(TEST_DISPLAY);
+        expect.that(currentCenterX).isLessThan(newCenterX);
+        expect.that(newCenterX - currentCenterX).isWithin(0.01f).of(expectedStep);
+        expect.that(currentCenterY).isEqualTo(newCenterY);
+
+        currentCenterX = newCenterX;
+        currentCenterY = newCenterY;
+
+        // Wait for the initial delay to occur.
+        advanceTime(timeoutMs + 1);
+
+        // It should have moved again after the handler was triggered.
+        newCenterX = mScreenMagnificationController.getCenterX(TEST_DISPLAY);
+        newCenterY = mScreenMagnificationController.getCenterY(TEST_DISPLAY);
+        expect.that(currentCenterX).isLessThan(newCenterX);
+        expect.that(newCenterX - currentCenterX).isWithin(0.01f).of(expectedStep);
+        expect.that(currentCenterY).isEqualTo(newCenterY);
+        currentCenterX = newCenterX;
+        currentCenterY = newCenterY;
+
+        for (int i = 0; i < 3; i++) {
+            // Wait for repeat delay to occur.
+            advanceTime(MagnificationController.KEYBOARD_REPEAT_INTERVAL_MS + 1);
+
+            // It should have moved another time.
+            newCenterX = mScreenMagnificationController.getCenterX(TEST_DISPLAY);
+            newCenterY = mScreenMagnificationController.getCenterY(TEST_DISPLAY);
+            expect.that(currentCenterX).isLessThan(newCenterX);
+            expect.that(newCenterX - currentCenterX).isWithin(0.01f).of(expectedStep);
+            expect.that(currentCenterY).isEqualTo(newCenterY);
+            currentCenterX = newCenterX;
+            currentCenterY = newCenterY;
+        }
+
+        // Stop magnification pan.
+        mMagnificationController.onPanMagnificationStop(TEST_DISPLAY,
+                MagnificationController.PAN_DIRECTION_RIGHT);
+
+        // It should not move again, even after the appropriate delay.
+        advanceTime(MagnificationController.KEYBOARD_REPEAT_INTERVAL_MS + 1);
+
+        newCenterX = mScreenMagnificationController.getCenterX(TEST_DISPLAY);
+        newCenterY = mScreenMagnificationController.getCenterY(TEST_DISPLAY);
+        expect.that(newCenterX).isEqualTo(currentCenterX);
+        expect.that(newCenterY).isEqualTo(currentCenterY);
     }
 
     private void advanceTime(long timeMs) {

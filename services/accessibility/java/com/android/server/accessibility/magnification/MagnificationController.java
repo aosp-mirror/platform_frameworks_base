@@ -50,6 +50,7 @@ import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.util.TypedValue;
 import android.view.Display;
+import android.view.ViewConfiguration;
 import android.view.accessibility.MagnificationAnimationCallback;
 
 import com.android.internal.accessibility.util.AccessibilityStatsLogUtils;
@@ -122,9 +123,8 @@ public class MagnificationController implements MagnificationConnectionManager.C
     private @ZoomDirection int mActiveZoomDirection = ZOOM_DIRECTION_IN;
     private int mActiveZoomDisplay = Display.INVALID_DISPLAY;
 
-    // TODO(b/355499907): Get initial repeat interval from repeat keys settings.
-    @VisibleForTesting
-    public static final int INITIAL_KEYBOARD_REPEAT_INTERVAL_MS = 500;
+    private int mInitialKeyboardRepeatIntervalMs =
+            ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT;
     @VisibleForTesting
     public static final int KEYBOARD_REPEAT_INTERVAL_MS = 60;
 
@@ -321,12 +321,6 @@ public class MagnificationController implements MagnificationConnectionManager.C
         mAlwaysOnMagnificationFeatureFlag = new AlwaysOnMagnificationFeatureFlag(context);
         mAlwaysOnMagnificationFeatureFlag.addOnChangedListener(
                 mBackgroundExecutor, mAms::updateAlwaysOnMagnification);
-
-        // TODO(b/355499907): Add an observer for repeat keys enabled changes,
-        // rather than initializing once at startup.
-        mRepeatKeysEnabled = Settings.Secure.getIntForUser(
-                mContext.getContentResolver(), Settings.Secure.KEY_REPEAT_ENABLED, 1,
-                UserHandle.USER_CURRENT) != 0;
     }
 
     @VisibleForTesting
@@ -383,7 +377,7 @@ public class MagnificationController implements MagnificationConnectionManager.C
         if (mRepeatKeysEnabled) {
             mHandler.sendMessageDelayed(
                     PooledLambda.obtainMessage(MagnificationController::maybeContinuePan, this),
-                    INITIAL_KEYBOARD_REPEAT_INTERVAL_MS);
+                    mInitialKeyboardRepeatIntervalMs);
         }
     }
 
@@ -404,7 +398,7 @@ public class MagnificationController implements MagnificationConnectionManager.C
         if (mRepeatKeysEnabled) {
             mHandler.sendMessageDelayed(
                     PooledLambda.obtainMessage(MagnificationController::maybeContinueZoom, this),
-                    INITIAL_KEYBOARD_REPEAT_INTERVAL_MS);
+                    mInitialKeyboardRepeatIntervalMs);
         }
     }
 
@@ -432,6 +426,19 @@ public class MagnificationController implements MagnificationConnectionManager.C
                     PooledLambda.obtainMessage(MagnificationController::maybeContinueZoom, this),
                     KEYBOARD_REPEAT_INTERVAL_MS);
         }
+    }
+
+    public void setRepeatKeysEnabled(boolean isRepeatKeysEnabled) {
+        mRepeatKeysEnabled = isRepeatKeysEnabled;
+    }
+
+    public void setRepeatKeysTimeoutMs(int repeatKeysTimeoutMs) {
+        mInitialKeyboardRepeatIntervalMs = repeatKeysTimeoutMs;
+    }
+
+    @VisibleForTesting
+    public int getInitialKeyboardRepeatIntervalMs() {
+        return mInitialKeyboardRepeatIntervalMs;
     }
 
     private void handleUserInteractionChanged(int displayId, int mode) {
