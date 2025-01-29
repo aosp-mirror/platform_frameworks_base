@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.emptyshade.ui.viewmodel
 
 import android.content.applicationContext
+import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.dump.dumpManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
@@ -31,6 +32,7 @@ val Kosmos.emptyShadeViewModel by
             zenModeInteractor,
             seenNotificationsInteractor,
             notificationSettingsInteractor,
+            configurationInteractor,
             testDispatcher,
             dumpManager,
         )

@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.emptyshade.ui.viewmodel
 
 import android.content.Context
 import android.icu.text.MessageFormat
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.modes.shared.ModesUi
@@ -36,9 +37,11 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
 /**
  * ViewModel for the empty shade (aka the "No notifications" text shown when there are no
@@ -51,6 +54,7 @@ constructor(
     zenModeInteractor: ZenModeInteractor,
     seenNotificationsInteractor: SeenNotificationsInteractor,
     notificationSettingsInteractor: NotificationSettingsInteractor,
+    configurationInteractor: ConfigurationInteractor,
     @Background bgDispatcher: CoroutineDispatcher,
     dumpManager: DumpManager,
 ) : FlowDumperImpl(dumpManager) {
@@ -71,6 +75,13 @@ constructor(
             "hasFilteredOutSeenNotifications"
         )
 
+    private val primaryLocale by lazy {
+        configurationInteractor.configurationValues
+            .map { it.locales.get(0) ?: Locale.getDefault() }
+            .onStart { emit(Locale.getDefault()) }
+            .distinctUntilChanged()
+    }
+
     val text: Flow<String> by lazy {
         if (ModesEmptyShadeFix.isUnexpectedlyInLegacyMode()) {
             flowOf(context.getString(R.string.empty_shade_text))
@@ -79,14 +90,16 @@ constructor(
             // recommended architecture, and making it so it reacts to changes for the new Modes.
             // The former does not depend on the modes flags being on, but the latter does.
             if (ModesUi.isEnabled) {
-                    zenModeInteractor.modesHidingNotifications.map { modes ->
+                    combine(zenModeInteractor.modesHidingNotifications, primaryLocale) {
+                        modes,
+                        locale ->
                         // Create a string that is either "No notifications" if no modes are
-                        // filtering
-                        // them out, or something like "Notifications paused by SomeMode" otherwise.
+                        // filtering them out, or something like "Notifications paused by SomeMode"
+                        // otherwise.
                         val msgFormat =
                             MessageFormat(
                                 context.getString(R.string.modes_suppressing_shade_text),
-                                Locale.getDefault(),
+                                locale,
                             )
                         val count = modes.count()
                         val args: MutableMap<String, Any> = HashMap()
