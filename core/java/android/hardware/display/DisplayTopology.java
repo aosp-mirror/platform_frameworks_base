@@ -33,6 +33,7 @@ import android.util.MathUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.view.Display;
 
 import androidx.annotation.NonNull;
@@ -61,6 +62,7 @@ import java.util.Queue;
 public final class DisplayTopology implements Parcelable {
     private static final String TAG = "DisplayTopology";
     private static final float EPSILON = 0.0001f;
+    private static final float MAX_GAP = 5;
 
     @android.annotation.NonNull
     public static final Creator<DisplayTopology> CREATOR =
@@ -108,7 +110,7 @@ public final class DisplayTopology implements Parcelable {
 
     public DisplayTopology() {}
 
-    public DisplayTopology(TreeNode root, int primaryDisplayId) {
+    public DisplayTopology(@Nullable TreeNode root, int primaryDisplayId) {
         mRoot = root;
         if (mRoot != null) {
             // Set mRoot's position and offset to predictable values, just so we don't leak state
@@ -181,6 +183,8 @@ public final class DisplayTopology implements Parcelable {
         if (findDisplay(displayId, mRoot) == null) {
             return false;
         }
+
+        // Re-add the other displays to a new tree
         Queue<TreeNode> queue = new ArrayDeque<>();
         queue.add(mRoot);
         mRoot = null;
@@ -191,6 +195,7 @@ public final class DisplayTopology implements Parcelable {
             }
             queue.addAll(node.mChildren);
         }
+
         if (mPrimaryDisplayId == displayId) {
             if (mRoot != null) {
                 mPrimaryDisplayId = mRoot.mDisplayId;
@@ -218,6 +223,9 @@ public final class DisplayTopology implements Parcelable {
      *                                  IDs in this topology, no more, no less
      */
     public void rearrange(Map<Integer, PointF> newPos) {
+        if (mRoot == null) {
+            return;
+        }
         var availableParents = new ArrayList<TreeNode>();
 
         availableParents.addLast(mRoot);
@@ -447,11 +455,11 @@ public final class DisplayTopology implements Parcelable {
             // Check that the offset is within bounds
             areTouching &= switch (targetDisplay.mPosition) {
                 case POSITION_LEFT, POSITION_RIGHT ->
-                        childBounds.bottom + EPSILON >= parentBounds.top
-                                && childBounds.top <= parentBounds.bottom + EPSILON;
+                        childBounds.bottom + EPSILON > parentBounds.top
+                                && childBounds.top < parentBounds.bottom + EPSILON;
                 case POSITION_TOP, POSITION_BOTTOM ->
-                        childBounds.right + EPSILON >= parentBounds.left
-                                && childBounds.left <= parentBounds.right + EPSILON;
+                        childBounds.right + EPSILON > parentBounds.left
+                                && childBounds.left < parentBounds.right + EPSILON;
                 default -> throw new IllegalStateException(
                         "Unexpected value: " + targetDisplay.mPosition);
             };
@@ -566,7 +574,7 @@ public final class DisplayTopology implements Parcelable {
                     "DisplayTopology: attempting to add a display that already exists");
         }
         if (mRoot == null) {
-            mRoot = new TreeNode(displayId, width, height, /* position= */ 0, /* offset= */ 0);
+            mRoot = new TreeNode(displayId, width, height, POSITION_LEFT, /* offset= */ 0);
             mPrimaryDisplayId = displayId;
             if (shouldLog) {
                 Slog.i(TAG, "First display added: " + mRoot);
@@ -681,13 +689,112 @@ public final class DisplayTopology implements Parcelable {
         }
     }
 
-    /** Returns the graph representation of the topology */
-    public DisplayTopologyGraph getGraph() {
-        // TODO(b/364907904): implement
-        return new DisplayTopologyGraph(mPrimaryDisplayId,
-                new DisplayTopologyGraph.DisplayNode[] { new DisplayTopologyGraph.DisplayNode(
-                        mRoot == null ? Display.DEFAULT_DISPLAY : mRoot.mDisplayId,
-                        new DisplayTopologyGraph.AdjacentDisplay[0])});
+    /**
+     * Check if two displays are touching.
+     * If the gap between two edges is <= {@link MAX_GAP}, they are still considered adjacent.
+     * The position indicates where the second display is touching the first one and the offset
+     * indicates where along the first display the second display is located.
+     * @param bounds1 The bounds of the first display
+     * @param bounds2 The bounds of the second display
+     * @return Empty list if the displays are not adjacent;
+     * List of one Pair(position, offset) if the displays are adjacent but not by a corner;
+     * List of two Pair(position, offset) if the displays are adjacent by a corner.
+     */
+    private List<Pair<Integer, Float>> findDisplayPlacements(RectF bounds1, RectF bounds2) {
+        List<Pair<Integer, Float>> placements = new ArrayList<>();
+        if (bounds1.top <= bounds2.bottom + MAX_GAP && bounds2.top <= bounds1.bottom + MAX_GAP) {
+            if (MathUtils.abs(bounds1.left - bounds2.right) <= MAX_GAP) {
+                placements.add(new Pair<>(POSITION_LEFT, bounds2.top - bounds1.top));
+            }
+            if (MathUtils.abs(bounds1.right - bounds2.left) <= MAX_GAP) {
+                placements.add(new Pair<>(POSITION_RIGHT, bounds2.top - bounds1.top));
+            }
+        }
+        if (bounds1.left <= bounds2.right + MAX_GAP && bounds2.left <= bounds1.right + MAX_GAP) {
+            if (MathUtils.abs(bounds1.top - bounds2.bottom) < MAX_GAP) {
+                placements.add(new Pair<>(POSITION_TOP, bounds2.left - bounds1.left));
+            }
+            if (MathUtils.abs(bounds1.bottom - bounds2.top) < MAX_GAP) {
+                placements.add(new Pair<>(POSITION_BOTTOM, bounds2.left - bounds1.left));
+            }
+        }
+        return placements;
+    }
+
+    /**
+     * @param densityPerDisplay The logical display densities, indexed by logical display ID
+     * @return The graph representation of the topology. If there is a corner adjacency, the same
+     * display will appear twice in the list of adjacent displays with both possible placements.
+     */
+    @Nullable
+    public DisplayTopologyGraph getGraph(SparseIntArray densityPerDisplay) {
+        // Sort the displays by position
+        SparseArray<RectF> bounds = getAbsoluteBounds();
+        Comparator<Integer> comparator = (displayId1, displayId2) -> {
+            RectF bounds1 = bounds.get(displayId1);
+            RectF bounds2 = bounds.get(displayId2);
+
+            int compareX = Float.compare(bounds1.left, bounds2.left);
+            if (compareX != 0) {
+                return compareX;
+            }
+            return Float.compare(bounds1.top, bounds2.top);
+        };
+        List<Integer> displayIds = new ArrayList<>(bounds.size());
+        for (int i = 0; i < bounds.size(); i++) {
+            displayIds.add(bounds.keyAt(i));
+        }
+        displayIds.sort(comparator);
+
+        SparseArray<List<DisplayTopologyGraph.AdjacentDisplay>> adjacentDisplaysPerId =
+                new SparseArray<>();
+        for (int id : displayIds) {
+            if (densityPerDisplay.get(id) == 0) {
+                Slog.w(TAG, "Cannot construct graph, no density for display " + id);
+                return null;
+            }
+            adjacentDisplaysPerId.append(id, new ArrayList<>(Math.min(10, displayIds.size())));
+        }
+
+        // Find touching displays
+        for (int i = 0; i < displayIds.size(); i++) {
+            int displayId1 = displayIds.get(i);
+            RectF bounds1 = bounds.get(displayId1);
+            List<DisplayTopologyGraph.AdjacentDisplay> adjacentDisplays1 =
+                    adjacentDisplaysPerId.get(displayId1);
+
+            for (int j = i + 1; j < displayIds.size(); j++) {
+                int displayId2 = displayIds.get(j);
+                RectF bounds2 = bounds.get(displayId2);
+                List<DisplayTopologyGraph.AdjacentDisplay> adjacentDisplays2 =
+                        adjacentDisplaysPerId.get(displayId2);
+
+                List<Pair<Integer, Float>> placements1 = findDisplayPlacements(bounds1, bounds2);
+                List<Pair<Integer, Float>> placements2 = findDisplayPlacements(bounds2, bounds1);
+                for (Pair<Integer, Float> placement : placements1) {
+                    adjacentDisplays1.add(new DisplayTopologyGraph.AdjacentDisplay(displayId2,
+                            /* position= */ placement.first, /* offsetDp= */ placement.second));
+                }
+                for (Pair<Integer, Float> placement : placements2) {
+                    adjacentDisplays2.add(new DisplayTopologyGraph.AdjacentDisplay(displayId1,
+                            /* position= */ placement.first, /* offsetDp= */ placement.second));
+                }
+                if (bounds2.left >= bounds1.right + EPSILON) {
+                    // This and the subsequent displays are already too far away
+                    break;
+                }
+            }
+        }
+
+        DisplayTopologyGraph.DisplayNode[] nodes =
+                new DisplayTopologyGraph.DisplayNode[adjacentDisplaysPerId.size()];
+        for (int i = 0; i < nodes.length; i++) {
+            int displayId = adjacentDisplaysPerId.keyAt(i);
+            nodes[i] = new DisplayTopologyGraph.DisplayNode(displayId,
+                    densityPerDisplay.get(displayId), adjacentDisplaysPerId.valueAt(i).toArray(
+                            new DisplayTopologyGraph.AdjacentDisplay[0]));
+        }
+        return new DisplayTopologyGraph(mPrimaryDisplayId, nodes);
     }
 
     /**

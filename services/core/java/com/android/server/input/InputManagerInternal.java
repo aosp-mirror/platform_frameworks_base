@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.graphics.PointF;
-import android.hardware.display.DisplayTopology;
+import android.hardware.display.DisplayTopologyGraph;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.KeyGestureEvent;
 import android.os.IBinder;
@@ -51,7 +51,7 @@ public abstract class InputManagerInternal {
      * Called by {@link com.android.server.display.DisplayManagerService} to inform InputManager
      * about changes in the displays topology.
      */
-    public abstract void setDisplayTopology(DisplayTopology topology);
+    public abstract void setDisplayTopology(DisplayTopologyGraph topology);
 
     /**
      * Called by the power manager to tell the input manager whether it should start

@@ -35,6 +35,7 @@ static struct {
 static struct {
     jclass clazz;
     jfieldID displayId;
+    jfieldID density;
     jfieldID adjacentDisplays;
 } gDisplayTopologyGraphNodeClassInfo;
 
@@ -42,7 +43,7 @@ static struct {
     jclass clazz;
     jfieldID displayId;
     jfieldID position;
-    jfieldID offsetPx;
+    jfieldID offsetDp;
 } gDisplayTopologyGraphAdjacentDisplayClassInfo;
 
 // ----------------------------------------------------------------------------
@@ -55,18 +56,22 @@ status_t android_hardware_display_DisplayTopologyAdjacentDisplay_toNative(
     adjacentDisplay->position = static_cast<DisplayTopologyPosition>(
             env->GetIntField(adjacentDisplayObj,
                              gDisplayTopologyGraphAdjacentDisplayClassInfo.position));
-    adjacentDisplay->offsetPx =
+    adjacentDisplay->offsetDp =
             env->GetFloatField(adjacentDisplayObj,
-                               gDisplayTopologyGraphAdjacentDisplayClassInfo.offsetPx);
+                               gDisplayTopologyGraphAdjacentDisplayClassInfo.offsetDp);
     return OK;
 }
 
 status_t android_hardware_display_DisplayTopologyGraphNode_toNative(
         JNIEnv* env, jobject nodeObj,
         std::unordered_map<ui::LogicalDisplayId, std::vector<DisplayTopologyAdjacentDisplay>>&
-                graph) {
+                graph,
+        std::unordered_map<ui::LogicalDisplayId, int>& displaysDensity) {
     ui::LogicalDisplayId displayId = ui::LogicalDisplayId{
             env->GetIntField(nodeObj, gDisplayTopologyGraphNodeClassInfo.displayId)};
+
+    displaysDensity[displayId] =
+            env->GetIntField(nodeObj, gDisplayTopologyGraphNodeClassInfo.density);
 
     jobjectArray adjacentDisplaysArray = static_cast<jobjectArray>(
             env->GetObjectField(nodeObj, gDisplayTopologyGraphNodeClassInfo.adjacentDisplays));
@@ -109,7 +114,8 @@ DisplayTopologyGraph android_hardware_display_DisplayTopologyGraph_toNative(JNIE
             }
 
             android_hardware_display_DisplayTopologyGraphNode_toNative(env, nodeObj.get(),
-                                                                       topology.graph);
+                                                                       topology.graph,
+                                                                       topology.displaysDensity);
         }
     }
     return topology;
@@ -132,6 +138,8 @@ int register_android_hardware_display_DisplayTopology(JNIEnv* env) {
     gDisplayTopologyGraphNodeClassInfo.clazz = MakeGlobalRefOrDie(env, displayNodeClazz);
     gDisplayTopologyGraphNodeClassInfo.displayId =
             GetFieldIDOrDie(env, gDisplayTopologyGraphNodeClassInfo.clazz, "displayId", "I");
+    gDisplayTopologyGraphNodeClassInfo.density =
+            GetFieldIDOrDie(env, gDisplayTopologyGraphNodeClassInfo.clazz, "density", "I");
     gDisplayTopologyGraphNodeClassInfo.adjacentDisplays =
             GetFieldIDOrDie(env, gDisplayTopologyGraphNodeClassInfo.clazz, "adjacentDisplays",
                             "[Landroid/hardware/display/DisplayTopologyGraph$AdjacentDisplay;");
@@ -146,8 +154,8 @@ int register_android_hardware_display_DisplayTopology(JNIEnv* env) {
     gDisplayTopologyGraphAdjacentDisplayClassInfo.position =
             GetFieldIDOrDie(env, gDisplayTopologyGraphAdjacentDisplayClassInfo.clazz, "position",
                             "I");
-    gDisplayTopologyGraphAdjacentDisplayClassInfo.offsetPx =
-            GetFieldIDOrDie(env, gDisplayTopologyGraphAdjacentDisplayClassInfo.clazz, "offsetPx",
+    gDisplayTopologyGraphAdjacentDisplayClassInfo.offsetDp =
+            GetFieldIDOrDie(env, gDisplayTopologyGraphAdjacentDisplayClassInfo.clazz, "offsetDp",
                             "F");
     return 0;
 }
