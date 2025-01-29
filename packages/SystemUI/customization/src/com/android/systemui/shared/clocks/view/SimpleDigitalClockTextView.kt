@@ -287,6 +287,7 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
                 targetTextBounds,
             )
         }
+
         if (layout == null) {
             requestLayout()
         } else {
