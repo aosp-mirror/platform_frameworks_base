@@ -623,6 +623,9 @@ public final class DisplayManager {
      * is triggered whenever the properties of a {@link android.view.Display}, such as size,
      * state, density are modified.
      *
+     * This event is not triggered for refresh rate changes as they can change very often.
+     * To monitor refresh rate changes, subscribe to {@link EVENT_TYPE_DISPLAY_REFRESH_RATE}.
+     *
      * @see #registerDisplayListener(DisplayListener, Handler, long)
      *
      */
@@ -801,6 +804,9 @@ public final class DisplayManager {
      * Registers a display listener to receive notifications about when
      * displays are added, removed or changed.
      *
+     * We encourage to use {@link #registerDisplayListener(Executor, long, DisplayListener)}
+     * instead to subscribe for explicit events of interest
+     *
      * @param listener The listener to register.
      * @param handler The handler on which the listener should be invoked, or null
      * if the listener should be invoked on the calling thread's looper.
@@ -809,7 +815,9 @@ public final class DisplayManager {
      */
     public void registerDisplayListener(DisplayListener listener, Handler handler) {
         registerDisplayListener(listener, handler, EVENT_TYPE_DISPLAY_ADDED
-                | EVENT_TYPE_DISPLAY_CHANGED | EVENT_TYPE_DISPLAY_REMOVED);
+                | EVENT_TYPE_DISPLAY_CHANGED
+                | EVENT_TYPE_DISPLAY_REFRESH_RATE
+                | EVENT_TYPE_DISPLAY_REMOVED);
     }
 
     /**

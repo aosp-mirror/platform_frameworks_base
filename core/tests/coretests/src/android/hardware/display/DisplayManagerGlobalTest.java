@@ -307,8 +307,10 @@ public class DisplayManagerGlobalTest {
         assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED,
                 mDisplayManagerGlobal
                         .mapFiltersToInternalEventFlag(DisplayManager.EVENT_TYPE_DISPLAY_ADDED, 0));
-        assertEquals(DISPLAY_CHANGE_EVENTS, mDisplayManagerGlobal
-                .mapFiltersToInternalEventFlag(DisplayManager.EVENT_TYPE_DISPLAY_CHANGED, 0));
+        assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_BASIC_CHANGED,
+                mDisplayManagerGlobal
+                        .mapFiltersToInternalEventFlag(DisplayManager.EVENT_TYPE_DISPLAY_CHANGED,
+                                0));
         assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED,
                 mDisplayManagerGlobal.mapFiltersToInternalEventFlag(
                         DisplayManager.EVENT_TYPE_DISPLAY_REMOVED, 0));
