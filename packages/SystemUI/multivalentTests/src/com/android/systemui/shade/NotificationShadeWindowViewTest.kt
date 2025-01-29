@@ -78,6 +78,7 @@ import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -220,6 +221,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 mock(),
                 { configurationForwarder },
                 brightnessMirrorShowingInteractor,
+                UnconfinedTestDispatcher(),
             )
 
         controller.setupExpandedStatusBar()

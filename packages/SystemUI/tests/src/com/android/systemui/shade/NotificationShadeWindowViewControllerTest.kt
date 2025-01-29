@@ -254,6 +254,7 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
                 mock(BouncerViewBinder::class.java),
                 { mock(ConfigurationForwarder::class.java) },
                 brightnessMirrorShowingInteractor,
+                kosmos.testDispatcher,
             )
         underTest.setupExpandedStatusBar()
         underTest.setDragDownHelper(dragDownHelper)
