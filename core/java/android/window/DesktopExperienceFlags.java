@@ -16,8 +16,6 @@
 
 package android.window;
 
-import static com.android.server.display.feature.flags.Flags.enableDisplayContentModeManagement;
-
 import android.annotation.Nullable;
 import android.os.SystemProperties;
 import android.util.Log;
@@ -42,7 +40,32 @@ import java.util.function.BooleanSupplier;
  * @hide
  */
 public enum DesktopExperienceFlags {
-    ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT(() -> enableDisplayContentModeManagement(), true);
+    ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT(
+            com.android.server.display.feature.flags.Flags::enableDisplayContentModeManagement,
+            true),
+    ACTIVITY_EMBEDDING_SUPPORT_FOR_CONNECTED_DISPLAYS(
+            Flags::activityEmbeddingSupportForConnectedDisplays, false),
+    BASE_DENSITY_FOR_EXTERNAL_DISPLAYS(
+            com.android.server.display.feature.flags.Flags::baseDensityForExternalDisplays, true),
+    CONNECTED_DISPLAYS_CURSOR(com.android.input.flags.Flags::connectedDisplaysCursor, true),
+    DISPLAY_TOPOLOGY(com.android.server.display.feature.flags.Flags::displayTopology, true),
+    ENABLE_BUG_FIXES_FOR_SECONDARY_DISPLAY(Flags::enableBugFixesForSecondaryDisplay, false),
+    ENABLE_CONNECTED_DISPLAYS_DND(Flags::enableConnectedDisplaysDnd, false),
+    ENABLE_CONNECTED_DISPLAYS_PIP(Flags::enableConnectedDisplaysPip, false),
+    ENABLE_CONNECTED_DISPLAYS_WINDOW_DRAG(Flags::enableConnectedDisplaysWindowDrag, false),
+    ENABLE_DISPLAY_FOCUS_IN_SHELL_TRANSITIONS(Flags::enableDisplayFocusInShellTransitions, false),
+    ENABLE_DISPLAY_WINDOWING_MODE_SWITCHING(Flags::enableDisplayWindowingModeSwitching, false),
+    ENABLE_DRAG_TO_MAXIMIZE(Flags::enableDragToMaximize, true),
+    ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT(Flags::enableMoveToNextDisplayShortcut, false),
+    ENABLE_MULTIPLE_DESKTOPS_BACKEND(Flags::enableMultipleDesktopsBackend, false),
+    ENABLE_MULTIPLE_DESKTOPS_FRONTEND(Flags::enableMultipleDesktopsFrontend, false),
+    ENABLE_PER_DISPLAY_DESKTOP_WALLPAPER_ACTIVITY(Flags::enablePerDisplayDesktopWallpaperActivity,
+            false),
+    ENABLE_PER_DISPLAY_PACKAGE_CONTEXT_CACHE_IN_STATUSBAR_NOTIF(
+            Flags::enablePerDisplayPackageContextCacheInStatusbarNotif, false),
+    ENTER_DESKTOP_BY_DEFAULT_ON_FREEFORM_DISPLAYS(Flags::enterDesktopByDefaultOnFreeformDisplays,
+            false),
+    REPARENT_WINDOW_TOKEN_API(Flags::reparentWindowTokenApi, true);
 
     /**
      * Flag class, to be used in case the enum cannot be used because the flag is not accessible.
@@ -55,7 +78,8 @@ public enum DesktopExperienceFlags {
         // Whether the flag state should be affected by developer option.
         private final boolean mShouldOverrideByDevOption;
 
-        public DesktopExperienceFlag(BooleanSupplier flagFunction, boolean shouldOverrideByDevOption) {
+        public DesktopExperienceFlag(BooleanSupplier flagFunction,
+                boolean shouldOverrideByDevOption) {
             this.mFlagFunction = flagFunction;
             this.mShouldOverrideByDevOption = shouldOverrideByDevOption;
         }
@@ -77,7 +101,8 @@ public enum DesktopExperienceFlags {
 
     // Local cache for toggle override, which is initialized once on its first access. It needs to
     // be refreshed only on reboots as overridden state is expected to take effect on reboots.
-    @Nullable private static Boolean sCachedToggleOverride;
+    @Nullable
+    private static Boolean sCachedToggleOverride;
 
     public static final String SYSTEM_PROPERTY_NAME = "persist.wm.debug.desktop_experience_devopts";
 
