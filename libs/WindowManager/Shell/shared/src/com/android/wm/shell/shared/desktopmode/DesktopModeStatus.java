@@ -212,10 +212,18 @@ public class DesktopModeStatus {
     }
 
     /**
+     * Return {@code true} if the current device supports the developer option for desktop mode.
+     */
+    private static boolean isDesktopModeDevOptionSupported(@NonNull Context context) {
+        return context.getResources().getBoolean(R.bool.config_isDesktopModeDevOptionSupported);
+    }
+
+    /**
      * Return {@code true} if desktop mode dev option should be shown on current device
      */
     public static boolean canShowDesktopModeDevOption(@NonNull Context context) {
-        return isDeviceEligibleForDesktopMode(context) && Flags.showDesktopWindowingDevOption();
+        return isDeviceEligibleForDesktopModeDevOption(context)
+                && Flags.showDesktopWindowingDevOption();
     }
 
     /**
@@ -226,17 +234,25 @@ public class DesktopModeStatus {
     }
 
     /** Returns if desktop mode dev option should be enabled if there is no user override. */
-    public static boolean shouldDevOptionBeEnabledByDefault() {
-        return Flags.enableDesktopWindowingMode();
+    public static boolean shouldDevOptionBeEnabledByDefault(Context context) {
+        return isDeviceEligibleForDesktopMode(context) && Flags.enableDesktopWindowingMode();
     }
 
     /**
      * Return {@code true} if desktop mode is enabled and can be entered on the current device.
      */
     public static boolean canEnterDesktopMode(@NonNull Context context) {
-        if (!isDeviceEligibleForDesktopMode(context)) return false;
+        return (isDeviceEligibleForDesktopMode(context)
+                && DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODE.isTrue())
+                || isDesktopModeEnabledByDevOption(context);
+    }
 
-        return DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODE.isTrue();
+    /**
+     * Check if Desktop mode should be enabled because the dev option is shown and enabled.
+     */
+    private static boolean isDesktopModeEnabledByDevOption(@NonNull Context context) {
+        return DesktopModeFlags.isDesktopModeForcedEnabled()
+                && canShowDesktopModeDevOption(context);
     }
 
     /**
@@ -298,7 +314,21 @@ public class DesktopModeStatus {
      * Return {@code true} if desktop mode is unrestricted and is supported in the device.
      */
     public static boolean isDeviceEligibleForDesktopMode(@NonNull Context context) {
-        return !enforceDeviceRestrictions() || isDesktopModeSupported(context);
+        return !enforceDeviceRestrictions() || isDesktopModeSupported(context) || (
+                Flags.enableDesktopModeThroughDevOption() && isDesktopModeDevOptionSupported(
+                        context));
+    }
+
+    /**
+     * Return {@code true} if the developer option for desktop mode is unrestricted and is supported
+     * in the device.
+     *
+     * Note that, if {@link #isDeviceEligibleForDesktopMode(Context)} is true, then
+     * {@link #isDeviceEligibleForDesktopModeDevOption(Context)} is also true.
+     */
+    private static boolean isDeviceEligibleForDesktopModeDevOption(@NonNull Context context) {
+        return !enforceDeviceRestrictions() || isDesktopModeSupported(context)
+                || isDesktopModeDevOptionSupported(context);
     }
 
     /**

@@ -7245,6 +7245,9 @@
     <!-- Whether desktop mode is supported on the current device  -->
     <bool name="config_isDesktopModeSupported">false</bool>
 
+    <!-- Whether the developer option for desktop mode is supported on the current device  -->
+    <bool name="config_isDesktopModeDevOptionSupported">false</bool>
+
     <!-- Maximum number of active tasks on a given Desktop Windowing session. Set to 0 for unlimited. -->
     <integer name="config_maxDesktopWindowingActiveTasks">0</integer>
 
