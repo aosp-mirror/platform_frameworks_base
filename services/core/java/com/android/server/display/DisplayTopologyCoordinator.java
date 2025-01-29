@@ -250,8 +250,29 @@ class DisplayTopologyCoordinator {
     }
 
     private boolean isDisplayAllowedInTopology(DisplayInfo info) {
-        return mIsExtendedDisplayEnabled.getAsBoolean()
-                && info.displayGroupId == Display.DEFAULT_DISPLAY_GROUP;
+        if (info.type != Display.TYPE_INTERNAL && info.type != Display.TYPE_EXTERNAL
+                && info.type != Display.TYPE_OVERLAY) {
+            Slog.d(TAG, "Display " + info.displayId + " not allowed in topology because "
+                    + "type is not INTERNAL, EXTERNAL or OVERLAY");
+            return false;
+        }
+        if (info.type == Display.TYPE_INTERNAL && info.displayId != Display.DEFAULT_DISPLAY) {
+            Slog.d(TAG, "Display " + info.displayId + " not allowed in topology because "
+                    + "it is a non-default internal display");
+            return false;
+        }
+        if ((info.type == Display.TYPE_EXTERNAL || info.type == Display.TYPE_OVERLAY)
+                && !mIsExtendedDisplayEnabled.getAsBoolean()) {
+            Slog.d(TAG, "Display " + info.displayId + " not allowed in topology because "
+                    + "type is EXTERNAL or OVERLAY and !mIsExtendedDisplayEnabled");
+            return false;
+        }
+        if (info.displayGroupId != Display.DEFAULT_DISPLAY_GROUP) {
+            Slog.d(TAG, "Display " + info.displayId + " not allowed in topology because "
+                    + "it is not in the default display group");
+            return false;
+        }
+        return true;
     }
 
     /**
