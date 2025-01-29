@@ -176,14 +176,14 @@ class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun nonPowerButtonFPS_coExFaceFailure_doNotVibrateError() =
+    fun nonPowerButtonFPS_coExFaceFailure_vibrateError() =
         testScope.runTest {
             val playErrorHaptic by collectLastValue(underTest.playErrorHaptic)
             enrollFingerprint(FingerprintSensorType.UDFPS_ULTRASONIC)
             enrollFace()
             runCurrent()
             faceFailure()
-            assertThat(playErrorHaptic).isNull()
+            assertThat(playErrorHaptic).isNotNull()
         }
 
     @Test

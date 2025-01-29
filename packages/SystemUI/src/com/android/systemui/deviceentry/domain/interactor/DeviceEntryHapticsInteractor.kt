@@ -123,7 +123,7 @@ constructor(
     private val playErrorHapticForBiometricFailure: Flow<Unit> =
         merge(
                 deviceEntryFingerprintAuthInteractor.fingerprintFailure,
-                deviceEntryBiometricAuthInteractor.faceOnlyFaceFailure,
+                deviceEntryBiometricAuthInteractor.faceFailure,
             )
             // map to Unit
             .map {}
