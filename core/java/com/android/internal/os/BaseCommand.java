@@ -58,15 +58,23 @@ public abstract class BaseCommand {
         mRawArgs = args;
         mArgs.init(null, null, null, null, args, 0);
 
+        int status = 1;
         try {
             onRun();
+            status = 0;
         } catch (IllegalArgumentException e) {
             onShowUsage(System.err);
             System.err.println();
             System.err.println("Error: " + e.getMessage());
+            status = 0;
         } catch (Exception e) {
             e.printStackTrace(System.err);
-            System.exit(1);
+        } finally {
+            System.out.flush();
+            System.err.flush();
+        }
+        if (status != 0) {
+            System.exit(status);
         }
     }
 
