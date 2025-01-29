@@ -58,7 +58,6 @@ constructor(
             .distinctUntilChanged()
             .logDiffsForTable(
                 tableLogBuffer = tableLogBuffer,
-                columnPrefix = "",
                 columnName = "postured",
                 initialValue = false,
             )

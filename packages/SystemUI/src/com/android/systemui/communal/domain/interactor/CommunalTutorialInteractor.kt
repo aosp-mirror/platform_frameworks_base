@@ -65,7 +65,6 @@ constructor(
             }
             .logDiffsForTable(
                 tableLogBuffer = tableLogBuffer,
-                columnPrefix = "",
                 columnName = "isTutorialAvailable",
                 initialValue = false,
             )

@@ -98,7 +98,6 @@ constructor(
             .filterNotNull()
             .logDiffsForTable(
                 tableLogBuffer = tableLogBuffer,
-                columnPrefix = "",
                 columnName = "tutorialSettingState",
                 initialValue = HUB_MODE_TUTORIAL_NOT_STARTED,
             )
