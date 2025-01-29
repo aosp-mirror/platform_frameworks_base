@@ -73,6 +73,9 @@ import com.android.wm.shell.shared.ShellTransitions
 import com.android.wm.shell.shared.TransitionUtil
 import java.util.concurrent.Executor
 import kotlin.math.roundToInt
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 private const val TAG = "ActivityTransitionAnimator"
 
@@ -241,7 +244,7 @@ constructor(
 
             override fun onTransitionAnimationProgress(linearProgress: Float) {
                 LinkedHashSet(listeners).forEach {
-                     it.onTransitionAnimationProgress(linearProgress)
+                    it.onTransitionAnimationProgress(linearProgress)
                 }
             }
 
@@ -494,15 +497,19 @@ constructor(
 
     /**
      * Create a new animation [Runner] controlled by the [Controller] that [controllerFactory] can
-     * create based on [forLaunch].
+     * create based on [forLaunch] and within the given [scope].
      *
      * This method must only be used for long-lived registrations. Otherwise, use
      * [createEphemeralRunner].
      */
     @VisibleForTesting
-    fun createLongLivedRunner(controllerFactory: ControllerFactory, forLaunch: Boolean): Runner {
+    fun createLongLivedRunner(
+        controllerFactory: ControllerFactory,
+        scope: CoroutineScope,
+        forLaunch: Boolean,
+    ): Runner {
         assertLongLivedReturnAnimations()
-        return Runner(callback!!, transitionAnimator, lifecycleListener) {
+        return Runner(scope, callback!!, transitionAnimator, lifecycleListener) {
             controllerFactory.createController(forLaunch)
         }
     }
@@ -564,7 +571,7 @@ constructor(
          * Creates a [Controller] for launching or returning from the activity linked to [cookie]
          * and [component].
          */
-        abstract fun createController(forLaunch: Boolean): Controller
+        abstract suspend fun createController(forLaunch: Boolean): Controller
     }
 
     /**
@@ -691,9 +698,14 @@ constructor(
      * animations.
      *
      * The [Controller]s created by [controllerFactory] will only be used for transitions matching
-     * the [cookie], or the [ComponentName] defined within it if the cookie matching fails.
+     * the [cookie], or the [ComponentName] defined within it if the cookie matching fails. These
+     * [Controller]s can only be created within [scope].
      */
-    fun register(cookie: TransitionCookie, controllerFactory: ControllerFactory) {
+    fun register(
+        cookie: TransitionCookie,
+        controllerFactory: ControllerFactory,
+        scope: CoroutineScope,
+    ) {
         assertLongLivedReturnAnimations()
 
         if (transitionRegister == null) {
@@ -725,7 +737,7 @@ constructor(
             }
         val launchRemoteTransition =
             RemoteTransition(
-                OriginTransition(createLongLivedRunner(controllerFactory, forLaunch = true)),
+                OriginTransition(createLongLivedRunner(controllerFactory, scope, forLaunch = true)),
                 "${cookie}_launchTransition",
             )
         transitionRegister.register(launchFilter, launchRemoteTransition, includeTakeover = true)
@@ -749,7 +761,9 @@ constructor(
             }
         val returnRemoteTransition =
             RemoteTransition(
-                OriginTransition(createLongLivedRunner(controllerFactory, forLaunch = false)),
+                OriginTransition(
+                    createLongLivedRunner(controllerFactory, scope, forLaunch = false)
+                ),
                 "${cookie}_returnTransition",
             )
         transitionRegister.register(returnFilter, returnRemoteTransition, includeTakeover = true)
@@ -952,7 +966,9 @@ constructor(
          * Reusable factory to generate single-use controllers. In case of an ephemeral [Runner],
          * this must be null and [controller] must be defined instead.
          */
-        private val controllerFactory: (() -> Controller)?,
+        private val controllerFactory: (suspend () -> Controller)?,
+        /** The scope to use when this runner is based on [controllerFactory]. */
+        private val scope: CoroutineScope? = null,
         private val callback: Callback,
         /** The animator to use to animate the window transition. */
         private val transitionAnimator: TransitionAnimator,
@@ -973,13 +989,15 @@ constructor(
         )
 
         constructor(
+            scope: CoroutineScope,
             callback: Callback,
             transitionAnimator: TransitionAnimator,
             listener: Listener? = null,
-            controllerFactory: () -> Controller,
+            controllerFactory: suspend () -> Controller,
         ) : this(
             controller = null,
             controllerFactory = controllerFactory,
+            scope = scope,
             callback = callback,
             transitionAnimator = transitionAnimator,
             listener = listener,
@@ -994,12 +1012,12 @@ constructor(
             assert((controller != null).xor(controllerFactory != null))
 
             delegate = null
-            if (controller != null) {
+            controller?.let {
                 // Ephemeral launches bundle the runner with the launch request (instead of being
                 // registered ahead of time for later use). This means that there could be a timeout
                 // between creation and invocation, so the delegate needs to exist from the
                 // beginning in order to handle such timeout.
-                createDelegate()
+                createDelegate(it)
             }
         }
 
@@ -1040,49 +1058,79 @@ constructor(
             finishedCallback: IRemoteAnimationFinishedCallback?,
             performAnimation: (AnimationDelegate) -> Unit,
         ) {
-            maybeSetUp()
-            val delegate = delegate
-            mainExecutor.execute {
-                if (delegate == null) {
-                    Log.i(TAG, "onAnimationStart called after completion")
-                    // Animation started too late and timed out already. We need to still
-                    // signal back that we're done with it.
-                    finishedCallback?.onAnimationFinished()
-                } else {
-                    performAnimation(delegate)
+            val controller = controller
+            val controllerFactory = controllerFactory
+
+            if (controller != null) {
+                maybeSetUp(controller)
+                val success = startAnimation(performAnimation)
+                if (!success) finishedCallback?.onAnimationFinished()
+            } else if (controllerFactory != null) {
+                scope?.launch {
+                    val success =
+                        withTimeoutOrNull(TRANSITION_TIMEOUT) {
+                            setUp(controllerFactory)
+                            startAnimation(performAnimation)
+                        } ?: false
+                    if (!success) finishedCallback?.onAnimationFinished()
                 }
+            } else {
+                // This should never happen, as either the controller or factory should always be
+                // defined. This final call is for safety in case something goes wrong.
+                Log.wtf(TAG, "initAndRun with neither a controller nor factory")
+                finishedCallback?.onAnimationFinished()
+            }
+        }
+
+        /** Tries to start the animation on the main thread and returns whether it succeeded. */
+        @BinderThread
+        private fun startAnimation(performAnimation: (AnimationDelegate) -> Unit): Boolean {
+            val delegate = delegate
+            return if (delegate != null) {
+                mainExecutor.execute { performAnimation(delegate) }
+                true
+            } else {
+                // Animation started too late and timed out already.
+                Log.i(TAG, "startAnimation called after completion")
+                false
             }
         }
 
         @BinderThread
         override fun onAnimationCancelled() {
             val delegate = delegate
-            mainExecutor.execute {
-                delegate ?: Log.wtf(TAG, "onAnimationCancelled called after completion")
-                delegate?.onAnimationCancelled()
+            if (delegate != null) {
+                mainExecutor.execute { delegate.onAnimationCancelled() }
+            } else {
+                Log.wtf(TAG, "onAnimationCancelled called after completion")
             }
         }
 
+        /**
+         * Posts the default animation timeouts. Since this only applies to ephemeral launches, this
+         * method is a no-op if [controller] is not defined.
+         */
         @VisibleForTesting
         @UiThread
         fun postTimeouts() {
-            maybeSetUp()
+            controller?.let { maybeSetUp(it) }
             delegate?.postTimeouts()
         }
 
         @AnyThread
-        private fun maybeSetUp() {
-            if (controllerFactory == null || delegate != null) return
-            createDelegate()
+        private fun maybeSetUp(controller: Controller) {
+            if (delegate != null) return
+            createDelegate(controller)
         }
 
         @AnyThread
-        private fun createDelegate() {
-            var controller = controller
-            val factory = controllerFactory
-            if (controller == null && factory == null) return
+        private suspend fun setUp(createController: suspend () -> Controller) {
+            val controller = createController()
+            createDelegate(controller)
+        }
 
-            controller = controller ?: factory!!.invoke()
+        @AnyThread
+        private fun createDelegate(controller: Controller) {
             delegate =
                 AnimationDelegate(
                     mainExecutor,

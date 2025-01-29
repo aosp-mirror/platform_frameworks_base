@@ -66,6 +66,7 @@ import com.android.systemui.util.kotlin.getOrNull
 import dagger.Lazy
 import java.util.Optional
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * Encapsulates the activity logic for activity starter when the SceneContainerFlag is enabled.
@@ -105,6 +106,7 @@ constructor(
     override fun registerTransition(
         cookie: ActivityTransitionAnimator.TransitionCookie,
         controllerFactory: ActivityTransitionAnimator.ControllerFactory,
+        scope: CoroutineScope,
     ) {
         check(TransitionAnimator.longLivedReturnAnimationsEnabled())
 
@@ -116,7 +118,7 @@ constructor(
                     controllerFactory.launchCujType,
                     controllerFactory.returnCujType,
                 ) {
-                override fun createController(
+                override suspend fun createController(
                     forLaunch: Boolean
                 ): ActivityTransitionAnimator.Controller {
                     val baseController = controllerFactory.createController(forLaunch)
@@ -132,7 +134,7 @@ constructor(
                 }
             }
 
-        activityTransitionAnimator.register(cookie, factory)
+        activityTransitionAnimator.register(cookie, factory, scope)
     }
 
     override fun unregisterTransition(cookie: ActivityTransitionAnimator.TransitionCookie) {
