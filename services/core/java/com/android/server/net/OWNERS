@@ -1,4 +1,4 @@
-set noparent
+# set noparent
 file:platform/packages/modules/Connectivity:main:/OWNERS_core_networking
 per-file NetworkPolicyManagerService.java=jackyu@google.com, sarahchin@google.com
 
