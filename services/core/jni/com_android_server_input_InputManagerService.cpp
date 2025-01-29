@@ -94,8 +94,6 @@ namespace input_flags = com::android::input::flags;
 
 namespace android {
 
-static const bool ENABLE_INPUT_FILTER_RUST = input_flags::enable_input_filter_rust_impl();
-
 // The exponent used to calculate the pointer speed scaling factor.
 // The scaling factor is calculated as 2 ^ (speed * exponent),
 // where the speed ranges from -7 to + 7 and is supplied by the user.
@@ -3248,27 +3246,21 @@ static void nativeSetStylusPointerIconEnabled(JNIEnv* env, jobject nativeImplObj
 static void nativeSetAccessibilityBounceKeysThreshold(JNIEnv* env, jobject nativeImplObj,
                                                       jint thresholdTimeMs) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
-    if (ENABLE_INPUT_FILTER_RUST) {
-        im->getInputManager()->getInputFilter().setAccessibilityBounceKeysThreshold(
-                static_cast<nsecs_t>(thresholdTimeMs) * 1000000);
-    }
+    im->getInputManager()->getInputFilter().setAccessibilityBounceKeysThreshold(
+            static_cast<nsecs_t>(thresholdTimeMs) * 1000000);
 }
 
 static void nativeSetAccessibilitySlowKeysThreshold(JNIEnv* env, jobject nativeImplObj,
                                                     jint thresholdTimeMs) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
-    if (ENABLE_INPUT_FILTER_RUST) {
-        im->getInputManager()->getInputFilter().setAccessibilitySlowKeysThreshold(
-                static_cast<nsecs_t>(thresholdTimeMs) * 1000000);
-    }
+    im->getInputManager()->getInputFilter().setAccessibilitySlowKeysThreshold(
+            static_cast<nsecs_t>(thresholdTimeMs) * 1000000);
 }
 
 static void nativeSetAccessibilityStickyKeysEnabled(JNIEnv* env, jobject nativeImplObj,
                                                     jboolean enabled) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
-    if (ENABLE_INPUT_FILTER_RUST) {
-        im->getInputManager()->getInputFilter().setAccessibilityStickyKeysEnabled(enabled);
-    }
+    im->getInputManager()->getInputFilter().setAccessibilityStickyKeysEnabled(enabled);
 }
 
 static void nativeSetInputMethodConnectionIsActive(JNIEnv* env, jobject nativeImplObj,
