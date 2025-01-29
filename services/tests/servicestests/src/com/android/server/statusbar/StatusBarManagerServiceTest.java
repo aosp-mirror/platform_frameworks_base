@@ -69,7 +69,6 @@ import android.os.Binder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.platform.test.annotations.EnableFlags;
 import android.service.quicksettings.TileService;
 import android.testing.TestableContext;
 
@@ -80,7 +79,6 @@ import com.android.internal.statusbar.IStatusBar;
 import com.android.server.LocalServices;
 import com.android.server.policy.GlobalActionsProvider;
 import com.android.server.wm.ActivityTaskManagerInternal;
-import com.android.systemui.shared.Flags;
 
 import libcore.junit.util.compat.CoreCompatChangeRule;
 
@@ -107,7 +105,6 @@ public class StatusBarManagerServiceTest {
             TEST_SERVICE);
     private static final CharSequence APP_NAME = "AppName";
     private static final CharSequence TILE_LABEL = "Tile label";
-    private static final int SECONDARY_DISPLAY_ID = 2;
 
     @Rule
     public final TestableContext mContext =
@@ -752,29 +749,6 @@ public class StatusBarManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_STATUS_BAR_CONNECTED_DISPLAYS)
-    public void testDisableForAllDisplays() throws Exception {
-        int user1Id = 0;
-        mockUidCheck();
-        mockCurrentUserCheck(user1Id);
-
-        mStatusBarManagerService.onDisplayAdded(SECONDARY_DISPLAY_ID);
-
-        int expectedFlags = DISABLE_MASK & DISABLE_BACK;
-        String pkg = mContext.getPackageName();
-
-        // before disabling
-        assertEquals(DISABLE_NONE,
-                mStatusBarManagerService.getDisableFlags(mMockStatusBar, user1Id)[0]);
-
-        // disable
-        mStatusBarManagerService.disable(expectedFlags, mMockStatusBar, pkg);
-
-        verify(mMockStatusBar).disable(0, expectedFlags, 0);
-        verify(mMockStatusBar).disable(SECONDARY_DISPLAY_ID, expectedFlags, 0);
-    }
-
-    @Test
     public void testSetHomeDisabled() throws Exception {
         int expectedFlags = DISABLE_MASK & DISABLE_HOME;
         String pkg = mContext.getPackageName();
@@ -874,29 +848,6 @@ public class StatusBarManagerServiceTest {
         // check that right flag is disabled
         assertEquals(expectedFlags,
                 mStatusBarManagerService.getDisableFlags(mMockStatusBar, userId)[0]);
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_STATUS_BAR_CONNECTED_DISPLAYS)
-    public void testDisable2ForAllDisplays() throws Exception {
-        int user1Id = 0;
-        mockUidCheck();
-        mockCurrentUserCheck(user1Id);
-
-        mStatusBarManagerService.onDisplayAdded(SECONDARY_DISPLAY_ID);
-
-        int expectedFlags = DISABLE2_MASK & DISABLE2_NOTIFICATION_SHADE;
-        String pkg = mContext.getPackageName();
-
-        // before disabling
-        assertEquals(DISABLE_NONE,
-                mStatusBarManagerService.getDisableFlags(mMockStatusBar, user1Id)[0]);
-
-        // disable
-        mStatusBarManagerService.disable2(expectedFlags, mMockStatusBar, pkg);
-
-        verify(mMockStatusBar).disable(0, 0, expectedFlags);
-        verify(mMockStatusBar).disable(SECONDARY_DISPLAY_ID, 0, expectedFlags);
     }
 
     @Test
@@ -1141,7 +1092,6 @@ public class StatusBarManagerServiceTest {
         // disable
         mStatusBarManagerService.disableForUser(expectedUser1Flags, mMockStatusBar, pkg, user1Id);
         mStatusBarManagerService.disableForUser(expectedUser2Flags, mMockStatusBar, pkg, user2Id);
-
         // check that right flag is disabled
         assertEquals(expectedUser1Flags,
                 mStatusBarManagerService.getDisableFlags(mMockStatusBar, user1Id)[0]);
