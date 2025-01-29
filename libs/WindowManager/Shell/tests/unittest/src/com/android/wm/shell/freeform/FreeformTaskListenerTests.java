@@ -35,7 +35,6 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.SurfaceControl;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -56,7 +55,6 @@ import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -71,9 +69,6 @@ import java.util.Optional;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public final class FreeformTaskListenerTests extends ShellTestCase {
-
-    @Rule
-    public final SetFlagsRule setFlagsRule = new SetFlagsRule();
 
     @Mock
     private ShellTaskOrganizer mTaskOrganizer;

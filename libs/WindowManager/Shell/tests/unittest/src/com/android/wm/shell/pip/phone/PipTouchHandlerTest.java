@@ -25,7 +25,6 @@ import static org.mockito.Mockito.verify;
 
 import android.graphics.Rect;
 import android.platform.test.annotations.DisableFlags;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Size;
@@ -49,7 +48,6 @@ import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -68,9 +66,6 @@ import java.util.Optional;
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class PipTouchHandlerTest extends ShellTestCase {
-    @Rule
-    public SetFlagsRule setFlagsRule = new SetFlagsRule();
-
     private static final int INSET = 10;
     private static final int PIP_LENGTH = 100;
 

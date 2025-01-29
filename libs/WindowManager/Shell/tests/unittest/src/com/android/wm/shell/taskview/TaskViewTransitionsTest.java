@@ -34,7 +34,6 @@ import android.app.ActivityManager;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.platform.test.flag.junit.FlagsParameterization;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.TestableLooper;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
@@ -50,7 +49,6 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -74,9 +72,6 @@ public class TaskViewTransitionsTest extends ShellTestCase {
                 Flags.FLAG_ENABLE_TASK_VIEW_CONTROLLER_CLEANUP);
     }
 
-    @Rule
-    public final SetFlagsRule mSetFlagsRule;
-
     @Mock
     Transitions mTransitions;
     @Mock
@@ -95,9 +90,7 @@ public class TaskViewTransitionsTest extends ShellTestCase {
     TaskViewRepository mTaskViewRepository;
     TaskViewTransitions mTaskViewTransitions;
 
-    public TaskViewTransitionsTest(FlagsParameterization flags) {
-        mSetFlagsRule = new SetFlagsRule(flags);
-    }
+    public TaskViewTransitionsTest(FlagsParameterization flags) {}
 
     @Before
     public void setUp() {

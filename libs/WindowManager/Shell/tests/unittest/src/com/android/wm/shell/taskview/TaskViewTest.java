@@ -51,7 +51,6 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Looper;
 import android.platform.test.flag.junit.FlagsParameterization;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.TestableLooper;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
@@ -72,7 +71,6 @@ import com.android.wm.shell.transition.Transitions;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -95,9 +93,6 @@ public class TaskViewTest extends ShellTestCase {
     public static List<FlagsParameterization> getParams() {
         return FlagsParameterization.allCombinationsOf(Flags.FLAG_TASK_VIEW_REPOSITORY);
     }
-
-    @Rule
-    public final SetFlagsRule mSetFlagsRule;
 
     @Mock
     TaskView.Listener mViewListener;
@@ -127,9 +122,7 @@ public class TaskViewTest extends ShellTestCase {
     TaskViewTransitions mTaskViewTransitions;
     TaskViewTaskController mTaskViewTaskController;
 
-    public TaskViewTest(FlagsParameterization flags) {
-        mSetFlagsRule = new SetFlagsRule(flags);
-    }
+    public TaskViewTest(FlagsParameterization flags) {}
 
     @Before
     public void setUp() {

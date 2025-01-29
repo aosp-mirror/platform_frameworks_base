@@ -19,7 +19,6 @@ package com.android.wm.shell.desktopmode
 import android.app.ActivityManager.RunningTaskInfo
 import android.graphics.Rect
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import com.android.dx.mockito.inline.extended.ExtendedMockito.clearInvocations
 import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.ExtendedMockito.staticMockMarker
@@ -65,14 +64,12 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
     val displayLayout = mock<DisplayLayout>()
 
     @JvmField
-    @Rule(order = 0)
+    @Rule()
     val extendedMockitoRule =
         ExtendedMockitoRule.Builder(this)
             .mockStatic(FrameworkStatsLog::class.java)
             .mockStatic(EventLogTags::class.java)
             .build()!!
-
-    @JvmField @Rule(order = 1) val setFlagsRule = SetFlagsRule()
 
     @Before
     fun setUp() {

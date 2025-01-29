@@ -47,7 +47,6 @@ import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 
@@ -77,7 +76,6 @@ import com.android.wm.shell.util.StubTransaction;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -114,9 +112,6 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
     private Transitions mTransitions;
 
     @Mock private DesktopRepository mDesktopRepository;
-
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private ShellTaskOrganizer mShellTaskOrganizer;
     private RecentTasksController mRecentTasksController;

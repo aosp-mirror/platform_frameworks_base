@@ -20,7 +20,6 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CLOSE
@@ -36,14 +35,12 @@ import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.util.TransitionObserverInputBuilder
 import com.android.wm.shell.util.executeTransitionObserverTest
 import java.util.function.Consumer
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 
 /**
@@ -55,9 +52,6 @@ import org.mockito.kotlin.verify
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class LetterboxTransitionObserverTest : ShellTestCase() {
-
-    @get:Rule
-    val setFlagsRule: SetFlagsRule = SetFlagsRule()
 
     @Test
     @DisableFlags(Flags.FLAG_APP_COMPAT_REFACTORING)

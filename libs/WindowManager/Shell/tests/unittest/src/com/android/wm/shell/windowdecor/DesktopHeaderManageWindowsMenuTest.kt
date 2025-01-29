@@ -19,7 +19,6 @@ import android.app.ActivityManager.RunningTaskInfo
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.SurfaceControl
@@ -35,7 +34,6 @@ import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystem
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -50,10 +48,6 @@ import org.mockito.kotlin.mock
 @TestableLooper.RunWithLooper
 @RunWith(AndroidTestingRunner::class)
 class DesktopHeaderManageWindowsMenuTest : ShellTestCase() {
-
-    @JvmField
-    @Rule
-    val setFlagsRule: SetFlagsRule = SetFlagsRule()
 
     private lateinit var userRepositories: DesktopUserRepositories
     private lateinit var menu: DesktopHeaderManageWindowsMenu
