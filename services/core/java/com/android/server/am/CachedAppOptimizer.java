@@ -572,6 +572,7 @@ public class CachedAppOptimizer {
         public long mTotalAnonMemFreedKBs;
         public long mSumOrigAnonRss;
         public double mMaxCompactEfficiency;
+        public double mMaxSwapEfficiency;
 
         // Cpu time
         public long mTotalCpuTimeMillis;
@@ -585,6 +586,10 @@ public class CachedAppOptimizer {
             final double compactEfficiency = memFreed / (double) origAnonRss;
             if (compactEfficiency > mMaxCompactEfficiency) {
                 mMaxCompactEfficiency = compactEfficiency;
+            }
+            final double swapEfficiency = anonRssSaved / (double) origAnonRss;
+            if (swapEfficiency > mMaxSwapEfficiency) {
+                mMaxSwapEfficiency = swapEfficiency;
             }
             mTotalDeltaAnonRssKBs += anonRssSaved;
             mTotalZramConsumedKBs += zramConsumed;
@@ -628,7 +633,11 @@ public class CachedAppOptimizer {
                 pw.println("    -----Memory Stats----");
                 pw.println("    Total Delta Anon RSS (KB) : " + mTotalDeltaAnonRssKBs);
                 pw.println("    Total Physical ZRAM Consumed (KB): " + mTotalZramConsumedKBs);
+                // Anon Mem Freed = Delta Anon RSS - ZRAM Consumed
                 pw.println("    Total Anon Memory Freed (KB): " + mTotalAnonMemFreedKBs);
+                pw.println("    Avg Swap Efficiency (KB) (Delta Anon RSS/Orig Anon RSS): "
+                        + (mTotalDeltaAnonRssKBs / (double) mSumOrigAnonRss));
+                pw.println("    Max Swap Efficiency: " + mMaxSwapEfficiency);
                 // This tells us how much anon memory we were able to free thanks to running
                 // compaction
                 pw.println("    Avg Compaction Efficiency (Anon Freed/Anon RSS): "
@@ -808,8 +817,9 @@ public class CachedAppOptimizer {
             pw.println("  Tracking last compaction stats for " + mLastCompactionStats.size()
                     + " processes.");
             pw.println("Last Compaction per process stats:");
-            pw.println("    (ProcessName,Source,DeltaAnonRssKBs,ZramConsumedKBs,AnonMemFreedKBs,"
-                    + "CompactEfficiency,CompactCost(ms/MB),procState,oomAdj,oomAdjReason)");
+            pw.println("    (ProcessName,Source,DeltaAnonRssKBs,ZramConsumedKBs,AnonMemFreedKBs"
+                    + ",SwapEfficiency,CompactEfficiency,CompactCost(ms/MB),procState,oomAdj,"
+                    + "oomAdjReason)");
             for (Map.Entry<Integer, SingleCompactionStats> entry :
                     mLastCompactionStats.entrySet()) {
                 SingleCompactionStats stats = entry.getValue();
@@ -818,7 +828,8 @@ public class CachedAppOptimizer {
             pw.println();
             pw.println("Last 20 Compactions Stats:");
             pw.println("    (ProcessName,Source,DeltaAnonRssKBs,ZramConsumedKBs,AnonMemFreedKBs,"
-                    + "CompactEfficiency,CompactCost(ms/MB),procState,oomAdj,oomAdjReason)");
+                    + "SwapEfficiency,CompactEfficiency,CompactCost(ms/MB),procState,oomAdj,"
+                    + "oomAdjReason)");
             for (SingleCompactionStats stats : mCompactionStatsHistory) {
                 stats.dump(pw);
             }
@@ -1779,6 +1790,8 @@ public class CachedAppOptimizer {
 
         double getCompactEfficiency() { return mAnonMemFreedKBs / (double) mOrigAnonRss; }
 
+        double getSwapEfficiency() { return mDeltaAnonRssKBs / (double) mOrigAnonRss; }
+
         double getCompactCost() {
             // mCpuTimeMillis / (anonMemFreedKBs/1024) and metric is in (ms/MB)
             return mCpuTimeMillis / (double) mAnonMemFreedKBs * 1024;
@@ -1791,7 +1804,8 @@ public class CachedAppOptimizer {
         @NeverCompile
         void dump(PrintWriter pw) {
             pw.println("    (" + mProcessName + "," + mSourceType.name() + "," + mDeltaAnonRssKBs
-                    + "," + mZramConsumedKBs + "," + mAnonMemFreedKBs + "," + getCompactEfficiency()
+                    + "," + mZramConsumedKBs + "," + mAnonMemFreedKBs + ","
+                    + getSwapEfficiency() + "," + getCompactEfficiency()
                     + "," + getCompactCost() + "," + mProcState + "," + mOomAdj + ","
                     + OomAdjuster.oomAdjReasonToString(mOomAdjReason) + ")");
         }
