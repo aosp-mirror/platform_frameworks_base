@@ -57,9 +57,7 @@ import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerMessageAreaVie
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerUdfpsIconViewModel
 import com.android.systemui.log.LongPressHandlingViewLogger
 import com.android.systemui.res.R
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 @Composable
 fun AlternateBouncer(
     alternateBouncerDependencies: AlternateBouncerDependencies,
@@ -127,7 +125,6 @@ fun AlternateBouncer(
     }
 }
 
-@ExperimentalCoroutinesApi
 @Composable
 private fun StatusMessage(
     viewModel: AlternateBouncerMessageAreaViewModel,
@@ -156,7 +153,6 @@ private fun StatusMessage(
     }
 }
 
-@ExperimentalCoroutinesApi
 @Composable
 private fun DeviceEntryIcon(
     viewModel: AlternateBouncerUdfpsIconViewModel,
@@ -179,7 +175,6 @@ private fun DeviceEntryIcon(
 }
 
 /** TODO (b/353955910): Validate accessibility CUJs */
-@ExperimentalCoroutinesApi
 @Composable
 private fun UdfpsA11yOverlay(
     viewModel: AlternateBouncerUdfpsAccessibilityOverlayViewModel,
