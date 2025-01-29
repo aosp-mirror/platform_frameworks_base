@@ -60,6 +60,12 @@ public abstract class DreamManagerInternal {
     public abstract boolean canStartDreaming(boolean isScreenOn);
 
     /**
+     * Whether or not the device is currently in the user's "when to dream" state, ex.
+     * docked & charging.
+     */
+    public abstract boolean dreamConditionActive();
+
+    /**
      * Register a {@link DreamManagerStateListener}, which will be called when there are changes to
      * dream state.
      *

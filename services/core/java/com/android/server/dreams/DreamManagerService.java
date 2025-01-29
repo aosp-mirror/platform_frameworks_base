@@ -495,6 +495,34 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
+    @VisibleForTesting
+    boolean dreamConditionActiveInternal() {
+        synchronized (mLock) {
+            return dreamConditionActiveInternalLocked();
+        }
+    }
+
+    private boolean dreamConditionActiveInternalLocked() {
+        if ((mWhenToDream & DREAM_ON_CHARGE) == DREAM_ON_CHARGE) {
+            return mIsCharging;
+        }
+
+        if ((mWhenToDream & DREAM_ON_DOCK) == DREAM_ON_DOCK) {
+            return mIsDocked;
+        }
+
+        if ((mWhenToDream & DREAM_ON_POSTURED) == DREAM_ON_POSTURED) {
+            return mIsPostured;
+        }
+
+        return false;
+    }
+
+    @VisibleForTesting
+    boolean dreamsEnabled() {
+        return mDreamsEnabledSetting;
+    }
+
     /** Whether dreaming can start given user settings and the current dock/charge state. */
     private boolean canStartDreamingInternal(boolean isScreenOn) {
         synchronized (mLock) {
@@ -524,19 +552,9 @@ public final class DreamManagerService extends SystemService {
                 return false;
             }
 
-            if ((mWhenToDream & DREAM_ON_CHARGE) == DREAM_ON_CHARGE) {
-                return mIsCharging;
-            }
-
-            if ((mWhenToDream & DREAM_ON_DOCK) == DREAM_ON_DOCK) {
-                return mIsDocked;
-            }
-
-            if ((mWhenToDream & DREAM_ON_POSTURED) == DREAM_ON_POSTURED) {
-                return mIsPostured;
-            }
-
-            return false;
+            // All dream prerequisites fulfilled, check if device state matches "when to dream"
+            // setting.
+            return dreamConditionActiveInternalLocked();
         }
     }
 
@@ -674,7 +692,8 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
-    private void setDevicePosturedInternal(boolean isPostured) {
+    @VisibleForTesting
+    void setDevicePosturedInternal(boolean isPostured) {
         Slog.d(TAG, "Device postured: " + isPostured);
         synchronized (mLock) {
             mIsPostured = isPostured;
@@ -1387,6 +1406,11 @@ public final class DreamManagerService extends SystemService {
         @Override
         public boolean canStartDreaming(boolean isScreenOn) {
             return canStartDreamingInternal(isScreenOn);
+        }
+
+        @Override
+        public boolean dreamConditionActive() {
+            return dreamConditionActiveInternal();
         }
 
         @Override

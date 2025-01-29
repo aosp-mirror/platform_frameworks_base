@@ -16,6 +16,7 @@
 
 package com.android.server.policy;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
@@ -33,6 +34,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.policy.PhoneWindowManager.EXTRA_TRIGGER_HUB;
+import static com.android.server.policy.PhoneWindowManager.SHORT_PRESS_POWER_HUB_OR_DREAM_OR_SLEEP;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -47,13 +50,20 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.hardware.input.InputManager;
+import android.os.Bundle;
 import android.os.PowerManager;
+import android.os.PowerManagerInternal;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
+import android.provider.Settings;
+import android.service.dreams.DreamManagerInternal;
+import android.testing.TestableContext;
+import android.view.contentprotection.flags.Flags;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.server.LocalServices;
+import com.android.internal.util.test.LocalServiceKeeperRule;
+import com.android.server.input.InputManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.keyguard.KeyguardServiceDelegate;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -66,6 +76,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Test class for {@link PhoneWindowManager}.
@@ -76,28 +89,62 @@ import org.junit.Test;
 @Presubmit
 @SmallTest
 public class PhoneWindowManagerTests {
-
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
+    @Rule
+    public LocalServiceKeeperRule mLocalServiceKeeperRule = new LocalServiceKeeperRule();
+
+    @Rule
+    public final TestableContext mContext = spy(
+            new TestableContext(getInstrumentation().getContext()));
+
     PhoneWindowManager mPhoneWindowManager;
+    @Mock
     private ActivityTaskManagerInternal mAtmInternal;
+    @Mock
+    private DreamManagerInternal mDreamManagerInternal;
+    @Mock
+    private InputManagerInternal mInputManagerInternal;
+    @Mock
+    private PowerManagerInternal mPowerManagerInternal;
+    @Mock
     private StatusBarManagerInternal mStatusBarManagerInternal;
-    private Context mContext;
+    @Mock
+    private UserManagerInternal mUserManagerInternal;
+
+    @Mock
+    private PowerManager mPowerManager;
+    @Mock
+    private DisplayPolicy mDisplayPolicy;
+    @Mock
+    private KeyguardServiceDelegate mKeyguardServiceDelegate;
 
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        when(mContext.getSystemService(Context.POWER_SERVICE)).thenReturn(mPowerManager);
+
         mPhoneWindowManager = spy(new PhoneWindowManager());
         spyOn(ActivityManager.getService());
-        mContext = getInstrumentation().getTargetContext();
-        spyOn(mContext);
-        mAtmInternal = mock(ActivityTaskManagerInternal.class);
-        LocalServices.addService(ActivityTaskManagerInternal.class, mAtmInternal);
+
+        mLocalServiceKeeperRule.overrideLocalService(ActivityTaskManagerInternal.class,
+                mAtmInternal);
         mPhoneWindowManager.mActivityTaskManagerInternal = mAtmInternal;
-        LocalServices.addService(WindowManagerInternal.class, mock(WindowManagerInternal.class));
-        mStatusBarManagerInternal = mock(StatusBarManagerInternal.class);
-        LocalServices.addService(StatusBarManagerInternal.class, mStatusBarManagerInternal);
-        mPhoneWindowManager.mKeyguardDelegate = mock(KeyguardServiceDelegate.class);
+        mLocalServiceKeeperRule.overrideLocalService(DreamManagerInternal.class,
+                mDreamManagerInternal);
+        mLocalServiceKeeperRule.overrideLocalService(InputManagerInternal.class,
+                mInputManagerInternal);
+        mLocalServiceKeeperRule.overrideLocalService(PowerManagerInternal.class,
+                mPowerManagerInternal);
+        mLocalServiceKeeperRule.overrideLocalService(StatusBarManagerInternal.class,
+                mStatusBarManagerInternal);
+        mLocalServiceKeeperRule.overrideLocalService(UserManagerInternal.class,
+                mUserManagerInternal);
+        mLocalServiceKeeperRule.overrideLocalService(WindowManagerInternal.class,
+                mock(WindowManagerInternal.class));
+
+        mPhoneWindowManager.mKeyguardDelegate = mKeyguardServiceDelegate;
         final InputManager im = mock(InputManager.class);
         doNothing().when(im).registerKeyGestureEventHandler(any());
         doReturn(im).when(mContext).getSystemService(eq(Context.INPUT_SERVICE));
@@ -107,9 +154,6 @@ public class PhoneWindowManagerTests {
     public void tearDown() {
         reset(ActivityManager.getService());
         reset(mContext);
-        LocalServices.removeServiceForTest(ActivityTaskManagerInternal.class);
-        LocalServices.removeServiceForTest(WindowManagerInternal.class);
-        LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
     }
 
     @Test
@@ -138,28 +182,20 @@ public class PhoneWindowManagerTests {
     public void testScreenTurnedOff() {
         doNothing().when(mPhoneWindowManager).updateSettings(any());
         doNothing().when(mPhoneWindowManager).initializeHdmiState();
-        final boolean[] isScreenTurnedOff = { false };
-        final DisplayPolicy displayPolicy = mock(DisplayPolicy.class);
-        doAnswer(invocation -> isScreenTurnedOff[0] = true).when(displayPolicy).screenTurnedOff(
+        final boolean[] isScreenTurnedOff = {false};
+        doAnswer(invocation -> isScreenTurnedOff[0] = true).when(mDisplayPolicy).screenTurnedOff(
                 anyBoolean());
-        doAnswer(invocation -> !isScreenTurnedOff[0]).when(displayPolicy).isScreenOnEarly();
-        doAnswer(invocation -> !isScreenTurnedOff[0]).when(displayPolicy).isScreenOnFully();
+        doAnswer(invocation -> !isScreenTurnedOff[0]).when(mDisplayPolicy).isScreenOnEarly();
+        doAnswer(invocation -> !isScreenTurnedOff[0]).when(mDisplayPolicy).isScreenOnFully();
 
-        mPhoneWindowManager.mDefaultDisplayPolicy = displayPolicy;
-        mPhoneWindowManager.mDefaultDisplayRotation = mock(DisplayRotation.class);
-        final PowerManager pm = mock(PowerManager.class);
-        doReturn(true).when(pm).isInteractive();
-        doReturn(pm).when(mContext).getSystemService(eq(Context.POWER_SERVICE));
-
-        mContext.getMainThreadHandler().runWithScissors(() -> mPhoneWindowManager.init(
-                new PhoneWindowManager.Injector(mContext,
-                        mock(WindowManagerPolicy.WindowManagerFuncs.class))), 0);
+        when(mPowerManager.isInteractive()).thenReturn(true);
+        initPhoneWindowManager();
         assertThat(isScreenTurnedOff[0]).isFalse();
         assertThat(mPhoneWindowManager.mIsGoingToSleepDefaultDisplay).isFalse();
 
         // Skip sleep-token for non-sleep-screen-off.
         mPhoneWindowManager.screenTurnedOff(DEFAULT_DISPLAY, true /* isSwappingDisplay */);
-        verify(displayPolicy).screenTurnedOff(false /* acquireSleepToken */);
+        verify(mDisplayPolicy).screenTurnedOff(false /* acquireSleepToken */);
         assertThat(isScreenTurnedOff[0]).isTrue();
 
         // Apply sleep-token for sleep-screen-off.
@@ -167,7 +203,7 @@ public class PhoneWindowManagerTests {
         mPhoneWindowManager.startedGoingToSleep(DEFAULT_DISPLAY, 0 /* reason */);
         assertThat(mPhoneWindowManager.mIsGoingToSleepDefaultDisplay).isTrue();
         mPhoneWindowManager.screenTurnedOff(DEFAULT_DISPLAY, true /* isSwappingDisplay */);
-        verify(displayPolicy).screenTurnedOff(true /* acquireSleepToken */);
+        verify(mDisplayPolicy).screenTurnedOff(true /* acquireSleepToken */);
 
         mPhoneWindowManager.finishedGoingToSleep(DEFAULT_DISPLAY, 0 /* reason */);
         assertThat(mPhoneWindowManager.mIsGoingToSleepDefaultDisplay).isFalse();
@@ -175,8 +211,7 @@ public class PhoneWindowManagerTests {
 
     @Test
     public void testCheckAddPermission_withoutAccessibilityOverlay_noAccessibilityAppOpLogged() {
-        mSetFlagsRule.enableFlags(android.view.contentprotection.flags.Flags
-                .FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED);
+        mSetFlagsRule.enableFlags(Flags.FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED);
         int[] outAppOp = new int[1];
         assertEquals(ADD_OKAY, mPhoneWindowManager.checkAddPermission(TYPE_WALLPAPER,
                 /* isRoundedCornerOverlay= */ false, "test.pkg", outAppOp, DEFAULT_DISPLAY));
@@ -185,8 +220,7 @@ public class PhoneWindowManagerTests {
 
     @Test
     public void testCheckAddPermission_withAccessibilityOverlay() {
-        mSetFlagsRule.enableFlags(android.view.contentprotection.flags.Flags
-                .FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED);
+        mSetFlagsRule.enableFlags(Flags.FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED);
         int[] outAppOp = new int[1];
         assertEquals(ADD_OKAY, mPhoneWindowManager.checkAddPermission(TYPE_ACCESSIBILITY_OVERLAY,
                 /* isRoundedCornerOverlay= */ false, "test.pkg", outAppOp, DEFAULT_DISPLAY));
@@ -195,8 +229,7 @@ public class PhoneWindowManagerTests {
 
     @Test
     public void testCheckAddPermission_withAccessibilityOverlay_flagDisabled() {
-        mSetFlagsRule.disableFlags(android.view.contentprotection.flags.Flags
-                .FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED);
+        mSetFlagsRule.disableFlags(Flags.FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED);
         int[] outAppOp = new int[1];
         assertEquals(ADD_OKAY, mPhoneWindowManager.checkAddPermission(TYPE_ACCESSIBILITY_OVERLAY,
                 /* isRoundedCornerOverlay= */ false, "test.pkg", outAppOp, DEFAULT_DISPLAY));
@@ -217,10 +250,107 @@ public class PhoneWindowManagerTests {
         verify(mStatusBarManagerInternal, never()).dismissKeyboardShortcutsMenu();
     }
 
+    @Test
+    public void powerPress_hubOrDreamOrSleep_goesToSleepFromDream() {
+        when(mDisplayPolicy.isAwake()).thenReturn(true);
+        initPhoneWindowManager();
+
+        // Set power button behavior.
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.POWER_BUTTON_SHORT_PRESS, SHORT_PRESS_POWER_HUB_OR_DREAM_OR_SLEEP);
+        mPhoneWindowManager.updateSettings(null);
+
+        // Device is dreaming.
+        when(mDreamManagerInternal.isDreaming()).thenReturn(true);
+
+        // Power button pressed.
+        int eventTime = 0;
+        mPhoneWindowManager.powerPress(eventTime, 1, 0);
+
+        // Device goes to sleep.
+        verify(mPowerManager).goToSleep(eventTime, PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
+    }
+
+    @Test
+    public void powerPress_hubOrDreamOrSleep_hubAvailableLocks() {
+        when(mDisplayPolicy.isAwake()).thenReturn(true);
+        mContext.getTestablePermissions().setPermission(android.Manifest.permission.DEVICE_POWER,
+                PERMISSION_GRANTED);
+        initPhoneWindowManager();
+
+        // Set power button behavior.
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.POWER_BUTTON_SHORT_PRESS, SHORT_PRESS_POWER_HUB_OR_DREAM_OR_SLEEP);
+        mPhoneWindowManager.updateSettings(null);
+
+        // Set up hub prerequisites.
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.GLANCEABLE_HUB_ENABLED, 1);
+        when(mUserManagerInternal.isUserUnlocked(any(Integer.class))).thenReturn(true);
+        when(mDreamManagerInternal.dreamConditionActive()).thenReturn(true);
+
+        // Power button pressed.
+        int eventTime = 0;
+        mPhoneWindowManager.powerPress(eventTime, 1, 0);
+
+        // Lock requested with the proper bundle options.
+        ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(mPhoneWindowManager).lockNow(bundleCaptor.capture());
+        assertThat(bundleCaptor.getValue().getBoolean(EXTRA_TRIGGER_HUB)).isTrue();
+    }
+
+    @Test
+    public void powerPress_hubOrDreamOrSleep_hubNotAvailableDreams() {
+        when(mDisplayPolicy.isAwake()).thenReturn(true);
+        initPhoneWindowManager();
+
+        // Set power button behavior.
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.POWER_BUTTON_SHORT_PRESS, SHORT_PRESS_POWER_HUB_OR_DREAM_OR_SLEEP);
+        mPhoneWindowManager.updateSettings(null);
+
+        // Hub is not available.
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.GLANCEABLE_HUB_ENABLED, 0);
+        when(mDreamManagerInternal.canStartDreaming(any(Boolean.class))).thenReturn(true);
+
+        // Power button pressed.
+        int eventTime = 0;
+        mPhoneWindowManager.powerPress(eventTime, 1, 0);
+
+        // Dream is requested.
+        verify(mDreamManagerInternal).requestDream();
+    }
+
+    private void initPhoneWindowManager() {
+        mPhoneWindowManager.mDefaultDisplayPolicy = mDisplayPolicy;
+        mPhoneWindowManager.mDefaultDisplayRotation = mock(DisplayRotation.class);
+        mContext.getMainThreadHandler().runWithScissors(() -> mPhoneWindowManager.init(
+                new TestInjector(mContext, mock(WindowManagerPolicy.WindowManagerFuncs.class))), 0);
+    }
+
     private void mockStartDockOrHome() throws Exception {
         doNothing().when(ActivityManager.getService()).stopAppSwitches();
         when(mAtmInternal.startHomeOnDisplay(
                 anyInt(), anyString(), anyInt(), anyBoolean(), anyBoolean())).thenReturn(false);
         mPhoneWindowManager.mUserManagerInternal = mock(UserManagerInternal.class);
+    }
+
+    private class TestInjector extends PhoneWindowManager.Injector {
+        TestInjector(Context context, WindowManagerPolicy.WindowManagerFuncs funcs) {
+            super(context, funcs);
+        }
+
+        KeyguardServiceDelegate getKeyguardServiceDelegate() {
+            return mKeyguardServiceDelegate;
+        }
+
+        /**
+         * {@code WindowWakeUpPolicy} registers a local service in its constructor, easier to just
+         * mock it out so we don't have to unregister it after every test.
+         */
+        WindowWakeUpPolicy getWindowWakeUpPolicy() {
+            return mock(WindowWakeUpPolicy.class);
+        }
     }
 }
