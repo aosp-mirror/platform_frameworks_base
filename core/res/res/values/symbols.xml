@@ -574,6 +574,7 @@
   <java-symbol type="dimen" name="notification_text_size" />
   <java-symbol type="dimen" name="notification_title_text_size" />
   <java-symbol type="dimen" name="notification_subtext_size" />
+  <java-symbol type="dimen" name="notification_2025_title_text_size" />
   <java-symbol type="dimen" name="notification_top_pad" />
   <java-symbol type="dimen" name="notification_top_pad_narrow" />
   <java-symbol type="dimen" name="notification_top_pad_large_text" />

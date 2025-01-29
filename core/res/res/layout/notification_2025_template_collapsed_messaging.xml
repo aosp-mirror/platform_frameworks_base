@@ -130,6 +130,7 @@
                             android:singleLine="true"
                             android:textAlignment="viewStart"
                             android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Title"
+                            android:textSize="@dimen/notification_2025_title_text_size"
                             />
 
                         <include layout="@layout/notification_2025_top_line_views" />

@@ -29,7 +29,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Title"
-        android:textSize="16sp"
+        android:textSize="@dimen/notification_2025_title_text_size"
         android:singleLine="true"
         android:layout_weight="1"
         />

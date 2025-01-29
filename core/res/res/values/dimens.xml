@@ -577,6 +577,9 @@
     <dimen name="notification_text_size">14sp</dimen>
     <!-- Size of notification text titles (see TextAppearance.StatusBar.EventContent.Title) -->
     <dimen name="notification_title_text_size">14sp</dimen>
+    <!-- Size of notification text titles, 2025 redesign version (see TextAppearance.StatusBar.EventContent.Title) -->
+    <!-- TODO: b/378660052 - When inlining the redesign flag, this should be updated directly in TextAppearance.DeviceDefault.Notification.Title -->
+    <dimen name="notification_2025_title_text_size">16sp</dimen>
     <!-- Size of big notification text titles (see TextAppearance.StatusBar.EventContent.BigTitle) -->
     <dimen name="notification_big_title_text_size">16sp</dimen>
     <!-- Size of smaller notification text (see TextAppearance.StatusBar.EventContent.Line2, Info, Time) -->
