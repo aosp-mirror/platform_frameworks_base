@@ -2150,4 +2150,8 @@
     <dimen name="volume_panel_slice_vertical_padding">8dp</dimen>
     <dimen name="volume_panel_slice_horizontal_padding">24dp</dimen>
     <!-- Volume end -->
+
+    <!-- Gradient color wallpaper start -->
+    <dimen name="gradient_color_wallpaper_center_offset">128dp</dimen>
+    <!-- Gradient color wallpaper end -->
 </resources>

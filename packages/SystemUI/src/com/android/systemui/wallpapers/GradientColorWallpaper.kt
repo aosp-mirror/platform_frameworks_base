@@ -19,10 +19,14 @@ package com.android.systemui.wallpapers
 import android.app.Flags
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.RadialGradient
+import android.graphics.Shader
 import android.service.wallpaper.WallpaperService
 import android.util.Log
 import android.view.SurfaceHolder
+import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.toRectF
+import com.android.systemui.res.R
 
 /** A wallpaper that shows a static gradient color image wallpaper. */
 class GradientColorWallpaper : WallpaperService() {
@@ -54,9 +58,60 @@ class GradientColorWallpaper : WallpaperService() {
                 canvas = surface.lockHardwareCanvas()
                 val destRectF = surfaceHolder.surfaceFrame.toRectF()
                 val toColor = context.getColor(com.android.internal.R.color.materialColorPrimary)
+                val fromColor =
+                    ColorUtils.setAlphaComponent(
+                        context.getColor(
+                            com.android.internal.R.color.materialColorPrimaryContainer
+                        ),
+                        /* alpha= */ 153, // 0.6f * 255
+                    )
 
-                // TODO(b/384519696): Draw the actual gradient color wallpaper instead.
                 canvas.drawRect(destRectF, Paint().apply { color = toColor })
+
+                val offsetPx: Float =
+                    context.resources
+                        .getDimensionPixelSize(R.dimen.gradient_color_wallpaper_center_offset)
+                        .toFloat()
+                val totalHeight = destRectF.height() + (offsetPx * 2)
+                val leftCenterX = -offsetPx
+                val leftCenterY = -offsetPx
+                val rightCenterX = offsetPx + destRectF.width()
+                val rightCenterY = totalHeight - offsetPx
+                val radius = (destRectF.width() / 2) + offsetPx
+
+                canvas.drawCircle(
+                    leftCenterX,
+                    leftCenterY,
+                    radius,
+                    Paint().apply {
+                        shader =
+                            RadialGradient(
+                                /* centerX= */ leftCenterX,
+                                /* centerY= */ leftCenterY,
+                                /* radius= */ radius,
+                                /* centerColor= */ fromColor,
+                                /* edgeColor= */ toColor,
+                                /* tileMode= */ Shader.TileMode.CLAMP,
+                            )
+                    },
+                )
+
+                canvas.drawCircle(
+                    rightCenterX,
+                    rightCenterY,
+                    radius,
+                    Paint().apply {
+                        shader =
+                            RadialGradient(
+                                /* centerX= */ rightCenterX,
+                                /* centerY= */ rightCenterY,
+                                /* radius= */ radius,
+                                /* centerColor= */ fromColor,
+                                /* edgeColor= */ toColor,
+                                /* tileMode= */ Shader.TileMode.CLAMP,
+                            )
+                    },
+                )
             } catch (exception: IllegalStateException) {
                 Log.d(TAG, "Fail to draw in the canvas", exception)
             } finally {

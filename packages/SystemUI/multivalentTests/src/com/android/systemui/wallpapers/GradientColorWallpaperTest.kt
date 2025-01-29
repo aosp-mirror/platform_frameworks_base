@@ -18,6 +18,7 @@ package com.android.systemui.wallpapers
 
 import android.app.Flags
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
@@ -31,14 +32,18 @@ import android.view.SurfaceHolder
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.res.R
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.spy
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyZeroInteractions
 import org.mockito.kotlin.whenever
@@ -56,6 +61,8 @@ class GradientColorWallpaperTest : SysuiTestCase() {
 
     @Mock private lateinit var mockContext: Context
 
+    @Mock private lateinit var mockResources: Resources
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -64,6 +71,13 @@ class GradientColorWallpaperTest : SysuiTestCase() {
         whenever(surfaceHolder.surfaceFrame).thenReturn(surfaceFrame)
         whenever(surface.lockHardwareCanvas()).thenReturn(canvas)
         whenever(mockContext.getColor(anyInt())).thenReturn(1)
+        whenever(mockContext.resources).thenReturn(mockResources)
+        whenever(
+                mockResources.getDimensionPixelOffset(
+                    eq(R.dimen.gradient_color_wallpaper_center_offset)
+                )
+            )
+            .thenReturn(OFFSET_PX)
     }
 
     private fun createGradientColorWallpaperEngine(): Engine {
@@ -93,9 +107,11 @@ class GradientColorWallpaperTest : SysuiTestCase() {
         engine.onSurfaceRedrawNeeded(surfaceHolder)
 
         verify(canvas).drawRect(any<RectF>(), any<Paint>())
+        verify(canvas, times(2)).drawCircle(anyFloat(), anyFloat(), anyFloat(), any<Paint>())
     }
 
     private companion object {
         val surfaceFrame = Rect(0, 0, 100, 100)
+        const val OFFSET_PX = 100
     }
 }
