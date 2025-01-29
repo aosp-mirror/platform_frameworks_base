@@ -3655,7 +3655,7 @@ class ActivityStarter {
     private static String getIntentRedirectPreventedLogMessage(@NonNull String message,
             @NonNull Intent intent, int intentCreatorUid, @Nullable String intentCreatorPackage,
             int callingUid, @Nullable String callingPackage) {
-        return "[IntentRedirect]" + message + " intentCreatorUid: " + intentCreatorUid
+        return "[IntentRedirect Hardening] " + message + " intentCreatorUid: " + intentCreatorUid
                 + "; intentCreatorPackage: " + intentCreatorPackage + "; callingUid: " + callingUid
                 + "; callingPackage: " + callingPackage + "; intent: " + intent;
     }

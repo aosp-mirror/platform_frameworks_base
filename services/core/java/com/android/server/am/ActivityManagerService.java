@@ -19397,13 +19397,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (((intent.getExtendedFlags() & Intent.EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED) == 0)
                 && intent.getExtras() != null && intent.getExtras().hasIntent()) {
             Slog.wtf(TAG,
-                    "[IntentRedirect] The intent does not have its nested keys collected as a "
+                    "[IntentRedirect Hardening] The intent does not have its nested keys collected as a "
                             + "preparation for creating intent creator tokens. Intent: "
                             + intent + "; creatorPackage: " + creatorPackage);
             if (preventIntentRedirectShowToastIfNestedKeysNotCollectedRW()) {
                 UiThread.getHandler().post(
                         () -> Toast.makeText(mContext,
-                                "Nested keys not collected. go/report-bug-intentRedir to report a"
+                                "Nested keys not collected, activity launch won't be blocked. go/report-bug-intentRedir to report a"
                                         + " bug", Toast.LENGTH_LONG).show());
             }
             if (preventIntentRedirectThrowExceptionIfNestedKeysNotCollected()) {
