@@ -81,6 +81,8 @@ public enum DesktopModeFlags {
             Flags::enableDesktopAppLaunchTransitionsBugfix, true),
     ENABLE_DESKTOP_COMPAT_UI_VISIBILITY_STATUS(
             Flags::enableCompatUiVisibilityStatus, true),
+    ENABLE_DESKTOP_SKIP_COMPAT_UI_EDUCATION_IN_DESKTOP_MODE_BUGFIX(
+            Flags::skipCompatUiEducationInDesktopMode, true),
     INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC(
             Flags::includeTopTransparentFullscreenTaskInDesktopHeuristic, true),
     ENABLE_DESKTOP_WINDOWING_HSUM(Flags::enableDesktopWindowingHsum, true),
