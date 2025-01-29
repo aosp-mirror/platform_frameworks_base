@@ -72,10 +72,10 @@ import java.util.concurrent.Executor;
  * <p>To execute an app function, the caller app can retrieve the {@code functionIdentifier} from
  * the {@code AppFunctionStaticMetadata} document and use it to build an {@link
  * ExecuteAppFunctionRequest}. Then, invoke {@link #executeAppFunction} with the request to execute
- * the app function. Callers need the {@code android.permission.EXECUTE_APP_FUNCTIONS} or {@code
- * android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} permission to execute app functions from other
- * apps. An app can always execute its own app functions and doesn't need these permissions.
- * AppFunction SDK provides a convenient way to achieve this and is the preferred method.
+ * the app function. Callers need the {@code android.permission.EXECUTE_APP_FUNCTIONS} permission to
+ * execute app functions from other apps. An app can always execute its own app functions and
+ * doesn't need these permissions. AppFunction SDK provides a convenient way to achieve this and
+ * is the preferred method.
  *
  * <h3>Example</h3>
  *
@@ -141,32 +141,24 @@ public final class AppFunctionManager {
      * Executes the app function.
      *
      * <p>Note: Applications can execute functions they define. To execute functions defined in
-     * another component, apps would need to have {@code
-     * android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or {@code
-     * android.permission.EXECUTE_APP_FUNCTIONS}.
+     * another component, apps would need to have the permission
+     * {@code android.permission.EXECUTE_APP_FUNCTIONS}.
      *
      * @param request the request to execute the app function
      * @param executor the executor to run the callback
      * @param cancellationSignal the cancellation signal to cancel the execution.
      * @param callback the callback to receive the function execution result or error.
      *     <p>If the calling app does not own the app function or does not have {@code
-     *     android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or {@code
      *     android.permission.EXECUTE_APP_FUNCTIONS}, the execution result will contain {@code
      *     AppFunctionException.ERROR_DENIED}.
-     *     <p>If the caller only has {@code android.permission.EXECUTE_APP_FUNCTIONS} but the
-     *     function requires {@code android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED}, the execution
+     *     <p>If the caller only has {@code android.permission.EXECUTE_APP_FUNCTIONS}, the execution
      *     result will contain {@code AppFunctionException.ERROR_DENIED}
      *     <p>If the function requested for execution is disabled, then the execution result will
      *     contain {@code AppFunctionException.ERROR_DISABLED}
      *     <p>If the cancellation signal is issued, the operation is cancelled and no response is
      *     returned to the caller.
      */
-    @RequiresPermission(
-            anyOf = {
-                Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
-                Manifest.permission.EXECUTE_APP_FUNCTIONS
-            },
-            conditional = true)
+    @RequiresPermission(value = Manifest.permission.EXECUTE_APP_FUNCTIONS, conditional = true)
     @UserHandleAware
     public void executeAppFunction(
             @NonNull ExecuteAppFunctionRequest request,
@@ -222,9 +214,8 @@ public final class AppFunctionManager {
      * Returns a boolean through a callback, indicating whether the app function is enabled.
      *
      * <p>This method can only check app functions owned by the caller, or those where the caller
-     * has visibility to the owner package and holds either the {@link
-     * Manifest.permission#EXECUTE_APP_FUNCTIONS} or {@link
-     * Manifest.permission#EXECUTE_APP_FUNCTIONS_TRUSTED} permission.
+     * has visibility to the owner package and holds the
+     * {@link Manifest.permission#EXECUTE_APP_FUNCTIONS} permission.
      *
      * <p>If the operation fails, the callback's {@link OutcomeReceiver#onError} is called with
      * errors:
@@ -241,12 +232,7 @@ public final class AppFunctionManager {
      * @param executor the executor to run the request
      * @param callback the callback to receive the function enabled check result
      */
-    @RequiresPermission(
-            anyOf = {
-                Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
-                Manifest.permission.EXECUTE_APP_FUNCTIONS
-            },
-            conditional = true)
+    @RequiresPermission(value = Manifest.permission.EXECUTE_APP_FUNCTIONS, conditional = true)
     public void isAppFunctionEnabled(
             @NonNull String functionIdentifier,
             @NonNull String targetPackage,

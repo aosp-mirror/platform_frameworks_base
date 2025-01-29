@@ -24,8 +24,8 @@ package com.android.extensions.appfunctions {
 
   public final class AppFunctionManager {
     ctor public AppFunctionManager(android.content.Context);
-    method @RequiresPermission(anyOf={android.Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED, android.Manifest.permission.EXECUTE_APP_FUNCTIONS}, conditional=true) public void executeAppFunction(@NonNull com.android.extensions.appfunctions.ExecuteAppFunctionRequest, @NonNull java.util.concurrent.Executor, @NonNull android.os.CancellationSignal, @NonNull android.os.OutcomeReceiver<com.android.extensions.appfunctions.ExecuteAppFunctionResponse,com.android.extensions.appfunctions.AppFunctionException>);
-    method @RequiresPermission(anyOf={android.Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED, android.Manifest.permission.EXECUTE_APP_FUNCTIONS}, conditional=true) public void isAppFunctionEnabled(@NonNull String, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Boolean,java.lang.Exception>);
+    method @RequiresPermission(android.Manifest.permission.EXECUTE_APP_FUNCTIONS) public void executeAppFunction(@NonNull com.android.extensions.appfunctions.ExecuteAppFunctionRequest, @NonNull java.util.concurrent.Executor, @NonNull android.os.CancellationSignal, @NonNull android.os.OutcomeReceiver<com.android.extensions.appfunctions.ExecuteAppFunctionResponse,com.android.extensions.appfunctions.AppFunctionException>);
+    method @RequiresPermission(android.Manifest.permission.EXECUTE_APP_FUNCTIONS) public void isAppFunctionEnabled(@NonNull String, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Boolean,java.lang.Exception>);
     method public void isAppFunctionEnabled(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Boolean,java.lang.Exception>);
     method public void setAppFunctionEnabled(@NonNull String, int, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,java.lang.Exception>);
     field public static final int APP_FUNCTION_STATE_DEFAULT = 0; // 0x0

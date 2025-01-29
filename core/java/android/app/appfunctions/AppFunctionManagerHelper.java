@@ -54,9 +54,8 @@ public class AppFunctionManagerHelper {
      * Returns (through a callback) a boolean indicating whether the app function is enabled.
      *
      * This method can only check app functions owned by the caller, or those where the caller
-     * has visibility to the owner package and holds either the {@link
-     * Manifest.permission#EXECUTE_APP_FUNCTIONS} or {@link
-     * Manifest.permission#EXECUTE_APP_FUNCTIONS_TRUSTED} permission.
+     * has visibility to the owner package and holds the {@link
+     * Manifest.permission#EXECUTE_APP_FUNCTIONS} permission.
      *
      * <p>If operation fails, the callback's {@link OutcomeReceiver#onError} is called with errors:
      *

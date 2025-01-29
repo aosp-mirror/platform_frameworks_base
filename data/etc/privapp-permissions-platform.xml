@@ -594,7 +594,6 @@ applications that come with the platform
         <!-- Permission required for CTS test - FileIntegrityManagerTest -->
         <permission name="android.permission.SETUP_FSVERITY" />
         <!-- Permissions required for CTS test - AppFunctionManagerTest -->
-        <permission name="android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED" />
         <permission name="android.permission.EXECUTE_APP_FUNCTIONS" />
         <!-- Permission required for CTS test - CtsNfcTestCases -->
         <permission name="android.permission.NFC_SET_CONTROLLER_ALWAYS_ON" />
