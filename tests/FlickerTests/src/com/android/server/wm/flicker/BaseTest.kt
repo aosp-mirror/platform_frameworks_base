@@ -18,7 +18,9 @@ package com.android.server.wm.flicker
 
 import android.app.Instrumentation
 import android.content.Intent
+import android.os.UserHandle
 import android.platform.test.annotations.Presubmit
+import android.provider.Settings
 import android.tools.flicker.junit.FlickerBuilderProvider
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
@@ -45,6 +47,12 @@ constructor(
 ) {
     init {
         tapl.setExpectedRotationCheckEnabled(true)
+        Settings.System.putIntForUser(
+            instrumentation.targetContext.contentResolver,
+            Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
+            0,
+            UserHandle.USER_CURRENT
+        );
     }
 
     private val logTag = this::class.java.simpleName
