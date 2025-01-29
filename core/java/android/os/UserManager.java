@@ -5326,7 +5326,9 @@ public class UserManager {
     }
 
     /**
-     * Returns list of the profiles of userId including userId itself.
+     * Returns a list of the users that are associated with userId, including userId itself. This
+     * includes the user, its profiles, its parent, and its parent's other profiles, as applicable.
+     *
      * Note that this returns both enabled and not enabled profiles. See
      * {@link #getEnabledProfiles(int)} if you need only the enabled ones.
      * <p>Note that this includes all profile types (not including Restricted profiles).
@@ -5334,7 +5336,7 @@ public class UserManager {
      * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} or
      * {@link android.Manifest.permission#CREATE_USERS} or
      * {@link android.Manifest.permission#QUERY_USERS} if userId is not the calling user.
-     * @param userId profiles of this user will be returned.
+     * @param userId profiles associated with this user (including itself) will be returned.
      * @return the list of profiles.
      * @hide
      */
@@ -5358,12 +5360,13 @@ public class UserManager {
     }
 
     /**
-     * Returns list of the profiles of the given user, including userId itself, as well as the
-     * communal profile, if there is one.
+     * Returns a list of the users that are associated with userId, including userId itself,
+     * as well as the communal profile, if there is one.
      *
      * <p>Note that this returns both enabled and not enabled profiles.
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
+     * @see #getProfiles(int)
      * @hide
      */
     @FlaggedApi(android.multiuser.Flags.FLAG_SUPPORT_COMMUNAL_PROFILE)
@@ -5419,7 +5422,10 @@ public class UserManager {
     }
 
     /**
-     * Returns list of the profiles of userId including userId itself.
+     * Returns a list of the enabled users that are associated with userId, including userId itself.
+     * This includes the user, its profiles, its parent, and its parent's other profiles, as
+     * applicable.
+     *
      * Note that this returns only {@link UserInfo#isEnabled() enabled} profiles.
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
@@ -5447,8 +5453,10 @@ public class UserManager {
     }
 
     /**
-     * Returns a list of UserHandles for profiles associated with the context user, including the
-     * user itself.
+     * Returns a list of the users that are associated with the context user, including the user
+     * itself. This includes the user, its profiles, its parent, and its parent's other profiles,
+     * as applicable.
+     *
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * @return A non-empty list of UserHandles associated with the context user.
@@ -5465,8 +5473,10 @@ public class UserManager {
     }
 
     /**
-     * Returns a list of ids for enabled profiles associated with the context user including the
-     * user itself.
+     * Returns a list of the enabled users that are associated with the context user, including the
+     * user itself. This includes the user, its profiles, its parent, and its parent's other
+     * profiles, as applicable.
+     *
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * @return A non-empty list of UserHandles associated with the context user.
@@ -5483,8 +5493,10 @@ public class UserManager {
     }
 
     /**
-     * Returns a list of ids for all profiles associated with the context user including the user
-     * itself.
+     * Returns a list of all users that are associated with the context user, including the user
+     * itself. This includes the user, its profiles, its parent, and its parent's other profiles,
+     * as applicable.
+     *
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * @return A non-empty list of UserHandles associated with the context user.
@@ -5501,8 +5513,10 @@ public class UserManager {
     }
 
     /**
-     * Returns a list of ids for profiles associated with the context user including the user
-     * itself.
+     * Returns a list of the users that are associated with the context user, including the user
+     * itself. This includes the user, its profiles, its parent, and its parent's other profiles, as
+     * applicable.
+     *
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * @param enabledOnly whether to return only {@link UserInfo#isEnabled() enabled} profiles
@@ -5528,8 +5542,10 @@ public class UserManager {
     }
 
     /**
-     * Returns a list of ids for profiles associated with the specified user including the user
-     * itself.
+     * Returns a list of the users that are associated with the specified user, including the user
+     * itself. This includes the user, its profiles, its parent, and its parent's other profiles,
+     * as applicable.
+     *
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * @param userId      id of the user to return profiles for
