@@ -589,7 +589,8 @@ public class BackgroundActivityStartControllerTests {
                         + "realCallerApp: null; "
                         + "balAllowedByPiSender: BSP.ALLOW_BAL; "
                         + "realCallerStartMode: MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED; "
-                        + "balRequireOptInByPendingIntentCreator: true]");
+                        + "balRequireOptInByPendingIntentCreator: true; "
+                        + "balDontBringExistingBackgroundTaskStackToFg: true]");
     }
 
     @Test
@@ -691,6 +692,7 @@ public class BackgroundActivityStartControllerTests {
                         + "realCallerApp: null; "
                         + "balAllowedByPiSender: BSP.ALLOW_FGS; "
                         + "realCallerStartMode: MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED; "
-                        + "balRequireOptInByPendingIntentCreator: true]");
+                        + "balRequireOptInByPendingIntentCreator: true; "
+                        + "balDontBringExistingBackgroundTaskStackToFg: true]");
     }
 }

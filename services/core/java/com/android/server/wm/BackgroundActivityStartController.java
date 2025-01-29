@@ -45,11 +45,12 @@ import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONL
 import static com.android.server.wm.ActivityTaskSupervisor.getApplicationLabel;
 import static com.android.server.wm.PendingRemoteAnimationRegistry.TIMEOUT_MS;
 import static com.android.window.flags.Flags.balAdditionalStartModes;
+import static com.android.window.flags.Flags.balDontBringExistingBackgroundTaskStackToFg;
 import static com.android.window.flags.Flags.balImprovedMetrics;
 import static com.android.window.flags.Flags.balRequireOptInByPendingIntentCreator;
 import static com.android.window.flags.Flags.balShowToastsBlocked;
-import static com.android.window.flags.Flags.balStrictModeGracePeriod;
 import static com.android.window.flags.Flags.balStrictModeRo;
+import static com.android.window.flags.Flags.balStrictModeGracePeriod;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 import static java.util.Objects.requireNonNull;
@@ -619,6 +620,8 @@ public class BackgroundActivityStartController {
             // features
             sb.append("; balRequireOptInByPendingIntentCreator: ")
                     .append(balRequireOptInByPendingIntentCreator());
+            sb.append("; balDontBringExistingBackgroundTaskStackToFg: ")
+                    .append(balDontBringExistingBackgroundTaskStackToFg());
             sb.append("]");
             return sb.toString();
         }
