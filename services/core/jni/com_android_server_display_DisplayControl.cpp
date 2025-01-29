@@ -172,9 +172,9 @@ static jlongArray nativeGetPhysicalDisplayIds(JNIEnv* env, jclass clazz) {
 }
 
 static jobject nativeGetPhysicalDisplayToken(JNIEnv* env, jclass clazz, jlong physicalDisplayId) {
-    const auto id = DisplayId::fromValue<PhysicalDisplayId>(physicalDisplayId);
-    if (!id) return nullptr;
-    sp<IBinder> token = SurfaceComposerClient::getPhysicalDisplayToken(*id);
+    const PhysicalDisplayId id = PhysicalDisplayId::fromValue(physicalDisplayId);
+    sp<IBinder> token = SurfaceComposerClient::getPhysicalDisplayToken(id);
+    if (!token) return nullptr;
     return javaObjectForIBinder(env, token);
 }
 
