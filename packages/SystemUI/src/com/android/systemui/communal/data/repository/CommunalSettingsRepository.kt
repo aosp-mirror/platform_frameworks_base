@@ -34,6 +34,7 @@ import com.android.systemui.communal.data.model.DisabledReason.DISABLED_REASON_I
 import com.android.systemui.communal.data.model.DisabledReason.DISABLED_REASON_USER_SETTING
 import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryModule.Companion.DEFAULT_BACKGROUND_TYPE
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
+import com.android.systemui.communal.shared.model.WhenToDream
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -58,6 +59,12 @@ interface CommunalSettingsRepository {
     fun getEnabledState(user: UserInfo): Flow<CommunalEnabledState>
 
     fun getScreensaverEnabledState(user: UserInfo): Flow<Boolean>
+
+    /**
+     * Returns a [WhenToDream] for the specified user, indicating what state the device should be in
+     * to trigger dreams.
+     */
+    fun getWhenToDreamState(user: UserInfo): Flow<WhenToDream>
 
     /**
      * Returns true if any glanceable hub functionality should be enabled via configs and flags.
@@ -154,6 +161,49 @@ constructor(
                     SCREENSAVER_ENABLED_SETTING_DEFAULT,
                     user.id,
                 ) == 1
+            }
+            .flowOn(bgDispatcher)
+
+    override fun getWhenToDreamState(user: UserInfo): Flow<WhenToDream> =
+        secureSettings
+            .observerFlow(
+                userId = user.id,
+                names =
+                    arrayOf(
+                        Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
+                        Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
+                        Settings.Secure.SCREENSAVER_ACTIVATE_ON_POSTURED,
+                    ),
+            )
+            .emitOnStart()
+            .map {
+                if (
+                    secureSettings.getIntForUser(
+                        Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
+                        0,
+                        user.id,
+                    ) == 1
+                ) {
+                    WhenToDream.WHILE_CHARGING
+                } else if (
+                    secureSettings.getIntForUser(
+                        Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
+                        0,
+                        user.id,
+                    ) == 1
+                ) {
+                    WhenToDream.WHILE_DOCKED
+                } else if (
+                    secureSettings.getIntForUser(
+                        Settings.Secure.SCREENSAVER_ACTIVATE_ON_POSTURED,
+                        0,
+                        user.id,
+                    ) == 1
+                ) {
+                    WhenToDream.WHILE_POSTURED
+                } else {
+                    WhenToDream.NEVER
+                }
             }
             .flowOn(bgDispatcher)
 

@@ -19,10 +19,13 @@ package com.android.systemui.communal.domain.interactor
 import android.content.testableContext
 import android.os.userManager
 import com.android.systemui.broadcast.broadcastDispatcher
+import com.android.systemui.common.domain.interactor.batteryInteractor
 import com.android.systemui.communal.data.repository.communalMediaRepository
 import com.android.systemui.communal.data.repository.communalSmartspaceRepository
 import com.android.systemui.communal.data.repository.communalWidgetRepository
+import com.android.systemui.communal.posturing.domain.interactor.posturingInteractor
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
+import com.android.systemui.dock.dockManager
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -64,6 +67,9 @@ val Kosmos.communalInteractor by Fixture {
         logBuffer = logcatLogBuffer("CommunalInteractor"),
         tableLogBuffer = mock(),
         managedProfileController = fakeManagedProfileController,
+        batteryInteractor = batteryInteractor,
+        dockManager = dockManager,
+        posturingInteractor = posturingInteractor,
     )
 }
 

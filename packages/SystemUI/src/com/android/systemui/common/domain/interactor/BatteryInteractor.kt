@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.common.data
+package com.android.systemui.common.domain.interactor
 
 import com.android.systemui.common.data.repository.BatteryRepository
-import com.android.systemui.common.data.repository.BatteryRepositoryImpl
-import com.android.systemui.common.data.repository.PackageChangeRepository
-import com.android.systemui.common.data.repository.PackageChangeRepositoryImpl
-import dagger.Binds
-import dagger.Module
+import com.android.systemui.dagger.SysUISingleton
+import javax.inject.Inject
 
-@Module
-abstract class CommonDataLayerModule {
-    @Binds
-    abstract fun bindPackageChangeRepository(
-        impl: PackageChangeRepositoryImpl
-    ): PackageChangeRepository
-
-    @Binds abstract fun bindBatteryRepository(impl: BatteryRepositoryImpl): BatteryRepository
+@SysUISingleton
+class BatteryInteractor @Inject constructor(batteryRepository: BatteryRepository) {
+    val isDevicePluggedIn = batteryRepository.isDevicePluggedIn
 }

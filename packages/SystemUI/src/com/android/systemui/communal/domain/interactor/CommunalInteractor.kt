@@ -30,11 +30,13 @@ import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.Flags.communalResponsiveGrid
 import com.android.systemui.Flags.glanceableHubBlurredBackground
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.common.domain.interactor.BatteryInteractor
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
 import com.android.systemui.communal.data.repository.CommunalSmartspaceRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.domain.model.CommunalContentModel.WidgetContent
+import com.android.systemui.communal.posturing.domain.interactor.PosturingInteractor
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalContentSize.FixedSize.FULL
@@ -43,11 +45,14 @@ import com.android.systemui.communal.shared.model.CommunalContentSize.FixedSize.
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.shared.model.EditModeState
+import com.android.systemui.communal.shared.model.WhenToDream
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dock.DockManager
+import com.android.systemui.dock.retrieveIsDocked
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
@@ -67,6 +72,7 @@ import com.android.systemui.statusbar.phone.ManagedProfileController
 import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.emitOnStart
+import com.android.systemui.util.kotlin.isDevicePluggedIn
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CoroutineDispatcher
@@ -86,6 +92,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -117,6 +124,9 @@ constructor(
     @CommunalLog logBuffer: LogBuffer,
     @CommunalTableLog tableLogBuffer: TableLogBuffer,
     private val managedProfileController: ManagedProfileController,
+    private val batteryInteractor: BatteryInteractor,
+    private val dockManager: DockManager,
+    private val posturingInteractor: PosturingInteractor,
 ) {
     private val logger = Logger(logBuffer, "CommunalInteractor")
 
@@ -171,6 +181,33 @@ constructor(
                 started = SharingStarted.WhileSubscribed(),
                 replay = 1,
             )
+
+    /**
+     * Whether communal hub should be shown automatically, depending on the user's [WhenToDream]
+     * state.
+     */
+    val shouldShowCommunal: Flow<Boolean> =
+        allOf(
+            isCommunalAvailable,
+            communalSettingsInteractor.whenToDream
+                .flatMapLatest { whenToDream ->
+                    when (whenToDream) {
+                        WhenToDream.NEVER -> flowOf(false)
+
+                        WhenToDream.WHILE_CHARGING -> batteryInteractor.isDevicePluggedIn
+
+                        WhenToDream.WHILE_DOCKED ->
+                            allOf(
+                                batteryInteractor.isDevicePluggedIn,
+                                dockManager.retrieveIsDocked(),
+                            )
+
+                        WhenToDream.WHILE_POSTURED ->
+                            allOf(batteryInteractor.isDevicePluggedIn, posturingInteractor.postured)
+                    }
+                }
+                .flowOn(bgDispatcher),
+        )
 
     private val _isDisclaimerDismissed = MutableStateFlow(false)
     val isDisclaimerDismissed: Flow<Boolean> = _isDisclaimerDismissed.asStateFlow()

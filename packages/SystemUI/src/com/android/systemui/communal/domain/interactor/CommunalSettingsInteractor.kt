@@ -21,6 +21,7 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.communal.data.model.CommunalEnabledState
 import com.android.systemui.communal.data.repository.CommunalSettingsRepository
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
+import com.android.systemui.communal.shared.model.WhenToDream
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.dagger.CommunalTableLog
@@ -71,6 +72,12 @@ constructor(
     val isScreensaverEnabled: Flow<Boolean> =
         userInteractor.selectedUserInfo.flatMapLatest { user ->
             repository.getScreensaverEnabledState(user)
+        }
+
+    /** When to dream for the currently selected user. */
+    val whenToDream: Flow<WhenToDream> =
+        userInteractor.selectedUserInfo.flatMapLatest { user ->
+            repository.getWhenToDreamState(user)
         }
 
     /**
