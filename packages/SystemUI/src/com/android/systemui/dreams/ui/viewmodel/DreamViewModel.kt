@@ -20,6 +20,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.Flags.glanceableHubAllowKeyguardWhenDreaming
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.FromDreamingTransitionInteractor
@@ -51,6 +52,7 @@ constructor(
     private val toLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
     private val fromDreamingTransitionInteractor: FromDreamingTransitionInteractor,
     private val communalInteractor: CommunalInteractor,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val userTracker: UserTracker,
     dumpManager: DumpManager,
@@ -58,8 +60,12 @@ constructor(
 
     fun startTransitionFromDream() {
         val showGlanceableHub =
-            communalInteractor.isCommunalEnabled.value &&
-                !keyguardUpdateMonitor.isEncryptedOrLockdown(userTracker.userId)
+            if (communalSettingsInteractor.isV2FlagEnabled()) {
+                communalInteractor.shouldShowCommunal.value
+            } else {
+                communalInteractor.isCommunalEnabled.value &&
+                    !keyguardUpdateMonitor.isEncryptedOrLockdown(userTracker.userId)
+            }
         fromDreamingTransitionInteractor.startToLockscreenOrGlanceableHubTransition(
             showGlanceableHub && !glanceableHubAllowKeyguardWhenDreaming()
         )
