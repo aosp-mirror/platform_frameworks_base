@@ -2988,37 +2988,44 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             throw new SecurityException("Requires permission "
                     + android.Manifest.permission.DEVICE_POWER);
         }
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                setLockScreenShownLocked(keyguardShowing, aodShowing);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
 
-        synchronized (mGlobalLock) {
-            final long ident = Binder.clearCallingIdentity();
-            if (mKeyguardShown != keyguardShowing) {
-                mKeyguardShown = keyguardShowing;
-                final Message msg = PooledLambda.obtainMessage(
-                        ActivityManagerInternal::reportCurKeyguardUsageEvent, mAmInternal,
-                        keyguardShowing);
-                mH.sendMessage(msg);
+    @GuardedBy("mGlobalLock")
+    void setLockScreenShownLocked(boolean keyguardShowing, boolean aodShowing) {
+        if (mKeyguardShown != keyguardShowing) {
+            mKeyguardShown = keyguardShowing;
+            final Message msg = PooledLambda.obtainMessage(
+                    ActivityManagerInternal::reportCurKeyguardUsageEvent, mAmInternal,
+                    keyguardShowing);
+            mH.sendMessage(msg);
+        }
+        // Always reset the state regardless of keyguard-showing change, because that means the
+        // unlock is either completed or canceled.
+        if ((mDemoteTopAppReasons & DEMOTE_TOP_REASON_DURING_UNLOCKING) != 0) {
+            mDemoteTopAppReasons &= ~DEMOTE_TOP_REASON_DURING_UNLOCKING;
+            // The scheduling group of top process was demoted by unlocking, so recompute
+            // to restore its real top priority if possible.
+            if (mTopApp != null) {
+                mTopApp.scheduleUpdateOomAdj();
             }
-            // Always reset the state regardless of keyguard-showing change, because that means the
-            // unlock is either completed or canceled.
-            if ((mDemoteTopAppReasons & DEMOTE_TOP_REASON_DURING_UNLOCKING) != 0) {
-                mDemoteTopAppReasons &= ~DEMOTE_TOP_REASON_DURING_UNLOCKING;
-                // The scheduling group of top process was demoted by unlocking, so recompute
-                // to restore its real top priority if possible.
-                if (mTopApp != null) {
-                    mTopApp.scheduleUpdateOomAdj();
-                }
-            }
-            try {
-                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "setLockScreenShown");
-                mRootWindowContainer.forAllDisplays(displayContent -> {
-                    mKeyguardController.setKeyguardShown(displayContent.getDisplayId(),
-                            keyguardShowing, aodShowing);
-                });
-                maybeHideLockedProfileActivityLocked();
-            } finally {
-                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-                Binder.restoreCallingIdentity(ident);
-            }
+        }
+        try {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "setLockScreenShown");
+            mRootWindowContainer.forAllDisplays(displayContent -> {
+                mKeyguardController.setKeyguardShown(displayContent.getDisplayId(),
+                        keyguardShowing, aodShowing);
+            });
+            maybeHideLockedProfileActivityLocked();
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
         mH.post(() -> {

@@ -1865,7 +1865,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         if (keyguardState != null) {
             boolean keyguardShowing = keyguardState.getKeyguardShowing();
             boolean aodShowing = keyguardState.getAodShowing();
-            mService.setLockScreenShown(keyguardShowing, aodShowing);
+            mService.setLockScreenShownLocked(keyguardShowing, aodShowing);
         }
         return effects;
     }
