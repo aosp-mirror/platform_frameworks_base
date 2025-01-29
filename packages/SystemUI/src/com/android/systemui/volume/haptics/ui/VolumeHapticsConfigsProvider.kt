@@ -18,11 +18,13 @@ package com.android.systemui.volume.haptics.ui
 
 import com.android.systemui.haptics.slider.SeekableSliderTrackerConfig
 import com.android.systemui.haptics.slider.SliderHapticFeedbackConfig
+import com.android.systemui.haptics.slider.SliderHapticFeedbackFilter
 
 object VolumeHapticsConfigsProvider {
 
     fun sliderHapticFeedbackConfig(
-        valueRange: ClosedFloatingPointRange<Float>
+        valueRange: ClosedFloatingPointRange<Float>,
+        filter: SliderHapticFeedbackFilter = SliderHapticFeedbackFilter(),
     ): SliderHapticFeedbackConfig {
         val sliderStepSize = 1f / (valueRange.endInclusive - valueRange.start)
         return SliderHapticFeedbackConfig(
@@ -33,6 +35,7 @@ object VolumeHapticsConfigsProvider {
             additionalVelocityMaxBump = 0.2f,
             maxVelocityToScale = 0.1f, /* slider progress(from 0 to 1) per sec */
             sliderStepSize = sliderStepSize,
+            filter = filter,
         )
     }
 

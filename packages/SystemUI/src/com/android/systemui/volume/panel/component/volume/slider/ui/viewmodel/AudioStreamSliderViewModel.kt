@@ -28,6 +28,7 @@ import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.settingslib.volume.shared.model.RingerMode
 import com.android.systemui.Flags
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.haptics.slider.SliderHapticFeedbackFilter
 import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
 import com.android.systemui.modes.shared.ModesUiIcons
 import com.android.systemui.res.R
@@ -159,6 +160,7 @@ constructor(
         return State(
             value = volume.toFloat(),
             valueRange = volumeRange.first.toFloat()..volumeRange.last.toFloat(),
+            hapticFilter = createHapticFilter(ringerMode),
             icon = icon,
             label = label,
             disabledMessage = disabledMessage,
@@ -197,6 +199,18 @@ constructor(
             isMutable = isAffectedByMute,
         )
     }
+
+    private fun AudioStreamModel.createHapticFilter(
+        ringerMode: RingerMode
+    ): SliderHapticFeedbackFilter =
+        when (audioStream.value) {
+            AudioManager.STREAM_RING -> SliderHapticFeedbackFilter(vibrateOnLowerBookend = false)
+            AudioManager.STREAM_NOTIFICATION ->
+                SliderHapticFeedbackFilter(
+                    vibrateOnLowerBookend = ringerMode.value != AudioManager.RINGER_MODE_VIBRATE
+                )
+            else -> SliderHapticFeedbackFilter()
+        }
 
     // TODO: b/372213356 - Figure out the correct messages for VOICE_CALL and RING.
     //  In fact, VOICE_CALL should not be affected by interruption filtering at all.
@@ -288,6 +302,7 @@ constructor(
     private data class State(
         override val value: Float,
         override val valueRange: ClosedFloatingPointRange<Float>,
+        override val hapticFilter: SliderHapticFeedbackFilter,
         override val icon: Icon,
         override val label: String,
         override val disabledMessage: String?,

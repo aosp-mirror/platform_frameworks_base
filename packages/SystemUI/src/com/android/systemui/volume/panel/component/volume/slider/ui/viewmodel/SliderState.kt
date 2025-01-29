@@ -17,6 +17,7 @@
 package com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel
 
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.haptics.slider.SliderHapticFeedbackFilter
 
 /**
  * Models a state of a volume slider.
@@ -26,6 +27,8 @@ import com.android.systemui.common.shared.model.Icon
 sealed interface SliderState {
     val value: Float
     val valueRange: ClosedFloatingPointRange<Float>
+    val hapticFilter: SliderHapticFeedbackFilter
+
     val icon: Icon?
     val isEnabled: Boolean
     val label: String
@@ -42,6 +45,7 @@ sealed interface SliderState {
     data object Empty : SliderState {
         override val value: Float = 0f
         override val valueRange: ClosedFloatingPointRange<Float> = 0f..1f
+        override val hapticFilter = SliderHapticFeedbackFilter()
         override val icon: Icon? = null
         override val label: String = ""
         override val disabledMessage: String? = null

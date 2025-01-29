@@ -49,4 +49,6 @@ data class SliderHapticFeedbackConfig(
     @FloatRange(from = 0.0, fromInclusive = false) val exponent: Float = 1f / 0.89f,
     /** The step-size that defines the slider quantization. Zero represents a continuous slider */
     @FloatRange(from = 0.0) val sliderStepSize: Float = 0f,
+    /** A filter that determines values for which haptics are triggered */
+    val filter: SliderHapticFeedbackFilter = SliderHapticFeedbackFilter(),
 )
