@@ -47,7 +47,7 @@ class ComposedDigitalLayerController(private val clockCtx: ClockContext) :
 
     init {
         fun createController(cfg: LayerConfig) {
-            val controller = SimpleDigitalHandLayerController(clockCtx, cfg)
+            val controller = SimpleDigitalHandLayerController(clockCtx, cfg, isLargeClock = true)
             view.addView(controller.view)
             layerControllers.add(controller)
         }

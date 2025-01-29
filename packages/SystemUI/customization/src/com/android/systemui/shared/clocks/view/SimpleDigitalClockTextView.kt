@@ -38,10 +38,13 @@ import com.android.systemui.animation.GSFAxes
 import com.android.systemui.animation.TextAnimator
 import com.android.systemui.customization.R
 import com.android.systemui.plugins.clocks.ClockFontAxisSetting
+import com.android.systemui.plugins.clocks.ClockFontAxisSetting.Companion.replace
+import com.android.systemui.plugins.clocks.ClockFontAxisSetting.Companion.toFVar
 import com.android.systemui.plugins.clocks.ClockLogger
 import com.android.systemui.shared.clocks.ClockContext
 import com.android.systemui.shared.clocks.DigitTranslateAnimator
 import com.android.systemui.shared.clocks.DimensionParser
+import com.android.systemui.shared.clocks.FLEX_CLOCK_ID
 import com.android.systemui.shared.clocks.FontTextStyle
 import java.lang.Thread
 import kotlin.math.max
@@ -63,14 +66,32 @@ enum class HorizontalAlignment {
 }
 
 @SuppressLint("AppCompatCustomView")
-open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSet? = null) :
-    TextView(clockCtx.context, attrs) {
+open class SimpleDigitalClockTextView(
+    clockCtx: ClockContext,
+    isLargeClock: Boolean,
+    attrs: AttributeSet? = null,
+) : TextView(clockCtx.context, attrs) {
     val lockScreenPaint = TextPaint()
     lateinit var textStyle: FontTextStyle
     lateinit var aodStyle: FontTextStyle
 
-    private var lsFontVariation = ClockFontAxisSetting.toFVar(DEFAULT_LS_AXES)
-    private var aodFontVariation = ClockFontAxisSetting.toFVar(DEFAULT_AOD_AXES)
+    private val isLegacyFlex = clockCtx.settings.clockId == FLEX_CLOCK_ID
+    private val fixedAodAxes =
+        when {
+            !isLegacyFlex -> listOf(AOD_WEIGHT_AXIS, WIDTH_AXIS)
+            isLargeClock -> listOf(FLEX_AOD_LARGE_WEIGHT_AXIS, FLEX_AOD_WIDTH_AXIS)
+            else -> listOf(FLEX_AOD_SMALL_WEIGHT_AXIS, FLEX_AOD_WIDTH_AXIS)
+        }
+
+    private var lsFontVariation =
+        if (!isLegacyFlex) listOf(LS_WEIGHT_AXIS, WIDTH_AXIS, ROUND_AXIS, SLANT_AXIS).toFVar()
+        else listOf(FLEX_LS_WEIGHT_AXIS, FLEX_LS_WIDTH_AXIS, FLEX_ROUND_AXIS, SLANT_AXIS).toFVar()
+
+    private var aodFontVariation = run {
+        val roundAxis = if (!isLegacyFlex) ROUND_AXIS else FLEX_ROUND_AXIS
+        (fixedAodAxes + listOf(roundAxis, SLANT_AXIS)).toFVar()
+    }
+
     private val parser = DimensionParser(clockCtx.context)
     var maxSingleDigitHeight = -1
     var maxSingleDigitWidth = -1
@@ -130,9 +151,8 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
     }
 
     fun updateAxes(lsAxes: List<ClockFontAxisSetting>) {
-        val aodAxes = ClockFontAxisSetting.replace(lsAxes, AOD_FIXED_AXES)
-        lsFontVariation = ClockFontAxisSetting.toFVar(lsAxes)
-        aodFontVariation = ClockFontAxisSetting.toFVar(aodAxes)
+        lsFontVariation = lsAxes.toFVar()
+        aodFontVariation = lsAxes.replace(fixedAodAxes).toFVar()
         logger.i({ "updateAxes(LS = $str1, AOD = $str2)" }) {
             str1 = lsFontVariation
             str2 = aodFontVariation
@@ -514,8 +534,12 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
         val ROUND_AXIS = ClockFontAxisSetting(GSFAxes.ROUND, 0f)
         val SLANT_AXIS = ClockFontAxisSetting(GSFAxes.SLANT, 0f)
 
-        val DEFAULT_LS_AXES = listOf(LS_WEIGHT_AXIS, WIDTH_AXIS, ROUND_AXIS, SLANT_AXIS)
-        val AOD_FIXED_AXES = listOf(AOD_WEIGHT_AXIS, WIDTH_AXIS)
-        val DEFAULT_AOD_AXES = AOD_FIXED_AXES + listOf(ROUND_AXIS, SLANT_AXIS)
+        // Axes for Legacy version of the Flex Clock
+        val FLEX_LS_WEIGHT_AXIS = ClockFontAxisSetting(GSFAxes.WEIGHT, 600f)
+        val FLEX_AOD_LARGE_WEIGHT_AXIS = ClockFontAxisSetting(GSFAxes.WEIGHT, 74f)
+        val FLEX_AOD_SMALL_WEIGHT_AXIS = ClockFontAxisSetting(GSFAxes.WEIGHT, 133f)
+        val FLEX_LS_WIDTH_AXIS = ClockFontAxisSetting(GSFAxes.WIDTH, 100f)
+        val FLEX_AOD_WIDTH_AXIS = ClockFontAxisSetting(GSFAxes.WIDTH, 43f)
+        val FLEX_ROUND_AXIS = ClockFontAxisSetting(GSFAxes.ROUND, 100f)
     }
 }

@@ -98,20 +98,19 @@ data class ClockFontAxisSetting(
             return result
         }
 
-        fun toFVar(settings: List<ClockFontAxisSetting>): String {
+        fun List<ClockFontAxisSetting>.toFVar(): String {
             val sb = StringBuilder()
-            for (axis in settings) {
+            for (axis in this) {
                 if (sb.length > 0) sb.append(", ")
                 sb.append("'${axis.key}' ${axis.value.toInt()}")
             }
             return sb.toString()
         }
 
-        fun replace(
-            list: List<ClockFontAxisSetting>,
-            replacements: List<ClockFontAxisSetting>,
+        fun List<ClockFontAxisSetting>.replace(
+            replacements: List<ClockFontAxisSetting>
         ): List<ClockFontAxisSetting> {
-            var remaining = list.filterNot { lhs -> replacements.any { rhs -> lhs.key == rhs.key } }
+            var remaining = this.filterNot { lhs -> replacements.any { rhs -> lhs.key == rhs.key } }
             return remaining + replacements
         }
     }

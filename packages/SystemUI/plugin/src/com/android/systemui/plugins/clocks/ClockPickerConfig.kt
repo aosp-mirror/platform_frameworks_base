@@ -62,12 +62,11 @@ data class ClockFontAxis(
     fun toSetting() = ClockFontAxisSetting(key, currentValue)
 
     companion object {
-        fun merge(
-            fontAxes: List<ClockFontAxis>,
-            axisSettings: List<ClockFontAxisSetting>,
+        fun List<ClockFontAxis>.merge(
+            axisSettings: List<ClockFontAxisSetting>
         ): List<ClockFontAxis> {
             val result = mutableListOf<ClockFontAxis>()
-            for (axis in fontAxes) {
+            for (axis in this) {
                 val setting = axisSettings.firstOrNull { axis.key == it.key }
                 val output = setting?.let { axis.copy(currentValue = it.value) } ?: axis
                 result.add(output)

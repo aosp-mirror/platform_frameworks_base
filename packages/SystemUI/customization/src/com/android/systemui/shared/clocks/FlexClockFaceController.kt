@@ -59,7 +59,7 @@ class FlexClockFaceController(clockCtx: ClockContext, private val isLargeClock: 
     init {
         layerController =
             if (isLargeClock) ComposedDigitalLayerController(clockCtx)
-            else SimpleDigitalHandLayerController(clockCtx, SMALL_LAYER_CONFIG)
+            else SimpleDigitalHandLayerController(clockCtx, SMALL_LAYER_CONFIG, isLargeClock)
 
         layerController.view.layoutParams =
             FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT).apply { gravity = Gravity.CENTER }
