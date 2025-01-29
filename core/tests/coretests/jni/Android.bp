@@ -111,27 +111,3 @@ cc_test_library {
     ],
     gtest: false,
 }
-
-cc_test_library {
-    name: "libperfetto_trace_test_jni",
-    srcs: [
-        "PerfettoTraceTest.cpp",
-    ],
-    static_libs: [
-        "perfetto_trace_protos",
-        "libtracing_perfetto_test_utils",
-    ],
-    shared_libs: [
-        "liblog",
-        "libnativehelper",
-        "libperfetto_c",
-        "libprotobuf-cpp-lite",
-        "libtracing_perfetto",
-    ],
-    stl: "libc++_static",
-    cflags: [
-        "-Werror",
-        "-Wall",
-    ],
-    gtest: false,
-}

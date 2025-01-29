@@ -24,9 +24,12 @@
 #include <nativehelper/scoped_primitive_array.h>
 #include <nativehelper/scoped_utf_chars.h>
 #include <nativehelper/utils.h>
+#include <tracing_perfetto.h>
 #include <tracing_sdk.h>
 
 namespace android {
+constexpr int kFlushTimeoutMs = 5000;
+
 template <typename T>
 inline static T* toPointer(jlong ptr) {
     return reinterpret_cast<T*>(static_cast<uintptr_t>(ptr));
@@ -49,6 +52,10 @@ static void android_os_PerfettoTrace_activate_trigger(JNIEnv* env, jclass, jstri
                                                       jint ttl_ms) {
     ScopedUtfChars name_chars = GET_UTF_OR_RETURN_VOID(env, name);
     tracing_perfetto::activate_trigger(name_chars.c_str(), static_cast<uint32_t>(ttl_ms));
+}
+
+void android_os_PerfettoTrace_register(bool is_backend_in_process) {
+    tracing_perfetto::registerWithPerfetto(is_backend_in_process);
 }
 
 static jlong android_os_PerfettoTraceCategory_init(JNIEnv* env, jclass, jstring name, jstring tag,
@@ -85,6 +92,36 @@ static jlong android_os_PerfettoTraceCategory_get_extra_ptr(jlong ptr) {
     return toJLong(category->get());
 }
 
+static jlong android_os_PerfettoTrace_start_session(JNIEnv* env, jclass /* obj */,
+                                                    jboolean is_backend_in_process,
+                                                    jbyteArray config_bytes) {
+    jsize length = env->GetArrayLength(config_bytes);
+    std::vector<uint8_t> data;
+    data.reserve(length);
+    env->GetByteArrayRegion(config_bytes, 0, length, reinterpret_cast<jbyte*>(data.data()));
+
+    tracing_perfetto::Session* session =
+            new tracing_perfetto::Session(is_backend_in_process, data.data(), length);
+
+    return reinterpret_cast<long>(session);
+}
+
+static jbyteArray android_os_PerfettoTrace_stop_session([[maybe_unused]] JNIEnv* env,
+                                                        jclass /* obj */, jlong ptr) {
+    tracing_perfetto::Session* session = reinterpret_cast<tracing_perfetto::Session*>(ptr);
+
+    session->FlushBlocking(kFlushTimeoutMs);
+    session->StopBlocking();
+
+    std::vector<uint8_t> data = session->ReadBlocking();
+
+    delete session;
+
+    jbyteArray bytes = env->NewByteArray(data.size());
+    env->SetByteArrayRegion(bytes, 0, data.size(), reinterpret_cast<jbyte*>(data.data()));
+    return bytes;
+}
+
 static const JNINativeMethod gCategoryMethods[] = {
         {"native_init", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)J",
          (void*)android_os_PerfettoTraceCategory_init},
@@ -101,7 +138,10 @@ static const JNINativeMethod gTraceMethods[] =
          {"native_get_thread_track_uuid", "(J)J",
           (void*)android_os_PerfettoTrace_get_thread_track_uuid},
          {"native_activate_trigger", "(Ljava/lang/String;I)V",
-          (void*)android_os_PerfettoTrace_activate_trigger}};
+          (void*)android_os_PerfettoTrace_activate_trigger},
+         {"native_register", "(Z)V", (void*)android_os_PerfettoTrace_register},
+         {"native_start_session", "(Z[B)J", (void*)android_os_PerfettoTrace_start_session},
+         {"native_stop_session", "(J)[B", (void*)android_os_PerfettoTrace_stop_session}};
 
 int register_android_os_PerfettoTrace(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/os/PerfettoTrace", gTraceMethods,

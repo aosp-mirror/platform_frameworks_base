@@ -122,7 +122,6 @@ android_test {
         "android.view.flags-aconfig-java",
     ],
     jni_libs: [
-        "libperfetto_trace_test_jni",
         "libpowermanagertest_jni",
         "libviewRootImplTest_jni",
         "libworksourceparceltest_jni",
