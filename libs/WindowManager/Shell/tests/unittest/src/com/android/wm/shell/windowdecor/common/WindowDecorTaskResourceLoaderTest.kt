@@ -86,6 +86,7 @@ class WindowDecorTaskResourceLoaderTest : ShellTestCase() {
         spyContext.setMockPackageManager(mockPackageManager)
         doReturn(spyContext).whenever(spyContext).createContextAsUser(any(), anyInt())
         doReturn(spyContext).whenever(mMockUserProfileContexts)[anyInt()]
+        doReturn(spyContext).whenever(mMockUserProfileContexts).getOrCreate(anyInt())
         loader =
             WindowDecorTaskResourceLoader(
                 shellInit = shellInit,

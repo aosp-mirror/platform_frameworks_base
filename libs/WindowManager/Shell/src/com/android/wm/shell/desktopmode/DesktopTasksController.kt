@@ -1862,9 +1862,10 @@ class DesktopTasksController(
         //  need updates in some cases.
         val baseActivity = callingTaskInfo.baseActivity ?: return
         val fillIn: Intent =
-            userProfileContexts[callingTaskInfo.userId]
-                ?.packageManager
-                ?.getLaunchIntentForPackage(baseActivity.packageName) ?: return
+            userProfileContexts
+                .getOrCreate(callingTaskInfo.userId)
+                .packageManager
+                .getLaunchIntentForPackage(baseActivity.packageName) ?: return
         fillIn.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
         val launchIntent =
             PendingIntent.getActivity(

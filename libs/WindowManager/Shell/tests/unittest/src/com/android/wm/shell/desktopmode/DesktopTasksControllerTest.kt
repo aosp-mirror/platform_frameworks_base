@@ -351,6 +351,7 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
             .thenReturn(ExitResult.NoExit)
         whenever(desktopWallpaperActivityTokenProvider.getToken()).thenReturn(wallpaperToken)
         whenever(userProfileContexts[anyInt()]).thenReturn(context)
+        whenever(userProfileContexts.getOrCreate(anyInt())).thenReturn(context)
 
         controller = createController()
         controller.setSplitScreenController(splitScreenController)
