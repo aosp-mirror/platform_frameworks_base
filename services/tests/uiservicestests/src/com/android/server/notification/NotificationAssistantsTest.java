@@ -757,18 +757,22 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         String allowedPackage = "allowed.package";
 
         assertThat(mAssistants.isAdjustmentAllowedForPackage(key, allowedPackage)).isTrue();
+        assertThat(mAssistants.getAdjustmentDeniedPackages(key)).isEmpty();
 
         // Set type adjustment disallowed for this package
         mAssistants.setAdjustmentSupportedForPackage(key, allowedPackage, false);
 
         // Then the package is marked as denied
         assertThat(mAssistants.isAdjustmentAllowedForPackage(key, allowedPackage)).isFalse();
+        assertThat(mAssistants.getAdjustmentDeniedPackages(key)).asList()
+                .containsExactly(allowedPackage);
 
         // Set type adjustment allowed again
         mAssistants.setAdjustmentSupportedForPackage(key, allowedPackage, true);
 
         // Then the package is marked as allowed again
         assertThat(mAssistants.isAdjustmentAllowedForPackage(key, allowedPackage)).isTrue();
+        assertThat(mAssistants.getAdjustmentDeniedPackages(key)).isEmpty();
     }
 
     @Test
@@ -789,6 +793,8 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         assertThat(mAssistants.isAdjustmentAllowedForPackage(key, deniedPkg1)).isFalse();
         assertThat(mAssistants.isAdjustmentAllowedForPackage(key, deniedPkg2)).isFalse();
         assertThat(mAssistants.isAdjustmentAllowedForPackage(key, deniedPkg3)).isFalse();
+        assertThat(mAssistants.getAdjustmentDeniedPackages(key)).asList()
+                .containsExactlyElementsIn(List.of(deniedPkg1, deniedPkg2, deniedPkg3));
 
         // And when we re-allow one of them,
         mAssistants.setAdjustmentSupportedForPackage(key, deniedPkg2, true);
@@ -797,6 +803,8 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         assertThat(mAssistants.isAdjustmentAllowedForPackage(key, deniedPkg1)).isFalse();
         assertThat(mAssistants.isAdjustmentAllowedForPackage(key, deniedPkg2)).isTrue();
         assertThat(mAssistants.isAdjustmentAllowedForPackage(key, deniedPkg3)).isFalse();
+        assertThat(mAssistants.getAdjustmentDeniedPackages(key)).asList()
+                .containsExactlyElementsIn(List.of(deniedPkg1, deniedPkg3));
     }
 
     @Test
