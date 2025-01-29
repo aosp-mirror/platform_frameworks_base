@@ -781,7 +781,8 @@ public class AudioService extends IAudioService.Stub
     private int mRingerModeExternal = -1;  // reported ringer mode to outside clients (AudioManager)
 
     /** @see System#MODE_RINGER_STREAMS_AFFECTED */
-    private int mRingerModeAffectedStreams = 0;
+    @VisibleForTesting
+    protected int mRingerModeAffectedStreams = 0;
 
     private int mZenModeAffectedStreams = 0;
 
@@ -6314,17 +6315,15 @@ public class AudioService extends IAudioService.Stub
                     }
                 }
                 sRingerAndZenModeMutedStreams &= ~(1 << streamType);
-                sMuteLogger.enqueue(new AudioServiceEvents.RingerZenMutedStreamsEvent(
-                        sRingerAndZenModeMutedStreams, "muteRingerModeStreams"));
                 vss.mute(false, "muteRingerModeStreams");
             } else {
                 // mute
                 sRingerAndZenModeMutedStreams |= (1 << streamType);
-                sMuteLogger.enqueue(new AudioServiceEvents.RingerZenMutedStreamsEvent(
-                        sRingerAndZenModeMutedStreams, "muteRingerModeStreams"));
                 vss.mute(true, "muteRingerModeStreams");
             }
         }
+        sMuteLogger.enqueue(new AudioServiceEvents.RingerZenMutedStreamsEvent(
+                sRingerAndZenModeMutedStreams, "muteRingerModeStreams"));
     }
 
     private boolean isAlarm(int streamType) {
@@ -10044,12 +10043,14 @@ public class AudioService extends IAudioService.Stub
                             new AudioServiceEvents.StreamMuteEvent(mStreamType, state, src));
                     // check to see if unmuting should not have happened due to ringer muted streams
                     if (!state && isStreamMutedByRingerOrZenMode(mStreamType)) {
-                        Log.e(TAG, "Unmuting stream " + mStreamType
+                        Slog.e(TAG, "Attempt to unmute stream " + mStreamType
                                 + " despite ringer-zen muted stream 0x"
                                 + Integer.toHexString(AudioService.sRingerAndZenModeMutedStreams),
                                 new Exception()); // this will put a stack trace in the logs
                         sMuteLogger.enqueue(new AudioServiceEvents.StreamUnmuteErrorEvent(
                                 mStreamType, AudioService.sRingerAndZenModeMutedStreams));
+                        // do not change mute state
+                        return false;
                     }
                     mIsMuted = state;
                     if (apply) {
