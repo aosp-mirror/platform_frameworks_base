@@ -22,6 +22,8 @@ import com.android.systemui.camera.CameraGestureHelper
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorActual
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.PowerRepository
 import com.android.systemui.power.shared.model.DozeScreenStateModel
@@ -35,6 +37,7 @@ import javax.inject.Provider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
@@ -226,6 +229,15 @@ constructor(
 
     fun onWalletLaunchGestureDetected() {
         repository.updateWakefulness(powerButtonLaunchGestureTriggered = true)
+    }
+
+    suspend fun hydrateTableLogBuffer(tableLogBuffer: TableLogBuffer) {
+        detailedWakefulness
+            .logDiffsForTable(
+                tableLogBuffer = tableLogBuffer,
+                initialValue = detailedWakefulness.value,
+            )
+            .collect()
     }
 
     companion object {

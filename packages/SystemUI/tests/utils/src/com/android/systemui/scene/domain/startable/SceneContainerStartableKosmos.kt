@@ -36,6 +36,7 @@ import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.model.sysUiState
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.disabledContentInteractor
@@ -89,5 +90,6 @@ val Kosmos.sceneContainerStartable by Fixture {
         disabledContentInteractor = disabledContentInteractor,
         activityTransitionAnimator = activityTransitionAnimator,
         shadeModeInteractor = shadeModeInteractor,
+        tableLogBuffer = logcatTableLogBuffer(this, "sceneFrameworkTableLogBuffer"),
     )
 }

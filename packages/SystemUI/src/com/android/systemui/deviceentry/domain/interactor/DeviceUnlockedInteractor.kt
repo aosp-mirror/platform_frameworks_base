@@ -33,8 +33,11 @@ import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.TrustInteractor
 import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.scene.domain.SceneFrameworkTableLog
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.settings.repository.UserAwareSecureSettingsRepository
 import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
@@ -48,6 +51,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -74,6 +78,7 @@ constructor(
     private val systemPropertiesHelper: SystemPropertiesHelper,
     private val userAwareSecureSettingsRepository: UserAwareSecureSettingsRepository,
     private val keyguardInteractor: KeyguardInteractor,
+    @SceneFrameworkTableLog private val tableLogBuffer: TableLogBuffer,
 ) : ExclusiveActivatable() {
 
     private val deviceUnlockSource =
@@ -179,17 +184,33 @@ constructor(
     private val lockNowRequests = Channel<Unit>()
 
     override suspend fun onActivated(): Nothing {
-        authenticationInteractor.authenticationMethod.collectLatest { authMethod ->
-            if (!authMethod.isSecure) {
-                // Device remains unlocked as long as the authentication method is not secure.
-                Log.d(TAG, "remaining unlocked because auth method not secure")
-                repository.deviceUnlockStatus.value = DeviceUnlockStatus(true, null)
-            } else if (authMethod == AuthenticationMethodModel.Sim) {
-                // Device remains locked while SIM is locked.
-                Log.d(TAG, "remaining locked because SIM locked")
-                repository.deviceUnlockStatus.value = DeviceUnlockStatus(false, null)
-            } else {
-                handleLockAndUnlockEvents()
+        coroutineScope {
+            launch {
+                authenticationInteractor.authenticationMethod.collectLatest { authMethod ->
+                    if (!authMethod.isSecure) {
+                        // Device remains unlocked as long as the authentication method is not
+                        // secure.
+                        Log.d(TAG, "remaining unlocked because auth method not secure")
+                        repository.deviceUnlockStatus.value = DeviceUnlockStatus(true, null)
+                    } else if (authMethod == AuthenticationMethodModel.Sim) {
+                        // Device remains locked while SIM is locked.
+                        Log.d(TAG, "remaining locked because SIM locked")
+                        repository.deviceUnlockStatus.value = DeviceUnlockStatus(false, null)
+                    } else {
+                        handleLockAndUnlockEvents()
+                    }
+                }
+            }
+
+            launch {
+                deviceUnlockStatus
+                    .map { it.isUnlocked }
+                    .logDiffsForTable(
+                        tableLogBuffer = tableLogBuffer,
+                        columnName = "isUnlocked",
+                        initialValue = deviceUnlockStatus.value.isUnlocked,
+                    )
+                    .collect()
             }
         }
 
