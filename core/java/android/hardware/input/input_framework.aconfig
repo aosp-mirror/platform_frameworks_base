@@ -225,3 +225,11 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "key_event_activity_detection"
+    namespace: "input"
+    is_exported: true
+    description: "Key Event Activity Detection"
+    bug: "356412905"
+}
