@@ -602,12 +602,14 @@ void NativeInputManager::dump(std::string& dump) {
             return std::to_string(displayId.val());
         };
         dump += StringPrintf(INDENT "Display not interactive: %s\n",
-                             dumpSet(mLocked.nonInteractiveDisplays, streamableToString).c_str());
+                             dumpContainer(mLocked.nonInteractiveDisplays, streamableToString)
+                                     .c_str());
         dump += StringPrintf(INDENT "System UI Lights Out: %s\n",
                              toString(mLocked.systemUiLightsOut));
         dump += StringPrintf(INDENT "Pointer Speed: %" PRId32 "\n", mLocked.pointerSpeed);
         dump += StringPrintf(INDENT "Display with Mouse Scaling Disabled: %s\n",
-                             dumpSet(mLocked.displaysWithMouseScalingDisabled, streamableToString)
+                             dumpContainer(mLocked.displaysWithMouseScalingDisabled,
+                                           streamableToString)
                                      .c_str());
         dump += StringPrintf(INDENT "Pointer Gestures Enabled: %s\n",
                              toString(mLocked.pointerGesturesEnabled));
