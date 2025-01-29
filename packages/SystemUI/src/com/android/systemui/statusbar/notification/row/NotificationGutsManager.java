@@ -48,6 +48,7 @@ import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.settingslib.notification.ConversationIconFactory;
 import com.android.systemui.CoreStartable;
+import com.android.systemui.Flags;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -223,6 +224,10 @@ public class NotificationGutsManager implements NotifGutsViewManager, CoreStarta
     }
 
     public void onDensityOrFontScaleChanged(NotificationEntry entry) {
+        if (!Flags.notificationUndoGutsOnConfigChanged()) {
+            Log.wtf(TAG, "onDensityOrFontScaleChanged should not be called if"
+                    + " notificationUndoGutsOnConfigChanged is off");
+        }
         setExposedGuts(entry.getGuts());
         bindGuts(entry.getRow());
     }
@@ -590,7 +595,8 @@ public class NotificationGutsManager implements NotifGutsViewManager, CoreStarta
     }
 
     /**
-     * Closes guts or notification menus that might be visible and saves any changes.
+     * Closes guts or notification menus that might be visible and saves any changes if applicable
+     * (see {@link NotificationGuts.GutsContent#shouldBeSavedOnClose}).
      *
      * @param removeLeavebehinds true if leavebehinds (e.g. snooze) should be closed.
      * @param force true if guts should be closed regardless of state (used for snooze only).
@@ -607,6 +613,20 @@ public class NotificationGutsManager implements NotifGutsViewManager, CoreStarta
         }
         if (resetMenu && mListContainer != null) {
             mListContainer.resetExposedMenuView(false /* animate */, true /* force */);
+        }
+    }
+
+    /**
+     * Closes all guts that might be visible without saving changes.
+     */
+    public void closeAndUndoGuts() {
+        if (mNotificationGutsExposed != null) {
+            mNotificationGutsExposed.removeCallbacks(mOpenRunnable);
+            mNotificationGutsExposed.closeControls(
+                    /* x = */ -1,
+                    /* y = */ -1,
+                    /* save = */ false,
+                    /* force = */ false);
         }
     }
 

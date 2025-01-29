@@ -196,6 +196,18 @@ flag {
 }
 
 flag {
+    name: "notification_undo_guts_on_config_changed"
+    namespace: "systemui"
+    description: "Fixes a bug where a theme or font change while notification guts were open"
+        " (e.g. the snooze options or notification info) would show an empty notification by"
+        " closing the guts and undoing changes."
+    bug: "379267630"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
    name: "pss_app_selector_recents_split_screen"
    namespace: "systemui"
    description: "Allows recent apps selected for partial screenshare to be launched in split screen mode"

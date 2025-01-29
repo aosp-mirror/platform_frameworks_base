@@ -22,6 +22,7 @@ import com.android.internal.widget.MessagingGroup
 import com.android.internal.widget.MessagingMessage
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.systemui.Flags
 import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener
@@ -144,7 +145,12 @@ internal constructor(
         )
         log { "ViewConfigCoordinator.updateNotificationsOnUiModeChanged()" }
         traceSection("updateNotifOnUiModeChanged") {
-            mPipeline?.allNotifs?.forEach { entry -> entry.row?.onUiModeChanged() }
+            mPipeline?.allNotifs?.forEach { entry ->
+                entry.row?.onUiModeChanged()
+                if (Flags.notificationUndoGutsOnConfigChanged()) {
+                    mGutsManager.closeAndUndoGuts()
+                }
+            }
         }
     }
 
@@ -152,9 +158,15 @@ internal constructor(
         colorUpdateLogger.logEvent("VCC.updateNotificationsOnDensityOrFontScaleChanged()")
         mPipeline?.allNotifs?.forEach { entry ->
             entry.onDensityOrFontScaleChanged()
-            val exposedGuts = entry.areGutsExposed()
-            if (exposedGuts) {
-                mGutsManager.onDensityOrFontScaleChanged(entry)
+            if (Flags.notificationUndoGutsOnConfigChanged()) {
+                mGutsManager.closeAndUndoGuts()
+            } else {
+                // This property actually gets reset when the guts are re-inflated, so we're never
+                // actually calling onDensityOrFontScaleChanged below.
+                val exposedGuts = entry.areGutsExposed()
+                if (exposedGuts) {
+                    mGutsManager.onDensityOrFontScaleChanged(entry)
+                }
             }
         }
     }

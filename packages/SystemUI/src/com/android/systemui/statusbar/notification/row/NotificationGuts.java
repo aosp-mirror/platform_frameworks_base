@@ -287,7 +287,7 @@ public class NotificationGuts extends FrameLayout {
      * @param save whether the state should be saved
      * @param force whether the guts should be force-closed regardless of state.
      */
-    private void closeControls(int x, int y, boolean save, boolean force) {
+    public void closeControls(int x, int y, boolean save, boolean force) {
         // First try to dismiss any blocking helper.
         if (getWindowToken() == null) {
             if (mClosedListener != null) {
