@@ -19,13 +19,11 @@ package com.android.systemui.communal.ui.compose
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntRect
@@ -35,6 +33,7 @@ import com.android.compose.animation.scene.ContentScope
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.smartspace.SmartspaceInteractionHandler
 import com.android.systemui.communal.ui.compose.section.AmbientStatusBarSection
+import com.android.systemui.communal.ui.compose.section.CommunalLockSection
 import com.android.systemui.communal.ui.compose.section.CommunalPopupSection
 import com.android.systemui.communal.ui.compose.section.CommunalToDreamButtonSection
 import com.android.systemui.communal.ui.compose.section.HubOnboardingSection
@@ -43,7 +42,6 @@ import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.keyguard.ui.composable.blueprint.BlueprintAlignmentLines
 import com.android.systemui.keyguard.ui.composable.section.BottomAreaSection
 import com.android.systemui.keyguard.ui.composable.section.LockSection
-import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import javax.inject.Inject
 import kotlin.math.min
@@ -58,6 +56,7 @@ constructor(
     private val communalSettingsInteractor: CommunalSettingsInteractor,
     private val dialogFactory: SystemUIDialogFactory,
     private val lockSection: LockSection,
+    private val communalLockSection: CommunalLockSection,
     private val bottomAreaSection: BottomAreaSection,
     private val ambientStatusBarSection: AmbientStatusBarSection,
     private val communalPopupSection: CommunalPopupSection,
@@ -88,12 +87,9 @@ constructor(
                         with(hubOnboardingSection) { BottomSheet() }
                     }
                     if (communalSettingsInteractor.isV2FlagEnabled()) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_lock),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.element(Communal.Elements.LockIcon),
-                        )
+                        with(communalLockSection) {
+                            LockIcon(modifier = Modifier.element(Communal.Elements.LockIcon))
+                        }
                     } else {
                         with(lockSection) {
                             LockIcon(
