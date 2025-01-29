@@ -922,7 +922,7 @@ public class Transitions implements RemoteCallable<Transitions>,
                 + " %s is still animating. Notify the animating transition"
                 + " in case they can be merged", ready, playing);
         mTransitionTracer.logMergeRequested(ready.mInfo.getDebugId(), playing.mInfo.getDebugId());
-        playing.mHandler.mergeAnimation(ready.mToken, ready.mInfo, ready.mStartT,
+        playing.mHandler.mergeAnimation(ready.mToken, ready.mInfo, ready.mStartT, ready.mFinishT,
                 playing.mToken, (wct) -> onMerged(playingToken, readyToken));
     }
 
@@ -1356,7 +1356,7 @@ public class Transitions implements RemoteCallable<Transitions>,
             // fast-forward.
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Attempt to merge sync %s"
                     + " into %s via a SLEEP proxy", nextSync, playing);
-            playing.mHandler.mergeAnimation(nextSync.mToken, dummyInfo, dummyT,
+            playing.mHandler.mergeAnimation(nextSync.mToken, dummyInfo, dummyT, dummyT,
                     playing.mToken, (wct) -> {});
             // it's possible to complete immediately. If that happens, just repeat the signal
             // loop until we either finish everything or start playing an animation that isn't
@@ -1404,7 +1404,9 @@ public class Transitions implements RemoteCallable<Transitions>,
          * @param finishTransaction the transaction given to the handler to be applied after the
          *                       transition animation. Unlike startTransaction, the handler is NOT
          *                       expected to apply this transaction. The Transition system will
-         *                       apply it when finishCallback is called.
+         *                       apply it when finishCallback is called. If additional transitions
+         *                       are merged, then the finish transactions for those transitions
+         *                       will be applied after this transaction.
          * @param finishCallback Call this when finished. This MUST be called on main thread.
          * @return true if transition was handled, false if not (falls-back to default).
          */
@@ -1412,6 +1414,17 @@ public class Transitions implements RemoteCallable<Transitions>,
                 @NonNull SurfaceControl.Transaction startTransaction,
                 @NonNull SurfaceControl.Transaction finishTransaction,
                 @NonNull TransitionFinishCallback finishCallback);
+
+        /**
+         * See {@link #mergeAnimation(IBinder, TransitionInfo, SurfaceControl.Transaction, SurfaceControl.Transaction, IBinder, TransitionFinishCallback)}
+         *
+         * This deprecated method header is provided until downstream implementation can migrate to
+         * the call that takes both start & finish transactions.
+         */
+        @Deprecated
+        default void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+                @NonNull SurfaceControl.Transaction startTransaction,
+                @NonNull IBinder mergeTarget, @NonNull TransitionFinishCallback finishCallback) { }
 
         /**
          * Attempts to merge a different transition's animation into an animation that this handler
@@ -1430,14 +1443,25 @@ public class Transitions implements RemoteCallable<Transitions>,
          *
          * @param transition This is the transition that wants to be merged.
          * @param info Information about what is changing in the transition.
-         * @param t Contains surface changes that resulted from the transition.
+         * @param startTransaction The start transaction containing surface changes that resulted
+         *                         from the incoming transition. This should be applied by this
+         *                         active handler only if it chooses to merge the transition.
+         * @param finishTransaction The finish transaction for the incoming transition. Unlike
+         *                          startTransaction, the handler is NOT expected to apply this
+         *                          transaction. If the transition is merged, the Transition system
+         *                          will apply after finishCallback is called following the finish
+         *                          transaction provided in `#startAnimation()`.
          * @param mergeTarget This is the transition that we are attempting to merge with (ie. the
          *                    one this handler is currently already animating).
          * @param finishCallback Call this if merged. This MUST be called on main thread.
          */
         default void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-                @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
-                @NonNull TransitionFinishCallback finishCallback) { }
+                @NonNull SurfaceControl.Transaction startTransaction,
+                @NonNull SurfaceControl.Transaction finishTransaction,
+                @NonNull IBinder mergeTarget, @NonNull TransitionFinishCallback finishCallback) {
+            // Call the legacy implementation by default
+            mergeAnimation(transition, info, startTransaction, mergeTarget, finishCallback);
+        }
 
         /**
          * Checks whether this handler is capable of taking over a transition matching `info`.

@@ -458,7 +458,8 @@ sealed class DragToDesktopTransitionHandler(
     override fun mergeAnimation(
         transition: IBinder,
         info: TransitionInfo,
-        t: SurfaceControl.Transaction,
+        startT: SurfaceControl.Transaction,
+        finishT: SurfaceControl.Transaction,
         mergeTarget: IBinder,
         finishCallback: Transitions.TransitionFinishCallback,
     ) {
@@ -488,18 +489,18 @@ sealed class DragToDesktopTransitionHandler(
         if (isEndTransition) {
             setupEndDragToDesktop(
                 info,
-                startTransaction = t,
+                startTransaction = startT,
                 finishTransaction = startTransactionFinishT,
             )
             // Call finishCallback to merge animation before startTransitionFinishCb is called
             finishCallback.onTransitionFinished(/* wct= */ null)
-            animateEndDragToDesktop(startTransaction = t, startTransitionFinishCb)
+            animateEndDragToDesktop(startTransaction = startT, startTransitionFinishCb)
         } else if (isCancelTransition) {
             info.changes.forEach { change ->
-                t.show(change.leash)
+                startT.show(change.leash)
                 startTransactionFinishT.show(change.leash)
             }
-            t.apply()
+            startT.apply()
             finishCallback.onTransitionFinished(/* wct= */ null)
             startTransitionFinishCb.onTransitionFinished(/* wct= */ null)
             clearState()

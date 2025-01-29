@@ -284,6 +284,7 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
             cancelToken,
             TransitionInfo(TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP, 0),
             mock<SurfaceControl.Transaction>(),
+            mock<SurfaceControl.Transaction>(),
             startToken,
             mock<Transitions.TransitionFinishCallback>(),
         )
@@ -385,21 +386,23 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
 
     @Test
     fun mergeAnimation_otherTransition_doesNotMerge() {
-        val transaction = mock<SurfaceControl.Transaction>()
+        val mergedStartTransaction = mock<SurfaceControl.Transaction>()
+        val mergedFinishTransaction = mock<SurfaceControl.Transaction>()
         val finishCallback = mock<Transitions.TransitionFinishCallback>()
         val task = createTask()
 
         startDrag(defaultHandler, task)
         defaultHandler.mergeAnimation(
-            transition = mock(),
+            transition = mock<IBinder>(),
             info = createTransitionInfo(type = TRANSIT_OPEN, draggedTask = task),
-            t = transaction,
-            mergeTarget = mock(),
+            startT = mergedStartTransaction,
+            finishT = mergedFinishTransaction,
+            mergeTarget = mock<IBinder>(),
             finishCallback = finishCallback,
         )
 
         // Should NOT have any transaction changes
-        verifyZeroInteractions(transaction)
+        verifyZeroInteractions(mergedStartTransaction)
         // Should NOT merge animation
         verify(finishCallback, never()).onTransitionFinished(any())
     }
@@ -408,6 +411,7 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
     fun mergeAnimation_endTransition_mergesAnimation() {
         val playingFinishTransaction = mock<SurfaceControl.Transaction>()
         val mergedStartTransaction = mock<SurfaceControl.Transaction>()
+        val mergedFinishTransaction = mock<SurfaceControl.Transaction>()
         val finishCallback = mock<Transitions.TransitionFinishCallback>()
         val task = createTask()
         val startTransition =
@@ -415,13 +419,14 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
         defaultHandler.onTaskResizeAnimationListener = mock()
 
         defaultHandler.mergeAnimation(
-            transition = mock(),
+            transition = mock<IBinder>(),
             info =
                 createTransitionInfo(
                     type = TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP,
                     draggedTask = task,
                 ),
-            t = mergedStartTransaction,
+            startT = mergedStartTransaction,
+            finishT = mergedFinishTransaction,
             mergeTarget = startTransition,
             finishCallback = finishCallback,
         )
@@ -440,6 +445,7 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
         whenever(dragAnimator.computeCurrentVelocity()).thenReturn(PointF())
         val playingFinishTransaction = mock<SurfaceControl.Transaction>()
         val mergedStartTransaction = mock<SurfaceControl.Transaction>()
+        val mergedFinishTransaction = mock<SurfaceControl.Transaction>()
         val finishCallback = mock<Transitions.TransitionFinishCallback>()
         val task = createTask()
         val startTransition =
@@ -447,13 +453,14 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
         springHandler.onTaskResizeAnimationListener = mock()
 
         springHandler.mergeAnimation(
-            transition = mock(),
+            transition = mock<IBinder>(),
             info =
                 createTransitionInfo(
                     type = TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP,
                     draggedTask = task,
                 ),
-            t = mergedStartTransaction,
+            startT = mergedStartTransaction,
+            finishT = mergedFinishTransaction,
             mergeTarget = startTransition,
             finishCallback = finishCallback,
         )
@@ -564,7 +571,8 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
                     type = TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP,
                     draggedTask = task,
                 ),
-            t = mock<SurfaceControl.Transaction>(),
+            startT = mock<SurfaceControl.Transaction>(),
+            finishT = mock<SurfaceControl.Transaction>(),
             mergeTarget = startTransition,
             finishCallback = mock<Transitions.TransitionFinishCallback>(),
         )

@@ -384,7 +384,8 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
     @Override
     void mergeAnimation(
             @NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+            @NonNull SurfaceControl.Transaction startT, @NonNull SurfaceControl.Transaction finishT,
+            @NonNull IBinder mergeTarget,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         switch (mType) {
             case TYPE_DISPLAY_AND_SPLIT_CHANGE:
@@ -394,7 +395,7 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
             case TYPE_ENTER_PIP_FROM_ACTIVITY_EMBEDDING:
                 mPipHandler.end();
                 mActivityEmbeddingController.mergeAnimation(
-                        transition, info, t, mergeTarget, finishCallback);
+                        transition, info, startT, finishT, mergeTarget, finishCallback);
                 return;
             case TYPE_ENTER_PIP_FROM_SPLIT:
                 if (mAnimType == ANIM_TYPE_GOING_HOME) {
@@ -405,26 +406,28 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
                     mPipHandler.end();
                     if (mLeftoversHandler != null) {
                         mLeftoversHandler.mergeAnimation(
-                                transition, info, t, mergeTarget, finishCallback);
+                                transition, info, startT, finishT, mergeTarget, finishCallback);
                     }
                 }
                 return;
             case TYPE_KEYGUARD:
-                mKeyguardHandler.mergeAnimation(transition, info, t, mergeTarget, finishCallback);
+                mKeyguardHandler.mergeAnimation(transition, info, startT, finishT, mergeTarget,
+                        finishCallback);
                 return;
             case TYPE_OPTIONS_REMOTE_AND_PIP_OR_DESKTOP_CHANGE:
                 mPipHandler.end();
                 if (mLeftoversHandler != null) {
                     mLeftoversHandler.mergeAnimation(
-                            transition, info, t, mergeTarget, finishCallback);
+                            transition, info, startT, finishT, mergeTarget, finishCallback);
                 }
                 return;
             case TYPE_UNFOLD:
-                mUnfoldHandler.mergeAnimation(transition, info, t, mergeTarget, finishCallback);
+                mUnfoldHandler.mergeAnimation(transition, info, startT, finishT, mergeTarget,
+                        finishCallback);
                 return;
             case TYPE_OPEN_IN_DESKTOP:
                 mDesktopTasksController.mergeAnimation(
-                        transition, info, t, mergeTarget, finishCallback);
+                        transition, info, startT, finishT, mergeTarget, finishCallback);
                 return;
             default:
                 throw new IllegalStateException("Playing a default mixed transition with unknown or"

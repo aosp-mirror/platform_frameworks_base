@@ -708,7 +708,9 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
     @Override
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+            @NonNull SurfaceControl.Transaction startT,
+            @NonNull SurfaceControl.Transaction finishT,
+            @NonNull IBinder mergeTarget,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         ArrayList<Animator> anims = mAnimations.get(mergeTarget);
         if (anims == null) return;

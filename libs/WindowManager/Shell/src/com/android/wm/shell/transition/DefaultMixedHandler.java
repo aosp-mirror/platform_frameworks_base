@@ -176,7 +176,9 @@ public class DefaultMixedHandler implements MixedTransitionHandler,
 
         abstract void mergeAnimation(
                 @NonNull IBinder transition, @NonNull TransitionInfo info,
-                @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+                @NonNull SurfaceControl.Transaction startT,
+                @NonNull SurfaceControl.Transaction finishT,
+                @NonNull IBinder mergeTarget,
                 @NonNull Transitions.TransitionFinishCallback finishCallback);
 
         abstract void onTransitionConsumed(
@@ -691,7 +693,9 @@ public class DefaultMixedHandler implements MixedTransitionHandler,
 
     @Override
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+            @NonNull SurfaceControl.Transaction startT,
+            @NonNull SurfaceControl.Transaction finishT,
+            @NonNull IBinder mergeTarget,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         for (int i = 0; i < mActiveTransitions.size(); ++i) {
             if (mActiveTransitions.get(i).mTransition != mergeTarget) continue;
@@ -701,7 +705,7 @@ public class DefaultMixedHandler implements MixedTransitionHandler,
                 // Already done, so no need to end it.
                 return;
             }
-            mixed.mergeAnimation(transition, info, t, mergeTarget, finishCallback);
+            mixed.mergeAnimation(transition, info, startT, finishT, mergeTarget, finishCallback);
         }
     }
 
