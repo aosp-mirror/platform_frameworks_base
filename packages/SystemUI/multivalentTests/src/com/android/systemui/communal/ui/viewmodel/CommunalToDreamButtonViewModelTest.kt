@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
+import android.content.pm.UserInfo
 import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
 import android.service.dream.dreamManager
@@ -24,15 +25,17 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.uiEventLoggerFake
 import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_V2
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.data.repository.fakeCommunalPrefsRepository
+import com.android.systemui.communal.domain.interactor.HubOnboardingInteractorTest.Companion.MAIN_USER
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
 import com.android.systemui.flags.fakeFeatureFlagsClassic
-import com.android.systemui.kosmos.collectLastValue
 import com.android.systemui.kosmos.runCurrent
 import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.plugins.activityStarter
+import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.statusbar.policy.batteryController
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
@@ -52,7 +55,6 @@ import org.mockito.kotlin.whenever
 class CommunalToDreamButtonViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val uiEventLoggerFake = kosmos.uiEventLoggerFake
     private val underTest: CommunalToDreamButtonViewModel by lazy {
         kosmos.communalToDreamButtonViewModel
     }
@@ -68,9 +70,9 @@ class CommunalToDreamButtonViewModelTest : SysuiTestCase() {
         with(kosmos) {
             runTest {
                 whenever(batteryController.isPluggedIn()).thenReturn(true)
+                runCurrent()
 
-                val shouldShowButton by collectLastValue(underTest.shouldShowDreamButtonOnHub)
-                assertThat(shouldShowButton).isTrue()
+                assertThat(underTest.shouldShowDreamButtonOnHub).isTrue()
             }
         }
 
@@ -79,9 +81,9 @@ class CommunalToDreamButtonViewModelTest : SysuiTestCase() {
         with(kosmos) {
             runTest {
                 whenever(batteryController.isPluggedIn()).thenReturn(false)
+                runCurrent()
 
-                val shouldShowButton by collectLastValue(underTest.shouldShowDreamButtonOnHub)
-                assertThat(shouldShowButton).isFalse()
+                assertThat(underTest.shouldShowDreamButtonOnHub).isFalse()
             }
         }
 
@@ -124,6 +126,23 @@ class CommunalToDreamButtonViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun shouldShowDreamButtonTooltip_trueWhenNotDismissed() =
+        kosmos.runTest {
+            runCurrent()
+            assertThat(underTest.shouldShowTooltip).isTrue()
+        }
+
+    @Test
+    fun shouldShowDreamButtonTooltip_falseWhenDismissed() =
+        kosmos.runTest {
+            setSelectedUser(MAIN_USER)
+            fakeCommunalPrefsRepository.setDreamButtonTooltipDismissed(MAIN_USER)
+            runCurrent()
+
+            assertThat(underTest.shouldShowTooltip).isFalse()
+        }
+
+    @Test
     fun onShowDreamButtonTap_eventLogged() =
         with(kosmos) {
             runTest {
@@ -134,4 +153,12 @@ class CommunalToDreamButtonViewModelTest : SysuiTestCase() {
                     .isEqualTo(CommunalUiEvent.COMMUNAL_HUB_SHOW_DREAM_BUTTON_TAP.id)
             }
         }
+
+    private suspend fun setSelectedUser(user: UserInfo) {
+        with(kosmos.fakeUserRepository) {
+            setUserInfos(listOf(user))
+            setSelectedUserInfo(user)
+        }
+        kosmos.fakeUserTracker.set(userInfos = listOf(user), selectedUserIndex = 0)
+    }
 }
