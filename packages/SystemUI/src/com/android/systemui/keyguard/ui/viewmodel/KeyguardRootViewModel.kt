@@ -307,6 +307,16 @@ constructor(
             BurnInScaleViewModel(scale = it.scale, scaleClockOnly = it.scaleClockOnly)
         }
 
+    val isAodPromotedNotifVisible: StateFlow<Boolean> =
+        keyguardTransitionInteractor
+            .transitionValue(AOD)
+            .map { it == 1f }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
+
     /** Is the notification icon container visible? */
     val isNotifIconContainerVisible: StateFlow<AnimatedValue<Boolean>> =
         combine(

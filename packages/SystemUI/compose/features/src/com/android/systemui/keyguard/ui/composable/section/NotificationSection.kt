@@ -54,6 +54,7 @@ import com.android.systemui.statusbar.notification.icon.ui.viewbinder.Notificati
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarIconViewBindingFailureTracker
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
 import com.android.systemui.statusbar.notification.promoted.AODPromotedNotification
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUiAod
 import com.android.systemui.statusbar.notification.promoted.ui.viewmodel.AODPromotedNotificationViewModel
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
@@ -110,8 +111,23 @@ constructor(
     }
 
     @Composable
-    fun AodPromotedNotification() {
-        AODPromotedNotification(aodPromotedNotificationViewModelFactory)
+    fun AodPromotedNotificationArea(modifier: Modifier = Modifier) {
+        if (!PromotedNotificationUiAod.isEnabled) {
+            return
+        }
+
+        val isVisible by
+            keyguardRootViewModel.isAodPromotedNotifVisible.collectAsStateWithLifecycle()
+        val burnIn = rememberBurnIn(clockInteractor)
+
+        AnimatedVisibility(
+            visible = isVisible,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = modifier.burnInAware(aodBurnInViewModel, burnIn.parameters),
+        ) {
+            AODPromotedNotification(aodPromotedNotificationViewModelFactory)
+        }
     }
 
     @Composable
