@@ -235,6 +235,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 modifyNotification(context).also {
                     it.setSmallIcon(android.R.drawable.ic_media_pause)
                     it.setStyle(MediaStyle().apply { setMediaSession(session.sessionToken) })
+                    it.setContentIntent(getNewPendingIntent())
                 }
                 build()
             }
@@ -2156,6 +2157,28 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         verify(kosmos.mediaLogger, never()).logDuplicateMediaNotification(eq(KEY))
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_MEDIA_CONTROLS_POSTS_OPTIMIZATION)
+    fun postDifferentIntentNotifications_CallsListeners() {
+        addNotificationAndLoad()
+        reset(listener)
+        mediaNotification =
+            mediaNotification.also { it.notification.contentIntent = getNewPendingIntent() }
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+
+        testScope.assertRunAllReady(foreground = 1, background = 1)
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(KEY),
+                eq(KEY),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false),
+            )
+        verify(kosmos.mediaLogger, never()).logDuplicateMediaNotification(eq(KEY))
+    }
+
     private fun TestScope.assertRunAllReady(foreground: Int = 0, background: Int = 0) {
         runCurrent()
         if (Flags.mediaLoadMetadataViaMediaDataLoader()) {
@@ -2234,5 +2257,15 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         stateCallbackCaptor.value.invoke(key, state)
         backgroundExecutor.runAllReady()
         foregroundExecutor.runAllReady()
+    }
+
+    private fun getNewPendingIntent(): PendingIntent {
+        val intent = Intent().setAction(null)
+        return PendingIntent.getBroadcast(
+            mContext,
+            1,
+            intent,
+            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
     }
 }
