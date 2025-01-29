@@ -16,8 +16,6 @@
 
 package com.android.systemui.media.dialog;
 
-import static com.android.systemui.media.dialog.MediaOutputSeekbar.VOLUME_PERCENTAGE_SCALE_SIZE;
-
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.app.WallpaperColors;
@@ -289,10 +287,7 @@ public abstract class MediaOutputBaseAdapter extends
                         }
                     } else {
                         if (!mVolumeAnimator.isStarted()) {
-                            int percentage =
-                                    (int) ((double) currentVolume * VOLUME_PERCENTAGE_SCALE_SIZE
-                                            / (double) mSeekBar.getMax());
-                            if (percentage == 0) {
+                            if (currentVolume == 0) {
                                 updateMutedVolumeIcon(device);
                             } else {
                                 updateUnmutedVolumeIcon(device);
@@ -319,20 +314,20 @@ public abstract class MediaOutputBaseAdapter extends
                     if (device == null || !fromUser) {
                         return;
                     }
-                    int progressToVolume = MediaOutputSeekbar.scaleProgressToVolume(progress);
-                    int deviceVolume = device.getCurrentVolume();
-                    int percentage =
-                            (int) ((double) progressToVolume * VOLUME_PERCENTAGE_SCALE_SIZE
-                                    / (double) seekBar.getMax());
-                    mVolumeValueText.setText(mContext.getResources().getString(
-                            R.string.media_output_dialog_volume_percentage, percentage));
+
+                    final String percentageString = mContext.getResources().getString(
+                            R.string.media_output_dialog_volume_percentage,
+                            mSeekBar.getPercentage());
+                    mVolumeValueText.setText(percentageString);
+
                     if (mStartFromMute) {
                         updateUnmutedVolumeIcon(device);
                         mStartFromMute = false;
                     }
-                    if (progressToVolume != deviceVolume) {
-                        mLatestUpdateVolume = progressToVolume;
-                        mController.adjustVolume(device, progressToVolume);
+                    int seekBarVolume = MediaOutputSeekbar.scaleProgressToVolume(progress);
+                    if (seekBarVolume != device.getCurrentVolume()) {
+                        mLatestUpdateVolume = seekBarVolume;
+                        mController.adjustVolume(device, seekBarVolume);
                     }
                 }
 
