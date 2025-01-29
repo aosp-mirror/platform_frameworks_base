@@ -163,7 +163,6 @@ constructor(
             }
             .logDiffsForTable(
                 tableLogBuffer = tableLogBuffer,
-                columnPrefix = "",
                 columnName = "isCommunalAvailable",
                 initialValue = false,
             )
@@ -300,7 +299,6 @@ constructor(
             }
             .logDiffsForTable(
                 tableLogBuffer = tableLogBuffer,
-                columnPrefix = "",
                 columnName = "isCommunalShowing",
                 initialValue = false,
             )

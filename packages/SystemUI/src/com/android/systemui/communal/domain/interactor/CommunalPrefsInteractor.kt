@@ -51,7 +51,6 @@ constructor(
             .flatMapLatest { user -> repository.isCtaDismissed(user) }
             .logDiffsForTable(
                 tableLogBuffer = tableLogBuffer,
-                columnPrefix = "",
                 columnName = "isCtaDismissed",
                 initialValue = false,
             )
@@ -69,7 +68,6 @@ constructor(
             .flatMapLatest { user -> repository.isHubOnboardingDismissed(user) }
             .logDiffsForTable(
                 tableLogBuffer = tableLogBuffer,
-                columnPrefix = "",
                 columnName = "isHubOnboardingDismissed",
                 initialValue = false,
             )
