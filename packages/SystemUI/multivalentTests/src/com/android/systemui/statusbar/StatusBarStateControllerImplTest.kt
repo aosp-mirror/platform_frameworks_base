@@ -33,7 +33,6 @@ import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteract
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.parameterizeSceneContainerFlag
-import com.android.systemui.jank.interactionJankMonitor
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
@@ -113,7 +112,6 @@ class StatusBarStateControllerImplTest(flags: FlagsParameterization) : SysuiTest
             object :
                 StatusBarStateControllerImpl(
                     uiEventLogger,
-                    { kosmos.interactionJankMonitor },
                     JavaAdapter(testScope.backgroundScope),
                     { kosmos.keyguardInteractor },
                     { kosmos.keyguardTransitionInteractor },

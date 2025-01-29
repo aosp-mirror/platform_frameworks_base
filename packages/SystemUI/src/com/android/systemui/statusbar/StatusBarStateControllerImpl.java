@@ -16,13 +16,9 @@
 
 package com.android.systemui.statusbar;
 
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_FROM_AOD;
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_TO_AOD;
 import static com.android.systemui.keyguard.shared.model.KeyguardState.GONE;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.combineFlows;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.os.SystemProperties;
@@ -30,7 +26,6 @@ import android.os.Trace;
 import android.text.format.DateFormat;
 import android.util.FloatProperty;
 import android.util.Log;
-import android.view.Choreographer;
 import android.view.View;
 import android.view.animation.Interpolator;
 
@@ -42,8 +37,6 @@ import com.android.compose.animation.scene.OverlayKey;
 import com.android.compose.animation.scene.SceneKey;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.jank.InteractionJankMonitor;
-import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
@@ -54,7 +47,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.res.R;
 import com.android.systemui.scene.data.model.SceneStack;
 import com.android.systemui.scene.data.model.SceneStackKt;
 import com.android.systemui.scene.domain.interactor.SceneBackInteractor;
@@ -113,7 +105,6 @@ public class StatusBarStateControllerImpl implements
 
     private final ArrayList<RankedListener> mListeners = new ArrayList<>();
     private final UiEventLogger mUiEventLogger;
-    private final Lazy<InteractionJankMonitor> mInteractionJankMonitorLazy;
     private final JavaAdapter mJavaAdapter;
     private final Lazy<KeyguardInteractor> mKeyguardInteractorLazy;
     private final Lazy<KeyguardTransitionInteractor> mKeyguardTransitionInteractorLazy;
@@ -184,7 +175,6 @@ public class StatusBarStateControllerImpl implements
     @Inject
     public StatusBarStateControllerImpl(
             UiEventLogger uiEventLogger,
-            Lazy<InteractionJankMonitor> interactionJankMonitorLazy,
             JavaAdapter javaAdapter,
             Lazy<KeyguardInteractor> keyguardInteractor,
             Lazy<KeyguardTransitionInteractor> keyguardTransitionInteractor,
@@ -196,7 +186,6 @@ public class StatusBarStateControllerImpl implements
             Lazy<SceneBackInteractor> sceneBackInteractorLazy,
             Lazy<AlternateBouncerInteractor> alternateBouncerInteractorLazy) {
         mUiEventLogger = uiEventLogger;
-        mInteractionJankMonitorLazy = interactionJankMonitorLazy;
         mJavaAdapter = javaAdapter;
         mKeyguardInteractorLazy = keyguardInteractor;
         mKeyguardTransitionInteractorLazy = keyguardTransitionInteractor;
@@ -470,22 +459,6 @@ public class StatusBarStateControllerImpl implements
                 this, SET_DARK_AMOUNT_PROPERTY, mDozeAmountTarget);
         darkAnimator.setInterpolator(Interpolators.LINEAR);
         darkAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP);
-        darkAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                cancelInteractionJankMonitor();
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                endInteractionJankMonitor();
-            }
-
-            @Override
-            public void onAnimationStart(Animator animation) {
-                beginInteractionJankMonitor();
-            }
-        });
         darkAnimator.start();
         return darkAnimator;
     }
@@ -511,42 +484,6 @@ public class StatusBarStateControllerImpl implements
         return mKeyguardClockInteractorLazy.get().getRenderedClockId();
     }
 
-    private void beginInteractionJankMonitor() {
-        final boolean shouldPost =
-                (mIsDozing && mDozeAmount == 0) || (!mIsDozing && mDozeAmount == 1);
-        InteractionJankMonitor monitor = mInteractionJankMonitorLazy.get();
-        if (monitor != null && mView != null && mView.isAttachedToWindow()) {
-            if (shouldPost) {
-                Choreographer.getInstance().postCallback(
-                        Choreographer.CALLBACK_ANIMATION, this::beginInteractionJankMonitor, null);
-            } else {
-                Configuration.Builder builder = Configuration.Builder.withView(getCujType(), mView)
-                        .setTag(getClockId())
-                        .setDeferMonitorForAnimationStart(false);
-                monitor.begin(builder);
-            }
-        }
-    }
-
-    private void endInteractionJankMonitor() {
-        InteractionJankMonitor monitor = mInteractionJankMonitorLazy.get();
-        if (monitor == null) {
-            return;
-        }
-        monitor.end(getCujType());
-    }
-
-    private void cancelInteractionJankMonitor() {
-        InteractionJankMonitor monitor = mInteractionJankMonitorLazy.get();
-        if (monitor == null) {
-            return;
-        }
-        monitor.cancel(getCujType());
-    }
-
-    private int getCujType() {
-        return mIsDozing ? CUJ_LOCKSCREEN_TRANSITION_TO_AOD : CUJ_LOCKSCREEN_TRANSITION_FROM_AOD;
-    }
 
     @Override
     public boolean goingToFullShade() {
