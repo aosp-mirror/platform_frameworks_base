@@ -334,6 +334,5 @@ public interface BiometricConstants {
      * Returned from {@link BiometricManager#getLastAuthenticationTime(int)} when there has
      * been no successful authentication for the given authenticator since boot.
      */
-    @FlaggedApi(Flags.FLAG_LAST_AUTHENTICATION_TIME)
     long BIOMETRIC_NO_AUTHENTICATION = -1;
 }

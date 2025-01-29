@@ -44,7 +44,6 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricStateListener;
-import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricSensorReceiver;
@@ -905,10 +904,6 @@ public class BiometricService extends SystemService {
         public long getLastAuthenticationTime(
                 int userId, @Authenticators.Types int authenticators) {
             super.getLastAuthenticationTime_enforcePermission();
-
-            if (!Flags.lastAuthenticationTime()) {
-                throw new UnsupportedOperationException();
-            }
 
             Slogf.d(TAG, "getLastAuthenticationTime(userId=%d, authenticators=0x%x)",
                     userId, authenticators);

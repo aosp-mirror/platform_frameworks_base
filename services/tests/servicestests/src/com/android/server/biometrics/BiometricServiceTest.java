@@ -2014,20 +2014,9 @@ public class BiometricServiceTest {
         verifyNoMoreInteractions(callback);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testGetLastAuthenticationTime_flagOff_throwsUnsupportedOperationException()
-            throws RemoteException {
-        mSetFlagsRule.disableFlags(Flags.FLAG_LAST_AUTHENTICATION_TIME);
-
-        mBiometricService = new BiometricService(mContext, mInjector, mBiometricHandlerProvider);
-        mBiometricService.mImpl.getLastAuthenticationTime(0, Authenticators.BIOMETRIC_STRONG);
-    }
-
     @Test
-    public void testGetLastAuthenticationTime_flagOn_callsKeystoreAuthorization()
+    public void testGetLastAuthenticationTime_callsKeystoreAuthorization()
             throws RemoteException {
-        mSetFlagsRule.enableFlags(Flags.FLAG_LAST_AUTHENTICATION_TIME);
-
         final int[] hardwareAuthenticators = new int[] {
                 HardwareAuthenticatorType.PASSWORD,
                 HardwareAuthenticatorType.FINGERPRINT
