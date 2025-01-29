@@ -969,11 +969,13 @@ class DesktopTasksController(
             cascadeWindow(bounds, displayLayout, displayId)
         }
         val pendingIntent =
-            PendingIntent.getActivity(
+            PendingIntent.getActivityAsUser(
                 context,
                 /* requestCode= */ 0,
                 intent,
                 PendingIntent.FLAG_IMMUTABLE,
+                /* options= */ null,
+                UserHandle.of(userId),
             )
         val ops =
             ActivityOptions.fromBundle(options).apply {
