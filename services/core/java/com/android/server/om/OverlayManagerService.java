@@ -403,6 +403,20 @@ public final class OverlayManagerService extends SystemService {
         return userIds;
     }
 
+    /**
+     * Ensure that the caller has permission to interact with the given userId.
+     * If the calling user is not the same as the provided user, the caller needs
+     * to hold the INTERACT_ACROSS_USERS_FULL permission (or be system uid or
+     * root).
+     *
+     * @param userId the user to interact with
+     * @param message message for any SecurityException
+     */
+    static int handleIncomingUser(final int userId, @NonNull final String message) {
+        return ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, true, message, null);
+    }
+
     private void handlePackageAdd(String packageName, Bundle extras, int userId) {
         final boolean replacing = extras.getBoolean(Intent.EXTRA_REPLACING, false);
         if (replacing) {
@@ -1037,7 +1051,7 @@ public final class OverlayManagerService extends SystemService {
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             final DumpState dumpState = new DumpState();
-            dumpState.setUserId(UserHandle.USER_ALL);
+            int userId = UserHandle.USER_ALL;
 
             int opti = 0;
             while (opti < args.length) {
@@ -1064,9 +1078,7 @@ public final class OverlayManagerService extends SystemService {
                         return;
                     }
                     try {
-                        final int userId = UserHandle.parseUserArg(args[opti]);
-                        final int realUserId = handleIncomingUser(userId, "dump");
-                        dumpState.setUserId(realUserId);
+                        userId = UserHandle.parseUserArg(args[opti]);
                         opti++;
                     } catch (Exception e) {
                         pw.println("Error: " + e.getMessage());
@@ -1105,26 +1117,15 @@ public final class OverlayManagerService extends SystemService {
             }
 
             enforceDumpPermission("dump");
+            final int realUserId = userId != UserHandle.USER_ALL
+                    ? handleIncomingUser(userId, "dump") : userId;
+            dumpState.setUserId(realUserId);
             synchronized (mLock) {
                 mImpl.dump(pw, dumpState);
                 if (dumpState.getPackageName() == null) {
                     mPackageManager.dump(pw, dumpState);
                 }
             }
-        }
-
-        /**
-         * Ensure that the caller has permission to interact with the given userId.
-         * If the calling user is not the same as the provided user, the caller needs
-         * to hold the INTERACT_ACROSS_USERS_FULL permission (or be system uid or
-         * root).
-         *
-         * @param userId the user to interact with
-         * @param message message for any SecurityException
-         */
-        private int handleIncomingUser(final int userId, @NonNull final String message) {
-            return ActivityManager.handleIncomingUser(Binder.getCallingPid(),
-                    Binder.getCallingUid(), userId, false, true, message, null);
         }
 
         /**

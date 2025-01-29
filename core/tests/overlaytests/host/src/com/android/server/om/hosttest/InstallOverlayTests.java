@@ -44,8 +44,11 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
             "com.android.server.om.hosttest.update_overlay_test";
     private static final String DEVICE_TEST_CLS = DEVICE_TEST_PKG + ".UpdateOverlayTest";
 
+    private int mCurrentUserid;
+
     @Before
     public void ensureNoOverlays() throws Exception {
+        mCurrentUserid = getDevice().getCurrentUser();
         // Make sure we're starting with a clean slate.
         for (String pkg : ALL_PACKAGES) {
             assertFalse(pkg + " should not be installed", isPackageInstalled(pkg));
@@ -62,7 +65,7 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
     @After
     public void uninstallOverlays() throws Exception {
         for (String pkg : ALL_PACKAGES) {
-            uninstallPackage(pkg);
+            getDevice().uninstallPackageForUser(pkg, mCurrentUserid);
         }
     }
 
@@ -166,7 +169,7 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
         installPackage("OverlayHostTests_AppOverlayV1.apk");
         assertTrue(getDevice().executeShellCommand("cat /data/system/overlays.xml")
                 .contains(APP_OVERLAY_PACKAGE_NAME));
-        uninstallPackage(APP_OVERLAY_PACKAGE_NAME);
+        getDevice().uninstallPackageForUser(APP_OVERLAY_PACKAGE_NAME, mCurrentUserid);
         delay();
         assertFalse(getDevice().executeShellCommand("cat /data/system/overlays.xml")
                 .contains(APP_OVERLAY_PACKAGE_NAME));
@@ -200,12 +203,12 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
     }
 
     private void installPackage(String pkg) throws Exception {
-        super.installPackage(pkg);
+        super.installPackageAsUser(pkg, true /* grantPermission */, mCurrentUserid);
         delay();
     }
 
     private void installInstantPackage(String pkg) throws Exception {
-        super.installPackage(pkg, "--instant");
+        super.installPackageAsUser(pkg, true /* grantPermission */, mCurrentUserid, "--instant");
         delay();
     }
 
