@@ -2008,3 +2008,10 @@ flag {
         purpose: PURPOSE_BUGFIX
    }
 }
+
+flag {
+    name: "show_locked_by_your_watch_keyguard_indicator"
+    namespace: "systemui"
+    description: "Show a Locked by your watch indicator on the keyguard when the device is locked by the watch."
+    bug: "387322459"
+}
