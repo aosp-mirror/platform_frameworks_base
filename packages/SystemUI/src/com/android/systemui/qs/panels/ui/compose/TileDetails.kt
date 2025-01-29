@@ -38,8 +38,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.android.systemui.bluetooth.qsdialog.BluetoothDetailsContent
+import com.android.systemui.bluetooth.qsdialog.BluetoothDetailsViewModel
+import com.android.systemui.plugins.qs.TileDetailsViewModel
 import com.android.systemui.qs.flags.QsDetailedView
 import com.android.systemui.qs.panels.ui.viewmodel.DetailsViewModel
+import com.android.systemui.qs.tiles.dialog.InternetDetailsContent
+import com.android.systemui.qs.tiles.dialog.InternetDetailsViewModel
+import com.android.systemui.qs.tiles.dialog.ModesDetailsContent
+import com.android.systemui.qs.tiles.dialog.ModesDetailsViewModel
+import com.android.systemui.qs.tiles.dialog.ScreenRecordDetailsContent
+import com.android.systemui.qs.tiles.dialog.ScreenRecordDetailsViewModel
 
 @Composable
 fun TileDetails(modifier: Modifier = Modifier, detailsViewModel: DetailsViewModel) {
@@ -107,7 +116,17 @@ fun TileDetails(modifier: Modifier = Modifier, detailsViewModel: DetailsViewMode
                 style = MaterialTheme.typography.titleSmall,
             )
         }
-        tileDetailedViewModel.GetContentView()
+        MapTileDetailsContent(tileDetailedViewModel)
+    }
+}
+
+@Composable
+private fun MapTileDetailsContent(tileDetailsViewModel: TileDetailsViewModel) {
+    when (tileDetailsViewModel) {
+        is InternetDetailsViewModel -> InternetDetailsContent(tileDetailsViewModel)
+        is ScreenRecordDetailsViewModel -> ScreenRecordDetailsContent(tileDetailsViewModel)
+        is BluetoothDetailsViewModel -> BluetoothDetailsContent()
+        is ModesDetailsViewModel -> ModesDetailsContent(tileDetailsViewModel)
     }
 }
 

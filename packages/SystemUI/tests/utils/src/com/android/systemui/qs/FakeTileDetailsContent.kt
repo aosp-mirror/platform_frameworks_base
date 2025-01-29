@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,16 @@
 
 package com.android.systemui.qs
 
-import com.android.systemui.plugins.qs.TileDetailsViewModel
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 
-class FakeTileDetailsViewModel(var tileSpec: String?) : TileDetailsViewModel() {
-    private var _clickOnSettingsButton = 0
-
-    override fun clickOnSettingsButton() {
-        _clickOnSettingsButton++
-    }
-
-    override fun getTitle(): String {
-        return tileSpec ?: " Fake title"
-    }
-
-    override fun getSubTitle(): String {
-        return tileSpec ?: "Fake sub title"
-    }
+@Composable
+fun FakeTileDetailsContent() {
+    Text(
+        text = "Fake details content",
+        textAlign = TextAlign.Center,
+        fontWeight = FontWeight.ExtraBold,
+    )
 }

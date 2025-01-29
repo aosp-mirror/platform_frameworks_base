@@ -62,8 +62,8 @@ class DetailsViewModelTest : SysuiTestCase() {
             val tiles = currentTilesInteractor.currentTiles.value
 
             assertThat(currentTilesInteractor.currentTilesSpecs.size).isEqualTo(2)
-            assertThat(tiles!![1].spec).isEqualTo(specNoDetails)
-            (tiles!![1].tile as FakeQSTile).hasDetailsViewModel = false
+            assertThat(tiles[1].spec).isEqualTo(specNoDetails)
+            (tiles[1].tile as FakeQSTile).hasDetailsViewModel = false
 
             assertThat(underTest.activeTileDetails).isNull()
 

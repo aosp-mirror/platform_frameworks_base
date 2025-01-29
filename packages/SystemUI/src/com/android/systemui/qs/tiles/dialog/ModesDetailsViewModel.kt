@@ -16,22 +16,14 @@
 
 package com.android.systemui.qs.tiles.dialog
 
-import androidx.compose.runtime.Composable
 import com.android.systemui.plugins.qs.TileDetailsViewModel
-import com.android.systemui.statusbar.policy.ui.dialog.composable.ModeTileGrid
 import com.android.systemui.statusbar.policy.ui.dialog.viewmodel.ModesDialogViewModel
 
 /** The view model used for the modes details view in the Quick Settings */
 class ModesDetailsViewModel(
     private val onSettingsClick: () -> Unit,
-    private val viewModel: ModesDialogViewModel,
+    val viewModel: ModesDialogViewModel,
 ) : TileDetailsViewModel() {
-    @Composable
-    override fun GetContentView() {
-        // TODO(b/378513940): Finish implementing this function.
-        ModeTileGrid(viewModel = viewModel)
-    }
-
     override fun clickOnSettingsButton() {
         onSettingsClick()
     }

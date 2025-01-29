@@ -16,29 +16,10 @@
 
 package com.android.systemui.bluetooth.qsdialog
 
-import android.view.LayoutInflater
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.viewinterop.AndroidView
 import com.android.systemui.plugins.qs.TileDetailsViewModel
-import com.android.systemui.res.R
 
 class BluetoothDetailsViewModel(onLongClick: () -> Unit) : TileDetailsViewModel() {
     private val _onLongClick = onLongClick
-
-    @Composable
-    override fun GetContentView() {
-        AndroidView(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
-            factory = { context ->
-                // Inflate with the existing dialog xml layout
-                LayoutInflater.from(context).inflate(R.layout.bluetooth_tile_dialog, null)
-                // TODO: b/378513956 - Implement the bluetooth details view
-            },
-        )
-    }
 
     override fun clickOnSettingsButton() {
         _onLongClick()
