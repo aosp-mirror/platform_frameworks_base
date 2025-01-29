@@ -1190,6 +1190,11 @@ public class AudioService extends IAudioService.Stub
     private @AttributeSystemUsage int[] mSupportedSystemUsages =
             new int[]{AudioAttributes.USAGE_CALL_ASSISTANT};
 
+    // Tracks the API/shell override of hardening enforcement used for debugging
+    // When this is set to true, enforcement is on regardless of flag state and any specific
+    // exemptions in place for compat purposes.
+    private final AtomicBoolean mShouldEnableAllHardening = new AtomicBoolean(false);
+
     // Defines the format for the connection "address" for ALSA devices
     public static String makeAlsaAddressString(int card, int device) {
         return "card=" + card + ";device=" + device;
@@ -1333,6 +1338,10 @@ public class AudioService extends IAudioService.Stub
         mAudioVolumeGroupHelper = audioVolumeGroupHelper;
         mSettings = settings;
         mAudioPolicy = audioPolicy;
+        mAudioPolicy.registerOnStartTask(() -> {
+            mAudioPolicy.setEnableHardening(mShouldEnableAllHardening.get());
+        });
+
         mPlatformType = AudioSystem.getPlatformType(context);
 
         mBroadcastHandlerThread = new HandlerThread("AudioService Broadcast");
@@ -15068,6 +15077,16 @@ public class AudioService extends IAudioService.Stub
             return false;
         }
         return true;
+    }
+
+    /**
+     * @see AudioManager#setEnableHardening(boolean)
+     */
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public void setEnableHardening(boolean shouldEnable) {
+        super.setEnableHardening_enforcePermission();
+        mShouldEnableAllHardening.set(shouldEnable);
+        mAudioPolicy.setEnableHardening(shouldEnable);
     }
 
     //======================

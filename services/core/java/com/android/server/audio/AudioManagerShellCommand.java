@@ -83,6 +83,8 @@ class AudioManagerShellCommand extends ShellCommand {
                 return setGroupVolume();
             case "adj-group-volume":
                 return adjGroupVolume();
+            case "set-hardening":
+                return setEnableHardening();
         }
         return 0;
     }
@@ -130,6 +132,8 @@ class AudioManagerShellCommand extends ShellCommand {
         pw.println("    Sets the volume for GROUP_ID to VOLUME_INDEX");
         pw.println("  adj-group-volume GROUP_ID <RAISE|LOWER|MUTE|UNMUTE>");
         pw.println("    Adjusts the group volume for GROUP_ID given the specified direction");
+        pw.println("  set-enable-hardening <1|0>");
+        pw.println("    Enables full audio hardening enforcement, disabling any exemptions");
     }
 
     private int setSurroundFormatEnabled() {
@@ -402,6 +406,20 @@ class AudioManagerShellCommand extends ShellCommand {
         getOutPrintWriter().println("calling AudioManager.adjustVolumeGroupVolume("
                 + groupId + ", " + direction + ", 0)");
         am.adjustVolumeGroupVolume(groupId, direction, 0);
+        return 0;
+    }
+
+    private int setEnableHardening() {
+        final Context context = mService.mContext;
+        final AudioManager am = context.getSystemService(AudioManager.class);
+        final boolean shouldEnable = !(readIntArg() == 0);
+        getOutPrintWriter().println(
+                "calling AudioManager.setEnableHardening(" + shouldEnable + ")");
+        try {
+            am.setEnableHardening(shouldEnable);
+        } catch (Exception e) {
+            getOutPrintWriter().println("Exception: " + e);
+        }
         return 0;
     }
 
