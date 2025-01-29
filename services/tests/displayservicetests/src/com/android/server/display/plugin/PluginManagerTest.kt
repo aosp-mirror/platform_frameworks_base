@@ -87,11 +87,15 @@ class PluginManagerTest {
         val mockPlugin1 = mock<Plugin>()
         val mockPlugin2 = mock<Plugin>()
 
-        override fun getPluginStorage(): PluginStorage {
+        override fun getPluginStorage(enabledTypes: Set<PluginType<*>>): PluginStorage {
             return mockStorage
         }
 
-        override fun loadPlugins(context: Context?, storage: PluginStorage?): List<Plugin> {
+        override fun loadPlugins(
+            context: Context?,
+            storage: PluginStorage?,
+            enabledTypes: Set<PluginType<*>>
+        ): List<Plugin> {
             return listOf(mockPlugin1, mockPlugin2)
         }
     }

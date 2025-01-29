@@ -29,7 +29,7 @@ private val DISPLAY_ID_2 = "display_2"
 @SmallTest
 class PluginStorageTest {
 
-    val storage = PluginStorage()
+    var storage = PluginStorage(setOf(TEST_PLUGIN_TYPE1, TEST_PLUGIN_TYPE2))
 
     @Test
     fun testUpdateValue() {
@@ -90,6 +90,18 @@ class PluginStorageTest {
 
         assertThat(testChangeListener1.receivedValue).isEqualTo(type1Value)
         assertThat(testChangeListener2.receivedValue).isNull()
+    }
+
+    @Test
+    fun testDisabledPluginType() {
+        storage = PluginStorage(setOf(TEST_PLUGIN_TYPE2))
+        val type1Value = "value1"
+        val testChangeListener = TestPluginChangeListener<String>()
+        storage.updateValue(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, type1Value)
+
+        storage.addListener(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, testChangeListener)
+
+        assertThat(testChangeListener.receivedValue).isNull()
     }
 
     @Test

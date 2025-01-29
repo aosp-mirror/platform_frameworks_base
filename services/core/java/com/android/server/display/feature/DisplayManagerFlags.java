@@ -245,6 +245,12 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_PLUGIN_MANAGER,
             Flags::enablePluginManager
     );
+
+    private final FlagState mEnableHdrOverridePluginTypeFlagState = new FlagState(
+            Flags.FLAG_ENABLE_HDR_OVERRIDE_PLUGIN_TYPE,
+            Flags::enableHdrOverridePluginType
+    );
+
     private final FlagState mDisplayListenerPerformanceImprovementsFlagState = new FlagState(
             Flags.FLAG_DISPLAY_LISTENER_PERFORMANCE_IMPROVEMENTS,
             Flags::displayListenerPerformanceImprovements
@@ -548,6 +554,10 @@ public class DisplayManagerFlags {
 
     public boolean isPluginManagerEnabled() {
         return mEnablePluginManagerFlagState.isEnabled();
+    }
+
+    public boolean isHdrOverrideEnabled() {
+        return mEnableHdrOverridePluginTypeFlagState.isEnabled();
     }
 
     /**
