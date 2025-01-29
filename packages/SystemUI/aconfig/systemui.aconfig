@@ -1826,6 +1826,13 @@ flag {
 }
 
 flag {
+    name: "notification_row_transparency"
+    namespace: "systemui"
+    description: "Enables transparency on the Notification Shade."
+    bug: "392187268"
+}
+
+flag {
   name: "shade_expands_on_status_bar_long_press"
   namespace: "systemui"
   description: "Expands the shade on long press of any status bar"
