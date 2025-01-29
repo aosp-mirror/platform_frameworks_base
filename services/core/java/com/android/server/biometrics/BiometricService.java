@@ -43,7 +43,6 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricStateListener;
-import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricSensorReceiver;
@@ -100,8 +99,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 /**
@@ -783,10 +782,6 @@ public class BiometricService extends SystemService {
         public long getLastAuthenticationTime(
                 int userId, @Authenticators.Types int authenticators) {
             super.getLastAuthenticationTime_enforcePermission();
-
-            if (!Flags.lastAuthenticationTime()) {
-                throw new UnsupportedOperationException();
-            }
 
             Slogf.d(TAG, "getLastAuthenticationTime(userId=%d, authenticators=0x%x)",
                     userId, authenticators);
