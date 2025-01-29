@@ -20,6 +20,8 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import static com.android.server.testutils.MockitoUtilsKt.eq;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.testng.AssertJUnit.assertEquals;
@@ -35,6 +37,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
 import android.view.InputDevice;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
@@ -193,6 +196,39 @@ public class AutoclickControllerTest {
     }
 
     @Test
+    @EnableFlags(com.android.server.accessibility.Flags.FLAG_ENABLE_AUTOCLICK_INDICATOR)
+    public void onKeyEvent_modifierKey_doNotUpdateMetaStateWhenControllerIsNull() {
+        assertThat(mController.mClickScheduler).isNull();
+
+        injectFakeKeyEvent(KeyEvent.KEYCODE_ALT_LEFT, KeyEvent.META_ALT_ON);
+
+        assertThat(mController.mClickScheduler).isNull();
+    }
+
+    @Test
+    @EnableFlags(com.android.server.accessibility.Flags.FLAG_ENABLE_AUTOCLICK_INDICATOR)
+    public void onKeyEvent_modifierKey_updateMetaStateWhenControllerNotNull() {
+        injectFakeMouseActionDownEvent();
+
+        int metaState = KeyEvent.META_ALT_ON | KeyEvent.META_META_ON;
+        injectFakeKeyEvent(KeyEvent.KEYCODE_ALT_LEFT, metaState);
+
+        assertThat(mController.mClickScheduler).isNotNull();
+        assertThat(mController.mClickScheduler.getMetaStateForTesting()).isEqualTo(metaState);
+    }
+
+    @Test
+    @EnableFlags(com.android.server.accessibility.Flags.FLAG_ENABLE_AUTOCLICK_INDICATOR)
+    public void onKeyEvent_modifierKey_cancelAutoClickWhenAdditionalRegularKeyPresssed() {
+        injectFakeMouseActionDownEvent();
+
+        injectFakeKeyEvent(KeyEvent.KEYCODE_J, KeyEvent.META_ALT_ON);
+
+        assertThat(mController.mClickScheduler).isNotNull();
+        assertThat(mController.mClickScheduler.getMetaStateForTesting()).isEqualTo(0);
+    }
+
+    @Test
     public void onDestroy_clearClickScheduler() {
         injectFakeMouseActionDownEvent();
 
@@ -230,6 +266,17 @@ public class AutoclickControllerTest {
         MotionEvent event = getFakeMotionDownEvent();
         event.setSource(InputDevice.SOURCE_KEYBOARD);
         mController.onMotionEvent(event, event, /* policyFlags= */ 0);
+    }
+
+    private void injectFakeKeyEvent(int keyCode, int modifiers) {
+        KeyEvent keyEvent = new KeyEvent(
+                /* downTime= */ 0,
+                /* eventTime= */ 0,
+                /* action= */ KeyEvent.ACTION_DOWN,
+                /* code= */ keyCode,
+                /* repeat= */ 0,
+                /* metaState= */ modifiers);
+        mController.onKeyEvent(keyEvent, /* policyFlags= */ 0);
     }
 
     private MotionEvent getFakeMotionDownEvent() {
