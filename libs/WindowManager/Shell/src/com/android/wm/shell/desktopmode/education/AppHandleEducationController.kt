@@ -140,6 +140,27 @@ class AppHandleEducationController(
                         windowingEducationViewController.hideEducationTooltip()
                     }
             }
+
+            // Listens to a [NoCaption] state change to dismiss any tooltip if the app handle or app
+            // header is gone or de-focused (e.g. when a user swipes up to home, overview, or enters
+            // split screen)
+            applicationCoroutineScope.launch {
+                if (
+                    isAppHandleHintViewed() &&
+                        isEnterDesktopModeHintViewed() &&
+                        isExitDesktopModeHintViewed()
+                )
+                    return@launch
+                windowDecorCaptionHandleRepository.captionStateFlow
+                    .filter { captionState ->
+                        captionState is CaptionState.NoCaption &&
+                            !isAppHandleHintViewed() &&
+                            !isEnterDesktopModeHintViewed() &&
+                            !isExitDesktopModeHintViewed()
+                    }
+                    .flowOn(backgroundDispatcher)
+                    .collectLatest { windowingEducationViewController.hideEducationTooltip() }
+            }
         }
     }
 

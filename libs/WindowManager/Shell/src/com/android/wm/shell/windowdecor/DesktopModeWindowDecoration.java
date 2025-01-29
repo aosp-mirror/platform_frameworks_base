@@ -578,6 +578,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             closeHandleMenu();
             closeManageWindowsMenu();
             closeMaximizeMenu();
+            notifyNoCaptionHandle();
         }
         updateDragResizeListener(oldDecorationSurface, inFullImmersive);
         updateMaximizeMenu(startT, inFullImmersive);
@@ -716,7 +717,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     private void notifyCaptionStateChanged() {
-        // TODO: b/366159408 - Ensure bounds sent with notification account for RTL mode.
         if (!canEnterDesktopMode(mContext) || !isEducationEnabled()) {
             return;
         }
