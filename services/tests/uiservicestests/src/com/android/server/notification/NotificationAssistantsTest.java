@@ -679,7 +679,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    @EnableFlags(Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
     public void testDisallowAdjustmentType_readWriteXml_entries() throws Exception {
         int userId = ActivityManager.getCurrentUser();
 
@@ -724,7 +724,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    @EnableFlags(Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
     public void testDisallowAdjustmentKeyType_readWriteXml() throws Exception {
         mAssistants.loadDefaultsFromConfig(true);
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, false);
