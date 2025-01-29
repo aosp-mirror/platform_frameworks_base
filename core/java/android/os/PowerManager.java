@@ -624,6 +624,7 @@ public final class PowerManager {
             WAKE_REASON_TAP,
             WAKE_REASON_LIFT,
             WAKE_REASON_BIOMETRIC,
+            WAKE_REASON_DOCK,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface WakeReason{}
@@ -765,6 +766,12 @@ public final class PowerManager {
     public static final int WAKE_REASON_BIOMETRIC = 17;
 
     /**
+     * Wake up reason code: Waking up due to a user docking the device.
+     * @hide
+     */
+    public static final int WAKE_REASON_DOCK = 18;
+
+    /**
      * Convert the wake reason to a string for debugging purposes.
      * @hide
      */
@@ -788,6 +795,7 @@ public final class PowerManager {
             case WAKE_REASON_TAP: return "WAKE_REASON_TAP";
             case WAKE_REASON_LIFT: return "WAKE_REASON_LIFT";
             case WAKE_REASON_BIOMETRIC: return "WAKE_REASON_BIOMETRIC";
+            case WAKE_REASON_DOCK: return "WAKE_REASON_DOCK";
             default: return Integer.toString(wakeReason);
         }
     }

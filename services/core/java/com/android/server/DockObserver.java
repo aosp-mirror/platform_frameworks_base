@@ -27,7 +27,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
-import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UEventObserver;
@@ -37,6 +36,7 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
@@ -57,8 +57,6 @@ import java.util.Map;
 final class DockObserver extends SystemService {
     private static final String TAG = "DockObserver";
 
-    private static final int MSG_DOCK_STATE_CHANGED = 0;
-
     private final PowerManager mPowerManager;
     private final PowerManager.WakeLock mWakeLock;
 
@@ -66,11 +64,16 @@ final class DockObserver extends SystemService {
 
     private boolean mSystemReady;
 
+    @GuardedBy("mLock")
     private int mActualDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
 
+    @GuardedBy("mLock")
     private int mReportedDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
+
+    @GuardedBy("mLock")
     private int mPreviousDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
 
+    @GuardedBy("mLock")
     private boolean mUpdatesStopped;
 
     private final boolean mKeepDreamingWhenUnplugging;
@@ -182,18 +185,24 @@ final class DockObserver extends SystemService {
                 ExtconInfo.EXTCON_DOCK
         });
 
-        if (!infos.isEmpty()) {
-            ExtconInfo info = infos.get(0);
-            Slog.i(TAG, "Found extcon info devPath: " + info.getDevicePath()
-                        + ", statePath: " + info.getStatePath());
+        synchronized (mLock) {
+            if (!infos.isEmpty()) {
+                ExtconInfo info = infos.get(0);
+                Slog.i(
+                        TAG,
+                        "Found extcon info devPath: "
+                                + info.getDevicePath()
+                                + ", statePath: "
+                                + info.getStatePath());
 
-            // set initial status
-            setDockStateFromProviderLocked(ExtconStateProvider.fromFile(info.getStatePath()));
-            mPreviousDockState = mActualDockState;
+                // set initial status
+                setDockStateFromProviderLocked(ExtconStateProvider.fromFile(info.getStatePath()));
+                mPreviousDockState = mActualDockState;
 
-            mExtconUEventObserver.startObserving(info);
-        } else {
-            Slog.i(TAG, "No extcon dock device found in this kernel.");
+                mExtconUEventObserver.startObserving(info);
+            } else {
+                Slog.i(TAG, "No extcon dock device found in this kernel.");
+            }
         }
 
         mDockObserverLocalService = new DockObserverLocalService();
@@ -223,13 +232,15 @@ final class DockObserver extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
     private void updateIfDockedLocked() {
         // don't bother broadcasting undocked here
         if (mReportedDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
-            updateLocked();
+            postWakefulDockStateChange();
         }
     }
 
+    @GuardedBy("mLock")
     private void setActualDockStateLocked(int newState) {
         mActualDockState = newState;
         if (!mUpdatesStopped) {
@@ -237,6 +248,7 @@ final class DockObserver extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
     private void setDockStateLocked(int newState) {
         if (newState != mReportedDockState) {
             mReportedDockState = newState;
@@ -246,10 +258,12 @@ final class DockObserver extends SystemService {
             if (mSystemReady) {
                 // Wake up immediately when docked or undocked unless prohibited from doing so.
                 if (allowWakeFromDock()) {
-                    mPowerManager.wakeUp(SystemClock.uptimeMillis(),
+                    mPowerManager.wakeUp(
+                            SystemClock.uptimeMillis(),
+                            PowerManager.WAKE_REASON_DOCK,
                             "android.server:DOCK");
                 }
-                updateLocked();
+                postWakefulDockStateChange();
             }
         }
     }
@@ -263,9 +277,8 @@ final class DockObserver extends SystemService {
                 Settings.Global.THEATER_MODE_ON, 0) == 0);
     }
 
-    private void updateLocked() {
-        mWakeLock.acquire();
-        mHandler.sendEmptyMessage(MSG_DOCK_STATE_CHANGED);
+    private void postWakefulDockStateChange() {
+        mHandler.post(mWakeLock.wrap(this::handleDockStateChange));
     }
 
     private void handleDockStateChange() {
@@ -348,17 +361,7 @@ final class DockObserver extends SystemService {
         }
     }
 
-    private final Handler mHandler = new Handler(true /*async*/) {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_DOCK_STATE_CHANGED:
-                    handleDockStateChange();
-                    mWakeLock.release();
-                    break;
-            }
-        }
-    };
+    private final Handler mHandler = new Handler(true /*async*/);
 
     private int getDockedStateExtraValue(ExtconStateProvider state) {
         for (ExtconStateConfig config : mExtconStateConfigs) {
@@ -386,6 +389,7 @@ final class DockObserver extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
     private void setDockStateFromProviderLocked(ExtconStateProvider provider) {
         int state = Intent.EXTRA_DOCK_STATE_UNDOCKED;
         if ("1".equals(provider.getValue("DOCK"))) {
