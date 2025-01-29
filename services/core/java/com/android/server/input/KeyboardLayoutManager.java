@@ -22,8 +22,6 @@ import static android.hardware.input.KeyboardLayoutSelectionResult.LAYOUT_SELECT
 import static android.hardware.input.KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD;
 import static android.hardware.input.KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_DEFAULT;
 
-import static com.android.hardware.input.Flags.keyboardLayoutManagerMultiUserImeSetup;
-
 import android.annotation.AnyThread;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -68,7 +66,6 @@ import android.util.SparseArray;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.inputmethod.InputMethodInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.R;
@@ -1081,8 +1078,6 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         List<ImeInfo> imeInfoList = new ArrayList<>();
         UserManager userManager = Objects.requireNonNull(
                 mContext.getSystemService(UserManager.class));
-        InputMethodManager inputMethodManager = Objects.requireNonNull(
-                mContext.getSystemService(InputMethodManager.class));
         // Need to use InputMethodManagerInternal to call getEnabledInputMethodListAsUser()
         // instead of using InputMethodManager which uses enforceCallingPermissions() that
         // breaks when we are calling the method for work profile user ID since it doesn't check
@@ -1093,14 +1088,10 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
             for (InputMethodInfo imeInfo :
                     inputMethodManagerInternal.getEnabledInputMethodListAsUser(
                             userId)) {
-                final List<InputMethodSubtype> imeSubtypes;
-                if (keyboardLayoutManagerMultiUserImeSetup()) {
-                    imeSubtypes = inputMethodManagerInternal.getEnabledInputMethodSubtypeListAsUser(
-                            imeInfo.getId(), true /* allowsImplicitlyEnabledSubtypes */, userId);
-                } else {
-                    imeSubtypes = inputMethodManager.getEnabledInputMethodSubtypeList(imeInfo,
-                            true /* allowsImplicitlyEnabledSubtypes */);
-                }
+                final List<InputMethodSubtype> imeSubtypes =
+                        inputMethodManagerInternal.getEnabledInputMethodSubtypeListAsUser(
+                                imeInfo.getId(), true /* allowsImplicitlyEnabledSubtypes */,
+                                userId);
                 for (InputMethodSubtype imeSubtype : imeSubtypes) {
                     if (!imeSubtype.isSuitableForPhysicalKeyboardLayoutMapping()) {
                         continue;
