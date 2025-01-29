@@ -125,11 +125,13 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         }
     };
 
-    private final AccessibilityDelegate mHandleDelegate = new AccessibilityDelegate() {
+    final AccessibilityDelegate mHandleDelegate = new AccessibilityDelegate() {
         @Override
         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
             super.onInitializeAccessibilityNodeInfo(host, info);
             final DividerSnapAlgorithm snapAlgorithm = mSplitLayout.mDividerSnapAlgorithm;
+            info.addAction(new AccessibilityAction(R.id.action_swap_apps,
+                    mContext.getString(R.string.accessibility_action_divider_swap)));
             if (mSplitLayout.isLeftRightSplit()) {
                 info.addAction(new AccessibilityAction(R.id.action_move_tl_full,
                         mContext.getString(R.string.accessibility_action_divider_left_full)));
@@ -172,6 +174,11 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         @Override
         public boolean performAccessibilityAction(@NonNull View host, int action,
                 @Nullable Bundle args) {
+            if (action == R.id.action_swap_apps) {
+                mSplitLayout.onDoubleTappedDivider();
+                return true;
+            }
+
             DividerSnapAlgorithm.SnapTarget nextTarget = null;
             DividerSnapAlgorithm snapAlgorithm = mSplitLayout.mDividerSnapAlgorithm;
             if (action == R.id.action_move_tl_full) {
