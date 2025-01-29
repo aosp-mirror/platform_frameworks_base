@@ -570,7 +570,7 @@ class DeviceUnlockedInteractorTest : SysuiTestCase() {
             unlockDevice()
             assertThat(isUnlocked).isTrue()
 
-            underTest.lockNow()
+            underTest.lockNow("test")
             runCurrent()
 
             assertThat(isUnlocked).isFalse()
@@ -592,6 +592,62 @@ class DeviceUnlockedInteractorTest : SysuiTestCase() {
             kosmos.powerInteractor.setAsleepForTest(
                 sleepReason = PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON
             )
+            runCurrent()
+
+            assertThat(deviceUnlockStatus?.isUnlocked).isFalse()
+        }
+
+    @Test
+    fun deviceUnlockStatus_staysUnlocked_whenDeviceGoesToSleep_whileIsTrusted() =
+        testScope.runTest {
+            setLockAfterScreenTimeout(5000)
+            kosmos.fakeAuthenticationRepository.powerButtonInstantlyLocks = false
+            val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
+
+            kosmos.fakeTrustRepository.setCurrentUserTrusted(true)
+
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
+
+            kosmos.powerInteractor.setAsleepForTest(
+                sleepReason = PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON
+            )
+            runCurrent()
+
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
+        }
+
+    @Test
+    fun deviceUnlockStatus_staysUnlocked_whileIsTrusted() =
+        testScope.runTest {
+            val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
+            kosmos.fakeTrustRepository.setCurrentUserTrusted(true)
+            unlockDevice()
+
+            kosmos.powerInteractor.setAsleepForTest(
+                sleepReason = PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON
+            )
+            runCurrent()
+
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
+        }
+
+    @Test
+    fun deviceUnlockStatus_becomesLocked_whenNoLongerTrusted_whileAsleep() =
+        testScope.runTest {
+            val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
+            kosmos.fakeTrustRepository.setCurrentUserTrusted(true)
+            unlockDevice()
+            kosmos.powerInteractor.setAsleepForTest(
+                sleepReason = PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON
+            )
+            runCurrent()
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
+
+            kosmos.fakeTrustRepository.setCurrentUserTrusted(false)
             runCurrent()
 
             assertThat(deviceUnlockStatus?.isUnlocked).isFalse()

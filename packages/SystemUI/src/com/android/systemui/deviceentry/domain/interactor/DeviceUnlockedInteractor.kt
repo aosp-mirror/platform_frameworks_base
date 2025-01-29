@@ -59,6 +59,7 @@ import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -70,7 +71,7 @@ class DeviceUnlockedInteractor
 constructor(
     private val authenticationInteractor: AuthenticationInteractor,
     private val repository: DeviceEntryRepository,
-    trustInteractor: TrustInteractor,
+    private val trustInteractor: TrustInteractor,
     faceAuthInteractor: DeviceEntryFaceAuthInteractor,
     fingerprintAuthInteractor: DeviceEntryFingerprintAuthInteractor,
     private val powerInteractor: PowerInteractor,
@@ -181,7 +182,8 @@ constructor(
     val deviceUnlockStatus: StateFlow<DeviceUnlockStatus> =
         repository.deviceUnlockStatus.asStateFlow()
 
-    private val lockNowRequests = Channel<Unit>()
+    /** A [Channel] of "lock now" requests where the values are the debugging reasons. */
+    private val lockNowRequests = Channel<String>()
 
     override suspend fun onActivated(): Nothing {
         coroutineScope {
@@ -218,8 +220,8 @@ constructor(
     }
 
     /** Locks the device instantly. */
-    fun lockNow() {
-        lockNowRequests.trySend(Unit)
+    fun lockNow(debuggingReason: String) {
+        lockNowRequests.trySend(debuggingReason)
     }
 
     private suspend fun handleLockAndUnlockEvents() {
@@ -244,47 +246,70 @@ constructor(
 
     private suspend fun handleLockEvents() {
         merge(
-                // Device wakefulness events.
-                powerInteractor.detailedWakefulness
-                    .map { Pair(it.isAsleep(), it.lastSleepReason) }
-                    .distinctUntilChangedBy { it.first }
-                    .map { (isAsleep, lastSleepReason) ->
-                        if (isAsleep) {
-                            if (
-                                (lastSleepReason == WakeSleepReason.POWER_BUTTON) &&
-                                    authenticationInteractor.getPowerButtonInstantlyLocks()
-                            ) {
-                                LockImmediately("locked instantly from power button")
-                            } else if (lastSleepReason == WakeSleepReason.SLEEP_BUTTON) {
-                                LockImmediately("locked instantly from sleep button")
-                            } else {
-                                LockWithDelay("entering sleep")
-                            }
-                        } else {
-                            CancelDelayedLock("waking up")
-                        }
-                    },
+                trustInteractor.isTrusted.flatMapLatestConflated { isTrusted ->
+                    if (isTrusted) {
+                        // When entering a trusted environment, power-related lock events are
+                        // ignored.
+                        Log.d(TAG, "In trusted environment, ignoring power-related lock events")
+                        flowOf(CancelDelayedLock("in trusted environment"))
+                    } else {
+                        // When not in a trusted environment, power-related lock events are treated
+                        // as normal.
+                        Log.d(
+                            TAG,
+                            "Not in trusted environment, power-related lock events treated as" +
+                                " normal",
+                        )
+                        merge(
+                            // Device wakefulness events.
+                            powerInteractor.detailedWakefulness
+                                .map { Pair(it.isAsleep(), it.lastSleepReason) }
+                                .distinctUntilChangedBy { it.first }
+                                .map { (isAsleep, lastSleepReason) ->
+                                    if (isAsleep) {
+                                        if (
+                                            (lastSleepReason == WakeSleepReason.POWER_BUTTON) &&
+                                                authenticationInteractor
+                                                    .getPowerButtonInstantlyLocks()
+                                        ) {
+                                            LockImmediately("locked instantly from power button")
+                                        } else if (
+                                            lastSleepReason == WakeSleepReason.SLEEP_BUTTON
+                                        ) {
+                                            LockImmediately("locked instantly from sleep button")
+                                        } else {
+                                            LockWithDelay("entering sleep")
+                                        }
+                                    } else {
+                                        CancelDelayedLock("waking up")
+                                    }
+                                },
+                            // Started dreaming
+                            powerInteractor.isInteractive.flatMapLatestConflated { isInteractive ->
+                                // Only respond to dream state changes while the device is
+                                // interactive.
+                                if (isInteractive) {
+                                    keyguardInteractor.isDreamingAny.distinctUntilChanged().map {
+                                        isDreaming ->
+                                        if (isDreaming) {
+                                            LockWithDelay("started dreaming")
+                                        } else {
+                                            CancelDelayedLock("stopped dreaming")
+                                        }
+                                    }
+                                } else {
+                                    emptyFlow()
+                                }
+                            },
+                        )
+                    }
+                },
                 // Device enters lockdown.
                 isInLockdown
                     .distinctUntilChanged()
                     .filter { it }
                     .map { LockImmediately("lockdown") },
-                // Started dreaming
-                powerInteractor.isInteractive.flatMapLatestConflated { isInteractive ->
-                    // Only respond to dream state changes while the device is interactive.
-                    if (isInteractive) {
-                        keyguardInteractor.isDreamingAny.distinctUntilChanged().map { isDreaming ->
-                            if (isDreaming) {
-                                LockWithDelay("started dreaming")
-                            } else {
-                                CancelDelayedLock("stopped dreaming")
-                            }
-                        }
-                    } else {
-                        emptyFlow()
-                    }
-                },
-                lockNowRequests.receiveAsFlow().map { LockImmediately("lockNow") },
+                lockNowRequests.receiveAsFlow().map { reason -> LockImmediately(reason) },
             )
             .collectLatest(::onLockEvent)
     }

@@ -44,6 +44,7 @@ import com.android.systemui.deviceentry.shared.model.DeviceUnlockSource
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.TrustInteractor
 import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor.Companion.keyguardScenes
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.model.SceneContainerPlugin
@@ -148,6 +149,7 @@ constructor(
     private val activityTransitionAnimator: ActivityTransitionAnimator,
     private val shadeModeInteractor: ShadeModeInteractor,
     @SceneFrameworkTableLog private val tableLogBuffer: TableLogBuffer,
+    private val trustInteractor: TrustInteractor,
 ) : CoreStartable {
     private val centralSurfaces: CentralSurfaces?
         get() = centralSurfacesOptLazy.get().getOrNull()
@@ -173,6 +175,7 @@ constructor(
             notifyKeyguardDismissCancelledCallbacks()
             refreshLockscreenEnabled()
             hydrateActivityTransitionAnimationState()
+            lockWhenDeviceBecomesUntrusted()
         } else {
             sceneLogger.logFrameworkEnabled(
                 isEnabled = false,
@@ -996,6 +999,18 @@ constructor(
                 }
             }
         )
+    }
+
+    private fun lockWhenDeviceBecomesUntrusted() {
+        applicationScope.launch {
+            trustInteractor.isTrusted.pairwise().collect { (wasTrusted, isTrusted) ->
+                if (wasTrusted && !isTrusted && !deviceEntryInteractor.isDeviceEntered.value) {
+                    deviceEntryInteractor.lockNow(
+                        "Exited trusted environment while not device not entered"
+                    )
+                }
+            }
+        }
     }
 
     companion object {
