@@ -19,6 +19,7 @@
 package com.android.systemui.keyguard.ui.view
 
 import android.graphics.Rect
+import android.os.DeadObjectException
 import android.util.Log
 import android.view.View
 import com.android.systemui.dagger.SysUISingleton
@@ -192,7 +193,12 @@ constructor(
 
         launcherAnimationController?.let {
             manualUnlockAmount = amount
-            it.setUnlockAmount(amount, forceIfAnimating)
+
+            try {
+                it.setUnlockAmount(amount, forceIfAnimating)
+            } catch (e: DeadObjectException) {
+                Log.e(TAG, "DeadObjectException in setUnlockAmount($amount, $forceIfAnimating)", e)
+            }
         }
     }
 }
