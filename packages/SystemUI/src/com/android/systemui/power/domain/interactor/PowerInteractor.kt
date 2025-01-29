@@ -50,7 +50,7 @@ constructor(
     @FalsingCollectorActual private val falsingCollector: FalsingCollector,
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val statusBarStateController: StatusBarStateController,
-    private val cameraGestureHelper: Provider<CameraGestureHelper>,
+    private val cameraGestureHelper: Provider<CameraGestureHelper?>,
 ) {
     /** Whether the screen is on or off. */
     val isInteractive: Flow<Boolean> = repository.isInteractive
@@ -154,8 +154,9 @@ constructor(
         // or onFinishedGoingToSleep(), carry that state forward. It will be reset by the next
         // onStartedGoingToSleep.
         val powerButtonLaunchGestureTriggered =
-            powerButtonLaunchGestureTriggeredOnWakeUp ||
-                repository.wakefulness.value.powerButtonLaunchGestureTriggered
+            !isPowerButtonGestureSuppressed() &&
+                (powerButtonLaunchGestureTriggeredOnWakeUp ||
+                    repository.wakefulness.value.powerButtonLaunchGestureTriggered)
 
         repository.updateWakefulness(
             rawState = WakefulnessState.STARTING_TO_WAKE,
@@ -204,8 +205,9 @@ constructor(
         // If the launch gesture was previously detected via onCameraLaunchGestureDetected, carry
         // that state forward. It will be reset by the next onStartedGoingToSleep.
         val powerButtonLaunchGestureTriggered =
-            powerButtonLaunchGestureTriggeredDuringSleep ||
-                repository.wakefulness.value.powerButtonLaunchGestureTriggered
+            !isPowerButtonGestureSuppressed() &&
+                (powerButtonLaunchGestureTriggeredDuringSleep ||
+                    repository.wakefulness.value.powerButtonLaunchGestureTriggered)
 
         repository.updateWakefulness(
             rawState = WakefulnessState.ASLEEP,
@@ -218,11 +220,7 @@ constructor(
     }
 
     fun onCameraLaunchGestureDetected() {
-        if (
-            cameraGestureHelper
-                .get()
-                .canCameraGestureBeLaunched(statusBarStateController.getState())
-        ) {
+        if (!isPowerButtonGestureSuppressed()) {
             repository.updateWakefulness(powerButtonLaunchGestureTriggered = true)
         }
     }
@@ -238,6 +236,16 @@ constructor(
                 initialValue = detailedWakefulness.value,
             )
             .collect()
+    }
+
+    /**
+     * Whether the power button gesture isn't allowed to launch anything even if a double tap is
+     * detected.
+     */
+    private fun isPowerButtonGestureSuppressed(): Boolean {
+        return cameraGestureHelper
+            .get()
+            ?.canCameraGestureBeLaunched(statusBarStateController.state) == false
     }
 
     companion object {
