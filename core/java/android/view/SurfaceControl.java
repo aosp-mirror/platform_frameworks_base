@@ -594,6 +594,7 @@ public final class SurfaceControl implements Parcelable {
 
         private final Runnable mFreeNativeResources;
         private boolean mRemoved = false;
+        private OnJankDataListener mListener;
 
         private OnJankDataListenerRegistration() {
             mNativeObject = 0;
@@ -604,6 +605,8 @@ public final class SurfaceControl implements Parcelable {
             mNativeObject = nativeCreateJankDataListenerWrapper(surface.mNativeObject, listener);
             mFreeNativeResources = (mNativeObject == 0) ? () -> {} :
                     sRegistry.registerNativeAllocation(this, mNativeObject);
+            // Make sure the listener doesn't get GCed as long as the registration is alive.
+            mListener = listener;
         }
 
         /**
@@ -643,6 +646,7 @@ public final class SurfaceControl implements Parcelable {
             if (!mRemoved) {
                 removeAfter(0);
             }
+            mListener = null;
             mFreeNativeResources.run();
         }
     }
