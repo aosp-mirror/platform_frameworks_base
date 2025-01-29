@@ -4210,6 +4210,7 @@ public abstract class Context {
             //@hide: STATUS_BAR_SERVICE,
             THREAD_NETWORK_SERVICE,
             CONNECTIVITY_SERVICE,
+            TETHERING_SERVICE,
             PAC_PROXY_SERVICE,
             VCN_MANAGEMENT_SERVICE,
             //@hide: IP_MEMORY_STORE_SERVICE,
@@ -4894,10 +4895,10 @@ public abstract class Context {
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link android.net.TetheringManager}
      * for managing tethering functions.
-     * @hide
+     *
      * @see android.net.TetheringManager
      */
-    @SystemApi
+    @SuppressLint("UnflaggedApi")
     public static final String TETHERING_SERVICE = "tethering";
 
     /**
