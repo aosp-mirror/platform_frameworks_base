@@ -262,6 +262,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Parcel;
@@ -577,6 +578,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     NetworkCapabilities mWifiNetworkCapabilities;
 
     private NotificationManagerService.WorkerHandler mWorkerHandler;
+    private Handler mBroadcastsHandler;
 
     private class TestableToastCallback extends ITransientNotification.Stub {
         @Override
@@ -814,14 +816,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mUmInternal.isUserInitialized(anyInt())).thenReturn(true);
 
         mWorkerHandler = spy(mService.new WorkerHandler(mTestableLooper.getLooper()));
-        mService.init(mWorkerHandler, mRankingHandler, mPackageManager, mPackageManagerClient,
-                mLightsManager, mListeners, mAssistants, mConditionProviders, mCompanionMgr,
-                mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager, mGroupHelper, mAm, mAtm,
-                mAppUsageStats, mDevicePolicyManager, mUgm, mUgmInternal,
-                mAppOpsManager, mUm, mHistoryManager, mStatsManager,
-                mAmi, mToastRateLimiter, mPermissionHelper, mock(UsageStatsManagerInternal.class),
-                mTelecomManager, mLogger, mTestFlagResolver, mPermissionManager,
-                mPowerManager, mConnectivityManager, mPostNotificationTrackerFactory);
+        mBroadcastsHandler = new Handler(mTestableLooper.getLooper());
+
+        mService.init(mWorkerHandler, mRankingHandler, mBroadcastsHandler, mPackageManager,
+                mPackageManagerClient, mLightsManager, mListeners, mAssistants, mConditionProviders,
+                mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
+                mGroupHelper, mAm, mAtm, mAppUsageStats, mDevicePolicyManager, mUgm, mUgmInternal,
+                mAppOpsManager, mUm, mHistoryManager, mStatsManager, mAmi, mToastRateLimiter,
+                mPermissionHelper, mock(UsageStatsManagerInternal.class), mTelecomManager, mLogger,
+                mTestFlagResolver, mPermissionManager, mPowerManager, mConnectivityManager,
+                mPostNotificationTrackerFactory);
 
         mService.setAttentionHelper(mAttentionHelper);
         mService.setLockPatternUtils(mock(LockPatternUtils.class));
@@ -997,6 +1001,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             // could cause issues, for example, messages that remove/cancel shown toasts (this causes
             // problematic interactions with mocks when they're no longer working as expected).
             mWorkerHandler.removeCallbacksAndMessages(null);
+        }
+        if (mBroadcastsHandler != null) {
+            mBroadcastsHandler.removeCallbacksAndMessages(null);
         }
 
         if (mTestableLooper != null) {
