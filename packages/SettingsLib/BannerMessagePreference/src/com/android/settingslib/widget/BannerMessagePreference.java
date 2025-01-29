@@ -116,8 +116,8 @@ public class BannerMessagePreference extends Preference implements GroupSectionD
 
     // Default attention level is High.
     private AttentionLevel mAttentionLevel = AttentionLevel.HIGH;
-    private String mSubtitle;
-    private String mHeader;
+    private CharSequence mSubtitle;
+    private CharSequence mHeader;
     private int mButtonOrientation;
 
     public BannerMessagePreference(Context context) {
@@ -351,7 +351,7 @@ public class BannerMessagePreference extends Preference implements GroupSectionD
     /**
      * Sets the text to be displayed in positive button.
      */
-    public BannerMessagePreference setPositiveButtonText(String positiveButtonText) {
+    public BannerMessagePreference setPositiveButtonText(CharSequence positiveButtonText) {
         if (!TextUtils.equals(positiveButtonText, mPositiveButtonInfo.mText)) {
             mPositiveButtonInfo.mText = positiveButtonText;
             notifyChanged();
@@ -369,7 +369,7 @@ public class BannerMessagePreference extends Preference implements GroupSectionD
     /**
      * Sets the text to be displayed in negative button.
      */
-    public BannerMessagePreference setNegativeButtonText(String negativeButtonText) {
+    public BannerMessagePreference setNegativeButtonText(CharSequence negativeButtonText) {
         if (!TextUtils.equals(negativeButtonText, mNegativeButtonInfo.mText)) {
             mNegativeButtonInfo.mText = negativeButtonText;
             notifyChanged();
@@ -401,7 +401,7 @@ public class BannerMessagePreference extends Preference implements GroupSectionD
      * Sets the subtitle.
      */
     @RequiresApi(Build.VERSION_CODES.S)
-    public BannerMessagePreference setSubtitle(String subtitle) {
+    public BannerMessagePreference setSubtitle(CharSequence subtitle) {
         if (!TextUtils.equals(subtitle, mSubtitle)) {
             mSubtitle = subtitle;
             notifyChanged();
@@ -421,8 +421,8 @@ public class BannerMessagePreference extends Preference implements GroupSectionD
      * Sets the header.
      */
     @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
-    public BannerMessagePreference setHeader(String header) {
-        if (!TextUtils.equals(header, mSubtitle)) {
+    public BannerMessagePreference setHeader(CharSequence header) {
+        if (!TextUtils.equals(header, mHeader)) {
             mHeader = header;
             notifyChanged();
         }
