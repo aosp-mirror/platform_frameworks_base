@@ -3,7 +3,9 @@ package com.android.systemui.statusbar.notification.stack
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.notification.Roundable
+import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import javax.inject.Inject
@@ -129,6 +131,10 @@ class NotificationTargetsHelper @Inject constructor() {
                     magneticTargets[leftIndex] = leftElement.magneticRowListener
                     leftIndex--
                 } else {
+                    if (leftElement.isValidMagneticBoundary()) {
+                        // Add the boundary and then stop the iterating
+                        magneticTargets[leftIndex] = leftElement?.magneticRowListener
+                    }
                     canMoveLeft = false
                 }
             }
@@ -138,12 +144,24 @@ class NotificationTargetsHelper @Inject constructor() {
                     magneticTargets[rightIndex] = rightElement.magneticRowListener
                     rightIndex++
                 } else {
+                    if (rightElement.isValidMagneticBoundary()) {
+                        // Add the boundary and then stop the iterating
+                        magneticTargets[rightIndex] = rightElement?.magneticRowListener
+                    }
                     canMoveRight = false
                 }
             }
         }
         return magneticTargets
     }
+
+    private fun ExpandableView?.isValidMagneticBoundary(): Boolean =
+        when (this) {
+            is FooterView,
+            is NotificationShelf,
+            is SectionHeaderView -> true
+            else -> false
+        }
 }
 
 /**
