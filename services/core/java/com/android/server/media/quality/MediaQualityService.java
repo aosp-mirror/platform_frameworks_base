@@ -35,6 +35,7 @@ import android.hardware.tv.mediaquality.IPictureProfileChangedListener;
 import android.hardware.tv.mediaquality.ISoundProfileAdjustmentListener;
 import android.hardware.tv.mediaquality.ISoundProfileChangedListener;
 import android.hardware.tv.mediaquality.ParamCapability;
+import android.hardware.tv.mediaquality.ParameterRange;
 import android.hardware.tv.mediaquality.PictureParameter;
 import android.hardware.tv.mediaquality.PictureParameters;
 import android.hardware.tv.mediaquality.SoundParameter;
@@ -1133,7 +1134,39 @@ public class MediaQualityService extends SystemService {
         @Override
         public List<ParameterCapability> getParameterCapabilities(
                 List<String> names, UserHandle user) {
-            return new ArrayList<>();
+            byte[] byteArray = MediaQualityUtils.convertParameterToByteArray(names);
+            ParamCapability[] caps = new ParamCapability[byteArray.length];
+            try {
+                mMediaQuality.getParamCaps(byteArray, caps);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to get parameter capabilities", e);
+            }
+
+            return getListParameterCapability(caps);
+        }
+
+        private List<ParameterCapability> getListParameterCapability(ParamCapability[] caps) {
+            List<ParameterCapability> pcList = new ArrayList<>();
+            for (ParamCapability pcHal : caps) {
+                String name = MediaQualityUtils.getParameterName(pcHal.name);
+                boolean isSupported = pcHal.isSupported;
+                int type = pcHal.defaultValue == null ? 0 : pcHal.defaultValue.getTag() + 1;
+                Bundle bundle = convertToCaps(pcHal.range);
+
+                pcList.add(new ParameterCapability(name, isSupported, type, bundle));
+            }
+            return pcList;
+        }
+
+        private Bundle convertToCaps(ParameterRange range) {
+            Bundle bundle = new Bundle();
+            bundle.putObject("INT_MIN_MAX", range.numRange.getIntMinMax());
+            bundle.putObject("INT_VALUES_SUPPORTED", range.numRange.getIntValuesSupported());
+            bundle.putObject("DOUBLE_MIN_MAX", range.numRange.getDoubleMinMax());
+            bundle.putObject("DOUBLE_VALUES_SUPPORTED", range.numRange.getDoubleValuesSupported());
+            bundle.putObject("LONG_MIN_MAX", range.numRange.getLongMinMax());
+            bundle.putObject("LONG_VALUES_SUPPORTED", range.numRange.getLongValuesSupported());
+            return bundle;
         }
 
         @GuardedBy("mPictureProfileLock")

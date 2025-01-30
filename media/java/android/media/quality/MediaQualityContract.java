@@ -341,6 +341,13 @@ public class MediaQualityContract {
         public static final String PARAMETER_FILM_MODE = "film_mode";
 
         /**
+         * Enable/disable black color auto stretch
+         *
+         * @hide
+         */
+        public static final String PARAMETER_BLACK_STRETCH = "black_stretch";
+
+        /**
          * Enable/disable blue color auto stretch
          *
          * <p>Type: BOOLEAN
@@ -452,6 +459,27 @@ public class MediaQualityContract {
          *
          */
         public static final String PARAMETER_GAMMA = "gamma";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TEMPERATURE_RED_GAIN =
+                "color_temperature_red_gain";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TEMPERATURE_GREEN_GAIN =
+                "color_temperature_green_gain";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TEMPERATURE_BLUE_GAIN =
+                "color_temperature_blue_gain";
 
         /**
          * @hide
