@@ -351,7 +351,7 @@ private class AODPromotedNotificationViewUpdater(root: View) {
         setTextViewColor(view, color)
 
         if (text != null && text.isNotEmpty()) {
-            view?.text = text
+            view?.text = text.toSkeleton()
             view?.visibility = VISIBLE
         } else {
             view?.text = ""
@@ -362,6 +362,10 @@ private class AODPromotedNotificationViewUpdater(root: View) {
     private fun setTextViewColor(view: TextView?, color: AodPromotedNotificationColor) {
         view?.setTextColor(color.colorInt)
     }
+}
+
+private fun CharSequence.toSkeleton(): CharSequence {
+    return this.toString()
 }
 
 private enum class AodPromotedNotificationColor(colorUInt: UInt) {
