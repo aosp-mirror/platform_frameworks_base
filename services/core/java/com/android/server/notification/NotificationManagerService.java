@@ -346,6 +346,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.messages.nano.SystemMessageProto;
+import com.android.internal.notification.NotificationChannelGroupsHelper;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
@@ -5010,8 +5011,8 @@ public class NotificationManagerService extends SystemService {
         public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(
                 String pkg) {
             checkCallerIsSystemOrSameApp(pkg);
-            return mPreferencesHelper.getNotificationChannelGroups(
-                    pkg, Binder.getCallingUid(), false, false, true, true, null);
+            return mPreferencesHelper.getNotificationChannelGroups(pkg, Binder.getCallingUid(),
+                    NotificationChannelGroupsHelper.Params.forAllGroups());
         }
 
         @Override
@@ -5131,8 +5132,9 @@ public class NotificationManagerService extends SystemService {
         public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroupsForPackage(
                 String pkg, int uid, boolean includeDeleted) {
             enforceSystemOrSystemUI("getNotificationChannelGroupsForPackage");
-            return mPreferencesHelper.getNotificationChannelGroups(
-                    pkg, uid, includeDeleted, true, false, true, null);
+            return mPreferencesHelper.getNotificationChannelGroups(pkg, uid,
+                    new NotificationChannelGroupsHelper.Params(includeDeleted, true, false, true,
+                            null));
         }
 
         @Override
@@ -5160,8 +5162,9 @@ public class NotificationManagerService extends SystemService {
                 }
             }
 
-            return mPreferencesHelper.getNotificationChannelGroups(
-                    pkg, uid, false, true, false, true, recentlySentChannels);
+            return mPreferencesHelper.getNotificationChannelGroups(pkg, uid,
+                    NotificationChannelGroupsHelper.Params.onlySpecifiedOrBlockedChannels(
+                            recentlySentChannels));
         }
 
         @Override
