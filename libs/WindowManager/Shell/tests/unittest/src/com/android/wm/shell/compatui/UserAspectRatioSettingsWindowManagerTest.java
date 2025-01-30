@@ -54,6 +54,7 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -83,7 +84,7 @@ import java.util.function.Supplier;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
-public class UserAspectRatioSettingsWindowManagerTest extends CompatUIShellTestCase {
+public class UserAspectRatioSettingsWindowManagerTest extends ShellTestCase {
 
     private static final int TASK_ID = 1;
 

@@ -34,6 +34,7 @@ import android.widget.CheckBox;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.R;
+import com.android.wm.shell.ShellTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +52,7 @@ import java.util.function.Consumer;
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class RestartDialogLayoutTest extends CompatUIShellTestCase  {
+public class RestartDialogLayoutTest extends ShellTestCase {
 
     @Mock private Runnable mDismissCallback;
     @Mock private Consumer<Boolean> mRestartCallback;

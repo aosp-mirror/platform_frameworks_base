@@ -34,6 +34,7 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.R;
+import com.android.wm.shell.ShellTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +51,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-public class ReachabilityEduLayoutTest extends CompatUIShellTestCase {
+public class ReachabilityEduLayoutTest extends ShellTestCase {
 
     private ReachabilityEduLayout mLayout;
     private View mMoveUpButton;
