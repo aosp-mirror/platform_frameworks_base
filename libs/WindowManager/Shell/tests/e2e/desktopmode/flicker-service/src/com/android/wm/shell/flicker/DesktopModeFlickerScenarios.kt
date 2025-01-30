@@ -19,7 +19,7 @@ package com.android.wm.shell.flicker
 import android.tools.PlatformConsts.DESKTOP_MODE_MINIMUM_WINDOW_HEIGHT
 import android.tools.PlatformConsts.DESKTOP_MODE_MINIMUM_WINDOW_WIDTH
 import android.tools.flicker.AssertionInvocationGroup
-import android.tools.flicker.assertors.assertions.AppLayerIncreasesInSize
+import android.tools.flicker.assertors.assertions.ResizeVeilKeepsIncreasingInSize
 import android.tools.flicker.assertors.assertions.AppLayerIsInvisibleAtEnd
 import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAlways
 import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAtStart
@@ -36,6 +36,7 @@ import android.tools.flicker.assertors.assertions.AppWindowHasMaxDisplayHeight
 import android.tools.flicker.assertors.assertions.AppWindowHasMaxDisplayWidth
 import android.tools.flicker.assertors.assertions.AppWindowHasSizeOfAtLeast
 import android.tools.flicker.assertors.assertions.AppWindowInsideDisplayBoundsAtEnd
+import android.tools.flicker.assertors.assertions.AppWindowIsBiggerThanInitialBoundsAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowIsInvisibleAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowIsVisibleAlways
 import android.tools.flicker.assertors.assertions.AppWindowMaintainsAspectRatioAlways
@@ -168,9 +169,12 @@ class DesktopModeFlickerScenarios {
                         TaggedCujTransitionMatcher(associatedTransitionRequired = false)
                     )
                     .build(),
-                // TODO(373638597) Add AppLayerIncreasesInSize assertion
-                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS
-            )
+                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
+                        listOf(
+                            ResizeVeilKeepsIncreasingInSize(DESKTOP_MODE_APP),
+                            AppWindowIsBiggerThanInitialBoundsAtEnd(DESKTOP_MODE_APP),
+                        ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
+                )
 
         val EDGE_RESIZE =
             FlickerConfigEntry(
@@ -184,7 +188,8 @@ class DesktopModeFlickerScenarios {
                     .build(),
                 assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
                         listOf(
-                            AppLayerIncreasesInSize(DESKTOP_MODE_APP),
+                            ResizeVeilKeepsIncreasingInSize(DESKTOP_MODE_APP),
+                            AppWindowIsBiggerThanInitialBoundsAtEnd(DESKTOP_MODE_APP),
                         ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 
@@ -223,9 +228,9 @@ class DesktopModeFlickerScenarios {
                 assertions =
                 AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
                         listOf(
-                            // TODO(373638597) Add AppLayerIncreasesInSize assertion
                             AppWindowHasMaxDisplayHeight(DESKTOP_MODE_APP),
-                            AppWindowHasMaxDisplayWidth(DESKTOP_MODE_APP)
+                            AppWindowHasMaxDisplayWidth(DESKTOP_MODE_APP),
+                            ResizeVeilKeepsIncreasingInSize(DESKTOP_MODE_APP),
                         ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 
@@ -368,7 +373,7 @@ class DesktopModeFlickerScenarios {
                 ),
                 assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
                         listOf(
-                            AppLayerIncreasesInSize(DESKTOP_MODE_APP),
+                            ResizeVeilKeepsIncreasingInSize(DESKTOP_MODE_APP),
                             AppWindowHasMaxDisplayHeight(DESKTOP_MODE_APP),
                             AppWindowHasMaxDisplayWidth(DESKTOP_MODE_APP)
                         ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
@@ -393,7 +398,7 @@ class DesktopModeFlickerScenarios {
                 assertions =
                 AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
                         listOf(
-                            AppLayerIncreasesInSize(DESKTOP_MODE_APP),
+                            ResizeVeilKeepsIncreasingInSize(DESKTOP_MODE_APP),
                             AppWindowMaintainsAspectRatioAlways(DESKTOP_MODE_APP),
                             AppWindowHasMaxBoundsInOnlyOneDimension(DESKTOP_MODE_APP)
                         ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
