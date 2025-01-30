@@ -21,9 +21,8 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
-import androidx.core.graphics.drawable.toBitmap
+import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.systemui.common.shared.model.Icon
 
 /**
@@ -36,7 +35,7 @@ fun Icon(icon: Icon, modifier: Modifier = Modifier, tint: Color = LocalContentCo
     val contentDescription = icon.contentDescription?.load()
     when (icon) {
         is Icon.Loaded -> {
-            Icon(icon.drawable.toBitmap().asImageBitmap(), contentDescription, modifier, tint)
+            Icon(rememberDrawablePainter(icon.drawable), contentDescription, modifier, tint)
         }
         is Icon.Resource -> Icon(painterResource(icon.res), contentDescription, modifier, tint)
     }
