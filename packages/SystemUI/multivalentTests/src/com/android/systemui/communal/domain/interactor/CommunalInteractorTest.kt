@@ -398,6 +398,7 @@ class CommunalInteractorTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     fun ctaTile_showsByDefault() =
         kosmos.runTest {
             fakeCommunalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
@@ -412,6 +413,7 @@ class CommunalInteractorTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     fun ctaTile_afterDismiss_doesNotShow() =
         kosmos.runTest {
             // Set to main user, so we can dismiss the tile for the main user.
