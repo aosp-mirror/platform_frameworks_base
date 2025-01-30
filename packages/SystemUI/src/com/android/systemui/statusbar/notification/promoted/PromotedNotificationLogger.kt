@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.promoted
 
 import androidx.constraintlayout.widget.ConstraintSet
+import com.android.systemui.keyguard.ui.view.layout.sections.AodPromotedNotificationSection
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel.ERROR
 import com.android.systemui.log.core.LogLevel.INFO
@@ -25,6 +26,7 @@ import com.android.systemui.statusbar.notification.logKey
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import javax.inject.Inject
 
+@OptIn(ExperimentalStdlibApi::class)
 class PromotedNotificationLogger
 @Inject
 constructor(@PromotedNotificationLog private val buffer: LogBuffer) {
@@ -92,20 +94,44 @@ constructor(@PromotedNotificationLog private val buffer: LogBuffer) {
         buffer.log(AOD_VIEW_BINDER_TAG, INFO, "binder unbound notification")
     }
 
-    fun logSectionAddedViews() {
-        buffer.log(AOD_SECTION_TAG, INFO, "section added views")
+    fun logSectionCreated(section: AodPromotedNotificationSection) {
+        buffer.log(
+            AOD_SECTION_TAG,
+            INFO,
+            "section ${System.identityHashCode(section).toHexString()} created",
+        )
     }
 
-    fun logSectionBoundData() {
-        buffer.log(AOD_SECTION_TAG, INFO, "section bound data")
+    fun logSectionAddedViews(section: AodPromotedNotificationSection) {
+        buffer.log(
+            AOD_SECTION_TAG,
+            INFO,
+            "section ${System.identityHashCode(section).toHexString()} added views",
+        )
     }
 
-    fun logSectionAppliedConstraints() {
-        buffer.log(AOD_SECTION_TAG, INFO, "section applied constraints")
+    fun logSectionBoundData(section: AodPromotedNotificationSection) {
+        buffer.log(
+            AOD_SECTION_TAG,
+            INFO,
+            "section ${System.identityHashCode(section).toHexString()} bound data",
+        )
     }
 
-    fun logSectionRemovedViews() {
-        buffer.log(AOD_SECTION_TAG, INFO, "section removed views")
+    fun logSectionAppliedConstraints(section: AodPromotedNotificationSection) {
+        buffer.log(
+            AOD_SECTION_TAG,
+            INFO,
+            "section ${System.identityHashCode(section).toHexString()} applied constraints",
+        )
+    }
+
+    fun logSectionRemovedViews(section: AodPromotedNotificationSection) {
+        buffer.log(
+            AOD_SECTION_TAG,
+            INFO,
+            "section ${System.identityHashCode(section).toHexString()} removed views",
+        )
     }
 }
 
