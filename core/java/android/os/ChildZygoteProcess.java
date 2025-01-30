@@ -67,12 +67,15 @@ public class ChildZygoteProcess extends ZygoteProcess {
         if (mDead.get()) {
             return true;
         }
+        StrictMode.ThreadPolicy oldStrictModeThreadPolicy = StrictMode.allowThreadDiskReads();
         try {
             if (Os.stat("/proc/" + mPid).st_uid == mUid) {
                 return false;
             }
         } catch (ErrnoException e) {
             // Do nothing, it's dead.
+        } finally {
+            StrictMode.setThreadPolicy(oldStrictModeThreadPolicy);
         }
         mDead.set(true);
         return true;
