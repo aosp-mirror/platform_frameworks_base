@@ -509,3 +509,11 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "display_category_built_in"
+    namespace: "display_manager"
+    description: "Add a new category to get the built in displays."
+    bug: "293651324"
+    is_fixed_read_only: false
+}
