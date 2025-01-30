@@ -311,7 +311,7 @@ constructor(
         SceneTransitionLayout(state = sceneState, modifier = Modifier.fillMaxSize()) {
             scene(QuickSettings) {
                 LaunchedEffect(Unit) { viewModel.onQSOpen() }
-                QuickSettingsElement()
+                QuickSettingsElement(Modifier.element(QuickSettings.rootElementKey))
             }
 
             scene(QuickQuickSettings) {
