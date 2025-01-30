@@ -109,7 +109,7 @@ import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.server.LocalServices;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.pm.BackgroundUserSoundNotifier;
-import com.android.server.pm.UserManagerService;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.vibrator.VibrationSession.Status;
 
 import org.junit.After;
@@ -898,7 +898,7 @@ public class VibratorManagerServiceTest {
 
     @Test
     public void vibrate_thenFgUserRequestsMute_getsCancelled() throws Throwable {
-        assumeTrue(UserManagerService.shouldShowNotificationForBackgroundUserSounds());
+        assumeTrue(UserManagerInternal.shouldShowNotificationForBackgroundUserSounds());
         mockVibrators(1);
         VibratorManagerService service = createSystemReadyService();
 
@@ -2760,7 +2760,7 @@ public class VibratorManagerServiceTest {
 
     @Test
     public void onExternalVibration_thenFgUserRequestsMute_doNotCancelVibration() throws Throwable {
-        assumeTrue(UserManagerService.shouldShowNotificationForBackgroundUserSounds());
+        assumeTrue(UserManagerInternal.shouldShowNotificationForBackgroundUserSounds());
         mockVibrators(1);
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
         VibratorManagerService service = createSystemReadyService();
