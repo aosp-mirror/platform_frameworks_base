@@ -69,6 +69,7 @@ class UserProfileContextsTest : ShellTestCase() {
             }
             .whenever(baseContext)
             .createContextAsUser(any<UserHandle>(), anyInt())
+        doReturn(DEFAULT_USER).whenever(baseContext).userId
         // Define users and profiles
         val currentUser = ActivityManager.getCurrentUser()
         whenever(userManager.getProfiles(eq(currentUser)))
@@ -136,6 +137,25 @@ class UserProfileContextsTest : ShellTestCase() {
         assertThat(userProfilesContexts[SECOND_PROFILE]?.userId).isEqualTo(SECOND_PROFILE)
     }
 
+    @Test
+    fun onUserProfilesChanged_keepDefaultUser() {
+        val userChangeListener = retrieveUserChangeListener()
+        val newUserContext = createContextForUser(SECOND_USER)
+
+        userChangeListener.onUserChanged(SECOND_USER, newUserContext)
+        userChangeListener.onUserProfilesChanged(SECOND_PROFILES)
+
+        assertThat(userProfilesContexts[DEFAULT_USER]).isEqualTo(baseContext)
+    }
+
+    @Test
+    fun getOrCreate_newUser_shouldCreateTheUser() {
+        val newContext = userProfilesContexts.getOrCreate(SECOND_USER)
+
+        assertThat(newContext).isNotNull()
+        assertThat(userProfilesContexts[SECOND_USER]).isEqualTo(newContext)
+    }
+
     private fun retrieveUserChangeListener(): UserChangeListener {
         val captor = argumentCaptor<UserChangeListener>()
 
@@ -155,6 +175,7 @@ class UserProfileContextsTest : ShellTestCase() {
         const val MAIN_PROFILE = 11
         const val SECOND_PROFILE = 15
         const val SECOND_PROFILE_2 = 17
+        const val DEFAULT_USER = 25
 
         val SECOND_PROFILES =
             listOf(

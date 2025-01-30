@@ -25,6 +25,7 @@ import android.util.SparseArray
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.sysui.UserChangeListener
+import androidx.core.util.size
 
 /** Creates and manages contexts for all the profiles of the current user. */
 class UserProfileContexts(
@@ -34,6 +35,8 @@ class UserProfileContexts(
 ) {
     // Contexts for all the profiles of the current user.
     private val currentProfilesContext = SparseArray<Context>()
+
+    private val shellUserId = baseContext.userId
 
     lateinit var userContext: Context
         private set
@@ -49,6 +52,9 @@ class UserProfileContexts(
                     currentProfilesContext.clear()
                     this@UserProfileContexts.userContext = userContext
                     currentProfilesContext.put(newUserId, userContext)
+                    if (newUserId != shellUserId) {
+                        currentProfilesContext.put(shellUserId, baseContext)
+                    }
                 }
 
                 override fun onUserProfilesChanged(profiles: List<UserInfo>) {
@@ -69,9 +75,9 @@ class UserProfileContexts(
             currentProfilesContext.put(profile.id, profileContext)
         }
         val profilesToRemove = buildList<Int> {
-            for (i in 0..<currentProfilesContext.size()) {
+            for (i in 0..<currentProfilesContext.size) {
                 val userId = currentProfilesContext.keyAt(i)
-                if (profiles.none { it.id == userId }) {
+                if (userId != shellUserId && profiles.none { it.id == userId }) {
                     add(userId)
                 }
             }
@@ -80,4 +86,12 @@ class UserProfileContexts(
     }
 
     operator fun get(userId: Int): Context? = currentProfilesContext.get(userId)
+
+    fun getOrCreate(userId: Int): Context {
+        val context = currentProfilesContext[userId]
+        if (context != null) return context
+        return baseContext.createContextAsUser(UserHandle.of(userId), /* flags= */ 0).also {
+            currentProfilesContext[userId] = it
+        }
+    }
 }
