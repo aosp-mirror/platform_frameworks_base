@@ -74,6 +74,7 @@ val Kosmos.shadeDisplayPolicies: Set<ShadeDisplayPolicy> by
             defaultShadeDisplayPolicy,
             anyExternalShadeDisplayPolicy,
             statusBarTouchShadeDisplayPolicy,
+            focusShadeDisplayPolicy,
             FakeShadeDisplayPolicy,
         )
     }
