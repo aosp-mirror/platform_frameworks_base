@@ -16,6 +16,8 @@
 
 package android.os;
 
+import com.android.internal.ravenwood.RavenwoodEnvironment;
+
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 
@@ -29,6 +31,7 @@ import java.util.function.Supplier;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class PerfettoTrackEventExtra {
     private static final int DEFAULT_EXTRA_CACHE_SIZE = 5;
     private static final Builder NO_OP_BUILDER = new NoOpBuilder();
@@ -305,6 +308,7 @@ public final class PerfettoTrackEventExtra {
         Builder endNested();
     }
 
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static final class NoOpBuilder implements Builder {
         @Override
         public void emit() {}
@@ -759,7 +763,9 @@ public final class PerfettoTrackEventExtra {
 
     private PerfettoTrackEventExtra() {
         mPtr = native_init();
-        sRegistry.registerNativeAllocation(this, mPtr);
+        if (!RavenwoodEnvironment.getInstance().isRunningOnRavenwood()) {
+            sRegistry.registerNativeAllocation(this, mPtr);
+        }
     }
 
     /**
@@ -1342,8 +1348,10 @@ public final class PerfettoTrackEventExtra {
     }
 
     @CriticalNative
+    @android.ravenwood.annotation.RavenwoodReplace
     private static native long native_init();
     @CriticalNative
+    @android.ravenwood.annotation.RavenwoodReplace
     private static native long native_delete();
     @CriticalNative
     private static native void native_add_arg(long ptr, long extraPtr);
@@ -1351,4 +1359,14 @@ public final class PerfettoTrackEventExtra {
     private static native void native_clear_args(long ptr);
     @FastNative
     private static native void native_emit(int type, long tag, String name, long ptr);
+
+    private static long native_init$ravenwood() {
+        // Tracing currently completely disabled under Ravenwood
+        return 0;
+    }
+
+    private static long native_delete$ravenwood() {
+        // Tracing currently completely disabled under Ravenwood
+        return 0;
+    }
 }

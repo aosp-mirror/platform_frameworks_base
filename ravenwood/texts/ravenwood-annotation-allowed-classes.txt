@@ -151,6 +151,10 @@ android.os.Looper
 android.os.Message
 android.os.MessageQueue
 android.os.MessageQueue_ravenwood
+android.os.PerfettoTrace
+android.os.PerfettoTrace$Category
+android.os.PerfettoTrackEventExtra
+android.os.PerfettoTrackEventExtra$NoOpBuilder
 android.os.PackageTagsList
 android.os.Parcel
 android.os.ParcelFileDescriptor

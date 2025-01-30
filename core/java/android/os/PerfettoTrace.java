@@ -16,6 +16,8 @@
 
 package android.os;
 
+import com.android.internal.ravenwood.RavenwoodEnvironment;
+
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 
@@ -32,6 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class PerfettoTrace {
     private static final String TAG = "PerfettoTrace";
 
@@ -53,6 +56,7 @@ public final class PerfettoTrace {
      * Registering a category is not sufficient to capture events within the category, it must
      * also be enabled in the trace config.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static final class Category implements PerfettoTrackEventExtra.PerfettoPointer {
         private static final NativeAllocationRegistry sRegistry =
                 NativeAllocationRegistry.createMalloced(
@@ -97,12 +101,16 @@ public final class PerfettoTrace {
             mSeverity = severity;
             mPtr = native_init(name, tag, severity);
             mExtraPtr = native_get_extra_ptr(mPtr);
-            sRegistry.registerNativeAllocation(this, mPtr);
+            if (!RavenwoodEnvironment.getInstance().isRunningOnRavenwood()) {
+                sRegistry.registerNativeAllocation(this, mPtr);
+            }
         }
 
         @FastNative
+        @android.ravenwood.annotation.RavenwoodReplace
         private static native long native_init(String name, String tag, String severity);
         @CriticalNative
+        @android.ravenwood.annotation.RavenwoodReplace
         private static native long native_delete();
         @CriticalNative
         private static native void native_register(long ptr);
@@ -111,7 +119,23 @@ public final class PerfettoTrace {
         @CriticalNative
         private static native boolean native_is_enabled(long ptr);
         @CriticalNative
+        @android.ravenwood.annotation.RavenwoodReplace
         private static native long native_get_extra_ptr(long ptr);
+
+        private static long native_init$ravenwood(String name, String tag, String severity) {
+            // Tracing currently completely disabled under Ravenwood
+            return 0;
+        }
+
+        private static long native_delete$ravenwood() {
+            // Tracing currently completely disabled under Ravenwood
+            return 0;
+        }
+
+        private static long native_get_extra_ptr$ravenwood(long ptr) {
+            // Tracing currently completely disabled under Ravenwood
+            return 0;
+        }
 
         /**
          * Register the category.
@@ -134,8 +158,14 @@ public final class PerfettoTrace {
         /**
          * Whether the category is enabled or not.
          */
+        @android.ravenwood.annotation.RavenwoodReplace
         public boolean isEnabled() {
             return IS_FLAG_ENABLED && native_is_enabled(mPtr);
+        }
+
+        public boolean isEnabled$ravenwood() {
+            // Tracing currently completely disabled under Ravenwood
+            return false;
         }
 
         /**
