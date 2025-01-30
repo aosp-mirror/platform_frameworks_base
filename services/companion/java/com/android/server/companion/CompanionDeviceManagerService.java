@@ -47,6 +47,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
+import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ecm.EnhancedConfirmationManager;
@@ -302,8 +303,17 @@ public class CompanionDeviceManagerService extends SystemService {
             enforceCallerCanManageAssociationsForPackage(getContext(), userId, packageName,
                     "create associations");
 
-            mAssociationRequestsProcessor.processNewAssociationRequest(
-                    request, packageName, userId, callback);
+            if (request.isSkipRoleGrant()) {
+                checkCallerCanSkipRoleGrant();
+                mAssociationRequestsProcessor.createAssociation(userId, packageName,
+                        /* macAddress= */ null, request.getDisplayName(),
+                        request.getDeviceProfile(), /* associatedDevice= */ null,
+                        request.isSelfManaged(), callback, /* resultReceiver= */ null,
+                        request.getDeviceIcon(), /* skipRoleGrant= */ true);
+            } else {
+                mAssociationRequestsProcessor.processNewAssociationRequest(
+                        request, packageName, userId, callback);
+            }
         }
 
         @Override
@@ -669,7 +679,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
             final MacAddress macAddressObj = MacAddress.fromString(macAddress);
             mAssociationRequestsProcessor.createAssociation(userId, packageName, macAddressObj,
-                    null, null, null, false, null, null, null);
+                    null, null, null, false, null, null, null, false);
         }
 
         private void checkCanCallNotificationApi(String callingPackage, int userId) {
@@ -682,6 +692,19 @@ public class CompanionDeviceManagerService extends SystemService {
                             mAssociationStore.getActiveAssociationsByPackage(userId,
                                     callingPackage)),
                     "App must have an association before calling this API");
+        }
+
+        private void checkCallerCanSkipRoleGrant() {
+            final KeyguardManager keyguardManager =
+                    getContext().getSystemService(KeyguardManager.class);
+            if (keyguardManager != null && keyguardManager.isKeyguardSecure()) {
+                throw new SecurityException("Skipping CDM role grant requires insecure keyguard.");
+            }
+            if (getContext().checkCallingPermission(ASSOCIATE_COMPANION_DEVICES)
+                    != PERMISSION_GRANTED) {
+                throw new SecurityException(
+                        "Skipping CDM role grant requires ASSOCIATE_COMPANION_DEVICES permission.");
+            }
         }
 
         @Override

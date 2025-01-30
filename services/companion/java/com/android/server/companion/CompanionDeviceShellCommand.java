@@ -106,8 +106,9 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     boolean selfManaged = getNextBooleanArg();
                     final MacAddress macAddress = MacAddress.fromString(address);
                     mAssociationRequestsProcessor.createAssociation(userId, packageName, macAddress,
-                            deviceProfile, deviceProfile, /* associatedDevice */ null, selfManaged,
-                            /* callback */ null, /* resultReceiver */ null, /* deviceIcon */ null);
+                            deviceProfile, deviceProfile, /* associatedDevice= */ null, selfManaged,
+                            /* callback= */ null, /* resultReceiver= */ null,
+                            /* deviceIcon= */ null, /* skipRoleGrant= */ false);
                 }
                 break;
 
