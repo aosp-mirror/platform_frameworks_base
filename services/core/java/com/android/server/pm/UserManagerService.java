@@ -60,7 +60,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SpecialUsers.CanBeALL;
 import android.annotation.SpecialUsers.CanBeCURRENT;
 import android.annotation.SpecialUsers.CanBeNULL;
-import android.annotation.SpecialUsers.CannotBeSpecialUser;
 import android.annotation.StringRes;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -7550,6 +7549,10 @@ public class UserManagerService extends IUserManager.Stub {
             if (mUpdatingSystemUserMode) {
                 pw.println("  (and being updated after boot)");
             }
+        }
+        if (isHeadlessSystemUserMode) {
+            pw.println("  Can switch to headless system user: " + Resources.getSystem()
+                    .getBoolean(com.android.internal.R.bool.config_canSwitchToHeadlessSystemUser));
         }
         pw.println("  User version: " + mUserVersion);
         pw.println("  Owner name: " + getOwnerName());
