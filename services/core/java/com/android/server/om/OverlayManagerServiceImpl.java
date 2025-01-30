@@ -715,20 +715,11 @@ final class OverlayManagerServiceImpl {
     }
 
     void dump(@NonNull final PrintWriter pw, @NonNull DumpState dumpState) {
-        Pair<OverlayIdentifier, String> overlayIdmap = null;
-        if (dumpState.getPackageName() != null) {
-            OverlayIdentifier id = new OverlayIdentifier(dumpState.getPackageName(),
-                    dumpState.getOverlayName());
-            OverlayInfo oi = mSettings.getNullableOverlayInfo(id, USER_SYSTEM);
-            if (oi != null) {
-                overlayIdmap = new Pair<>(id, oi.baseCodePath);
-            }
-        }
-
         // settings
         mSettings.dump(pw, dumpState);
 
         // idmap data
+        final var overlayIdmap = mSettings.getIdentifierAndBaseCodePath(dumpState);
         if (dumpState.getField() == null) {
             Set<Pair<OverlayIdentifier, String>> allIdmaps = (overlayIdmap != null)
                     ? Set.of(overlayIdmap) : mSettings.getAllIdentifiersAndBaseCodePaths();

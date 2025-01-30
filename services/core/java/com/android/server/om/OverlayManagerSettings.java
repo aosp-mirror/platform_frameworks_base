@@ -212,15 +212,39 @@ final class OverlayManagerSettings {
     }
 
     Set<String> getAllBaseCodePaths() {
+        // Overlays installed for multiple users have the same code path, avoid duplicates with Set.
         final Set<String> paths = new ArraySet<>();
         mItems.forEach(item -> paths.add(item.mBaseCodePath));
         return paths;
     }
 
     Set<Pair<OverlayIdentifier, String>> getAllIdentifiersAndBaseCodePaths() {
+        // Overlays installed for multiple users have the same code path, avoid duplicates with Set.
         final Set<Pair<OverlayIdentifier, String>> set = new ArraySet<>();
-        mItems.forEach(item -> set.add(new Pair(item.mOverlay, item.mBaseCodePath)));
+        mItems.forEach(item -> set.add(new Pair<>(item.mOverlay, item.mBaseCodePath)));
         return set;
+    }
+
+    @Nullable
+    Pair<OverlayIdentifier, String> getIdentifierAndBaseCodePath(@NonNull DumpState dumpState) {
+        if (dumpState.getPackageName() == null) {
+            return null;
+        }
+        OverlayIdentifier id = new OverlayIdentifier(dumpState.getPackageName(),
+                dumpState.getOverlayName());
+        final int userId = dumpState.getUserId();
+        for (int i = 0; i < mItems.size(); i++) {
+            final var item = mItems.get(i);
+            if (userId != UserHandle.USER_ALL && userId != item.mUserId) {
+                continue;
+            }
+            if (!id.equals(item.mOverlay)) {
+                continue;
+            }
+            // Overlays installed for multiple users have the same code path, return first found.
+            return new Pair<>(id, item.mBaseCodePath);
+        }
+        return null;
     }
 
     @NonNull
