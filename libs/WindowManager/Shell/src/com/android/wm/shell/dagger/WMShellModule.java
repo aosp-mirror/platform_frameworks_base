@@ -59,7 +59,7 @@ import com.android.wm.shell.bubbles.BubbleDataRepository;
 import com.android.wm.shell.bubbles.BubbleEducationController;
 import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubblePositioner;
-import com.android.wm.shell.bubbles.properties.ProdBubbleProperties;
+import com.android.wm.shell.bubbles.BubbleResizabilityChecker;
 import com.android.wm.shell.bubbles.storage.BubblePersistentRepository;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
@@ -294,7 +294,7 @@ public abstract class WMShellModule {
                 transitions,
                 syncQueue,
                 wmService,
-                ProdBubbleProperties.INSTANCE);
+                new BubbleResizabilityChecker());
     }
 
     //

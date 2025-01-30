@@ -26,6 +26,6 @@ interface INoteTaskBubblesService {
 
     boolean areBubblesAvailable();
 
-    void showOrHideAppBubble(in Intent intent, in UserHandle userHandle, in Icon icon,
+    void showOrHideNoteBubble(in Intent intent, in UserHandle userHandle, in Icon icon,
      in NoteTaskBubbleExpandBehavior bubbleExpandBehavior);
 }

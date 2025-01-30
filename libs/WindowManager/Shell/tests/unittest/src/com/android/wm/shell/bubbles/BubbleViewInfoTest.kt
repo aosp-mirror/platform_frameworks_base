@@ -34,7 +34,6 @@ import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView
-import com.android.wm.shell.bubbles.properties.BubbleProperties
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayImeController
 import com.android.wm.shell.common.DisplayInsetsController
@@ -143,7 +142,7 @@ class BubbleViewInfoTest : ShellTestCase() {
                 mock<Transitions>(),
                 mock<SyncTransactionQueue>(),
                 mock<IWindowManager>(),
-                mock<BubbleProperties>()
+                BubbleResizabilityChecker()
             )
 
         val bubbleStackViewManager = BubbleStackViewManager.fromBubbleController(bubbleController)

@@ -758,20 +758,20 @@ public class BubblePositioner {
      * is being shown, for a normal bubble.
      */
     public PointF getDefaultStartPosition() {
-        return getDefaultStartPosition(false /* isAppBubble */);
+        return getDefaultStartPosition(false /* isNoteBubble */);
     }
 
     /**
      * The stack position to use if we don't have a saved location or if user education
      * is being shown.
      *
-     * @param isAppBubble whether this start position is for an app bubble or not.
+     * @param isNoteBubble whether this start position is for a note bubble or not.
      */
-    public PointF getDefaultStartPosition(boolean isAppBubble) {
+    public PointF getDefaultStartPosition(boolean isNoteBubble) {
         // Normal bubbles start on the left if we're in LTR, right otherwise.
         // TODO (b/294284894): update language around "app bubble" here
         // App bubbles start on the right in RTL, left otherwise.
-        final boolean startOnLeft = isAppBubble ? mDeviceConfig.isRtl() : !mDeviceConfig.isRtl();
+        final boolean startOnLeft = isNoteBubble ? mDeviceConfig.isRtl() : !mDeviceConfig.isRtl();
         return getStartPosition(startOnLeft ? StackPinnedEdge.LEFT : StackPinnedEdge.RIGHT);
     }
 

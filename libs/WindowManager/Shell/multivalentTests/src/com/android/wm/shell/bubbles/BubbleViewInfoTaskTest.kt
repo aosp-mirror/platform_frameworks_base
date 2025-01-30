@@ -35,7 +35,6 @@ import com.android.internal.protolog.ProtoLog
 import com.android.internal.statusbar.IStatusBarService
 import com.android.launcher3.icons.BubbleIconFactory
 import com.android.wm.shell.ShellTaskOrganizer
-import com.android.wm.shell.bubbles.properties.BubbleProperties
 import com.android.wm.shell.bubbles.storage.BubblePersistentRepository
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayImeController
@@ -161,7 +160,7 @@ class BubbleViewInfoTaskTest {
                 mock<Transitions>(),
                 SyncTransactionQueue(TransactionPool(), mainExecutor),
                 mock<IWindowManager>(),
-                mock<BubbleProperties>()
+                BubbleResizabilityChecker()
             )
 
         // TODO: (b/371829099) - when optional overflow is no longer flagged we can enable this

@@ -72,11 +72,17 @@ import java.util.concurrent.Executor;
 public class Bubble implements BubbleViewProvider {
     private static final String TAG = "Bubble";
 
-    /** A string suffix used in app bubbles' {@link #mKey}. */
+    /** A string prefix used in app bubbles' {@link #mKey}. */
     public static final String KEY_APP_BUBBLE = "key_app_bubble";
+
+    /** A string prefix used in note bubbles' {@link #mKey}. */
+    public static final String KEY_NOTE_BUBBLE = "key_note_bubble";
 
     /** Whether the bubble is an app bubble. */
     private final boolean mIsAppBubble;
+
+    /** Whether the bubble is a notetaking bubble. */
+    private final boolean mIsNoteBubble;
 
     private final String mKey;
     @Nullable
@@ -245,6 +251,7 @@ public class Bubble implements BubbleViewProvider {
         mTaskId = taskId;
         mBubbleMetadataFlagListener = listener;
         mIsAppBubble = false;
+        mIsNoteBubble = false;
     }
 
     private Bubble(
@@ -252,6 +259,7 @@ public class Bubble implements BubbleViewProvider {
             UserHandle user,
             @Nullable Icon icon,
             boolean isAppBubble,
+            boolean isNoteBubble,
             String key,
             @ShellMainThread Executor mainExecutor,
             @ShellBackgroundThread Executor bgExecutor) {
@@ -261,6 +269,7 @@ public class Bubble implements BubbleViewProvider {
         mUser = user;
         mIcon = icon;
         mIsAppBubble = isAppBubble;
+        mIsNoteBubble = isNoteBubble;
         mKey = key;
         mShowBubbleUpdateDot = false;
         mMainExecutor = mainExecutor;
@@ -279,6 +288,7 @@ public class Bubble implements BubbleViewProvider {
         mUser = info.getUserHandle();
         mIcon = info.getIcon();
         mIsAppBubble = false;
+        mIsNoteBubble = false;
         mKey = getBubbleKeyForShortcut(info);
         mShowBubbleUpdateDot = false;
         mMainExecutor = mainExecutor;
@@ -303,6 +313,7 @@ public class Bubble implements BubbleViewProvider {
         mUser = user;
         mIcon = icon;
         mIsAppBubble = true;
+        mIsNoteBubble = false;
         mKey = key;
         mShowBubbleUpdateDot = false;
         mMainExecutor = mainExecutor;
@@ -313,6 +324,17 @@ public class Bubble implements BubbleViewProvider {
         mPackageName = task.baseActivity.getPackageName();
     }
 
+    /** Creates a notetaking bubble. */
+    public static Bubble createNotesBubble(Intent intent, UserHandle user, @Nullable Icon icon,
+            @ShellMainThread Executor mainExecutor, @ShellBackgroundThread Executor bgExecutor) {
+        return new Bubble(intent,
+                user,
+                icon,
+                /* isAppBubble= */ true,
+                /* isNoteBubble= */ true,
+                /* key= */ getNoteBubbleKeyForApp(intent.getPackage(), user),
+                mainExecutor, bgExecutor);
+    }
 
     /** Creates an app bubble. */
     public static Bubble createAppBubble(Intent intent, UserHandle user, @Nullable Icon icon,
@@ -321,6 +343,7 @@ public class Bubble implements BubbleViewProvider {
                 user,
                 icon,
                 /* isAppBubble= */ true,
+                /* isNoteBubble= */ false,
                 /* key= */ getAppBubbleKeyForApp(intent.getPackage(), user),
                 mainExecutor, bgExecutor);
     }
@@ -353,6 +376,16 @@ public class Bubble implements BubbleViewProvider {
     }
 
     /**
+     * Returns the key for a note bubble from an app with package name, {@code packageName} on an
+     * Android user, {@code user}.
+     */
+    public static String getNoteBubbleKeyForApp(String packageName, UserHandle user) {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(user);
+        return KEY_NOTE_BUBBLE + ":" + user.getIdentifier()  + ":" + packageName;
+    }
+
+    /**
      * Returns the key for a shortcut bubble using {@code packageName}, {@code user}, and the
      * {@code shortcutInfo} id.
      */
@@ -375,6 +408,7 @@ public class Bubble implements BubbleViewProvider {
             final Bubbles.PendingIntentCanceledListener intentCancelListener,
             @ShellMainThread Executor mainExecutor, @ShellBackgroundThread Executor bgExecutor) {
         mIsAppBubble = false;
+        mIsNoteBubble = false;
         mKey = entry.getKey();
         mGroupKey = entry.getGroupKey();
         mLocusId = entry.getLocusId();
@@ -1122,10 +1156,17 @@ public class Bubble implements BubbleViewProvider {
     }
 
     /**
-     * Returns whether this bubble is from an app versus a notification.
+     * Returns whether this bubble is from an app (as well as notetaking) versus a notification.
      */
     public boolean isAppBubble() {
         return mIsAppBubble;
+    }
+
+    /**
+     * Returns whether this bubble is specific from the notetaking API.
+     */
+    public boolean isNoteBubble() {
+        return mIsNoteBubble;
     }
 
     /** Creates open app settings intent */

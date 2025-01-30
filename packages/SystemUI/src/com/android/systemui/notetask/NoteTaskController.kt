@@ -96,7 +96,7 @@ constructor(
 
         val info = infoReference.getAndSet(null) ?: return
 
-        if (key != Bubble.getAppBubbleKeyForApp(info.packageName, info.user)) return
+        if (key != Bubble.getNoteBubbleKeyForApp(info.packageName, info.user)) return
 
         // Safe guard mechanism, this callback should only be called for app bubbles.
         if (info.launchMode !is NoteTaskLaunchMode.AppBubble) return
@@ -219,7 +219,7 @@ constructor(
                     val intent = createNoteTaskIntent(info, useStylusMode)
                     val icon =
                         Icon.createWithResource(context, R.drawable.ic_note_task_shortcut_widget)
-                    noteTaskBubblesController.showOrHideAppBubble(
+                    noteTaskBubblesController.showOrHideNoteBubble(
                         intent,
                         user,
                         icon,
