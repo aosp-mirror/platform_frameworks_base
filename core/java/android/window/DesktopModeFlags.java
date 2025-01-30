@@ -95,7 +95,9 @@ public enum DesktopModeFlags {
         Flags::enableTopVisibleRootTaskPerUserTracking, true),
     ENABLE_DESKTOP_RECENTS_TRANSITIONS_CORNERS_BUGFIX(
             Flags::enableDesktopRecentsTransitionsCornersBugfix, false),
-    ENABLE_DESKTOP_SYSTEM_DIALOGS_TRANSITIONS(Flags::enableDesktopSystemDialogsTransitions, true);
+    ENABLE_DESKTOP_SYSTEM_DIALOGS_TRANSITIONS(Flags::enableDesktopSystemDialogsTransitions, true),
+    ENABLE_DESKTOP_WINDOWING_MULTI_INSTANCE_FEATURES(
+        Flags::enableDesktopWindowingMultiInstanceFeatures, true);
 
     /**
      * Flag class, to be used in case the enum cannot be used because the flag is not accessible.

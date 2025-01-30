@@ -1364,7 +1364,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         updateGenericLink();
         final boolean supportsMultiInstance = mMultiInstanceHelper
                 .supportsMultiInstanceSplit(mTaskInfo.baseActivity, mTaskInfo.userId)
-                && Flags.enableDesktopWindowingMultiInstanceFeatures();
+                && DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MULTI_INSTANCE_FEATURES.isTrue();
         final boolean shouldShowManageWindowsButton = supportsMultiInstance
                 && mMinimumInstancesFound;
         final boolean shouldShowChangeAspectRatioButton = HandleMenu.Companion
