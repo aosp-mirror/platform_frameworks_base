@@ -61,7 +61,7 @@ public class DisplayManagerFlags {
 
     private final FlagState mDisplayTopology = new FlagState(
             Flags.FLAG_DISPLAY_TOPOLOGY,
-            Flags::displayTopology);
+            DesktopExperienceFlags.DISPLAY_TOPOLOGY::isTrue);
 
     private final FlagState mConnectedDisplayErrorHandlingFlagState = new FlagState(
             Flags.FLAG_ENABLE_CONNECTED_DISPLAY_ERROR_HANDLING,
@@ -267,7 +267,7 @@ public class DisplayManagerFlags {
 
     private final FlagState mBaseDensityForExternalDisplays = new FlagState(
             Flags.FLAG_BASE_DENSITY_FOR_EXTERNAL_DISPLAYS,
-            Flags::baseDensityForExternalDisplays
+            DesktopExperienceFlags.BASE_DENSITY_FOR_EXTERNAL_DISPLAYS::isTrue
     );
 
     private final FlagState mFramerateOverrideTriggersRrCallbacks = new FlagState(
