@@ -31,6 +31,7 @@ import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE;
 import static android.app.ActivityManagerInternal.ALLOW_PROFILES_OR_NON_FULL;
+import static android.app.KeyguardManager.LOCK_ON_USER_SWITCH_CALLBACK;
 import static android.os.PowerWhitelistManager.REASON_BOOT_COMPLETED;
 import static android.os.PowerWhitelistManager.REASON_LOCKED_BOOT_COMPLETED;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
@@ -3904,10 +3905,6 @@ class UserController implements Handler.Callback {
             return mService.mWindowManager;
         }
 
-        ActivityTaskManagerInternal getActivityTaskManagerInternal() {
-            return mService.mAtmInternal;
-        }
-
         void activityManagerOnUserStopped(@UserIdInt int userId) {
             LocalServices.getService(ActivityTaskManagerInternal.class).onUserStopped(userId);
         }
@@ -4122,40 +4119,25 @@ class UserController implements Handler.Callback {
         }
 
         void lockDeviceNowAndWaitForKeyguardShown() {
-            if (getWindowManager().isKeyguardLocked()) {
-                Slogf.w(TAG, "Not locking the device since the keyguard is already locked");
-                return;
-            }
-
             final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
             t.traceBegin("lockDeviceNowAndWaitForKeyguardShown");
 
             final CountDownLatch latch = new CountDownLatch(1);
-            ActivityTaskManagerInternal.ScreenObserver screenObserver =
-                    new ActivityTaskManagerInternal.ScreenObserver() {
-                        @Override
-                        public void onAwakeStateChanged(boolean isAwake) {
-
-                        }
-
-                        @Override
-                        public void onKeyguardStateChanged(boolean isShowing) {
-                            if (isShowing) {
-                                latch.countDown();
-                            }
-                        }
-                    };
-
-            getActivityTaskManagerInternal().registerScreenObserver(screenObserver);
-            getWindowManager().lockDeviceNow();
+            Bundle bundle = new Bundle();
+            bundle.putBinder(LOCK_ON_USER_SWITCH_CALLBACK, new IRemoteCallback.Stub() {
+                public void sendResult(Bundle data) {
+                    latch.countDown();
+                }
+            });
+            getWindowManager().lockNow(bundle);
             try {
                 if (!latch.await(20, TimeUnit.SECONDS)) {
-                    throw new RuntimeException("Keyguard is not shown in 20 seconds");
+                    throw new RuntimeException("User controller expected a callback while waiting "
+                            + "to show the keyguard. Timed out after 20 seconds.");
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             } finally {
-                getActivityTaskManagerInternal().unregisterScreenObserver(screenObserver);
                 t.traceEnd();
             }
         }
