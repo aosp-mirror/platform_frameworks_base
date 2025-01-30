@@ -1929,27 +1929,17 @@ public class NotificationManagerService extends SystemService {
         if (DBG) {
             Slog.v(TAG, "unclassifyNotification: " + r);
         }
-
-        boolean hasOriginalSummary = false;
-        if (r.getSbn().isAppGroup() && r.getNotification().isGroupChild()) {
-            final String oldGroupKey = GroupHelper.getFullAggregateGroupKey(
-                    r.getSbn().getPackageName(), r.getOriginalGroupKey(), r.getUserId());
-            NotificationRecord groupSummary = mSummaryByGroupKey.get(oldGroupKey);
-            // We only care about app-provided valid groups
-            hasOriginalSummary = (groupSummary != null
-                    && !GroupHelper.isAggregatedGroup(groupSummary));
-        }
-
         // Only NotificationRecord's mChannel is updated when bundled, the Notification
         // mChannelId will always be the original channel.
         String origChannelId = r.getNotification().getChannelId();
         NotificationChannel originalChannel = mPreferencesHelper.getNotificationChannel(
                 r.getSbn().getPackageName(), r.getUid(), origChannelId, false);
         String currChannelId = r.getChannel().getId();
-        boolean isBundled = NotificationChannel.SYSTEM_RESERVED_IDS.contains(currChannelId);
-        if (originalChannel != null && !origChannelId.equals(currChannelId) && isBundled) {
+        boolean isClassified = NotificationChannel.SYSTEM_RESERVED_IDS.contains(currChannelId);
+        if (originalChannel != null && !origChannelId.equals(currChannelId) && isClassified) {
             r.updateNotificationChannel(originalChannel);
-            mGroupHelper.onNotificationUnbundled(r, hasOriginalSummary);
+            mGroupHelper.onNotificationUnbundled(r,
+                    GroupHelper.isOriginalGroupSummaryPresent(r, mSummaryByGroupKey));
         }
     }
 
@@ -2034,9 +2024,9 @@ public class NotificationManagerService extends SystemService {
             Slog.v(TAG, "reclassifyNotification: " + r);
         }
 
-        boolean isBundled = NotificationChannel.SYSTEM_RESERVED_IDS.contains(
+        boolean isClassified = NotificationChannel.SYSTEM_RESERVED_IDS.contains(
                 r.getChannel().getId());
-        if (r.getBundleType() != Adjustment.TYPE_OTHER && !isBundled) {
+        if (r.getBundleType() != Adjustment.TYPE_OTHER && !isClassified) {
             final Bundle classifBundle = new Bundle();
             classifBundle.putInt(KEY_TYPE, r.getBundleType());
             Adjustment adj = new Adjustment(r.getSbn().getPackageName(), r.getKey(),
@@ -3583,7 +3573,7 @@ public class NotificationManagerService extends SystemService {
                 synchronized (mNotificationLock) {
                     mGroupHelper.onChannelUpdated(
                             UserHandle.getUserHandleForUid(uid).getIdentifier(), pkg,
-                            updatedChannel, mNotificationList);
+                            updatedChannel, mNotificationList, mSummaryByGroupKey);
                 }
             }, DELAY_FORCE_REGROUP_TIME);
         }
