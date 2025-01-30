@@ -259,6 +259,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public static List<FlagsParameterization> getParams() {
         return FlagsParameterization.allCombinationsOf(
                 android.app.Flags.FLAG_API_RICH_ONGOING,
+                android.app.Flags.FLAG_UI_RICH_ONGOING,
                 FLAG_NOTIFICATION_CLASSIFICATION, FLAG_NOTIFICATION_CLASSIFICATION_UI,
                 FLAG_MODES_UI);
     }
@@ -661,6 +662,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         mHelper.setShowBadge(PKG_N_MR1, UID_N_MR1, true);
         if (android.app.Flags.uiRichOngoing()) {
+            mHelper.setCanBePromoted(PKG_N_MR1, UID_N_MR1, false, true);
             mHelper.setCanBePromoted(PKG_N_MR1, UID_N_MR1, true, true);
         }
 
@@ -6640,6 +6642,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Test
     @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testSetCanBePromoted_allowlistNotOverrideUser() {
+        // default value is true. So we need to set it false to trigger the change.
+        mHelper.setCanBePromoted(PKG_P, UID_P, false, true);
         mHelper.setCanBePromoted(PKG_P, UID_P, true, true);
         assertThat(mHelper.canBePromoted(PKG_P, UID_P)).isTrue();
 
