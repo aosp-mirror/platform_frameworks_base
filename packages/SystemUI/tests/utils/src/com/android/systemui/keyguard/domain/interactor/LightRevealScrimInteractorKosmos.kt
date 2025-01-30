@@ -20,6 +20,7 @@ import com.android.keyguard.logging.scrimLogger
 import com.android.systemui.keyguard.data.lightRevealScrimRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.power.domain.interactor.powerInteractor
 
 val Kosmos.lightRevealScrimInteractor by
@@ -30,5 +31,6 @@ val Kosmos.lightRevealScrimInteractor by
             applicationCoroutineScope,
             scrimLogger,
             { powerInteractor },
+            backgroundDispatcher = testDispatcher,
         )
     }

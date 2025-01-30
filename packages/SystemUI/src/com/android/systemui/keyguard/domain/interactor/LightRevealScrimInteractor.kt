@@ -15,9 +15,11 @@
  */
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.keyguard.logging.ScrimLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.data.repository.DEFAULT_REVEAL_DURATION
 import com.android.systemui.keyguard.data.repository.LightRevealScrimRepository
 import com.android.systemui.keyguard.shared.model.Edge
@@ -31,12 +33,13 @@ import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.kotlin.sample
 import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import com.android.app.tracing.coroutines.launchTraced as launch
+import kotlinx.coroutines.flow.flowOn
 
 @SysUISingleton
 class LightRevealScrimInteractor
@@ -47,6 +50,7 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val scrimLogger: ScrimLogger,
     private val powerInteractor: Lazy<PowerInteractor>,
+    @Background backgroundDispatcher: CoroutineDispatcher,
 ) {
     init {
         listenForStartedKeyguardTransitionStep()
@@ -113,6 +117,7 @@ constructor(
                     repository.maxAlpha
                 }
             }
+            .flowOn(backgroundDispatcher)
 
     val revealAmount =
         repository.revealAmount.filter {
