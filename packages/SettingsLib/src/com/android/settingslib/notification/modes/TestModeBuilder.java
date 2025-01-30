@@ -33,9 +33,11 @@ import android.service.notification.ZenPolicy;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 
-import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class TestModeBuilder {
+
+    private static final AtomicInteger sNextId = new AtomicInteger(0);
 
     private String mId;
     private AutomaticZenRule mRule;
@@ -47,7 +49,7 @@ public class TestModeBuilder {
 
     public TestModeBuilder() {
         // Reasonable defaults
-        int id = new Random().nextInt(1000);
+        int id = sNextId.incrementAndGet();
         mId = "rule_" + id;
         mRule = new AutomaticZenRule.Builder("Test Rule #" + id, Uri.parse("rule://" + id))
                 .setPackage("some_package")
