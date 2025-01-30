@@ -493,8 +493,6 @@ public final class DisplayInfo implements Parcelable {
                 && logicalDensityDpi == other.logicalDensityDpi
                 && physicalXDpi == other.physicalXDpi
                 && physicalYDpi == other.physicalYDpi
-                && appVsyncOffsetNanos == other.appVsyncOffsetNanos
-                && presentationDeadlineNanos == other.presentationDeadlineNanos
                 && state == other.state
                 && committedState == other.committedState
                 && ownerUid == other.ownerUid
@@ -517,6 +515,8 @@ public final class DisplayInfo implements Parcelable {
         if (compareRefreshRate) {
             return isEqualWithoutRefreshRate
                     && (getRefreshRate() == other.getRefreshRate())
+                    && appVsyncOffsetNanos == other.appVsyncOffsetNanos
+                    && presentationDeadlineNanos == other.presentationDeadlineNanos
                     && (modeId == other.modeId);
         }
         return isEqualWithoutRefreshRate;
