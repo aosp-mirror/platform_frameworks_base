@@ -20,20 +20,23 @@ import android.app.TaskInfo
 import android.content.Context
 import android.window.DesktopModeFlags
 import com.android.internal.R
+import java.util.ArrayList
 
 /**
  * Class to decide whether to apply app compat policies in desktop mode.
  */
 // TODO(b/347289970): Consider replacing with API
-class DesktopModeCompatPolicy(context: Context) {
+class DesktopModeCompatPolicy(private val context: Context) {
 
     private val systemUiPackage: String = context.resources.getString(R.string.config_systemUi)
+    private val defaultHomePackage: String?
+        get() = context.getPackageManager().getHomeActivities(ArrayList())?.packageName
 
     /**
      * If the top activity should be exempt from desktop windowing and forced back to fullscreen.
-     * Currently includes all system ui activities and modal dialogs. However if the top activity is
-     * not being displayed, regardless of its configuration, we will not exempt it as to remain in
-     * the desktop windowing environment.
+     * Currently includes all system ui, default home and transparent stack activities. However if
+     * the top activity is not being displayed, regardless of its configuration, we will not exempt
+     * it as to remain in the desktop windowing environment.
      */
     fun isTopActivityExemptFromDesktopWindowing(task: TaskInfo) =
         isTopActivityExemptFromDesktopWindowing(task.baseActivity?.packageName,
@@ -43,6 +46,7 @@ class DesktopModeCompatPolicy(context: Context) {
         numActivities: Int, isTopActivityNoDisplay: Boolean, isActivityStackTransparent: Boolean) =
         DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODALS_POLICY.isTrue
                 && ((isSystemUiTask(packageName)
+                || isPartOfDefaultHomePackage(packageName)
                 || isTransparentTask(isActivityStackTransparent, numActivities))
                 && !isTopActivityNoDisplay)
 
@@ -57,4 +61,10 @@ class DesktopModeCompatPolicy(context: Context) {
         isActivityStackTransparent && numActivities > 0
 
     private fun isSystemUiTask(packageName: String?) = packageName == systemUiPackage
+
+    /**
+     * Returns true if the tasks base activity is part of the default home package.
+     */
+    private fun isPartOfDefaultHomePackage(packageName: String?) =
+        packageName != null && packageName == defaultHomePackage
 }

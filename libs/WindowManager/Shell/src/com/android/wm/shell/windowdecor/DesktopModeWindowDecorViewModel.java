@@ -50,7 +50,6 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
@@ -1654,9 +1653,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         if (mDesktopModeCompatPolicy.isTopActivityExemptFromDesktopWindowing(taskInfo)) {
             return false;
         }
-        if (isPartOfDefaultHomePackage(taskInfo)) {
-            return false;
-        }
         final boolean isOnLargeScreen = taskInfo.getConfiguration().smallestScreenWidthDp
                 >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP;
         if (!DesktopModeStatus.canEnterDesktopMode(mContext)
@@ -1670,14 +1666,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 && taskInfo.getWindowingMode() != WINDOWING_MODE_PINNED
                 && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
                 && !taskInfo.configuration.windowConfiguration.isAlwaysOnTop();
-    }
-
-    private boolean isPartOfDefaultHomePackage(RunningTaskInfo taskInfo) {
-        final ComponentName currentDefaultHome =
-                mContext.getPackageManager().getHomeActivities(new ArrayList<>());
-        return currentDefaultHome != null && taskInfo.baseActivity != null
-                && currentDefaultHome.getPackageName()
-                .equals(taskInfo.baseActivity.getPackageName());
     }
 
     private void createWindowDecoration(
