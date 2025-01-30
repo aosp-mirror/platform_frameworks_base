@@ -551,6 +551,11 @@ public class AppOpsService extends IAppOpsService.Stub {
     @VisibleForTesting
     final Constants mConstants;
 
+    /**
+     * Some processes in the user may still be running when trying to drop the user's state
+     */
+    private static final long REMOVE_USER_DELAY = 5000L;
+
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     final class UidState {
         public final int uid;
@@ -6820,14 +6825,17 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public void removeUser(int userHandle) throws RemoteException {
         checkSystemUid("removeUser");
-        synchronized (AppOpsService.this) {
-            final int tokenCount = mOpUserRestrictions.size();
-            for (int i = tokenCount - 1; i >= 0; i--) {
-                ClientUserRestrictionState opRestrictions = mOpUserRestrictions.valueAt(i);
-                opRestrictions.removeUser(userHandle);
+        mHandler.postDelayed(() -> {
+            Slog.i(TAG, "Removing user " + userHandle + " from AppOpsService");
+            synchronized (AppOpsService.this) {
+                final int tokenCount = mOpUserRestrictions.size();
+                for (int i = tokenCount - 1; i >= 0; i--) {
+                    ClientUserRestrictionState opRestrictions = mOpUserRestrictions.valueAt(i);
+                    opRestrictions.removeUser(userHandle);
+                }
+                removeUidsForUserLocked(userHandle);
             }
-            removeUidsForUserLocked(userHandle);
-        }
+        }, REMOVE_USER_DELAY);
     }
 
     @Override
