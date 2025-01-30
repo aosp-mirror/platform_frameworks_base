@@ -2977,10 +2977,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     @Override
     public void mergeAnimation(IBinder transition, TransitionInfo info,
-            SurfaceControl.Transaction t, IBinder mergeTarget,
+            @NonNull SurfaceControl.Transaction startT,
+            @NonNull SurfaceControl.Transaction finishT,
+            IBinder mergeTarget,
             Transitions.TransitionFinishCallback finishCallback) {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "mergeAnimation: transition=%d", info.getDebugId());
-        mSplitTransitions.mergeAnimation(transition, info, t, mergeTarget, finishCallback);
+        mSplitTransitions.mergeAnimation(transition, info, startT, finishT, mergeTarget,
+                finishCallback);
     }
 
     /** Jump the current transition animation to the end. */

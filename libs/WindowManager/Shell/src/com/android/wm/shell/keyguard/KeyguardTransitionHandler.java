@@ -277,7 +277,8 @@ public class KeyguardTransitionHandler
 
     @Override
     public void mergeAnimation(@NonNull IBinder nextTransition, @NonNull TransitionInfo nextInfo,
-            @NonNull SurfaceControl.Transaction nextT, @NonNull IBinder currentTransition,
+            @NonNull SurfaceControl.Transaction nextT, @NonNull SurfaceControl.Transaction finishT,
+            @NonNull IBinder currentTransition,
             @NonNull TransitionFinishCallback nextFinishCallback) {
         final StartedTransition playing = mStartedTransitions.get(currentTransition);
         if (playing == null) {

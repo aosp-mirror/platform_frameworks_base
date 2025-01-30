@@ -307,7 +307,9 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
 
     @Override
     public void mergeAnimation(IBinder transition, TransitionInfo info,
-            SurfaceControl.Transaction t, IBinder mergeTarget,
+            @NonNull SurfaceControl.Transaction startT,
+            @NonNull SurfaceControl.Transaction finishT,
+            IBinder mergeTarget,
             Transitions.TransitionFinishCallback finishCallback) {
         final RecentsController controller = findController(mergeTarget);
         if (controller == null) {
@@ -315,7 +317,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                     "RecentsTransitionHandler.mergeAnimation: no controller found");
             return;
         }
-        controller.merge(info, t, mergeTarget, finishCallback);
+        controller.merge(info, startT, mergeTarget, finishCallback);
     }
 
     @Override

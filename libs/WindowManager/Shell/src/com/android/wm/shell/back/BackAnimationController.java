@@ -1463,7 +1463,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
         @Override
         public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-                @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+                @NonNull SurfaceControl.Transaction startT,
+                @NonNull SurfaceControl.Transaction finishT,
+                @NonNull IBinder mergeTarget,
                 @NonNull Transitions.TransitionFinishCallback finishCallback) {
             if (mClosePrepareTransition == transition) {
                 mClosePrepareTransition = null;
@@ -1476,7 +1478,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             if (info.getType() == TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION
                     && !mCloseTransitionRequested && info.getChanges().isEmpty() && mApps == null) {
                 finishCallback.onTransitionFinished(null);
-                t.apply();
+                startT.apply();
                 applyFinishOpenTransition();
                 return;
             }
@@ -1489,7 +1491,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             }
             // Handle the commit transition if this handler is running the open transition.
             finishCallback.onTransitionFinished(null);
-            t.apply();
+            startT.apply();
             if (mCloseTransitionRequested) {
                 if (mApps == null || mApps.length == 0) {
                     // animation was done

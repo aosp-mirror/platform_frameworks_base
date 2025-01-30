@@ -170,7 +170,8 @@ public class UnfoldTransitionHandlerTest extends ShellTestCase {
         // Send fold transition request
         TransitionFinishCallback mergeFinishCallback = mock(TransitionFinishCallback.class);
         mUnfoldTransitionHandler.mergeAnimation(new Binder(), createFoldTransitionInfo(),
-                mock(SurfaceControl.Transaction.class), mTransition, mergeFinishCallback);
+                mock(SurfaceControl.Transaction.class), mock(SurfaceControl.Transaction.class),
+                mTransition, mergeFinishCallback);
         mTestLooper.dispatchAll();
 
         // Verify that fold transition is merged into unfold and that unfold is finished
@@ -388,6 +389,7 @@ public class UnfoldTransitionHandlerTest extends ShellTestCase {
                 new Binder(),
                 new TransitionInfoBuilder(TRANSIT_CHANGE, TRANSIT_FLAG_KEYGUARD_GOING_AWAY).build(),
                 mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
                 mTransition,
                 mergeCallback);
         verify(finishCallback, never()).onTransitionFinished(any());
@@ -396,6 +398,7 @@ public class UnfoldTransitionHandlerTest extends ShellTestCase {
         mUnfoldTransitionHandler.mergeAnimation(
                 new Binder(),
                 new TransitionInfoBuilder(TRANSIT_CHANGE).build(),
+                mock(SurfaceControl.Transaction.class),
                 mock(SurfaceControl.Transaction.class),
                 mTransition,
                 mergeCallback);

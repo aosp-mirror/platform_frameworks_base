@@ -271,7 +271,9 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
         mController.startAnimation(mTransition, info, mStartTransaction,
                 mFinishTransaction, mFinishCallback);
         verify(mFinishCallback, never()).onTransitionFinished(any());
-        mController.mergeAnimation(mTransition, info, new SurfaceControl.Transaction(),
+        mController.mergeAnimation(mTransition, info,
+                new SurfaceControl.Transaction(),
+                new SurfaceControl.Transaction(),
                 mTransition, (wct) -> {});
         verify(mFinishCallback).onTransitionFinished(any());
     }

@@ -292,6 +292,7 @@ public class DefaultTransitionHandlerTest extends ShellTestCase {
                 new Binder(),
                 new TransitionInfoBuilder(TRANSIT_SLEEP, FLAG_SYNC).build(),
                 MockTransactionPool.create(),
+                MockTransactionPool.create(),
                 token,
                 mock(Transitions.TransitionFinishCallback.class));
     }

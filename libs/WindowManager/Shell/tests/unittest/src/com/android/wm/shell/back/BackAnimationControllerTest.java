@@ -666,7 +666,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         Transitions.TransitionFinishCallback mergeCallback =
                 mock(Transitions.TransitionFinishCallback.class);
         mBackTransitionHandler.mergeAnimation(
-                mock(IBinder.class), tInfo2, st, mock(IBinder.class), mergeCallback);
+                mock(IBinder.class), tInfo2, st, ft, mock(IBinder.class), mergeCallback);
         mBackTransitionHandler.onAnimationFinished();
         verify(callback).onTransitionFinished(any());
         verify(mergeCallback).onTransitionFinished(any());
@@ -701,7 +701,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         mBackTransitionHandler.mClosePrepareTransition = mock(IBinder.class);
         mergeCallback = mock(Transitions.TransitionFinishCallback.class);
         mBackTransitionHandler.mergeAnimation(mBackTransitionHandler.mClosePrepareTransition,
-                tInfo2, st, mock(IBinder.class), mergeCallback);
+                tInfo2, st, ft, mock(IBinder.class), mergeCallback);
         assertTrue("Change should be consumed", tInfo2.getChanges().isEmpty());
         verify(callback).onTransitionFinished(any());
     }
@@ -747,7 +747,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         final TransitionInfo closeInfo = createTransitionInfo(TRANSIT_CLOSE, close);
         Transitions.TransitionFinishCallback mergeCallback =
                 mock(Transitions.TransitionFinishCallback.class);
-        mBackTransitionHandler.mergeAnimation(mock(IBinder.class), closeInfo, ft,
+        mBackTransitionHandler.mergeAnimation(mock(IBinder.class), closeInfo, st, ft,
                 mock(IBinder.class), mergeCallback);
         verify(callback2).onTransitionFinished(any());
         verify(mergeCallback, never()).onTransitionFinished(any());
@@ -766,7 +766,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 openTaskId2, TRANSIT_OPEN, FLAG_MOVED_TO_TOP);
         final TransitionInfo openInfo = createTransitionInfo(TRANSIT_OPEN, open2, close);
         mergeCallback = mock(Transitions.TransitionFinishCallback.class);
-        mBackTransitionHandler.mergeAnimation(mock(IBinder.class), openInfo, ft,
+        mBackTransitionHandler.mergeAnimation(mock(IBinder.class), openInfo, st, ft,
                 mock(IBinder.class), mergeCallback);
         verify(callback3).onTransitionFinished(any());
         verify(mergeCallback, never()).onTransitionFinished(any());
