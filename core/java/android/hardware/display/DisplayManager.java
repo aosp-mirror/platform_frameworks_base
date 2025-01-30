@@ -1881,6 +1881,8 @@ public final class DisplayManager {
      */
     @RequiresPermission(MANAGE_DISPLAYS)
     @Nullable
+    @TestApi
+    @FlaggedApi(Flags.FLAG_DISPLAY_TOPOLOGY)
     public DisplayTopology getDisplayTopology() {
         return mGlobal.getDisplayTopology();
     }
