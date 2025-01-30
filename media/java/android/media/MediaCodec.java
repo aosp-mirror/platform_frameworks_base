@@ -44,6 +44,7 @@ import android.os.IHwBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
+import android.os.Trace;
 import android.view.Surface;
 
 import java.io.IOException;
@@ -3103,6 +3104,7 @@ final public class MediaCodec {
             int index,
             int offset, int size, long presentationTimeUs, int flags)
         throws CryptoException {
+        Trace.traceBegin(Trace.TRACE_TAG_VIDEO, "MediaCodec::queueInputBuffer#java");
         if ((flags & BUFFER_FLAG_DECODE_ONLY) != 0
                 && (flags & BUFFER_FLAG_END_OF_STREAM) != 0) {
             throw new InvalidBufferFlagsException(EOS_AND_DECODE_ONLY_ERROR_MESSAGE);
@@ -3122,6 +3124,8 @@ final public class MediaCodec {
         } catch (CryptoException | IllegalStateException e) {
             revalidateByteBuffer(mCachedInputBuffers, index, true /* input */);
             throw e;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIDEO);
         }
     }
 
@@ -3163,6 +3167,7 @@ final public class MediaCodec {
     public final void queueInputBuffers(
             int index,
             @NonNull ArrayDeque<BufferInfo> bufferInfos) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIDEO, "MediaCodec::queueInputBuffers#java");
         synchronized(mBufferLock) {
             if (mBufferMode == BUFFER_MODE_BLOCK) {
                 throw new IncompatibleWithBlockModelException("queueInputBuffers() "
@@ -3178,6 +3183,8 @@ final public class MediaCodec {
         } catch (CryptoException | IllegalStateException | IllegalArgumentException e) {
             revalidateByteBuffer(mCachedInputBuffers, index, true /* input */);
             throw e;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIDEO);
         }
     }
 
@@ -3438,6 +3445,7 @@ final public class MediaCodec {
             @NonNull CryptoInfo info,
             long presentationTimeUs,
             int flags) throws CryptoException {
+        Trace.traceBegin(Trace.TRACE_TAG_VIDEO, "MediaCodec::queueSecureInputBuffer#java");
         if ((flags & BUFFER_FLAG_DECODE_ONLY) != 0
                 && (flags & BUFFER_FLAG_END_OF_STREAM) != 0) {
             throw new InvalidBufferFlagsException(EOS_AND_DECODE_ONLY_ERROR_MESSAGE);
@@ -3457,6 +3465,8 @@ final public class MediaCodec {
         } catch (CryptoException | IllegalStateException e) {
             revalidateByteBuffer(mCachedInputBuffers, index, true /* input */);
             throw e;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIDEO);
         }
     }
 
@@ -3487,6 +3497,7 @@ final public class MediaCodec {
             int index,
             @NonNull ArrayDeque<BufferInfo> bufferInfos,
             @NonNull ArrayDeque<CryptoInfo> cryptoInfos) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIDEO, "MediaCodec::queueSecureInputBuffers#java");
         synchronized(mBufferLock) {
             if (mBufferMode == BUFFER_MODE_BLOCK) {
                 throw new IncompatibleWithBlockModelException("queueSecureInputBuffers() "
@@ -3502,6 +3513,8 @@ final public class MediaCodec {
         } catch (CryptoException | IllegalStateException | IllegalArgumentException e) {
             revalidateByteBuffer(mCachedInputBuffers, index, true /* input */);
             throw e;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIDEO);
         }
     }
 
@@ -3529,6 +3542,7 @@ final public class MediaCodec {
      * @throws MediaCodec.CodecException upon codec error.
      */
     public final int dequeueInputBuffer(long timeoutUs) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIDEO, "MediaCodec::dequeueInputBuffer#java");
         synchronized (mBufferLock) {
             if (mBufferMode == BUFFER_MODE_BLOCK) {
                 throw new IncompatibleWithBlockModelException("dequeueInputBuffer() "
@@ -3542,6 +3556,7 @@ final public class MediaCodec {
                 validateInputByteBufferLocked(mCachedInputBuffers, res);
             }
         }
+        Trace.traceEnd(Trace.TRACE_TAG_VIDEO);
         return res;
     }
 
