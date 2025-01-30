@@ -107,6 +107,7 @@ import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayGroupListener;
 import android.hardware.display.DisplayManagerInternal.DisplayTransactionListener;
 import android.hardware.display.DisplayTopology;
+import android.hardware.display.DisplayTopologyGraph;
 import android.hardware.display.DisplayViewport;
 import android.hardware.display.DisplayedContentSample;
 import android.hardware.display.DisplayedContentSamplingAttributes;
@@ -292,6 +293,7 @@ public final class DisplayManagerService extends SystemService {
     private final DisplayModeDirector mDisplayModeDirector;
     private final ExternalDisplayPolicy mExternalDisplayPolicy;
     private WindowManagerInternal mWindowManagerInternal;
+    @Nullable
     private InputManagerInternal mInputManagerInternal;
     private ActivityManagerInternal mActivityManagerInternal;
     private final UidImportanceListener mUidImportanceListener = new UidImportanceListener();
@@ -680,8 +682,15 @@ public final class DisplayManagerService extends SystemService {
         mExternalDisplayPolicy = new ExternalDisplayPolicy(new ExternalDisplayPolicyInjector());
         if (mFlags.isDisplayTopologyEnabled()) {
             final var backupManager = new BackupManager(mContext);
+            Consumer<Pair<DisplayTopology, DisplayTopologyGraph>> topologyChangedCallback =
+                    update -> {
+                        if (mInputManagerInternal != null) {
+                            mInputManagerInternal.setDisplayTopology(update.second);
+                        }
+                        deliverTopologyUpdate(update.first);
+                    };
             mDisplayTopologyCoordinator = new DisplayTopologyCoordinator(
-                    this::isExtendedDisplayEnabled, this::deliverTopologyUpdate,
+                    this::isExtendedDisplayEnabled, topologyChangedCallback,
                     new HandlerExecutor(mHandler), mSyncRoot, backupManager::dataChanged);
         } else {
             mDisplayTopologyCoordinator = null;
