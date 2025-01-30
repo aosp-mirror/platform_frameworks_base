@@ -90,8 +90,7 @@ public class AppFunctionRuntimeMetadata extends GenericDocument {
      * we need to have per-package app function schemas.
      *
      * <p>This schema should be set visible to callers from the package owner itself and for callers
-     * with {@link android.Manifest.permission#EXECUTE_APP_FUNCTIONS} or {@link
-     * android.Manifest.permission#EXECUTE_APP_FUNCTIONS_TRUSTED} permissions.
+     * with the permission {@link android.Manifest.permission#EXECUTE_APP_FUNCTIONS}.
      *
      * @param packageName The package name to create a schema for.
      */
@@ -105,9 +104,8 @@ public class AppFunctionRuntimeMetadata extends GenericDocument {
     /**
      * Creates a parent schema for all app function runtime schemas.
      *
-     * <p>This schema should be set visible to the owner itself and for callers with {@link
-     * android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or {@link
-     * android.permission.EXECUTE_APP_FUNCTIONS} permissions.
+     * <p>This schema should be set visible to the owner itself and for callers with
+     * the permission {@link android.permission.EXECUTE_APP_FUNCTIONS}.
      */
     public static AppSearchSchema createParentAppFunctionRuntimeSchema() {
         return getAppFunctionRuntimeSchemaBuilder(RUNTIME_SCHEMA_TYPE).build();

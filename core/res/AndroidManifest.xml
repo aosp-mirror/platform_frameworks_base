@@ -8308,26 +8308,9 @@
         android:featureFlag="android.app.appfunctions.flags.enable_app_function_manager"
         android:protectionLevel="signature" />
 
-    <!-- Allows a trusted application to perform actions on behalf of users inside of
-         applications with privacy guarantees from the system.
-         <p>This permission is currently only granted to system packages in the
-         {@link android.app.role.SYSTEM_UI_INTELLIGENCE} role which complies with privacy
-         requirements outlined in the Android CDD section "9.8.6 Content Capture".
-         <p>Apps are not able to opt-out from caller having this permission.
-         <p>Protection level: internal|role
-         @SystemApi
-         @hide
-         @FlaggedApi(android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER)  -->
-    <permission android:name="android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED"
-        android:featureFlag="android.app.appfunctions.flags.enable_app_function_manager"
-        android:protectionLevel="internal|role" />
-
     <!-- Allows an application to perform actions on behalf of users inside of
          applications.
          <p>This permission is currently only granted to privileged system apps.
-         <p>Apps contributing app functions can opt to disallow callers with this permission,
-         limiting to only callers with {@link android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED}
-         instead.
          <p>Protection level: internal|privileged
          @FlaggedApi(android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER)  -->
     <permission android:name="android.permission.EXECUTE_APP_FUNCTIONS"
