@@ -32,7 +32,6 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.SceneContainerTransitions
 import com.android.systemui.scene.ui.viewmodel.SplitEdgeDetector
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.shade.shared.flag.DualShade
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -103,28 +102,24 @@ interface SceneContainerFrameworkModule {
                         Scenes.Dream,
                         Scenes.Lockscreen,
                         Scenes.Bouncer,
-                        Scenes.QuickSettings.takeUnless { DualShade.isEnabled },
-                        Scenes.Shade.takeUnless { DualShade.isEnabled },
+                        Scenes.QuickSettings,
+                        Scenes.Shade,
                     ),
                 initialSceneKey = Scenes.Lockscreen,
                 transitions = SceneContainerTransitions,
                 overlayKeys =
-                    listOfNotNull(
-                        Overlays.NotificationsShade.takeIf { DualShade.isEnabled },
-                        Overlays.QuickSettingsShade.takeIf { DualShade.isEnabled },
-                    ),
+                    listOfNotNull(Overlays.NotificationsShade, Overlays.QuickSettingsShade),
                 navigationDistances =
                     mapOf(
                             Scenes.Gone to 0,
                             Scenes.Lockscreen to 0,
                             Scenes.Communal to 1,
                             Scenes.Dream to 2,
-                            Scenes.Shade to 3.takeUnless { DualShade.isEnabled },
-                            Scenes.QuickSettings to 4.takeUnless { DualShade.isEnabled },
+                            Scenes.Shade to 3,
+                            Scenes.QuickSettings to 4,
                             Scenes.Bouncer to 5,
                         )
-                        .filterValues { it != null }
-                        .mapValues { checkNotNull(it.value) },
+                        .mapValues { it.value },
             )
         }
 
