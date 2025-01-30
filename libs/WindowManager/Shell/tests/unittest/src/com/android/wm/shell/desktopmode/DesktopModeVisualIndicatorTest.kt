@@ -19,22 +19,30 @@ package com.android.wm.shell.desktopmode
 import android.app.ActivityManager.RunningTaskInfo
 import android.graphics.PointF
 import android.graphics.Rect
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper.RunWithLooper
 import android.view.SurfaceControl
 import androidx.test.filters.SmallTest
 import com.android.internal.policy.SystemBarUtils
+import com.android.modules.utils.testing.ExtendedMockitoRule
+import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
+import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 
 /**
@@ -43,9 +51,19 @@ import org.mockito.kotlin.whenever
  * Usage: atest WMShellUnitTests:DesktopModeVisualIndicatorTest
  */
 @SmallTest
+@RunWithLooper
 @RunWith(AndroidTestingRunner::class)
+@EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
 class DesktopModeVisualIndicatorTest : ShellTestCase() {
-    @Mock private lateinit var taskInfo: RunningTaskInfo
+
+    @JvmField @Rule val setFlagsRule = SetFlagsRule()
+
+    @JvmField
+    @Rule
+    val extendedMockitoRule =
+        ExtendedMockitoRule.Builder(this).mockStatic(DesktopModeStatus::class.java).build()!!
+
+    private lateinit var taskInfo: RunningTaskInfo
     @Mock private lateinit var syncQueue: SyncTransactionQueue
     @Mock private lateinit var displayController: DisplayController
     @Mock private lateinit var taskSurface: SurfaceControl
@@ -56,10 +74,13 @@ class DesktopModeVisualIndicatorTest : ShellTestCase() {
 
     @Before
     fun setUp() {
+        whenever(DesktopModeStatus.canEnterDesktopMode(any())).thenReturn(true)
         whenever(displayLayout.width()).thenReturn(DISPLAY_BOUNDS.width())
         whenever(displayLayout.height()).thenReturn(DISPLAY_BOUNDS.height())
         whenever(displayLayout.stableInsets()).thenReturn(STABLE_INSETS)
         whenever(displayController.getDisplayLayout(anyInt())).thenReturn(displayLayout)
+        whenever(displayController.getDisplay(anyInt())).thenReturn(mContext.display)
+        taskInfo = DesktopTestHelpers.createFullscreenTask()
     }
 
     @Test
@@ -187,6 +208,39 @@ class DesktopModeVisualIndicatorTest : ShellTestCase() {
         assertThat(result).isEqualTo(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
         createVisualIndicator(DesktopModeVisualIndicator.DragStartState.FROM_FREEFORM)
         result = visualIndicator.updateIndicatorType(PointF(500f, 10000f))
+        assertThat(result).isEqualTo(DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR)
+    }
+
+    @Test
+    @EnableFlags(
+        com.android.wm.shell.Flags.FLAG_ENABLE_BUBBLE_TO_FULLSCREEN,
+        com.android.wm.shell.Flags.FLAG_ENABLE_CREATE_ANY_BUBBLE,
+    )
+    fun testDefaultIndicatorWithNoDesktop() {
+        whenever(DesktopModeStatus.canEnterDesktopMode(any())).thenReturn(false)
+
+        createVisualIndicator(DesktopModeVisualIndicator.DragStartState.FROM_FULLSCREEN)
+        var result = visualIndicator.updateIndicatorType(PointF(500f, 500f))
+        assertThat(result).isEqualTo(DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR)
+
+        result = visualIndicator.updateIndicatorType(PointF(10000f, 500f))
+        assertThat(result)
+            .isEqualTo(DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_RIGHT_INDICATOR)
+
+        result = visualIndicator.updateIndicatorType(PointF(-10000f, 500f))
+        assertThat(result)
+            .isEqualTo(DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR)
+
+        createVisualIndicator(DesktopModeVisualIndicator.DragStartState.FROM_SPLIT)
+        result = visualIndicator.updateIndicatorType(PointF(500f, 500f))
+        assertThat(result).isEqualTo(DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR)
+
+        result = visualIndicator.updateIndicatorType(PointF(500f, 0f))
+        assertThat(result)
+            .isEqualTo(DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR)
+
+        createVisualIndicator(DesktopModeVisualIndicator.DragStartState.DRAGGED_INTENT)
+        result = visualIndicator.updateIndicatorType(PointF(500f, 500f))
         assertThat(result).isEqualTo(DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR)
     }
 

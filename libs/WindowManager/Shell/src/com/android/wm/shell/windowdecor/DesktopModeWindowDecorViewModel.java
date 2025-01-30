@@ -131,6 +131,7 @@ import com.android.wm.shell.recents.RecentsTransitionStateListener;
 import com.android.wm.shell.shared.FocusTransitionListener;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
 import com.android.wm.shell.shared.desktopmode.DesktopModeCompatPolicy;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
@@ -1439,12 +1440,16 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 mDragToDesktopAnimationStartBounds.set(
                         relevantDecor.mTaskInfo.configuration.windowConfiguration.getBounds());
                 boolean dragFromStatusBarAllowed = false;
+                final int windowingMode = relevantDecor.mTaskInfo.getWindowingMode();
                 if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
                     // In proto2 any full screen or multi-window task can be dragged to
                     // freeform.
-                    final int windowingMode = relevantDecor.mTaskInfo.getWindowingMode();
                     dragFromStatusBarAllowed = windowingMode == WINDOWING_MODE_FULLSCREEN
                             || windowingMode == WINDOWING_MODE_MULTI_WINDOW;
+                }
+                if (BubbleAnythingFlagHelper.enableBubbleToFullscreen()) {
+                    // TODO(b/388851898): add support for split screen (multi-window wm mode)
+                    dragFromStatusBarAllowed = windowingMode == WINDOWING_MODE_FULLSCREEN;
                 }
                 final boolean shouldStartTransitionDrag =
                         relevantDecor.checkTouchEventInFocusedCaptionHandle(ev)

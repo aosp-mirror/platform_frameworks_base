@@ -252,6 +252,7 @@ class HandleMenu(
                     view = handleMenuView.rootView,
                     forciblyShownTypes = if (forceShowSystemBars) { systemBars() } else { 0 },
                     ignoreCutouts = Flags.showAppHandleLargeScreens()
+                            || BubbleAnythingFlagHelper.enableBubbleToFullscreen()
                 )
             } else {
                 parentDecor.addWindow(

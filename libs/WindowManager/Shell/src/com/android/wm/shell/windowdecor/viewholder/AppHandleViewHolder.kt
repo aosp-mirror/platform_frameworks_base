@@ -41,6 +41,7 @@ import com.android.internal.policy.SystemBarUtils
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.shared.animation.Interpolators
+import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper
 import com.android.wm.shell.windowdecor.WindowManagerWrapper
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
 
@@ -146,6 +147,7 @@ internal class AppHandleViewHolder(
             taskInfo.taskId, handlePosition.x, handlePosition.y, handleWidth, handleHeight,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             ignoreCutouts = Flags.showAppHandleLargeScreens()
+                    || BubbleAnythingFlagHelper.enableBubbleToFullscreen()
         )
         val view = statusBarInputLayer?.view ?: error("Unable to find statusBarInputLayer View")
         val lp = statusBarInputLayer?.lp ?: error("Unable to find statusBarInputLayer " +

@@ -74,6 +74,7 @@ java_library {
         "**/desktopmode/*.kt",
     ],
     static_libs: [
+        "WindowManager-Shell-shared-AOSP",
         "com.android.window.flags.window-aconfig-java",
         "wm_shell-shared-utils",
     ],

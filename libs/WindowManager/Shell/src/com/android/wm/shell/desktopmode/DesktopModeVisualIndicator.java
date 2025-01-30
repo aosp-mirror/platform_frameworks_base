@@ -59,6 +59,8 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 
 /**
  * Animated visual indicator for Desktop Mode windowing transitions.
@@ -149,12 +151,19 @@ public class DesktopModeVisualIndicator {
         // left, and split right for the right edge. This is universal across all drag event types.
         if (inputCoordinates.x < 0) return TO_SPLIT_LEFT_INDICATOR;
         if (inputCoordinates.x > layout.width()) return TO_SPLIT_RIGHT_INDICATOR;
-        // If we are in freeform, we don't want a visible indicator in the "freeform" drag zone.
-        // In drags not originating on a freeform caption, we should default to a TO_DESKTOP
-        // indicator.
-        IndicatorType result = mDragStartState == DragStartState.FROM_FREEFORM
-                ? NO_INDICATOR
-                : TO_DESKTOP_INDICATOR;
+        IndicatorType result;
+        if (BubbleAnythingFlagHelper.enableBubbleToFullscreen()
+                && !DesktopModeStatus.canEnterDesktopMode(mContext)) {
+            // If desktop is not available, default to "no indicator"
+            result = NO_INDICATOR;
+        } else {
+            // If we are in freeform, we don't want a visible indicator in the "freeform" drag zone.
+            // In drags not originating on a freeform caption, we should default to a TO_DESKTOP
+            // indicator.
+            result = mDragStartState == DragStartState.FROM_FREEFORM
+                    ? NO_INDICATOR
+                    : TO_DESKTOP_INDICATOR;
+        }
         final int transitionAreaWidth = mContext.getResources().getDimensionPixelSize(
                 com.android.wm.shell.R.dimen.desktop_mode_transition_region_thickness);
         // Because drags in freeform use task position for indicator calculation, we need to
