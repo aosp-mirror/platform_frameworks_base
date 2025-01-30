@@ -523,6 +523,8 @@
     <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"Snel opladen"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Ingesteld door beheerder"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Beheerd door beperkte instelling"</string>
+    <!-- no translation found for disabled_in_phone_call_text (6568931334337318320) -->
+    <skip />
     <string name="disabled" msgid="8017887509554714950">"Uitgezet"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Toegestaan"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Niet toegestaan"</string>
