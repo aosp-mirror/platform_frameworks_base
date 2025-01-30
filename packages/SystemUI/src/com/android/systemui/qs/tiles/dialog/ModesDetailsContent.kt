@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs
+package com.android.systemui.qs.tiles.dialog
 
-import com.android.systemui.plugins.qs.TileDetailsViewModel
+import androidx.compose.runtime.Composable
+import com.android.systemui.statusbar.policy.ui.dialog.composable.ModeTileGrid
 
-class FakeTileDetailsViewModel(var tileSpec: String?) : TileDetailsViewModel() {
-    private var _clickOnSettingsButton = 0
-
-    override fun clickOnSettingsButton() {
-        _clickOnSettingsButton++
-    }
-
-    override fun getTitle(): String {
-        return tileSpec ?: " Fake title"
-    }
-
-    override fun getSubTitle(): String {
-        return tileSpec ?: "Fake sub title"
-    }
+@Composable
+fun ModesDetailsContent(viewModel: ModesDetailsViewModel) {
+    // TODO(b/378513940): Finish implementing this function.
+    ModeTileGrid(viewModel = viewModel.viewModel)
 }

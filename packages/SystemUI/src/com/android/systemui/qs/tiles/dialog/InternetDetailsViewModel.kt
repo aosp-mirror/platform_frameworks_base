@@ -16,18 +16,7 @@
 
 package com.android.systemui.qs.tiles.dialog
 
-import android.util.Log
-import android.view.LayoutInflater
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.viewinterop.AndroidView
 import com.android.systemui.plugins.qs.TileDetailsViewModel
-import com.android.systemui.res.R
 import com.android.systemui.statusbar.connectivity.AccessPointController
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -37,45 +26,9 @@ class InternetDetailsViewModel
 @AssistedInject
 constructor(
     private val accessPointController: AccessPointController,
-    private val contentManagerFactory: InternetDetailsContentManager.Factory,
+    val contentManagerFactory: InternetDetailsContentManager.Factory,
     @Assisted private val onLongClick: () -> Unit,
 ) : TileDetailsViewModel() {
-    private lateinit var internetDetailsContentManager: InternetDetailsContentManager
-
-    @Composable
-    override fun GetContentView() {
-        val coroutineScope = rememberCoroutineScope()
-        val context = LocalContext.current
-
-        internetDetailsContentManager = remember {
-            contentManagerFactory.create(
-                canConfigMobileData = accessPointController.canConfigMobileData(),
-                canConfigWifi = accessPointController.canConfigWifi(),
-                coroutineScope = coroutineScope,
-                context = context,
-            )
-        }
-        AndroidView(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
-            factory = { context ->
-                // Inflate with the existing dialog xml layout and bind it with the manager
-                val view =
-                    LayoutInflater.from(context)
-                        .inflate(R.layout.internet_connectivity_dialog, null)
-                internetDetailsContentManager.bind(view)
-
-                view
-                // TODO: b/377388104 - Polish the internet details view UI
-            },
-            onRelease = {
-                internetDetailsContentManager.unBind()
-                if (DEBUG) {
-                    Log.d(TAG, "onRelease")
-                }
-            },
-        )
-    }
-
     override fun clickOnSettingsButton() {
         onLongClick()
     }
@@ -96,13 +49,16 @@ constructor(
         return "Tab a network to connect"
     }
 
+    fun getCanConfigMobileData(): Boolean {
+        return accessPointController.canConfigMobileData()
+    }
+
+    fun getCanConfigWifi(): Boolean {
+        return accessPointController.canConfigWifi()
+    }
+
     @AssistedFactory
     interface Factory {
         fun create(onLongClick: () -> Unit): InternetDetailsViewModel
-    }
-
-    companion object {
-        private const val TAG = "InternetDetailsVModel"
-        private val DEBUG: Boolean = Log.isLoggable(TAG, Log.DEBUG)
     }
 }
