@@ -26,7 +26,6 @@ import static org.mockito.kotlin.MatchersKt.eq;
 import static org.mockito.kotlin.VerificationKt.times;
 import static org.mockito.kotlin.VerificationKt.verify;
 
-import android.app.TaskInfo;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Matrix;
@@ -39,12 +38,9 @@ import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsState;
-import com.android.wm.shell.desktopmode.DesktopRepository;
-import com.android.wm.shell.desktopmode.DesktopUserRepositories;
-import com.android.wm.shell.desktopmode.desktopwallpaperactivity.DesktopWallpaperActivityTokenProvider;
+import com.android.wm.shell.common.pip.PipDesktopState;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip2.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip2.animation.PipAlphaAnimator;
@@ -55,10 +51,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-
-import java.util.Optional;
 
 /**
  * Unit test against {@link PipScheduler}
@@ -77,16 +70,13 @@ public class PipSchedulerTest {
     @Mock private PipBoundsState mMockPipBoundsState;
     @Mock private ShellExecutor mMockMainExecutor;
     @Mock private PipTransitionState mMockPipTransitionState;
+    @Mock private PipDesktopState mMockPipDesktopState;
     @Mock private PipTransitionController mMockPipTransitionController;
     @Mock private Runnable mMockUpdateMovementBoundsRunnable;
     @Mock private WindowContainerToken mMockPipTaskToken;
     @Mock private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory mMockFactory;
     @Mock private SurfaceControl.Transaction mMockTransaction;
     @Mock private PipAlphaAnimator mMockAlphaAnimator;
-    @Mock private DesktopUserRepositories mMockDesktopUserRepositories;
-    @Mock private DesktopWallpaperActivityTokenProvider mMockDesktopWallpaperActivityTokenProvider;
-    @Mock private RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
-
     @Captor private ArgumentCaptor<Runnable> mRunnableArgumentCaptor;
     @Captor private ArgumentCaptor<WindowContainerTransaction> mWctArgumentCaptor;
 
@@ -101,14 +91,9 @@ public class PipSchedulerTest {
         when(mMockFactory.getTransaction()).thenReturn(mMockTransaction);
         when(mMockTransaction.setMatrix(any(SurfaceControl.class), any(Matrix.class), any()))
                 .thenReturn(mMockTransaction);
-        when(mMockDesktopUserRepositories.getCurrent())
-                .thenReturn(Mockito.mock(DesktopRepository.class));
-        when(mMockPipTransitionState.getPipTaskInfo()).thenReturn(Mockito.mock(TaskInfo.class));
 
         mPipScheduler = new PipScheduler(mMockContext, mMockPipBoundsState, mMockMainExecutor,
-                mMockPipTransitionState, Optional.of(mMockDesktopUserRepositories),
-                Optional.of(mMockDesktopWallpaperActivityTokenProvider),
-                mRootTaskDisplayAreaOrganizer);
+                mMockPipTransitionState, mMockPipDesktopState);
         mPipScheduler.setPipTransitionController(mMockPipTransitionController);
         mPipScheduler.setSurfaceControlTransactionFactory(mMockFactory);
         mPipScheduler.setPipAlphaAnimatorSupplier((context, leash, startTx, finishTx, direction) ->

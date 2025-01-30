@@ -31,6 +31,7 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.pip.PipAppOpsListener;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDesktopState;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipMediaController;
 import com.android.wm.shell.common.pip.PipPerfHintController;
@@ -84,14 +85,11 @@ public abstract class Pip2Module {
             @NonNull PipDisplayLayoutState pipDisplayLayoutState,
             @NonNull PipUiStateChangeController pipUiStateChangeController,
             DisplayController displayController,
-            Optional<DesktopUserRepositories> desktopUserRepositoriesOptional,
-            Optional<DesktopWallpaperActivityTokenProvider>
-                    desktopWallpaperActivityTokenProviderOptional) {
+            PipDesktopState pipDesktopState) {
         return new PipTransition(context, shellInit, shellTaskOrganizer, transitions,
                 pipBoundsState, null, pipBoundsAlgorithm, pipTaskListener,
                 pipScheduler, pipStackListenerController, pipDisplayLayoutState,
-                pipUiStateChangeController, displayController, desktopUserRepositoriesOptional,
-                desktopWallpaperActivityTokenProviderOptional);
+                pipUiStateChangeController, displayController, pipDesktopState);
     }
 
     @WMSingleton
@@ -142,13 +140,9 @@ public abstract class Pip2Module {
             PipBoundsState pipBoundsState,
             @ShellMainThread ShellExecutor mainExecutor,
             PipTransitionState pipTransitionState,
-            Optional<DesktopUserRepositories> desktopUserRepositoriesOptional,
-            Optional<DesktopWallpaperActivityTokenProvider>
-                    desktopWallpaperActivityTokenProviderOptional,
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
+            PipDesktopState pipDesktopState) {
         return new PipScheduler(context, pipBoundsState, mainExecutor, pipTransitionState,
-                desktopUserRepositoriesOptional, desktopWallpaperActivityTokenProviderOptional,
-                rootTaskDisplayAreaOrganizer);
+                pipDesktopState);
     }
 
     @WMSingleton
@@ -232,5 +226,18 @@ public abstract class Pip2Module {
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTaskListener(context, shellTaskOrganizer, pipTransitionState,
                 pipScheduler, pipBoundsState, pipBoundsAlgorithm, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipDesktopState providePipDesktopState(
+            PipDisplayLayoutState pipDisplayLayoutState,
+            Optional<DesktopUserRepositories> desktopUserRepositoriesOptional,
+            Optional<DesktopWallpaperActivityTokenProvider>
+                    desktopWallpaperActivityTokenProviderOptional,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer
+    ) {
+        return new PipDesktopState(pipDisplayLayoutState, desktopUserRepositoriesOptional,
+                desktopWallpaperActivityTokenProviderOptional, rootTaskDisplayAreaOrganizer);
     }
 }
