@@ -299,8 +299,7 @@ open class ClockRegistry(
                             Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE,
                         )
                     }
-
-                ClockSettings.fromJson(JSONObject(json))
+                json?.let { ClockSettings.fromJson(JSONObject(it)) }
             } catch (ex: Exception) {
                 logger.e("Failed to parse clock settings", ex)
                 null
