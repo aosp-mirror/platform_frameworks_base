@@ -574,6 +574,8 @@
 
     <dimen name="notification_panel_margin_bottom">32dp</dimen>
 
+    <dimen name="notification_2025_panel_margin_bottom">64dp</dimen>
+
     <!-- The bottom padding of the panel that holds the list of notifications. -->
     <dimen name="notification_panel_padding_bottom">0dp</dimen>
 
