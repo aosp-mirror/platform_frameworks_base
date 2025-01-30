@@ -398,7 +398,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         if ((bundle.mFlags & FLAG_HAS_BINDERS_KNOWN) == 0) {
             mFlags &= ~FLAG_HAS_BINDERS_KNOWN;
         }
-        mFlags |= bundle.mFlags & FLAG_HAS_INTENT;
+        setHasIntent(hasIntent() || bundle.hasIntent());
     }
 
     /**
@@ -465,7 +465,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @hide
      */
     public boolean hasIntent() {
-        return (mFlags & FLAG_HAS_INTENT) != 0;
+        return super.hasIntent();
     }
 
     /** {@hide} */
@@ -591,7 +591,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         mFlags &= ~FLAG_HAS_FDS_KNOWN;
         mFlags &= ~FLAG_HAS_BINDERS_KNOWN;
         if (intentClass != null && intentClass.isInstance(value)) {
-            mFlags |= FLAG_HAS_INTENT;
+            setHasIntent(true);
         }
     }
 
