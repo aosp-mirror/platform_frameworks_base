@@ -17,11 +17,8 @@
 package com.android.systemui.scene.ui.composable.transitions
 
 import androidx.compose.animation.core.tween
-import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.TransitionBuilder
-import com.android.compose.animation.scene.UserActionDistance
-import com.android.compose.animation.scene.UserActionDistanceScope
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockElementKeys
 import com.android.systemui.notifications.ui.composable.Notifications
 import com.android.systemui.notifications.ui.composable.NotificationsShade
@@ -31,9 +28,6 @@ import kotlin.time.Duration.Companion.milliseconds
 
 fun TransitionBuilder.toNotificationsShadeTransition(durationScale: Double = 1.0) {
     spec = tween(durationMillis = (DefaultDuration * durationScale).inWholeMilliseconds.toInt())
-    distance = UserActionDistance { _, shadeContentKey, _ ->
-        calculateShadePanelTargetPositionY(shadeContentKey)
-    }
 
     // Ensure the clock isn't clipped by the shade outline during the transition from lockscreen.
     sharedElement(
@@ -48,14 +42,6 @@ fun TransitionBuilder.toNotificationsShadeTransition(durationScale: Double = 1.0
 
     fractionRange(end = .5f) { fade(OverlayShade.Elements.Scrim) }
     fractionRange(start = .5f) { fade(Notifications.Elements.NotificationScrim) }
-}
-
-/** Returns the Y position of the bottom of the shade container panel within [shadeOverlayKey]. */
-fun UserActionDistanceScope.calculateShadePanelTargetPositionY(shadeOverlayKey: ContentKey): Float {
-    val marginTop = OverlayShade.Elements.Panel.targetOffset(shadeOverlayKey)?.y ?: 0f
-    val panelHeight =
-        OverlayShade.Elements.Panel.targetSize(shadeOverlayKey)?.height?.toFloat() ?: 0f
-    return marginTop + panelHeight
 }
 
 private val DefaultDuration = 300.milliseconds
