@@ -18,7 +18,6 @@
 package com.android.systemui.complication.dagger
 
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.TextClock
 import com.android.internal.util.Preconditions
 import com.android.systemui.Flags
@@ -64,7 +63,7 @@ interface DreamClockTimeComplicationComponent {
             @Provides
             @DreamClockTimeComplicationScope
             @Named(DREAM_CLOCK_TIME_COMPLICATION_VIEW)
-            fun provideComplicationView(layoutInflater: LayoutInflater): View {
+            fun provideComplicationView(layoutInflater: LayoutInflater): TextClock {
                 val view =
                     Preconditions.checkNotNull(
                         layoutInflater.inflate(
