@@ -306,7 +306,7 @@ class LegacyMediaDataManagerImpl(
         }
 
     init {
-        dumpManager.registerDumpable(TAG, this)
+        dumpManager.registerNormalDumpable(TAG, this)
 
         // Initialize the internal processing pipeline. The listeners at the front of the pipeline
         // are set as internal listeners so that they receive events. From there, events are

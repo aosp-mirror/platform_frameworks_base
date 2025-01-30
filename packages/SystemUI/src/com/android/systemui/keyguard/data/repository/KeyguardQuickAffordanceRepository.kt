@@ -124,7 +124,7 @@ constructor(
 
     init {
         legacySettingSyncer.startSyncing()
-        dumpManager.registerDumpable("KeyguardQuickAffordances", Dumpster())
+        dumpManager.registerNormalDumpable("KeyguardQuickAffordances", Dumpster())
     }
 
     /**

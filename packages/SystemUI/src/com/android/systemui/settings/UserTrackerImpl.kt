@@ -151,7 +151,7 @@ internal constructor(
 
         registerUserSwitchObserver()
 
-        dumpManager.registerDumpable(TAG, this)
+        dumpManager.registerNormalDumpable(TAG, this)
     }
 
     override fun onReceive(context: Context, intent: Intent) {
