@@ -33,6 +33,7 @@ import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.IconNormalizer;
 import com.android.wm.shell.R;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
+import com.android.wm.shell.shared.bubbles.DeviceConfig;
 
 /**
  * Keeps track of display size, configuration, and specific bubble sizes. One place for all

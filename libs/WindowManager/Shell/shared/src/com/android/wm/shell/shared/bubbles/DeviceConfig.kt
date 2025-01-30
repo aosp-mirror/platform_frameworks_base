@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.bubbles
+package com.android.wm.shell.shared.bubbles
 
 import android.content.Context
 import android.content.res.Configuration
