@@ -610,3 +610,10 @@ flag {
        purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "enable_desktop_taskbar_on_freeform_displays"
+    namespace: "lse_desktop_experience"
+    description: "Forces pinned taskbar with desktop tasks on freeform displays"
+    bug: "390665752"
+}
