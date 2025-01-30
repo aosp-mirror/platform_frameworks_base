@@ -49,7 +49,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.Executor
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -81,7 +80,6 @@ private const val SMARTSPACE_KEY = "SMARTSPACE_KEY"
 private const val SMARTSPACE_PACKAGE = "SMARTSPACE_PKG"
 private val SMARTSPACE_INSTANCE_ID = InstanceId.fakeInstanceId(456)!!
 
-@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper

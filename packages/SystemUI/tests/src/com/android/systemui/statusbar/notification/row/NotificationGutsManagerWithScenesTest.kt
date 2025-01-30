@@ -75,7 +75,6 @@ import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.wmshell.BubblesManager
 import java.util.Optional
 import kotlin.test.assertEquals
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runCurrent
 import org.junit.Assert
@@ -98,7 +97,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 /** Tests for [NotificationGutsManager] with the scene container enabled. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper

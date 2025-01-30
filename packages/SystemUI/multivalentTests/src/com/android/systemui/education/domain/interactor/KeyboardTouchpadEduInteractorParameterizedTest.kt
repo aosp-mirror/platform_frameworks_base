@@ -57,7 +57,6 @@ import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class KeyboardTouchpadEduInteractorParameterizedTest(private val gestureType: GestureType) :
     SysuiTestCase() {
     private val kosmos = testKosmos()

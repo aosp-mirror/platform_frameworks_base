@@ -79,7 +79,6 @@ import java.util.Locale
 import javax.inject.Provider
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -112,7 +111,6 @@ private val SMARTSPACE_KEY = "smartspace"
 private const val PAUSED_LOCAL = "paused local"
 private const val PLAYING_LOCAL = "playing local"
 
-@ExperimentalCoroutinesApi
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(ParameterizedAndroidJunit4::class)

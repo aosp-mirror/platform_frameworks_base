@@ -61,7 +61,6 @@ import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.utils.os.FakeHandler
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -86,7 +85,6 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.lastValue
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -458,7 +456,6 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         assertThat(mediaHierarchyManager.isCurrentlyInGuidedTransformation()).isTrue()
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun isCurrentlyInGuidedTransformation_hostsVisible_expandImmediateEnabled_returnsFalse() =
         testScope.runTest {
