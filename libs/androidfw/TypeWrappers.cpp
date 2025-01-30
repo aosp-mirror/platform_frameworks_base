@@ -18,8 +18,11 @@
 
 namespace android {
 
-TypeVariant::TypeVariant(const ResTable_type* data) : data(data), mLength(dtohl(data->entryCount)) {
-    if (data->flags & ResTable_type::FLAG_SPARSE) {
+TypeVariant::TypeVariant(const ResTable_type* data)
+    : data(data)
+    , mLength(dtohl(data->entryCount))
+    , mSparse(data->flags & ResTable_type::FLAG_SPARSE) {
+    if (mSparse) {
         const uint32_t entryCount = dtohl(data->entryCount);
         const uintptr_t containerEnd = reinterpret_cast<uintptr_t>(data) + dtohl(data->header.size);
         const uint32_t* const entryIndices = reinterpret_cast<const uint32_t*>(
@@ -40,18 +43,18 @@ TypeVariant::iterator& TypeVariant::iterator::operator++() {
         mIndex = mTypeVariant->mLength;
     }
 
-    const ResTable_type* type = mTypeVariant->data;
-    if ((type->flags & ResTable_type::FLAG_SPARSE) == 0) {
+    if (!mTypeVariant->mSparse) {
       return *this;
     }
 
     // Need to adjust |mSparseIndex| as well if we've passed its current element.
+    const ResTable_type* type = mTypeVariant->data;
     const uint32_t entryCount = dtohl(type->entryCount);
-    const auto entryIndices = reinterpret_cast<const uint32_t*>(
-        reinterpret_cast<uintptr_t>(type) + dtohs(type->header.headerSize));
     if (mSparseIndex >= entryCount) {
       return *this; // done
     }
+    const auto entryIndices = reinterpret_cast<const uint32_t*>(
+        reinterpret_cast<uintptr_t>(type) + dtohs(type->header.headerSize));
     const auto element = (const ResTable_sparseTypeEntry*)(entryIndices + mSparseIndex);
     if (mIndex > dtohs(element->idx)) {
       ++mSparseIndex;
@@ -79,7 +82,7 @@ const ResTable_entry* TypeVariant::iterator::operator*() const {
     }
 
     uint32_t entryOffset;
-    if (type->flags & ResTable_type::FLAG_SPARSE) {
+    if (mTypeVariant->mSparse) {
       if (mSparseIndex >= entryCount) {
         return nullptr;
       }
