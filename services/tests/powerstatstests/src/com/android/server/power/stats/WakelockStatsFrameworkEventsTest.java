@@ -186,14 +186,16 @@ public class WakelockStatsFrameworkEventsTest {
     public void wakelockOpen() throws Exception {
         mEvents.noteStartWakeLock(UID_1, TAG_1, WAKELOCK_TYPE_1, TS_1);
 
-        ArrayList<WakelockInfo> info = pullResults(TS_3);
+        for (int i = 0; i < 5; i++) {
+            ArrayList<WakelockInfo> info = pullResults(TS_3);
 
-        assertEquals("size", 1, info.size());
-        assertEquals("uid", UID_1, info.get(0).uid);
-        assertEquals("tag", TAG_1, info.get(0).tag);
-        assertEquals("type", WAKELOCK_TYPE_1, info.get(0).type);
-        assertEquals("duration", TS_3 - TS_1, info.get(0).uptimeMillis);
-        assertEquals("count", 0, info.get(0).completedCount);
+            assertEquals("size", 1, info.size());
+            assertEquals("uid", UID_1, info.get(0).uid);
+            assertEquals("tag", TAG_1, info.get(0).tag);
+            assertEquals("type", WAKELOCK_TYPE_1, info.get(0).type);
+            assertEquals("duration", TS_3 - TS_1, info.get(0).uptimeMillis);
+            assertEquals("count", 0, info.get(0).completedCount);
+        }
     }
 
     @Test
