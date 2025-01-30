@@ -16,7 +16,6 @@
 package com.android.systemui.biometrics
 
 import android.app.ActivityTaskManager
-import android.app.admin.DevicePolicyManager
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.hardware.biometrics.BiometricAuthenticator
@@ -43,6 +42,8 @@ import androidx.test.filters.SmallTest
 import com.android.app.viewcapture.ViewCapture
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.widget.LockPatternUtils
+import com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN
+import com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN
 import com.android.launcher3.icons.IconProvider
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeBiometricStatusRepository
@@ -432,8 +433,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
                 .setMoreOptionsButtonListener(fakeExecutor) { _, _ -> isButtonClicked = true }
                 .build()
 
-        val container =
-            initializeFingerprintContainer(contentViewWithMoreOptionsButton = contentView)
+        val container = initializeFingerprintContainer()
 
         waitForIdleSync()
 
@@ -488,8 +488,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
                 .build()
         val container =
             initializeFingerprintContainer(
-                authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL,
-                contentViewWithMoreOptionsButton = contentView,
+                authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL
             )
         waitForIdleSync()
 
@@ -500,8 +499,8 @@ open class AuthContainerViewTest : SysuiTestCase() {
     @Test
     fun testCredentialViewUsesEffectiveUserId() {
         whenever(userManager.getCredentialOwnerProfile(anyInt())).thenReturn(200)
-        whenever(lockPatternUtils.getKeyguardStoredPasswordQuality(eq(200)))
-            .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING)
+        whenever(lockPatternUtils.getCredentialTypeForUser(eq(200)))
+            .thenReturn(CREDENTIAL_TYPE_PATTERN)
 
         val container =
             initializeFingerprintContainer(
@@ -578,8 +577,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
         addToView: Boolean = true
     ): TestAuthContainerView {
         whenever(userManager.getCredentialOwnerProfile(anyInt())).thenReturn(20)
-        whenever(lockPatternUtils.getKeyguardStoredPasswordQuality(eq(20)))
-            .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC)
+        whenever(lockPatternUtils.getCredentialTypeForUser(eq(20))).thenReturn(CREDENTIAL_TYPE_PIN)
 
         // In the credential view, clicking on the background (to cancel authentication) is not
         // valid. Thus, the listener should be null, and it should not be in the accessibility
@@ -599,7 +597,6 @@ open class AuthContainerViewTest : SysuiTestCase() {
         authenticators: Int = BiometricManager.Authenticators.BIOMETRIC_WEAK,
         addToView: Boolean = true,
         verticalListContentView: PromptVerticalListContentView? = null,
-        contentViewWithMoreOptionsButton: PromptContentViewWithMoreOptionsButton? = null,
     ) =
         initializeContainer(
             TestAuthContainerView(

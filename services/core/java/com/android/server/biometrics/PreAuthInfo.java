@@ -164,6 +164,7 @@ class PreAuthInfo {
                 Slog.d(TAG, "Package: " + opPackageName
                         + " Sensor ID: " + sensor.id
                         + " Modality: " + sensor.modality
+                        + " User id: " + effectiveUserId
                         + " Status: " + status);
 
                 // A sensor with privacy enabled will still be eligible to
