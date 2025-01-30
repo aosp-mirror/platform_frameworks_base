@@ -1681,9 +1681,13 @@ public final class NotificationRecord {
         }
 
         if (mTargetSdkVersion >= Build.VERSION_CODES.R
-                && notification.isStyle(Notification.MessagingStyle.class)
-                && (mShortcutInfo == null || isOnlyBots(mShortcutInfo.getPersons()))) {
-            return false;
+                && notification.isStyle(Notification.MessagingStyle.class)) {
+            if (mShortcutInfo == null || isOnlyBots(mShortcutInfo.getPersons())) {
+                return false;
+            }
+            if (Flags.notificationNoCustomViewConversations() && hasUndecoratedRemoteView()) {
+                return false;
+            }
         }
         if (mHasSentValidMsg && mShortcutInfo == null) {
             return false;
