@@ -17647,8 +17647,19 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
-    public void testSetCanBePromoted_granted() throws Exception {
+    @EnableFlags({android.app.Flags.FLAG_API_RICH_ONGOING})
+    public void testSetCanBePromoted_granted_noui() throws Exception {
+        testSetCanBePromoted_granted();
+    }
+
+    @Test
+    @EnableFlags({android.app.Flags.FLAG_API_RICH_ONGOING,
+            android.app.Flags.FLAG_UI_RICH_ONGOING })
+    public void testSetCanBePromoted_granted_ui() throws Exception {
+        testSetCanBePromoted_granted();
+    }
+
+    private void testSetCanBePromoted_granted() throws Exception {
         // qualifying posted notification
         Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
@@ -17703,6 +17714,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addNotification(r);
         mService.addEnqueuedNotification(r1);
 
+        // GIVEN - make sure the promoted value does not depend on the default value.
+        mBinderService.setCanBePromoted(mPkg, mUid, false, true);
+        waitForIdle();
+        clearInvocations(mListeners);
+
         mBinderService.setCanBePromoted(mPkg, mUid, true, true);
 
         waitForIdle();
@@ -17725,7 +17741,18 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
-    public void testSetCanBePromoted_granted_onlyNotifiesOnce() throws Exception {
+    public void testSetCanBePromoted_granted_onlyNotifiesOnce_noui() throws Exception {
+        testSetCanBePromoted_granted_onlyNotifiesOnce();
+    }
+
+    @Test
+    @EnableFlags({android.app.Flags.FLAG_API_RICH_ONGOING,
+            android.app.Flags.FLAG_UI_RICH_ONGOING})
+    public void testSetCanBePromoted_granted_onlyNotifiesOnce_ui() throws Exception {
+        testSetCanBePromoted_granted_onlyNotifiesOnce();
+    }
+
+    private void testSetCanBePromoted_granted_onlyNotifiesOnce() throws Exception {
         // qualifying posted notification
         Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
@@ -17741,6 +17768,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         mService.addNotification(r);
+        // GIVEN - make sure the promoted value does not depend on the default value.
+        mBinderService.setCanBePromoted(mPkg, mUid, false, true);
+        waitForIdle();
+        clearInvocations(mListeners);
 
         mBinderService.setCanBePromoted(mPkg, mUid, true, true);
         waitForIdle();
