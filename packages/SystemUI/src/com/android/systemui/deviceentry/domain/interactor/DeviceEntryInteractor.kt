@@ -16,7 +16,6 @@
 
 package com.android.systemui.deviceentry.domain.interactor
 
-import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.policy.IKeyguardDismissCallback
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
@@ -36,11 +35,9 @@ import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.utils.coroutines.flow.mapLatestConflated
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -285,32 +282,7 @@ constructor(
     }
 
     /** Locks the device instantly. */
-    fun lockNow() {
-        deviceUnlockedInteractor.lockNow()
-    }
-
-    suspend fun hydrateTableLogBuffer(tableLogBuffer: TableLogBuffer) {
-        coroutineScope {
-            launch {
-                isDeviceEntered
-                    .logDiffsForTable(
-                        tableLogBuffer = tableLogBuffer,
-                        columnName = "isDeviceEntered",
-                        initialValue = isDeviceEntered.value,
-                    )
-                    .collect()
-            }
-
-            launch {
-                canSwipeToEnter
-                    .map { it?.toString() ?: "" }
-                    .logDiffsForTable(
-                        tableLogBuffer = tableLogBuffer,
-                        columnName = "canSwipeToEnter",
-                        initialValue = canSwipeToEnter.value?.toString() ?: "",
-                    )
-                    .collect()
-            }
-        }
+    fun lockNow(debuggingReason: String) {
+        deviceUnlockedInteractor.lockNow(debuggingReason)
     }
 }

@@ -2697,6 +2697,34 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(isVisible).isFalse()
         }
 
+    @Test
+    fun deviceLocks_whenNoLongerTrusted_whileDeviceNotEntered() =
+        testScope.runTest {
+            prepareState(isDeviceUnlocked = true, initialSceneKey = Scenes.Gone)
+            underTest.start()
+
+            val isDeviceEntered by collectLastValue(kosmos.deviceEntryInteractor.isDeviceEntered)
+            val deviceUnlockStatus by
+                collectLastValue(kosmos.deviceUnlockedInteractor.deviceUnlockStatus)
+            val currentScene by collectLastValue(kosmos.sceneInteractor.currentScene)
+            assertThat(isDeviceEntered).isTrue()
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+            kosmos.fakeTrustRepository.setCurrentUserTrusted(true)
+            kosmos.sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
+            runCurrent()
+            assertThat(isDeviceEntered).isFalse()
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+
+            kosmos.fakeTrustRepository.setCurrentUserTrusted(false)
+            runCurrent()
+
+            assertThat(isDeviceEntered).isFalse()
+            assertThat(deviceUnlockStatus?.isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+        }
+
     private fun TestScope.emulateSceneTransition(
         transitionStateFlow: MutableStateFlow<ObservableTransitionState>,
         toScene: SceneKey,
