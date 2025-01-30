@@ -88,7 +88,7 @@ class CallChipViewModelTest : SysuiTestCase() {
 
             repo.setOngoingCallState(OngoingCallModel.NoCall)
 
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Inactive::class.java)
         }
 
     @Test
@@ -98,7 +98,7 @@ class CallChipViewModelTest : SysuiTestCase() {
 
             repo.setOngoingCallState(inCallModel(startTimeMs = 0))
 
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Active.IconOnly::class.java)
         }
 
     @Test
@@ -108,7 +108,7 @@ class CallChipViewModelTest : SysuiTestCase() {
 
             repo.setOngoingCallState(inCallModel(startTimeMs = -2))
 
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Active.IconOnly::class.java)
         }
 
     @Test
@@ -118,7 +118,7 @@ class CallChipViewModelTest : SysuiTestCase() {
 
             repo.setOngoingCallState(inCallModel(startTimeMs = 345))
 
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Active.Timer::class.java)
         }
 
     @Test
@@ -135,7 +135,7 @@ class CallChipViewModelTest : SysuiTestCase() {
             // started 2000ms ago (1000 - 3000). The OngoingActivityChipModel start time needs to be
             // relative to elapsedRealtime, so it should be 2000ms before the elapsed realtime set
             // on the clock.
-            assertThat((latest as OngoingActivityChipModel.Shown.Timer).startTimeMs)
+            assertThat((latest as OngoingActivityChipModel.Active.Timer).startTimeMs)
                 .isEqualTo(398_000)
         }
 
@@ -150,12 +150,12 @@ class CallChipViewModelTest : SysuiTestCase() {
                 inCallModel(startTimeMs = 1000, notificationIcon = null, notificationKey = notifKey)
             )
 
-            assertThat((latest as OngoingActivityChipModel.Shown).icon)
+            assertThat((latest as OngoingActivityChipModel.Active).icon)
                 .isInstanceOf(
                     OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon::class.java
                 )
             val actualNotifKey =
-                (((latest as OngoingActivityChipModel.Shown).icon)
+                (((latest as OngoingActivityChipModel.Active).icon)
                         as OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon)
                     .notificationKey
             assertThat(actualNotifKey).isEqualTo(notifKey)
@@ -176,10 +176,10 @@ class CallChipViewModelTest : SysuiTestCase() {
                 )
             )
 
-            assertThat((latest as OngoingActivityChipModel.Shown).icon)
+            assertThat((latest as OngoingActivityChipModel.Active).icon)
                 .isInstanceOf(OngoingActivityChipModel.ChipIcon.StatusBarView::class.java)
             val actualIcon =
-                (latest as OngoingActivityChipModel.Shown).icon
+                (latest as OngoingActivityChipModel.Active).icon
                     as OngoingActivityChipModel.ChipIcon.StatusBarView
             assertThat(actualIcon.impl).isEqualTo(notifIcon)
             assertThat(actualIcon.contentDescription.loadContentDescription(context))
@@ -203,12 +203,12 @@ class CallChipViewModelTest : SysuiTestCase() {
                 )
             )
 
-            assertThat((latest as OngoingActivityChipModel.Shown).icon)
+            assertThat((latest as OngoingActivityChipModel.Active).icon)
                 .isInstanceOf(
                     OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon::class.java
                 )
             val actualIcon =
-                (latest as OngoingActivityChipModel.Shown).icon
+                (latest as OngoingActivityChipModel.Active).icon
                     as OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon
             assertThat(actualIcon.notificationKey).isEqualTo("notifKey")
             assertThat(actualIcon.contentDescription.loadContentDescription(context))
@@ -225,10 +225,10 @@ class CallChipViewModelTest : SysuiTestCase() {
 
             repo.setOngoingCallState(inCallModel(startTimeMs = 1000, notificationIcon = null))
 
-            assertThat((latest as OngoingActivityChipModel.Shown).icon)
+            assertThat((latest as OngoingActivityChipModel.Active).icon)
                 .isInstanceOf(OngoingActivityChipModel.ChipIcon.SingleColorIcon::class.java)
             val icon =
-                (((latest as OngoingActivityChipModel.Shown).icon)
+                (((latest as OngoingActivityChipModel.Active).icon)
                         as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
                     .impl as Icon.Resource
             assertThat(icon.res).isEqualTo(com.android.internal.R.drawable.ic_phone)
@@ -250,12 +250,12 @@ class CallChipViewModelTest : SysuiTestCase() {
                 )
             )
 
-            assertThat((latest as OngoingActivityChipModel.Shown).icon)
+            assertThat((latest as OngoingActivityChipModel.Active).icon)
                 .isInstanceOf(
                     OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon::class.java
                 )
             val actualIcon =
-                (latest as OngoingActivityChipModel.Shown).icon
+                (latest as OngoingActivityChipModel.Active).icon
                     as OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon
             assertThat(actualIcon.notificationKey).isEqualTo("notifKey")
             assertThat(actualIcon.contentDescription.loadContentDescription(context))
@@ -271,7 +271,7 @@ class CallChipViewModelTest : SysuiTestCase() {
 
             repo.setOngoingCallState(inCallModel(startTimeMs = 1000, promotedContent = null))
 
-            assertThat((latest as OngoingActivityChipModel.Shown).colors)
+            assertThat((latest as OngoingActivityChipModel.Active).colors)
                 .isEqualTo(ColorsModel.Themed)
         }
 
@@ -282,7 +282,7 @@ class CallChipViewModelTest : SysuiTestCase() {
 
             repo.setOngoingCallState(inCallModel(startTimeMs = 0, promotedContent = null))
 
-            assertThat((latest as OngoingActivityChipModel.Shown).colors)
+            assertThat((latest as OngoingActivityChipModel.Active).colors)
                 .isEqualTo(ColorsModel.Themed)
         }
 
@@ -296,7 +296,7 @@ class CallChipViewModelTest : SysuiTestCase() {
                 inCallModel(startTimeMs = 1000, promotedContent = PROMOTED_CONTENT_WITH_COLOR)
             )
 
-            assertThat((latest as OngoingActivityChipModel.Shown).colors)
+            assertThat((latest as OngoingActivityChipModel.Active).colors)
                 .isEqualTo(ColorsModel.Themed)
         }
 
@@ -310,7 +310,7 @@ class CallChipViewModelTest : SysuiTestCase() {
                 inCallModel(startTimeMs = 0, promotedContent = PROMOTED_CONTENT_WITH_COLOR)
             )
 
-            assertThat((latest as OngoingActivityChipModel.Shown).colors)
+            assertThat((latest as OngoingActivityChipModel.Active).colors)
                 .isEqualTo(ColorsModel.Themed)
         }
 
@@ -324,7 +324,7 @@ class CallChipViewModelTest : SysuiTestCase() {
                 inCallModel(startTimeMs = 1000, promotedContent = PROMOTED_CONTENT_WITH_COLOR)
             )
 
-            assertThat((latest as OngoingActivityChipModel.Shown).colors)
+            assertThat((latest as OngoingActivityChipModel.Active).colors)
                 .isEqualTo(
                     ColorsModel.Custom(
                         backgroundColorInt = PROMOTED_BACKGROUND_COLOR,
@@ -343,7 +343,7 @@ class CallChipViewModelTest : SysuiTestCase() {
                 inCallModel(startTimeMs = 0, promotedContent = PROMOTED_CONTENT_WITH_COLOR)
             )
 
-            assertThat((latest as OngoingActivityChipModel.Shown).colors)
+            assertThat((latest as OngoingActivityChipModel.Active).colors)
                 .isEqualTo(
                     ColorsModel.Custom(
                         backgroundColorInt = PROMOTED_BACKGROUND_COLOR,
@@ -361,13 +361,13 @@ class CallChipViewModelTest : SysuiTestCase() {
 
             // Start a call
             repo.setOngoingCallState(inCallModel(startTimeMs = 1000))
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            assertThat((latest as OngoingActivityChipModel.Shown.Timer).startTimeMs)
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Active::class.java)
+            assertThat((latest as OngoingActivityChipModel.Active.Timer).startTimeMs)
                 .isEqualTo(398_000)
 
             // End the call
             repo.setOngoingCallState(OngoingCallModel.NoCall)
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Inactive::class.java)
 
             // Let 100_000ms elapse
             kosmos.fakeSystemClock.setCurrentTimeMillis(103_000)
@@ -375,8 +375,8 @@ class CallChipViewModelTest : SysuiTestCase() {
 
             // Start a new call, which started 1000ms ago
             repo.setOngoingCallState(inCallModel(startTimeMs = 102_000))
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            assertThat((latest as OngoingActivityChipModel.Shown.Timer).startTimeMs)
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Active::class.java)
+            assertThat((latest as OngoingActivityChipModel.Active.Timer).startTimeMs)
                 .isEqualTo(499_000)
         }
 
@@ -388,7 +388,7 @@ class CallChipViewModelTest : SysuiTestCase() {
 
             repo.setOngoingCallState(inCallModel(startTimeMs = 1000, intent = null))
 
-            assertThat((latest as OngoingActivityChipModel.Shown).onClickListenerLegacy).isNull()
+            assertThat((latest as OngoingActivityChipModel.Active).onClickListenerLegacy).isNull()
         }
 
     @Test
@@ -399,7 +399,7 @@ class CallChipViewModelTest : SysuiTestCase() {
 
             val pendingIntent = mock<PendingIntent>()
             repo.setOngoingCallState(inCallModel(startTimeMs = 1000, intent = pendingIntent))
-            val clickListener = (latest as OngoingActivityChipModel.Shown).onClickListenerLegacy
+            val clickListener = (latest as OngoingActivityChipModel.Active).onClickListenerLegacy
             assertThat(clickListener).isNotNull()
 
             clickListener!!.onClick(chipView)
@@ -417,7 +417,7 @@ class CallChipViewModelTest : SysuiTestCase() {
 
             val pendingIntent = mock<PendingIntent>()
             repo.setOngoingCallState(inCallModel(startTimeMs = 0, intent = pendingIntent))
-            val clickListener = (latest as OngoingActivityChipModel.Shown).onClickListenerLegacy
+            val clickListener = (latest as OngoingActivityChipModel.Active).onClickListenerLegacy
 
             assertThat(clickListener).isNotNull()
 
@@ -440,7 +440,7 @@ class CallChipViewModelTest : SysuiTestCase() {
                 intent = null,
             )
 
-            assertThat((latest as OngoingActivityChipModel.Shown).clickBehavior)
+            assertThat((latest as OngoingActivityChipModel.Active).clickBehavior)
                 .isInstanceOf(OngoingActivityChipModel.ClickBehavior.None::class.java)
         }
 
@@ -457,7 +457,7 @@ class CallChipViewModelTest : SysuiTestCase() {
                 intent = pendingIntent,
             )
 
-            val clickBehavior = (latest as OngoingActivityChipModel.Shown).clickBehavior
+            val clickBehavior = (latest as OngoingActivityChipModel.Active).clickBehavior
             assertThat(clickBehavior)
                 .isInstanceOf(OngoingActivityChipModel.ClickBehavior.ExpandAction::class.java)
             (clickBehavior as OngoingActivityChipModel.ClickBehavior.ExpandAction).onClick(
@@ -482,7 +482,7 @@ class CallChipViewModelTest : SysuiTestCase() {
                 intent = pendingIntent,
             )
 
-            val clickBehavior = (latest as OngoingActivityChipModel.Shown).clickBehavior
+            val clickBehavior = (latest as OngoingActivityChipModel.Active).clickBehavior
             assertThat(clickBehavior)
                 .isInstanceOf(OngoingActivityChipModel.ClickBehavior.ExpandAction::class.java)
             (clickBehavior as OngoingActivityChipModel.ClickBehavior.ExpandAction).onClick(

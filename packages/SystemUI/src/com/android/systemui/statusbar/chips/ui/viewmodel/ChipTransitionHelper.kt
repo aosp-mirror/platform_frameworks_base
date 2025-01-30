@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.chips.ui.viewmodel
 
 import android.annotation.SuppressLint
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import kotlinx.coroutines.CoroutineScope
@@ -28,7 +29,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * A class that can help [OngoingActivityChipViewModel] instances with various transition states.
@@ -76,20 +76,19 @@ class ChipTransitionHelper(@Application private val scope: CoroutineScope) {
      * (see [onActivityStoppedFromDialog]). In general, this flow just uses value in [chip].
      */
     fun createChipFlow(chip: Flow<OngoingActivityChipModel>): StateFlow<OngoingActivityChipModel> {
-        return combine(
-                chip,
-                wasActivityRecentlyStoppedFromDialog,
-            ) { chipModel, activityRecentlyStopped ->
+        return combine(chip, wasActivityRecentlyStoppedFromDialog) {
+                chipModel,
+                activityRecentlyStopped ->
                 if (activityRecentlyStopped) {
                     // There's a bit of a delay between when the user stops an activity via
                     // SysUI and when the system services notify SysUI that the activity has
                     // indeed stopped. Prevent the chip from showing during this delay by
                     // immediately hiding it without any animation.
-                    OngoingActivityChipModel.Hidden(shouldAnimate = false)
+                    OngoingActivityChipModel.Inactive(shouldAnimate = false)
                 } else {
                     chipModel
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden())
+            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Inactive())
     }
 }

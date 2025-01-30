@@ -310,8 +310,8 @@ class NotifChipsViewModelTest : SysuiTestCase() {
             )
 
             assertThat(latest).hasSize(1)
-            assertThat(latest!![0]).isInstanceOf(OngoingActivityChipModel.Shown.Text::class.java)
-            assertThat((latest!![0] as OngoingActivityChipModel.Shown.Text).text)
+            assertThat(latest!![0]).isInstanceOf(OngoingActivityChipModel.Active.Text::class.java)
+            assertThat((latest!![0] as OngoingActivityChipModel.Active.Text).text)
                 .isEqualTo("Arrived")
         }
 
@@ -335,7 +335,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
 
             assertThat(latest).hasSize(1)
             assertThat(latest!![0])
-                .isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
+                .isInstanceOf(OngoingActivityChipModel.Active.IconOnly::class.java)
         }
 
     @Test
@@ -365,7 +365,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
 
             assertThat(latest).hasSize(1)
             assertThat(latest!![0])
-                .isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
+                .isInstanceOf(OngoingActivityChipModel.Active.IconOnly::class.java)
         }
 
     @Test
@@ -395,7 +395,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
 
             assertThat(latest).hasSize(1)
             assertThat(latest!![0])
-                .isInstanceOf(OngoingActivityChipModel.Shown.ShortTimeDelta::class.java)
+                .isInstanceOf(OngoingActivityChipModel.Active.ShortTimeDelta::class.java)
         }
 
     @Test
@@ -424,7 +424,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
 
             assertThat(latest).hasSize(1)
             assertThat(latest!![0])
-                .isInstanceOf(OngoingActivityChipModel.Shown.ShortTimeDelta::class.java)
+                .isInstanceOf(OngoingActivityChipModel.Active.ShortTimeDelta::class.java)
         }
 
     @Test
@@ -452,7 +452,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
             )
 
             assertThat(latest).hasSize(1)
-            assertThat(latest!![0]).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
+            assertThat(latest!![0]).isInstanceOf(OngoingActivityChipModel.Active.Timer::class.java)
         }
 
     @Test
@@ -480,7 +480,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
             )
 
             assertThat(latest).hasSize(1)
-            assertThat(latest!![0]).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
+            assertThat(latest!![0]).isInstanceOf(OngoingActivityChipModel.Active.Timer::class.java)
         }
 
     @Test
@@ -512,7 +512,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
 
             // THEN the chip shows the time
             assertThat(latest!![0])
-                .isInstanceOf(OngoingActivityChipModel.Shown.ShortTimeDelta::class.java)
+                .isInstanceOf(OngoingActivityChipModel.Active.ShortTimeDelta::class.java)
         }
 
     @Test
@@ -551,7 +551,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
             // (In real life the chip won't show at all, but that's handled in a different part of
             // the system. What we know here is that the chip shouldn't shrink to icon only.)
             assertThat(latest!![0])
-                .isInstanceOf(OngoingActivityChipModel.Shown.ShortTimeDelta::class.java)
+                .isInstanceOf(OngoingActivityChipModel.Active.ShortTimeDelta::class.java)
         }
 
     @Test
@@ -603,7 +603,8 @@ class NotifChipsViewModelTest : SysuiTestCase() {
 
             // THEN the "notif" chip keeps showing time
             val chip = latest!![0]
-            assertThat(chip).isInstanceOf(OngoingActivityChipModel.Shown.ShortTimeDelta::class.java)
+            assertThat(chip)
+                .isInstanceOf(OngoingActivityChipModel.Active.ShortTimeDelta::class.java)
             assertIsNotifChip(chip, context, icon, "notif")
         }
 
@@ -641,7 +642,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
 
             // THEN the chip shrinks to icon only
             assertThat(latest!![0])
-                .isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
+                .isInstanceOf(OngoingActivityChipModel.Active.IconOnly::class.java)
         }
 
     @Test
@@ -724,22 +725,23 @@ class NotifChipsViewModelTest : SysuiTestCase() {
             expectedNotificationKey: String,
             expectedContentDescriptionSubstrings: List<String> = emptyList(),
         ) {
-            val shown = latest as OngoingActivityChipModel.Shown
+            val active = latest as OngoingActivityChipModel.Active
             if (StatusBarConnectedDisplays.isEnabled) {
-                assertThat(shown.icon)
+                assertThat(active.icon)
                     .isInstanceOf(
                         OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon::class.java
                     )
-                val icon = shown.icon as OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon
+                val icon =
+                    active.icon as OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon
 
                 assertThat(icon.notificationKey).isEqualTo(expectedNotificationKey)
                 expectedContentDescriptionSubstrings.forEach {
                     assertThat(icon.contentDescription.loadContentDescription(context)).contains(it)
                 }
             } else {
-                assertThat(shown.icon)
+                assertThat(active.icon)
                     .isInstanceOf(OngoingActivityChipModel.ChipIcon.StatusBarView::class.java)
-                val icon = shown.icon as OngoingActivityChipModel.ChipIcon.StatusBarView
+                val icon = active.icon as OngoingActivityChipModel.ChipIcon.StatusBarView
                 assertThat(icon.impl).isEqualTo(expectedIcon!!)
                 expectedContentDescriptionSubstrings.forEach {
                     assertThat(icon.contentDescription.loadContentDescription(context)).contains(it)
@@ -749,7 +751,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
 
         fun assertIsNotifKey(latest: OngoingActivityChipModel?, expectedKey: String) {
             assertThat(
-                    ((latest as OngoingActivityChipModel.Shown).icon
+                    ((latest as OngoingActivityChipModel.Active).icon
                             as OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon)
                         .notificationKey
                 )

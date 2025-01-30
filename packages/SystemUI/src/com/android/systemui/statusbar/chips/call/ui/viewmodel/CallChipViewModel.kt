@@ -66,7 +66,7 @@ constructor(
             .map { state ->
                 when (state) {
                     is OngoingCallModel.NoCall,
-                    is OngoingCallModel.InCallWithVisibleApp -> OngoingActivityChipModel.Hidden()
+                    is OngoingCallModel.InCallWithVisibleApp -> OngoingActivityChipModel.Inactive()
                     is OngoingCallModel.InCall -> {
                         val key = state.notificationKey
                         val contentDescription = getContentDescription(state.appName)
@@ -97,7 +97,7 @@ constructor(
                         if (state.startTimeMs <= 0L) {
                             // If the start time is invalid, don't show a timer and show just an
                             // icon. See b/192379214.
-                            OngoingActivityChipModel.Shown.IconOnly(
+                            OngoingActivityChipModel.Active.IconOnly(
                                 key = key,
                                 icon = icon,
                                 colors = colors,
@@ -108,7 +108,7 @@ constructor(
                             val startTimeInElapsedRealtime =
                                 state.startTimeMs - systemClock.currentTimeMillis() +
                                     systemClock.elapsedRealtime()
-                            OngoingActivityChipModel.Shown.Timer(
+                            OngoingActivityChipModel.Active.Timer(
                                 key = key,
                                 icon = icon,
                                 colors = colors,
@@ -120,7 +120,7 @@ constructor(
                     }
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden())
+            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Inactive())
 
     private fun getOnClickListener(state: OngoingCallModel.InCall): View.OnClickListener? {
         if (state.intent == null) {

@@ -488,7 +488,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
             kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.DoingNothing
 
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Inactive::class.java)
 
             kosmos.fakeMediaProjectionRepository.mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)

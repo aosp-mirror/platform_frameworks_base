@@ -32,16 +32,16 @@ sealed class OngoingActivityChipModel {
     /**
      * This chip shouldn't be shown.
      *
-     * @property shouldAnimate true if the transition from [Shown] to [Hidden] should be animated,
-     *   and false if that transition should *not* be animated (i.e. the chip view should
+     * @property shouldAnimate true if the transition from [Active] to [Inactive] should be
+     *   animated, and false if that transition should *not* be animated (i.e. the chip view should
      *   immediately disappear).
      */
-    data class Hidden(val shouldAnimate: Boolean = true) : OngoingActivityChipModel() {
-        override val logName = "Hidden(anim=$shouldAnimate)"
+    data class Inactive(val shouldAnimate: Boolean = true) : OngoingActivityChipModel() {
+        override val logName = "Inactive(anim=$shouldAnimate)"
     }
 
     /** This chip should be shown with the given information. */
-    sealed class Shown(
+    sealed class Active(
         /**
          * A key that uniquely identifies this chip. Used for better visual effects, like animation.
          */
@@ -66,8 +66,8 @@ sealed class OngoingActivityChipModel {
             override val colors: ColorsModel,
             override val onClickListenerLegacy: View.OnClickListener?,
             override val clickBehavior: ClickBehavior,
-        ) : Shown(key, icon, colors, onClickListenerLegacy, clickBehavior) {
-            override val logName = "Shown.Icon"
+        ) : Active(key, icon, colors, onClickListenerLegacy, clickBehavior) {
+            override val logName = "Active.Icon"
         }
 
         /** The chip shows a timer, counting up from [startTimeMs]. */
@@ -87,8 +87,8 @@ sealed class OngoingActivityChipModel {
             val startTimeMs: Long,
             override val onClickListenerLegacy: View.OnClickListener?,
             override val clickBehavior: ClickBehavior,
-        ) : Shown(key, icon, colors, onClickListenerLegacy, clickBehavior) {
-            override val logName = "Shown.Timer"
+        ) : Active(key, icon, colors, onClickListenerLegacy, clickBehavior) {
+            override val logName = "Active.Timer"
         }
 
         /**
@@ -103,12 +103,12 @@ sealed class OngoingActivityChipModel {
             val time: Long,
             override val onClickListenerLegacy: View.OnClickListener?,
             override val clickBehavior: ClickBehavior,
-        ) : Shown(key, icon, colors, onClickListenerLegacy, clickBehavior) {
+        ) : Active(key, icon, colors, onClickListenerLegacy, clickBehavior) {
             init {
                 StatusBarNotifChips.assertInNewMode()
             }
 
-            override val logName = "Shown.ShortTimeDelta"
+            override val logName = "Active.ShortTimeDelta"
         }
 
         /**
@@ -121,14 +121,14 @@ sealed class OngoingActivityChipModel {
             /** The number of seconds until an event is started. */
             val secondsUntilStarted: Long,
         ) :
-            Shown(
+            Active(
                 key,
                 icon = null,
                 colors,
                 onClickListenerLegacy = null,
                 clickBehavior = ClickBehavior.None,
             ) {
-            override val logName = "Shown.Countdown"
+            override val logName = "Active.Countdown"
         }
 
         /** This chip shows the specified [text] in the chip. */
@@ -140,8 +140,8 @@ sealed class OngoingActivityChipModel {
             val text: String,
             override val onClickListenerLegacy: View.OnClickListener? = null,
             override val clickBehavior: ClickBehavior,
-        ) : Shown(key, icon, colors, onClickListenerLegacy, clickBehavior) {
-            override val logName = "Shown.Text"
+        ) : Active(key, icon, colors, onClickListenerLegacy, clickBehavior) {
+            override val logName = "Active.Text"
         }
     }
 

@@ -118,7 +118,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
             val latest by collectLastValue(underTest.primaryChip)
 
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Inactive::class.java)
         }
 
     @Test
@@ -266,7 +266,8 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
             runCurrent()
 
-            assertThat((latest as OngoingActivityChipModel.Shown.Timer).startTimeMs).isEqualTo(1234)
+            assertThat((latest as OngoingActivityChipModel.Active.Timer).startTimeMs)
+                .isEqualTo(1234)
 
             // Stop subscribing to the chip flow
             job1.cancel()
@@ -280,7 +281,8 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN the old start time is still used
-            assertThat((latest as OngoingActivityChipModel.Shown.Timer).startTimeMs).isEqualTo(1234)
+            assertThat((latest as OngoingActivityChipModel.Active.Timer).startTimeMs)
+                .isEqualTo(1234)
 
             job2.cancel()
         }
@@ -312,7 +314,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             dialogStopAction.onClick(mock<DialogInterface>(), 0)
 
             // THEN the chip is immediately hidden with no animation
-            assertThat(latest).isEqualTo(OngoingActivityChipModel.Hidden(shouldAnimate = false))
+            assertThat(latest).isEqualTo(OngoingActivityChipModel.Inactive(shouldAnimate = false))
         }
 
     @Test
@@ -339,7 +341,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             dialogStopAction.onClick(mock<DialogInterface>(), 0)
 
             // THEN the chip is immediately hidden with no animation
-            assertThat(latest).isEqualTo(OngoingActivityChipModel.Hidden(shouldAnimate = false))
+            assertThat(latest).isEqualTo(OngoingActivityChipModel.Inactive(shouldAnimate = false))
         }
 
     companion object {
@@ -372,13 +374,13 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
                 .thenThrow(PackageManager.NameNotFoundException())
 
             if (StatusBarChipsModernization.isEnabled) {
-                val clickBehavior = (latest as OngoingActivityChipModel.Shown).clickBehavior
+                val clickBehavior = (latest as OngoingActivityChipModel.Active).clickBehavior
                 (clickBehavior as OngoingActivityChipModel.ClickBehavior.ExpandAction).onClick(
                     expandable
                 )
             } else {
                 val clickListener =
-                    ((latest as OngoingActivityChipModel.Shown).onClickListenerLegacy)
+                    ((latest as OngoingActivityChipModel.Active).onClickListenerLegacy)
                 clickListener!!.onClick(chipView)
             }
 
@@ -386,8 +388,8 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
         }
 
         fun assertIsScreenRecordChip(latest: OngoingActivityChipModel?) {
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            assertThat((latest as OngoingActivityChipModel.Shown).key)
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Active::class.java)
+            assertThat((latest as OngoingActivityChipModel.Active).key)
                 .isEqualTo(ScreenRecordChipViewModel.KEY)
             val icon =
                 ((latest.icon) as OngoingActivityChipModel.ChipIcon.SingleColorIcon).impl
@@ -396,8 +398,8 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
         }
 
         fun assertIsShareToAppChip(latest: OngoingActivityChipModel?) {
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            assertThat((latest as OngoingActivityChipModel.Shown).key)
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Active::class.java)
+            assertThat((latest as OngoingActivityChipModel.Active).key)
                 .isEqualTo(ShareToAppChipViewModel.KEY)
             val icon =
                 ((latest.icon) as OngoingActivityChipModel.ChipIcon.SingleColorIcon).impl
@@ -406,8 +408,8 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
         }
 
         fun assertIsCallChip(latest: OngoingActivityChipModel?, notificationKey: String) {
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            assertThat((latest as OngoingActivityChipModel.Shown).key).isEqualTo(notificationKey)
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Active::class.java)
+            assertThat((latest as OngoingActivityChipModel.Active).key).isEqualTo(notificationKey)
 
             if (StatusBarConnectedDisplays.isEnabled) {
                 assertNotificationIcon(latest, notificationKey)
@@ -423,9 +425,9 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             latest: OngoingActivityChipModel?,
             notificationKey: String,
         ) {
-            val shown = latest as OngoingActivityChipModel.Shown
+            val active = latest as OngoingActivityChipModel.Active
             val notificationIcon =
-                shown.icon as OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon
+                active.icon as OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon
             assertThat(notificationIcon.notificationKey).isEqualTo(notificationKey)
         }
     }

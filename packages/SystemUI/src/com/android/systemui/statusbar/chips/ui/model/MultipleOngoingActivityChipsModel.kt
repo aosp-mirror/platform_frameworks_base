@@ -19,19 +19,19 @@ package com.android.systemui.statusbar.chips.ui.model
 /** Models multiple active ongoing activity chips at once. */
 data class MultipleOngoingActivityChipsModel(
     /** The primary chip to show. This will *always* be shown. */
-    val primary: OngoingActivityChipModel = OngoingActivityChipModel.Hidden(),
+    val primary: OngoingActivityChipModel = OngoingActivityChipModel.Inactive(),
     /**
      * The secondary chip to show. If there's not enough room in the status bar, this chip will
      * *not* be shown.
      */
-    val secondary: OngoingActivityChipModel = OngoingActivityChipModel.Hidden(),
+    val secondary: OngoingActivityChipModel = OngoingActivityChipModel.Inactive(),
 ) {
     init {
         if (
-            primary is OngoingActivityChipModel.Hidden &&
-                secondary is OngoingActivityChipModel.Shown
+            primary is OngoingActivityChipModel.Inactive &&
+                secondary is OngoingActivityChipModel.Active
         ) {
-            throw IllegalArgumentException("`secondary` cannot be Shown if `primary` is Hidden")
+            throw IllegalArgumentException("`secondary` cannot be Active if `primary` is Inactive")
         }
     }
 }
