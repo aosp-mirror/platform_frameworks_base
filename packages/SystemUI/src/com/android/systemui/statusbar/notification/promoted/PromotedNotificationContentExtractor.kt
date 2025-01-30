@@ -21,6 +21,9 @@ import android.app.Notification.BigPictureStyle
 import android.app.Notification.BigTextStyle
 import android.app.Notification.CallStyle
 import android.app.Notification.EXTRA_CHRONOMETER_COUNT_DOWN
+import android.app.Notification.EXTRA_PROGRESS
+import android.app.Notification.EXTRA_PROGRESS_INDETERMINATE
+import android.app.Notification.EXTRA_PROGRESS_MAX
 import android.app.Notification.EXTRA_SUB_TEXT
 import android.app.Notification.EXTRA_TEXT
 import android.app.Notification.EXTRA_TITLE
@@ -34,6 +37,7 @@ import com.android.systemui.statusbar.notification.promoted.AutomaticPromotionCo
 import com.android.systemui.statusbar.notification.promoted.AutomaticPromotionCoordinator.Companion.EXTRA_WAS_AUTOMATICALLY_PROMOTED
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.Companion.isPromotedForStatusBarChip
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.OldProgress
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.Style
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.When
 import javax.inject.Inject
@@ -90,6 +94,7 @@ constructor(
         contentBuilder.title = notification.title()
         contentBuilder.text = notification.text()
         contentBuilder.skeletonLargeIcon = null // TODO
+        contentBuilder.oldProgress = notification.oldProgress()
 
         val colorsFromNotif = recoveredBuilder.getColors(/* header= */ false)
         contentBuilder.colors =
@@ -125,6 +130,21 @@ private fun Notification.shortCriticalText(): String? {
 
 private fun Notification.chronometerCountDown(): Boolean =
     extras?.getBoolean(EXTRA_CHRONOMETER_COUNT_DOWN, /* defaultValue= */ false) ?: false
+
+private fun Notification.oldProgress(): OldProgress? {
+    val progress = progress() ?: return null
+    val max = progressMax() ?: return null
+    val isIndeterminate = progressIndeterminate() ?: return null
+
+    return OldProgress(progress = progress, max = max, isIndeterminate = isIndeterminate)
+}
+
+private fun Notification.progress(): Int? = extras?.getInt(EXTRA_PROGRESS)
+
+private fun Notification.progressMax(): Int? = extras?.getInt(EXTRA_PROGRESS_MAX)
+
+private fun Notification.progressIndeterminate(): Boolean? =
+    extras?.getBoolean(EXTRA_PROGRESS_INDETERMINATE)
 
 private fun Notification.extractWhen(): When? {
     val time = `when`
@@ -191,5 +211,5 @@ private fun CallStyle.extractContent(contentBuilder: PromotedNotificationContent
 
 private fun ProgressStyle.extractContent(contentBuilder: PromotedNotificationContentModel.Builder) {
     // TODO: Create NotificationProgressModel.toSkeleton, or something similar.
-    contentBuilder.progress = createProgressModel(0xffffffff.toInt(), 0xff000000.toInt())
+    contentBuilder.newProgress = createProgressModel(0xffffffff.toInt(), 0xff000000.toInt())
 }

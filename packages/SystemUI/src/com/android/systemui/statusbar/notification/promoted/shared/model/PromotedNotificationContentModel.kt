@@ -51,6 +51,7 @@ data class PromotedNotificationContentModel(
     val title: CharSequence?,
     val text: CharSequence?,
     val skeletonLargeIcon: Icon?, // TODO(b/377568176): Make into an IconModel.
+    val oldProgress: OldProgress?,
     val colors: Colors,
     val style: Style,
 
@@ -61,7 +62,7 @@ data class PromotedNotificationContentModel(
     val verificationText: CharSequence?,
 
     // for ProgressStyle:
-    val progress: NotificationProgressModel?,
+    val newProgress: NotificationProgressModel?,
 ) {
     class Builder(val key: String) {
         var wasPromotedAutomatically: Boolean = false
@@ -75,6 +76,7 @@ data class PromotedNotificationContentModel(
         var title: CharSequence? = null
         var text: CharSequence? = null
         var skeletonLargeIcon: Icon? = null
+        var oldProgress: OldProgress? = null
         var style: Style = Style.Ineligible
         var colors: Colors = Colors(backgroundColor = 0, primaryTextColor = 0)
 
@@ -85,7 +87,7 @@ data class PromotedNotificationContentModel(
         var verificationText: CharSequence? = null
 
         // for ProgressStyle:
-        var progress: NotificationProgressModel? = null
+        var newProgress: NotificationProgressModel? = null
 
         fun build() =
             PromotedNotificationContentModel(
@@ -101,13 +103,14 @@ data class PromotedNotificationContentModel(
                 title = title,
                 text = text,
                 skeletonLargeIcon = skeletonLargeIcon,
+                oldProgress = oldProgress,
                 colors = colors,
                 style = style,
                 personIcon = personIcon,
                 personName = personName,
                 verificationIcon = verificationIcon,
                 verificationText = verificationText,
-                progress = progress,
+                newProgress = newProgress,
             )
     }
 
@@ -128,6 +131,9 @@ data class PromotedNotificationContentModel(
 
     /** The colors used to display the notification. */
     data class Colors(@ColorInt val backgroundColor: Int, @ColorInt val primaryTextColor: Int)
+
+    /** The fields needed to render the old-style progress bar. */
+    data class OldProgress(val progress: Int, val max: Int, val isIndeterminate: Boolean)
 
     /** The promotion-eligible style of a notification, or [Style.Ineligible] if not. */
     enum class Style {
