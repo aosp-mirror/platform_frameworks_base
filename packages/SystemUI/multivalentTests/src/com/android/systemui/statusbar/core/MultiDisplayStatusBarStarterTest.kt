@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.core
 
 import android.platform.test.annotations.EnableFlags
 import android.view.Display
+import android.view.mockIWindowManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -31,11 +32,13 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -51,75 +54,110 @@ class MultiDisplayStatusBarStarterTest : SysuiTestCase() {
     private val fakeInitializerStore = kosmos.fakeStatusBarInitializerStore
     private val fakePrivacyDotStore = kosmos.fakePrivacyDotWindowControllerStore
     private val fakeLightBarStore = kosmos.fakeLightBarControllerStore
+    private val windowManager = kosmos.mockIWindowManager
+
     // Lazy, so that @EnableFlags is set before initializer is instantiated.
     private val underTest by lazy { kosmos.multiDisplayStatusBarStarter }
+
+    @Before
+    fun setup() {
+        whenever(windowManager.shouldShowSystemDecors(Display.DEFAULT_DISPLAY)).thenReturn(true)
+        whenever(windowManager.shouldShowSystemDecors(DISPLAY_1)).thenReturn(true)
+        whenever(windowManager.shouldShowSystemDecors(DISPLAY_2)).thenReturn(true)
+        whenever(windowManager.shouldShowSystemDecors(DISPLAY_3)).thenReturn(true)
+        whenever(windowManager.shouldShowSystemDecors(DISPLAY_4_NO_SYSTEM_DECOR)).thenReturn(false)
+    }
 
     @Test
     fun start_startsInitializersForCurrentDisplays() =
         testScope.runTest {
-            fakeDisplayRepository.addDisplay(displayId = 1)
-            fakeDisplayRepository.addDisplay(displayId = 2)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_1)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_2)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR)
 
             underTest.start()
             runCurrent()
 
             expect
-                .that(fakeInitializerStore.forDisplay(displayId = 1).startedByCoreStartable)
+                .that(fakeInitializerStore.forDisplay(displayId = DISPLAY_1).startedByCoreStartable)
                 .isTrue()
             expect
-                .that(fakeInitializerStore.forDisplay(displayId = 2).startedByCoreStartable)
+                .that(fakeInitializerStore.forDisplay(displayId = DISPLAY_2).startedByCoreStartable)
                 .isTrue()
+            expect
+                .that(
+                    fakeInitializerStore
+                        .forDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR)
+                        .startedByCoreStartable
+                )
+                .isFalse()
         }
 
     @Test
     fun start_startsOrchestratorForCurrentDisplays() =
         testScope.runTest {
-            fakeDisplayRepository.addDisplay(displayId = 1)
-            fakeDisplayRepository.addDisplay(displayId = 2)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_1)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_2)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR)
 
             underTest.start()
             runCurrent()
 
-            verify(fakeOrchestratorFactory.createdOrchestratorForDisplay(displayId = 1)!!).start()
-            verify(fakeOrchestratorFactory.createdOrchestratorForDisplay(displayId = 2)!!).start()
+            verify(fakeOrchestratorFactory.createdOrchestratorForDisplay(displayId = DISPLAY_1)!!)
+                .start()
+            verify(fakeOrchestratorFactory.createdOrchestratorForDisplay(displayId = DISPLAY_2)!!)
+                .start()
+            assertThat(
+                    fakeOrchestratorFactory.createdOrchestratorForDisplay(
+                        displayId = DISPLAY_4_NO_SYSTEM_DECOR
+                    )
+                )
+                .isNull()
         }
 
     @Test
     fun start_startsPrivacyDotForCurrentDisplays() =
         testScope.runTest {
-            fakeDisplayRepository.addDisplay(displayId = 1)
-            fakeDisplayRepository.addDisplay(displayId = 2)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_1)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_2)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR)
 
             underTest.start()
             runCurrent()
 
-            verify(fakePrivacyDotStore.forDisplay(displayId = 1)).start()
-            verify(fakePrivacyDotStore.forDisplay(displayId = 2)).start()
+            verify(fakePrivacyDotStore.forDisplay(displayId = DISPLAY_1)).start()
+            verify(fakePrivacyDotStore.forDisplay(displayId = DISPLAY_2)).start()
+            verify(fakePrivacyDotStore.forDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR), never())
+                .start()
         }
 
     @Test
     fun start_doesNotStartLightBarControllerForCurrentDisplays() =
         testScope.runTest {
-            fakeDisplayRepository.addDisplay(displayId = 1)
-            fakeDisplayRepository.addDisplay(displayId = 2)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_1)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_2)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR)
 
             underTest.start()
             runCurrent()
 
-            verify(fakeLightBarStore.forDisplay(displayId = 1), never()).start()
-            verify(fakeLightBarStore.forDisplay(displayId = 2), never()).start()
+            verify(fakeLightBarStore.forDisplay(displayId = DISPLAY_1), never()).start()
+            verify(fakeLightBarStore.forDisplay(displayId = DISPLAY_2), never()).start()
+            verify(fakeLightBarStore.forDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR), never())
+                .start()
         }
 
     @Test
     fun start_createsLightBarControllerForCurrentDisplays() =
         testScope.runTest {
-            fakeDisplayRepository.addDisplay(displayId = 1)
-            fakeDisplayRepository.addDisplay(displayId = 2)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_1)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_2)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR)
 
             underTest.start()
             runCurrent()
 
-            assertThat(fakeLightBarStore.perDisplayMocks.keys).containsExactly(1, 2)
+            assertThat(fakeLightBarStore.perDisplayMocks.keys).containsExactly(1, DISPLAY_2)
         }
 
     @Test
@@ -135,121 +173,174 @@ class MultiDisplayStatusBarStarterTest : SysuiTestCase() {
         }
 
     @Test
-    fun displayAdded_orchestratorForNewDisplayIsStarted() =
+    fun displayAdded_orchestratorForNewDisplay() =
         testScope.runTest {
             underTest.start()
             runCurrent()
 
-            fakeDisplayRepository.addDisplay(displayId = 3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR)
             runCurrent()
 
-            verify(fakeOrchestratorFactory.createdOrchestratorForDisplay(displayId = 3)!!).start()
+            verify(fakeOrchestratorFactory.createdOrchestratorForDisplay(displayId = DISPLAY_3)!!)
+                .start()
+            assertThat(
+                    fakeOrchestratorFactory.createdOrchestratorForDisplay(
+                        displayId = DISPLAY_4_NO_SYSTEM_DECOR
+                    )
+                )
+                .isNull()
         }
 
     @Test
-    fun displayAdded_initializerForNewDisplayIsStarted() =
+    fun displayAdded_initializerForNewDisplay() =
         testScope.runTest {
             underTest.start()
             runCurrent()
 
-            fakeDisplayRepository.addDisplay(displayId = 3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR)
             runCurrent()
 
             expect
-                .that(fakeInitializerStore.forDisplay(displayId = 3).startedByCoreStartable)
+                .that(fakeInitializerStore.forDisplay(displayId = DISPLAY_3).startedByCoreStartable)
                 .isTrue()
+            expect
+                .that(
+                    fakeInitializerStore
+                        .forDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR)
+                        .startedByCoreStartable
+                )
+                .isFalse()
         }
 
     @Test
-    fun displayAdded_privacyDotForNewDisplayIsStarted() =
+    fun displayAdded_privacyDotForNewDisplay() =
         testScope.runTest {
             underTest.start()
             runCurrent()
 
-            fakeDisplayRepository.addDisplay(displayId = 3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR)
             runCurrent()
 
-            verify(fakePrivacyDotStore.forDisplay(displayId = 3)).start()
+            verify(fakePrivacyDotStore.forDisplay(displayId = DISPLAY_3)).start()
+            verify(fakePrivacyDotStore.forDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR), never())
+                .start()
         }
 
     @Test
-    fun displayAdded_lightBarForNewDisplayIsCreated() =
+    fun displayAdded_lightBarForNewDisplayCreate() =
         testScope.runTest {
             underTest.start()
             runCurrent()
 
-            fakeDisplayRepository.addDisplay(displayId = 3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR)
             runCurrent()
 
-            assertThat(fakeLightBarStore.perDisplayMocks.keys).containsExactly(3)
+            assertThat(fakeLightBarStore.perDisplayMocks.keys).containsExactly(DISPLAY_3)
         }
 
     @Test
-    fun displayAdded_lightBarForNewDisplayIsNotStarted() =
+    fun displayAdded_lightBarForNewDisplayStart() =
         testScope.runTest {
             underTest.start()
             runCurrent()
 
-            fakeDisplayRepository.addDisplay(displayId = 3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR)
             runCurrent()
 
-            verify(fakeLightBarStore.forDisplay(displayId = 3), never()).start()
+            verify(fakeLightBarStore.forDisplay(displayId = DISPLAY_3), never()).start()
+            verify(fakeLightBarStore.forDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR), never())
+                .start()
         }
 
     @Test
-    fun displayAddedDuringStart_initializerForNewDisplayIsStarted() =
+    fun displayAddedDuringStart_initializerForNewDisplay() =
         testScope.runTest {
             underTest.start()
 
-            fakeDisplayRepository.addDisplay(displayId = 3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR)
             runCurrent()
 
             expect
-                .that(fakeInitializerStore.forDisplay(displayId = 3).startedByCoreStartable)
+                .that(fakeInitializerStore.forDisplay(displayId = DISPLAY_3).startedByCoreStartable)
                 .isTrue()
+            expect
+                .that(
+                    fakeInitializerStore
+                        .forDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR)
+                        .startedByCoreStartable
+                )
+                .isFalse()
         }
 
     @Test
-    fun displayAddedDuringStart_orchestratorForNewDisplayIsStarted() =
+    fun displayAddedDuringStart_orchestratorForNewDisplay() =
         testScope.runTest {
             underTest.start()
 
-            fakeDisplayRepository.addDisplay(displayId = 3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR)
             runCurrent()
 
-            verify(fakeOrchestratorFactory.createdOrchestratorForDisplay(displayId = 3)!!).start()
+            verify(fakeOrchestratorFactory.createdOrchestratorForDisplay(displayId = DISPLAY_3)!!)
+                .start()
+            assertThat(
+                    fakeOrchestratorFactory.createdOrchestratorForDisplay(
+                        displayId = DISPLAY_4_NO_SYSTEM_DECOR
+                    )
+                )
+                .isNull()
         }
 
     @Test
-    fun displayAddedDuringStart_privacyDotForNewDisplayIsStarted() =
+    fun displayAddedDuringStart_privacyDotForNewDisplay() =
         testScope.runTest {
             underTest.start()
 
-            fakeDisplayRepository.addDisplay(displayId = 3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR)
             runCurrent()
 
-            verify(fakePrivacyDotStore.forDisplay(displayId = 3)).start()
+            verify(fakePrivacyDotStore.forDisplay(displayId = DISPLAY_3)).start()
+            verify(fakePrivacyDotStore.forDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR), never())
+                .start()
         }
 
     @Test
-    fun displayAddedDuringStart_lightBarForNewDisplayIsCreated() =
+    fun displayAddedDuringStart_lightBarForNewDisplayCreate() =
         testScope.runTest {
             underTest.start()
 
-            fakeDisplayRepository.addDisplay(displayId = 3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR)
             runCurrent()
 
-            assertThat(fakeLightBarStore.perDisplayMocks.keys).containsExactly(3)
+            assertThat(fakeLightBarStore.perDisplayMocks.keys).containsExactly(DISPLAY_3)
         }
 
     @Test
-    fun displayAddedDuringStart_lightBarForNewDisplayIsNotStarted() =
+    fun displayAddedDuringStart_lightBarForNewDisplayStart() =
         testScope.runTest {
             underTest.start()
 
-            fakeDisplayRepository.addDisplay(displayId = 3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_3)
+            fakeDisplayRepository.addDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR)
             runCurrent()
 
-            verify(fakeLightBarStore.forDisplay(displayId = 3), never()).start()
+            verify(fakeLightBarStore.forDisplay(displayId = DISPLAY_3), never()).start()
+            verify(fakeLightBarStore.forDisplay(displayId = DISPLAY_4_NO_SYSTEM_DECOR), never())
+                .start()
         }
+
+    companion object {
+        const val DISPLAY_1 = 1
+        const val DISPLAY_2 = 2
+        const val DISPLAY_3 = 3
+        const val DISPLAY_4_NO_SYSTEM_DECOR = 4
+    }
 }
