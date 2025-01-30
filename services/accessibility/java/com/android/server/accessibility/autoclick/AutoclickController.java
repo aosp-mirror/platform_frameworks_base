@@ -310,7 +310,7 @@ public class AutoclickController extends BaseEventStreamTransformation {
                     if (mAutoclickIndicatorScheduler != null) {
                         mAutoclickIndicatorScheduler.updateCursorAreaSize(size);
                     }
-                    mClickScheduler.updateMovementSlope(size);
+                    mClickScheduler.updateMovementSlop(size);
                 }
 
                 if (mAutoclickIgnoreMinorCursorMovementSettingUri.equals(uri)) {
@@ -400,9 +400,9 @@ public class AutoclickController extends BaseEventStreamTransformation {
          * to be discarded as noise. Anchor is the position of the last MOVE event that was not
          * considered noise.
          */
-        private static final double DEFAULT_MOVEMENT_SLOPE = 20f;
+        private static final double DEFAULT_MOVEMENT_SLOP = 20f;
 
-        private double mMovementSlope = DEFAULT_MOVEMENT_SLOPE;
+        private double mMovementSlop = DEFAULT_MOVEMENT_SLOP;
 
         /** Whether the minor cursor movement should be ignored. */
         private boolean mIgnoreMinorCursorMovement = AUTOCLICK_IGNORE_MINOR_CURSOR_MOVEMENT_DEFAULT;
@@ -589,19 +589,19 @@ public class AutoclickController extends BaseEventStreamTransformation {
             float deltaX = mAnchorCoords.x - event.getX(pointerIndex);
             float deltaY = mAnchorCoords.y - event.getY(pointerIndex);
             double delta = Math.hypot(deltaX, deltaY);
-            double slope =
+            double slop =
                     ((Flags.enableAutoclickIndicator() && mIgnoreMinorCursorMovement)
-                            ? mMovementSlope
-                            : DEFAULT_MOVEMENT_SLOPE);
-            return delta > slope;
+                            ? mMovementSlop
+                            : DEFAULT_MOVEMENT_SLOP);
+            return delta > slop;
         }
 
         public void setIgnoreMinorCursorMovement(boolean ignoreMinorCursorMovement) {
             mIgnoreMinorCursorMovement = ignoreMinorCursorMovement;
         }
 
-        private void updateMovementSlope(double slope) {
-            mMovementSlope = slope;
+        private void updateMovementSlop(double slop) {
+            mMovementSlop = slop;
         }
 
         /**
