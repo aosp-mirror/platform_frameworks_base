@@ -48,15 +48,20 @@ import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
 import android.media.session.MediaSessionManager;
 import android.os.Build;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 
+import com.android.media.flags.Flags;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.settingslib.media.InfoMediaManager.Api34Impl;
 import com.android.settingslib.testutils.shadow.ShadowRouter2Manager;
 
 import com.google.common.collect.ImmutableList;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -121,6 +126,8 @@ public class InfoMediaManagerTest {
                     .setSystemRoute(true)
                     .addFeature(MediaRoute2Info.FEATURE_LIVE_AUDIO)
                     .build();
+
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock
     private MediaRouter2Manager mRouterManager;
@@ -377,21 +384,26 @@ public class InfoMediaManagerTest {
     }
 
     private RouteListingPreference setUpPreferenceList(String packageName) {
+        return setUpPreferenceList(packageName, false);
+    }
+
+    private RouteListingPreference setUpPreferenceList(
+                String packageName, boolean useSystemOrdering) {
         ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT",
                 Build.VERSION_CODES.UPSIDE_DOWN_CAKE);
         final List<RouteListingPreference.Item> preferenceItemList = new ArrayList<>();
-        RouteListingPreference.Item item1 =
+        RouteListingPreference.Item item1 = new RouteListingPreference.Item.Builder(
+                TEST_ID_3).build();
+        RouteListingPreference.Item item2 =
                 new RouteListingPreference.Item.Builder(TEST_ID_4)
                         .setFlags(RouteListingPreference.Item.FLAG_SUGGESTED)
                         .build();
-        RouteListingPreference.Item item2 = new RouteListingPreference.Item.Builder(
-                TEST_ID_3).build();
         preferenceItemList.add(item1);
         preferenceItemList.add(item2);
 
         RouteListingPreference routeListingPreference =
                 new RouteListingPreference.Builder().setItems(
-                        preferenceItemList).setUseSystemOrdering(false).build();
+                        preferenceItemList).setUseSystemOrdering(useSystemOrdering).build();
         when(mRouterManager.getRouteListingPreference(packageName))
                 .thenReturn(routeListingPreference);
         return routeListingPreference;
@@ -907,5 +919,67 @@ public class InfoMediaManagerTest {
         assertThat(device instanceof BluetoothMediaDevice).isTrue();
         assertThat(device.getState()).isEqualTo(STATE_SELECTED);
         assertThat(mInfoMediaManager.getCurrentConnectedDevice()).isEqualTo(device);
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_OUTPUT_SWITCHER_SESSION_GROUPING)
+    @Test
+    public void composePreferenceRouteListing_useSystemOrderingIsFalse() {
+        RouteListingPreference routeListingPreference =
+                setUpPreferenceList(TEST_PACKAGE_NAME, false);
+
+        List<RouteListingPreference.Item> routeOrder =
+                Api34Impl.composePreferenceRouteListing(routeListingPreference);
+
+        assertThat(routeOrder.get(0).getRouteId()).isEqualTo(TEST_ID_3);
+        assertThat(routeOrder.get(1).getRouteId()).isEqualTo(TEST_ID_4);
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_OUTPUT_SWITCHER_SESSION_GROUPING)
+    @Test
+    public void composePreferenceRouteListing_useSystemOrderingIsTrue() {
+        RouteListingPreference routeListingPreference =
+                setUpPreferenceList(TEST_PACKAGE_NAME, true);
+
+        List<RouteListingPreference.Item> routeOrder =
+                Api34Impl.composePreferenceRouteListing(routeListingPreference);
+
+        assertThat(routeOrder.get(0).getRouteId()).isEqualTo(TEST_ID_4);
+        assertThat(routeOrder.get(1).getRouteId()).isEqualTo(TEST_ID_3);
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_OUTPUT_SWITCHER_SESSION_GROUPING)
+    @Test
+    public void arrangeRouteListByPreference_useSystemOrderingIsFalse() {
+        RouteListingPreference routeListingPreference =
+                setUpPreferenceList(TEST_PACKAGE_NAME, false);
+        List<MediaRoute2Info> routes = setAvailableRoutesList(TEST_PACKAGE_NAME);
+        when(mRouterManager.getSelectedRoutes(any())).thenReturn(routes);
+
+        List<MediaRoute2Info> routeOrder =
+                Api34Impl.arrangeRouteListByPreference(
+                        routes, routes, routeListingPreference);
+
+        assertThat(routeOrder.get(0).getId()).isEqualTo(TEST_ID_3);
+        assertThat(routeOrder.get(1).getId()).isEqualTo(TEST_ID_4);
+        assertThat(routeOrder.get(2).getId()).isEqualTo(TEST_ID_2);
+        assertThat(routeOrder.get(3).getId()).isEqualTo(TEST_ID_1);
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_OUTPUT_SWITCHER_SESSION_GROUPING)
+    @Test
+    public void arrangeRouteListByPreference_useSystemOrderingIsTrue() {
+        RouteListingPreference routeListingPreference =
+                setUpPreferenceList(TEST_PACKAGE_NAME, true);
+        List<MediaRoute2Info> routes = setAvailableRoutesList(TEST_PACKAGE_NAME);
+        when(mRouterManager.getSelectedRoutes(any())).thenReturn(routes);
+
+        List<MediaRoute2Info> routeOrder =
+                Api34Impl.arrangeRouteListByPreference(
+                        routes, routes, routeListingPreference);
+
+        assertThat(routeOrder.get(0).getId()).isEqualTo(TEST_ID_2);
+        assertThat(routeOrder.get(1).getId()).isEqualTo(TEST_ID_3);
+        assertThat(routeOrder.get(2).getId()).isEqualTo(TEST_ID_4);
+        assertThat(routeOrder.get(3).getId()).isEqualTo(TEST_ID_1);
     }
 }
