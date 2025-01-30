@@ -849,16 +849,19 @@ public class BubbleController implements ConfigurationChangeListener,
     public void onDragItemOverBubbleBarDragZone(@Nullable BubbleBarLocation bubbleBarLocation) {
         if (bubbleBarLocation == null) return;
         if (isShowingAsBubbleBar() && BubbleAnythingFlagHelper.enableCreateAnyBubble()) {
-            //TODO(b/388894910) show expanded view drop
             mBubbleStateListener.onDragItemOverBubbleBarDragZone(bubbleBarLocation);
+            ensureBubbleViewsAndWindowCreated();
+            if (mLayerView != null) {
+                mLayerView.showBubbleBarExtendedViewDropTarget(bubbleBarLocation);
+            }
         }
     }
 
     @Override
     public void onItemDraggedOutsideBubbleBarDropZone() {
         if (isShowingAsBubbleBar() && BubbleAnythingFlagHelper.enableCreateAnyBubble()) {
-            //TODO(b/388894910) hide expanded view drop
             mBubbleStateListener.onItemDraggedOutsideBubbleBarDropZone();
+            hideBubbleBarExpandedViewDropTarget();
         }
     }
 
@@ -866,6 +869,7 @@ public class BubbleController implements ConfigurationChangeListener,
     public void onItemDroppedOverBubbleBarDragZone(@Nullable BubbleBarLocation bubbleBarLocation) {
         if (bubbleBarLocation == null) return;
         if (isShowingAsBubbleBar() && BubbleAnythingFlagHelper.enableCreateAnyBubble()) {
+            hideBubbleBarExpandedViewDropTarget();
             //TODO(b/388894910) handle item drop with expandStackAndSelectBubble()
         }
     }
@@ -884,6 +888,12 @@ public class BubbleController implements ConfigurationChangeListener,
                     new Rect(r - bubbleBarDropZoneSideSize, top, r, b));
         }
         return result;
+    }
+
+    private void hideBubbleBarExpandedViewDropTarget() {
+        if (mLayerView != null) {
+            mLayerView.hideBubbleBarExpandedViewDropTarget();
+        }
     }
 
     /** Whether this userId belongs to the current user. */

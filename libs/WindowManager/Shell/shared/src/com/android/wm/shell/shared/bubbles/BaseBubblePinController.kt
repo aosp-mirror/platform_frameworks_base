@@ -95,7 +95,7 @@ abstract class BaseBubblePinController(private val screenSizeProvider: () -> Poi
 
     /** Signal the controller that dragging interaction has finished. */
     fun onDragEnd() {
-        getDropTargetView()?.let { view -> view.animateOut { removeDropTargetView(view) } }
+        hideDropTarget()
         dismissZone = null
         listener?.onRelease(if (onLeft) LEFT else RIGHT)
     }
@@ -139,7 +139,7 @@ abstract class BaseBubblePinController(private val screenSizeProvider: () -> Poi
         return rect
     }
 
-    private fun showDropTarget(location: BubbleBarLocation) {
+    fun showDropTarget(location: BubbleBarLocation) {
         val targetView = getDropTargetView() ?: createDropTargetView().apply { alpha = 0f }
         if (targetView.alpha > 0) {
             targetView.animateOut {
@@ -150,6 +150,10 @@ abstract class BaseBubblePinController(private val screenSizeProvider: () -> Poi
             updateLocation(location)
             targetView.animateIn()
         }
+    }
+
+    fun hideDropTarget() {
+        getDropTargetView()?.let { view -> view.animateOut { removeDropTargetView(view) } }
     }
 
     private fun View.animateIn() {
