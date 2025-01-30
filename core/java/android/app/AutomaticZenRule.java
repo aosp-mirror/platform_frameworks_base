@@ -162,7 +162,7 @@ public final class AutomaticZenRule implements Parcelable {
      * both to fields in the rule itself (such as its name) and items with sub-fields.
      * @hide
      */
-    public static final int MAX_STRING_LENGTH = 1000;
+    public static final int MAX_STRING_LENGTH = 500;
 
     /**
      * The maximum string length for the trigger description rule, given UI constraints.
