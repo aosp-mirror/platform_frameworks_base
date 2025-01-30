@@ -649,9 +649,19 @@ public final class RoutingSessionInfo implements Parcelable {
          * @param sessionInfo the existing instance to copy data from.
          */
         public Builder(@NonNull RoutingSessionInfo sessionInfo) {
+            this(sessionInfo, sessionInfo.getOriginalId());
+        }
+
+        /**
+         * Builds upon the given {@code sessionInfo}, using the given {@link #getOriginalId()} for
+         * the id.
+         *
+         * @hide
+         */
+        public Builder(@NonNull RoutingSessionInfo sessionInfo, String originalId) {
             Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
 
-            mOriginalId = sessionInfo.mOriginalId;
+            mOriginalId = originalId;
             mName = sessionInfo.mName;
             mClientPackageName = sessionInfo.mClientPackageName;
             mProviderId = sessionInfo.mProviderId;

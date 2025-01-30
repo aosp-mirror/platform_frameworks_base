@@ -56,8 +56,8 @@ import java.util.stream.Stream;
  */
 /* package */ class SystemMediaRoute2Provider2 extends SystemMediaRoute2Provider {
 
-    private static final String ROUTE_ID_PREFIX_SYSTEM = "SYSTEM";
-    private static final String ROUTE_ID_SYSTEM_SEPARATOR = ".";
+    private static final String UNIQUE_SYSTEM_ID_PREFIX = "SYSTEM";
+    private static final String UNIQUE_SYSTEM_ID_SEPARATOR = "-";
 
     private final PackageManager mPackageManager;
 
@@ -66,6 +66,10 @@ import java.util.stream.Stream;
 
     @GuardedBy("mLock")
     private final Map<String, ProviderProxyRecord> mProxyRecords = new ArrayMap<>();
+
+    @GuardedBy("mLock")
+    private final Map<String, SystemMediaSessionRecord> mSessionOriginalIdToSessionRecord =
+            new ArrayMap<>();
 
     /**
      * Maps package names to corresponding sessions maintained by {@link MediaRoute2ProviderService
@@ -150,7 +154,7 @@ import java.util.stream.Stream;
                     if (currentProxyRecord != null) {
                         currentProxyRecord.releaseSession(
                                 requestId, existingSession.getOriginalId());
-                        existingSessionRecord.removeSelfFromSessionMap();
+                        existingSessionRecord.removeSelfFromSessionMaps();
                     }
                 }
             }
@@ -238,6 +242,24 @@ import java.util.stream.Stream;
             }
         }
         super.setRouteVolume(requestId, routeOriginalId, volume);
+    }
+
+    @Override
+    public void setSessionVolume(long requestId, String sessionOriginalId, int volume) {
+        if (SYSTEM_SESSION_ID.equals(sessionOriginalId)) {
+            super.setSessionVolume(requestId, sessionOriginalId, volume);
+            return;
+        }
+        synchronized (mLock) {
+            var sessionRecord = mSessionOriginalIdToSessionRecord.get(sessionOriginalId);
+            var proxyRecord = sessionRecord != null ? sessionRecord.getProxyRecord() : null;
+            if (proxyRecord != null) {
+                proxyRecord.mProxy.setSessionVolume(
+                        requestId, sessionRecord.getServiceSessionId(), volume);
+                return;
+            }
+        }
+        notifyRequestFailed(requestId, MediaRoute2ProviderService.REASON_ROUTE_NOT_AVAILABLE);
     }
 
     /**
@@ -376,16 +398,17 @@ import java.util.stream.Stream;
     }
 
     /**
-     * Equivalent to {@link #asSystemRouteId}, except it takes a unique route id instead of a
-     * original id.
+     * Equivalent to {@link #asUniqueSystemId}, except it takes a unique id instead of an original
+     * id.
      */
     private static String uniqueIdAsSystemRouteId(String providerId, String uniqueRouteId) {
-        return asSystemRouteId(providerId, MediaRouter2Utils.getOriginalId(uniqueRouteId));
+        return asUniqueSystemId(providerId, MediaRouter2Utils.getOriginalId(uniqueRouteId));
     }
 
     /**
      * Returns a unique {@link MediaRoute2Info#getOriginalId() original id} for this provider to
-     * publish system media routes from {@link MediaRoute2ProviderService provider services}.
+     * publish system media routes and sessions from {@link MediaRoute2ProviderService provider
+     * services}.
      *
      * <p>This provider will publish system media routes as part of the system routing session.
      * However, said routes may also support {@link MediaRoute2Info#FLAG_ROUTING_TYPE_REMOTE remote
@@ -393,12 +416,12 @@ import java.util.stream.Stream;
      * we derive a {@link MediaRoute2Info#getOriginalId original id} that is unique among all
      * original route ids used by this provider.
      */
-    private static String asSystemRouteId(String providerId, String originalRouteId) {
-        return ROUTE_ID_PREFIX_SYSTEM
-                + ROUTE_ID_SYSTEM_SEPARATOR
+    private static String asUniqueSystemId(String providerId, String originalId) {
+        return UNIQUE_SYSTEM_ID_PREFIX
+                + UNIQUE_SYSTEM_ID_SEPARATOR
                 + providerId
-                + ROUTE_ID_SYSTEM_SEPARATOR
-                + originalRouteId;
+                + UNIQUE_SYSTEM_ID_SEPARATOR
+                + originalId;
     }
 
     /**
@@ -485,7 +508,7 @@ import java.util.stream.Stream;
                     continue;
                 }
                 String id =
-                        asSystemRouteId(providerInfo.getUniqueId(), sourceRoute.getOriginalId());
+                        asUniqueSystemId(providerInfo.getUniqueId(), sourceRoute.getOriginalId());
                 var newRouteBuilder = new MediaRoute2Info.Builder(id, sourceRoute);
                 if ((sourceRoute.getSupportedRoutingTypes()
                                 & MediaRoute2Info.FLAG_ROUTING_TYPE_SYSTEM_AUDIO)
@@ -534,6 +557,9 @@ import java.util.stream.Stream;
                             RoutingSessionInfo translatedSession;
                             synchronized (mLock) {
                                 mSessionRecord = systemMediaSessionRecord;
+                                mSessionOriginalIdToSessionRecord.put(
+                                        systemMediaSessionRecord.mOriginalId,
+                                        systemMediaSessionRecord);
                                 mPackageNameToSessionRecord.put(
                                         mClientPackageName, systemMediaSessionRecord);
                                 mPendingSessionCreations.remove(mRequestId);
@@ -576,22 +602,36 @@ import java.util.stream.Stream;
 
         private final String mProviderId;
 
-        @GuardedBy("SystemMediaRoute2Provider2.this.mLock")
-        @NonNull
-        private RoutingSessionInfo mSourceSessionInfo;
+        /**
+         * The {@link RoutingSessionInfo#getOriginalId() original id} with which this session is
+         * published.
+         *
+         * <p>Derived from the service routing session, using {@link #asUniqueSystemId}.
+         */
+        private final String mOriginalId;
+
+        // @GuardedBy("SystemMediaRoute2Provider2.this.mLock")
+        @NonNull private RoutingSessionInfo mSourceSessionInfo;
 
         /**
-         * The same as {@link #mSourceSessionInfo}, except ids are {@link #asSystemRouteId system
+         * The same as {@link #mSourceSessionInfo}, except ids are {@link #asUniqueSystemId system
          * provider ids}.
          */
-        @NonNull
-        private RoutingSessionInfo mTranslatedSessionInfo;
+        // @GuardedBy("SystemMediaRoute2Provider2.this.mLock")
+        @NonNull private RoutingSessionInfo mTranslatedSessionInfo;
 
         SystemMediaSessionRecord(
                 @NonNull String providerId, @NonNull RoutingSessionInfo sessionInfo) {
             mProviderId = providerId;
             mSourceSessionInfo = sessionInfo;
+            mOriginalId =
+                    asUniqueSystemId(sessionInfo.getProviderId(), sessionInfo.getOriginalId());
             mTranslatedSessionInfo = asSystemProviderSession(sessionInfo);
+        }
+
+        // @GuardedBy("SystemMediaRoute2Provider2.this.mLock")
+        public String getServiceSessionId() {
+            return mSourceSessionInfo.getOriginalId();
         }
 
         @Override
@@ -612,31 +652,32 @@ import java.util.stream.Stream;
         @Override
         public void onSessionReleased() {
             synchronized (mLock) {
-                removeSelfFromSessionMap();
+                removeSelfFromSessionMaps();
             }
             notifyGlobalSessionInfoUpdated();
         }
 
-        @GuardedBy("SystemMediaRoute2Provider2.this.mLock")
+        // @GuardedBy("SystemMediaRoute2Provider2.this.mLock")
         @Nullable
         public ProviderProxyRecord getProxyRecord() {
             ProviderProxyRecord provider = mProxyRecords.get(mProviderId);
             if (provider == null) {
                 // Unexpected condition where the proxy is no longer available while there's an
                 // ongoing session. Could happen due to a crash in the provider process.
-                removeSelfFromSessionMap();
+                removeSelfFromSessionMaps();
             }
             return provider;
         }
 
-        @GuardedBy("SystemMediaRoute2Provider2.this.mLock")
-        private void removeSelfFromSessionMap() {
+        // @GuardedBy("SystemMediaRoute2Provider2.this.mLock")
+        private void removeSelfFromSessionMaps() {
+            mSessionOriginalIdToSessionRecord.remove(mOriginalId);
             mPackageNameToSessionRecord.remove(mSourceSessionInfo.getClientPackageName());
         }
 
         private RoutingSessionInfo asSystemProviderSession(RoutingSessionInfo session) {
             var builder =
-                    new RoutingSessionInfo.Builder(session)
+                    new RoutingSessionInfo.Builder(session, mOriginalId)
                             .setProviderId(mUniqueId)
                             .setSystemSession(true)
                             .clearSelectedRoutes()
