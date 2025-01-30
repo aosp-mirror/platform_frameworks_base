@@ -56,6 +56,7 @@ class DesktopModeStatusTest : ShellTestCase() {
         doReturn(false).whenever(mockResources).getBoolean(
             eq(R.bool.config_isDesktopModeDevOptionSupported)
         )
+        setDeviceEligibleForDesktopMode(false)
         doReturn(context.contentResolver).whenever(mockContext).contentResolver
         resetDesktopModeFlagsCache()
         resetEnforceDeviceRestriction()
@@ -74,7 +75,7 @@ class DesktopModeStatusTest : ShellTestCase() {
         Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION
     )
     @Test
-    fun canEnterDesktopMode_DWFlagDisabled_configsOff_returnsFalse() {
+    fun canEnterDesktopMode_DWFlagDisabled_deviceNotEligible_returnsFalse() {
         assertThat(DesktopModeStatus.canEnterDesktopMode(mockContext)).isFalse()
     }
 
@@ -83,8 +84,8 @@ class DesktopModeStatusTest : ShellTestCase() {
         Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION
     )
     @Test
-    fun canEnterDesktopMode_DWFlagDisabled_configsOn_disableDeviceRestrictions_returnsFalse() {
-        doReturn(true).whenever(mockResources).getBoolean(eq(R.bool.config_isDesktopModeSupported))
+    fun canEnterDesktopMode_DWFlagDisabled_deviceEligible_configDevOptionOn_returnsFalse() {
+        setDeviceEligibleForDesktopMode(true)
         doReturn(true).whenever(mockResources).getBoolean(
             eq(R.bool.config_isDesktopModeDevOptionSupported)
         )
@@ -98,7 +99,7 @@ class DesktopModeStatusTest : ShellTestCase() {
         Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION
     )
     @Test
-    fun canEnterDesktopMode_DWFlagDisabled_configDevOptionOn_returnsFalse() {
+    fun canEnterDesktopMode_DWFlagDisabled_deviceNotEligible_configDevOptionOn_returnsFalse() {
         doReturn(true).whenever(mockResources).getBoolean(
             eq(R.bool.config_isDesktopModeDevOptionSupported)
         )
@@ -111,7 +112,7 @@ class DesktopModeStatusTest : ShellTestCase() {
         Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION
     )
     @Test
-    fun canEnterDesktopMode_DWFlagDisabled_configDevOptionOn_flagOverrideOn_returnsTrue() {
+    fun canEnterDesktopMode_DWFlagDisabled_deviceNotEligible_forceUsingDevOption_returnsTrue() {
         doReturn(true).whenever(mockResources).getBoolean(
             eq(R.bool.config_isDesktopModeDevOptionSupported)
         )
@@ -123,14 +124,7 @@ class DesktopModeStatusTest : ShellTestCase() {
     @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION)
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     @Test
-    fun canEnterDesktopMode_DWFlagEnabled_configsOff_returnsFalse() {
-        assertThat(DesktopModeStatus.canEnterDesktopMode(mockContext)).isFalse()
-    }
-
-    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION)
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-    @Test
-    fun canEnterDesktopMode_DWFlagEnabled_configDesktopModeOff_returnsFalse() {
+    fun canEnterDesktopMode_DWFlagEnabled_deviceNotEligible_returnsFalse() {
         doReturn(true).whenever(mockResources).getBoolean(
             eq(R.bool.config_isDesktopModeDevOptionSupported)
         )
@@ -141,8 +135,8 @@ class DesktopModeStatusTest : ShellTestCase() {
     @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION)
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     @Test
-    fun canEnterDesktopMode_DWFlagEnabled_configDesktopModeOn_returnsTrue() {
-        doReturn(true).whenever(mockResources).getBoolean(eq(R.bool.config_isDesktopModeSupported))
+    fun canEnterDesktopMode_DWFlagEnabled_deviceEligible_returnsTrue() {
+        setDeviceEligibleForDesktopMode(true)
 
         assertThat(DesktopModeStatus.canEnterDesktopMode(mockContext)).isTrue()
     }
@@ -150,16 +144,7 @@ class DesktopModeStatusTest : ShellTestCase() {
     @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION)
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     @Test
-    fun canEnterDesktopMode_DWFlagEnabled_configsOff_disableDeviceRestrictions_returnsTrue() {
-        disableEnforceDeviceRestriction()
-
-        assertThat(DesktopModeStatus.canEnterDesktopMode(mockContext)).isTrue()
-    }
-
-    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION)
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-    @Test
-    fun canEnterDesktopMode_DWFlagEnabled_configDevOptionOn_flagOverrideOn_returnsTrue() {
+    fun canEnterDesktopMode_DWFlagEnabled_deviceNotEligible_forceUsingDevOption_returnsTrue() {
         doReturn(true).whenever(mockResources).getBoolean(
             eq(R.bool.config_isDesktopModeDevOptionSupported)
         )
@@ -198,6 +183,28 @@ class DesktopModeStatusTest : ShellTestCase() {
         assertThat(DesktopModeStatus.isDeviceEligibleForDesktopMode(mockContext)).isTrue()
     }
 
+    @DisableFlags(Flags.FLAG_SHOW_DESKTOP_EXPERIENCE_DEV_OPTION)
+    @Test
+    fun canShowDesktopExperienceDevOption_flagDisabled_returnsFalse() {
+        setDeviceEligibleForDesktopMode(true)
+
+        assertThat(DesktopModeStatus.canShowDesktopExperienceDevOption(mockContext)).isFalse()
+    }
+
+    @EnableFlags(Flags.FLAG_SHOW_DESKTOP_EXPERIENCE_DEV_OPTION)
+    @Test
+    fun canShowDesktopExperienceDevOption_flagEnabled_deviceNotEligible_returnsFalse() {
+        assertThat(DesktopModeStatus.canShowDesktopExperienceDevOption(mockContext)).isFalse()
+    }
+
+    @EnableFlags(Flags.FLAG_SHOW_DESKTOP_EXPERIENCE_DEV_OPTION)
+    @Test
+    fun canShowDesktopExperienceDevOption_flagEnabled_deviceEligible_returnsTrue() {
+        setDeviceEligibleForDesktopMode(true)
+
+        assertThat(DesktopModeStatus.canShowDesktopExperienceDevOption(mockContext)).isTrue()
+    }
+
     private fun resetEnforceDeviceRestriction() {
         setEnforceDeviceRestriction(true)
     }
@@ -231,5 +238,11 @@ class DesktopModeStatusTest : ShellTestCase() {
             context.contentResolver,
             DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES, override.setting
         )
+    }
+
+    private fun setDeviceEligibleForDesktopMode(eligible: Boolean) {
+        val deviceRestrictions = DesktopModeStatus::class.java.getDeclaredField("ENFORCE_DEVICE_RESTRICTIONS")
+        deviceRestrictions.isAccessible = true
+        deviceRestrictions.setBoolean(/* obj= */ null, /* z= */ !eligible)
     }
 }
