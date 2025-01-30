@@ -4279,7 +4279,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runClearBadProcess(PrintWriter pw) throws RemoteException {
-        final String processName = getNextArgRequired();
         int userId = UserHandle.USER_CURRENT;
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -4290,6 +4289,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 return -1;
             }
         }
+        final String processName = getNextArgRequired();
         if (userId == UserHandle.USER_CURRENT) {
             userId = mInternal.getCurrentUserId();
         }
