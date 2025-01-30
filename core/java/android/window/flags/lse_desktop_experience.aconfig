@@ -513,6 +513,13 @@ flag {
 }
 
 flag {
+    name: "enable_taskbar_connected_displays"
+    namespace: "lse_desktop_experience"
+    description: "Enables connected displays in taskbar."
+    bug: "393398093"
+}
+
+flag {
     name: "enable_bug_fixes_for_secondary_display"
     namespace: "lse_desktop_experience"
     description: "Bugfixes / papercuts to bring Desktop Windowing to secondary displays."
