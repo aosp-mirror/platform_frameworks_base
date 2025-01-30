@@ -280,6 +280,7 @@ cc_library_shared_for_libandroid_runtime {
             ],
 
             static_libs: [
+                "android.os.flags-aconfig-cc",
                 "libasync_safe",
                 "libbinderthreadstateutils",
                 "libdmabufinfo",
