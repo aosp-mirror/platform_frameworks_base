@@ -20,6 +20,7 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.view.View
 import com.android.systemui.plugins.DarkIconDispatcher
+import com.android.systemui.statusbar.chips.mediaprojection.domain.model.MediaProjectionStopDialogModel
 import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.Idle
@@ -45,6 +46,9 @@ class FakeHomeStatusBarViewModel(
     override val ongoingActivityChips = MutableStateFlow(MultipleOngoingActivityChipsModel())
 
     override val statusBarPopupChips = MutableStateFlow(emptyList<PopupChipModel.Shown>())
+
+    override val mediaProjectionStopDialogDueToCallEndedState =
+        MutableStateFlow(MediaProjectionStopDialogModel.Hidden)
 
     override val isHomeStatusBarAllowedByScene = MutableStateFlow(false)
 

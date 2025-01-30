@@ -289,7 +289,11 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
     fun primaryChip_screenRecordStoppedViaDialog_chipHiddenWithoutAnimation() =
         testScope.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
-            mediaProjectionState.value = MediaProjectionState.NotProjecting
+            mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(
+                    NORMAL_PACKAGE,
+                    hostDeviceName = "Recording Display",
+                )
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
 
             val latest by collectLastValue(underTest.primaryChip)

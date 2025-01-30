@@ -36,7 +36,9 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.chips.mediaprojection.domain.model.MediaProjectionStopDialogModel
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
+import com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.ShareToAppChipViewModel
 import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModel
@@ -94,6 +96,12 @@ interface HomeStatusBarViewModel {
 
     /** Emits whenever a transition from lockscreen to dream has started. */
     val transitionFromLockscreenToDreamStartedEvent: Flow<Unit>
+
+    /**
+     * The current media projection stop dialog to be shown, or
+     * `MediaProjectionStopDialogModel.Hidden` if no dialog is visible.
+     */
+    val mediaProjectionStopDialogDueToCallEndedState: StateFlow<MediaProjectionStopDialogModel>
 
     /**
      * The ongoing activity chip that should be primarily shown on the left-hand side of the status
@@ -180,6 +188,7 @@ constructor(
     sceneInteractor: SceneInteractor,
     sceneContainerOcclusionInteractor: SceneContainerOcclusionInteractor,
     shadeInteractor: ShadeInteractor,
+    shareToAppChipViewModel: ShareToAppChipViewModel,
     ongoingActivityChipsViewModel: OngoingActivityChipsViewModel,
     statusBarPopupChipsViewModel: StatusBarPopupChipsViewModel,
     animations: SystemStatusEventAnimationInteractor,
@@ -205,6 +214,9 @@ constructor(
             .transition(Edge.create(from = LOCKSCREEN, to = DREAMING))
             .filter { it.transitionState == TransitionState.STARTED }
             .map {}
+
+    override val mediaProjectionStopDialogDueToCallEndedState =
+        shareToAppChipViewModel.stopDialogToShow
 
     override val primaryOngoingActivityChip = ongoingActivityChipsViewModel.primaryChip
 

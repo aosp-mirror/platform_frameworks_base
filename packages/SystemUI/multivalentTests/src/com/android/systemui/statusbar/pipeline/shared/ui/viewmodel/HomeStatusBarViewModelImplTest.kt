@@ -45,8 +45,8 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.collectLastValue
 import com.android.systemui.kosmos.collectValues
 import com.android.systemui.kosmos.runTest
-import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.log.assertLogsWtf
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
@@ -58,7 +58,9 @@ import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.NORMAL_PACKAGE
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
+import com.android.systemui.statusbar.chips.mediaprojection.domain.model.MediaProjectionStopDialogModel
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
+import com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.shareToAppChipViewModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsScreenRecordChip
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsShareToAppChip
@@ -89,7 +91,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -98,9 +100,7 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class HomeStatusBarViewModelImplTest : SysuiTestCase() {
-    private val kosmos by lazy {
-        testKosmos().also { it.testDispatcher = UnconfinedTestDispatcher() }
-    }
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val Kosmos.underTest by Kosmos.Fixture { kosmos.homeStatusBarViewModel }
 
     @Before
@@ -110,6 +110,55 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Before
     fun addDisplays() = runBlocking { kosmos.displayRepository.fake.addDisplay(DEFAULT_DISPLAY) }
+
+    @Test
+    @EnableFlags(com.android.media.projection.flags.Flags.FLAG_SHOW_STOP_DIALOG_POST_CALL_END)
+    fun mediaProjectionStopDialogDueToCallEndedState_initiallyHidden() =
+        kosmos.runTest {
+            shareToAppChipViewModel.start()
+            val latest by collectLastValue(underTest.mediaProjectionStopDialogDueToCallEndedState)
+
+            // Verify that the stop dialog is initially hidden
+            assertThat(latest).isInstanceOf(MediaProjectionStopDialogModel.Hidden::class.java)
+        }
+
+    @Test
+    @EnableFlags(com.android.media.projection.flags.Flags.FLAG_SHOW_STOP_DIALOG_POST_CALL_END)
+    fun mediaProjectionStopDialogDueToCallEndedState_flagEnabled_mediaIsProjecting_projectionStartedDuringCallAndActivePostCallEventEmitted_isShown() =
+        kosmos.runTest {
+            shareToAppChipViewModel.start()
+
+            val latest by
+                collectLastValue(
+                    homeStatusBarViewModel.mediaProjectionStopDialogDueToCallEndedState
+                )
+
+            fakeMediaProjectionRepository.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
+
+            fakeMediaProjectionRepository.emitProjectionStartedDuringCallAndActivePostCallEvent()
+
+            assertThat(latest).isInstanceOf(MediaProjectionStopDialogModel.Shown::class.java)
+        }
+
+    @Test
+    @DisableFlags(com.android.media.projection.flags.Flags.FLAG_SHOW_STOP_DIALOG_POST_CALL_END)
+    fun mediaProjectionStopDialogDueToCallEndedState_flagDisabled_mediaIsProjecting_projectionStartedDuringCallAndActivePostCallEventEmitted_isHidden() =
+        kosmos.runTest {
+            shareToAppChipViewModel.start()
+
+            val latest by
+                collectLastValue(
+                    homeStatusBarViewModel.mediaProjectionStopDialogDueToCallEndedState
+                )
+
+            fakeMediaProjectionRepository.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
+
+            fakeMediaProjectionRepository.emitProjectionStartedDuringCallAndActivePostCallEvent()
+
+            assertThat(latest).isInstanceOf(MediaProjectionStopDialogModel.Hidden::class.java)
+        }
 
     @Test
     fun isTransitioningFromLockscreenToOccluded_started_isTrue() =
