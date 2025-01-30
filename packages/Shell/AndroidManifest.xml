@@ -997,6 +997,12 @@
     <uses-permission android:name="android.permission.health.READ_SKIN_TEMPERATURE"
         android:featureFlag="android.permission.flags.replace_body_sensor_permission_enabled"/>
 
+    <!-- Permissions required for CTS test - CtsHealthFitnessDeviceTestCases-->
+    <uses-permission android:name="android.permission.BACKUP_HEALTH_CONNECT_DATA_AND_SETTINGS"
+        android:featureFlag="android.permission.flags.health_connect_backup_restore_permission_enabled"/>
+    <uses-permission android:name="android.permission.RESTORE_HEALTH_CONNECT_DATA_AND_SETTINGS"
+        android:featureFlag="android.permission.flags.health_connect_backup_restore_permission_enabled"/>
+
     <!-- Permission for TestClassifier tests to get access to classifier by type -->
     <uses-permission android:name="android.permission.ACCESS_TEXT_CLASSIFIER_BY_TYPE"
         android:featureFlag="android.permission.flags.text_classifier_choice_api_enabled"/>
