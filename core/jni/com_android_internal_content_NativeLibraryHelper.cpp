@@ -273,6 +273,7 @@ static install_status_t copyFileIfChanged(JNIEnv* env, void* arg, ZipFileRO* zip
     jboolean extractNativeLibs = *(jboolean*)args[1];
     jboolean debuggable = *(jboolean*)args[2];
     jboolean app_compat_16kb = *(jboolean*)args[3];
+    jboolean pageSizeCompatDisabled = *(jboolean*)args[4];
     install_status_t ret = INSTALL_SUCCEEDED;
 
     ScopedUtfChars nativeLibPath(env, *javaNativeLibPath);
@@ -304,6 +305,16 @@ static install_status_t copyFileIfChanged(JNIEnv* env, void* arg, ZipFileRO* zip
         }
 
         if (offset % kPageSize != 0) {
+            // If page size app compat was disabled explicitly in manifest, don't extract libs on
+            // 16 KB page size device.
+            if (kPageSize == 0x4000 && pageSizeCompatDisabled) {
+                ALOGE("pageSizeCompat=disabled library '%s' is not PAGE(%zu)-"
+                      "aligned within apk (APK alignment, not ELF alignment) -"
+                      "and will not be extracted.\n",
+                      fileName, kPageSize);
+                return INSTALL_FAILED_INVALID_APK;
+            }
+
             // If the library is zip-aligned correctly for 4kb devices and app compat is
             // enabled, on 16kb devices fallback to extraction
             if (offset % 0x1000 == 0 && app_compat_16kb) {
@@ -537,13 +548,12 @@ static inline bool app_compat_16kb_enabled() {
     return !android::base::GetBoolProperty("pm.16kb.app_compat.disabled", false);
 }
 
-static jint
-com_android_internal_content_NativeLibraryHelper_copyNativeBinaries(JNIEnv *env, jclass clazz,
-        jlong apkHandle, jstring javaNativeLibPath, jstring javaCpuAbi,
-        jboolean extractNativeLibs, jboolean debuggable)
-{
+static jint com_android_internal_content_NativeLibraryHelper_copyNativeBinaries(
+        JNIEnv* env, jclass clazz, jlong apkHandle, jstring javaNativeLibPath, jstring javaCpuAbi,
+        jboolean extractNativeLibs, jboolean debuggable, jboolean pageSizeCompatDisabled) {
     jboolean app_compat_16kb = app_compat_16kb_enabled();
-    void* args[] = { &javaNativeLibPath, &extractNativeLibs, &debuggable, &app_compat_16kb };
+    void* args[] = {&javaNativeLibPath, &extractNativeLibs, &debuggable, &app_compat_16kb,
+                    &pageSizeCompatDisabled};
     return (jint) iterateOverNativeFiles(env, apkHandle, javaCpuAbi,
             copyFileIfChanged, reinterpret_cast<void*>(args));
 }
@@ -804,7 +814,7 @@ static const JNINativeMethod gMethods[] = {
         {"nativeOpenApkFd", "(Ljava/io/FileDescriptor;Ljava/lang/String;)J",
          (void*)com_android_internal_content_NativeLibraryHelper_openApkFd},
         {"nativeClose", "(J)V", (void*)com_android_internal_content_NativeLibraryHelper_close},
-        {"nativeCopyNativeBinaries", "(JLjava/lang/String;Ljava/lang/String;ZZ)I",
+        {"nativeCopyNativeBinaries", "(JLjava/lang/String;Ljava/lang/String;ZZZ)I",
          (void*)com_android_internal_content_NativeLibraryHelper_copyNativeBinaries},
         {"nativeSumNativeBinaries", "(JLjava/lang/String;)J",
          (void*)com_android_internal_content_NativeLibraryHelper_sumNativeBinaries},
