@@ -679,6 +679,8 @@ public class NotificationManagerService extends SystemService {
     WorkerHandler mHandler;
     private final HandlerThread mRankingThread = new HandlerThread("ranker",
             Process.THREAD_PRIORITY_BACKGROUND);
+    @FlaggedApi(Flags.FLAG_NM_BINDER_PERF_THROTTLE_EFFECTS_SUPPRESSOR_BROADCAST)
+    private Handler mBroadcastsHandler;
 
     private final SparseArray<ArraySet<ComponentName>> mListenersDisablingEffects =
             new SparseArray<>();
@@ -2682,7 +2684,7 @@ public class NotificationManagerService extends SystemService {
 
     // TODO: All tests should use this init instead of the one-off setters above.
     @VisibleForTesting
-    void init(WorkerHandler handler, RankingHandler rankingHandler,
+    void init(WorkerHandler handler, RankingHandler rankingHandler, Handler broadcastsHandler,
             IPackageManager packageManager, PackageManager packageManagerClient,
             LightsManager lightsManager, NotificationListeners notificationListeners,
             NotificationAssistants notificationAssistants, ConditionProviders conditionProviders,
@@ -2702,6 +2704,9 @@ public class NotificationManagerService extends SystemService {
             ConnectivityManager connectivityManager,
             PostNotificationTrackerFactory postNotificationTrackerFactory) {
         mHandler = handler;
+        if (Flags.nmBinderPerfThrottleEffectsSuppressorBroadcast()) {
+            mBroadcastsHandler = broadcastsHandler;
+        }
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
                 Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
@@ -3045,13 +3050,22 @@ public class NotificationManagerService extends SystemService {
 
         WorkerHandler handler = new WorkerHandler(Looper.myLooper());
 
+        Handler broadcastsHandler;
+        if (Flags.nmBinderPerfThrottleEffectsSuppressorBroadcast()) {
+            HandlerThread broadcastsThread = new HandlerThread("NMS Broadcasts");
+            broadcastsThread.start();
+            broadcastsHandler = new Handler(broadcastsThread.getLooper());
+        } else {
+            broadcastsHandler = null;
+        }
+
         mShowReviewPermissionsNotification = getContext().getResources().getBoolean(
                 R.bool.config_notificationReviewPermissions);
 
         mDefaultUnsupportedAdjustments = getContext().getResources().getStringArray(
                 R.array.config_notificationDefaultUnsupportedAdjustments);
 
-        init(handler, new RankingHandlerWorker(mRankingThread.getLooper()),
+        init(handler, new RankingHandlerWorker(mRankingThread.getLooper()), broadcastsHandler,
                 AppGlobals.getPackageManager(), getContext().getPackageManager(),
                 getLocalService(LightsManager.class),
                 new NotificationListeners(getContext(), mNotificationLock, mUserProfiles,
@@ -3297,10 +3311,11 @@ public class NotificationManagerService extends SystemService {
      * so that e.g. rapidly changing some value A -> B -> C will only produce a broadcast for C
      * (instead of every time because the extras are different).
      */
+    @FlaggedApi(Flags.FLAG_NM_BINDER_PERF_THROTTLE_EFFECTS_SUPPRESSOR_BROADCAST)
     private void sendZenBroadcastWithDelay(Intent intent) {
         String token = "zen_broadcast:" + intent.getAction();
-        mHandler.removeCallbacksAndEqualMessages(token);
-        mHandler.postDelayed(() -> sendRegisteredOnlyBroadcast(intent), token,
+        mBroadcastsHandler.removeCallbacksAndEqualMessages(token);
+        mBroadcastsHandler.postDelayed(() -> sendRegisteredOnlyBroadcast(intent), token,
                 ZEN_BROADCAST_DELAY.toMillis());
     }
 
