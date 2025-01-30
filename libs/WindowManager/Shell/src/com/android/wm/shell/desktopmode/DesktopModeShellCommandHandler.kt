@@ -152,8 +152,8 @@ class DesktopModeShellCommandHandler(private val controller: DesktopTasksControl
                 pw.println("Error: desk id should be an integer")
                 return false
             }
-        pw.println("Not implemented.")
-        return false
+        controller.removeDesk(deskId)
+        return true
     }
 
     private fun runRemoveAllDesks(args: Array<String>, pw: PrintWriter): Boolean {

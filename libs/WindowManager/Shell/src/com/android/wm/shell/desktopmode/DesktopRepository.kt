@@ -174,6 +174,9 @@ class DesktopRepository(
     /** Returns the number of desks in the given display. */
     fun getNumberOfDesks(displayId: Int) = desktopData.getNumberOfDesks(displayId)
 
+    /** Returns the display the given desk is in. */
+    fun getDisplayForDesk(deskId: Int) = desktopData.getDisplayForDesk(deskId)
+
     /** Adds [regionListener] to inform about changes to exclusion regions for all Desktop tasks. */
     fun setExclusionRegionListener(regionListener: Consumer<Region>, executor: Executor) {
         desktopGestureExclusionListener = regionListener
@@ -206,6 +209,14 @@ class DesktopRepository(
     fun addDesk(displayId: Int, deskId: Int) {
         desktopData.createDesk(displayId, deskId)
     }
+
+    /** Returns the ids of the existing desks in the given display. */
+    @VisibleForTesting
+    fun getDeskIds(displayId: Int): Set<Int> =
+        desktopData.desksSequence(displayId).map { desk -> desk.deskId }.toSet()
+
+    /** Returns the id of the default desk in the given display. */
+    fun getDefaultDeskId(displayId: Int): Int? = getDefaultDesk(displayId)?.deskId
 
     /** Returns the default desk in the given display. */
     private fun getDefaultDesk(displayId: Int): Desk? = desktopData.getDefaultDesk(displayId)
@@ -716,17 +727,13 @@ class DesktopRepository(
         }
     }
 
-    /**
-     * Removes the active desk for the given [displayId] and returns the active tasks on that desk.
-     *
-     * TODO: b/389960283 - add explicit [deskId] argument.
-     */
-    fun removeDesk(displayId: Int): ArraySet<Int> {
-        val desk = desktopData.getActiveDesk(displayId)
-        if (desk == null) {
-            logW("Could not find desk to remove: displayId=%d", displayId)
-            return ArraySet()
-        }
+    /** Removes the given desk and returns the active tasks in that desk. */
+    fun removeDesk(deskId: Int): Set<Int> {
+        val desk =
+            desktopData.getDesk(deskId)
+                ?: return emptySet<Int>().also {
+                    logW("Could not find desk to remove: deskId=%d", deskId)
+                }
         val activeTasks = ArraySet(desk.activeTasks)
         desktopData.remove(desk.deskId)
         return activeTasks
@@ -1066,7 +1073,7 @@ class DesktopRepository(
         }
 
         override fun getDisplayForDesk(deskId: Int): Int =
-            getAllActiveDesks().find { it.deskId == deskId }?.displayId
+            desksSequence().find { it.deskId == deskId }?.displayId
                 ?: error("Display for desk=$deskId not found")
     }
 

@@ -37,6 +37,7 @@ import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.back.BackAnimationController
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.isExitDesktopModeTransition
 import com.android.wm.shell.desktopmode.desktopwallpaperactivity.DesktopWallpaperActivityTokenProvider
+import com.android.wm.shell.desktopmode.multidesks.DesksTransitionObserver
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
@@ -58,6 +59,7 @@ class DesktopTasksTransitionObserver(
     private val desktopMixedTransitionHandler: DesktopMixedTransitionHandler,
     private val backAnimationController: BackAnimationController,
     private val desktopWallpaperActivityTokenProvider: DesktopWallpaperActivityTokenProvider,
+    private val desksTransitionObserver: DesksTransitionObserver,
     shellInit: ShellInit,
 ) : Transitions.TransitionObserver {
 
@@ -87,6 +89,7 @@ class DesktopTasksTransitionObserver(
         finishTransaction: SurfaceControl.Transaction,
     ) {
         // TODO: b/332682201 Update repository state
+        desksTransitionObserver.onTransitionReady(transition, info)
         if (
             DesktopModeFlags.INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC
                 .isTrue() && DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODALS_POLICY.isTrue()

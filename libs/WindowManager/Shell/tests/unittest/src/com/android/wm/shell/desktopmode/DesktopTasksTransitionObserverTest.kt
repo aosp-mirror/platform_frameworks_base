@@ -47,11 +47,13 @@ import com.android.wm.shell.back.BackAnimationController
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_TASK_DRAG
 import com.android.wm.shell.desktopmode.desktopwallpaperactivity.DesktopWallpaperActivityTokenProvider
+import com.android.wm.shell.desktopmode.multidesks.DesksTransitionObserver
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP
 import com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP
+import com.android.wm.shell.util.StubTransaction
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Before
@@ -92,6 +94,7 @@ class DesktopTasksTransitionObserverTest {
     private val backAnimationController = mock<BackAnimationController>()
     private val desktopWallpaperActivityTokenProvider =
         mock<DesktopWallpaperActivityTokenProvider>()
+    private val desksTransitionObserver = mock<DesksTransitionObserver>()
     private val wallpaperToken = MockToken().token()
 
     private lateinit var transitionObserver: DesktopTasksTransitionObserver
@@ -115,6 +118,7 @@ class DesktopTasksTransitionObserverTest {
                 mixedHandler,
                 backAnimationController,
                 desktopWallpaperActivityTokenProvider,
+                desksTransitionObserver,
                 shellInit,
             )
     }
@@ -409,6 +413,21 @@ class DesktopTasksTransitionObserverTest {
         )
 
         verify(taskRepository).setTaskInPip(task.displayId, task.taskId, enterPip = false)
+    }
+
+    @Test
+    fun onTransitionReady_forwardsToDesksTransitionObserver() {
+        val transition = Binder()
+        val info = TransitionInfo(TRANSIT_CLOSE, /* flags= */ 0)
+
+        transitionObserver.onTransitionReady(
+            transition = transition,
+            info = info,
+            StubTransaction(),
+            StubTransaction(),
+        )
+
+        verify(desksTransitionObserver).onTransitionReady(transition, info)
     }
 
     private fun createBackNavigationTransition(
