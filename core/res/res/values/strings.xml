@@ -6149,6 +6149,16 @@
     <!-- Label for Dpad center action [CHAR LIMIT=NONE] -->
     <string name="accessibility_system_action_dpad_center_label">Dpad Center</string>
 
+    <!-- Accessibility autoclick related strings -->
+    <!-- Label for autoclick type settings panel [CHAR LIMIT=NONE] -->
+    <string name="accessibility_autoclick_type_settings_panel_title">Autoclick type settings panel</string>
+    <!-- Label for autoclick left click button [CHAR LIMIT=NONE] -->
+    <string name="accessibility_autoclick_left_click">Left click</string>
+    <!-- Label for autoclick pause button [CHAR LIMIT=NONE] -->
+    <string name="accessibility_autoclick_pause">Pause</string>
+    <!-- Label for autoclick position button [CHAR LIMIT=NONE] -->
+    <string name="accessibility_autoclick_position">Position</string>
+
     <!-- Text to tell the user that a package has been forced by themselves in the RESTRICTED bucket. [CHAR LIMIT=NONE] -->
     <string name="as_app_forced_to_restricted_bucket">
         <xliff:g id="package_name" example="com.android.example">%1$s</xliff:g> has been put into the RESTRICTED bucket</string>

@@ -81,6 +81,7 @@ public class AutoclickController extends BaseEventStreamTransformation {
     @VisibleForTesting AutoclickSettingsObserver mAutoclickSettingsObserver;
     @VisibleForTesting AutoclickIndicatorScheduler mAutoclickIndicatorScheduler;
     @VisibleForTesting AutoclickIndicatorView mAutoclickIndicatorView;
+    @VisibleForTesting AutoclickTypePanel mAutoclickTypePanel;
     private WindowManager mWindowManager;
 
     public AutoclickController(Context context, int userId, AccessibilityTraceManager trace) {
@@ -123,6 +124,9 @@ public class AutoclickController extends BaseEventStreamTransformation {
         mAutoclickIndicatorView = new AutoclickIndicatorView(mContext);
 
         mWindowManager = mContext.getSystemService(WindowManager.class);
+        mAutoclickTypePanel = new AutoclickTypePanel(mContext, mWindowManager);
+
+        mAutoclickTypePanel.show();
         mWindowManager.addView(mAutoclickIndicatorView, mAutoclickIndicatorView.getLayoutParams());
     }
 
@@ -167,6 +171,7 @@ public class AutoclickController extends BaseEventStreamTransformation {
             mAutoclickIndicatorScheduler.cancel();
             mAutoclickIndicatorScheduler = null;
             mWindowManager.removeView(mAutoclickIndicatorView);
+            mAutoclickTypePanel.hide();
         }
     }
 

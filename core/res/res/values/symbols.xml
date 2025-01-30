@@ -5604,6 +5604,24 @@
   <java-symbol type="bool" name="config_enable_a11y_fullscreen_magnification_overscroll_handler" />
   <java-symbol type="dimen" name="accessibility_fullscreen_magnification_gesture_edge_slop" />
 
+  <!-- Accessibility autoclick related -->
+  <java-symbol type="layout" name="accessibility_autoclick_type_panel" />
+  <java-symbol type="string" name="accessibility_autoclick_type_settings_panel_title" />
+  <java-symbol type="string" name="accessibility_autoclick_left_click" />
+  <java-symbol type="string" name="accessibility_autoclick_pause" />
+  <java-symbol type="string" name="accessibility_autoclick_position" />
+  <java-symbol type="dimen" name="accessibility_autoclick_type_panel_button_spacing" />
+  <java-symbol type="dimen" name="accessibility_autoclick_type_panel_button_size" />
+  <java-symbol type="dimen" name="accessibility_autoclick_type_panel_divider_height" />
+  <java-symbol type="dimen" name="accessibility_autoclick_type_panel_divider_width" />
+  <java-symbol type="id" name="accessibility_autoclick_type_panel" />
+  <java-symbol type="id" name="accessibility_autoclick_left_click_layout" />
+  <java-symbol type="id" name="accessibility_autoclick_left_click_button" />
+  <java-symbol type="id" name="accessibility_autoclick_pause_layout" />
+  <java-symbol type="id" name="accessibility_autoclick_pause_button" />
+  <java-symbol type="id" name="accessibility_autoclick_position_layout" />
+  <java-symbol type="id" name="accessibility_autoclick_position_button" />
+
   <!-- For HapticFeedbackConstants configurability defined at HapticFeedbackCustomization -->
   <java-symbol type="string" name="config_hapticFeedbackCustomizationFile" />
   <java-symbol type="xml" name="haptic_feedback_customization" />
