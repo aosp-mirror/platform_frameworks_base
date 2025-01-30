@@ -37,6 +37,7 @@ import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.shared.clocks.view.FlexClockView
 import com.android.systemui.shared.clocks.view.HorizontalAlignment
+import com.android.systemui.shared.clocks.view.VerticalAlignment
 import java.util.Locale
 import java.util.TimeZone
 import kotlin.math.max
@@ -255,7 +256,7 @@ class FlexClockFaceController(clockCtx: ClockContext, private val isLargeClock: 
                 timespec = DigitalTimespec.TIME_FULL_FORMAT,
                 style = FontTextStyle(fontSizeScale = 0.98f),
                 aodStyle = FontTextStyle(),
-                alignment = DigitalAlignment(HorizontalAlignment.LEFT, null),
+                alignment = DigitalAlignment(HorizontalAlignment.LEFT, VerticalAlignment.CENTER),
                 dateTimeFormat = "h:mm",
             )
     }
