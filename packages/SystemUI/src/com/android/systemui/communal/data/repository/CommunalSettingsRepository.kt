@@ -111,6 +111,18 @@ constructor(
     @Named(DEFAULT_BACKGROUND_TYPE) private val defaultBackgroundType: CommunalBackgroundType,
 ) : CommunalSettingsRepository {
 
+    private val dreamsActivatedOnSleepByDefault by lazy {
+        resources.getBoolean(com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault)
+    }
+
+    private val dreamsActivatedOnDockByDefault by lazy {
+        resources.getBoolean(com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault)
+    }
+
+    private val dreamsActivatedOnPosturedByDefault by lazy {
+        resources.getBoolean(com.android.internal.R.bool.config_dreamsActivatedOnPosturedByDefault)
+    }
+
     override fun getFlagEnabled(): Boolean {
         return if (getV2FlagEnabled()) {
             true
@@ -178,27 +190,27 @@ constructor(
             .emitOnStart()
             .map {
                 if (
-                    secureSettings.getIntForUser(
+                    secureSettings.getBoolForUser(
                         Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
-                        0,
+                        dreamsActivatedOnSleepByDefault,
                         user.id,
-                    ) == 1
+                    )
                 ) {
                     WhenToDream.WHILE_CHARGING
                 } else if (
-                    secureSettings.getIntForUser(
+                    secureSettings.getBoolForUser(
                         Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
-                        0,
+                        dreamsActivatedOnDockByDefault,
                         user.id,
-                    ) == 1
+                    )
                 ) {
                     WhenToDream.WHILE_DOCKED
                 } else if (
-                    secureSettings.getIntForUser(
+                    secureSettings.getBoolForUser(
                         Settings.Secure.SCREENSAVER_ACTIVATE_ON_POSTURED,
-                        0,
+                        dreamsActivatedOnPosturedByDefault,
                         user.id,
-                    ) == 1
+                    )
                 ) {
                     WhenToDream.WHILE_POSTURED
                 } else {

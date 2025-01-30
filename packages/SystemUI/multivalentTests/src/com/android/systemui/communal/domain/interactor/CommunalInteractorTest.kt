@@ -21,6 +21,7 @@ import android.app.admin.DevicePolicyManager
 import android.app.admin.devicePolicyManager
 import android.content.Intent
 import android.content.pm.UserInfo
+import android.content.res.mainResources
 import android.os.UserHandle
 import android.os.UserManager
 import android.os.userManager
@@ -85,6 +86,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceTimeBy
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -106,7 +108,10 @@ class CommunalInteractorTest(flags: FlagsParameterization) : SysuiTestCase() {
         UserInfo(/* id= */ 0, /* name= */ "primary user", /* flags= */ UserInfo.FLAG_MAIN)
     private val secondaryUser = UserInfo(/* id= */ 1, /* name= */ "secondary user", /* flags= */ 0)
 
-    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
+    private val kosmos =
+        testKosmos()
+            .apply { mainResources = mContext.orCreateTestableResources.resources }
+            .useUnconfinedTestDispatcher()
 
     private val Kosmos.underTest by Kosmos.Fixture { communalInteractor }
 
@@ -122,6 +127,32 @@ class CommunalInteractorTest(flags: FlagsParameterization) : SysuiTestCase() {
 
         kosmos.fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, true)
         mSetFlagsRule.enableFlags(FLAG_COMMUNAL_HUB)
+
+        mContext.orCreateTestableResources.addOverride(
+            com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault,
+            false,
+        )
+        mContext.orCreateTestableResources.addOverride(
+            com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault,
+            false,
+        )
+        mContext.orCreateTestableResources.addOverride(
+            com.android.internal.R.bool.config_dreamsActivatedOnPosturedByDefault,
+            false,
+        )
+    }
+
+    @After
+    fun tearDown() {
+        mContext.orCreateTestableResources.removeOverride(
+            com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault
+        )
+        mContext.orCreateTestableResources.removeOverride(
+            com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault
+        )
+        mContext.orCreateTestableResources.removeOverride(
+            com.android.internal.R.bool.config_dreamsActivatedOnPosturedByDefault
+        )
     }
 
     @Test
