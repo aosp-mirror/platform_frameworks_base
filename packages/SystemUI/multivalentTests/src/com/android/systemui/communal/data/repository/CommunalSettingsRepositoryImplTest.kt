@@ -51,6 +51,7 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -78,6 +79,32 @@ class CommunalSettingsRepositoryImplTest(flags: FlagsParameterization?) : SysuiT
         setKeyguardFeaturesDisabled(PRIMARY_USER, KEYGUARD_DISABLE_FEATURES_NONE)
         setKeyguardFeaturesDisabled(SECONDARY_USER, KEYGUARD_DISABLE_FEATURES_NONE)
         setKeyguardFeaturesDisabled(WORK_PROFILE, KEYGUARD_DISABLE_FEATURES_NONE)
+
+        mContext.orCreateTestableResources.addOverride(
+            com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault,
+            false,
+        )
+        mContext.orCreateTestableResources.addOverride(
+            com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault,
+            false,
+        )
+        mContext.orCreateTestableResources.addOverride(
+            com.android.internal.R.bool.config_dreamsActivatedOnPosturedByDefault,
+            false,
+        )
+    }
+
+    @After
+    fun tearDown() {
+        mContext.orCreateTestableResources.removeOverride(
+            com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault
+        )
+        mContext.orCreateTestableResources.removeOverride(
+            com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault
+        )
+        mContext.orCreateTestableResources.removeOverride(
+            com.android.internal.R.bool.config_dreamsActivatedOnPosturedByDefault
+        )
     }
 
     @EnableFlags(FLAG_COMMUNAL_HUB)
@@ -334,6 +361,18 @@ class CommunalSettingsRepositoryImplTest(flags: FlagsParameterization?) : SysuiT
         }
 
     @Test
+    fun whenToDream_charging_defaultValue() =
+        kosmos.runTest {
+            mContext.orCreateTestableResources.addOverride(
+                com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault,
+                true,
+            )
+
+            val whenToDreamState by collectLastValue(underTest.getWhenToDreamState(PRIMARY_USER))
+            assertThat(whenToDreamState).isEqualTo(WhenToDream.WHILE_CHARGING)
+        }
+
+    @Test
     fun whenToDream_docked() =
         kosmos.runTest {
             val whenToDreamState by collectLastValue(underTest.getWhenToDreamState(PRIMARY_USER))
@@ -348,6 +387,18 @@ class CommunalSettingsRepositoryImplTest(flags: FlagsParameterization?) : SysuiT
         }
 
     @Test
+    fun whenToDream_docked_defaultValue() =
+        kosmos.runTest {
+            mContext.orCreateTestableResources.addOverride(
+                com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault,
+                true,
+            )
+
+            val whenToDreamState by collectLastValue(underTest.getWhenToDreamState(PRIMARY_USER))
+            assertThat(whenToDreamState).isEqualTo(WhenToDream.WHILE_DOCKED)
+        }
+
+    @Test
     fun whenToDream_postured() =
         kosmos.runTest {
             val whenToDreamState by collectLastValue(underTest.getWhenToDreamState(PRIMARY_USER))
@@ -358,6 +409,18 @@ class CommunalSettingsRepositoryImplTest(flags: FlagsParameterization?) : SysuiT
                 PRIMARY_USER.id,
             )
 
+            assertThat(whenToDreamState).isEqualTo(WhenToDream.WHILE_POSTURED)
+        }
+
+    @Test
+    fun whenToDream_postured_defaultValue() =
+        kosmos.runTest {
+            mContext.orCreateTestableResources.addOverride(
+                com.android.internal.R.bool.config_dreamsActivatedOnPosturedByDefault,
+                true,
+            )
+
+            val whenToDreamState by collectLastValue(underTest.getWhenToDreamState(PRIMARY_USER))
             assertThat(whenToDreamState).isEqualTo(WhenToDream.WHILE_POSTURED)
         }
 
