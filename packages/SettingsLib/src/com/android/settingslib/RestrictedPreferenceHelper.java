@@ -44,6 +44,8 @@ import androidx.preference.PreferenceViewHolder;
 public class RestrictedPreferenceHelper {
     private static final String TAG = "RestrictedPreferenceHelper";
 
+    private static final String REASON_PHONE_STATE = "phone_state";
+
     private final Context mContext;
     private final Preference mPreference;
     String packageName;
@@ -121,7 +123,7 @@ public class RestrictedPreferenceHelper {
                 if (mDisabledByAdmin) {
                     summaryView.setText(disabledText);
                 } else if (mDisabledByEcm) {
-                    summaryView.setText(R.string.disabled_by_app_ops_text);
+                    summaryView.setText(getEcmTextResId());
                 } else if (TextUtils.equals(disabledText, summaryView.getText())) {
                     // It's previously set to disabled text, clear it.
                     summaryView.setText(null);
@@ -323,7 +325,16 @@ public class RestrictedPreferenceHelper {
         }
 
         if (!isEnabled && mDisabledByEcm) {
-            mPreference.setSummary(R.string.disabled_by_app_ops_text);
+            mPreference.setSummary(getEcmTextResId());
+        }
+    }
+
+    private int getEcmTextResId() {
+        if (mDisabledByEcmIntent != null && REASON_PHONE_STATE.equals(
+                mDisabledByEcmIntent.getStringExtra(Intent.EXTRA_REASON))) {
+            return R.string.disabled_in_phone_call_text;
+        } else {
+            return R.string.disabled_by_app_ops_text;
         }
     }
 

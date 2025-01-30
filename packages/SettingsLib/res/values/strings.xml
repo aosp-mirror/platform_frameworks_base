@@ -1228,6 +1228,8 @@
 
     <!-- Summary for settings preference disabled by app ops [CHAR LIMIT=50] -->
     <string name="disabled_by_app_ops_text">Controlled by Restricted Setting</string>
+    <!-- Summary for settings preference disabled while the device is in a phone call [CHAR LIMIT=50] -->
+    <string name="disabled_in_phone_call_text">Unavailable during calls</string>
 
     <!-- [CHAR LIMIT=25] Manage applications, text telling using an application is disabled. -->
     <string name="disabled">Disabled</string>
