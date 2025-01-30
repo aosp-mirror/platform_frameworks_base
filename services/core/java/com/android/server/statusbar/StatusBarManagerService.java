@@ -770,10 +770,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void onDisplayReady(int displayId) {
+        public void onDisplayAddSystemDecorations(int displayId) {
             if (isVisibleBackgroundUserOnDisplay(displayId)) {
                 if (SPEW) {
-                    Slog.d(TAG, "Skipping onDisplayReady for visible background user "
+                    Slog.d(TAG, "Skipping onDisplayAddSystemDecorations for visible background "
+                            + "user "
                             + mUserManagerInternal.getUserAssignedToDisplay(displayId));
                 }
                 return;
@@ -781,7 +782,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             IStatusBar bar = mBar;
             if (bar != null) {
                 try {
-                    bar.onDisplayReady(displayId);
+                    bar.onDisplayAddSystemDecorations(displayId);
                 } catch (RemoteException ex) {}
             }
         }

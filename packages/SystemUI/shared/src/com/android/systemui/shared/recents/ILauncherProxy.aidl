@@ -146,9 +146,9 @@ oneway interface ILauncherProxy {
     void onUnbind(IRemoteCallback reply) = 35;
 
     /**
-     * Sent when {@link TaskbarDelegate#onDisplayReady} is called.
+     * Sent when {@link TaskbarDelegate#onDisplayAddSystemDecorations} is called.
      */
-    void onDisplayReady(int displayId) = 36;
+    void onDisplayAddSystemDecorations(int displayId) = 36;
 
     /**
      * Sent when {@link TaskbarDelegate#onDisplayRemoved} is called.

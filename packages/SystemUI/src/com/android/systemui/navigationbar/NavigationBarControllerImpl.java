@@ -284,7 +284,10 @@ public class NavigationBarControllerImpl implements
         }
 
         @Override
-        public void onDisplayReady(int displayId) {
+        public void onDisplayAddSystemDecorations(int displayId) {
+            if (enableDisplayContentModeManagement()) {
+                mHasNavBar.put(displayId, true);
+            }
             Display display = mDisplayManager.getDisplay(displayId);
             mIsLargeScreen = isLargeScreen(mContext);
             createNavigationBar(display, null /* savedState */, null /* result */);

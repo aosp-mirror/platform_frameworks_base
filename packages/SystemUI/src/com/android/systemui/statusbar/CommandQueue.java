@@ -111,7 +111,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_COLLAPSE_PANELS                   = 4 << MSG_SHIFT;
     private static final int MSG_EXPAND_SETTINGS                   = 5 << MSG_SHIFT;
     private static final int MSG_SYSTEM_BAR_CHANGED                = 6 << MSG_SHIFT;
-    private static final int MSG_DISPLAY_READY                     = 7 << MSG_SHIFT;
+    private static final int MSG_DISPLAY_ADD_SYSTEM_DECORATIONS    = 7 << MSG_SHIFT;
     private static final int MSG_SHOW_IME_BUTTON                   = 8 << MSG_SHIFT;
     private static final int MSG_TOGGLE_RECENT_APPS                = 9 << MSG_SHIFT;
     private static final int MSG_PRELOAD_RECENT_APPS               = 10 << MSG_SHIFT;
@@ -415,9 +415,9 @@ public class CommandQueue extends IStatusBar.Stub implements
         }
 
         /**
-         * @see IStatusBar#onDisplayReady(int)
+         * @see IStatusBar#onDisplayAddSystemDecorations(int)
          */
-        default void onDisplayReady(int displayId) {
+        default void onDisplayAddSystemDecorations(int displayId) {
         }
 
         /**
@@ -1205,9 +1205,9 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void onDisplayReady(int displayId) {
+    public void onDisplayAddSystemDecorations(int displayId) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_DISPLAY_READY, displayId, 0).sendToTarget();
+            mHandler.obtainMessage(MSG_DISPLAY_ADD_SYSTEM_DECORATIONS, displayId, 0).sendToTarget();
         }
     }
 
@@ -1851,9 +1851,9 @@ public class CommandQueue extends IStatusBar.Stub implements
                         mCallbacks.get(i).showPinningEscapeToast();
                     }
                     break;
-                case MSG_DISPLAY_READY:
+                case MSG_DISPLAY_ADD_SYSTEM_DECORATIONS:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).onDisplayReady(msg.arg1);
+                        mCallbacks.get(i).onDisplayAddSystemDecorations(msg.arg1);
                     }
                     break;
                 case MSG_DISPLAY_REMOVE_SYSTEM_DECORATIONS:

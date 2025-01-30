@@ -171,11 +171,11 @@ public interface StatusBarManagerInternal {
     void onProposedRotationChanged(int displayId, int rotation, boolean isValid);
 
     /**
-     * Notifies System UI that the display is ready to show system decorations.
+     * Notifies System UI that the system decorations should be added on the display.
      *
      * @param displayId display ID
      */
-    void onDisplayReady(int displayId);
+    void onDisplayAddSystemDecorations(int displayId);
 
     /**
      * Notifies System UI that the system decorations should be removed from the display.

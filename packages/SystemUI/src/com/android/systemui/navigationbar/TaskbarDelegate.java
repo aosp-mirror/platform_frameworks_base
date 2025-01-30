@@ -238,16 +238,16 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     }
 
     @Override
-    public void onDisplayReady(int displayId) {
-        CommandQueue.Callbacks.super.onDisplayReady(displayId);
+    public void onDisplayAddSystemDecorations(int displayId) {
+        CommandQueue.Callbacks.super.onDisplayAddSystemDecorations(displayId);
         if (mLauncherProxyService.getProxy() == null) {
             return;
         }
 
         try {
-            mLauncherProxyService.getProxy().onDisplayReady(displayId);
+            mLauncherProxyService.getProxy().onDisplayAddSystemDecorations(displayId);
         } catch (RemoteException e) {
-            Log.e(TAG, "onDisplayReady() failed", e);
+            Log.e(TAG, "onDisplayAddSystemDecorations() failed", e);
         }
     }
 
