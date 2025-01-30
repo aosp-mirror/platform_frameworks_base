@@ -138,6 +138,7 @@ public class PromotedNotificationInfoTest extends SysuiTestCase {
                 mEntry,
                 null,
                 null,
+                null,
                 mUiEventLogger,
                 true,
                 false,
