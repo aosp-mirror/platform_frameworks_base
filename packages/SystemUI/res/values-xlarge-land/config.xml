@@ -16,5 +16,5 @@
 
 <resources>
     <item name="shortcut_helper_screen_width_fraction"  format="float" type="dimen">0.8</item>
-    <bool name="center_align_magic_portrait_shape">true</bool>
+    <bool name="center_align_focal_area_shape">true</bool>
 </resources>

@@ -50,8 +50,7 @@ constructor(
     keyguardClockRepository: KeyguardClockRepository,
     wallpaperRepository: WallpaperRepository,
 ) {
-    // When there's notifications in splitshade, magic portrait shape effects should be left
-    // aligned in foldable
+    // When there's notifications in splitshade, the focal area shape effect should be left aligned
     private val notificationInShadeWideLayout: Flow<Boolean> =
         combine(
             shadeRepository.isShadeLayoutWide,
@@ -104,7 +103,7 @@ constructor(
                     )
                 val (left, right) =
                 // tablet landscape
-                if (context.resources.getBoolean(R.bool.center_align_magic_portrait_shape)) {
+                if (context.resources.getBoolean(R.bool.center_align_focal_area_shape)) {
                         Pair(
                             scaledBounds.centerX() - maxFocalAreaWidth / 2F,
                             scaledBounds.centerX() + maxFocalAreaWidth / 2F,
@@ -129,7 +128,7 @@ constructor(
                         wallpaperZoomedInScale
                 val top =
                     // tablet landscape
-                    if (context.resources.getBoolean(R.bool.center_align_magic_portrait_shape)) {
+                    if (context.resources.getBoolean(R.bool.center_align_focal_area_shape)) {
                         // no strict constraints for top, use bottom margin to make it symmetric
                         // vertically
                         scaledBounds.top + scaledBottomMargin
@@ -169,8 +168,8 @@ constructor(
             )
         }
 
-        // A max width for magic portrait shape effects bounds, to avoid it going too large
-        // in large screen portrait mode
+        // A max width for focal area shape effects bounds, to avoid
+        // it becoming too large in large screen portrait mode
         const val FOCAL_AREA_MAX_WIDTH_DP = 500
     }
 }

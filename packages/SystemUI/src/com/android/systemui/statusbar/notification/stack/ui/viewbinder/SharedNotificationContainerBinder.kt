@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.shared.Flags.extendedWallpaperEffects
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
@@ -143,7 +144,7 @@ constructor(
                     }
 
                     if (!SceneContainerFlag.isEnabled) {
-                        if (Flags.magicPortraitWallpapers()) {
+                        if (extendedWallpaperEffects()) {
                             launch {
                                 combine(
                                         viewModel.getNotificationStackAbsoluteBottom(

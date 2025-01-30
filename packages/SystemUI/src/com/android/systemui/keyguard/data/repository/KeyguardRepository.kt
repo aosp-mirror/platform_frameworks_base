@@ -326,10 +326,7 @@ interface KeyguardRepository {
 
     fun setShortcutAbsoluteTop(top: Float)
 
-    /**
-     * Set bottom of notifications from notification stack, and Magic Portrait will layout base on
-     * this value
-     */
+    /** Set bottom of notifications from notification stack */
     fun setNotificationStackAbsoluteBottom(bottom: Float)
 
     fun setWallpaperFocalAreaBounds(bounds: RectF)
