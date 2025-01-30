@@ -3888,7 +3888,9 @@ final public class MediaCodec {
 
         /**
          * Set a hardware graphic buffer to this queue request. Exactly one buffer must
-         * be set for a queue request before calling {@link #queue}.
+         * be set for a queue request before calling {@link #queue}. Ownership of the
+         * hardware buffer is not transferred to this queue request, nor will it be transferred
+         * to the codec once {@link #queue} is called.
          * <p>
          * Note: buffers should have format {@link HardwareBuffer#YCBCR_420_888},
          * a single layer, and an appropriate usage ({@link HardwareBuffer#USAGE_CPU_READ_OFTEN}
