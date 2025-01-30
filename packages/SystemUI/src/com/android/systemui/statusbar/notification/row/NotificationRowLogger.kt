@@ -219,6 +219,21 @@ constructor(
             { "Failed to set magnetic and roundable targets for $str1 on state $str2." },
         )
     }
+
+    fun logMagneticRowTranslationNotSet(
+        state: MagneticNotificationRowManagerImpl.State,
+        entry: NotificationEntry,
+    ) {
+        buffer.log(
+            TAG,
+            LogLevel.ERROR,
+            {
+                str1 = entry.logKey
+                str2 = state.name
+            },
+            { "Failed to set magnetic row translation for $str1 on state $str2." },
+        )
+    }
 }
 
 private const val TAG = "NotifRow"
