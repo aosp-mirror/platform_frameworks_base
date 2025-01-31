@@ -1528,16 +1528,11 @@ class DesktopTasksController(
     private fun addWallpaperActivity(displayId: Int, wct: WindowContainerTransaction) {
         logV("addWallpaperActivity")
         if (ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER.isTrue()) {
-
-            // If the wallpaper activity for this display already exists, let's reorder it to top.
-            val wallpaperActivityToken = desktopWallpaperActivityTokenProvider.getToken(displayId)
-            if (wallpaperActivityToken != null) {
-                wct.reorder(wallpaperActivityToken, /* onTop= */ true)
-                return
-            }
-
             val intent = Intent(context, DesktopWallpaperActivity::class.java)
-            if (Flags.enablePerDisplayDesktopWallpaperActivity()) {
+            if (
+                desktopWallpaperActivityTokenProvider.getToken(displayId) == null &&
+                    Flags.enablePerDisplayDesktopWallpaperActivity()
+            ) {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
             }
