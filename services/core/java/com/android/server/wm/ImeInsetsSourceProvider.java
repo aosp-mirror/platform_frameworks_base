@@ -182,12 +182,18 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
             if (control != null && control.getLeash() != null) {
                 ImeTracker.Token statsToken = getAndClearStatsToken();
                 if (statsToken == null) {
-                    ProtoLog.d(WM_DEBUG_IME, "IME getControl without statsToken");
-                } else {
-                    ImeTracker.forLogging().onProgress(statsToken,
-                            ImeTracker.PHASE_WM_GET_CONTROL_WITH_LEASH);
-                    control.setImeStatsToken(statsToken);
+                    ProtoLog.w(WM_DEBUG_IME,
+                            "IME getControl without statsToken (check previous request!). "
+                                    + "Start new request");
+                    // TODO(b/353463205) remove this later after fixing the race of two requests
+                    //  that cancel each other (cf. b/383466954#comment19).
+                    statsToken = ImeTracker.forLogging().onStart(ImeTracker.TYPE_SHOW,
+                            ImeTracker.ORIGIN_SERVER, SoftInputShowHideReason.CONTROLS_CHANGED,
+                            false /* fromUser */);
                 }
+                ImeTracker.forLogging().onProgress(statsToken,
+                        ImeTracker.PHASE_WM_GET_CONTROL_WITH_LEASH);
+                control.setImeStatsToken(statsToken);
             }
         }
         return control;
