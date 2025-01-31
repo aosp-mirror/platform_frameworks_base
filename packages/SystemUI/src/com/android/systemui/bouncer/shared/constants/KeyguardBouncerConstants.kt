@@ -16,6 +16,8 @@
 
 package com.android.systemui.bouncer.shared.constants
 
+import com.android.internal.R.color as colors
+
 object KeyguardBouncerConstants {
     /**
      * Values for the bouncer expansion represented as the panel expansion. Panel expansion 1f =
@@ -33,15 +35,40 @@ object KeyguardBouncerConstants {
     const val DEFAULT_PIN_LENGTH = 6
 
     object ColorId {
+        private const val DEPRECATION_MSG =
+            "Colors will not be used after bouncerUiRevamp2 flag is launched"
+
+        @Deprecated(DEPRECATION_MSG)
         const val TITLE = com.android.internal.R.color.materialColorOnSurface
+
+        @Deprecated(DEPRECATION_MSG)
         const val PIN_SHAPES = com.android.internal.R.color.materialColorOnSurfaceVariant
+
+        @Deprecated(DEPRECATION_MSG)
         const val NUM_PAD_BACKGROUND =
             com.android.internal.R.color.materialColorSurfaceContainerHigh
+
+        @Deprecated(DEPRECATION_MSG)
         const val NUM_PAD_BACKGROUND_PRESSED =
             com.android.internal.R.color.materialColorPrimaryFixed
+
+        @Deprecated(DEPRECATION_MSG)
         const val NUM_PAD_PRESSED = com.android.internal.R.color.materialColorOnPrimaryFixed
+
+        @Deprecated(DEPRECATION_MSG)
         const val NUM_PAD_KEY = com.android.internal.R.color.materialColorOnSurface
+
+        @Deprecated(DEPRECATION_MSG)
         const val NUM_PAD_BUTTON = com.android.internal.R.color.materialColorOnSecondaryFixed
+
+        @Deprecated(DEPRECATION_MSG)
         const val EMERGENCY_BUTTON = com.android.internal.R.color.materialColorTertiaryFixed
+    }
+}
+
+object PinBouncerConstants {
+    object Color {
+        @JvmField val hintDot = colors.materialColorOnSurfaceVariant
+        @JvmField val shape = colors.materialColorPrimary
     }
 }
