@@ -288,6 +288,7 @@ cc_benchmark {
         "tests/AttributeResolution_bench.cpp",
         "tests/CursorWindow_bench.cpp",
         "tests/Generic_bench.cpp",
+        "tests/LocaleDataLookup_bench.cpp",
         "tests/SparseEntry_bench.cpp",
         "tests/Theme_bench.cpp",
     ],
