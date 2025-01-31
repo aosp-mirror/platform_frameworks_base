@@ -19,7 +19,7 @@
 
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<resources>
     <!-- The maximum number of rows in the QuickSettings -->
     <integer name="quick_settings_max_rows">4</integer>
 
@@ -51,9 +51,7 @@
     ignored. -->
     <string-array name="config_keyguardQuickAffordanceDefaults" translatable="false">
         <item>bottom_start:home</item>
-        <!-- TODO(b/384119565): revisit decision on defaults -->
-        <item android:featureFlag="!com.android.systemui.glanceable_hub_v2_resources">bottom_end:create_note</item>
-        <item android:featureFlag="com.android.systemui.glanceable_hub_v2_resources">bottom_end:glanceable_hub</item>
+        <item>bottom_end:create_note</item>
     </string-array>
 
     <!-- Whether volume panel should use the large screen layout or not -->
