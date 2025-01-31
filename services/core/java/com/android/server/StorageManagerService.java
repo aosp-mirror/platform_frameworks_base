@@ -947,7 +947,6 @@ class StorageManagerService extends IStorageManager.Stub
         refreshZramSettings();
 
         if (mmdEnabled()) {
-            // TODO: b/375432472 - Start zram maintenance only when zram is enabled.
             ZramMaintenance.startZramMaintenance(mContext);
         } else {
             // Schedule zram writeback unless zram is disabled by persist.sys.zram_enabled
