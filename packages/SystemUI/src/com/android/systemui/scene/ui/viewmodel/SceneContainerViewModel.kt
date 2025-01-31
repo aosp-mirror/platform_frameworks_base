@@ -82,7 +82,7 @@ constructor(
 
     val allContentKeys: List<ContentKey> = sceneInteractor.allContentKeys
 
-    private val hapticsViewModel = hapticsViewModelFactory.create(view)
+    val hapticsViewModel: SceneContainerHapticsViewModel = hapticsViewModelFactory.create(view)
 
     /**
      * The [SwipeSourceDetector] to use for defining which edges of the screen can be defined in the
