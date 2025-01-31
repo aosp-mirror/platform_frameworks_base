@@ -219,6 +219,7 @@ public class SettingsToPropertiesMapper {
         "pixel_continuity",
         "pixel_display",
         "pixel_perf",
+        "pixel_sensai",
         "pixel_sensors",
         "pixel_state_server",
         "pixel_system_sw_video",
