@@ -232,7 +232,7 @@ public class DesktopModeStatus {
      * Return {@code true} if desktop mode dev option should be shown on current device
      */
     public static boolean canShowDesktopExperienceDevOption(@NonNull Context context) {
-        return Flags.showDesktopExperienceDevOption();
+        return Flags.showDesktopExperienceDevOption() && isDeviceEligibleForDesktopMode(context);
     }
 
     /** Returns if desktop mode dev option should be enabled if there is no user override. */
