@@ -2373,7 +2373,7 @@ class UserController implements Handler.Callback {
             // If running in background is disabled or mStopUserOnSwitch mode, stop the user.
             if (hasRestriction || isStopUserOnSwitchEnabled()) {
                 Slogf.i(TAG, "Stopping user %d and its profiles on user switch", oldUserId);
-                stopUsersLU(oldUserId, /* allowDelayedLocking= */ false, null, null);
+                stopUsersLU(oldUserId, /* allowDelayedLocking= */ !hasRestriction, null, null);
                 return;
             }
         }
