@@ -18,7 +18,6 @@ package com.android.server.notification;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
-import static android.app.Flags.FLAG_MODES_UI;
 import static android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI;
 import static android.app.Notification.VISIBILITY_PRIVATE;
 import static android.app.Notification.VISIBILITY_SECRET;
@@ -259,10 +258,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Parameters(name = "{0}")
     public static List<FlagsParameterization> getParams() {
         return FlagsParameterization.allCombinationsOf(
-                android.app.Flags.FLAG_API_RICH_ONGOING,
                 android.app.Flags.FLAG_UI_RICH_ONGOING,
-                FLAG_NOTIFICATION_CLASSIFICATION, FLAG_NOTIFICATION_CLASSIFICATION_UI,
-                FLAG_MODES_UI, android.app.Flags.FLAG_NM_BINDER_PERF_CACHE_CHANNELS);
+                FLAG_NOTIFICATION_CLASSIFICATION_UI,
+                android.app.Flags.FLAG_NM_BINDER_PERF_CACHE_CHANNELS);
     }
 
     public PreferencesHelperTest(FlagsParameterization flags) {
