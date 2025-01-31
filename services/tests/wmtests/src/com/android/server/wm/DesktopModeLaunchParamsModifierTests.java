@@ -1345,7 +1345,7 @@ public class DesktopModeLaunchParamsModifierTests extends
     private void setupDesktopModeLaunchParamsModifier(boolean isDesktopModeSupported,
             boolean enforceDeviceRestrictions) {
         doReturn(isDesktopModeSupported)
-                .when(() -> DesktopModeHelper.isDesktopModeSupported(any()));
+                .when(() -> DesktopModeHelper.isDeviceEligibleForDesktopMode(any()));
         doReturn(enforceDeviceRestrictions)
                 .when(DesktopModeHelper::shouldEnforceDeviceRestrictions);
     }

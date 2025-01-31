@@ -67,7 +67,7 @@ class DesktopModeWindowDecorViewModelAppHandleOnlyTest :
                 .spyStatic(DesktopModeStatus::class.java)
                 .spyStatic(DragPositioningCallbackUtility::class.java)
                 .startMocking()
-        doReturn(false).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
+        doReturn(false).`when` { DesktopModeStatus.isDeviceEligibleForDesktopMode(any()) }
         doReturn(true).`when` { DesktopModeStatus.overridesShowAppHandle(any())}
         setUpCommon()
     }
