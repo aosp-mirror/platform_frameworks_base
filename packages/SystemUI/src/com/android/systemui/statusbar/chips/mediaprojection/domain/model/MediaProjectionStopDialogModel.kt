@@ -34,6 +34,13 @@ sealed interface MediaProjectionStopDialogModel {
          */
         fun createAndShowDialog() {
             val dialog = dialogDelegate.createDialog()
+            // Prevents the dialog from being dismissed by tapping outside its boundary.
+            // This is specifically required for the stop dialog shown at call end (i.e.,
+            // PROJECTION_STARTED_DURING_CALL_AND_ACTIVE_POST_CALL event) to disallow remote
+            // dismissal by external devices. Other media projection stop dialogs do not require
+            // this since they are triggered explicitly by tapping the status bar chip, in which
+            // case the full screen containing the dialog is not remote dismissible.
+            dialog.setCanceledOnTouchOutside(/* cancel= */ false)
             dialog.setOnCancelListener { onDismissAction.invoke() }
             dialog.setOnDismissListener { onDismissAction.invoke() }
             dialog.show()

@@ -297,6 +297,33 @@ class ShareToAppChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(com.android.media.projection.flags.Flags.FLAG_SHOW_STOP_DIALOG_POST_CALL_END)
+    fun stopDialog_flagEnabled_eventEmitted_dialogCannotBeDismissedByTouchOutside() =
+        kosmos.runTest {
+            val latestDialogModel by collectLastValue(underTest.stopDialogToShow)
+
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
+
+            fakeMediaProjectionRepository.emitProjectionStartedDuringCallAndActivePostCallEvent()
+
+            // Verify that the dialog is shown
+            assertThat(latestDialogModel)
+                .isInstanceOf(MediaProjectionStopDialogModel.Shown::class.java)
+
+            val dialogModel = latestDialogModel as MediaProjectionStopDialogModel.Shown
+
+            whenever(dialogModel.dialogDelegate.createDialog()).thenReturn(mockDialog)
+
+            dialogModel.createAndShowDialog()
+
+            verify(mockDialog).show()
+
+            // Verify that setCanceledOnTouchOutside(false) is called
+            verify(mockDialog).setCanceledOnTouchOutside(false)
+        }
+
+    @Test
     fun chip_notProjectingState_isHidden() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
