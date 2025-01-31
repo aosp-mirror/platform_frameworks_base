@@ -617,3 +617,10 @@ flag {
     description: "Forces pinned taskbar with desktop tasks on freeform displays"
     bug: "390665752"
 }
+
+flag {
+    name: "enable_presentation_for_connected_displays"
+    namespace: "lse_desktop_experience"
+    description: "Enables full support of presentation API for connected displays."
+    bug: "378503083"
+}
