@@ -39,6 +39,9 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
+/**
+ * Test class for [DesktopModeStatus].
+ */
 @SmallTest
 @Presubmit
 @EnableFlags(Flags.FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)

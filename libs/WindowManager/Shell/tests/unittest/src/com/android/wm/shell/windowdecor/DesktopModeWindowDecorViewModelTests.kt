@@ -116,7 +116,7 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
                 .spyStatic(DragPositioningCallbackUtility::class.java)
                 .startMocking()
 
-        doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(Mockito.any()) }
+        doReturn(true).`when` { DesktopModeStatus.isDeviceEligibleForDesktopMode(Mockito.any()) }
         doReturn(false).`when` { DesktopModeStatus.overridesShowAppHandle(Mockito.any()) }
 
         setUpCommon()
@@ -379,37 +379,21 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-    fun testWindowDecor_desktopModeUnsupportedOnDevice_deviceRestrictionsOverridden_decorCreated() {
-        // Simulate enforce device restrictions system property overridden to false
-        whenever(DesktopModeStatus.enforceDeviceRestrictions()).thenReturn(false)
-        // Simulate device that doesn't support desktop mode
-        doReturn(false).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
-
-        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN)
-        setUpMockDecorationsForTasks(task)
-
-        onTaskOpening(task)
-        assertTrue(windowDecorByTaskIdSpy.contains(task.taskId))
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-    fun testWindowDecor_deviceSupportsDesktopMode_decorCreated() {
+    fun testWindowDecor_deviceEligibleForDesktopMode_decorCreated() {
         // Simulate default enforce device restrictions system property
         whenever(DesktopModeStatus.enforceDeviceRestrictions()).thenReturn(true)
 
         val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN)
-        doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
+        doReturn(true).`when` { DesktopModeStatus.isDeviceEligibleForDesktopMode(any()) }
         setUpMockDecorationsForTasks(task)
 
         onTaskOpening(task)
-        assertTrue(windowDecorByTaskIdSpy.contains(task.taskId))
+        assertTrue(task.taskId in windowDecorByTaskIdSpy)
     }
 
     @Test
     fun testOnDecorMaximizedOrRestored_togglesTaskSize_maximize() {
-        val maxOrRestoreListenerCaptor = forClass(Function0::class.java)
-                as ArgumentCaptor<Function0<Unit>>
+        val maxOrRestoreListenerCaptor = forClass(Function0::class.java as Class<Function0<Unit>>)
         val decor = createOpenTaskDecoration(
             windowingMode = WINDOWING_MODE_FREEFORM,
             onMaxOrRestoreListenerCaptor = maxOrRestoreListenerCaptor

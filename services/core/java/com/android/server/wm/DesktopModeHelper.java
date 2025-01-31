@@ -52,8 +52,7 @@ public final class DesktopModeHelper {
      * Return {@code true} if the current device supports desktop mode.
      */
     // TODO(b/337819319): use a companion object instead.
-    @VisibleForTesting
-    static boolean isDesktopModeSupported(@NonNull Context context) {
+    private static boolean isDesktopModeSupported(@NonNull Context context) {
         return context.getResources().getBoolean(R.bool.config_isDesktopModeSupported);
     }
 
