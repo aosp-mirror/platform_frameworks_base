@@ -7599,11 +7599,19 @@ public class Notification implements Parcelable
         }
 
         private int getCompactHeadsUpBaseLayoutResource() {
-            return R.layout.notification_template_material_compact_heads_up_base;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_compact_heads_up_base;
+            } else {
+                return R.layout.notification_template_material_compact_heads_up_base;
+            }
         }
 
         private int getMessagingCompactHeadsUpLayoutResource() {
-            return R.layout.notification_template_material_messaging_compact_heads_up;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_compact_heads_up_messaging;
+            } else {
+                return R.layout.notification_template_material_messaging_compact_heads_up;
+            }
         }
 
         private int getExpandedBaseLayoutResource() {

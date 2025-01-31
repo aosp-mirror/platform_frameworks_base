@@ -2412,6 +2412,8 @@
   <java-symbol type="layout" name="notification_2025_template_collapsed_base" />
   <java-symbol type="layout" name="notification_2025_template_expanded_base" />
   <java-symbol type="layout" name="notification_2025_template_heads_up_base" />
+  <java-symbol type="layout" name="notification_2025_template_compact_heads_up_base" />
+  <java-symbol type="layout" name="notification_2025_template_compact_heads_up_messaging" />
   <java-symbol type="layout" name="notification_2025_template_header" />
   <java-symbol type="layout" name="notification_2025_template_collapsed_messaging" />
   <java-symbol type="layout" name="notification_2025_template_collapsed_media" />
