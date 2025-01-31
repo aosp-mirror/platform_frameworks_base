@@ -539,7 +539,7 @@ constructor(
 
     private fun bouncerToGoneNotificationAlpha(viewState: ViewStateAccessor): Flow<Float> =
         merge(
-                primaryBouncerToGoneTransitionViewModel.notificationAlpha,
+                primaryBouncerToGoneTransitionViewModel.notificationAlpha(viewState),
                 alternateBouncerToGoneTransitionViewModel.notificationAlpha(viewState),
             )
             .sample(communalSceneInteractor.isCommunalVisible) { alpha, isCommunalVisible ->
