@@ -208,8 +208,7 @@ public class DesktopModeStatus {
     /**
      * Return {@code true} if the current device supports desktop mode.
      */
-    @VisibleForTesting
-    public static boolean isDesktopModeSupported(@NonNull Context context) {
+    private static boolean isDesktopModeSupported(@NonNull Context context) {
         return context.getResources().getBoolean(R.bool.config_isDesktopModeSupported);
     }
 
