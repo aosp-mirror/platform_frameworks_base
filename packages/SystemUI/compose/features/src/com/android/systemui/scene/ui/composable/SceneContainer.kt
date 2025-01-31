@@ -232,6 +232,7 @@ fun SceneContainer(
 
         BottomRightCornerRibbon(
             content = { Text(text = "flexi\uD83E\uDD43", color = Color.White) },
+            colorSaturation = { viewModel.ribbonColorSaturation },
             modifier = Modifier.align(Alignment.BottomEnd),
         )
     }

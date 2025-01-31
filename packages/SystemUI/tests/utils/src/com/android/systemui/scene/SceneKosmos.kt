@@ -4,6 +4,7 @@ import android.view.View
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.classifier.domain.interactor.falsingInteractor
 import com.android.systemui.haptics.msdl.msdlPlayer
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.ui.viewmodel.lightRevealScrimViewModel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -100,6 +101,7 @@ val Kosmos.sceneContainerViewModelFactory by Fixture {
                 motionEventHandlerReceiver = motionEventHandlerReceiver,
                 lightRevealScrim = lightRevealScrimViewModel,
                 wallpaperViewModel = wallpaperViewModel,
+                keyguardInteractor = keyguardInteractor,
             )
     }
 }
