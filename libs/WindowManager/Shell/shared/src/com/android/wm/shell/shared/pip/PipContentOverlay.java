@@ -169,8 +169,6 @@ public abstract class PipContentOverlay {
         // The maximum size for app icon in pixel.
         private static final int MAX_APP_ICON_SIZE_DP = 72;
 
-        private static final long RECYCLE_BITMAP_TIMEOUT_MILLIS = 2_000;
-
         private final Context mContext;
         private final int mAppIconSizePx;
         /**
@@ -233,12 +231,6 @@ public abstract class PipContentOverlay {
             tx.setAlpha(mLeash, 0f);
             tx.reparent(mLeash, parentLeash);
             tx.apply();
-
-            // Recycle the mBitmap as a last resort.
-            if (mContext.getMainThreadHandler() != null) {
-                mContext.getMainThreadHandler().postDelayed(
-                        this::safeRecycle, RECYCLE_BITMAP_TIMEOUT_MILLIS);
-            }
         }
 
         @Override
@@ -264,10 +256,6 @@ public abstract class PipContentOverlay {
         @Override
         public void detach(SurfaceControl.Transaction tx) {
             super.detach(tx);
-            safeRecycle();
-        }
-
-        private void safeRecycle() {
             if (mBitmap != null && !mBitmap.isRecycled()) {
                 mBitmap.recycle();
             }
