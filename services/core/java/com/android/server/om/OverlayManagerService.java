@@ -251,14 +251,17 @@ public final class OverlayManagerService extends SystemService {
 
     private final Object mLock = new Object();
 
+    @GuardedBy("mLock")
     private final AtomicFile mSettingsFile;
 
     private final PackageManagerHelperImpl mPackageManager;
 
     private final UserManagerService mUserManager;
 
+    @GuardedBy("mLock")
     private final OverlayManagerSettings mSettings;
 
+    @GuardedBy("mLock")
     private final OverlayManagerServiceImpl mImpl;
 
     private final OverlayActorEnforcer mActorEnforcer;
@@ -296,7 +299,9 @@ public final class OverlayManagerService extends SystemService {
             UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
             umi.addUserLifecycleListener(new UserLifecycleListener());
 
-            restoreSettings();
+            // No async stuff happening in the constructor yet, so it's OK to call a ...Locked()
+            // method without a lock here.
+            restoreSettingsLocked();
 
             // Wipe all shell overlays on boot, to recover from a potentially broken device
             String shellPkgName = TextUtils.emptyIfNull(
@@ -916,25 +921,28 @@ public final class OverlayManagerService extends SystemService {
                 throws RemoteException {
             try {
                 traceBegin(TRACE_TAG_RRO, "OMS#commit " + transaction);
-                try {
-                    executeAllRequests(transaction);
-                } catch (Exception e) {
-                    final long ident = Binder.clearCallingIdentity();
+                synchronized (mLock) {
                     try {
-                        restoreSettings();
-                    } finally {
-                        Binder.restoreCallingIdentity(ident);
+                        executeAllRequestsLocked(transaction);
+                    } catch (Exception e) {
+                        final long ident = Binder.clearCallingIdentity();
+                        try {
+                            restoreSettingsLocked();
+                        } finally {
+                            Binder.restoreCallingIdentity(ident);
+                        }
+                        Slog.d(TAG, "commit failed: " + e.getMessage(), e);
+                        throw new SecurityException("commit failed"
+                                + (DEBUG || Build.IS_DEBUGGABLE ? ": " + e.getMessage() : ""));
                     }
-                    Slog.d(TAG, "commit failed: " + e.getMessage(), e);
-                    throw new SecurityException("commit failed"
-                            + (DEBUG || Build.IS_DEBUGGABLE ? ": " + e.getMessage() : ""));
                 }
             } finally {
                 traceEnd(TRACE_TAG_RRO);
             }
         }
 
-        private Set<UserPackage> executeRequest(
+        @GuardedBy("mLock")
+        private Set<UserPackage> executeRequestLocked(
                 @NonNull final OverlayManagerTransaction.Request request)
                 throws OperationFailedException {
             Objects.requireNonNull(request, "Transaction contains a null request");
@@ -1009,33 +1017,29 @@ public final class OverlayManagerService extends SystemService {
             }
         }
 
-        private void executeAllRequests(@NonNull final OverlayManagerTransaction transaction)
+        @GuardedBy("mLock")
+        private void executeAllRequestsLocked(@NonNull final OverlayManagerTransaction transaction)
                 throws OperationFailedException {
             if (DEBUG) {
                 Slog.d(TAG, "commit " + transaction);
             }
-            if (transaction == null) {
-                throw new IllegalArgumentException("null transaction");
+
+            // execute the requests (as calling user)
+            Set<UserPackage> affectedPackagesToUpdate = null;
+            for (Iterator<Request> it = transaction.getRequests(); it.hasNext(); ) {
+                Request request = it.next();
+                affectedPackagesToUpdate = CollectionUtils.addAll(affectedPackagesToUpdate,
+                        executeRequestLocked(request));
             }
 
-            synchronized (mLock) {
-                // execute the requests (as calling user)
-                Set<UserPackage> affectedPackagesToUpdate = null;
-                for (Iterator<Request> it = transaction.getRequests(); it.hasNext(); ) {
-                    Request request = it.next();
-                    affectedPackagesToUpdate = CollectionUtils.addAll(affectedPackagesToUpdate,
-                            executeRequest(request));
-                }
-
-                // past the point of no return: the entire transaction has been
-                // processed successfully, we can no longer fail: continue as
-                // system_server
-                final long ident = Binder.clearCallingIdentity();
-                try {
-                    updateTargetPackagesLocked(affectedPackagesToUpdate);
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
-                }
+            // past the point of no return: the entire transaction has been
+            // processed successfully, we can no longer fail: continue as
+            // system_server
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                updateTargetPackagesLocked(affectedPackagesToUpdate);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
         }
 
@@ -1448,12 +1452,14 @@ public final class OverlayManagerService extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
     private void updateTargetPackagesLocked(@Nullable UserPackage updatedTarget) {
         if (updatedTarget != null) {
             updateTargetPackagesLocked(Set.of(updatedTarget));
         }
     }
 
+    @GuardedBy("mLock")
     private void updateTargetPackagesLocked(@Nullable Set<UserPackage> updatedTargets) {
         if (CollectionUtils.isEmpty(updatedTargets)) {
             return;
@@ -1549,6 +1555,7 @@ public final class OverlayManagerService extends SystemService {
     }
 
     @NonNull
+    @GuardedBy("mLock")
     private SparseArray<List<String>> updatePackageManagerLocked(
             @Nullable Set<UserPackage> targets) {
         if (CollectionUtils.isEmpty(targets)) {
@@ -1569,6 +1576,7 @@ public final class OverlayManagerService extends SystemService {
      *         targetPackageNames: the target themselves and shared libraries)
      */
     @NonNull
+    @GuardedBy("mLock")
     private List<String> updatePackageManagerLocked(@NonNull Collection<String> targetPackageNames,
             final int userId) {
         try {
@@ -1624,6 +1632,7 @@ public final class OverlayManagerService extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
     private void persistSettingsLocked() {
         if (DEBUG) {
             Slog.d(TAG, "Writing overlay settings");
@@ -1639,35 +1648,35 @@ public final class OverlayManagerService extends SystemService {
         }
     }
 
-    private void restoreSettings() {
+    @GuardedBy("mLock")
+    private void restoreSettingsLocked() {
         try {
             traceBegin(TRACE_TAG_RRO, "OMS#restoreSettings");
-            synchronized (mLock) {
-                if (!mSettingsFile.getBaseFile().exists()) {
-                    return;
+
+            if (!mSettingsFile.getBaseFile().exists()) {
+                return;
+            }
+            try (FileInputStream stream = mSettingsFile.openRead()) {
+                mSettings.restore(stream);
+
+                // We might have data for dying users if the device was
+                // restarted before we received USER_REMOVED. Remove data for
+                // users that will not exist after the system is ready.
+
+                final List<UserInfo> liveUsers = mUserManager.getUsers(true /*excludeDying*/);
+                final int[] liveUserIds = new int[liveUsers.size()];
+                for (int i = 0; i < liveUsers.size(); i++) {
+                    liveUserIds[i] = liveUsers.get(i).getUserHandle().getIdentifier();
                 }
-                try (FileInputStream stream = mSettingsFile.openRead()) {
-                    mSettings.restore(stream);
+                Arrays.sort(liveUserIds);
 
-                    // We might have data for dying users if the device was
-                    // restarted before we received USER_REMOVED. Remove data for
-                    // users that will not exist after the system is ready.
-
-                    final List<UserInfo> liveUsers = mUserManager.getUsers(true /*excludeDying*/);
-                    final int[] liveUserIds = new int[liveUsers.size()];
-                    for (int i = 0; i < liveUsers.size(); i++) {
-                        liveUserIds[i] = liveUsers.get(i).getUserHandle().getIdentifier();
+                for (int userId : mSettings.getUsers()) {
+                    if (Arrays.binarySearch(liveUserIds, userId) < 0) {
+                        mSettings.removeUser(userId);
                     }
-                    Arrays.sort(liveUserIds);
-
-                    for (int userId : mSettings.getUsers()) {
-                        if (Arrays.binarySearch(liveUserIds, userId) < 0) {
-                            mSettings.removeUser(userId);
-                        }
-                    }
-                } catch (IOException | XmlPullParserException e) {
-                    Slog.e(TAG, "failed to restore overlay state", e);
                 }
+            } catch (IOException | XmlPullParserException e) {
+                Slog.e(TAG, "failed to restore overlay state", e);
             }
         } finally {
             traceEnd(TRACE_TAG_RRO);
