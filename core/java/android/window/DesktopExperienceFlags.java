@@ -40,9 +40,7 @@ import java.util.function.BooleanSupplier;
  * @hide
  */
 public enum DesktopExperienceFlags {
-    ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT(
-            com.android.server.display.feature.flags.Flags::enableDisplayContentModeManagement,
-            true),
+    // go/keep-sorted start
     ACTIVITY_EMBEDDING_SUPPORT_FOR_CONNECTED_DISPLAYS(
             Flags::activityEmbeddingSupportForConnectedDisplays, false),
     BASE_DENSITY_FOR_EXTERNAL_DISPLAYS(
@@ -53,6 +51,9 @@ public enum DesktopExperienceFlags {
     ENABLE_CONNECTED_DISPLAYS_DND(Flags::enableConnectedDisplaysDnd, false),
     ENABLE_CONNECTED_DISPLAYS_PIP(Flags::enableConnectedDisplaysPip, false),
     ENABLE_CONNECTED_DISPLAYS_WINDOW_DRAG(Flags::enableConnectedDisplaysWindowDrag, false),
+    ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT(
+            com.android.server.display.feature.flags.Flags::enableDisplayContentModeManagement,
+            true),
     ENABLE_DISPLAY_FOCUS_IN_SHELL_TRANSITIONS(Flags::enableDisplayFocusInShellTransitions, false),
     ENABLE_DISPLAY_WINDOWING_MODE_SWITCHING(Flags::enableDisplayWindowingModeSwitching, false),
     ENABLE_DRAG_TO_MAXIMIZE(Flags::enableDragToMaximize, true),
@@ -66,7 +67,9 @@ public enum DesktopExperienceFlags {
     ENABLE_TASKBAR_CONNECTED_DISPLAYS(Flags::enableTaskbarConnectedDisplays, false),
     ENTER_DESKTOP_BY_DEFAULT_ON_FREEFORM_DISPLAYS(Flags::enterDesktopByDefaultOnFreeformDisplays,
             false),
-    REPARENT_WINDOW_TOKEN_API(Flags::reparentWindowTokenApi, true);
+    REPARENT_WINDOW_TOKEN_API(Flags::reparentWindowTokenApi, true)
+    // go/keep-sorted end
+    ;
 
     /**
      * Flag class, to be used in case the enum cannot be used because the flag is not accessible.
