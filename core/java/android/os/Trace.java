@@ -544,5 +544,6 @@ public final class Trace {
      */
     public static void registerWithPerfetto() {
         PerfettoTrace.register(false /* isBackendInProcess */);
+        PerfettoTrace.registerCategories();
     }
 }
