@@ -32,7 +32,6 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.SceneContainerTransitions
 import com.android.systemui.scene.ui.viewmodel.SplitEdgeDetector
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.shade.shared.flag.DualShade
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -90,29 +89,14 @@ interface KeyguardlessSceneContainerFrameworkModule {
         @Provides
         fun containerConfig(): SceneContainerConfig {
             return SceneContainerConfig(
-                // Note that this list is in z-order. The first one is the bottom-most and the
-                // last one is top-most.
-                sceneKeys =
-                    listOfNotNull(
-                        Scenes.Gone,
-                        Scenes.QuickSettings.takeUnless { DualShade.isEnabled },
-                        Scenes.Shade.takeUnless { DualShade.isEnabled },
-                    ),
+                // Note that this list is in z-order. The first one is the bottom-most and the last
+                // one is top-most.
+                sceneKeys = listOf(Scenes.Gone, Scenes.QuickSettings, Scenes.Shade),
                 initialSceneKey = Scenes.Gone,
                 transitions = SceneContainerTransitions,
-                overlayKeys =
-                    listOfNotNull(
-                        Overlays.NotificationsShade.takeIf { DualShade.isEnabled },
-                        Overlays.QuickSettingsShade.takeIf { DualShade.isEnabled },
-                    ),
+                overlayKeys = listOf(Overlays.NotificationsShade, Overlays.QuickSettingsShade),
                 navigationDistances =
-                    mapOf(
-                            Scenes.Gone to 0,
-                            Scenes.Shade to 1.takeUnless { DualShade.isEnabled },
-                            Scenes.QuickSettings to 2.takeUnless { DualShade.isEnabled },
-                        )
-                        .filterValues { it != null }
-                        .mapValues { checkNotNull(it.value) },
+                    mapOf(Scenes.Gone to 0, Scenes.Shade to 1, Scenes.QuickSettings to 2),
             )
         }
 
