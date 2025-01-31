@@ -88,16 +88,13 @@ import com.android.systemui.statusbar.pipeline.shared.domain.interactor.setHomeS
 import com.android.systemui.statusbar.pipeline.shared.ui.model.VisibilityModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     private val kosmos = testKosmos().useUnconfinedTestDispatcher()
