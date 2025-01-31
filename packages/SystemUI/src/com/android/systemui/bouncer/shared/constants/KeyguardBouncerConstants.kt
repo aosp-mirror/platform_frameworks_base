@@ -16,7 +16,9 @@
 
 package com.android.systemui.bouncer.shared.constants
 
+import com.android.app.animation.Interpolators
 import com.android.internal.R.color as colors
+import com.android.systemui.Flags
 
 object KeyguardBouncerConstants {
     /**
@@ -66,9 +68,33 @@ object KeyguardBouncerConstants {
     }
 }
 
+private fun <T> c(old: T, new: T): T {
+    return if (Flags.bouncerUiRevamp2()) {
+        new
+    } else {
+        old
+    }
+}
+
 object PinBouncerConstants {
     object Color {
         @JvmField val hintDot = colors.materialColorOnSurfaceVariant
         @JvmField val shape = colors.materialColorPrimary
+    }
+
+    object Animation {
+        @JvmField val expansionDuration = c(old = 100, new = 33)
+        @JvmField val expansionColorDuration = c(old = 50, new = expansionDuration)
+        @JvmField
+        val expansionInterpolator = c(old = Interpolators.LINEAR, new = Interpolators.LINEAR)!!
+
+        @JvmField val contractionDuration = c(old = 417, new = 300)
+        @JvmField val contractionStartDelay = c(old = 33, new = 0)
+        @JvmField
+        val contractionRadiusInterpolator =
+            c(old = Interpolators.FAST_OUT_SLOW_IN, new = Interpolators.STANDARD)!!
+        @JvmField
+        val contractionColorInterpolator =
+            c(old = Interpolators.LINEAR, new = Interpolators.STANDARD)!!
     }
 }
