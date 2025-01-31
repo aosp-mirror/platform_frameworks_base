@@ -165,6 +165,25 @@ public class PipTaskListenerTest {
     }
 
     @Test
+    public void onTaskInfoChanged_withNullPipParams_doNothing() {
+        mPipTaskListener = new PipTaskListener(mMockContext, mMockShellTaskOrganizer,
+                mMockPipTransitionState, mMockPipScheduler, mMockPipBoundsState,
+                mMockPipBoundsAlgorithm, mMockShellExecutor);
+        mPipTaskListener.addParamsChangedListener(mMockPipParamsChangedCallback);
+        Rational aspectRatio = new Rational(4, 3);
+        when(mMockPipBoundsState.getAspectRatio()).thenReturn(aspectRatio.toFloat());
+        String action1 = "action1";
+        mPipTaskListener.onTaskInfoChanged(getTaskInfo(aspectRatio, action1));
+
+        clearInvocations(mMockPipParamsChangedCallback);
+        mPipTaskListener.onTaskInfoChanged(new ActivityManager.RunningTaskInfo());
+
+        verifyZeroInteractions(mMockPipParamsChangedCallback);
+        verify(mMockPipTransitionState, times(0))
+                .setOnIdlePipTransitionStateRunnable(any(Runnable.class));
+    }
+
+    @Test
     public void onTaskInfoChanged_withActionsChanged_callbackActionsChanged() {
         mPipTaskListener = new PipTaskListener(mMockContext, mMockShellTaskOrganizer,
                 mMockPipTransitionState, mMockPipScheduler, mMockPipBoundsState,
