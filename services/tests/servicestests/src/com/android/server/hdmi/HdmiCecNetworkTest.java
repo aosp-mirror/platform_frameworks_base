@@ -17,9 +17,12 @@
 package com.android.server.hdmi;
 
 
+import static android.content.pm.PackageManager.FEATURE_HDMI_CEC;
 import static android.hardware.hdmi.DeviceFeatures.FEATURE_SUPPORTED;
 
 import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assume.assumeTrue;
 
 import android.content.Context;
 import android.hardware.hdmi.DeviceFeatures;
@@ -66,6 +69,9 @@ public class HdmiCecNetworkTest {
 
     @Before
     public void setUp() throws Exception {
+        assumeTrue("Test requires FEATURE_HDMI_CEC",
+                InstrumentationRegistry.getTargetContext().getPackageManager()
+                        .hasSystemFeature(FEATURE_HDMI_CEC));
         mContext = InstrumentationRegistry.getTargetContext();
 
         FakeAudioFramework audioFramework = new FakeAudioFramework();
