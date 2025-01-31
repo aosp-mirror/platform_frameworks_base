@@ -4565,6 +4565,12 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public String[] getAdjustmentDeniedPackages(String key) {
+            checkCallerIsSystemOrSystemUiOrShell();
+            return mAssistants.getAdjustmentDeniedPackages(key);
+        }
+
+        @Override
         public boolean isAdjustmentSupportedForPackage(String key, String pkg) {
             checkCallerIsSystemOrSystemUiOrShell();
             return mAssistants.isAdjustmentAllowedForPackage(key, pkg);
@@ -12281,6 +12287,16 @@ public class NotificationManagerService extends SystemService {
                     mAllowedClassificationTypes.remove(type);
                 }
             }
+        }
+
+        protected @NonNull String[] getAdjustmentDeniedPackages(@Adjustment.Keys String key) {
+            synchronized (mLock) {
+                if (notificationClassificationUi() || nmSummarization() | nmSummarizationUi()) {
+                    return mAdjustmentKeyDeniedPackages.getOrDefault(
+                            key, new ArraySet<>()).toArray(new String[0]);
+                }
+            }
+            return new String[]{};
         }
 
         protected @NonNull boolean isAdjustmentAllowedForPackage(@Adjustment.Keys String key,
