@@ -29,12 +29,14 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInte
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.WallpaperFocalAreaInteractor
 import com.android.systemui.keyguard.ui.binder.KeyguardBlueprintViewBinder
+import com.android.systemui.keyguard.ui.binder.KeyguardJankBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardRootViewBinder
 import com.android.systemui.keyguard.ui.binder.LightRevealScrimViewBinder
 import com.android.systemui.keyguard.ui.view.KeyguardIndicationArea
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardJankViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel
@@ -65,6 +67,7 @@ class KeyguardViewConfigurator
 constructor(
     private val keyguardRootView: KeyguardRootView,
     private val keyguardRootViewModel: KeyguardRootViewModel,
+    private val keyguardJankViewModel: KeyguardJankViewModel,
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
     private val chipbarCoordinator: ChipbarCoordinator,
@@ -93,9 +96,11 @@ constructor(
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
+    private var jankHandle: DisposableHandle? = null
 
     override fun start() {
         bindKeyguardRootView()
+        bindJankViewModel()
         initializeViews()
 
         if (lightRevealMigration()) {
@@ -145,15 +150,30 @@ constructor(
                 clockInteractor,
                 wallpaperFocalAreaInteractor,
                 keyguardClockViewModel,
-                interactionJankMonitor,
                 deviceEntryHapticsInteractor,
                 vibratorHelper,
                 falsingManager,
-                keyguardViewMediator,
                 statusBarKeyguardViewManager,
                 mainDispatcher,
                 msdlPlayer,
                 blueprintLog,
+            )
+    }
+
+    private fun bindJankViewModel() {
+        if (SceneContainerFlag.isEnabled) {
+            return
+        }
+
+        jankHandle?.dispose()
+        jankHandle =
+            KeyguardJankBinder.bind(
+                keyguardRootView,
+                keyguardJankViewModel,
+                interactionJankMonitor,
+                clockInteractor,
+                keyguardViewMediator,
+                mainDispatcher,
             )
     }
 

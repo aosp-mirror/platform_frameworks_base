@@ -375,7 +375,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         SystemClock systemClock = new FakeSystemClock();
         mStatusBarStateController = new StatusBarStateControllerImpl(
                 mUiEventLogger,
-                () -> mKosmos.getInteractionJankMonitor(),
                 mJavaAdapter,
                 () -> mKeyguardInteractor,
                 () -> mKeyguardTransitionInteractor,
@@ -456,7 +455,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                         mock(HeadsUpManager.class),
                         new StatusBarStateControllerImpl(
                                 new UiEventLoggerFake(),
-                                () -> mKosmos.getInteractionJankMonitor(),
                                 mJavaAdapter,
                                 () -> mKeyguardInteractor,
                                 () -> mKeyguardTransitionInteractor,
