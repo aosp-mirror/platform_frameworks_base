@@ -15,12 +15,6 @@
  */
 package com.android.keyguard;
 
-import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_BACKGROUND;
-import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_BACKGROUND_PRESSED;
-import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_BUTTON;
-import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_KEY;
-import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_PRESSED;
-
 import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
@@ -35,7 +29,9 @@ import android.widget.TextView;
 
 import androidx.annotation.StyleRes;
 
+import com.android.systemui.Flags;
 import com.android.systemui.bouncer.shared.constants.PinBouncerConstants.Animation;
+import com.android.systemui.bouncer.shared.constants.PinBouncerConstants.Color;
 
 /**
  * Provides background color and radius animations for key pad buttons.
@@ -117,21 +113,23 @@ class NumPadAnimator {
     void reloadColors(Context context) {
         boolean isNumPadKey = mImageButton == null;
 
-        int[] customAttrs = {android.R.attr.colorControlNormal};
-        ContextThemeWrapper ctw = new ContextThemeWrapper(context, mStyle);
-        @SuppressLint("ResourceType") TypedArray a = ctw.obtainStyledAttributes(customAttrs);
+        if (!Flags.bouncerUiRevamp2()) {
+            int[] customAttrs = {android.R.attr.colorControlNormal};
+            ContextThemeWrapper ctw = new ContextThemeWrapper(context, mStyle);
+            @SuppressLint("ResourceType") TypedArray a = ctw.obtainStyledAttributes(customAttrs);
 
-        mNormalBackgroundColor = a.getColor(0, context.getColor(NUM_PAD_BACKGROUND));
+            mNormalBackgroundColor = a.getColor(0, context.getColor(Color.digitBg));
 
-        a.recycle();
+            a.recycle();
+        } else {
+            mNormalBackgroundColor = context.getColor(isNumPadKey ? Color.digitBg : Color.actionBg);
+        }
 
-        mPressedBackgroundColor = context.getColor(NUM_PAD_BACKGROUND_PRESSED);
-        mTextColorPressed = context.getColor(NUM_PAD_PRESSED);
+        mPressedBackgroundColor = context.getColor(Color.bgPressed);
+        mTextColorPressed = context.getColor(Color.digitPressed);
 
         mBackground.setColor(mNormalBackgroundColor);
-        mTextColorPrimary = isNumPadKey
-                ? context.getColor(NUM_PAD_KEY)
-                : context.getColor(NUM_PAD_BUTTON);
+        mTextColorPrimary = context.getColor(isNumPadKey ? Color.digit : Color.action);
         createAnimators();
     }
 

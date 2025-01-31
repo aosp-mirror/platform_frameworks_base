@@ -15,9 +15,6 @@
  */
 package com.android.keyguard;
 
-import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_BUTTON;
-import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_KEY;
-
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -30,6 +27,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.Nullable;
 
+import com.android.systemui.Flags;
+import com.android.systemui.bouncer.shared.constants.PinBouncerConstants.Color;
 import com.android.systemui.res.R;
 
 /**
@@ -99,7 +98,7 @@ public class NumPadButton extends AlphaOptimizedImageButton implements NumPadAni
     public void reloadColors() {
         if (mAnimator != null) mAnimator.reloadColors(getContext());
 
-        int textColorResId = mIsTransparentMode ? NUM_PAD_KEY : NUM_PAD_BUTTON;
+        int textColorResId = mIsTransparentMode ? Color.actionWithAutoConfirm : Color.action;
         int imageColor = getContext().getColor(textColorResId);
         ((VectorDrawable) getDrawable()).setTintList(ColorStateList.valueOf(imageColor));
     }
@@ -126,7 +125,11 @@ public class NumPadButton extends AlphaOptimizedImageButton implements NumPadAni
         if (isTransparentMode) {
             setBackgroundColor(getResources().getColor(android.R.color.transparent));
         } else {
-            setBackground(getContext().getDrawable(R.drawable.num_pad_key_background));
+            Drawable bgDrawable = getContext().getDrawable(R.drawable.num_pad_key_background);
+            if (Flags.bouncerUiRevamp2() && bgDrawable != null) {
+                bgDrawable.setTint(Color.actionBg);
+            }
+            setBackground(bgDrawable);
         }
         setupAnimator();
         reloadColors();

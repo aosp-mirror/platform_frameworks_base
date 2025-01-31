@@ -19,6 +19,11 @@ package com.android.systemui.bouncer.shared.constants
 import com.android.app.animation.Interpolators
 import com.android.internal.R.color as colors
 import com.android.systemui.Flags
+import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_BACKGROUND
+import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_BACKGROUND_PRESSED
+import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_BUTTON
+import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_KEY
+import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_PRESSED
 
 object KeyguardBouncerConstants {
     /**
@@ -80,6 +85,18 @@ object PinBouncerConstants {
     object Color {
         @JvmField val hintDot = colors.materialColorOnSurfaceVariant
         @JvmField val shape = colors.materialColorPrimary
+        @JvmField val digit = c(old = NUM_PAD_KEY, new = colors.materialColorOnSurface)
+        @JvmField
+        val digitPressed = c(old = NUM_PAD_PRESSED, new = colors.materialColorOnPrimaryContainer)
+        @JvmField
+        val digitBg = c(old = NUM_PAD_BACKGROUND, colors.materialColorSurfaceContainerHigh)
+        @JvmField
+        val bgPressed = c(old = NUM_PAD_BACKGROUND_PRESSED, colors.materialColorPrimaryContainer)
+        @JvmField
+        val actionWithAutoConfirm = c(old = NUM_PAD_KEY, new = colors.materialColorOnSurface)
+        @JvmField val action = c(old = NUM_PAD_BUTTON, new = colors.materialColorOnSecondary)
+        @JvmField
+        val actionBg = c(old = colors.materialColorSecondaryFixedDim, colors.materialColorSecondary)
     }
 
     object Animation {
