@@ -121,6 +121,24 @@ public class UiModeManager {
     }
 
     /**
+     * Listener for the force invert state. To listen for changes to
+     * the force invert state on the device, implement this interface and
+     * register it with the system by calling {@link #addForceInvertStateChangeListener}.
+     *
+     * @hide
+     */
+    public interface ForceInvertStateChangeListener {
+
+        /**
+         * Called when the force invert state changes.
+         *
+         * @param forceInvertState The force invert state in {@link #getForceInvertState}
+         * @hide
+         */
+        void onForceInvertStateChanged(@ForceInvertType int forceInvertState);
+    }
+
+    /**
      * Broadcast sent when the device's UI has switched to car mode, either
      * by being placed in a car dock or explicit action of the user.  After
      * sending the broadcast, the system will start the intent
@@ -374,6 +392,36 @@ public class UiModeManager {
     @SystemApi
     public static final int MODE_NIGHT_CUSTOM_TYPE_BEDTIME = 1;
 
+    /** @hide */
+    @IntDef(prefix = {"Force_Invert_Type_"}, value = {
+            FORCE_INVERT_TYPE_OFF,
+            FORCE_INVERT_TYPE_DARK,
+            FORCE_INVERT_TYPE_LIGHT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ForceInvertType {}
+
+    /**
+     * Constant for {@link #getForceInvertState()}: Do not force invert.
+     *
+     * @hide
+     */
+    public static final int FORCE_INVERT_TYPE_OFF = 0;
+
+    /**
+     * Constant for {@link #getForceInvertState()}: Force apps to be dark.
+     *
+     * @hide
+     */
+    public static final int FORCE_INVERT_TYPE_DARK = 1;
+
+    /**
+     * Constant for {@link #getForceInvertState()}: Force apps to be light.
+     *
+     * @hide
+     */
+    public static final int FORCE_INVERT_TYPE_LIGHT = 2;
+
     private static Globals sGlobals;
 
     /**
@@ -405,6 +453,8 @@ public class UiModeManager {
         private final IUiModeManager mService;
         private final Object mGlobalsLock = new Object();
 
+        @ForceInvertType
+        private int mForceInvertState = FORCE_INVERT_TYPE_OFF;
         private float mContrast = ContrastUtils.CONTRAST_DEFAULT_VALUE;
 
         /**
@@ -414,14 +464,61 @@ public class UiModeManager {
         private final ArrayMap<ContrastChangeListener, Executor>
                 mContrastChangeListeners = new ArrayMap<>();
 
+        private final ArrayMap<ForceInvertStateChangeListener, Executor>
+                mForceInvertStateChangeListeners = new ArrayMap<>();
+
         Globals(IUiModeManager service) {
             mService = service;
             try {
                 mService.addCallback(this);
                 mContrast = mService.getContrast();
+                mForceInvertState = mService.getForceInvertState();
             } catch (RemoteException e) {
                 Log.e(TAG, "Setup failed: UiModeManagerService is dead", e);
             }
+        }
+
+        @ForceInvertType
+        private int getForceInvertState() {
+            synchronized (mGlobalsLock) {
+                return mForceInvertState;
+            }
+        }
+
+        private void addForceInvertStateChangeListener(ForceInvertStateChangeListener listener,
+                Executor executor) {
+            synchronized (mGlobalsLock) {
+                mForceInvertStateChangeListeners.put(listener, executor);
+            }
+        }
+
+        private void removeForceInvertStateChangeListener(ForceInvertStateChangeListener listener) {
+            synchronized (mGlobalsLock) {
+                mForceInvertStateChangeListeners.remove(listener);
+            }
+        }
+
+        @Override
+        public void notifyForceInvertStateChanged(@ForceInvertType int forceInvertState) {
+            final Map<ForceInvertStateChangeListener, Executor> listeners = new ArrayMap<>();
+            synchronized (mGlobalsLock) {
+                // if value changed in the settings, update the cached value and notify listeners
+                if (mForceInvertState == forceInvertState) {
+                    return;
+                }
+
+                mForceInvertState = forceInvertState;
+                listeners.putAll(mForceInvertStateChangeListeners);
+            }
+
+            listeners.forEach((listener, executor) -> {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> listener.onForceInvertStateChanged(forceInvertState));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            });
         }
 
         private float getContrast() {
@@ -1452,5 +1549,45 @@ public class UiModeManager {
     public void removeContrastChangeListener(@NonNull ContrastChangeListener listener) {
         Objects.requireNonNull(listener);
         sGlobals.removeContrastChangeListener(listener);
+    }
+
+    /**
+     * Returns the force invert state for the user.
+     *
+     * @hide
+     */
+    @ForceInvertType
+    public int getForceInvertState() {
+        return sGlobals.getForceInvertState();
+    }
+
+    /**
+     * Registers a {@link ForceInvertStateChangeListener} for the current user.
+     *
+     * @param executor The executor on which the listener should be called back.
+     * @param listener The listener.
+     *
+     * @hide
+     */
+    public void addForceInvertStateChangeListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull ForceInvertStateChangeListener listener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(listener);
+        sGlobals.addForceInvertStateChangeListener(listener, executor);
+    }
+
+    /**
+     * Unregisters a {@link ForceInvertStateChangeListener} for the current user.
+     * If the listener was not registered, does nothing and returns.
+     *
+     * @param listener The listener to unregister.
+     *
+     * @hide
+     */
+    public void removeForceInvertStateChangeListener(
+            @NonNull ForceInvertStateChangeListener listener) {
+        Objects.requireNonNull(listener);
+        sGlobals.removeForceInvertStateChangeListener(listener);
     }
 }
