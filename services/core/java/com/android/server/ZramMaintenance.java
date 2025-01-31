@@ -73,7 +73,7 @@ public class ZramMaintenance extends JobService {
         if (binder != null) {
             IMmd mmd = IMmd.Stub.asInterface(binder);
             try {
-                mmd.doZramMaintenance();
+                mmd.doZramMaintenanceAsync();
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to doZramMaintenance", e);
             }
