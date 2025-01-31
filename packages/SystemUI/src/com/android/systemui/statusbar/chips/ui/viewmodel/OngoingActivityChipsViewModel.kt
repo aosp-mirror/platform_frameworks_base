@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.chips.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.statusbar.chips.StatusBarChipLogTags.pad
@@ -50,7 +50,7 @@ import kotlinx.coroutines.flow.stateIn
 class OngoingActivityChipsViewModel
 @Inject
 constructor(
-    @Application scope: CoroutineScope,
+    @Background scope: CoroutineScope,
     screenRecordChipViewModel: ScreenRecordChipViewModel,
     shareToAppChipViewModel: ShareToAppChipViewModel,
     castToOtherDeviceChipViewModel: CastToOtherDeviceChipViewModel,
