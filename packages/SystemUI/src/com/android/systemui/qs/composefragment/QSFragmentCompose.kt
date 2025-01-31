@@ -573,8 +573,7 @@ constructor(
             onDispose { qqsVisible.value = false }
         }
         val squishiness by
-            viewModel.containerViewModel.quickQuickSettingsViewModel.squishinessViewModel
-                .squishiness
+            viewModel.quickQuickSettingsViewModel.squishinessViewModel.squishiness
                 .collectAsStateWithLifecycle()
 
         Column(modifier = modifier.sysuiResTag(ResIdTags.quickQsPanel)) {
@@ -607,9 +606,7 @@ constructor(
             ) {
                 val Tiles =
                     @Composable {
-                        QuickQuickSettings(
-                            viewModel = viewModel.containerViewModel.quickQuickSettingsViewModel
-                        )
+                        QuickQuickSettings(viewModel = viewModel.quickQuickSettingsViewModel)
                     }
                 val Media =
                     @Composable {

@@ -33,6 +33,7 @@ import com.android.systemui.qs.footerActionsViewModelFactory
 import com.android.systemui.qs.panels.domain.interactor.tileSquishinessInteractor
 import com.android.systemui.qs.panels.ui.viewmodel.inFirstPageViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.mediaInRowInLandscapeViewModelFactory
+import com.android.systemui.qs.panels.ui.viewmodel.quickQuickSettingsViewModelFactory
 import com.android.systemui.qs.ui.viewmodel.quickSettingsContainerViewModelFactory
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.largeScreenHeaderHelper
@@ -48,6 +49,7 @@ val Kosmos.qsFragmentComposeViewModelFactory by
             ): QSFragmentComposeViewModel {
                 return QSFragmentComposeViewModel(
                     quickSettingsContainerViewModelFactory,
+                    quickQuickSettingsViewModelFactory,
                     mainResources,
                     footerActionsViewModelFactory,
                     footerActionsController,
