@@ -5165,7 +5165,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /**
      * Creates a LayerCaptureArgs object to represent the entire DisplayContent
      */
-    LayerCaptureArgs getLayerCaptureArgs(Set<Integer> windowTypesToExclude) {
+    LayerCaptureArgs getLayerCaptureArgs(@Nullable ToBooleanFunction<WindowState> predicate) {
         if (!mWmService.mPolicy.isScreenOn()) {
             if (DEBUG_SCREENSHOT) {
                 Slog.i(TAG_WM, "Attempted to take screenshot while display was off.");
@@ -5178,17 +5178,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         LayerCaptureArgs.Builder builder = new LayerCaptureArgs.Builder(getSurfaceControl())
                 .setSourceCrop(mTmpRect);
 
-        if (!windowTypesToExclude.isEmpty()) {
-            ArrayList<SurfaceControl> surfaceControls = new ArrayList<>();
+        if (predicate != null) {
+            ArrayList<SurfaceControl> excludeLayers = new ArrayList<>();
             forAllWindows(
                     window -> {
-                        if (windowTypesToExclude.contains(window.getWindowType())) {
-                            surfaceControls.add(window.mSurfaceControl);
+                        if (!predicate.apply(window)) {
+                            excludeLayers.add(window.mSurfaceControl);
                         }
-                    }, true
-            );
-            if (!surfaceControls.isEmpty()) {
-                builder.setExcludeLayers(surfaceControls.toArray(new SurfaceControl[0]));
+                    }, true);
+            if (!excludeLayers.isEmpty()) {
+                builder.setExcludeLayers(excludeLayers.toArray(new SurfaceControl[0]));
             }
         }
         return builder.build();

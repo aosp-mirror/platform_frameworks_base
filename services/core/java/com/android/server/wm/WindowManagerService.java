@@ -325,6 +325,7 @@ import android.window.WindowContainerToken;
 import android.window.WindowContextInfo;
 
 import com.android.internal.R;
+import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
@@ -4159,7 +4160,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Nullable
-    private ScreenshotHardwareBuffer takeAssistScreenshot(Set<Integer> windowTypesToExclude) {
+    private ScreenshotHardwareBuffer takeAssistScreenshot(
+            @Nullable ToBooleanFunction<WindowState> predicate) {
         if (!checkCallingPermission(READ_FRAME_BUFFER, "requestAssistScreenshot()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
@@ -4174,7 +4176,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 captureArgs = null;
             } else {
-                captureArgs = displayContent.getLayerCaptureArgs(windowTypesToExclude);
+                captureArgs = displayContent.getLayerCaptureArgs(predicate);
             }
         }
 
@@ -4204,8 +4206,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     @Override
     public boolean requestAssistScreenshot(final IAssistDataReceiver receiver) {
-        final ScreenshotHardwareBuffer shb =
-                takeAssistScreenshot(/* windowTypesToExclude= */ Set.of());
+        final ScreenshotHardwareBuffer shb = takeAssistScreenshot(/* predicate= */ null);
         final Bitmap bm = shb != null ? shb.asBitmap() : null;
         FgThread.getHandler().post(() -> {
             try {
@@ -8618,9 +8619,27 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public ScreenshotHardwareBuffer takeAssistScreenshot(Set<Integer> windowTypesToExclude) {
+        public ScreenshotHardwareBuffer takeAssistScreenshot() {
             // WMS.takeAssistScreenshot takes care of the locking.
-            return WindowManagerService.this.takeAssistScreenshot(windowTypesToExclude);
+            return WindowManagerService.this.takeAssistScreenshot(/* predicate */ null);
+        }
+
+        @Override
+        public ScreenshotHardwareBuffer takeContextualSearchScreenshot(int uid) {
+            // WMS.takeAssistScreenshot takes care of the locking.
+            return WindowManagerService.this.takeAssistScreenshot(win -> {
+                switch (win.getWindowType()) {
+                    case LayoutParams.TYPE_STATUS_BAR:
+                    case LayoutParams.TYPE_NAVIGATION_BAR:
+                    case LayoutParams.TYPE_NAVIGATION_BAR_PANEL:
+                    case LayoutParams.TYPE_POINTER:
+                        return false;
+                    case LayoutParams.TYPE_APPLICATION_OVERLAY:
+                        return uid != win.getOwningUid();
+                    default:
+                        return true;
+                }
+            });
         }
     }
 
