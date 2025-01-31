@@ -19,11 +19,11 @@ package com.android.systemui.statusbar.notification.promoted.shared.model
 import android.annotation.DrawableRes
 import android.app.Notification
 import android.app.Notification.FLAG_PROMOTED_ONGOING
-import android.graphics.drawable.Icon
 import androidx.annotation.ColorInt
 import com.android.internal.widget.NotificationProgressModel
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUi
+import com.android.systemui.statusbar.notification.row.shared.ImageModel
 
 /**
  * The content needed to render a promoted notification to surfaces besides the notification stack,
@@ -37,7 +37,7 @@ data class PromotedNotificationContentModel(
      * True if this notification was automatically promoted - see [AutomaticPromotionCoordinator].
      */
     val wasPromotedAutomatically: Boolean,
-    val skeletonSmallIcon: Icon?, // TODO(b/377568176): Make into an IconModel.
+    val smallIcon: ImageModel?,
     val appName: CharSequence?,
     val subText: CharSequence?,
     val shortCriticalText: String?,
@@ -50,15 +50,15 @@ data class PromotedNotificationContentModel(
     @DrawableRes val profileBadgeResId: Int?,
     val title: CharSequence?,
     val text: CharSequence?,
-    val skeletonLargeIcon: Icon?, // TODO(b/377568176): Make into an IconModel.
+    val skeletonLargeIcon: ImageModel?,
     val oldProgress: OldProgress?,
     val colors: Colors,
     val style: Style,
 
     // for CallStyle:
-    val personIcon: Icon?, // TODO(b/377568176): Make into an IconModel.
+    val personIcon: ImageModel?,
     val personName: CharSequence?,
-    val verificationIcon: Icon?, // TODO(b/377568176): Make into an IconModel.
+    val verificationIcon: ImageModel?,
     val verificationText: CharSequence?,
 
     // for ProgressStyle:
@@ -66,7 +66,7 @@ data class PromotedNotificationContentModel(
 ) {
     class Builder(val key: String) {
         var wasPromotedAutomatically: Boolean = false
-        var skeletonSmallIcon: Icon? = null
+        var smallIcon: ImageModel? = null
         var appName: CharSequence? = null
         var subText: CharSequence? = null
         var time: When? = null
@@ -75,15 +75,15 @@ data class PromotedNotificationContentModel(
         @DrawableRes var profileBadgeResId: Int? = null
         var title: CharSequence? = null
         var text: CharSequence? = null
-        var skeletonLargeIcon: Icon? = null
+        var skeletonLargeIcon: ImageModel? = null
         var oldProgress: OldProgress? = null
         var style: Style = Style.Ineligible
         var colors: Colors = Colors(backgroundColor = 0, primaryTextColor = 0)
 
         // for CallStyle:
-        var personIcon: Icon? = null
+        var personIcon: ImageModel? = null
         var personName: CharSequence? = null
-        var verificationIcon: Icon? = null
+        var verificationIcon: ImageModel? = null
         var verificationText: CharSequence? = null
 
         // for ProgressStyle:
@@ -93,7 +93,7 @@ data class PromotedNotificationContentModel(
             PromotedNotificationContentModel(
                 identity = Identity(key, style),
                 wasPromotedAutomatically = wasPromotedAutomatically,
-                skeletonSmallIcon = skeletonSmallIcon,
+                smallIcon = smallIcon,
                 appName = appName,
                 subText = subText,
                 shortCriticalText = shortCriticalText,

@@ -171,6 +171,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     private boolean mIsPromotedOngoing = false;
 
+    @Nullable
+    public ImageModelIndex mImageModelIndex = null;
+
     /**
      * Listener for when {@link ExpandableNotificationRow} is laid out.
      */

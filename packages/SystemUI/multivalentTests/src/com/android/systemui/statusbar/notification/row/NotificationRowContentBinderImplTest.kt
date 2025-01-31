@@ -203,6 +203,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
         val result =
             NotificationRowContentBinderImpl.InflationProgress(
                 packageContext = mContext,
+                rowImageInflater = RowImageInflater.newInstance(null),
                 remoteViews = NewRemoteViews(),
                 contentModel = NotificationContentModel(headsUpStatusBarModel),
                 promotedContent = null,
