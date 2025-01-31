@@ -111,7 +111,9 @@ import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.Adjustment.KEY_SUMMARIZATION;
 import static android.service.notification.Adjustment.KEY_TYPE;
 import static android.service.notification.Adjustment.TYPE_CONTENT_RECOMMENDATION;
+import static android.service.notification.Adjustment.TYPE_NEWS;
 import static android.service.notification.Adjustment.TYPE_PROMOTION;
+import static android.service.notification.Adjustment.TYPE_SOCIAL_MEDIA;
 import static android.service.notification.Flags.FLAG_NOTIFICATION_CONVERSATION_CHANNEL_MANAGEMENT;
 import static android.service.notification.Flags.callstyleCallbackApi;
 import static android.service.notification.Flags.notificationClassification;
@@ -492,7 +494,10 @@ public class NotificationManagerService extends SystemService {
     };
 
     static final Integer[] DEFAULT_ALLOWED_ADJUSTMENT_KEY_TYPES = new Integer[] {
-            TYPE_PROMOTION
+            TYPE_PROMOTION,
+            TYPE_NEWS,
+            TYPE_CONTENT_RECOMMENDATION,
+            TYPE_SOCIAL_MEDIA
     };
 
     static final String[] NON_BLOCKABLE_DEFAULT_ROLES = new String[] {
@@ -4522,7 +4527,7 @@ public class NotificationManagerService extends SystemService {
                     if (key == null) {
                         return;
                     }
-                    mAssistants.setAdjustmentTypeSupportedState(info,  key, supported);
+                    mAssistants.setAdjustmentTypeSupportedState(info.userid,  key, supported);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -7023,7 +7028,7 @@ public class NotificationManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationLock) {
-                    mAssistants.checkServiceTokenLocked(token);
+                    ManagedServiceInfo info = mAssistants.checkServiceTokenLocked(token);
                     int N = mEnqueuedNotifications.size();
                     for (int i = 0; i < N; i++) {
                         final NotificationRecord r = mEnqueuedNotifications.get(i);
@@ -7369,6 +7374,10 @@ public class NotificationManagerService extends SystemService {
                     mAssistants.setPackageOrComponentEnabled(assistant.flattenToString(),
                             userId, true, granted, userSet);
 
+                    if (android.service.notification.Flags.notificationClassification()) {
+                        mAssistants.setNasUnsupportedDefaults(userId);
+                    }
+
                     getContext().sendBroadcastAsUser(
                             new Intent(ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
                                     .setPackage(assistant.getPackageName())
@@ -7400,7 +7409,8 @@ public class NotificationManagerService extends SystemService {
                     toRemove.add(potentialKey);
                 }
                 if (notificationClassification() && potentialKey.equals(KEY_TYPE)) {
-                    mAssistants.setNasUnsupportedDefaults(r.getSbn().getNormalizedUserId());
+                    mAssistants.setAdjustmentTypeSupportedState(
+                            r.getSbn().getNormalizedUserId(), potentialKey, true);
                     if (!mAssistants.isAdjustmentKeyTypeAllowed(adjustments.getInt(KEY_TYPE))) {
                         toRemove.add(potentialKey);
                     } else if (notificationClassificationUi()
@@ -7411,6 +7421,8 @@ public class NotificationManagerService extends SystemService {
                 }
                 if ((nmSummarization() || nmSummarizationUi())
                         && potentialKey.equals(KEY_SUMMARIZATION)) {
+                    mAssistants.setAdjustmentTypeSupportedState(
+                            r.getSbn().getNormalizedUserId(), potentialKey, true);
                     if (!mAssistants.isAdjustmentAllowedForPackage(KEY_SUMMARIZATION,
                             r.getSbn().getPackageName())) {
                         toRemove.add(potentialKey);
@@ -12068,8 +12080,8 @@ public class NotificationManagerService extends SystemService {
         private static final String TAG_DENIED_KEY = "adjustment";
         private static final String ATT_DENIED_KEY = "key";
         private static final String ATT_DENIED_KEY_APPS = "denied_apps";
-        private static final String TAG_ENABLED_TYPES = "enabled_key_types";
-        private static final String ATT_NAS_UNSUPPORTED = "nas_unsupported_adjustments";
+        private static final String TAG_ENABLED_TYPES = "enabled_classification_types";
+        private static final String ATT_NAS_UNSUPPORTED = "unsupported_adjustments";
 
         private final Object mLock = new Object();
 
@@ -12681,10 +12693,6 @@ public class NotificationManagerService extends SystemService {
                     setNotificationAssistantAccessGrantedForUserInternal(
                             currentComponent, userId, false, userSet);
                 }
-            } else {
-                if (android.service.notification.Flags.notificationClassification()) {
-                    setNasUnsupportedDefaults(userId);
-                }
             }
             super.setPackageOrComponentEnabled(pkgOrComponent, userId, isPrimary, enabled, userSet);
         }
@@ -12717,36 +12725,37 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
         @GuardedBy("mNotificationLock")
-        public void setAdjustmentTypeSupportedState(ManagedServiceInfo info,
+        public void setAdjustmentTypeSupportedState(@UserIdInt int userId,
                 @Adjustment.Keys String key, boolean supported) {
-            if (!android.service.notification.Flags.notificationClassification()) {
+            if (!(android.service.notification.Flags.notificationClassification()
+                    || android.app.Flags.nmSummarizationUi()
+                    || android.app.Flags.nmSummarization())) {
                 return;
             }
-            setNasUnsupportedDefaults(info.userid);
-            HashSet<String> disabledAdjustments = mNasUnsupported.get(info.userid);
+            HashSet<String> disabledAdjustments =
+                    mNasUnsupported.getOrDefault(userId, new HashSet<>());
             if (supported) {
                 disabledAdjustments.remove(key);
             } else {
                 disabledAdjustments.add(key);
             }
-            mNasUnsupported.put(info.userid, disabledAdjustments);
+            mNasUnsupported.put(userId, disabledAdjustments);
             handleSavePolicyFile();
         }
 
-        @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
         @GuardedBy("mNotificationLock")
         public @NonNull Set<String> getUnsupportedAdjustments(@UserIdInt int userId) {
-            if (!android.service.notification.Flags.notificationClassification()) {
+            if (!(android.service.notification.Flags.notificationClassification()
+                    || android.app.Flags.nmSummarizationUi()
+                    || android.app.Flags.nmSummarization())) {
                 return new HashSet<>();
             }
-            setNasUnsupportedDefaults(userId);
-            return mNasUnsupported.get(userId);
+            return mNasUnsupported.getOrDefault(userId, new HashSet<>());
         }
 
         private void setNasUnsupportedDefaults(@UserIdInt int userId) {
-            if (mNasUnsupported != null && !mNasUnsupported.containsKey(userId)) {
+            if (mNasUnsupported != null) {
                 mNasUnsupported.put(userId, new HashSet(List.of(mDefaultUnsupportedAdjustments)));
                 handleSavePolicyFile();
             }
@@ -12759,10 +12768,8 @@ public class NotificationManagerService extends SystemService {
                 return;
             }
             synchronized (mLock) {
-                if (mNasUnsupported.containsKey(approvedUserId)) {
-                    out.attribute(null, ATT_NAS_UNSUPPORTED,
-                            TextUtils.join(",", mNasUnsupported.get(approvedUserId)));
-                }
+                out.attribute(null, ATT_NAS_UNSUPPORTED, TextUtils.join(",",
+                        mNasUnsupported.getOrDefault(approvedUserId, new HashSet<>())));
             }
         }
 
@@ -12775,8 +12782,15 @@ public class NotificationManagerService extends SystemService {
             if (ManagedServices.TAG_MANAGED_SERVICES.equals(tag)) {
                 final String types = XmlUtils.readStringAttribute(parser, ATT_NAS_UNSUPPORTED);
                 synchronized (mLock) {
-                    if (!TextUtils.isEmpty(types)) {
-                        mNasUnsupported.put(approvedUserId, new HashSet(List.of(types.split(","))));
+                    if (types == null) {
+                        setNasUnsupportedDefaults(approvedUserId);
+                    } else {
+                        if (!TextUtils.isEmpty(types)) {
+                            mNasUnsupported.put(approvedUserId,
+                                    new HashSet(List.of(types.split(","))));
+                        } else {
+                            mNasUnsupported.put(approvedUserId, new HashSet());
+                        }
                     }
                 }
             }
