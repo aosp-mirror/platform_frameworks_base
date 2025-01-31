@@ -35,6 +35,7 @@ import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -45,6 +46,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** ShadeInteractor implementation for Scene Container. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class ShadeInteractorSceneContainerImpl
 @Inject
@@ -137,20 +139,18 @@ constructor(
 
     override fun expandNotificationsShade(loggingReason: String, transitionKey: TransitionKey?) {
         if (shadeModeInteractor.isDualShade) {
-            if (Overlays.QuickSettingsShade in sceneInteractor.currentOverlays.value) {
-                sceneInteractor.replaceOverlay(
-                    from = Overlays.QuickSettingsShade,
-                    to = Overlays.NotificationsShade,
-                    loggingReason = loggingReason,
-                    transitionKey = transitionKey,
-                )
-            } else {
-                sceneInteractor.showOverlay(
-                    overlay = Overlays.NotificationsShade,
-                    loggingReason = loggingReason,
-                    transitionKey = transitionKey,
-                )
-            }
+            // Collapse the quick settings shade if it's expanded (no-op if it isn't).
+            sceneInteractor.hideOverlay(
+                overlay = Overlays.QuickSettingsShade,
+                loggingReason = loggingReason,
+                transitionKey = transitionKey,
+            )
+            // Expand the notifications shade.
+            sceneInteractor.showOverlay(
+                overlay = Overlays.NotificationsShade,
+                loggingReason = loggingReason,
+                transitionKey = transitionKey,
+            )
         } else {
             sceneInteractor.changeScene(
                 toScene = Scenes.Shade,
@@ -163,20 +163,18 @@ constructor(
 
     override fun expandQuickSettingsShade(loggingReason: String, transitionKey: TransitionKey?) {
         if (shadeModeInteractor.isDualShade) {
-            if (Overlays.NotificationsShade in sceneInteractor.currentOverlays.value) {
-                sceneInteractor.replaceOverlay(
-                    from = Overlays.NotificationsShade,
-                    to = Overlays.QuickSettingsShade,
-                    loggingReason = loggingReason,
-                    transitionKey = transitionKey,
-                )
-            } else {
-                sceneInteractor.showOverlay(
-                    overlay = Overlays.QuickSettingsShade,
-                    loggingReason = loggingReason,
-                    transitionKey = transitionKey,
-                )
-            }
+            // Collapse the notifications shade if it's expanded (no-op if it isn't).
+            sceneInteractor.hideOverlay(
+                overlay = Overlays.NotificationsShade,
+                loggingReason = loggingReason,
+                transitionKey = transitionKey,
+            )
+            // Expand the quick settings shade.
+            sceneInteractor.showOverlay(
+                overlay = Overlays.QuickSettingsShade,
+                loggingReason = loggingReason,
+                transitionKey = transitionKey,
+            )
         } else {
             val isSplitShade = shadeModeInteractor.isSplitShade
             sceneInteractor.changeScene(
@@ -199,12 +197,12 @@ constructor(
             // TODO(b/356596436): Define instant transition instead of snapToScene().
             sceneInteractor.snapToScene(
                 toScene = SceneFamilies.Home,
-                loggingReason = loggingReason + " (collapseNotificationsShade)",
+                loggingReason = "$loggingReason (collapseNotificationsShade)",
             )
         } else {
             sceneInteractor.changeScene(
                 toScene = SceneFamilies.Home,
-                loggingReason = loggingReason + " (collapseNotificationsShade)",
+                loggingReason = "$loggingReason (collapseNotificationsShade)",
                 transitionKey =
                     transitionKey ?: ToSplitShade.takeIf { shadeModeInteractor.isSplitShade },
             )
@@ -233,12 +231,12 @@ constructor(
             // TODO(b/356596436): Define instant transition instead of snapToScene().
             sceneInteractor.snapToScene(
                 toScene = targetScene,
-                loggingReason = loggingReason + " (collapseQuickSettingsShade)",
+                loggingReason = "$loggingReason (collapseQuickSettingsShade)",
             )
         } else {
             sceneInteractor.changeScene(
                 toScene = targetScene,
-                loggingReason = loggingReason + " (collapseQuickSettingsShade)",
+                loggingReason = "$loggingReason (collapseQuickSettingsShade)",
                 transitionKey = transitionKey ?: ToSplitShade.takeIf { isSplitShade },
             )
         }
