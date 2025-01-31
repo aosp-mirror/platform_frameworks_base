@@ -32,14 +32,17 @@ import com.android.systemui.statusbar.chips.notification.ui.viewmodel.NotifChips
 import com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel.ScreenRecordChipViewModel
 import com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.ShareToAppChipViewModel
 import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
+import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModelLegacy
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -95,6 +98,7 @@ constructor(
     }
 
     /** Model that helps us internally track the various chip states from each of the types. */
+    @Deprecated("Since StatusBarChipsModernization, this isn't used anymore")
     private sealed interface InternalChipModel {
         /**
          * Represents that we've internally decided to show the chip with type [type] with the given
@@ -184,9 +188,10 @@ constructor(
             .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Inactive())
 
     /**
-     * Equivalent to [MultipleOngoingActivityChipsModel] but using the internal models to do some
-     * state tracking before we get the final output.
+     * Equivalent to [MultipleOngoingActivityChipsModelLegacy] but using the internal models to do
+     * some state tracking before we get the final output.
      */
+    @Deprecated("Since StatusBarChipsModernization, this isn't used anymore")
     private data class InternalMultipleOngoingActivityChipsModel(
         val primary: InternalChipModel,
         val secondary: InternalChipModel,
@@ -261,34 +266,99 @@ constructor(
     }
 
     /**
+     * A flow modeling the active and inactive chips as well as which should be shown in the status
+     * bar after accounting for possibly multiple ongoing activities and animation requirements.
+     */
+    val chips: StateFlow<MultipleOngoingActivityChipsModel> =
+        if (StatusBarChipsModernization.isEnabled) {
+            incomingChipBundle
+                .map { bundle -> rankChips(bundle) }
+                .stateIn(scope, SharingStarted.Lazily, MultipleOngoingActivityChipsModel())
+        } else {
+            MutableStateFlow(MultipleOngoingActivityChipsModel()).asStateFlow()
+        }
+
+    /**
      * A flow modeling the primary chip that should be shown in the status bar after accounting for
      * possibly multiple ongoing activities and animation requirements.
      *
      * [com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment] is responsible for
      * actually displaying the chip.
+     *
+     * Deprecated: since StatusBarChipsModernization, use the new [chips] instead.
      */
-    val chips: StateFlow<MultipleOngoingActivityChipsModel> =
-        if (!StatusBarNotifChips.isEnabled) {
+    val chipsLegacy: StateFlow<MultipleOngoingActivityChipsModelLegacy> =
+        if (StatusBarChipsModernization.isEnabled) {
+            MutableStateFlow(MultipleOngoingActivityChipsModelLegacy()).asStateFlow()
+        } else if (!StatusBarNotifChips.isEnabled) {
             // Multiple chips are only allowed with notification chips. If the flag isn't on, use
             // just the primary chip.
             primaryChip
                 .map {
-                    MultipleOngoingActivityChipsModel(
+                    MultipleOngoingActivityChipsModelLegacy(
                         primary = it,
                         secondary = OngoingActivityChipModel.Inactive(),
                     )
                 }
-                .stateIn(scope, SharingStarted.Lazily, MultipleOngoingActivityChipsModel())
+                .stateIn(scope, SharingStarted.Lazily, MultipleOngoingActivityChipsModelLegacy())
         } else {
             internalChips
                 .pairwise(initialValue = DEFAULT_MULTIPLE_INTERNAL_INACTIVE_MODEL)
                 .map { (old, new) ->
                     val correctPrimary = createOutputModel(old.primary, new.primary)
                     val correctSecondary = createOutputModel(old.secondary, new.secondary)
-                    MultipleOngoingActivityChipsModel(correctPrimary, correctSecondary)
+                    MultipleOngoingActivityChipsModelLegacy(correctPrimary, correctSecondary)
                 }
-                .stateIn(scope, SharingStarted.Lazily, MultipleOngoingActivityChipsModel())
+                .stateIn(scope, SharingStarted.Lazily, MultipleOngoingActivityChipsModelLegacy())
         }
+
+    /**
+     * Sort the given chip [bundle] in order of priority, and divide the chips between active,
+     * overflow, and inactive (see [MultipleOngoingActivityChipsModel] for a description of each).
+     */
+    private fun rankChips(bundle: ChipBundle): MultipleOngoingActivityChipsModel {
+        val activeChips = mutableListOf<OngoingActivityChipModel.Active>()
+        val overflowChips = mutableListOf<OngoingActivityChipModel.Active>()
+        val inactiveChips = mutableListOf<OngoingActivityChipModel.Inactive>()
+
+        val sortedChips =
+            mutableListOf(
+                    bundle.screenRecord,
+                    bundle.shareToApp,
+                    bundle.castToOtherDevice,
+                    bundle.call,
+                )
+                .apply { bundle.notifs.forEach { add(it) } }
+
+        var shownSlotsRemaining = MAX_VISIBLE_CHIPS
+        for (chip in sortedChips) {
+            when (chip) {
+                is OngoingActivityChipModel.Active -> {
+                    // Screen recording also activates the media projection APIs, which means that
+                    // whenever the screen recording chip is active, the share-to-app chip would
+                    // also be active. (Screen recording is a special case of share-to-app, where
+                    // the app receiving the share is specifically System UI.)
+                    // We want only the screen-recording-specific chip to be shown in this case. If
+                    // we did have screen recording as the primary chip, we need to suppress the
+                    // share-to-app chip to make sure they don't both show.
+                    // See b/296461748.
+                    val suppressShareToApp =
+                        chip == bundle.shareToApp &&
+                            bundle.screenRecord is OngoingActivityChipModel.Active
+                    if (shownSlotsRemaining > 0 && !suppressShareToApp) {
+                        activeChips.add(chip)
+                        if (!chip.isHidden) shownSlotsRemaining--
+                    } else {
+                        overflowChips.add(chip)
+                    }
+                }
+
+                is OngoingActivityChipModel.Inactive -> inactiveChips.add(chip)
+            }
+        }
+
+        return MultipleOngoingActivityChipsModel(activeChips, overflowChips, inactiveChips)
+    }
 
     /** A data class representing the return result of [pickMostImportantChip]. */
     private data class MostImportantChipResult(
@@ -426,5 +496,8 @@ constructor(
                 primary = DEFAULT_INTERNAL_INACTIVE_MODEL,
                 secondary = DEFAULT_INTERNAL_INACTIVE_MODEL,
             )
+
+        // TODO(b/392886257): Support 3 chips if there's space available.
+        private const val MAX_VISIBLE_CHIPS = 2
     }
 }

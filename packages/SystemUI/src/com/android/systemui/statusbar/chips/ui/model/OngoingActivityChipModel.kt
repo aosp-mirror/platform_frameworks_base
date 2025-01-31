@@ -57,6 +57,13 @@ sealed class OngoingActivityChipModel {
         open val onClickListenerLegacy: View.OnClickListener?,
         /** Data class that determines how clicks on the chip should be handled. */
         open val clickBehavior: ClickBehavior,
+        /**
+         * Whether this chip should be hidden. This can be the case depending on system states (like
+         * which apps are in the foreground and whether there is an ongoing transition.
+         */
+        open val isHidden: Boolean,
+        /** Whether the transition from hidden to shown should be animated. */
+        open val shouldAnimate: Boolean,
     ) : OngoingActivityChipModel() {
 
         /** This chip shows only an icon and nothing else. */
@@ -66,7 +73,18 @@ sealed class OngoingActivityChipModel {
             override val colors: ColorsModel,
             override val onClickListenerLegacy: View.OnClickListener?,
             override val clickBehavior: ClickBehavior,
-        ) : Active(key, icon, colors, onClickListenerLegacy, clickBehavior) {
+            override val isHidden: Boolean = false,
+            override val shouldAnimate: Boolean = true,
+        ) :
+            Active(
+                key,
+                icon,
+                colors,
+                onClickListenerLegacy,
+                clickBehavior,
+                isHidden,
+                shouldAnimate,
+            ) {
             override val logName = "Active.Icon"
         }
 
@@ -87,7 +105,18 @@ sealed class OngoingActivityChipModel {
             val startTimeMs: Long,
             override val onClickListenerLegacy: View.OnClickListener?,
             override val clickBehavior: ClickBehavior,
-        ) : Active(key, icon, colors, onClickListenerLegacy, clickBehavior) {
+            override val isHidden: Boolean = false,
+            override val shouldAnimate: Boolean = true,
+        ) :
+            Active(
+                key,
+                icon,
+                colors,
+                onClickListenerLegacy,
+                clickBehavior,
+                isHidden,
+                shouldAnimate,
+            ) {
             override val logName = "Active.Timer"
         }
 
@@ -103,7 +132,18 @@ sealed class OngoingActivityChipModel {
             val time: Long,
             override val onClickListenerLegacy: View.OnClickListener?,
             override val clickBehavior: ClickBehavior,
-        ) : Active(key, icon, colors, onClickListenerLegacy, clickBehavior) {
+            override val isHidden: Boolean = false,
+            override val shouldAnimate: Boolean = true,
+        ) :
+            Active(
+                key,
+                icon,
+                colors,
+                onClickListenerLegacy,
+                clickBehavior,
+                isHidden,
+                shouldAnimate,
+            ) {
             init {
                 StatusBarNotifChips.assertInNewMode()
             }
@@ -120,6 +160,8 @@ sealed class OngoingActivityChipModel {
             override val colors: ColorsModel,
             /** The number of seconds until an event is started. */
             val secondsUntilStarted: Long,
+            override val isHidden: Boolean = false,
+            override val shouldAnimate: Boolean = true,
         ) :
             Active(
                 key,
@@ -127,6 +169,8 @@ sealed class OngoingActivityChipModel {
                 colors,
                 onClickListenerLegacy = null,
                 clickBehavior = ClickBehavior.None,
+                isHidden,
+                shouldAnimate,
             ) {
             override val logName = "Active.Countdown"
         }
@@ -140,7 +184,18 @@ sealed class OngoingActivityChipModel {
             val text: String,
             override val onClickListenerLegacy: View.OnClickListener? = null,
             override val clickBehavior: ClickBehavior,
-        ) : Active(key, icon, colors, onClickListenerLegacy, clickBehavior) {
+            override val isHidden: Boolean = false,
+            override val shouldAnimate: Boolean = true,
+        ) :
+            Active(
+                key,
+                icon,
+                colors,
+                onClickListenerLegacy,
+                clickBehavior,
+                isHidden,
+                shouldAnimate,
+            ) {
             override val logName = "Active.Text"
         }
     }
