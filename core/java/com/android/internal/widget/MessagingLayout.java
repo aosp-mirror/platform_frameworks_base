@@ -86,6 +86,7 @@ public class MessagingLayout extends FrameLayout
     private CharSequence mConversationTitle;
     private final ArrayList<MessagingLinearLayout.MessagingChild> mToRecycle = new ArrayList<>();
     private boolean mPrecomputedTextEnabled = false;
+    private CharSequence mSummarizedContent;
 
     public MessagingLayout(@NonNull Context context) {
         super(context);
@@ -140,6 +141,16 @@ public class MessagingLayout extends FrameLayout
         mIsCollapsed = isCollapsed;
     }
 
+    /**
+     * setDataAsync needs to do different stuff for the collapsed vs expanded view, so store the
+     * collapsed state early.
+     */
+    @RemotableViewMethod(asyncImpl = "setIsCollapsedAsync")
+    public Runnable setIsCollapsedAsync(boolean isCollapsed) {
+        mIsCollapsed = isCollapsed;
+        return () -> {};
+    }
+
     @RemotableViewMethod
     public void setLargeIcon(Icon largeIcon) {
         // Unused
@@ -182,10 +193,20 @@ public class MessagingLayout extends FrameLayout
         boolean showSpinner =
                 extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
 
+
         final List<MessagingMessage> historicMessagingMessages = createMessages(newHistoricMessages,
                 /* isHistoric= */true, usePrecomputedText);
-        final List<MessagingMessage> newMessagingMessages =
-                createMessages(newMessages, /* isHistoric */false, usePrecomputedText);
+        List<MessagingMessage> newMessagingMessages;
+        mSummarizedContent = extras.getCharSequence(Notification.EXTRA_SUMMARIZED_CONTENT);
+        if (mSummarizedContent != null && mIsCollapsed) {
+            Notification.MessagingStyle.Message summary =
+                    new Notification.MessagingStyle.Message(mSummarizedContent,  0, "");
+            newMessagingMessages = createMessages(List.of(summary), false, usePrecomputedText);
+        } else {
+            newMessagingMessages =
+                    createMessages(newMessages, /* isHistoric= */false, usePrecomputedText);
+        }
+
         // Let's first find our groups!
         List<List<MessagingMessage>> groups = new ArrayList<>();
         List<Person> senders = new ArrayList<>();
@@ -193,8 +214,8 @@ public class MessagingLayout extends FrameLayout
         // Lets first find the groups
         findGroups(historicMessagingMessages, newMessagingMessages, groups, senders);
 
-        return new MessagingData(user, showSpinner,
-                historicMessagingMessages, newMessagingMessages, groups, senders);
+        return new MessagingData(user, showSpinner, historicMessagingMessages, newMessagingMessages,
+                groups, senders, mSummarizedContent);
     }
 
     /**
