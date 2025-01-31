@@ -56,7 +56,6 @@ import com.android.systemui.statusbar.phone.ui.DarkIconManager
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarIconBlockListBinder
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinder
-import com.android.systemui.statusbar.pipeline.shared.ui.binder.StatusBarVisibilityChangeListener
 import com.android.systemui.statusbar.pipeline.shared.ui.model.VisibilityModel
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.HomeStatusBarViewModelFactory
@@ -124,25 +123,6 @@ fun StatusBarRoot(
     eventAnimationInteractor: SystemStatusEventAnimationInteractor,
     onViewCreated: (ViewGroup) -> Unit,
 ) {
-    // None of these methods are used when [StatusBarRootModernization] is on.
-    // This can be deleted once the fragment is gone
-    val nopVisibilityChangeListener =
-        object : StatusBarVisibilityChangeListener {
-            override fun onStatusBarVisibilityMaybeChanged() {}
-
-            override fun onTransitionFromLockscreenToDreamStarted() {}
-
-            override fun onOngoingActivityStatusChanged(
-                hasPrimaryOngoingActivity: Boolean,
-                hasSecondaryOngoingActivity: Boolean,
-                shouldAnimate: Boolean,
-            ) {}
-
-            override fun onIsHomeStatusBarAllowedBySceneChanged(
-                isHomeStatusBarAllowedByScene: Boolean
-            ) {}
-        }
-
     Box(Modifier.fillMaxSize()) {
         // TODO(b/364360986): remove this before rolling the flag forward
         if (StatusBarRootModernization.SHOW_DISAMBIGUATION) {
@@ -282,7 +262,7 @@ fun StatusBarRoot(
                             statusBarViewModel,
                             eventAnimationInteractor::animateStatusBarContentForChipEnter,
                             eventAnimationInteractor::animateStatusBarContentForChipExit,
-                            nopVisibilityChangeListener,
+                            listener = null,
                         )
                     }
                     onViewCreated(phoneStatusBarView)

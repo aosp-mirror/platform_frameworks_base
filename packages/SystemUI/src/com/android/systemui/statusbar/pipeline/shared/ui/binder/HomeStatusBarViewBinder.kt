@@ -67,7 +67,7 @@ interface HomeStatusBarViewBinder {
         viewModel: HomeStatusBarViewModel,
         systemEventChipAnimateIn: ((View) -> Unit)?,
         systemEventChipAnimateOut: ((View) -> Unit)?,
-        listener: StatusBarVisibilityChangeListener,
+        listener: StatusBarVisibilityChangeListener?,
     )
 }
 
@@ -83,7 +83,7 @@ constructor(
         viewModel: HomeStatusBarViewModel,
         systemEventChipAnimateIn: ((View) -> Unit)?,
         systemEventChipAnimateOut: ((View) -> Unit)?,
-        listener: StatusBarVisibilityChangeListener,
+        listener: StatusBarVisibilityChangeListener?,
     ) {
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -95,15 +95,19 @@ constructor(
                     } else {
                         null
                     }
-                launch {
-                    viewModel.isTransitioningFromLockscreenToOccluded.collect {
-                        listener.onStatusBarVisibilityMaybeChanged()
+                listener?.let { listener ->
+                    launch {
+                        viewModel.isTransitioningFromLockscreenToOccluded.collect {
+                            listener.onStatusBarVisibilityMaybeChanged()
+                        }
                     }
                 }
 
-                launch {
-                    viewModel.transitionFromLockscreenToDreamStartedEvent.collect {
-                        listener.onTransitionFromLockscreenToDreamStarted()
+                listener?.let { listener ->
+                    launch {
+                        viewModel.transitionFromLockscreenToDreamStartedEvent.collect {
+                            listener.onTransitionFromLockscreenToDreamStarted()
+                        }
                     }
                 }
 
@@ -155,14 +159,14 @@ constructor(
                             } else {
                                 when (primaryChipModel) {
                                     is OngoingActivityChipModel.Shown ->
-                                        listener.onOngoingActivityStatusChanged(
+                                        listener?.onOngoingActivityStatusChanged(
                                             hasPrimaryOngoingActivity = true,
                                             hasSecondaryOngoingActivity = false,
                                             shouldAnimate = true,
                                         )
 
                                     is OngoingActivityChipModel.Hidden ->
-                                        listener.onOngoingActivityStatusChanged(
+                                        listener?.onOngoingActivityStatusChanged(
                                             hasPrimaryOngoingActivity = false,
                                             hasSecondaryOngoingActivity = false,
                                             shouldAnimate = primaryChipModel.shouldAnimate,
@@ -205,7 +209,7 @@ constructor(
                                     chips.secondary.toVisibilityModel()
                                 )
                             } else {
-                                listener.onOngoingActivityStatusChanged(
+                                listener?.onOngoingActivityStatusChanged(
                                     hasPrimaryOngoingActivity =
                                         chips.primary is OngoingActivityChipModel.Shown,
                                     hasSecondaryOngoingActivity =
@@ -231,9 +235,11 @@ constructor(
                 }
 
                 if (SceneContainerFlag.isEnabled) {
-                    launch {
-                        viewModel.isHomeStatusBarAllowedByScene.collect {
-                            listener.onIsHomeStatusBarAllowedBySceneChanged(it)
+                    listener?.let { listener ->
+                        launch {
+                            viewModel.isHomeStatusBarAllowedByScene.collect {
+                                listener.onIsHomeStatusBarAllowedBySceneChanged(it)
+                            }
                         }
                     }
                 }
