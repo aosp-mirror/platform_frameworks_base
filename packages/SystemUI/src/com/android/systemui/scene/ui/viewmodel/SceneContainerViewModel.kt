@@ -30,6 +30,7 @@ import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.Hydrator
@@ -66,6 +67,7 @@ constructor(
     hapticsViewModelFactory: SceneContainerHapticsViewModel.Factory,
     val lightRevealScrim: LightRevealScrimViewModel,
     val wallpaperViewModel: WallpaperViewModel,
+    keyguardInteractor: KeyguardInteractor,
     @Assisted view: View,
     @Assisted private val motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
 ) : ExclusiveActivatable() {
@@ -94,6 +96,14 @@ constructor(
                 shadeInteractor.shadeMode.map {
                     if (it is ShadeMode.Dual) splitEdgeDetector else DefaultEdgeDetector
                 },
+        )
+
+    /** Amount of color saturation for the Flexi🥃 ribbon. */
+    val ribbonColorSaturation: Float by
+        hydrator.hydratedStateOf(
+            traceName = "ribbonColorSaturation",
+            source = keyguardInteractor.dozeAmount.map { 1 - it },
+            initialValue = 1f,
         )
 
     override suspend fun onActivated(): Nothing {
