@@ -809,7 +809,7 @@ final class KeyGestureController {
                     if (firstDown) {
                         handleKeyGesture(deviceId, new int[]{KeyEvent.KEYCODE_FULLSCREEN},
                                 /* modifierState = */0,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION,
                                 KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId, focusedToken,
                                 /* flags = */0, /* appLaunchData = */null);
                     }

@@ -1111,9 +1111,9 @@ class KeyGestureControllerTests {
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
-                "FULLSCREEN -> Maximizes a task to fit the screen",
+                "FULLSCREEN -> Turns a task into fullscreen",
                 intArrayOf(KeyEvent.KEYCODE_FULLSCREEN),
-                KeyGestureEvent.KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW,
+                KeyGestureEvent.KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION,
                 intArrayOf(KeyEvent.KEYCODE_FULLSCREEN),
                 0,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
