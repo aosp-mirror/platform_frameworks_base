@@ -2182,7 +2182,7 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ही सूचना सायलंट करण्यात आली आहे. फीडबॅक देण्यासाठी टॅप करा."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"हा सूचनेला उच्च रँक करण्यात आले. फीडबॅक देण्यासाठी टॅप करा."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"या सूचनेला कमी रँक करण्यात आले. फीडबॅक देण्यासाठी टॅप करा."</string>
-    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"वर्धित सूचना"</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"वर्धित नोटिफिकेशन"</string>
     <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"सुचवलेल्या कृती आणि उत्तरे आता वर्धित सूचनांद्वारे दिली जातात. Android अ‍ॅडॅप्टिव्ह सूचना यांना आता सपोर्ट नाही."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ओके"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"बंद करा"</string>

@@ -2469,7 +2469,7 @@
     <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Zapnite Vyberať sieť automaticky"</string>
     <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Zapnite v Nastaveniach možnosť Vyberať sieť automaticky, aby telefón mohol nájsť sieť, ktorá spolupracuje so satelitom"</string>
     <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Zapnúť"</string>
-    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Prejsť späť"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Späť"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Nespracovaná…"</string>
     <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"Pomoc cez satelit je teraz k dispozícii"</string>
     <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Tiesňovej linke môžete poslať správu, keď nie je dostupná mobilná sieť ani sieť Wi‑Fi. Správy Google musíte mať nastavené ako predvolený komunikátor."</string>
