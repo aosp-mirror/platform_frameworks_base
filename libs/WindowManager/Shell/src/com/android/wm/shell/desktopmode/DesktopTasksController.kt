@@ -1025,6 +1025,10 @@ class DesktopTasksController(
                 task.displayId,
                 wct,
                 forceToFullscreen = false,
+                // TODO: b/371096166 - Temporary turing home relaunch off to prevent home stealing
+                // display focus. Remove shouldEndUpAtHome = false when home focus handling
+                // with connected display is implemented in wm core.
+                shouldEndUpAtHome = false,
             )
         }
 
