@@ -1636,7 +1636,7 @@ public class UserManagerService extends IUserManager.Stub {
         final int userSize = mUsers.size();
         for (int i = 0; i < userSize; i++) {
             UserInfo profile = mUsers.valueAt(i).info;
-            if (!isProfileOf(user, profile)) {
+            if (!isSameProfileGroup(user, profile)) {
                 continue;
             }
             if (enabledOnly && !profile.isEnabled()) {
@@ -1704,22 +1704,18 @@ public class UserManagerService extends IUserManager.Stub {
         return isSameProfileGroupNoChecks(userId, otherUserId);
     }
 
-    /**
-     * Returns whether users are in the same non-empty profile group.
-     * Currently, false if empty profile group, even if they are the same user, for whatever reason.
-     */
+    /** Returns whether users are in the same profile group. */
     private boolean isSameProfileGroupNoChecks(@UserIdInt int userId, int otherUserId) {
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
-            if (userInfo == null || userInfo.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
+            if (userInfo == null) {
                 return false;
             }
             UserInfo otherUserInfo = getUserInfoLU(otherUserId);
-            if (otherUserInfo == null
-                    || otherUserInfo.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
+            if (otherUserInfo == null) {
                 return false;
             }
-            return userInfo.profileGroupId == otherUserInfo.profileGroupId;
+            return isSameProfileGroup(userInfo, otherUserInfo);
         }
     }
 
@@ -1778,10 +1774,10 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private static boolean isProfileOf(UserInfo user, UserInfo profile) {
-        return user.id == profile.id ||
-                (user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
-                && user.profileGroupId == profile.profileGroupId);
+    private static boolean isSameProfileGroup(@NonNull UserInfo user1, @NonNull UserInfo user2) {
+        return user1.id == user2.id ||
+                (user1.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
+                && user1.profileGroupId == user2.profileGroupId);
     }
 
     private String getAvailabilityIntentAction(boolean enableQuietMode, boolean useManagedActions) {
@@ -8411,21 +8407,27 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * Checks if the given user has a profile associated with it.
-     * @param userId The parent user
-     * @return
+     * Formerly: Checks if the given user has a profile associated with it.
+     * Now: Just throws. Do not use it.
+     * @param userId The parent user (passing in a profile user is not supported)
+     * @deprecated
      */
     boolean hasProfile(@UserIdInt int userId) {
-        synchronized (mUsersLock) {
-            UserInfo userInfo = getUserInfoLU(userId);
-            final int userSize = mUsers.size();
-            for (int i = 0; i < userSize; i++) {
-                UserInfo profile = mUsers.valueAt(i).info;
-                if (userId != profile.id && isProfileOf(userInfo, profile)) {
-                    return true;
+        if (!android.content.pm.Flags.removeCrossUserPermissionHack()) {
+            synchronized (mUsersLock) {
+                UserInfo userInfo = getUserInfoLU(userId);
+                final int userSize = mUsers.size();
+                for (int i = 0; i < userSize; i++) {
+                    UserInfo profile = mUsers.valueAt(i).info;
+                    if (userId != profile.id && isSameProfileGroup(userInfo, profile)) {
+                        return true;
+                    }
                 }
+                return false;
             }
-            return false;
+        } else {
+            // TODO(b/332664521): Remove this method entirely. It is no longer used.
+            throw new UnsupportedOperationException();
         }
     }
 

@@ -353,8 +353,10 @@ public abstract class UserManagerInternal {
             boolean excludePreCreated);
 
     /**
-     * Returns an array of ids for profiles associated with the specified user including the user
-     * itself.
+     * Returns a list of the users that are associated with the specified user, including the user
+     * itself. This includes the user, its profiles, its parent, and its parent's other profiles,
+     * as applicable.
+     *
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * @param userId      id of the user to return profiles for
