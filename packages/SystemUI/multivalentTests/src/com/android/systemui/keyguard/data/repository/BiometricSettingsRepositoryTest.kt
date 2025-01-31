@@ -79,6 +79,7 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.stub
 
@@ -470,6 +471,51 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(faceAuthAllowed).isTrue()
+        }
+
+    @Test
+    @EnableFlags(com.android.settings.flags.Flags.FLAG_BIOMETRICS_ONBOARDING_EDUCATION)
+    fun registerEnabledOnKeyguardCallback_multipleUsers_shouldSendAllUpdates() =
+        testScope.runTest {
+
+            // Simulate call to register callback when in multiple users setup
+            biometricManager.stub {
+                on { registerEnabledOnKeyguardCallback(any()) } doAnswer
+                        { invocation ->
+                            val callback =
+                                invocation.arguments[0] as IBiometricEnabledOnKeyguardCallback
+                            callback.onChanged(true, PRIMARY_USER_ID, TYPE_FACE)
+                            callback.onChanged(true, PRIMARY_USER_ID, TYPE_FINGERPRINT)
+                            callback.onChanged(true, ANOTHER_USER_ID, TYPE_FACE)
+                            callback.onChanged(true, ANOTHER_USER_ID, TYPE_FINGERPRINT)
+                        }
+            }
+            authController.stub {
+                on { isFingerprintEnrolled(anyInt()) } doReturn true
+                on { isFaceAuthEnrolled(anyInt()) } doReturn true
+            }
+
+            // Check primary user status
+            createBiometricSettingsRepository()
+            var fingerprintAllowed = collectLastValue(underTest.isFingerprintEnrolledAndEnabled)
+            var faceAllowed = collectLastValue(underTest.isFaceAuthEnrolledAndEnabled)
+            runCurrent()
+
+            enrollmentChange(UNDER_DISPLAY_FINGERPRINT, PRIMARY_USER_ID, true)
+            enrollmentChange(FACE, PRIMARY_USER_ID, true)
+            assertThat(fingerprintAllowed()).isTrue()
+            assertThat(faceAllowed()).isTrue()
+
+            // Check secondary user status
+            userRepository.setSelectedUserInfo(ANOTHER_USER)
+            fingerprintAllowed = collectLastValue(underTest.isFingerprintEnrolledAndEnabled)
+            faceAllowed = collectLastValue(underTest.isFaceAuthEnrolledAndEnabled)
+            runCurrent()
+
+            enrollmentChange(UNDER_DISPLAY_FINGERPRINT, ANOTHER_USER_ID, true)
+            enrollmentChange(FACE, ANOTHER_USER_ID, true)
+            assertThat(fingerprintAllowed()).isTrue()
+            assertThat(faceAllowed()).isTrue()
         }
 
     @Test
