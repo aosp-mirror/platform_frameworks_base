@@ -39,7 +39,7 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.Overlay
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
@@ -60,7 +60,7 @@ constructor(
     private val sceneInteractor: SceneInteractor,
     private val falsingInteractor: FalsingInteractor,
     private val powerInteractor: PowerInteractor,
-    shadeInteractor: ShadeInteractor,
+    shadeModeInteractor: ShadeModeInteractor,
     private val remoteInputInteractor: RemoteInputInteractor,
     private val splitEdgeDetector: SplitEdgeDetector,
     private val logger: SceneLogger,
@@ -93,7 +93,7 @@ constructor(
             traceName = "edgeDetector",
             initialValue = DefaultEdgeDetector,
             source =
-                shadeInteractor.shadeMode.map {
+                shadeModeInteractor.shadeMode.map {
                     if (it is ShadeMode.Dual) splitEdgeDetector else DefaultEdgeDetector
                 },
         )

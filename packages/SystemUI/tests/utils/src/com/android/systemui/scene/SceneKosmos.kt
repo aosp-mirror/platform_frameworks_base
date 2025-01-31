@@ -20,6 +20,7 @@ import com.android.systemui.scene.ui.viewmodel.SceneContainerHapticsViewModel
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.scene.ui.viewmodel.splitEdgeDetector
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 import com.android.systemui.statusbar.domain.interactor.remoteInputInteractor
 import com.android.systemui.wallpapers.ui.viewmodel.wallpaperViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -92,7 +93,7 @@ val Kosmos.sceneContainerViewModelFactory by Fixture {
                 sceneInteractor = sceneInteractor,
                 falsingInteractor = falsingInteractor,
                 powerInteractor = powerInteractor,
-                shadeInteractor = shadeInteractor,
+                shadeModeInteractor = shadeModeInteractor,
                 remoteInputInteractor = remoteInputInteractor,
                 splitEdgeDetector = splitEdgeDetector,
                 logger = sceneLogger,

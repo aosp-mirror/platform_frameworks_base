@@ -25,7 +25,7 @@ import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -42,13 +42,13 @@ class ShadeUserActionsViewModel
 @AssistedInject
 constructor(
     private val qsSceneAdapter: QSSceneAdapter,
-    private val shadeInteractor: ShadeInteractor,
+    private val shadeModeInteractor: ShadeModeInteractor,
     private val sceneBackInteractor: SceneBackInteractor,
 ) : UserActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
         combine(
-                shadeInteractor.shadeMode,
+                shadeModeInteractor.shadeMode,
                 qsSceneAdapter.isCustomizerShowing,
                 sceneBackInteractor.backScene
                     .filter { it != Scenes.Shade }

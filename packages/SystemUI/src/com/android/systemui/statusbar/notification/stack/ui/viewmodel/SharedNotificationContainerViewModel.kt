@@ -76,6 +76,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode.Dual
 import com.android.systemui.shade.shared.model.ShadeMode.Single
 import com.android.systemui.shade.shared.model.ShadeMode.Split
@@ -91,6 +92,7 @@ import com.android.systemui.util.kotlin.sample
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -111,6 +113,7 @@ import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.isActive
 
 /** View-model for the shared notification container, used by both the shade and keyguard spaces */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class SharedNotificationContainerViewModel
 @Inject
@@ -123,7 +126,8 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val shadeInteractor: ShadeInteractor,
-    private val notificationStackAppearanceInteractor: NotificationStackAppearanceInteractor,
+    shadeModeInteractor: ShadeModeInteractor,
+    notificationStackAppearanceInteractor: NotificationStackAppearanceInteractor,
     private val alternateBouncerToGoneTransitionViewModel:
         AlternateBouncerToGoneTransitionViewModel,
     private val alternateBouncerToPrimaryBouncerTransitionViewModel:
@@ -233,7 +237,7 @@ constructor(
         if (SceneContainerFlag.isEnabled) {
                 combine(
                     shadeInteractor.isShadeLayoutWide,
-                    shadeInteractor.shadeMode,
+                    shadeModeInteractor.shadeMode,
                     configurationInteractor.onAnyConfigurationChange,
                 ) { isShadeLayoutWide, shadeMode, _ ->
                     with(context.resources) {
@@ -477,7 +481,7 @@ constructor(
      */
     private val alphaForShadeAndQsExpansion: Flow<Float> =
         if (SceneContainerFlag.isEnabled) {
-                shadeInteractor.shadeMode.flatMapLatest { shadeMode ->
+                shadeModeInteractor.shadeMode.flatMapLatest { shadeMode ->
                     when (shadeMode) {
                         Single ->
                             combineTransform(

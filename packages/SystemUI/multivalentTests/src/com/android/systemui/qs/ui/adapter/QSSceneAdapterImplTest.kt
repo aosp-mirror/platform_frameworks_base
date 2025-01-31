@@ -39,7 +39,7 @@ import com.android.systemui.qs.dagger.QSComponent
 import com.android.systemui.qs.dagger.QSSceneComponent
 import com.android.systemui.settings.brightness.MirrorController
 import com.android.systemui.shade.data.repository.fakeShadeRepository
-import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
@@ -118,16 +118,14 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             }
         }
 
-    private val shadeInteractor = kosmos.shadeInteractor
-    private val displayStateInteractor = kosmos.displayStateInteractor
     private val dumpManager = mock<DumpManager>()
 
     private val underTest =
         QSSceneAdapterImpl(
             qsSceneComponentFactory,
             qsImplProvider,
-            shadeInteractor,
-            displayStateInteractor,
+            kosmos.shadeModeInteractor,
+            kosmos.displayStateInteractor,
             dumpManager,
             testDispatcher,
             testScope.backgroundScope,

@@ -39,13 +39,14 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModelFactory
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.disableDualShade
-import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 import com.android.systemui.shade.ui.viewmodel.shadeHeaderViewModelFactory
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -54,6 +55,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
@@ -72,7 +74,6 @@ class QuickSettingsSceneContentViewModelTest : SysuiTestCase() {
 
     private val sceneContainerStartable = kosmos.sceneContainerStartable
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
-    private val shadeInteractor by lazy { kosmos.shadeInteractor }
 
     private lateinit var underTest: QuickSettingsSceneContentViewModel
 
@@ -89,7 +90,7 @@ class QuickSettingsSceneContentViewModelTest : SysuiTestCase() {
                 footerActionsViewModelFactory = footerActionsViewModelFactory,
                 footerActionsController = footerActionsController,
                 mediaCarouselInteractor = kosmos.mediaCarouselInteractor,
-                shadeInteractor = shadeInteractor,
+                shadeModeInteractor = kosmos.shadeModeInteractor,
                 sceneInteractor = sceneInteractor,
             )
         underTest.activateIn(testScope)

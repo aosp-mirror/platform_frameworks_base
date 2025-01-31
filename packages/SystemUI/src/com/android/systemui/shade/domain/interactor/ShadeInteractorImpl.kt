@@ -42,7 +42,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
-/** The non-empty SceneInteractor implementation. */
+/** The non-empty [ShadeInteractor] implementation. */
 @SysUISingleton
 class ShadeInteractorImpl
 @Inject
@@ -100,30 +100,25 @@ constructor(
 
     override val isShadeTouchable: Flow<Boolean> =
         combine(
-            powerInteractor.isAsleep
-                .onEach { Log.d(TAG, "isShadeTouchable: upstream isAsleep=$it") },
+            powerInteractor.isAsleep.onEach {
+                Log.d(TAG, "isShadeTouchable: upstream isAsleep=$it")
+            },
             keyguardTransitionInteractor
                 .isInTransition(Edge.create(to = KeyguardState.AOD))
-                .onEach {
-                    Log.d(
-                        TAG,
-                        "isShadeTouchable: upstream isTransitioningToAod=$it",
-                    )
-                },
+                .onEach { Log.d(TAG, "isShadeTouchable: upstream isTransitioningToAod=$it") },
             keyguardRepository.dozeTransitionModel
                 .map { it.to == DozeStateModel.DOZE_PULSING }
-                .onEach {
-                    Log.d(TAG, "isShadeTouchable: upstream isPulsing=$it")
-                },
+                .onEach { Log.d(TAG, "isShadeTouchable: upstream isPulsing=$it") },
         ) { isAsleep, isTransitioningToAod, isPulsing ->
-            val downstream = when {
-                // If the device is transitioning to AOD, only accept touches if
-                // still animating.
-                isTransitioningToAod -> dozeParams.shouldControlScreenOff()
-                // If the device is asleep, only accept touches if there's a pulse
-                isAsleep -> isPulsing
-                else -> true
-            }
+            val downstream =
+                when {
+                    // If the device is transitioning to AOD, only accept touches if
+                    // still animating.
+                    isTransitioningToAod -> dozeParams.shouldControlScreenOff()
+                    // If the device is asleep, only accept touches if there's a pulse
+                    isAsleep -> isPulsing
+                    else -> true
+                }
             Log.d(TAG, "isShadeTouchable emitting $downstream, values:")
             Log.d(TAG, "  isAsleep=$isAsleep")
             Log.d(TAG, "  isTransitioningToAod=$isTransitioningToAod")

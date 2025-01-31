@@ -25,6 +25,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.domain.interactor.privacyChipInteractor
 import com.android.systemui.shade.domain.interactor.shadeHeaderClockInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.phone.ui.TintedIconManager
@@ -39,6 +40,7 @@ val Kosmos.shadeHeaderViewModel: ShadeHeaderViewModel by
             activityStarter = activityStarter,
             sceneInteractor = sceneInteractor,
             shadeInteractor = shadeInteractor,
+            shadeModeInteractor = shadeModeInteractor,
             mobileIconsInteractor = mobileIconsInteractor,
             mobileIconsViewModel = mobileIconsViewModel,
             privacyChipInteractor = privacyChipInteractor,
