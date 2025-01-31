@@ -54,5 +54,5 @@ class PromotedNotificationViewModel(
     val verificationText: Flow<CharSequence?> = content.map { it.verificationText }
 
     // for ProgressStyle:
-    val progress: Flow<NotificationProgressModel?> = content.map { it.progress }
+    val progress: Flow<NotificationProgressModel?> = content.map { it.newProgress }
 }

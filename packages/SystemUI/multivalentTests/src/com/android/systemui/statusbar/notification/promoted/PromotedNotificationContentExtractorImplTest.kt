@@ -237,9 +237,9 @@ class PromotedNotificationContentExtractorImplTest : SysuiTestCase() {
 
         assertThat(content).isNotNull()
         assertThat(content?.style).isEqualTo(Style.Progress)
-        assertThat(content?.progress).isNotNull()
-        assertThat(content?.progress?.progress).isEqualTo(75)
-        assertThat(content?.progress?.progressMax).isEqualTo(100)
+        assertThat(content?.newProgress).isNotNull()
+        assertThat(content?.newProgress?.progress).isEqualTo(75)
+        assertThat(content?.newProgress?.progressMax).isEqualTo(100)
     }
 
     @Test
@@ -253,6 +253,43 @@ class PromotedNotificationContentExtractorImplTest : SysuiTestCase() {
 
         assertThat(content).isNotNull()
         assertThat(content?.style).isEqualTo(Style.Ineligible)
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
+    fun extractsContent_fromOldProgressDeterminate() {
+        val entry = createEntry {
+            setProgress(TEST_PROGRESS_MAX, TEST_PROGRESS, /* indeterminate= */ false)
+        }
+
+        val content = extractContent(entry)
+
+        assertThat(content).isNotNull()
+
+        val oldProgress = content?.oldProgress
+        assertThat(oldProgress).isNotNull()
+
+        assertThat(content).isNotNull()
+        assertThat(content?.oldProgress).isNotNull()
+        assertThat(content?.oldProgress?.progress).isEqualTo(TEST_PROGRESS)
+        assertThat(content?.oldProgress?.max).isEqualTo(TEST_PROGRESS_MAX)
+        assertThat(content?.oldProgress?.isIndeterminate).isFalse()
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
+    fun extractsContent_fromOldProgressIndeterminate() {
+        val entry = createEntry {
+            setProgress(TEST_PROGRESS_MAX, TEST_PROGRESS, /* indeterminate= */ true)
+        }
+
+        val content = extractContent(entry)
+
+        assertThat(content).isNotNull()
+        assertThat(content?.oldProgress).isNotNull()
+        assertThat(content?.oldProgress?.progress).isEqualTo(TEST_PROGRESS)
+        assertThat(content?.oldProgress?.max).isEqualTo(TEST_PROGRESS_MAX)
+        assertThat(content?.oldProgress?.isIndeterminate).isTrue()
     }
 
     private fun extractContent(entry: NotificationEntry): PromotedNotificationContentModel? {
@@ -276,6 +313,9 @@ class PromotedNotificationContentExtractorImplTest : SysuiTestCase() {
         private const val TEST_CONTENT_TITLE = "content title"
         private const val TEST_CONTENT_TEXT = "content text"
         private const val TEST_SHORT_CRITICAL_TEXT = "short"
+
+        private const val TEST_PROGRESS = 50
+        private const val TEST_PROGRESS_MAX = 100
 
         private const val TEST_PERSON_NAME = "person name"
         private const val TEST_PERSON_KEY = "person key"

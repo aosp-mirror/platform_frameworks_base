@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.promoted
 
 import android.app.Flags
+import android.app.Notification
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -49,6 +50,7 @@ import com.android.internal.widget.CachingIconView
 import com.android.internal.widget.ImageFloatingTextView
 import com.android.internal.widget.NotificationExpandButton
 import com.android.internal.widget.NotificationProgressBar
+import com.android.internal.widget.NotificationProgressModel
 import com.android.internal.widget.NotificationRowIconView
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.res.R as systemuiR
@@ -176,17 +178,17 @@ private class AODPromotedNotificationViewUpdater(root: View) {
     private val verificationIcon: ImageView? = root.findViewById(R.id.verification_icon)
     private val verificationText: TextView? = root.findViewById(R.id.verification_text)
 
-    private var oldProgressStub = root.findViewById<View>(R.id.progress) as? ViewStub
-    private var oldProgress: ProgressBar? = null
-    private val newProgress = root.findViewById<View>(R.id.progress) as? NotificationProgressBar
+    private var oldProgressBarStub = root.findViewById<View>(R.id.progress) as? ViewStub
+    private var oldProgressBar: ProgressBar? = null
+    private val newProgressBar = root.findViewById<View>(R.id.progress) as? NotificationProgressBar
 
     fun update(content: PromotedNotificationContentModel) {
         when (content.style) {
             Style.Base -> updateBase(content)
-            Style.BigPicture -> updateBigPicture(content)
-            Style.BigText -> updateBigText(content)
-            Style.Call -> updateCall(content)
-            Style.Progress -> updateProgress(content)
+            Style.BigPicture -> updateBigPictureStyle(content)
+            Style.BigText -> updateBigTextStyle(content)
+            Style.Call -> updateCallStyle(content)
+            Style.Progress -> updateProgressStyle(content)
             Style.Ineligible -> {}
         }
     }
@@ -194,42 +196,72 @@ private class AODPromotedNotificationViewUpdater(root: View) {
     private fun updateBase(
         content: PromotedNotificationContentModel,
         textView: ImageFloatingTextView? = null,
+        showOldProgress: Boolean = true,
     ) {
         updateHeader(content)
 
         updateTitle(title, content)
         updateText(textView ?: text, content)
+
+        if (showOldProgress) {
+            updateOldProgressBar(content)
+        }
     }
 
-    private fun updateBigPicture(content: PromotedNotificationContentModel) {
+    private fun updateBigPictureStyle(content: PromotedNotificationContentModel) {
         updateBase(content)
 
         bigPicture?.visibility = GONE
     }
 
-    private fun updateBigText(content: PromotedNotificationContentModel) {
+    private fun updateBigTextStyle(content: PromotedNotificationContentModel) {
         updateBase(content, textView = bigText)
     }
 
-    private fun updateCall(content: PromotedNotificationContentModel) {
+    private fun updateCallStyle(content: PromotedNotificationContentModel) {
         updateConversationHeader(content)
 
         updateText(text, content)
     }
 
-    private fun updateProgress(content: PromotedNotificationContentModel) {
-        updateBase(content)
+    private fun updateProgressStyle(content: PromotedNotificationContentModel) {
+        updateBase(content, showOldProgress = false)
 
         updateNewProgressBar(content)
+    }
+
+    private fun updateOldProgressBar(content: PromotedNotificationContentModel) {
+        if (
+            content.oldProgress == null ||
+                content.oldProgress.max == 0 ||
+                content.oldProgress.isIndeterminate
+        ) {
+            oldProgressBar?.visibility = GONE
+            return
+        }
+
+        inflateOldProgressBar()
+
+        val oldProgressBar = oldProgressBar ?: return
+
+        oldProgressBar.progress = content.oldProgress.progress
+        oldProgressBar.max = content.oldProgress.max
+        oldProgressBar.isIndeterminate = content.oldProgress.isIndeterminate
+        oldProgressBar.visibility = VISIBLE
     }
 
     private fun updateNewProgressBar(content: PromotedNotificationContentModel) {
         notificationProgressStartIcon?.visibility = GONE
         notificationProgressEndIcon?.visibility = GONE
-        content.progress?.let {
-            newProgress?.setProgressModel(it.toBundle())
-            newProgress?.visibility = VISIBLE
-        } ?: run { newProgress?.visibility = GONE }
+
+        val newProgressBar = newProgressBar ?: return
+
+        if (content.newProgress != null && !content.newProgress.isIndeterminate) {
+            newProgressBar.setProgressModel(content.newProgress.toSkeleton().toBundle())
+            newProgressBar.visibility = VISIBLE
+        } else {
+            newProgressBar.visibility = GONE
+        }
     }
 
     private fun updateHeader(content: PromotedNotificationContentModel) {
@@ -335,6 +367,15 @@ private class AODPromotedNotificationViewUpdater(root: View) {
         chronometerStub = null
     }
 
+    private fun inflateOldProgressBar() {
+        if (oldProgressBar != null) {
+            return
+        }
+
+        oldProgressBar = oldProgressBarStub?.inflate() as ProgressBar
+        oldProgressBarStub = null
+    }
+
     private fun updateText(
         view: ImageFloatingTextView?,
         content: PromotedNotificationContentModel,
@@ -366,6 +407,34 @@ private class AODPromotedNotificationViewUpdater(root: View) {
 
 private fun CharSequence.toSkeleton(): CharSequence {
     return this.toString()
+}
+
+private fun NotificationProgressModel.toSkeleton(): NotificationProgressModel {
+    if (isIndeterminate) {
+        return NotificationProgressModel(/* indeterminateColor= */ SecondaryText.colorInt)
+    }
+
+    return NotificationProgressModel(
+        listOf(Notification.ProgressStyle.Segment(progressMax).toSkeleton()),
+        points.map { it.toSkeleton() }.toList(),
+        progress,
+        /* isStyledByProgress = */ true,
+        /* segmentsFallbackColor = */ SecondaryText.colorInt,
+    )
+}
+
+private fun Notification.ProgressStyle.Segment.toSkeleton(): Notification.ProgressStyle.Segment {
+    return Notification.ProgressStyle.Segment(length).also {
+        it.id = id
+        it.color = SecondaryText.colorInt
+    }
+}
+
+private fun Notification.ProgressStyle.Point.toSkeleton(): Notification.ProgressStyle.Point {
+    return Notification.ProgressStyle.Point(position).also {
+        it.id = id
+        it.color = SecondaryText.colorInt
+    }
 }
 
 private enum class AodPromotedNotificationColor(colorUInt: UInt) {
