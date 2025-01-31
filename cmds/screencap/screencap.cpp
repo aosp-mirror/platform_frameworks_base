@@ -37,9 +37,6 @@
 #include <ui/GraphicTypes.h>
 #include <ui/PixelFormat.h>
 
-#include "utils/Errors.h"
-#include "screencap_utils.h"
-
 using namespace android;
 
 #define COLORSPACE_UNKNOWN    0
@@ -146,6 +143,24 @@ static status_t notifyMediaScanner(const char* fileName) {
         return UNKNOWN_ERROR;
     }
     return NO_ERROR;
+}
+
+status_t capture(const DisplayId displayId,
+            const gui::CaptureArgs& captureArgs,
+            ScreenCaptureResults& outResult) {
+    sp<SyncScreenCaptureListener> captureListener = new SyncScreenCaptureListener();
+    ScreenshotClient::captureDisplay(displayId, captureArgs, captureListener);
+
+    ScreenCaptureResults captureResults = captureListener->waitForResults();
+    if (!captureResults.fenceResult.ok()) {
+        fprintf(stderr, "Failed to take screenshot. Status: %d\n",
+                fenceStatus(captureResults.fenceResult));
+        return 1;
+    }
+
+    outResult = captureResults;
+
+    return 0;
 }
 
 status_t saveImage(const char* fn, std::optional<AndroidBitmapCompressFormat> format,
@@ -412,12 +427,15 @@ int main(int argc, char** argv)
 
     std::vector<ScreenCaptureResults> results;
     const size_t numDisplays = displaysToCapture.size();
-    for (int i = 0; i < numDisplays; i++) {
+    for (int i=0; i<numDisplays; i++) {
+        ScreenCaptureResults result;
+
         // 1. Capture the screen
-        auto captureResult = screencap::capture(displaysToCapture[i], captureArgs);
-        if (captureResult.error().code() != OK) {
-            fprintf(stderr, "%sCapturing failed.\n", captureResult.error().message().c_str());
-            return 1;
+        if (const status_t captureStatus =
+            capture(displaysToCapture[i], captureArgs, result) != 0) {
+
+            fprintf(stderr, "Capturing failed.\n");
+            return captureStatus;
         }
 
         // 2. Save the capture result as an image.
@@ -435,7 +453,7 @@ int main(int argc, char** argv)
         if (!filename.empty()) {
             fn = filename.c_str();
         }
-        if (const status_t saveImageStatus = saveImage(fn, format, captureResult.value()) != 0) {
+        if (const status_t saveImageStatus = saveImage(fn, format, result) != 0) {
             fprintf(stderr, "Saving image failed.\n");
             return saveImageStatus;
         }
