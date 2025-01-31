@@ -695,8 +695,10 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         private void checkCallerCanSkipRoleGrant() {
+            final Context context =
+                    getContext().createContextAsUser(Binder.getCallingUserHandle(), 0);
             final KeyguardManager keyguardManager =
-                    getContext().getSystemService(KeyguardManager.class);
+                    context.getSystemService(KeyguardManager.class);
             if (keyguardManager != null && keyguardManager.isKeyguardSecure()) {
                 throw new SecurityException("Skipping CDM role grant requires insecure keyguard.");
             }
