@@ -46,6 +46,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.provider.visualStabilityProvider
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
@@ -678,25 +679,32 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(StatusBarNotifChips.FLAG_NAME, PromotedNotificationUi.FLAG_NAME)
+    fun testIsSticky_promotedAndExpanded_notifChipsFlagOff_promotedUiFlagOff_true() {
+        assertThat(getIsSticky_promotedAndExpanded()).isTrue()
+    }
+
+    @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME, PromotedNotificationUi.FLAG_NAME)
+    fun testIsSticky_promotedAndExpanded_notifChipsFlagOn_promotedUiFlagOn_false() {
+        assertThat(getIsSticky_promotedAndExpanded()).isFalse()
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUi.FLAG_NAME)
     @DisableFlags(StatusBarNotifChips.FLAG_NAME)
-    fun testIsSticky_promotedAndExpanded_notifChipsFlagOff_true() {
-        val notif = Notification.Builder(mContext, "").setSmallIcon(R.drawable.ic_person).build()
-        notif.flags = FLAG_PROMOTED_ONGOING
-        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, notif)
-        val row = testHelper.createRow().apply { setPinnedStatus(PinnedStatus.PinnedBySystem) }
-        notifEntry.row = row
-
-        underTest.showNotification(notifEntry)
-
-        val headsUpEntry = underTest.getHeadsUpEntry(notifEntry.key)
-        headsUpEntry!!.setExpanded(true)
-
-        assertThat(underTest.isSticky(notifEntry.key)).isTrue()
+    fun testIsSticky_promotedAndExpanded_promotedUiFlagOn_false() {
+        assertThat(getIsSticky_promotedAndExpanded()).isFalse()
     }
 
     @Test
     @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    @DisableFlags(PromotedNotificationUi.FLAG_NAME)
     fun testIsSticky_promotedAndExpanded_notifChipsFlagOn_false() {
+        assertThat(getIsSticky_promotedAndExpanded()).isFalse()
+    }
+
+    private fun getIsSticky_promotedAndExpanded(): Boolean {
         val notif = Notification.Builder(mContext, "").setSmallIcon(R.drawable.ic_person).build()
         notif.flags = FLAG_PROMOTED_ONGOING
         val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, notif)
@@ -708,7 +716,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
         val headsUpEntry = underTest.getHeadsUpEntry(notifEntry.key)
         headsUpEntry!!.setExpanded(true)
 
-        assertThat(underTest.isSticky(notifEntry.key)).isFalse()
+        return underTest.isSticky(notifEntry.key)
     }
 
     @Test
