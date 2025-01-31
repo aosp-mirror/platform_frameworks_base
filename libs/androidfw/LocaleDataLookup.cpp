@@ -7518,6 +7518,13 @@ const char* lookupLikelyScript(uint32_t packed_lang_region) {
      }
 }
 
+/*
+ * TODO: Consider turning the below switch statement into binary search
+ *      to save the disk space when the table is larger in the future.
+ *      Disassembled code shows that the jump table emitted by clang can be
+ *      4x larger than the data in disk size, but it depends on the optimization option.
+ *      However, a switch statement will benefit from the future of compiler improvement.
+ */
 bool isLocaleRepresentative(uint32_t language_and_region, const char* script) {
     const uint64_t packed_locale =
             ((static_cast<uint64_t>(language_and_region)) << 32u) |
