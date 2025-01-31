@@ -2013,3 +2013,10 @@ flag {
     description: "Show a Locked by your watch indicator on the keyguard when the device is locked by the watch."
     bug: "387322459"
 }
+
+flag {
+    name: "decouple_view_controller_in_animlib"
+    namespace: "systemui"
+    description: "Decouple view and controller in AnimLib."
+    bug: "393241010"
+}
