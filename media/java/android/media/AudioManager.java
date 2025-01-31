@@ -10406,6 +10406,23 @@ public class AudioManager {
         }
     }
 
+    /**
+     * Enable strict audio hardening (background) enforcement, regardless of release or temporary
+     * exemptions for debugging purposes.
+     * Enforced hardening can be found in the audio dumpsys with the API being restricted and the
+     * level of restriction which was encountered.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public void setEnableHardening(boolean shouldEnable) {
+        final IAudioService service = getService();
+        try {
+            service.setEnableHardening(shouldEnable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     //====================================================================
     // Mute await connection
 

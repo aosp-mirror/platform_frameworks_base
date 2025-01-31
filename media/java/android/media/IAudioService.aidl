@@ -819,4 +819,8 @@ interface IAudioService {
     @EnforcePermission("QUERY_AUDIO_STATE")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.QUERY_AUDIO_STATE)")
     boolean shouldNotificationSoundPlay(in AudioAttributes aa);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)")
+    void setEnableHardening(in boolean shouldEnable);
 }
