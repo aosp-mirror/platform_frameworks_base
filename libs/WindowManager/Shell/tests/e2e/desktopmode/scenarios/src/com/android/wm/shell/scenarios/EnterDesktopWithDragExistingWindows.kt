@@ -62,7 +62,7 @@ constructor(
     @Test
     open fun reenterDesktopWithDrag() {
         // By default this method uses drag to desktop
-        testApp.enterDesktopMode(wmHelper, device)
+        testApp.enterDesktopMode(wmHelper, device, shouldUseDragToDesktop = true)
     }
 
     @After
