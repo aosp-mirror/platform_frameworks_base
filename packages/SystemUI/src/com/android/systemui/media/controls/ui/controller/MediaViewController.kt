@@ -899,7 +899,11 @@ constructor(
             // If the view isn't bound, we can drop the animation, otherwise we'll execute it
             animateNextStateChange = false
             if (transitionLayout == null) {
-                logger.logMediaLocation("setCurrentState: view not bound", startLocation, endLocation)
+                logger.logMediaLocation(
+                    "setCurrentState: view not bound",
+                    startLocation,
+                    endLocation,
+                )
                 return
             }
 
@@ -973,13 +977,20 @@ constructor(
         val overrideSize = mediaHostStatesManager.carouselSizes[location]
         var overridden = false
         overrideSize?.let {
-            // To be safe we're using a maximum here. The override size should always be set
-            // properly though.
-            if (
+            if (SceneContainerFlag.isEnabled) {
+                result.measureWidth = widthInSceneContainerPx
+                result.measureHeight = heightInSceneContainerPx
+                overridden = true
+            } else if (
                 result.measureHeight != it.measuredHeight || result.measureWidth != it.measuredWidth
             ) {
+                // To be safe we're using a maximum here. The override size should always be set
+                // properly though.
                 result.measureHeight = Math.max(it.measuredHeight, result.measureHeight)
                 result.measureWidth = Math.max(it.measuredWidth, result.measureWidth)
+                overridden = true
+            }
+            if (overridden) {
                 // The measureHeight and the shown height should both be set to the overridden
                 // height
                 result.height = result.measureHeight
@@ -991,7 +1002,6 @@ constructor(
                         state.width = result.width
                     }
                 }
-                overridden = true
             }
         }
         if (overridden && state != null && state.squishFraction <= 1f) {
