@@ -18,6 +18,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.Nullable;
 import android.util.ArraySet;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -38,10 +39,13 @@ public class TestLooperManager {
     private final MessageQueue mQueue;
     private final Looper mLooper;
     private final LinkedBlockingQueue<MessageExecution> mExecuteQueue = new LinkedBlockingQueue<>();
+    private final boolean mLooperIsMyLooper;
+
+    // When this latch is zero, it's guaranteed that the LooperHolder Message
+    // is not in the underlying queue.
+    private final CountDownLatch mLooperHolderLatch = new CountDownLatch(1);
 
     private boolean mReleased;
-    private boolean mLooperBlocked;
-    private final boolean mLooperIsMyLooper;
 
     /**
      * @hide
@@ -59,6 +63,8 @@ public class TestLooperManager {
         if (!mLooperIsMyLooper) {
             // Post a message that will keep the looper blocked as long as we are dispatching.
             new Handler(looper).post(new LooperHolder());
+        } else {
+            mLooperHolderLatch.countDown();
         }
     }
 
@@ -222,23 +228,16 @@ public class TestLooperManager {
      * is not in the underlying queue.
      */
     private void waitForLooperHolder() {
-        while (!mLooperIsMyLooper && !mLooperBlocked) {
-            synchronized (this) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                }
-            }
+        try {
+            mLooperHolderLatch.await();
+        } catch (InterruptedException e) {
         }
     }
 
     private class LooperHolder implements Runnable {
         @Override
         public void run() {
-            synchronized (TestLooperManager.this) {
-                mLooperBlocked = true;
-                TestLooperManager.this.notify();
-            }
+            mLooperHolderLatch.countDown();
             while (!mReleased) {
                 try {
                     final MessageExecution take = mExecuteQueue.take();
@@ -247,9 +246,6 @@ public class TestLooperManager {
                     }
                 } catch (InterruptedException e) {
                 }
-            }
-            synchronized (TestLooperManager.this) {
-                mLooperBlocked = false;
             }
         }
 
