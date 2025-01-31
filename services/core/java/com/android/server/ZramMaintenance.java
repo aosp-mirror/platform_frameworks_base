@@ -28,6 +28,7 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.provider.DeviceConfig;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -56,20 +57,21 @@ public class ZramMaintenance extends JobService {
     @VisibleForTesting
     public static final String KEY_CHECK_STATUS = "check_status";
 
+    private static final String SYSTEM_PROPERTY_PREFIX = "mm.";
     private static final String FIRST_DELAY_SECONDS_PROP =
-            "mm.zram.maintenance.first_delay_seconds";
+            "zram.maintenance.first_delay_seconds";
     // The default is 1 hour.
     private static final long DEFAULT_FIRST_DELAY_SECONDS = 3600;
     private static final String PERIODIC_DELAY_SECONDS_PROP =
-            "mm.zram.maintenance.periodic_delay_seconds";
+            "zram.maintenance.periodic_delay_seconds";
     // The default is 1 hour.
     private static final long DEFAULT_PERIODIC_DELAY_SECONDS = 3600;
     private static final String REQUIRE_DEVICE_IDLE_PROP =
-            "mm.zram.maintenance.require_device_idle";
+            "zram.maintenance.require_device_idle";
     private static final boolean DEFAULT_REQUIRE_DEVICE_IDLE =
             true;
     private static final String REQUIRE_BATTERY_NOT_LOW_PROP =
-            "mm.zram.maintenance.require_battry_not_low";
+            "zram.maintenance.require_battry_not_low";
     private static final boolean DEFAULT_REQUIRE_BATTERY_NOT_LOW =
             true;
 
@@ -124,7 +126,7 @@ public class ZramMaintenance extends JobService {
         } else {
             Slog.w(TAG, "binder not found");
         }
-        Duration delay = Duration.ofSeconds(SystemProperties.getLong(PERIODIC_DELAY_SECONDS_PROP,
+        Duration delay = Duration.ofSeconds(getLongProperty(PERIODIC_DELAY_SECONDS_PROP,
                 DEFAULT_PERIODIC_DELAY_SECONDS));
         scheduleZramMaintenance(context, delay, checkStatus);
     }
@@ -134,7 +136,7 @@ public class ZramMaintenance extends JobService {
      */
     public static void startZramMaintenance(Context context) {
         Duration delay = Duration.ofSeconds(
-                SystemProperties.getLong(FIRST_DELAY_SECONDS_PROP, DEFAULT_FIRST_DELAY_SECONDS));
+                getLongProperty(FIRST_DELAY_SECONDS_PROP, DEFAULT_FIRST_DELAY_SECONDS));
         scheduleZramMaintenance(context, delay, true);
     }
 
@@ -148,13 +150,23 @@ public class ZramMaintenance extends JobService {
             js.schedule(new JobInfo.Builder(JOB_ID, sZramMaintenance)
                     .setMinimumLatency(delay.toMillis())
                     .setRequiresDeviceIdle(
-                            SystemProperties.getBoolean(REQUIRE_DEVICE_IDLE_PROP,
+                            getBooleanProperty(REQUIRE_DEVICE_IDLE_PROP,
                                     DEFAULT_REQUIRE_DEVICE_IDLE))
                     .setRequiresBatteryNotLow(
-                            SystemProperties.getBoolean(REQUIRE_BATTERY_NOT_LOW_PROP,
+                            getBooleanProperty(REQUIRE_BATTERY_NOT_LOW_PROP,
                                     DEFAULT_REQUIRE_BATTERY_NOT_LOW))
                     .setExtras(bundle)
                     .build());
         }
+    }
+
+    private static long getLongProperty(String name, long defaultValue) {
+        return DeviceConfig.getLong(DeviceConfig.NAMESPACE_MM, name,
+                SystemProperties.getLong(SYSTEM_PROPERTY_PREFIX + name, defaultValue));
+    }
+
+    private static boolean getBooleanProperty(String name, boolean defaultValue) {
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_MM, name,
+                SystemProperties.getBoolean(SYSTEM_PROPERTY_PREFIX + name, defaultValue));
     }
 }
