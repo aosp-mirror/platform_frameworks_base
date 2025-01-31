@@ -959,9 +959,16 @@ constructor(
         super.setupEndDragToDesktop(info, startTransaction, finishTransaction)
 
         val state = requireTransitionState()
-        val homeLeash = state.homeChange?.leash ?: error("Expects home leash to be non-null")
-        // Hide home on finish to prevent flickering when wallpaper activity flag is enabled
-        finishTransaction.hide(homeLeash)
+        val homeLeash = state.homeChange?.leash
+        if (homeLeash == null) {
+            ProtoLog.e(
+                ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+                "DragToDesktop: home leash is null",
+            )
+        } else {
+            // Hide home on finish to prevent flickering when wallpaper activity flag is enabled
+            finishTransaction.hide(homeLeash)
+        }
         // Setup freeform tasks before animation
         state.freeformTaskChanges.forEach { change ->
             val startScale = FREEFORM_TASKS_INITIAL_SCALE
