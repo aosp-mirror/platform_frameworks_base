@@ -23,6 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.sensors.AsyncSensorManager
 import java.util.Optional
+import javax.inject.Provider
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,7 +51,11 @@ class AmbientLightModeMonitorTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         ambientLightModeMonitor =
-            AmbientLightModeMonitor(Optional.of(algorithm), sensorManager, Optional.of(sensor))
+            AmbientLightModeMonitor(
+                Optional.of(algorithm),
+                sensorManager,
+                Optional.of(Provider { sensor }),
+            )
     }
 
     @Test

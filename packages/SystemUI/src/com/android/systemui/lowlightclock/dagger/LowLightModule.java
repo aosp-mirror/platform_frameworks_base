@@ -16,6 +16,7 @@
 
 package com.android.systemui.lowlightclock.dagger;
 
+import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.hardware.Sensor;
 
@@ -100,6 +101,7 @@ public abstract class LowLightModule {
     abstract LowLightDisplayController bindsLowLightDisplayController();
 
     @BindsOptionalOf
+    @Nullable
     @Named(LIGHT_SENSOR)
     abstract Sensor bindsLightSensor();
 
