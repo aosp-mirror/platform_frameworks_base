@@ -3249,7 +3249,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         Log.d(TAG, "handleStartKeyguardExitAnimation startTime=" + startTime
                 + " fadeoutDuration=" + fadeoutDuration);
         int currentUserId = mSelectedUserInteractor.getSelectedUserId();
-        if (mGoingAwayRequestedForUserId != currentUserId) {
+        if (!KeyguardWmStateRefactor.isEnabled() && mGoingAwayRequestedForUserId != currentUserId) {
             Log.e(TAG, "Not executing handleStartKeyguardExitAnimationInner() due to userId "
                     + "mismatch. Requested: " + mGoingAwayRequestedForUserId + ", current: "
                     + currentUserId);
@@ -3516,7 +3516,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
      * app transition before finishing the current RemoteAnimation, or the keyguard being re-shown).
      */
     private void handleCancelKeyguardExitAnimation() {
-        if (mGoingAwayRequestedForUserId != mSelectedUserInteractor.getSelectedUserId()) {
+        if (!KeyguardWmStateRefactor.isEnabled()
+                && mGoingAwayRequestedForUserId != mSelectedUserInteractor.getSelectedUserId()) {
             Log.e(TAG, "Setting pendingLock = true due to userId mismatch. Requested: "
                     + mGoingAwayRequestedForUserId + ", current: "
                     + mSelectedUserInteractor.getSelectedUserId());
