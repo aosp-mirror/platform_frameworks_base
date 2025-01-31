@@ -314,6 +314,7 @@ filegroup {
         "tests/src/**/systemui/statusbar/policy/WalletControllerImplTest.kt",
         "tests/src/**/keyguard/ClockEventControllerTest.kt",
         "tests/src/**/systemui/bluetooth/qsdialog/BluetoothStateInteractorTest.kt",
+        "tests/src/**/systemui/bluetooth/qsdialog/BluetoothDetailsContentManagerTest.kt",
         "tests/src/**/systemui/bluetooth/qsdialog/BluetoothTileDialogDelegateTest.kt",
         "tests/src/**/systemui/bluetooth/qsdialog/BluetoothTileDialogRepositoryTest.kt",
         "tests/src/**/systemui/bluetooth/qsdialog/BluetoothTileDialogViewModelTest.kt",
