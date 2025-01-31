@@ -3067,7 +3067,7 @@ public class AppOpsManager {
         new AppOpInfo.Builder(OP_ESTABLISH_VPN_MANAGER, OPSTR_ESTABLISH_VPN_MANAGER,
                 "ESTABLISH_VPN_MANAGER").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_ACCESS_RESTRICTED_SETTINGS, OPSTR_ACCESS_RESTRICTED_SETTINGS,
-                "ACCESS_RESTRICTED_SETTINGS").setDefaultMode(AppOpsManager.MODE_ALLOWED)
+                "ACCESS_RESTRICTED_SETTINGS").setDefaultMode(AppOpsManager.MODE_DEFAULT)
             .setDisableReset(true).setRestrictRead(true).build(),
         new AppOpInfo.Builder(OP_RECEIVE_AMBIENT_TRIGGER_AUDIO, OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO,
                 "RECEIVE_SOUNDTRIGGER_AUDIO").setDefaultMode(AppOpsManager.MODE_ALLOWED)
