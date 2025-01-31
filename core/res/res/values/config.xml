@@ -5958,6 +5958,9 @@
         <!-- <item>com.google</item> -->
     </string-array>
 
+    <!-- Whether to restrict the accounts that raw contacts can be created in. -->
+    <bool name = "config_rawContactsAccountRestrictionEnabled">true</bool>
+
     <!-- Whether or not to use assistant stream volume separately from music volume -->
     <bool name="config_useAssistantVolume">false</bool>
 

@@ -4617,6 +4617,7 @@
   <java-symbol type="string" name="config_rawContactsLocalAccountName" />
   <java-symbol type="string" name="config_rawContactsLocalAccountType" />
   <java-symbol type="array" name="config_rawContactsEligibleDefaultAccountTypes" />
+  <java-symbol type="bool" name="config_rawContactsAccountRestrictionEnabled" />
 
   <!-- For App Standby -->
   <java-symbol type="string" name="as_app_forced_to_restricted_bucket" />
