@@ -296,13 +296,6 @@ private class NestedDraggableNode(
 
         awaitEachGesture {
             val down = awaitFirstDown(requireUnconsumed = false)
-            check(down.position == lastFirstDown) {
-                "Position from detectDrags() is not the same as position in trackDownPosition()"
-            }
-            check(pointersDown.size == 1 && pointersDown.keys.first() == down.id) {
-                "pointersDown should only contain $down but it contains $pointersDown"
-            }
-
             var overSlop = 0f
             val onTouchSlopReached = { change: PointerInputChange, over: Float ->
                 if (draggable.shouldStartDrag(change)) {
@@ -342,7 +335,12 @@ private class NestedDraggableNode(
 
                 check(pointersDown.size > 0) { "pointersDown is empty" }
                 val controller =
-                    draggable.onDragStarted(down.position, sign, pointersDown.size, drag.type)
+                    draggable.onDragStarted(
+                        down.position,
+                        sign,
+                        pointersDown.size.coerceAtLeast(1),
+                        drag.type,
+                    )
                 if (overSlop != 0f) {
                     onDrag(controller, drag, overSlop, velocityTracker)
                 }
