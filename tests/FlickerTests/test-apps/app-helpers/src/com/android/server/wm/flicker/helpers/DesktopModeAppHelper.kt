@@ -87,14 +87,18 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         wmHelper: WindowManagerStateHelper,
         device: UiDevice,
         motionEventHelper: MotionEventHelper = MotionEventHelper(getInstrumentation(), TOUCH),
+        shouldUseDragToDesktop: Boolean = false,
     ) {
         innerHelper.launchViaIntent(wmHelper)
-        if (!isInDesktopWindowingMode(wmHelper)) {
+        if (isInDesktopWindowingMode(wmHelper)) return
+        if (shouldUseDragToDesktop) {
             enterDesktopModeWithDrag(
                 wmHelper = wmHelper,
                 device = device,
                 motionEventHelper = motionEventHelper
             )
+        } else {
+            enterDesktopModeFromAppHandleMenu(wmHelper, device)
         }
     }
 
