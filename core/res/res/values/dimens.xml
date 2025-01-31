@@ -714,6 +714,18 @@
     <!-- The minimum window size of the accessibility window magnifier -->
     <dimen name="accessibility_window_magnifier_min_size">122dp</dimen>
 
+    <!-- The accessibility autoclick panel button spacing -->
+    <dimen name="accessibility_autoclick_type_panel_button_spacing">12dp</dimen>
+
+    <!-- The accessibility autoclick panel button width and height -->
+    <dimen name="accessibility_autoclick_type_panel_button_size">36dp</dimen>
+
+    <!-- The accessibility autoclick panel divider width -->
+    <dimen name="accessibility_autoclick_type_panel_divider_width">1dp</dimen>
+
+    <!-- The accessibility autoclick panel divider height -->
+    <dimen name="accessibility_autoclick_type_panel_divider_height">24dp</dimen>
+
     <!-- Margin around the various security views -->
     <dimen name="keyguard_muliuser_selector_margin">8dp</dimen>
 
