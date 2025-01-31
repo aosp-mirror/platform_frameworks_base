@@ -28,6 +28,7 @@ import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.common.shared.model.asIcon
+import com.android.systemui.kosmos.mainCoroutineContext
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter
@@ -125,6 +126,7 @@ class ModesTileTest : SysuiTestCase() {
 
         userActionInteractor =
             ModesTileUserActionInteractor(
+                kosmos.mainCoroutineContext,
                 inputHandler,
                 dialogDelegate,
                 kosmos.zenModeInteractor,
