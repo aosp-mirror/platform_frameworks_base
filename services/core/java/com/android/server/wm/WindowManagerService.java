@@ -157,6 +157,7 @@ import static com.android.server.wm.WindowManagerServiceDumpProto.POLICY;
 import static com.android.server.wm.WindowManagerServiceDumpProto.ROOT_WINDOW_CONTAINER;
 import static com.android.server.wm.WindowManagerServiceDumpProto.WINDOW_FRAMES_VALID;
 import static com.android.window.flags.Flags.enableDisplayFocusInShellTransitions;
+import static com.android.window.flags.Flags.enablePresentationForConnectedDisplays;
 import static com.android.window.flags.Flags.multiCrop;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
 
@@ -1924,6 +1925,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (res >= ADD_OKAY
                     && (type == TYPE_PRESENTATION || type == TYPE_PRIVATE_PRESENTATION)) {
+                displayContent.mIsPresenting = true;
+                if (enablePresentationForConnectedDisplays()) {
+                    // A presentation hides all activities behind on the same display.
+                    displayContent.ensureActivitiesVisible(/*starting=*/ null,
+                            /*notifyClients=*/ true);
+                }
                 mDisplayManagerInternal.onPresentation(displayContent.getDisplay().getDisplayId(),
                         /*isShown=*/ true);
             }

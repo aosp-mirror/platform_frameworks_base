@@ -26,6 +26,7 @@ import static android.permission.flags.Flags.FLAG_SENSITIVE_CONTENT_RECENTS_SCRE
 import static android.permission.flags.Flags.FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_OWN_FOCUS;
+import static android.view.Display.FLAG_PRESENTATION;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
@@ -53,6 +54,7 @@ import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
+import static com.android.window.flags.Flags.FLAG_ENABLE_PRESENTATION_FOR_CONNECTED_DISPLAYS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -99,6 +101,7 @@ import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.MergedConfiguration;
 import android.view.ContentRecordingSession;
+import android.view.DisplayInfo;
 import android.view.IWindow;
 import android.view.InputChannel;
 import android.view.InputDevice;
@@ -1403,6 +1406,38 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         // Report the last reported value when activity is invisible.
         final ActivityWindowInfo activityWindowInfo3 = outRelayoutResult.activityWindowInfo;
         assertEquals(activityWindowInfo2, activityWindowInfo3);
+    }
+
+    @EnableFlags(FLAG_ENABLE_PRESENTATION_FOR_CONNECTED_DISPLAYS)
+    @Test
+    public void testPresentationHidesActivitiesBehind() {
+        DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.copyFrom(mDisplayInfo);
+        displayInfo.flags = FLAG_PRESENTATION;
+        DisplayContent dc = createNewDisplay(displayInfo);
+        int displayId = dc.getDisplayId();
+        doReturn(dc).when(mWm.mRoot).getDisplayContentOrCreate(displayId);
+        ActivityRecord activity = createActivityRecord(createTask(dc));
+        assertTrue(activity.isVisible());
+
+        doReturn(true).when(() -> UserManager.isVisibleBackgroundUsersEnabled());
+        int uid = 100000; // uid for non-system user
+        Session session = createTestSession(mAtm, 1234 /* pid */, uid);
+        int userId = UserHandle.getUserId(uid);
+        doReturn(false).when(mWm.mUmInternal).isUserVisible(eq(userId), eq(displayId));
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                LayoutParams.TYPE_PRESENTATION);
+
+        final IWindow clientWindow = new TestIWindow();
+        int result = mWm.addWindow(session, clientWindow, params, View.VISIBLE, displayId,
+                userId, WindowInsets.Type.defaultVisible(), null, new InsetsState(),
+                new InsetsSourceControl.Array(), new Rect(), new float[1]);
+        assertTrue(result >= WindowManagerGlobal.ADD_OKAY);
+        assertFalse(activity.isVisible());
+
+        final WindowState window = mWm.windowForClientLocked(session, clientWindow, false);
+        window.removeImmediately();
+        assertTrue(activity.isVisible());
     }
 
     @Test

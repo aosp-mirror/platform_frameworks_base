@@ -547,6 +547,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     // TODO(multi-display): remove some of the usages.
     boolean isDefaultDisplay;
 
+    /** Indicates whether any presentation is shown on this display. */
+    boolean mIsPresenting;
+
     /** Save allocating when calculating rects */
     private final Rect mTmpRect = new Rect();
     private final Region mTmpRegion = new Region();
