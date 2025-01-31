@@ -10082,6 +10082,7 @@ public class RemoteViews implements Parcelable, Filter {
         if (mApplication != null) {
             // mApplication may be null if this was created with DrawInstructions constructor.
             out.write(RemoteViewsProto.PACKAGE_NAME, mApplication.packageName);
+            out.write(RemoteViewsProto.UID, mApplication.uid);
         }
         Resources appResources = getContextForResourcesEnsuringCorrectCachedApkPaths(
                 context).getResources();
@@ -10163,6 +10164,7 @@ public class RemoteViews implements Parcelable, Filter {
             int mApplyFlags = 0;
             long mProviderInstanceId = -1;
             String mPackageName = null;
+            Integer mUid = null;
             SizeF mIdealSize = null;
             String mLayoutResName = null;
             String mLightBackgroundResName = null;
@@ -10184,6 +10186,9 @@ public class RemoteViews implements Parcelable, Filter {
                         break;
                     case (int) RemoteViewsProto.PACKAGE_NAME:
                         ref.mPackageName = in.readString(RemoteViewsProto.PACKAGE_NAME);
+                        break;
+                    case (int) RemoteViewsProto.UID:
+                        ref.mUid = in.readInt(RemoteViewsProto.UID);
                         break;
                     case (int) RemoteViewsProto.IDEAL_SIZE:
                         final long idealSizeToken = in.start(RemoteViewsProto.IDEAL_SIZE);
@@ -10286,8 +10291,9 @@ public class RemoteViews implements Parcelable, Filter {
             Resources appResources = null;
             if (!ref.mHasDrawInstructions) {
                 checkProtoResultNotNull(ref.mPackageName, "No application info");
-                rv.mApplication = context.getPackageManager().getApplicationInfo(ref.mPackageName,
-                        /* flags= */ 0);
+                checkProtoResultNotNull(ref.mUid, "No uid");
+                rv.mApplication = context.getPackageManager().getApplicationInfoAsUser(
+                        ref.mPackageName, /* flags= */ 0, UserHandle.getUserId(ref.mUid));
                 appContext = rv.getContextForResourcesEnsuringCorrectCachedApkPaths(context);
                 appResources = appContext.getResources();
 
