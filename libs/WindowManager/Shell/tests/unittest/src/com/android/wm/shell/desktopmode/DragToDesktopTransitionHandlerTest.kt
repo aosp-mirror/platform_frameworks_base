@@ -477,6 +477,40 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
     }
 
     @Test
+    fun mergeAnimation_endTransition_springHandler_noStartHomeChange_doesntCrash() {
+        whenever(dragAnimator.computeCurrentVelocity()).thenReturn(PointF())
+        val playingFinishTransaction = mock<SurfaceControl.Transaction>()
+        val mergedStartTransaction = mock<SurfaceControl.Transaction>()
+        val mergedFinishTransaction = mock<SurfaceControl.Transaction>()
+        val finishCallback = mock<Transitions.TransitionFinishCallback>()
+        val task = createTask()
+        val startTransition = startDrag(
+            springHandler, task, finishTransaction = playingFinishTransaction, homeChange = null)
+        springHandler.onTaskResizeAnimationListener = mock()
+
+        springHandler.mergeAnimation(
+            transition = mock<IBinder>(),
+            info =
+            createTransitionInfo(
+                type = TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP,
+                draggedTask = task,
+            ),
+            startT = mergedStartTransaction,
+            finishT = mergedFinishTransaction,
+            mergeTarget = startTransition,
+            finishCallback = finishCallback,
+        )
+
+        // Should show dragged task layer in start and finish transaction
+        verify(mergedStartTransaction).show(draggedTaskLeash)
+        verify(playingFinishTransaction).show(draggedTaskLeash)
+        // Should update the dragged task layer
+        verify(mergedStartTransaction).setLayer(eq(draggedTaskLeash), anyInt())
+        // Should merge animation
+        verify(finishCallback).onTransitionFinished(null)
+    }
+
+    @Test
     fun propertyValue_returnsSystemPropertyValue() {
         val name = "property_name"
         val value = 10f
@@ -589,6 +623,7 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
         handler: DragToDesktopTransitionHandler,
         task: RunningTaskInfo = createTask(),
         finishTransaction: SurfaceControl.Transaction = mock(),
+        homeChange: TransitionInfo.Change? = createHomeChange(),
     ): IBinder {
         whenever(dragAnimator.position).thenReturn(PointF())
         // Simulate transition is started and is ready to animate.
@@ -599,6 +634,7 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
                 createTransitionInfo(
                     type = TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP,
                     draggedTask = task,
+                    homeChange = homeChange,
                 ),
             startTransaction = mock(),
             finishTransaction = finishTransaction,
@@ -684,16 +720,12 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
             }
     }
 
-    private fun createTransitionInfo(type: Int, draggedTask: RunningTaskInfo) =
+    private fun createTransitionInfo(
+        type: Int,
+        draggedTask: RunningTaskInfo,
+        homeChange: TransitionInfo.Change? = createHomeChange()) =
         TransitionInfo(type, /* flags= */ 0).apply {
-            addChange( // Home.
-                TransitionInfo.Change(mock(), homeTaskLeash).apply {
-                    parent = null
-                    taskInfo =
-                        TestRunningTaskInfoBuilder().setActivityType(ACTIVITY_TYPE_HOME).build()
-                    flags = flags or FLAG_IS_WALLPAPER
-                }
-            )
+            homeChange?.let { addChange(it) }
             addChange( // Dragged Task.
                 TransitionInfo.Change(mock(), draggedTaskLeash).apply {
                     parent = null
@@ -708,6 +740,12 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
                 }
             )
         }
+
+    private fun createHomeChange() = TransitionInfo.Change(mock(), homeTaskLeash).apply {
+        parent = null
+        taskInfo = TestRunningTaskInfoBuilder().setActivityType(ACTIVITY_TYPE_HOME).build()
+        flags = flags or FLAG_IS_WALLPAPER
+    }
 
     private fun systemPropertiesKey(name: String) =
         "${SpringDragToDesktopTransitionHandler.SYSTEM_PROPERTIES_GROUP}.$name"
