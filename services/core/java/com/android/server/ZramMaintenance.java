@@ -24,10 +24,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.IMmd;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.provider.DeviceConfig;
 import android.util.Slog;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.time.Duration;
 
@@ -46,43 +50,45 @@ public class ZramMaintenance extends JobService {
     private static final String TAG = ZramMaintenance.class.getName();
     // Job id must be unique across all clients of the same uid. ZramMaintenance uses the bug number
     // as the job id.
-    private static final int JOB_ID = 375432472;
+    @VisibleForTesting
+    public static final int JOB_ID = 375432472;
     private static final ComponentName sZramMaintenance =
             new ComponentName("android", ZramMaintenance.class.getName());
+    @VisibleForTesting
+    public static final String KEY_CHECK_STATUS = "check_status";
 
+    private static final String SYSTEM_PROPERTY_PREFIX = "mm.";
     private static final String FIRST_DELAY_SECONDS_PROP =
-            "mm.zram.maintenance.first_delay_seconds";
+            "zram.maintenance.first_delay_seconds";
     // The default is 1 hour.
     private static final long DEFAULT_FIRST_DELAY_SECONDS = 3600;
     private static final String PERIODIC_DELAY_SECONDS_PROP =
-            "mm.zram.maintenance.periodic_delay_seconds";
+            "zram.maintenance.periodic_delay_seconds";
     // The default is 1 hour.
     private static final long DEFAULT_PERIODIC_DELAY_SECONDS = 3600;
     private static final String REQUIRE_DEVICE_IDLE_PROP =
-            "mm.zram.maintenance.require_device_idle";
+            "zram.maintenance.require_device_idle";
     private static final boolean DEFAULT_REQUIRE_DEVICE_IDLE =
             true;
     private static final String REQUIRE_BATTERY_NOT_LOW_PROP =
-            "mm.zram.maintenance.require_battry_not_low";
+            "zram.maintenance.require_battry_not_low";
     private static final boolean DEFAULT_REQUIRE_BATTERY_NOT_LOW =
             true;
 
     @Override
     public boolean onStartJob(JobParameters params) {
-        IBinder binder = ServiceManager.getService("mmd");
-        if (binder != null) {
-            IMmd mmd = IMmd.Stub.asInterface(binder);
-            try {
-                mmd.doZramMaintenance();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to doZramMaintenance", e);
+        new Thread("ZramMaintenance") {
+            @Override
+            public void run() {
+                try {
+                    IBinder binder = ServiceManager.getService("mmd");
+                    IMmd mmd = IMmd.Stub.asInterface(binder);
+                    startJob(ZramMaintenance.this, params, mmd);
+                } finally {
+                    jobFinished(params, false);
+                }
             }
-        } else {
-            Slog.w(TAG, "binder not found");
-        }
-        Duration delay = Duration.ofSeconds(SystemProperties.getLong(PERIODIC_DELAY_SECONDS_PROP,
-                DEFAULT_PERIODIC_DELAY_SECONDS));
-        scheduleZramMaintenance(this, delay);
+        }.start();
         return true;
     }
 
@@ -92,27 +98,75 @@ public class ZramMaintenance extends JobService {
     }
 
     /**
+     * This is public to test ZramMaintenance logic.
+     *
+     * <p>
+     * We need to pass mmd as parameter because we can't mock "IMmd.Stub.asInterface".
+     *
+     * <p>
+     * Since IMmd.isZramMaintenanceSupported() is blocking call, this method should be executed on
+     * a worker thread.
+     */
+    @VisibleForTesting
+    public static void startJob(Context context, JobParameters params, IMmd mmd) {
+        boolean checkStatus = params.getExtras().getBoolean(KEY_CHECK_STATUS);
+        if (mmd != null) {
+            try {
+                if (checkStatus && !mmd.isZramMaintenanceSupported()) {
+                    Slog.i(TAG, "zram maintenance is not supported");
+                    return;
+                }
+                // Status check is required before the first doZramMaintenanceAsync() call once.
+                checkStatus = false;
+
+                mmd.doZramMaintenanceAsync();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to binder call to mmd", e);
+            }
+        } else {
+            Slog.w(TAG, "binder not found");
+        }
+        Duration delay = Duration.ofSeconds(getLongProperty(PERIODIC_DELAY_SECONDS_PROP,
+                DEFAULT_PERIODIC_DELAY_SECONDS));
+        scheduleZramMaintenance(context, delay, checkStatus);
+    }
+
+    /**
      * Starts periodical zram maintenance.
      */
     public static void startZramMaintenance(Context context) {
         Duration delay = Duration.ofSeconds(
-                SystemProperties.getLong(FIRST_DELAY_SECONDS_PROP, DEFAULT_FIRST_DELAY_SECONDS));
-        scheduleZramMaintenance(context, delay);
+                getLongProperty(FIRST_DELAY_SECONDS_PROP, DEFAULT_FIRST_DELAY_SECONDS));
+        scheduleZramMaintenance(context, delay, true);
     }
 
-    private static void scheduleZramMaintenance(Context context, Duration delay) {
+    private static void scheduleZramMaintenance(Context context, Duration delay,
+            boolean checkStatus) {
         JobScheduler js = context.getSystemService(JobScheduler.class);
 
         if (js != null) {
+            final PersistableBundle bundle = new PersistableBundle();
+            bundle.putBoolean(KEY_CHECK_STATUS, checkStatus);
             js.schedule(new JobInfo.Builder(JOB_ID, sZramMaintenance)
                     .setMinimumLatency(delay.toMillis())
                     .setRequiresDeviceIdle(
-                            SystemProperties.getBoolean(REQUIRE_DEVICE_IDLE_PROP,
+                            getBooleanProperty(REQUIRE_DEVICE_IDLE_PROP,
                                     DEFAULT_REQUIRE_DEVICE_IDLE))
                     .setRequiresBatteryNotLow(
-                            SystemProperties.getBoolean(REQUIRE_BATTERY_NOT_LOW_PROP,
+                            getBooleanProperty(REQUIRE_BATTERY_NOT_LOW_PROP,
                                     DEFAULT_REQUIRE_BATTERY_NOT_LOW))
+                    .setExtras(bundle)
                     .build());
         }
+    }
+
+    private static long getLongProperty(String name, long defaultValue) {
+        return DeviceConfig.getLong(DeviceConfig.NAMESPACE_MM, name,
+                SystemProperties.getLong(SYSTEM_PROPERTY_PREFIX + name, defaultValue));
+    }
+
+    private static boolean getBooleanProperty(String name, boolean defaultValue) {
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_MM, name,
+                SystemProperties.getBoolean(SYSTEM_PROPERTY_PREFIX + name, defaultValue));
     }
 }
