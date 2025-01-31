@@ -46,7 +46,6 @@ import android.animation.Animator;
 import android.content.Context;
 import android.graphics.Color;
 import android.platform.test.annotations.DisableFlags;
-import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
 import android.testing.ViewUtils;
 import android.util.MathUtils;
@@ -78,7 +77,7 @@ import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransition
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scrim.ScrimView;
-import com.android.systemui.shade.shared.flag.DualShade;
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.shade.transition.LinearLargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.policy.FakeConfigurationController;
@@ -156,6 +155,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     private final FakeKeyguardTransitionRepository mKeyguardTransitionRepository =
             mKosmos.getKeyguardTransitionRepository();
     @Mock private KeyguardInteractor mKeyguardInteractor;
+    @Mock private ShadeModeInteractor mShadeModeInteractor;
 
     // TODO(b/204991468): Use a real PanelExpansionStateManager object once this bug is fixed. (The
     //   event-dispatch-on-registration pattern caused some of these unit tests to fail.)
@@ -272,6 +272,8 @@ public class ScrimControllerTest extends SysuiTestCase {
         when(mAlternateBouncerToGoneTransitionViewModel.getScrimAlpha())
                 .thenReturn(emptyFlow());
 
+        when(mShadeModeInteractor.isDualShade()).thenReturn(false);
+
         mScrimController = new ScrimController(
                 mLightBarController,
                 mDozeParameters,
@@ -290,6 +292,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mAlternateBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
                 mKeyguardInteractor,
+                mShadeModeInteractor,
                 mKosmos.getTestDispatcher(),
                 mLinearLargeScreenShadeInterpolator,
                 new BlurConfig(0.0f, 0.0f));
@@ -356,8 +359,8 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     @EnableSceneContainer
-    @DisableFlags(DualShade.FLAG_NAME)
     public void transitionToShadeLocked_sceneContainer_dualShadeOff() {
+        when(mShadeModeInteractor.isDualShade()).thenReturn(false);
         mScrimController.transitionTo(SHADE_LOCKED);
         mScrimController.setQsPosition(1f, 0);
         finishAnimationsImmediately();
@@ -376,8 +379,8 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     @EnableSceneContainer
-    @EnableFlags(DualShade.FLAG_NAME)
     public void transitionToShadeLocked_sceneContainer_dualShadeOn() {
+        when(mShadeModeInteractor.isDualShade()).thenReturn(true);
         mScrimController.transitionTo(SHADE_LOCKED);
         mScrimController.setQsPosition(1f, 0);
         finishAnimationsImmediately();
@@ -956,8 +959,8 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     @EnableSceneContainer
-    @DisableFlags(DualShade.FLAG_NAME)
     public void transitionToUnlocked_sceneContainer_dualShadeOff() {
+        when(mShadeModeInteractor.isDualShade()).thenReturn(false);
         mScrimController.setRawPanelExpansionFraction(0f);
         mScrimController.transitionTo(ScrimState.UNLOCKED);
         finishAnimationsImmediately();
@@ -985,8 +988,8 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     @EnableSceneContainer
-    @EnableFlags(DualShade.FLAG_NAME)
     public void transitionToUnlocked_sceneContainer_dualShadeOn() {
+        when(mShadeModeInteractor.isDualShade()).thenReturn(true);
         mScrimController.setRawPanelExpansionFraction(0f);
         mScrimController.transitionTo(ScrimState.UNLOCKED);
         finishAnimationsImmediately();
@@ -1256,6 +1259,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mAlternateBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
                 mKeyguardInteractor,
+                mShadeModeInteractor,
                 mKosmos.getTestDispatcher(),
                 mLinearLargeScreenShadeInterpolator,
                 new BlurConfig(0.0f, 0.0f));

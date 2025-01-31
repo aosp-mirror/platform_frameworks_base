@@ -178,7 +178,9 @@ class KosmosJavaAdapter() {
     val scrimStartable by lazy { kosmos.scrimStartable }
     val sceneContainerOcclusionInteractor by lazy { kosmos.sceneContainerOcclusionInteractor }
     val msdlPlayer by lazy { kosmos.fakeMSDLPlayer }
+
     val shadeModeInteractor by lazy { kosmos.shadeModeInteractor }
+
     val bouncerHapticHelper by lazy { kosmos.bouncerHapticPlayer }
 
     val glanceableHubToLockscreenTransitionViewModel by lazy {
