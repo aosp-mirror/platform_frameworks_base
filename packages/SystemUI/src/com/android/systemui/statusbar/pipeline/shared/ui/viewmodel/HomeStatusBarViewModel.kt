@@ -87,9 +87,6 @@ import kotlinx.coroutines.flow.stateIn
  * so that it's all in one place and easily testable outside of the fragment.
  */
 interface HomeStatusBarViewModel {
-    /** Should the entire status bar be hidden? */
-    val shouldHomeStatusBarBeVisible: Flow<Boolean>
-
     /**
      * True if the device is currently transitioning from lockscreen to occluded and false
      * otherwise.
@@ -303,7 +300,7 @@ constructor(
             isHomeScreenStatusBarAllowedLegacy
         }
 
-    override val shouldHomeStatusBarBeVisible =
+    private val shouldHomeStatusBarBeVisible =
         combine(
                 isHomeStatusBarAllowed,
                 keyguardInteractor.isSecureCameraActive,

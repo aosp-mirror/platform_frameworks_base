@@ -85,6 +85,20 @@ constructor(
         systemEventChipAnimateOut: ((View) -> Unit)?,
         listener: StatusBarVisibilityChangeListener?,
     ) {
+        // Set some top-level views to gone before we get started
+        val primaryChipView: View = view.requireViewById(R.id.ongoing_activity_chip_primary)
+        val systemInfoView = view.requireViewById<View>(R.id.status_bar_end_side_content)
+        val clockView = view.requireViewById<View>(R.id.clock)
+        val notificationIconsArea = view.requireViewById<View>(R.id.notificationIcons)
+
+        // CollapsedStatusBarFragment doesn't need this
+        if (StatusBarRootModernization.isEnabled) {
+            primaryChipView.isVisible = false
+            systemInfoView.isVisible = false
+            clockView.isVisible = false
+            notificationIconsArea.isVisible = false
+        }
+
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 val iconViewStore =
@@ -133,9 +147,7 @@ constructor(
 
                 if (!StatusBarNotifChips.isEnabled && !StatusBarChipsModernization.isEnabled) {
                     val primaryChipViewBinding =
-                        OngoingActivityChipBinder.createBinding(
-                            view.requireViewById(R.id.ongoing_activity_chip_primary)
-                        )
+                        OngoingActivityChipBinder.createBinding(primaryChipView)
                     launch {
                         viewModel.primaryOngoingActivityChip.collect { primaryChipModel ->
                             OngoingActivityChipBinder.bind(
@@ -181,9 +193,7 @@ constructor(
                     // Create view bindings here so we don't keep re-fetching child views each time
                     // the chip model changes.
                     val primaryChipViewBinding =
-                        OngoingActivityChipBinder.createBinding(
-                            view.requireViewById(R.id.ongoing_activity_chip_primary)
-                        )
+                        OngoingActivityChipBinder.createBinding(primaryChipView)
                     val secondaryChipViewBinding =
                         OngoingActivityChipBinder.createBinding(
                             view.requireViewById(R.id.ongoing_activity_chip_secondary)
@@ -245,7 +255,11 @@ constructor(
                 }
 
                 if (StatusBarRootModernization.isEnabled) {
+                    // TODO(b/393445203): figure out the best story for this stub view. This crashes
+                    // if we move it up to the top of [bind]
                     val operatorNameView = view.requireViewById<View>(R.id.operator_name_frame)
+                    operatorNameView.isVisible = false
+
                     StatusBarOperatorNameViewBinder.bind(
                         operatorNameView,
                         viewModel.operatorNameViewModel,
@@ -257,19 +271,14 @@ constructor(
                         }
                     }
 
-                    val clockView = view.requireViewById<View>(R.id.clock)
                     launch { viewModel.isClockVisible.collect { clockView.adjustVisibility(it) } }
 
-                    val notificationIconsArea = view.requireViewById<View>(R.id.notificationIcons)
                     launch {
                         viewModel.isNotificationIconContainerVisible.collect {
                             notificationIconsArea.adjustVisibility(it)
                         }
                     }
 
-                    val systemInfoView =
-                        view.requireViewById<View>(R.id.status_bar_end_side_content)
-                    // TODO(b/364360986): Also handle operator name view.
                     launch {
                         viewModel.systemInfoCombinedVis.collect { (baseVis, animState) ->
                             // Broadly speaking, the baseVis controls the view.visibility, and
@@ -358,6 +367,9 @@ constructor(
 
     // See CollapsedStatusBarFragment#hide.
     private fun View.hide(state: Int = View.INVISIBLE, shouldAnimateChange: Boolean) {
+        if (visibility == View.INVISIBLE || visibility == View.GONE) {
+            return
+        }
         val v = this
         v.animate().cancel()
         if (!shouldAnimateChange) {
@@ -376,6 +388,9 @@ constructor(
 
     // See CollapsedStatusBarFragment#show.
     private fun View.show(shouldAnimateChange: Boolean) {
+        if (visibility == View.VISIBLE) {
+            return
+        }
         val v = this
         v.animate().cancel()
         v.visibility = View.VISIBLE

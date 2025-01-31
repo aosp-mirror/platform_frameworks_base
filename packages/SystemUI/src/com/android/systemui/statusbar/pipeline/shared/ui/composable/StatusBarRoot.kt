@@ -25,16 +25,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.view.isVisible
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.theme.PlatformTheme
 import com.android.keyguard.AlphaOptimizedLinearLayout
 import com.android.systemui.plugins.DarkIconDispatcher
@@ -130,9 +127,6 @@ fun StatusBarRoot(
         }
 
         Row(Modifier.fillMaxSize()) {
-            val scope = rememberCoroutineScope()
-            val visible =
-                statusBarViewModel.shouldHomeStatusBarBeVisible.collectAsStateWithLifecycle(false)
             AndroidView(
                 factory = { context ->
                     val inflater = LayoutInflater.from(context)
@@ -247,32 +241,23 @@ fun StatusBarRoot(
                         endSideContent.addView(composeView, 0)
                     }
 
-                    scope.launch {
-                        notificationIconsBinder.bindWhileAttached(
-                            notificationIconContainer,
-                            context.displayId,
-                        )
-                    }
+                    notificationIconsBinder.bindWhileAttached(
+                        notificationIconContainer,
+                        context.displayId,
+                    )
 
                     // This binder handles everything else
-                    scope.launch {
-                        statusBarViewBinder.bind(
-                            context.displayId,
-                            phoneStatusBarView,
-                            statusBarViewModel,
-                            eventAnimationInteractor::animateStatusBarContentForChipEnter,
-                            eventAnimationInteractor::animateStatusBarContentForChipExit,
-                            listener = null,
-                        )
-                    }
+                    statusBarViewBinder.bind(
+                        context.displayId,
+                        phoneStatusBarView,
+                        statusBarViewModel,
+                        eventAnimationInteractor::animateStatusBarContentForChipEnter,
+                        eventAnimationInteractor::animateStatusBarContentForChipExit,
+                        listener = null,
+                    )
                     onViewCreated(phoneStatusBarView)
                     phoneStatusBarView
-                },
-                update = { view ->
-                    // Show or hide the entire status bar. This is important so that we aren't
-                    // visible when first inflated
-                    view.isVisible = visible.value
-                },
+                }
             )
         }
     }
