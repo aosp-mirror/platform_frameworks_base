@@ -29,10 +29,10 @@ import com.android.internal.logging.InstanceId
 import com.android.internal.statusbar.IAddTileResultCallback
 import com.android.systemui.InstanceIdSequenceFake
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.external.ui.dialog.tileRequestDialogComposeDelegateFactory
 import com.android.systemui.qs.flags.QSComposeFragment
-import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.testKosmos
@@ -57,7 +57,8 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@DisableFlags(value = [QSComposeFragment.FLAG_NAME, DualShade.FLAG_NAME])
+@DisableFlags(QSComposeFragment.FLAG_NAME)
+@DisableSceneContainer
 class TileServiceRequestControllerTestComposeOff : SysuiTestCase() {
 
     companion object {
