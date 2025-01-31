@@ -109,15 +109,22 @@ constructor(
                             }
                             if (isShadeLayoutWide && !isBypassEnabled) {
                                 with(notificationSection) {
-                                    Notifications(
-                                        areNotificationsVisible = areNotificationsVisible,
-                                        isShadeLayoutWide = true,
-                                        burnInParams = null,
-                                        modifier =
-                                            Modifier.fillMaxWidth(0.5f)
-                                                .fillMaxHeight()
-                                                .align(alignment = Alignment.TopEnd),
-                                    )
+                                    Box(modifier = Modifier.fillMaxHeight()) {
+                                        AodPromotedNotificationArea(
+                                            modifier =
+                                                Modifier.fillMaxWidth(0.5f)
+                                                    .align(alignment = Alignment.TopStart)
+                                        )
+                                        Notifications(
+                                            areNotificationsVisible = areNotificationsVisible,
+                                            isShadeLayoutWide = true,
+                                            burnInParams = null,
+                                            modifier =
+                                                Modifier.fillMaxWidth(0.5f)
+                                                    .fillMaxHeight()
+                                                    .align(alignment = Alignment.TopEnd),
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -142,9 +149,18 @@ constructor(
                                 }
                             } else {
                                 Column {
-                                    AodPromotedNotificationArea()
+                                    if (!isShadeLayoutWide) {
+                                        AodPromotedNotificationArea()
+                                    }
                                     AodNotificationIcons(
-                                        modifier = Modifier.padding(start = aodIconPadding)
+                                        modifier =
+                                            Modifier.padding(
+                                                top =
+                                                    dimensionResource(
+                                                        R.dimen.keyguard_status_view_bottom_margin
+                                                    ),
+                                                start = aodIconPadding,
+                                            )
                                     )
                                 }
                             }

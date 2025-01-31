@@ -42,6 +42,10 @@ constructor(
 ) : KeyguardSection() {
     var view: ComposeView? = null
 
+    init {
+        logger.logSectionCreated(this)
+    }
+
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (!PromotedNotificationUiAod.isEnabled) {
             return
@@ -56,7 +60,7 @@ constructor(
                 constraintLayout.addView(this)
             }
 
-        logger.logSectionAddedViews()
+        logger.logSectionAddedViews(this)
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
@@ -68,7 +72,7 @@ constructor(
 
         // Do nothing; the binding happens in the AODPromotedNotification Composable.
 
-        logger.logSectionBoundData()
+        logger.logSectionBoundData(this)
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
@@ -76,7 +80,8 @@ constructor(
             return
         }
 
-        checkNotNull(view)
+        // view may have been created by a different instance of the section (!), and we don't
+        // actually *need* it to set constraints, so don't check for it here.
 
         constraintSet.apply {
             val isShadeLayoutWide = shadeInteractor.isShadeLayoutWide.value
@@ -90,7 +95,7 @@ constructor(
             constrainHeight(viewId, ConstraintSet.WRAP_CONTENT)
         }
 
-        logger.logSectionAppliedConstraints()
+        logger.logSectionAppliedConstraints(this)
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
@@ -102,7 +107,7 @@ constructor(
 
         view = null
 
-        logger.logSectionRemovedViews()
+        logger.logSectionRemovedViews(this)
     }
 
     companion object {
