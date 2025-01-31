@@ -31,6 +31,7 @@ import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.clipScrollableContainer
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement.spacedBy
@@ -49,7 +50,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -101,7 +101,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
-import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
@@ -138,7 +137,6 @@ import com.android.systemui.qs.panels.ui.compose.selection.ResizingState
 import com.android.systemui.qs.panels.ui.compose.selection.ResizingState.ResizeOperation
 import com.android.systemui.qs.panels.ui.compose.selection.ResizingState.ResizeOperation.FinalResizeOperation
 import com.android.systemui.qs.panels.ui.compose.selection.ResizingState.ResizeOperation.TemporaryResizeOperation
-import com.android.systemui.qs.panels.ui.compose.selection.clearSelectionTile
 import com.android.systemui.qs.panels.ui.compose.selection.rememberResizingState
 import com.android.systemui.qs.panels.ui.compose.selection.rememberSelectionState
 import com.android.systemui.qs.panels.ui.compose.selection.selectableTile
@@ -190,6 +188,7 @@ fun DefaultEditTileGrid(
     columns: Int,
     largeTilesSpan: Int,
     modifier: Modifier,
+    onAddTile: (TileSpec) -> Unit,
     onRemoveTile: (TileSpec) -> Unit,
     onSetTiles: (List<TileSpec>) -> Unit,
     onResize: (TileSpec, toIcon: Boolean) -> Unit,
@@ -230,20 +229,26 @@ fun DefaultEditTileGrid(
                     modifier
                         .fillMaxSize()
                         // Apply top padding before the scroll so the scrollable doesn't show under
-                        // the
-                        // top bar
+                        // the top bar
                         .padding(top = innerPadding.calculateTopPadding())
                         .clipScrollableContainer(Orientation.Vertical)
                         .verticalScroll(scrollState),
             ) {
                 AnimatedContent(
-                    targetState = listState.dragInProgress,
-                    modifier = Modifier.wrapContentSize(),
+                    targetState = listState.dragInProgress || selectionState.selected,
                     label = "QSEditHeader",
-                ) { dragIsInProgress ->
-                    EditGridHeader(Modifier.dragAndDropRemoveZone(listState, onRemoveTile)) {
-                        if (dragIsInProgress) {
-                            RemoveTileTarget()
+                ) { showRemoveTarget ->
+                    EditGridHeader(
+                        Modifier.dragAndDropRemoveZone(listState, onRemoveTile)
+                            .padding(bottom = 26.dp)
+                    ) {
+                        if (showRemoveTarget) {
+                            RemoveTileTarget {
+                                selectionState.selection?.let {
+                                    selectionState.unSelect()
+                                    onRemoveTile(it.tileSpec)
+                                }
+                            }
                         } else {
                             Text(text = stringResource(id = R.string.drag_to_rearrange_tiles))
                         }
@@ -283,7 +288,13 @@ fun DefaultEditTileGrid(
                                 Text(text = stringResource(id = R.string.drag_to_add_tiles))
                             }
 
-                            AvailableTileGrid(otherTiles, selectionState, columns, listState)
+                            AvailableTileGrid(
+                                otherTiles,
+                                selectionState,
+                                columns,
+                                onAddTile,
+                                listState,
+                            )
                         }
                     }
                 }
@@ -347,22 +358,18 @@ private fun EditGridHeader(
     CompositionLocalProvider(
         LocalContentColor provides MaterialTheme.colorScheme.onBackground.copy(alpha = .5f)
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = modifier.fillMaxWidth().wrapContentHeight(),
-        ) {
-            content()
-        }
+        Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxWidth()) { content() }
     }
 }
 
 @Composable
-private fun RemoveTileTarget() {
+private fun RemoveTileTarget(onClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = tileHorizontalArrangement(),
         modifier =
             Modifier.fillMaxHeight()
+                .clickable(onClick = onClick)
                 .border(1.dp, LocalContentColor.current, shape = CircleShape)
                 .padding(10.dp),
     ) {
@@ -441,6 +448,7 @@ private fun AvailableTileGrid(
     tiles: List<SizedTile<EditTileViewModel>>,
     selectionState: MutableSelectionState,
     columns: Int,
+    onAddTile: (TileSpec) -> Unit,
     dragAndDropState: DragAndDropState,
 ) {
     // Available tiles aren't visible during drag and drop, so the row/col isn't needed
@@ -478,6 +486,7 @@ private fun AvailableTileGrid(
                                     index = index,
                                     dragAndDropState = dragAndDropState,
                                     selectionState = selectionState,
+                                    onAddTile = onAddTile,
                                     modifier = Modifier.weight(1f).fillMaxHeight(),
                                 )
                             }
@@ -682,11 +691,16 @@ private fun AvailableTileGridCell(
     index: Int,
     dragAndDropState: DragAndDropState,
     selectionState: MutableSelectionState,
+    onAddTile: (TileSpec) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val onClickActionName = stringResource(id = R.string.accessibility_qs_edit_tile_add_action)
     val stateDescription = stringResource(id = R.string.accessibility_qs_edit_position, index + 1)
     val colors = EditModeTileDefaults.editTileColors()
+    val onClick = {
+        onAddTile(cell.tile.tileSpec)
+        selectionState.select(cell.tile.tileSpec, manual = false)
+    }
 
     // Displays the tile as an icon tile with the label underneath
     Column(
@@ -697,11 +711,8 @@ private fun AvailableTileGridCell(
         Box(
             Modifier.fillMaxWidth()
                 .height(TileHeight)
-                .clearSelectionTile(selectionState)
-                .semantics(mergeDescendants = true) {
-                    onClick(onClickActionName) { false }
-                    this.stateDescription = stateDescription
-                }
+                .clickable(onClick = onClick, onClickLabel = onClickActionName)
+                .semantics(mergeDescendants = true) { this.stateDescription = stateDescription }
                 .dragAndDropTileSource(
                     SizedTileImpl(cell.tile, cell.width),
                     dragAndDropState,

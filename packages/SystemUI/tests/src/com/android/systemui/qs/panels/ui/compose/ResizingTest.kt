@@ -65,6 +65,7 @@ class ResizingTest : SysuiTestCase() {
             columns = 4,
             largeTilesSpan = 4,
             modifier = Modifier.fillMaxSize(),
+            onAddTile = {},
             onRemoveTile = {},
             onSetTiles = {},
             onResize = onResize,
