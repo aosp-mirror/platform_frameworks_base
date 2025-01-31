@@ -28,6 +28,7 @@ import android.util.Pair;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.transition.Transitions;
@@ -50,7 +51,7 @@ import java.util.function.Consumer;
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class RestartDialogWindowManagerTest extends CompatUIShellTestCase {
+public class RestartDialogWindowManagerTest extends ShellTestCase {
 
     @Mock
     private SyncTransactionQueue mSyncTransactionQueue;

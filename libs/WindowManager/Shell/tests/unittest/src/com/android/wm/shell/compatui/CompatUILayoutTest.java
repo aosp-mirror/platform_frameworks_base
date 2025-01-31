@@ -38,6 +38,7 @@ import androidx.test.filters.SmallTest;
 import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIController.CompatUIHintsState;
@@ -62,7 +63,7 @@ import java.util.function.Consumer;
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class CompatUILayoutTest extends CompatUIShellTestCase {
+public class CompatUILayoutTest extends ShellTestCase {
 
     private static final int TASK_ID = 1;
 

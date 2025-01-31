@@ -49,6 +49,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -85,7 +86,7 @@ import org.mockito.MockitoAnnotations;
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class CompatUIControllerTest extends CompatUIShellTestCase {
+public class CompatUIControllerTest extends ShellTestCase {
     private static final int DISPLAY_ID = 0;
     private static final int TASK_ID = 12;
 

@@ -30,6 +30,7 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -52,7 +53,7 @@ import java.util.function.BiConsumer;
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class ReachabilityEduWindowManagerTest extends CompatUIShellTestCase {
+public class ReachabilityEduWindowManagerTest extends ShellTestCase {
     @Mock
     private SyncTransactionQueue mSyncTransactionQueue;
     @Mock
