@@ -56,6 +56,16 @@ import java.util.List;
 public abstract class MediaOutputBaseAdapter extends
         RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    record OngoingSessionStatus(boolean host) {}
+
+    record GroupStatus(Boolean selected, Boolean deselectable) {}
+
+    enum ConnectionState {
+        CONNECTED,
+        CONNECTING,
+        DISCONNECTED,
+    }
+
     protected final MediaSwitchingController mController;
 
     private static final int UNMUTE_DEFAULT_VOLUME = 2;
@@ -175,6 +185,7 @@ public abstract class MediaOutputBaseAdapter extends
             mCheckBox.setVisibility(View.GONE);
             mStatusIcon.setVisibility(View.GONE);
             mEndTouchArea.setVisibility(View.GONE);
+            mEndClickIcon.setVisibility(View.GONE);
             mEndTouchArea.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
             mContainerLayout.setOnClickListener(null);
             mContainerLayout.setContentDescription(null);
@@ -187,11 +198,10 @@ public abstract class MediaOutputBaseAdapter extends
         }
 
         void setSingleLineLayout(CharSequence title) {
-            setSingleLineLayout(title, false, false, false, false);
+            setSingleLineLayout(title, false, false);
         }
 
-        void setSingleLineLayout(CharSequence title, boolean showSeekBar,
-                boolean showProgressBar, boolean showCheckBox, boolean showEndTouchArea) {
+        void setSingleLineLayout(CharSequence title, boolean showSeekBar, boolean showProgressBar) {
             boolean isActive = showSeekBar || showProgressBar;
             if (!mCornerAnimator.isRunning()) {
                 final Drawable backgroundDrawable =
@@ -216,22 +226,11 @@ public abstract class MediaOutputBaseAdapter extends
                 mSeekBar.resetVolume();
             }
             mTitleText.setText(title);
-            mCheckBox.setVisibility(showCheckBox ? View.VISIBLE : View.GONE);
-            mEndTouchArea.setVisibility(showEndTouchArea ? View.VISIBLE : View.GONE);
-            if (Flags.enableOutputSwitcherSessionGrouping()) {
-                mEndClickIcon.setVisibility(
-                        !showCheckBox && showEndTouchArea ? View.VISIBLE : View.GONE);
-            }
-        }
-
-        void setTwoLineLayout(CharSequence title, boolean showSeekBar,
-                boolean showProgressBar, boolean showSubtitle, boolean showStatus) {
-            setTwoLineLayout(title, showSeekBar, showProgressBar, showSubtitle, showStatus, false);
         }
 
         void setTwoLineLayout(CharSequence title,
                 boolean showSeekBar, boolean showProgressBar, boolean showSubtitle,
-                boolean showStatus , boolean showEndTouchArea) {
+                boolean showStatus) {
             mStatusIcon.setVisibility(showStatus ? View.VISIBLE : View.GONE);
             mSeekBar.setAlpha(1);
             mSeekBar.setVisibility(showSeekBar ? View.VISIBLE : View.GONE);
@@ -246,13 +245,18 @@ public abstract class MediaOutputBaseAdapter extends
             if (showSeekBar) {
                 updateSeekbarProgressBackground();
             }
-            //update end click area by isActive
-            mEndTouchArea.setVisibility(showEndTouchArea ? View.VISIBLE : View.GONE);
-            mEndClickIcon.setVisibility(showEndTouchArea ? View.VISIBLE : View.GONE);
             mItemLayout.setBackground(backgroundDrawable);
             mProgressBar.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
             mSubTitleText.setVisibility(showSubtitle ? View.VISIBLE : View.GONE);
             mTitleText.setText(title);
+        }
+
+        protected void updateEndAreaVisibility(boolean showEndTouchArea, boolean isCheckbox) {
+            mEndTouchArea.setVisibility(showEndTouchArea ? View.VISIBLE : View.GONE);
+            if (showEndTouchArea) {
+                mCheckBox.setVisibility(isCheckbox ? View.VISIBLE : View.GONE);
+                mEndClickIcon.setVisibility(!isCheckbox ? View.VISIBLE : View.GONE);
+            }
         }
 
         void updateSeekbarProgressBackground() {

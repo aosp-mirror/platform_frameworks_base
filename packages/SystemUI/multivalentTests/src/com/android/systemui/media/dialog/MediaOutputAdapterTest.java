@@ -246,6 +246,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         assertThat(mViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mEndClickIcon.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mEndTouchArea.getVisibility()).isEqualTo(View.VISIBLE);
     }
@@ -297,6 +298,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mEndTouchArea.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mEndClickIcon.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
@@ -312,12 +314,12 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mTitleText.getText().toString()).isEqualTo(TEST_DEVICE_NAME_1);
         assertThat(mViewHolder.mStatusIcon.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mEndClickIcon.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mEndTouchArea.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mEndClickIcon.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
@@ -383,7 +385,9 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 1);
 
         assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mEndTouchArea.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mEndClickIcon.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mTitleText.getText().toString()).isEqualTo(TEST_DEVICE_NAME_2);
         assertThat(mViewHolder.mContainerLayout.isFocusable()).isTrue();
