@@ -63,6 +63,7 @@ public enum DesktopExperienceFlags {
             false),
     ENABLE_PER_DISPLAY_PACKAGE_CONTEXT_CACHE_IN_STATUSBAR_NOTIF(
             Flags::enablePerDisplayPackageContextCacheInStatusbarNotif, false),
+    ENABLE_TASKBAR_CONNECTED_DISPLAYS(Flags::enableTaskbarConnectedDisplays, false),
     ENTER_DESKTOP_BY_DEFAULT_ON_FREEFORM_DISPLAYS(Flags::enterDesktopByDefaultOnFreeformDisplays,
             false),
     REPARENT_WINDOW_TOKEN_API(Flags::reparentWindowTokenApi, true);
