@@ -30,8 +30,11 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
-import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.display.data.repository.displayStateRepository
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runCurrent
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
@@ -70,8 +73,6 @@ import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
@@ -86,7 +87,6 @@ import org.mockito.kotlin.whenever
 @EnableFlags(StatusBarNotifChips.FLAG_NAME)
 class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos().useUnconfinedTestDispatcher()
-    private val testScope = kosmos.testScope
     private val systemClock = kosmos.fakeSystemClock
 
     private val screenRecordState = kosmos.screenRecordRepository.screenRecordState
@@ -108,7 +108,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
     private val mockExpandable: Expandable =
         mock<Expandable>().apply { whenever(dialogTransitionController(any())).thenReturn(mock()) }
 
-    private val underTest by lazy { kosmos.ongoingActivityChipsViewModel }
+    private val Kosmos.underTest by Kosmos.Fixture { ongoingActivityChipsViewModel }
 
     @Before
     fun setUp() {
@@ -127,7 +127,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun primaryChip_allHidden_hidden() =
-        testScope.runTest {
+        kosmos.runTest {
             screenRecordState.value = ScreenRecordModel.DoingNothing
             mediaProjectionState.value = MediaProjectionState.NotProjecting
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
@@ -139,7 +139,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun chips_allHidden_bothPrimaryAndSecondaryHidden() =
-        testScope.runTest {
+        kosmos.runTest {
             screenRecordState.value = ScreenRecordModel.DoingNothing
             mediaProjectionState.value = MediaProjectionState.NotProjecting
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
@@ -153,7 +153,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun primaryChip_screenRecordShow_restHidden_screenRecordShown() =
-        testScope.runTest {
+        kosmos.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
             mediaProjectionState.value = MediaProjectionState.NotProjecting
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
@@ -165,7 +165,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun chips_screenRecordShow_restHidden_primaryIsScreenRecordSecondaryIsHidden() =
-        testScope.runTest {
+        kosmos.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
             mediaProjectionState.value = MediaProjectionState.NotProjecting
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
@@ -179,7 +179,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun primaryChip_screenRecordShowAndCallShow_screenRecordShown() =
-        testScope.runTest {
+        kosmos.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
             callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
 
@@ -190,7 +190,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun chips_screenRecordShowAndCallShow_primaryIsScreenRecordSecondaryIsCall() =
-        testScope.runTest {
+        kosmos.runTest {
             val callNotificationKey = "call"
             screenRecordState.value = ScreenRecordModel.Recording
             callRepo.setOngoingCallState(
@@ -205,7 +205,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun chips_oneChip_notSquished() =
-        testScope.runTest {
+        kosmos.runTest {
             callRepo.setOngoingCallState(inCallModel(startTimeMs = 34, notificationKey = "call"))
 
             val latest by collectLastValue(underTest.chips)
@@ -218,7 +218,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
     @Test
     @DisableFlags(StatusBarChipsModernization.FLAG_NAME, StatusBarRootModernization.FLAG_NAME)
     fun chips_twoTimerChips_isSmallPortrait_andChipsModernizationDisabled_bothSquished() =
-        testScope.runTest {
+        kosmos.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
             callRepo.setOngoingCallState(inCallModel(startTimeMs = 34, notificationKey = "call"))
 
@@ -234,7 +234,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
     @Test
     @DisableFlags(StatusBarChipsModernization.FLAG_NAME, StatusBarRootModernization.FLAG_NAME)
     fun chips_countdownChipAndTimerChip_countdownNotSquished_butTimerSquished() =
-        testScope.runTest {
+        kosmos.runTest {
             screenRecordState.value = ScreenRecordModel.Starting(millisUntilStarted = 2000)
             callRepo.setOngoingCallState(inCallModel(startTimeMs = 34, notificationKey = "call"))
 
@@ -251,7 +251,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
     @Test
     @DisableFlags(StatusBarChipsModernization.FLAG_NAME, StatusBarRootModernization.FLAG_NAME)
     fun chips_numberOfChipsChanges_chipsGetSquishedAndUnsquished() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
 
             // WHEN there's only one chip
@@ -287,7 +287,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
     @Test
     @DisableFlags(StatusBarChipsModernization.FLAG_NAME, StatusBarRootModernization.FLAG_NAME)
     fun chips_twoChips_isLandscape_notSquished() =
-        testScope.runTest {
+        kosmos.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
             callRepo.setOngoingCallState(inCallModel(startTimeMs = 34, notificationKey = "call"))
 
@@ -310,7 +310,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
     @Test
     @DisableFlags(StatusBarChipsModernization.FLAG_NAME, StatusBarRootModernization.FLAG_NAME)
     fun chips_twoChips_isLargeScreen_notSquished() =
-        testScope.runTest {
+        kosmos.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
             callRepo.setOngoingCallState(inCallModel(startTimeMs = 34, notificationKey = "call"))
 
@@ -329,7 +329,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
     @Test
     @EnableFlags(StatusBarChipsModernization.FLAG_NAME, StatusBarRootModernization.FLAG_NAME)
     fun chips_twoChips_chipsModernizationEnabled_notSquished() =
-        testScope.runTest {
+        kosmos.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
             setNotifs(
                 listOf(
@@ -353,7 +353,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun primaryChip_screenRecordShowAndShareToAppShow_screenRecordShown() =
-        testScope.runTest {
+        kosmos.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
             mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
@@ -366,7 +366,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun chips_screenRecordShowAndShareToAppShow_primaryIsScreenRecordSecondaryIsHidden() =
-        testScope.runTest {
+        kosmos.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
             mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
@@ -383,7 +383,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun primaryChip_shareToAppShowAndCallShow_shareToAppShown() =
-        testScope.runTest {
+        kosmos.runTest {
             screenRecordState.value = ScreenRecordModel.DoingNothing
             mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
@@ -396,7 +396,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun chips_shareToAppShowAndCallShow_primaryIsShareToAppSecondaryIsCall() =
-        testScope.runTest {
+        kosmos.runTest {
             val callNotificationKey = "call"
             screenRecordState.value = ScreenRecordModel.DoingNothing
             mediaProjectionState.value =
@@ -413,7 +413,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun primaryChip_onlyCallShown_callShown() =
-        testScope.runTest {
+        kosmos.runTest {
             screenRecordState.value = ScreenRecordModel.DoingNothing
             // MediaProjection covers both share-to-app and cast-to-other-device
             mediaProjectionState.value = MediaProjectionState.NotProjecting
@@ -430,7 +430,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun chips_onlyCallShown_primaryIsCallSecondaryIsHidden() =
-        testScope.runTest {
+        kosmos.runTest {
             val callNotificationKey = "call"
             screenRecordState.value = ScreenRecordModel.DoingNothing
             // MediaProjection covers both share-to-app and cast-to-other-device
@@ -449,7 +449,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun chips_singlePromotedNotif_primaryIsNotifSecondaryIsHidden() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
 
             val icon = createStatusBarIconViewOrNull()
@@ -470,7 +470,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun chips_twoPromotedNotifs_primaryAndSecondaryAreNotifsInOrder() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
 
             val firstIcon = createStatusBarIconViewOrNull()
@@ -498,7 +498,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun chips_threePromotedNotifs_topTwoShown() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
 
             val firstIcon = createStatusBarIconViewOrNull()
@@ -533,7 +533,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun chips_callAndPromotedNotifs_primaryIsCallSecondaryIsNotif() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
 
             val callNotificationKey = "call"
@@ -565,7 +565,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun chips_screenRecordAndCallAndPromotedNotifs_notifsNotShown() =
-        testScope.runTest {
+        kosmos.runTest {
             val callNotificationKey = "call"
             val latest by collectLastValue(underTest.chips)
 
@@ -589,7 +589,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun primaryChip_higherPriorityChipAdded_lowerPriorityChipReplaced() =
-        testScope.runTest {
+        kosmos.runTest {
             val callNotificationKey = "call"
             // Start with just the lowest priority chip shown
             val notifIcon = createStatusBarIconViewOrNull()
@@ -639,7 +639,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun primaryChip_highestPriorityChipRemoved_showsNextPriorityChip() =
-        testScope.runTest {
+        kosmos.runTest {
             val callNotificationKey = "call"
             // WHEN all chips are active
             screenRecordState.value = ScreenRecordModel.Recording
@@ -685,7 +685,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun chips_movesChipsAroundAccordingToPriority() =
-        testScope.runTest {
+        kosmos.runTest {
             val callNotificationKey = "call"
             // Start with just the lowest priority chip shown
             val notifIcon = createStatusBarIconViewOrNull()
@@ -758,10 +758,10 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
     /** Regression test for b/347726238. */
     @Test
     fun primaryChip_timerDoesNotResetAfterSubscribersRestart() =
-        testScope.runTest {
+        kosmos.runTest {
             var latest: OngoingActivityChipModel? = null
 
-            val job1 = underTest.primaryChip.onEach { latest = it }.launchIn(this)
+            val job1 = underTest.primaryChip.onEach { latest = it }.launchIn(testScope)
 
             // Start a chip with a timer
             systemClock.setElapsedRealtime(1234)
@@ -779,7 +779,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
             systemClock.setElapsedRealtime(5678)
 
             // WHEN we re-subscribe to the chip flow
-            val job2 = underTest.primaryChip.onEach { latest = it }.launchIn(this)
+            val job2 = underTest.primaryChip.onEach { latest = it }.launchIn(testScope)
 
             runCurrent()
 
@@ -793,10 +793,10 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
     /** Regression test for b/347726238. */
     @Test
     fun chips_timerDoesNotResetAfterSubscribersRestart() =
-        testScope.runTest {
+        kosmos.runTest {
             var latest: MultipleOngoingActivityChipsModel? = null
 
-            val job1 = underTest.chips.onEach { latest = it }.launchIn(this)
+            val job1 = underTest.chips.onEach { latest = it }.launchIn(testScope)
 
             // Start a chip with a timer
             systemClock.setElapsedRealtime(1234)
@@ -814,7 +814,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
             systemClock.setElapsedRealtime(5678)
 
             // WHEN we re-subscribe to the chip flow
-            val job2 = underTest.chips.onEach { latest = it }.launchIn(this)
+            val job2 = underTest.chips.onEach { latest = it }.launchIn(testScope)
 
             runCurrent()
 
@@ -828,7 +828,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
     @Test
     @Ignore("b/364653005") // We'll need to re-do the animation story when we implement RON chips
     fun primaryChip_screenRecordStoppedViaDialog_chipHiddenWithoutAnimation() =
-        testScope.runTest {
+        kosmos.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
             mediaProjectionState.value = MediaProjectionState.NotProjecting
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
@@ -854,7 +854,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
     @Test
     fun primaryChip_projectionStoppedViaDialog_chipHiddenWithoutAnimation() =
-        testScope.runTest {
+        kosmos.runTest {
             mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
             screenRecordState.value = ScreenRecordModel.DoingNothing
@@ -884,6 +884,5 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
             ActiveNotificationsStore.Builder()
                 .apply { notifs.forEach { addIndividualNotif(it) } }
                 .build()
-        testScope.runCurrent()
     }
 }
