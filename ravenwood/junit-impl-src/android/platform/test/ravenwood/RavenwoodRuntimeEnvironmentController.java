@@ -44,6 +44,7 @@ import android.app.UiAutomation;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
+import android.icu.util.ULocale;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
@@ -81,6 +82,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
@@ -228,6 +230,9 @@ public class RavenwoodRuntimeEnvironmentController {
         RuntimeInit.redirectLogStreams();
 
         dumpCommandLineArgs();
+        dumpEnvironment();
+        dumpJavaProperties();
+        dumpOtherInfo();
 
         // We haven't initialized liblog yet, so directly write to System.out here.
         RavenwoodCommonUtils.log(TAG, "globalInitInner()");
@@ -563,5 +568,35 @@ public class RavenwoodRuntimeEnvironmentController {
         for (var arg : args) {
             Log.v(TAG, "  " + arg);
         }
+    }
+
+    private static void dumpJavaProperties() {
+        Log.v(TAG, "JVM properties:");
+        dumpMap(System.getProperties());
+    }
+
+    private static void dumpEnvironment() {
+        Log.v(TAG, "Environment:");
+        dumpMap(System.getenv());
+    }
+
+    private static void dumpMap(Map<?, ?> map) {
+        for (var key : map.keySet().stream().sorted().toList()) {
+            Log.v(TAG, "  " + key + "=" + map.get(key));
+        }
+    }
+
+    private static void dumpOtherInfo() {
+        Log.v(TAG, "Other key information:");
+        var jloc = Locale.getDefault();
+        Log.v(TAG, "  java.util.Locale=" + jloc + " / " + jloc.toLanguageTag());
+        var uloc = ULocale.getDefault();
+        Log.v(TAG, "  android.icu.util.ULocale=" + uloc + " / " + uloc.toLanguageTag());
+
+        var jtz = java.util.TimeZone.getDefault();
+        Log.v(TAG, "  java.util.TimeZone=" + jtz.getDisplayName() + " / " + jtz);
+
+        var itz = android.icu.util.TimeZone.getDefault();
+        Log.v(TAG, "  android.icu.util.TimeZone="  + itz.getDisplayName() + " / " + itz);
     }
 }
