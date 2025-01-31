@@ -7545,6 +7545,10 @@ public class UserManagerService extends IUserManager.Stub {
                 pw.println("  (and being updated after boot)");
             }
         }
+        if (isHeadlessSystemUserMode) {
+            pw.println("  Can switch to headless system user: " + Resources.getSystem()
+                    .getBoolean(com.android.internal.R.bool.config_canSwitchToHeadlessSystemUser));
+        }
         pw.println("  User version: " + mUserVersion);
         pw.println("  Owner name: " + getOwnerName());
         if (DBG_ALLOCATION) {
