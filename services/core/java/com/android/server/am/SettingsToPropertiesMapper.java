@@ -186,6 +186,7 @@ public class SettingsToPropertiesMapper {
         "core_libraries",
         "crumpet",
         "dck_framework",
+        "desktop_connectivity",
         "desktop_hwsec",
         "desktop_stats",
         "devoptions_settings",
