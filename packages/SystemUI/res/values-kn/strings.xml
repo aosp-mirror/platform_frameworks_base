@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ಬ್ಯಾಟರಿ ಶೇಕಡಾವಾರು ತಿಳಿದಿಲ್ಲ."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> ಗೆ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> ಗೆ ಸಂಪರ್ಕಿಸಲಾಗಿದೆ."</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"ಸಂಪರ್ಕಗೊಂಡಿಲ್ಲ."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"ರೋಮಿಂಗ್"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"ಆಫ್"</string>
@@ -539,6 +543,8 @@
     <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"ಹಬ್ ಮೋಡ್ ಅನ್ನು ಎಕ್ಸ್‌ಪ್ಲೋರ್ ಮಾಡಿ"</string>
     <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"ಚಾರ್ಜ್ ಮಾಡುವಾಗ ನಿಮ್ಮ ನೆಚ್ಚಿನ ವಿಜೆಟ್‌ಗಳು ಮತ್ತು ಸ್ಕ್ರೀನ್ ಸೇವರ್‌ಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಿ."</string>
     <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"ಪ್ರಾರಂಭಿಸೋಣ"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ಬಳಕೆದಾರರನ್ನು ಬದಲಿಸಿ"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ಪುಲ್‌ಡೌನ್ ಮೆನು"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ಈ ಸೆಶನ್‌ನಲ್ಲಿನ ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
@@ -801,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"ಸಂಭಾಷಣೆ ಅಧಿಸೂಚನೆಗಳ ಮೇಲ್ಭಾಗದಲ್ಲಿ ಹಾಗೂ ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನ ಮೇಲೆ ಪ್ರೊಫೈಲ್ ಚಿತ್ರವಾಗಿ ತೋರಿಸುತ್ತದೆ, ಬಬಲ್‌ನಂತೆ ಗೋಚರಿಸುತ್ತದೆ, ಅಡಚಣೆ ಮಾಡಬೇಡ ಮೋಡ್‌ಗೆ ಅಡ್ಡಿಯುಂಟುಮಾಡುತ್ತದೆ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ಆದ್ಯತೆ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"ಸಂವಾದ ಫೀಚರ್‌ಗಳನ್ನು <xliff:g id="APP_NAME">%1$s</xliff:g> ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"ವಜಾಗೊಳಿಸಿ"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"ಮತ್ತೊಮ್ಮೆ ತೋರಿಸಬೇಡಿ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"ಕರೆ ಅಧಿಸೂಚನೆಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ಈ ಗುಂಪಿನ ಅಧಿಸೂಚನೆಗಳನ್ನು ಇಲ್ಲಿ ಕಾನ್ಫಿಗರ್‌ ಮಾಡಲಾಗಿರುವುದಿಲ್ಲ"</string>
@@ -915,15 +919,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"ಕ್ಯಾಲ್ಕ್ಯುಲೇಟರ್"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"ಬೌನ್ಸ್ ಕೀಗಳನ್ನು ಟಾಗಲ್ ಮಾಡಿ"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"ಮೌಸ್ ಕೀಗಳನ್ನು ಟಾಗಲ್ ಮಾಡಿ"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"ಸ್ಟಿಕಿ ಕೀಗಳನ್ನು ಟಾಗಲ್ ಮಾಡಿ"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"ನಿಧಾನ ಕೀಗಳನ್ನು ಟಾಗಲ್ ಮಾಡಿ"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"ಧ್ವನಿ ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಟಾಗಲ್ ಮಾಡಿ"</string>
+    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
     <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ವಾಲ್ಯೂಮ್ ಬಟನ್‌ಗಳ ಶಾರ್ಟ್‌ಕಟ್‌"</string>
@@ -1304,6 +1309,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ತೆರೆಯುವುದಕ್ಕಾಗಿ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಬಳಸಿ"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"ದೃಢೀಕರಣದ ಅವಶ್ಯಕತೆಯಿದೆ. ದೃಢೀಕರಿಸಲು ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್ ಅನ್ನು ಸ್ಪರ್ಶಿಸಿ."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"ಚಾಲ್ತಿಯಲ್ಲಿರುವ ಕರೆ"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"ಮೊಬೈಲ್ ಡೇಟಾ"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"ತಾತ್ಕಾಲಿಕವಾಗಿ ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>

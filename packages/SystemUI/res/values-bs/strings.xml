@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Postotak napunjenosti baterije nije poznat"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Povezan na <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Povezan na <xliff:g id="CAST">%s</xliff:g>."</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Nije povezano."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roming"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Isključeno"</string>
@@ -536,9 +540,11 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Da otvorite aplikaciju pomoću vidžeta, morat ćete potvrditi identitet. Također imajte na umu da ih svako može pregledati, čak i ako je tablet zaključan. Neki vidžeti možda nisu namijenjeni za vaš zaključani ekran i njihovo dodavanje ovdje možda nije sigurno."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Razumijem"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Dugme za prikaz čuvara ekrana"</string>
-    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"Istraži način Huba"</string>
-    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"Pristupite omiljenim widgetima i čuvarima zaslona tijekom punjenja."</string>
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"Istražite način rada središta"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"Pristupajte svojim omiljenim vidžetima i čuvarima ekrana tokom punjenja."</string>
     <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Započnimo"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Zamijeni korisnika"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"padajući meni"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Sve aplikacije i podaci iz ove sesije će se izbrisati."</string>
@@ -801,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Prikazuje se na vrhu obavještenja u razgovorima i kao slika profila na zaključanom ekranu, izgleda kao oblačić, prekida funkciju Ne ometaj"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritetno"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podržava funkcije razgovora"</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"Odbaci"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"Ne prikazuj ponovo"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ta obavještenja se ne mogu izmijeniti."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Nije moguće izmijeniti obavještenja o pozivima."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ovu grupu obavještenja nije moguće konfigurirati ovdje"</string>
@@ -876,7 +880,7 @@
     <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"Prikazivanje prečica koje otvaraju aplikacije"</string>
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Prikazivanje prečica za trenutnu aplikaciju"</string>
     <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Prikaz obavještenja"</string>
-    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Pravljenje snimka ekrana"</string>
+    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Izrada snimka ekrana"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Prikaz prečica"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Nazad"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Odlazak na početni ekran"</string>
@@ -915,16 +919,14 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Kalendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Kalkulator"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Mape"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
-    <skip />
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"Uključivanje/isključivanje zanemarivanja slučajnih pritisaka tipki"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"Uključivanje/isključivanje tipki za miš"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"Uključivanje/isključivanje ljepljivih tipki"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"Uključivanje/isključivanje sporog reagiranja tipki"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Uključivanje/isključivanje Pristupa glasom"</string>
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"Uključi/isključi TalkBack"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"Uključi/isključi povećavanje"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"Aktiviraj Odabir za govor"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Ne ometaj"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Prečica za dugmad za Jačinu zvuka"</string>
     <string name="battery" msgid="769686279459897127">"Baterija"</string>
@@ -1304,6 +1306,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Otvorite pomoću otiska prsta"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Potrebna je autentifikacija. Dodirnite senzor za otisak prsta da autentificirate."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"Poziv u toku"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Prijenos podataka na mobilnoj mreži"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Povezano"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Privremeno povezano"</string>
@@ -1509,10 +1513,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Izvršili ste pokret za prikaz nedavnih aplikacija."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Da pogledate nedavne aplikacije, prevucite nagore i zadržite s tri prsta na dodirnoj podlozi"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"Promijenite aplikaciju"</string>
-    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"Prijeđite udesno četirima prstima na dodirnoj podlozi"</string>
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"Prevucite udesno s četiri prsta na dodirnoj podlozi"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"Sjajno!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"Izvršili ste pokret za promjenu aplikacije."</string>
-    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"Prijeđite udesno četirima prstima na dodirnoj podlozi za prebacivanje između aplikacija"</string>
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"Prevucite udesno s četiri prsta na dodirnoj podlozi da promijenite aplikaciju"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Pogledajte sve aplikacije"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Pritisnite tipku radnji na tastaturi"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Odlično!"</string>

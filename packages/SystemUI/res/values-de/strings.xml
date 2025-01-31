@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Akkustand unbekannt."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Mit <xliff:g id="BLUETOOTH">%s</xliff:g> verbunden"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Verbunden mit <xliff:g id="CAST">%s</xliff:g>."</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Nicht verbunden"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Aus"</string>
@@ -536,11 +540,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Wenn du eine App mit einem Widget öffnen möchtest, musst du deine Identität bestätigen. Beachte auch, dass jeder die Widgets sehen kann, auch wenn dein Tablet gesperrt ist. Einige Widgets sind möglicherweise nicht für den Sperrbildschirm vorgesehen, sodass es unsicher sein kann, sie hier hinzuzufügen."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Ok"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Schaltfläche „Bildschirmschoner anzeigen“"</string>
-    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"Hub-Modus entdecken"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"Du kannst während des Ladevorgangs auf deine bevorzugten Widgets und Bildschirmschoner zugreifen."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Los gehts"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Nutzer wechseln"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"Pull-down-Menü"</string>
@@ -804,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Wird oben im Bereich „Unterhaltungen“ sowie als Profilbild auf dem Sperrbildschirm angezeigt, erscheint als Bubble, unterbricht „Bitte nicht stören“"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorität"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> unterstützt keine Funktionen für Unterhaltungen"</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"Schließen"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"Nicht mehr anzeigen"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Diese Benachrichtigungen können nicht geändert werden."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Anrufbenachrichtigungen können nicht geändert werden."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Die Benachrichtigungsgruppe kann hier nicht konfiguriert werden"</string>
@@ -918,16 +919,14 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Kalender"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Rechner"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
-    <skip />
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"Bounce-Tasten aktivieren/deaktivieren"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"Tastaturmaus aktivieren/deaktivieren"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"Einfingerbedienung aktivieren/deaktivieren"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"Anschlagverzögerung aktivieren/deaktivieren"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Voice Access aktivieren/deaktivieren"</string>
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"TalkBack aktivieren/deaktivieren"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"„Vergrößerung“ aktivieren/deaktivieren"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"„Vorlesen“ aktivieren"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Bitte nicht stören"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Tastenkombination für Lautstärketasten"</string>
     <string name="battery" msgid="769686279459897127">"Akku"</string>
@@ -1307,6 +1306,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Mit Fingerabdruck öffnen"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Authentifizierung erforderlich. Tippe dazu einfach auf den Fingerabdrucksensor."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"Aktiver Anruf"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobile Daten"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Verbunden"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Vorübergehend verbunden"</string>
@@ -1512,12 +1513,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Du hast das Tutorial für die Touch-Geste zum Aufrufen der zuletzt verwendeten Apps abgeschlossen."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Wenn du zuletzt verwendete Apps aufrufen möchtest, wische mit drei Fingern nach oben und halte das Touchpad gedrückt"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"Zwischen Apps wechseln"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"Wische mit vier Fingern auf dem Touchpad nach rechts"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"Gut gemacht!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"Du hast die Touch-Geste „Zwischen Apps wechseln\" abgeschlossen."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"Wische mit vier Fingern auf dem Touchpad nach rechts, um zwischen Apps zu wechseln"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Alle Apps anzeigen"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Drücke die Aktionstaste auf deiner Tastatur"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Perfekt!"</string>

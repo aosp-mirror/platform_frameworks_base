@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"배터리 잔량을 알 수 없습니다."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>에 연결되었습니다."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g>에 연결됨"</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"연결되지 않았습니다."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"로밍"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"사용 안함"</string>
@@ -542,6 +546,8 @@
     <skip />
     <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
     <skip />
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"사용자 전환"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"풀다운 메뉴"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"이 세션에 있는 모든 앱과 데이터가 삭제됩니다."</string>
@@ -804,10 +810,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"대화 알림 상단에 표시, 잠금 화면에 프로필 사진으로 표시, 대화창으로 표시, 방해 금지 모드를 무시함"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"우선순위"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱은 대화 기능을 지원하지 않습니다."</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"닫기"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"다시 표시하지 않음"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"이 알림은 수정할 수 없습니다."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"전화 알림은 수정할 수 없습니다."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"이 알림 그룹은 여기에서 설정할 수 없습니다."</string>
@@ -918,15 +922,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"계산기"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"지도"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"바운스 키 전환"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"마우스 키 전환"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"고정키 전환"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"느린 키 전환"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"음성 액세스 전환"</string>
+    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
     <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"방해 금지 모드"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"볼륨 버튼 단축키"</string>
@@ -1307,6 +1312,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"지문으로 열기"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"인증이 필요합니다. 지문 센서를 터치하여 인증하세요."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"진행 중인 통화"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"모바일 데이터"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"연결됨"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"일시적으로 연결됨"</string>

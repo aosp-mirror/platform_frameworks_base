@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"બૅટરીની ટકાવારી અજાણ છે."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> થી કનેક્ટ થયાં."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> થી કનેક્ટ કરેલ."</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"કનેક્ટ થયેલું નથી."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"રોમિંગ"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"બંધ કરો"</string>
@@ -536,11 +540,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"વિજેટનો ઉપયોગ કરીને ઍપ ખોલવા માટે, તમારે એ ચકાસણી કરવાની જરૂર રહેશે કે આ તમે જ છો. તે ઉપરાંત, ધ્યાનમાં રાખો કે તમારું ટૅબ્લેટ લૉક કરેલું હોય તો પણ કોઈપણ વ્યક્તિ તેમને જોઈ શકે છે. અમુક વિજેટ કદાચ તમારી લૉક સ્ક્રીન માટે બનાવવામાં આવ્યા ન હોઈ શકે છે અને તેમને અહીં ઉમેરવાનું અસલામત હોઈ શકે છે."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"સમજાઈ ગયું"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"સ્ક્રીનસેવર બટન બતાવો"</string>
-    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"હબ મોડ શોધખોળ કરો"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"ચાર્જ કરતી વખતે તમારા મનપસંદ વિજેટ અને સ્ક્રીન સેવર ઍક્સેસ કરો."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"ચાલો પ્રારંભ કરીએ"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"વપરાશકર્તા સ્વિચ કરો"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"પુલડાઉન મેનૂ"</string>
@@ -804,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"વાતચીતના નોટિફિકેશન વિભાગની ટોચ પર અને લૉક કરેલી સ્ક્રીન પર પ્રોફાઇલ ફોટો તરીકે બતાવે છે, બબલ તરીકે દેખાય છે, ખલેલ પાડશો નહીં મોડમાં વિક્ષેપ ઊભો કરે છે"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"પ્રાધાન્યતા"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> વાતચીતની સુવિધાઓને સપોર્ટ આપતી નથી"</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"છોડી દો"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"ફરી બતાવશો નહીં"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"આ નોટિફિકેશનમાં કોઈ ફેરફાર થઈ શકશે નહીં."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"કૉલના નોટિફિકેશનમાં કોઈ ફેરફાર કરી શકાતો નથી."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"નોટિફિકેશનના આ ગ્રૂપની ગોઠવણી અહીં કરી શકાશે નહીં"</string>
@@ -918,15 +919,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"કેલ્ક્યુલેટર"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"બાઉન્સ કીને ટૉગલ કરો"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"માઉસ કીને ટૉગલ કરો"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"સ્ટીકી કીને ટૉગલ કરો"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"ધીમી કીને ટૉગલ કરો"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Voice Accessને ટૉગલ કરો"</string>
+    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
     <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ખલેલ પાડશો નહીં"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"વૉલ્યૂમ બટન્સ શૉર્ટકટ"</string>
@@ -973,12 +975,12 @@
     <string name="tuner_time" msgid="2450785840990529997">"સમય"</string>
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"કલાક, મિનિટ અને સેકન્ડ બતાવો"</item>
-    <item msgid="1271006222031257266">"કલાક અને મિનિટ બતાવો (ડિફોલ્ટ)"</item>
+    <item msgid="1271006222031257266">"કલાક અને મિનિટ બતાવો (ડિફૉલ્ટ)"</item>
     <item msgid="6135970080453877218">"આ આઇકન બતાવશો નહીં"</item>
   </string-array>
   <string-array name="battery_options">
     <item msgid="7714004721411852551">"હંમેશાં ટકાવારી બતાવો"</item>
-    <item msgid="3805744470661798712">"ચાર્જ થાય ત્યારે ટકાવારી બતાવો (ડિફોલ્ટ)"</item>
+    <item msgid="3805744470661798712">"ચાર્જ થાય ત્યારે ટકાવારી બતાવો (ડિફૉલ્ટ)"</item>
     <item msgid="8619482474544321778">"આ આઇકન બતાવશો નહીં"</item>
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"ઓછી પ્રાધાન્યતાનું નોટિફિકેશન આઇકન બતાવો"</string>
@@ -1307,6 +1309,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ખોલવા માટે ફિંગરપ્રિન્ટનો ઉપયોગ કરો"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"પ્રમાણીકરણ આવશ્યક છે. પ્રમાણિત કરવા માટે ફિંગરપ્રિન્ટ સેન્સરને ટચ કરો."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"ચાલુ કૉલ"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"મોબાઇલ ડેટા"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"કનેક્ટ કરેલું"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"હંગામી રીતે કનેક્ટ કર્યું"</string>
@@ -1512,12 +1516,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"તમે \'તાજેતરની ઍપ જુઓ\' સંકેત પૂર્ણ કર્યો."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"તાજેતરની ઍપ જોવા માટે, તમારા ટચપૅડ પર ત્રણ આંગળી વડે ઉપરની તરફ સ્વાઇપ કરો અને દબાવી રાખો"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"ઍપ સ્વિચ કરો"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"તમારા ટચપૅડ પર ચાર આંગળીઓનો ઉપયોગ કરીને જમણે સ્વાઇપ કરો"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"ખૂબ સરસ કામ!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"તમે ઍપ સ્વિચ કરવાનો સંકેત પૂર્ણ કર્યો છે."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"ઍપ સ્વિચ કરવા માટે, તમારા ટચપૅડ પર ચાર આંગળીઓનો ઉપયોગ કરીને જમણે સ્વાઇપ કરો"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"બધી ઍપ જુઓ"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"તમારા કીબોર્ડ પરની ઍક્શન કી દબાવો"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"વાહ!"</string>

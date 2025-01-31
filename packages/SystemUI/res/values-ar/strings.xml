@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"نسبة شحن البطارية غير معروفة."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"متصل بـ <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"تم الاتصال بـ <xliff:g id="CAST">%s</xliff:g>."</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"غير متصل."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"التجوال"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"غير مفعّلة"</string>
@@ -536,11 +540,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"لفتح تطبيق باستخدام تطبيق مصغَّر، عليك إثبات هويتك. يُرجى ملاحظة أنّ أي شخص يمكنه الاطّلاع محتوى التطبيقات المصغَّرة، حتى وإن كان جهازك اللوحي مُقفلاً. بعض التطبيقات المصغّرة قد لا تكون مُصمَّمة لإضافتها إلى شاشة القفل، وقد يكون هذا الإجراء غير آمن."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"حسنًا"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"زر \"إظهار شاشة الاستراحة\""</string>
-    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"التعرُّف على \"وضع الإرساء\""</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"يمكنك الاطّلاع على التطبيقات المصغّرة وشاشات الاستراحة المفضَّلة لديك أثناء شحن الجهاز."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"لنبدأ"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"تبديل المستخدم"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"القائمة المنسدلة"</string>
@@ -753,8 +756,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"جارٍ تعديل الحالة"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"ملف العمل"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"وضع الطيران"</string>
-    <!-- no translation found for status_bar_supervision (6735015942701134125) -->
-    <skip />
+    <string name="status_bar_supervision" msgid="6735015942701134125">"أدوات رقابة الأهل"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"لن تسمع المنبّه القادم في <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"في <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"يوم <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -805,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"تظهر في أعلى إشعارات المحادثات وكصورة ملف شخصي على شاشة القفل وتظهر على شكل فقاعة لمقاطعة ميزة \"عدم الإزعاج\"."</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"الأولوية"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"لا يدعم تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> ميزات المحادثات."</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"إغلاق"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"عدم الإظهار مرة أخرى"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"يتعذّر تعديل هذه الإشعارات."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"لا يمكن تعديل إشعارات المكالمات."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"يتعذّر ضبط مجموعة الإشعارات هذه هنا."</string>
@@ -919,16 +919,14 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"‏تقويم Google"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"الآلة الحاسبة"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"‏خرائط Google"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
-    <skip />
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"تفعيل ميزة \"تجاهُل النقرات المتكرّرة\" أو إيقافها"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"تفعيل ميزة \"مفاتيح الماوس\" أو إيقافها"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"تفعيل ميزة \"تثبيت المفاتيح\" أو إيقافها"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"تفعيل ميزة \"المفاتيح البطيئة\" أو إيقافها"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"‏تفعيل تطبيق Voice Access أو إيقافه"</string>
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"‏تفعيل ميزة TalkBack أو إيقافها"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"تفعيل ميزة \"التكبير\" أو إيقافها"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"تفعيل ميزة \"سماع الاختيار\""</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"عدم الإزعاج"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"اختصار أزرار مستوى الصوت"</string>
     <string name="battery" msgid="769686279459897127">"البطارية"</string>
@@ -1308,6 +1306,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"يمكنك استخدام بصمة الإصبع للفتح"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"المصادقة مطلوبة. المس مستشعر بصمات الإصبع للمصادقة."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"مكالمة جارية"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"بيانات الجوّال"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"متصلة بالإنترنت"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"متصلة مؤقتًا"</string>
@@ -1449,8 +1449,7 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"تطبيقات النظام"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"تعدُّد المهام"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"تقسيم الشاشة"</string>
-    <!-- no translation found for shortcutHelper_category_accessibility (8068337792277570938) -->
-    <skip />
+    <string name="shortcutHelper_category_accessibility" msgid="8068337792277570938">"خدمات تسهيل الاستخدام"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"الإدخال"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"اختصارات التطبيقات"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"التطبيق الحالي"</string>
@@ -1514,12 +1513,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"لقد أكملْت التدريب على إيماءة عرض التطبيقات المستخدَمة مؤخرًا."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"لعرض التطبيقات المستخدَمة مؤخرًا، يُرجى التمرير سريعًا للأعلى مع الاستمرار باستخدام ثلاثة أصابع على لوحة اللمس"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"التبديل بين التطبيقات"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"يُرجى التمرير سريعًا لليمين باستخدام أربعة أصابع على لوحة اللمس"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"أحسنت صنعًا."</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"أكملت التدريب على إيماءة التبديل بين التطبيقات."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"يُرجى التمرير سريعًا لليمين باستخدام أربعة أصابع على لوحة اللمس للتبديل بين التطبيقات"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"عرض جميع التطبيقات"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"اضغط على مفتاح الإجراء في لوحة المفاتيح"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"أحسنت!"</string>

@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ব্যাটারি কত শতাংশ আছে তা জানা যায়নি।"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>এ সংযুক্ত হয়ে আছে।"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> এর সাথে সংযুক্ত৷"</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"সংযুক্ত নয়৷"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"রোমিং"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"বন্ধ"</string>
@@ -536,11 +540,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"উইজেট ব্যবহার করে কোনও অ্যাপ খুলতে, আপনাকে নিজের পরিচয় যাচাই করতে হবে। এছাড়াও, মনে রাখবেন, আপনার ট্যাবলেট লক থাকলেও যেকেউ তা দেখতে পারবেন। কিছু উইজেট আপনার লক স্ক্রিনের উদ্দেশ্যে তৈরি করা হয়নি এবং এখানে যোগ করা নিরাপদ নাও হতে পারে।"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"বুঝেছি"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"স্ক্রিন সেভার বোতাম দেখুন"</string>
-    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"হাব মোড ঘুরে দেখুন"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"চার্জ করার সময় আপনার পছন্দের উইজেট এবং স্ক্রিন সেভার অ্যাক্সেস করুন।"</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"শুরু করা যাক"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ব্যবহারকারী পাল্টে দিন"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"পুলডাউন মেনু"</string>
@@ -804,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"কথোপকথনের বিজ্ঞপ্তির উপরের দিকে এবং প্রোফাইল ছবি হিসেবে লক স্ক্রিনে দেখানো হয়, বাবল হিসেবেও এটি দেখা যায় এবং এর ফলে \'বিরক্ত করবে না\' মোডে কাজ করতে অসুবিধা হয়"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"অগ্রাধিকার"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>-এ কথোপকথন ফিচার কাজ করে না"</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"বাতিল করুন"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"আর দেখতে চাই না"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"এই বিজ্ঞপ্তিগুলি পরিবর্তন করা যাবে না।"</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"কল বিজ্ঞপ্তি পরিবর্তন করা যাবে না।"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"এই সমস্ত বিজ্ঞপ্তিকে এখানে কনফিগার করা যাবে না"</string>
@@ -918,15 +919,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"ক্যালকুলেটর"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"ম্যাপ"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"বাউন্স \'কী\' টগল করুন"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"মাউস \'কী\' টগল করুন"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"স্টিকি \'কী\' টগল করুন"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"স্লো \'কী\' টগল করুন"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Voice Access টগল করুন"</string>
+    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
     <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"বিরক্ত করবে না"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ভলিউম বোতামের শর্টকাট"</string>
@@ -1307,6 +1309,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"খুলতে ফিঙ্গারপ্রিন্ট ব্যবহার করুন"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"যাচাইকরণ করতে হবে। যাচাইকরণ করতে আঙুলের ছাপের সেন্সরে টাচ করুন।"</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"চালু থাকা কল"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"মোবাইল ডেটা"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"কানেক্ট করা আছে"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"সাময়িকভাবে কানেক্ট করা হয়েছে"</string>
@@ -1512,12 +1516,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"সম্প্রতি ব্যবহার করা হয়েছে এমন অ্যাপের জেসচার দেখা সম্পূর্ণ করেছেন।"</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"সাম্প্রতিক অ্যাপ দেখতে, নিজের টাচপ্যাডে তিনটি আঙুল ব্যবহার করে উপরের দিকে সোয়াইপ করে হোল্ড করুন"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"অ্যাপ পরিবর্তন করুন"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"আপনার টাচপ্যাডে চারটি আঙুল ব্যবহার করে ডানদিকে সোয়াইপ করুন"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"অসাধারণ!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"আপনি অ্যাপ পরিবর্তন করার জেসচার সম্পূর্ণ করেছেন।"</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"অ্যাপ পরিবর্তন করতে, আপনার টাচপ্যাডে চারটি আঙুল ব্যবহার করে ডানদিকে সোয়াইপ করুন"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"সব অ্যাপ দেখুন"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"আপনার কীবোর্ডে অ্যাকশন কী প্রেস করুন"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"দারুণ!"</string>

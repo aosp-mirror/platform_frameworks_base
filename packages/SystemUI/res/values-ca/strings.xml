@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Es desconeix el percentatge de bateria."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"S\'ha connectat a <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Està connectat amb <xliff:g id="CAST">%s</xliff:g>."</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Sense connexió."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Itinerància"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Desactivades"</string>
@@ -536,11 +540,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Per obrir una aplicació utilitzant un widget, necessitaràs verificar la teva identitat. També has de tenir en compte que qualsevol persona pot veure els widgets, fins i tot quan la tauleta està bloquejada. És possible que alguns widgets no estiguin pensats per a la pantalla de bloqueig i que no sigui segur afegir-los-hi."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Entesos"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Botó Mostra l\'estalvi de pantalla"</string>
-    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"Explora el mode Hub"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"Accedeix als teus widgets i estalvis de pantalla preferits mentre es carrega."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Som-hi"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Canvia d\'usuari"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menú desplegable"</string>
@@ -804,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Es mostra a la part superior de les notificacions de les converses i com a foto de perfil a la pantalla de bloqueig, apareix com una bombolla, interromp el mode No molestis"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritat"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admet les funcions de converses"</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"Ignora"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"No ho tornis a mostrar"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Aquestes notificacions no es poden modificar."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Les notificacions de trucades no es poden modificar."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Aquest grup de notificacions no es pot configurar aquí"</string>
@@ -918,16 +919,14 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Calculadora"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
-    <skip />
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"Commuta les tecles de rebot"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"Commuta les tecles del ratolí"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"Commuta les tecles permanents"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"Commuta les tecles lentes"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Commuta Voice Access"</string>
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"Commuta TalkBack"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"Commuta l\'ampliació"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"Activa Escolta la selecció"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"No molestis"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Drecera per als botons de volum"</string>
     <string name="battery" msgid="769686279459897127">"Bateria"</string>
@@ -1307,6 +1306,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Utilitza l\'empremta digital per obrir"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Autenticació necessària. Toca el sensor d\'empremtes digitals per autenticar-te."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"Trucada en curs"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Dades mòbils"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Connectat"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Connexió temporal"</string>
@@ -1512,12 +1513,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Has completat el gest per veure les aplicacions recents."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Per veure les aplicacions recents, llisca cap amunt amb tres dits i mantén-los premuts al ratolí tàctil"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"Canviar d\'aplicació"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"Llisca cap a la dreta amb quatre dits al ratolí tàctil"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"Ben fet!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"Has completat el gest per canviar d\'aplicació."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"Llisca cap a la dreta amb quatre dits al ratolí tàctil per canviar d\'aplicació"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Mostra totes les aplicacions"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Prem la tecla d\'acció al teclat"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Enhorabona!"</string>

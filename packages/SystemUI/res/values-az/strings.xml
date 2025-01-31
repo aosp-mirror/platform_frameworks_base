@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batareyanın faizi naməlumdur."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> üzərindən qoşuldu."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> cihazına qoşulub."</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Qoşulu deyil."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Rouminq"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Deaktiv"</string>
@@ -536,11 +540,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Vidcetdən istifadə edərək tətbiqi açmaq üçün kimliyi doğrulamalısınız. Planşet kilidli olsa da, hər kəs vidcetlərə baxa bilər. Bəzi vidcetlər kilid ekranı üçün nəzərdə tutulmayıb və bura əlavə etmək təhlükəli ola bilər."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Anladım"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Ekran qoruyucu düyməsini göstərin"</string>
-    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"Hab rejimini araşdırın"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"Şarj edərkən sevimli vidcet və ekran qoruyucularınıza daxil olun."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Başlayaq"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Switch user"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"aşağı çəkilən menyu"</string>
@@ -804,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Söhbət bildirişlərinin yuxarısında və kilid ekranında profil şəkli kimi göstərilir, baloncuq kimi görünür, Narahat Etməyin rejimini kəsir"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> söhbət funksiyalarını dəstəkləmir"</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"Rədd edin"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"Yenidən göstərməyin"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Bu bildirişlər dəyişdirilə bilməz."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Zəng bildirişləri dəyişdirilə bilməz."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Bu bildiriş qrupunu burada konfiqurasiya etmək olmaz"</string>
@@ -918,15 +919,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Təqvim"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Kalkulyator"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Xəritə"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"Sıçrayan klavişləri aktiv/deaktiv edin"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"Maus klavişlərini aktiv/deaktiv edin"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"Əvəzedici düymələri aktiv/deaktiv edin"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"Asta düymələri aktiv/deaktiv edin"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Səs girişini aktiv/deaktiv edin"</string>
+    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
     <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Narahat Etməyin"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Səs düymələri qısayolu"</string>
@@ -1307,6 +1309,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Açmaq üçün barmaq izindən istifadə edin"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Doğrulanma tələb olunur. Doğrulamaq üçün barmaq izi sensoruna toxunun."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"Davam edən zəng"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobil data"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Qoşulub"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Müvəqqəti qoşulub"</string>
@@ -1512,12 +1516,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Son tətbiqlərə baxmaq jestini tamamladınız."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Ən son tətbiqlərə baxmaq üçün taçpeddə üç barmağınızla yuxarı çəkin və saxlayın"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"Başqa tətbiqə keçin"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"Taçpeddə dörd barmaqla sağa çəkin"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"Əla!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"Tətbiqlərarası keçid jestini tamamladınız."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"Tətbiqlər arasında keçid etmək üçün taçpeddə dörd barmaqla sağa çəkin"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Bütün tətbiqlərə baxın"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Klaviaturada fəaliyyət açarına basın"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Əla!"</string>

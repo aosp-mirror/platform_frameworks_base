@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batteriniveauet er ukendt."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Forbundet med <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Forbundet til <xliff:g id="CAST">%s</xliff:g>."</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Ikke tilsluttet."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Fra"</string>
@@ -536,11 +540,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Hvis du vil åbne en app ved hjælp af en widget, skal du verificere din identitet. Husk også, at alle kan se dem, også når din tablet er låst. Nogle widgets er muligvis ikke beregnet til låseskærmen, og det kan være usikkert at tilføje dem her."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Knappen Vis pauseskærm"</string>
-    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"Udforsk i Hub-tilstand"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"Få adgang til dine foretrukne widgets og pauseskærme under opladning."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Kom i gang"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Skift bruger"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"rullemenu"</string>
@@ -804,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Vises øverst i samtalenotifikationer og som et profilbillede på låseskærmen. Vises som en boble, der afbryder Forstyr ikke"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> understøtter ikke samtalefunktioner"</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"Luk"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"Vis ikke igen"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Disse notifikationer kan ikke redigeres."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Opkaldsnotifikationer kan ikke redigeres."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Du kan ikke konfigurere denne gruppe notifikationer her"</string>
@@ -918,15 +919,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Kalender"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Lomme­regner"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"Slå elastiktaster til/fra"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"Slå musetaster til/fra"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"Slå træge taster til/fra"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"Slå langsomtaster til/fra"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Slå Stemmeadgang til/fra"</string>
+    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
     <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Forstyr ikke"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Genvej til lydstyrkeknapper"</string>
@@ -1307,6 +1309,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Brug fingeraftryk for at åbne"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Godkendelse er påkrævet. Sæt fingeren på fingeraftrykssensoren for at godkende."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"Igangværende opkald"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobildata"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Forbundet"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Midlertidigt forbundet"</string>
@@ -1512,12 +1516,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Du har udført bevægelsen for at se de seneste apps."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Du kan se nyligt brugte apps ved at stryge opad og holde tre fingre nede på touchpladen"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"Skift mellem apps"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"Stryg til højre med fire fingre på touchpladen"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"Godt klaret!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"Du har fuldført bevægelsen for at skifte mellem apps."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"Stryg til højre med fire fingre på touchpladen for at skifte mellem apps"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Se alle apps"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Tryk på handlingstasten på dit tastatur"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Flot klaret!"</string>

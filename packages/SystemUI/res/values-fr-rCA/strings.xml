@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Pourcentage de la pile inconnu."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Connecté à : <xliff:g id="BLUETOOTH">%s</xliff:g>"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Connecté à <xliff:g id="CAST">%s</xliff:g>."</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Non connecté"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Itinérance"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Désactivé"</string>
@@ -539,6 +543,8 @@
     <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"Explorer le mode Console"</string>
     <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"Accéder à vos widgets et écrans de veille préférés pendant le chargement."</string>
     <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Allons-y"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Changer d\'utilisateur"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menu déroulant"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Toutes les applis et les données de cette session seront supprimées."</string>
@@ -801,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"S\'affiche dans le haut des notifications de conversation et comme photo de profil à l\'écran de verrouillage, s\'affiche comme bulle, interrompt le mode Ne pas déranger"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritaire"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ne prend pas en charge les fonctionnalités de conversation"</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"Fermer"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"Ne plus afficher"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ces notifications ne peuvent pas être modifiées"</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Les notifications d\'appel ne peuvent pas être modifiées."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ce groupe de notifications ne peut pas être configuré ici"</string>
@@ -915,15 +919,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Agenda"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Calculatrice"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"Activer/Désactiver les touches non répétées"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"Activer/Désactiver les touches de souris"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"Activer/Désactiver les touches rémanentes"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"Activer/Désactiver les touches lentes"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Activer/Désactiver l\'Accès vocal"</string>
+    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
     <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Ne pas déranger"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Raccourci des boutons de volume"</string>
@@ -1304,6 +1309,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Servez-vous de votre empreinte digitale pour ouvrir"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Authentification requise. Touchez le capteur d\'empreintes digitales pour vous authentifier."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"Appel en cours"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Données cellulaires"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Connexion active"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Connectée temporairement"</string>
@@ -1475,7 +1482,7 @@
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Supprimer"</string>
     <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Oui, réinitialiser"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Annuler"</string>
-    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Appuyez sur la touche"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Appuyez sur une ou des touches"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="3325858369539848162">"La combinaison de touches est déjà utilisée. Essayez une autre combinaison."</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Le raccourci ne peut pas être défini."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>

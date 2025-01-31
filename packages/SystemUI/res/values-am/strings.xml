@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"የባትሪ መቶኛ አይታወቅም።"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"ከ<xliff:g id="BLUETOOTH">%s</xliff:g> ጋር ተገናኝቷል።"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"ከ<xliff:g id="CAST">%s</xliff:g> ጋር ተገናኝቷል።"</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"አልተገናኘም።"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"በማዛወር ላይ"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"ጠፍቷል"</string>
@@ -536,11 +540,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ምግብር በመጠቀም መተግበሪያ ለመክፈት እርስዎ መሆንዎን ማረጋገጥ አለብዎት። እንዲሁም የእርስዎ ጡባዊ በተቆለፈበት ጊዜ እንኳን ማንኛውም ሰው እነሱን ማየት እንደሚችል ከግምት ውስጥ ያስገቡ። አንዳንድ ምግብሮች ለማያ ገፅ ቁልፍዎ የታሰቡ ላይሆኑ ይችላሉ እና እዚህ ለማከል አስተማማኝ ላይሆኑ ይችላሉ።"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"ገባኝ"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"የገፀ ማያ አሳራፊ አዝራርን አሳይ"</string>
-    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"የመገናኛ ሁነታን ያስሱ"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"ኃይል በሚሞሉበት ወቅት የእርስዎን ተወዳጅ ምግብሮች እና ማያ ገፅ ቆጣቢዎችን ይድረሱ።"</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"እንሂድ"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ተጠቃሚ ቀይር"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ወደታች ተጎታች ምናሌ"</string>
@@ -804,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"በውይይት ማሳወቂያዎች አናት ላይ እና በማያ ገፅ መቆለፊያ ላይ እንደ መገለጫ ምስል ይታያል፣ እንደ አረፋ ሆኖ ይታያል፣ አትረብሽን ያቋርጣል"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ቅድሚያ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> የውይይት ባህሪያትን አይደግፍም"</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"አሰናብት"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"ዳግም አታሳይ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"እነዚህ ማሳወቂያዎች ሊሻሻሉ አይችሉም።"</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"የጥሪ ማሳወቂያዎች ሊቀየሩ አይችሉም።"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"የማሳወቂያዎች ይህ ቡድን እዚህ ላይ ሊዋቀር አይችልም"</string>
@@ -918,15 +919,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"የቀን መቁጠሪያ"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"ሒሳብ ማስያ"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"ካርታዎች"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"የወጡ ቁልፎችን ይቀያይሩ"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"የመዳፊት ቁልፎችን ይቀያይሩ"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"ተጣባቂ ቁልፎችን ይቀያይሩ"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"ቀርፋፋ ቁልፎችን ይቀያይሩ"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"የድምፅ መዳረሻን ይቀያይሩ"</string>
+    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
     <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"አትረብሽ"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"የድምፅ አዝራሮች አቋራጭ"</string>
@@ -1307,6 +1309,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ለመክፈት የጣት አሻራ ይጠቀሙ"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"ማረጋገጥ ያስፈልጋል። ለማረጋገጥ የጣት አሻራ ዳሳሹን ይንኩ።"</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"እየተካሄደ ያለ ጥሪ"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"የተንቀሳቃሽ ስልክ ውሂብ"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"ተገናኝቷል"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"በጊዜያዊነት ተገናኝቷል"</string>
@@ -1457,7 +1461,7 @@
     <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"አቋራጮችን ያብጁ"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"አቋራጭ ይወገድ?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"ወደ ነባሪ ዳግም ይጀመር?"</string>
-    <string name="shortcut_customize_mode_add_shortcut_description" msgid="7636040209946696120">"ይህን አቋራጭ ለመፍጠር የእርምጃ ቁልፉን እና ላይ አንድ ወይም ከዚያ በላይ ሌሎቹ ቁልፎችን አንድ ላይ ይጫኑ"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="7636040209946696120">"ይህን አቋራጭ ለመፍጠር የእርምጃ ቁልፉን እና አንድ ወይም ከዚያ በላይ ሌሎቹ ቁልፎችን አንድ ላይ ይጫኑ"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"ይህ ብጁ አቋራጭዎን በቋሚነት ይሰርዛል።"</string>
     <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"ይህ ሁሉንም ብጁ አቋራጮችዎን በቋሚነት ይሰርዛል።"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"የፍለጋ አቋራጮች"</string>
@@ -1512,12 +1516,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"የቅርብ ጊዜ መተግበሪያዎች አሳይ ምልክትን አጠናቅቀዋል።"</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"የቅርብ ጊዜ መተግበሪያዎችን ለማየት የመዳሰሻ ሰሌዳዎ ላይ ሦስት ጣቶችን በመጠቀም ወደላይ ያንሸራትቱ እና ይያዙ"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"መተግበሪያዎችን ይቀያይሩ"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"የመዳሰሻ ሰሌዳዎ ላይ አራት ጣቶችን በመጠቀም ወደ ቀኝ ያንሸራትቱ"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"ጥሩ ሠርተዋል!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"የመተግበሪያ ምልክቶችን ይቀይሩ የሚለወን አጠናቅቀዋል።"</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"መተግበሪያዎችን ለመቀያየር የመዳሰሻ ሰሌዳዎ ላይ አራት ጣቶችን በመጠቀም ወደ ቀኝ ያንሸራትቱ"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"ሁሉንም መተግበሪያዎች ይመልከቱ"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"በቁልፍ ሰሌዳዎ ላይ ያለውን የተግባር ቁልፍ ይጫኑ"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"ጥሩ ሠርተዋል!"</string>
