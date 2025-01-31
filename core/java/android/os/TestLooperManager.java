@@ -174,6 +174,7 @@ public class TestLooperManager {
                 try {
                     execution.wait();
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
                 if (execution.response != null) {
                     throw new RuntimeException(execution.response);
@@ -231,6 +232,7 @@ public class TestLooperManager {
         try {
             mLooperHolderLatch.await();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -245,6 +247,7 @@ public class TestLooperManager {
                         processMessage(take);
                     }
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
             }
         }
