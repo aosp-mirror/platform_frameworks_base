@@ -117,6 +117,12 @@ public class VolumeHelperTest {
     /** Choose a default stream volume value which does not depend on min/max. */
     private static final int DEFAULT_STREAM_VOLUME = 2;
 
+    /**
+     * The default ringer mode affected stream value since the ringer mode delegate is not used
+     * for unit testing.
+     */
+    private static final int DEFAULT_RINGER_MODE_AFFECTED_STREAMS = 0x1a6;
+
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
 
@@ -185,6 +191,10 @@ public class VolumeHelperTest {
 
         public void setMuteAffectedStreams(int muteAffectedStreams) {
             mMuteAffectedStreams = muteAffectedStreams;
+        }
+
+        public void setRingerModeAffectedStreams(int ringerModeAffectedStreams) {
+            mRingerModeAffectedStreams = ringerModeAffectedStreams;
         }
     }
 
@@ -549,6 +559,48 @@ public class VolumeHelperTest {
 
         assertEquals(RINGER_MODE_VIBRATE, mAudioService.getRingerModeInternal());
     }
+
+    @Test
+    public void setStreamVolume_doesNotUnmuteStreamAffectedByRingerMode() throws Exception {
+        assumeFalse("Skipping ringer mode test on automotive", mIsAutomotive);
+        mAudioService.setRingerModeAffectedStreams(DEFAULT_RINGER_MODE_AFFECTED_STREAMS);
+        mAudioService.setRingerModeInternal(RINGER_MODE_VIBRATE, mContext.getOpPackageName());
+
+        mAudioService.setStreamVolume(STREAM_NOTIFICATION, /*index=*/1, /*flags=*/0,
+                mContext.getOpPackageName());
+        mTestLooper.dispatchAll();
+
+        assertEquals(0, mAudioService.getStreamVolume(STREAM_NOTIFICATION));
+    }
+
+    @Test
+    public void adjustUnmuteStreamVolume_doesNotUnmuteStreamAffectedByRingerMode()
+            throws Exception {
+        assumeFalse("Skipping ringer mode test on automotive", mIsAutomotive);
+        mAudioService.setRingerModeAffectedStreams(DEFAULT_RINGER_MODE_AFFECTED_STREAMS);
+        mAudioService.setRingerModeInternal(RINGER_MODE_VIBRATE, mContext.getOpPackageName());
+
+        mAudioService.adjustStreamVolume(STREAM_NOTIFICATION, ADJUST_UNMUTE, /*flags=*/0,
+                mContext.getOpPackageName());
+        mTestLooper.dispatchAll();
+
+        assertEquals(0, mAudioService.getStreamVolume(STREAM_NOTIFICATION));
+    }
+
+    @Test
+    public void adjustRaiseStreamVolume_doesNotUnmuteStreamAffectedByRingerMode()
+            throws Exception {
+        assumeFalse("Skipping ringer mode test on automotive", mIsAutomotive);
+        mAudioService.setRingerModeAffectedStreams(DEFAULT_RINGER_MODE_AFFECTED_STREAMS);
+        mAudioService.setRingerModeInternal(RINGER_MODE_VIBRATE, mContext.getOpPackageName());
+
+        mAudioService.adjustStreamVolume(STREAM_NOTIFICATION, ADJUST_RAISE, /*flags=*/0,
+                mContext.getOpPackageName());
+        mTestLooper.dispatchAll();
+
+        assertEquals(0, mAudioService.getStreamVolume(STREAM_NOTIFICATION));
+    }
+
 
     // --------------------- Permission tests ---------------------
 
