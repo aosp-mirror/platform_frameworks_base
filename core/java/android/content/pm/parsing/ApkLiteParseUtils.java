@@ -22,6 +22,7 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
 import android.annotation.NonNull;
 import android.app.admin.DeviceAdminReceiver;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
@@ -459,6 +460,7 @@ public class ApkLiteParseUtils {
         boolean overlayIsStatic = false;
         int overlayPriority = 0;
         int rollbackDataPolicy = 0;
+        int pageSizeCompat = ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED;
 
         String requiredSystemPropertyName = null;
         String requiredSystemPropertyValue = null;
@@ -515,6 +517,10 @@ public class ApkLiteParseUtils {
                         "permission");
                 boolean hasBindDeviceAdminPermission =
                         android.Manifest.permission.BIND_DEVICE_ADMIN.equals(permission);
+
+                pageSizeCompat = parser.getAttributeIntValue(ANDROID_RES_NAMESPACE,
+                        "pageSizeCompat",
+                        ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED);
 
                 final int innerDepth = parser.getDepth();
                 int innerType;
@@ -817,7 +823,7 @@ public class ApkLiteParseUtils {
                         usesSdkLibrariesVersionsMajor, usesSdkLibrariesCertDigests, isStaticLibrary,
                         usesStaticLibraries, usesStaticLibrariesVersions,
                         usesStaticLibrariesCertDigests, updatableSystem, emergencyInstaller,
-                        declaredLibraries));
+                        declaredLibraries, pageSizeCompat));
     }
 
     private static ParseResult<String[]> parseAdditionalCertificates(ParseInput input,
