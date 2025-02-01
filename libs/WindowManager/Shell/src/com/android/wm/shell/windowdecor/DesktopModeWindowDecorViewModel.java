@@ -755,7 +755,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         // App sometimes draws before the insets from WindowDecoration#relayout have
         // been added, so they must be added here
         decoration.addCaptionInset(wct);
-        mDesktopTasksController.moveTaskToDesktop(taskId, wct, source,
+        mDesktopTasksController.moveTaskToDefaultDeskAndActivate(taskId, wct, source,
                 /* remoteTransition= */ null, /* moveToDesktopCallback */ null);
         decoration.closeHandleMenu();
 

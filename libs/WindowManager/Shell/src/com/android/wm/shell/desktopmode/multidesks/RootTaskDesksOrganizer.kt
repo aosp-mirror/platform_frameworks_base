@@ -89,6 +89,7 @@ class RootTaskDesksOrganizer(
         task: RunningTaskInfo,
     ) {
         val root = roots[deskId] ?: error("Root not found for desk: $deskId")
+        wct.setWindowingMode(task.token, WINDOWING_MODE_UNDEFINED)
         wct.reparent(task.token, root.taskInfo.token, /* onTop= */ true)
     }
 

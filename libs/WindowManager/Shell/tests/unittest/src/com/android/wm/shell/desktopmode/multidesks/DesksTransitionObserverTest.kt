@@ -29,9 +29,12 @@ import com.android.window.flags.Flags
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.desktopmode.DesktopRepository
+import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFreeformTask
 import com.android.wm.shell.desktopmode.DesktopUserRepositories
 import com.android.wm.shell.sysui.ShellInit
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -51,6 +54,7 @@ class DesksTransitionObserverTest : ShellTestCase() {
     @JvmField @Rule val setFlagsRule = SetFlagsRule()
 
     private val mockDesksOrganizer = mock<DesksOrganizer>()
+    val testScope = TestScope()
 
     private lateinit var desktopUserRepositories: DesktopUserRepositories
     private lateinit var observer: DesksTransitionObserver
@@ -67,7 +71,7 @@ class DesksTransitionObserverTest : ShellTestCase() {
                 /* shellController= */ mock(),
                 /* persistentRepository= */ mock(),
                 /* repositoryInitializer= */ mock(),
-                /* mainCoroutineScope= */ mock(),
+                testScope,
                 /* userManager= */ mock(),
             )
         observer = DesksTransitionObserver(desktopUserRepositories, mockDesksOrganizer)
@@ -145,4 +149,32 @@ class DesksTransitionObserverTest : ShellTestCase() {
 
         assertThat(repository.getActiveDeskId(DEFAULT_DISPLAY)).isEqualTo(5)
     }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun onTransitionReady_activateDeskWithTask_updatesRepository() =
+        testScope.runTest {
+            val deskId = 5
+            val task = createFreeformTask(DEFAULT_DISPLAY).apply { isVisibleRequested = true }
+            val transition = Binder()
+            val change = Change(mock(), mock()).apply { taskInfo = task }
+            whenever(mockDesksOrganizer.getDeskAtEnd(change)).thenReturn(deskId)
+            val activateTransition =
+                DeskTransition.ActiveDeskWithTask(
+                    transition,
+                    displayId = DEFAULT_DISPLAY,
+                    deskId = deskId,
+                    enterTaskId = task.taskId,
+                )
+            repository.addDesk(DEFAULT_DISPLAY, deskId = deskId)
+
+            observer.addPendingTransition(activateTransition)
+            observer.onTransitionReady(
+                transition = transition,
+                info = TransitionInfo(TRANSIT_TO_FRONT, /* flags= */ 0).apply { addChange(change) },
+            )
+
+            assertThat(repository.getActiveDeskId(DEFAULT_DISPLAY)).isEqualTo(deskId)
+            assertThat(repository.getActiveTaskIdsInDesk(deskId)).contains(task.taskId)
+        }
 }

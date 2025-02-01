@@ -15,6 +15,7 @@
  */
 package com.android.wm.shell.desktopmode.multidesks
 
+import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.testing.AndroidTestingRunner
 import android.view.Display
 import android.view.SurfaceControl
@@ -214,6 +215,13 @@ class RootTaskDesksOrganizerTest : ShellTestCase() {
                         hop.toTop &&
                         hop.container == desktopTask.token.asBinder() &&
                         hop.newParent == freeformRoot.token.asBinder()
+                }
+            )
+            .isTrue()
+        assertThat(
+                wct.changes.any { change ->
+                    change.key == desktopTask.token.asBinder() &&
+                        change.value.windowingMode == WINDOWING_MODE_UNDEFINED
                 }
             )
             .isTrue()

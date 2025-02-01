@@ -68,6 +68,26 @@ class DesksTransitionObserver(
                     )
                 }
             }
+            is DeskTransition.ActiveDeskWithTask -> {
+                val withTask =
+                    info.changes.find { change ->
+                        change.taskInfo?.taskId == deskTransition.enterTaskId &&
+                            change.taskInfo?.isVisibleRequested == true &&
+                            desksOrganizer.getDeskAtEnd(change) == deskTransition.deskId
+                    }
+                withTask?.let {
+                    desktopRepository.setActiveDesk(
+                        displayId = deskTransition.displayId,
+                        deskId = deskTransition.deskId,
+                    )
+                    desktopRepository.addTaskToDesk(
+                        displayId = deskTransition.displayId,
+                        deskId = deskTransition.deskId,
+                        taskId = deskTransition.enterTaskId,
+                        isVisible = true,
+                    )
+                }
+            }
         }
     }
 }
