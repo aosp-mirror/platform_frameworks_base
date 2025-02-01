@@ -29,6 +29,7 @@ import java.io.PrintWriter
 import java.util.Optional
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 
 /**
  * Monitors ambient light signals, applies a debouncing algorithm, and produces the current ambient
@@ -43,7 +44,7 @@ class AmbientLightModeMonitor
 constructor(
     private val algorithm: Optional<DebounceAlgorithm>,
     private val sensorManager: AsyncSensorManager,
-    @Named(LIGHT_SENSOR) private val lightSensor: Optional<Sensor>,
+    @Named(LIGHT_SENSOR) private val lightSensor: Optional<Provider<Sensor>>,
 ) : Dumpable {
     companion object {
         private const val TAG = "AmbientLightModeMonitor"
@@ -67,7 +68,7 @@ constructor(
     fun start(callback: Callback) {
         if (DEBUG) Log.d(TAG, "start monitoring ambient light mode")
 
-        if (lightSensor.isEmpty) {
+        if (lightSensor.isEmpty || lightSensor.get().get() == null) {
             if (DEBUG) Log.w(TAG, "light sensor not available")
             return
         }
@@ -80,7 +81,7 @@ constructor(
         algorithm.get().start(callback)
         sensorManager.registerListener(
             mSensorEventListener,
-            lightSensor.get(),
+            lightSensor.get().get(),
             SensorManager.SENSOR_DELAY_NORMAL,
         )
     }
