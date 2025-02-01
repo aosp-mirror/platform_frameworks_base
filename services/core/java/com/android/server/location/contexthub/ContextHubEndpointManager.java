@@ -30,6 +30,7 @@ import android.os.ServiceSpecificException;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -45,13 +46,13 @@ import java.util.function.Consumer;
  */
 /* package */ class ContextHubEndpointManager
         implements ContextHubHalEndpointCallback.IEndpointSessionCallback {
+    /** The range of session IDs to use for endpoints */
+    public static final int SERVICE_SESSION_RANGE = 1024;
+
     private static final String TAG = "ContextHubEndpointManager";
 
     /** The hub ID of the Context Hub Service. */
     private static final long SERVICE_HUB_ID = 0x416e64726f696400L;
-
-    /** The range of session IDs to use for endpoints */
-    private static final int SERVICE_SESSION_RANGE = 1024;
 
     /** The length of the array that should be returned by HAL requestSessionIdRange */
     private static final int SERVICE_SESSION_RANGE_LENGTH = 2;
@@ -399,5 +400,17 @@ import java.util.function.Consumer;
      */
     private boolean isSessionIdRangeValid(int minId, int maxId) {
         return (minId <= maxId) && (minId >= 0) && (maxId >= 0);
+    }
+
+    @VisibleForTesting
+    /* package */ int getNumAvailableSessions() {
+        synchronized (mSessionIdLock) {
+            return (mMaxSessionId - mMinSessionId + 1) - mReservedSessionIds.size();
+        }
+    }
+
+    @VisibleForTesting
+    /* package */ int getNumRegisteredClients() {
+        return mEndpointMap.size();
     }
 }
