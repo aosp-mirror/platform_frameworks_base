@@ -119,7 +119,7 @@ public class BubbleTaskViewHelper {
                         PendingIntent pi = PendingIntent.getActivity(
                                 context,
                                 /* requestCode= */ 0,
-                                mBubble.getAppBubbleIntent()
+                                mBubble.getIntent()
                                         .addFlags(FLAG_ACTIVITY_MULTIPLE_TASK),
                                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT,
                                 /* options= */ null);
@@ -133,7 +133,7 @@ public class BubbleTaskViewHelper {
                     } else {
                         options.setLaunchedFromBubble(true);
                         if (mBubble != null) {
-                            mBubble.setIntentActive();
+                            mBubble.setPendingIntentActive();
                         }
                         final Intent fillInIntent = new Intent();
                         // Apply flags to make behaviour match documentLaunchMode=always.
@@ -231,7 +231,7 @@ public class BubbleTaskViewHelper {
         boolean isNew = mBubble == null || didBackingContentChange(bubble);
         mBubble = bubble;
         if (isNew) {
-            mPendingIntent = mBubble.getBubbleIntent();
+            mPendingIntent = mBubble.getPendingIntent();
             return true;
         }
         return false;
@@ -276,7 +276,7 @@ public class BubbleTaskViewHelper {
      */
     private boolean didBackingContentChange(Bubble newBubble) {
         boolean prevWasIntentBased = mBubble != null && mPendingIntent != null;
-        boolean newIsIntentBased = newBubble.getBubbleIntent() != null;
+        boolean newIsIntentBased = newBubble.getPendingIntent() != null;
         return prevWasIntentBased != newIsIntentBased;
     }
 }

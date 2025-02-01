@@ -237,8 +237,7 @@ public class BubbleExpandedView extends LinearLayout {
                         PendingIntent pi = PendingIntent.getActivity(
                                 context,
                                 /* requestCode= */ 0,
-                                mBubble.getAppBubbleIntent()
-                                        .addFlags(FLAG_ACTIVITY_MULTIPLE_TASK),
+                                mBubble.getIntent().addFlags(FLAG_ACTIVITY_MULTIPLE_TASK),
                                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT,
                                 /* options= */ null);
                         mTaskView.startActivity(pi, /* fillInIntent= */ null, options,
@@ -252,7 +251,7 @@ public class BubbleExpandedView extends LinearLayout {
                     } else {
                         options.setLaunchedFromBubble(true);
                         if (mBubble != null) {
-                            mBubble.setIntentActive();
+                            mBubble.setPendingIntentActive();
                         }
                         final Intent fillInIntent = new Intent();
                         // Apply flags to make behaviour match documentLaunchMode=always.
@@ -920,7 +919,7 @@ public class BubbleExpandedView extends LinearLayout {
                     });
 
             if (isNew) {
-                mPendingIntent = mBubble.getBubbleIntent();
+                mPendingIntent = mBubble.getPendingIntent();
                 if ((mPendingIntent != null || mBubble.hasMetadataShortcutId())
                         && mTaskView != null) {
                     setContentVisibility(false);
@@ -947,7 +946,7 @@ public class BubbleExpandedView extends LinearLayout {
      */
     private boolean didBackingContentChange(Bubble newBubble) {
         boolean prevWasIntentBased = mBubble != null && mPendingIntent != null;
-        boolean newIsIntentBased = newBubble.getBubbleIntent() != null;
+        boolean newIsIntentBased = newBubble.getPendingIntent() != null;
         return prevWasIntentBased != newIsIntentBased;
     }
 

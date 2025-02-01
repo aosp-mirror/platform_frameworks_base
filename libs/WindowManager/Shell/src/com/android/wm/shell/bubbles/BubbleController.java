@@ -417,10 +417,11 @@ public class BubbleController implements ConfigurationChangeListener,
         mDataRepository.setSuppressionChangedListener(this::onBubbleMetadataFlagChanged);
 
         mBubbleData.setPendingIntentCancelledListener(bubble -> {
-            if (bubble.getBubbleIntent() == null) {
+            if (bubble.getPendingIntent() == null) {
                 return;
             }
-            if (bubble.isIntentActive() || mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
+            if (bubble.isPendingIntentActive()
+                    || mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
                 bubble.setPendingIntentCanceled();
                 return;
             }
@@ -1620,7 +1621,7 @@ public class BubbleController implements ConfigurationChangeListener,
                 // It's in the overflow, so remove it & reinflate
                 mBubbleData.dismissBubbleWithKey(noteBubbleKey, Bubbles.DISMISS_NOTIF_CANCEL);
                 // Update the bubble entry in the overflow with the latest intent.
-                b.setAppBubbleIntent(intent);
+                b.setIntent(intent);
             } else {
                 // Notes bubble does not exist, lets add and expand it
                 b = Bubble.createNotesBubble(intent, user, icon, mMainExecutor,
