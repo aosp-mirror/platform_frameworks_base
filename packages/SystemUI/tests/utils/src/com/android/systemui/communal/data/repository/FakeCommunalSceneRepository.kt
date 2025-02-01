@@ -17,8 +17,7 @@ import kotlinx.coroutines.launch
 /** Fake implementation of [CommunalSceneRepository]. */
 class FakeCommunalSceneRepository(
     private val applicationScope: CoroutineScope,
-    override val currentScene: MutableStateFlow<SceneKey> =
-        MutableStateFlow(CommunalScenes.Default),
+    override val currentScene: MutableStateFlow<SceneKey> = MutableStateFlow(CommunalScenes.Default),
 ) : CommunalSceneRepository {
 
     override fun changeScene(toScene: SceneKey, transitionKey: TransitionKey?) =
@@ -29,6 +28,10 @@ class FakeCommunalSceneRepository(
             currentScene.value = toScene
             _transitionState.value = flowOf(ObservableTransitionState.Idle(toScene))
         }
+    }
+
+    override suspend fun showHubFromPowerButton() {
+        snapToScene(CommunalScenes.Communal)
     }
 
     private val defaultTransitionState = ObservableTransitionState.Idle(CommunalScenes.Default)

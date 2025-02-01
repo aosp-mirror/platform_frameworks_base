@@ -148,6 +148,29 @@ constructor(
         }
     }
 
+    fun showHubFromPowerButton() {
+        val loggingReason = "showing hub from power button"
+        applicationScope.launch("$TAG#showHubFromPowerButton") {
+            if (SceneContainerFlag.isEnabled) {
+                sceneInteractor.changeScene(
+                    toScene = CommunalScenes.Communal.toSceneContainerSceneKey(),
+                    loggingReason = loggingReason,
+                )
+                return@launch
+            }
+
+            if (currentScene.value == CommunalScenes.Communal) return@launch
+            logger.logSceneChangeRequested(
+                from = currentScene.value,
+                to = CommunalScenes.Communal,
+                reason = loggingReason,
+                isInstant = true,
+            )
+            notifyListeners(CommunalScenes.Communal, null)
+            repository.showHubFromPowerButton()
+        }
+    }
+
     private fun notifyListeners(newScene: SceneKey, keyguardState: KeyguardState?) {
         onSceneAboutToChangeListener.forEach { it.onSceneAboutToChange(newScene, keyguardState) }
     }

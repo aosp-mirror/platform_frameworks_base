@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,34 +21,44 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.kosmos.testScope
-import com.android.systemui.scene.shared.model.sceneDataSource
+import com.android.systemui.kosmos.backgroundScope
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runTest
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
+import com.android.systemui.scene.shared.model.SceneDataSource
+import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class CommunalRepositoryImplTest : SysuiTestCase() {
+class CommunalSceneRepositoryImplTest : SysuiTestCase() {
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
 
-    private val kosmos = testKosmos()
-    private val testScope = kosmos.testScope
-    private val underTest by lazy {
-        CommunalSceneRepositoryImpl(
-            kosmos.applicationCoroutineScope,
-            kosmos.applicationCoroutineScope,
-            kosmos.sceneDataSource,
-        )
-    }
+    private val delegator = mock<SceneDataSourceDelegator> {}
+
+    private val Kosmos.underTest by
+        Kosmos.Fixture {
+            CommunalSceneRepositoryImpl(
+                applicationScope = applicationCoroutineScope,
+                backgroundScope = backgroundScope,
+                sceneDataSource = delegator,
+                delegator = delegator,
+            )
+        }
 
     @Test
     fun transitionState_idleByDefault() =
-        testScope.runTest {
+        kosmos.runTest {
             val transitionState by collectLastValue(underTest.transitionState)
             assertThat(transitionState)
                 .isEqualTo(ObservableTransitionState.Idle(CommunalScenes.Default))
@@ -56,7 +66,7 @@ class CommunalRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun transitionState_setTransitionState_returnsNewValue() =
-        testScope.runTest {
+        kosmos.runTest {
             val expectedSceneKey = CommunalScenes.Communal
             underTest.setTransitionState(flowOf(ObservableTransitionState.Idle(expectedSceneKey)))
 
@@ -66,7 +76,7 @@ class CommunalRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun transitionState_setNullTransitionState_returnsDefaultValue() =
-        testScope.runTest {
+        kosmos.runTest {
             // Set a value for the transition state flow.
             underTest.setTransitionState(
                 flowOf(ObservableTransitionState.Idle(CommunalScenes.Communal))
@@ -79,5 +89,19 @@ class CommunalRepositoryImplTest : SysuiTestCase() {
             val transitionState by collectLastValue(underTest.transitionState)
             assertThat(transitionState)
                 .isEqualTo(ObservableTransitionState.Idle(CommunalScenes.Default))
+        }
+
+    @Test
+    fun showHubFromPowerButton() =
+        kosmos.runTest {
+            fakeKeyguardRepository.setKeyguardShowing(false)
+
+            underTest.showHubFromPowerButton()
+
+            argumentCaptor<SceneDataSource>().apply {
+                verify(delegator).setDelegate(capture())
+
+                assertThat(firstValue.currentScene.value).isEqualTo(CommunalScenes.Communal)
+            }
         }
 }

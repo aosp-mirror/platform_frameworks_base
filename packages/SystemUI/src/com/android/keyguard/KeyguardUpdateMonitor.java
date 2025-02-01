@@ -296,7 +296,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final Provider<JavaAdapter> mJavaAdapter;
     private final Provider<SceneInteractor> mSceneInteractor;
     private final Provider<AlternateBouncerInteractor> mAlternateBouncerInteractor;
-    private final CommunalSceneInteractor mCommunalSceneInteractor;
+    private final Provider<CommunalSceneInteractor> mCommunalSceneInteractor;
     private final AuthController mAuthController;
     private final UiEventLogger mUiEventLogger;
     private final Set<String> mAllowFingerprintOnOccludingActivitiesFromPackage;
@@ -2210,7 +2210,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             Provider<AlternateBouncerInteractor> alternateBouncerInteractor,
             Provider<JavaAdapter> javaAdapter,
             Provider<SceneInteractor> sceneInteractor,
-            CommunalSceneInteractor communalSceneInteractor) {
+            Provider<CommunalSceneInteractor> communalSceneInteractor) {
         mContext = context;
         mSubscriptionManager = subscriptionManager;
         mUserTracker = userTracker;
@@ -2543,7 +2543,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         if (glanceableHubV2()) {
             mJavaAdapter.get().alwaysCollectFlow(
-                    mCommunalSceneInteractor.isCommunalVisible(),
+                    mCommunalSceneInteractor.get().isCommunalVisible(),
                     this::onCommunalShowingChanged
             );
         }
