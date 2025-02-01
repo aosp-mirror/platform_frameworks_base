@@ -71,6 +71,11 @@ object KeyguardBouncerConstants {
         @Deprecated(DEPRECATION_MSG)
         const val EMERGENCY_BUTTON = com.android.internal.R.color.materialColorTertiaryFixed
     }
+
+    object Color {
+        @JvmField val actionButtonText = colors.materialColorOnSecondaryContainer
+        @JvmField val actionButtonBg = colors.materialColorSecondaryContainer
+    }
 }
 
 private fun <T> c(old: T, new: T): T {
