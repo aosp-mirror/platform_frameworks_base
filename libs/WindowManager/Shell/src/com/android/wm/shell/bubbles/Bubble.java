@@ -56,7 +56,6 @@ import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
-import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
 import com.android.wm.shell.shared.bubbles.BubbleInfo;
 import com.android.wm.shell.shared.bubbles.ParcelableFlyoutMessage;
 import com.android.wm.shell.taskview.TaskView;
@@ -439,7 +438,7 @@ public class Bubble implements BubbleViewProvider {
                 getTitle(),
                 getAppName(),
                 isImportantConversation(),
-                !isAppLaunchIntent(),
+                showAppBadge(),
                 getParcelableFlyoutMessage());
     }
 
@@ -1124,14 +1123,10 @@ public class Bubble implements BubbleViewProvider {
     }
 
     /**
-     * Whether this bubble represents the full app, i.e. the intent used is the launch
-     * intent for an app. In this case we don't show a badge on the icon.
+     * Whether an app badge should be shown for this bubble.
      */
-    public boolean isAppLaunchIntent() {
-        if (BubbleAnythingFlagHelper.enableCreateAnyBubble() && mIntent != null) {
-            return mIntent.hasCategory("android.intent.category.LAUNCHER");
-        }
-        return false;
+    public boolean showAppBadge() {
+        return isChat() || isShortcut() || isNote();
     }
 
     /**

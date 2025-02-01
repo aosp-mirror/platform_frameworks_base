@@ -234,6 +234,42 @@ public class BubbleTest extends ShellTestCase {
     }
 
     @Test
+    public void testShowAppBadge_chat() {
+        Bubble bubble = createChatBubble(true /* useShortcut */);
+        assertThat(bubble.isChat()).isTrue();
+        assertThat(bubble.showAppBadge()).isTrue();
+    }
+
+    @Test
+    public void testShowAppBadge_note() {
+        Bubble bubble = Bubble.createNotesBubble(createIntent(), UserHandle.of(0),
+                mock(Icon.class),
+                mMainExecutor, mBgExecutor);
+        assertThat(bubble.isNote()).isTrue();
+        assertThat(bubble.showAppBadge()).isTrue();
+    }
+
+    @Test
+    public void testShowAppBadge_app() {
+        Bubble bubble = Bubble.createAppBubble(createIntent(), UserHandle.of(0),
+                mock(Icon.class),
+                mMainExecutor, mBgExecutor);
+        assertThat(bubble.isApp()).isTrue();
+        assertThat(bubble.showAppBadge()).isFalse();
+    }
+
+    @Test
+    public void testShowAppBadge_shortcut() {
+        ShortcutInfo shortcutInfo = new ShortcutInfo.Builder(mContext)
+                .setId("mockShortcutId")
+                .build();
+        Bubble bubble = Bubble.createShortcutBubble(shortcutInfo,
+                mMainExecutor, mBgExecutor);
+        assertThat(bubble.isShortcut()).isTrue();
+        assertThat(bubble.showAppBadge()).isTrue();
+    }
+
+    @Test
     public void testBubbleAsBubbleBarBubble_withShortcut() {
         Bubble bubble = createChatBubble(true /* useShortcut */);
         BubbleInfo bubbleInfo = bubble.asBubbleBarBubble();
