@@ -226,6 +226,10 @@ class DesktopRepository(
         desktopData.setActiveDesk(displayId = displayId, deskId = deskId)
     }
 
+    /** Returns the id of the active desk in the given display, if any. */
+    @VisibleForTesting
+    fun getActiveDeskId(displayId: Int): Int? = desktopData.getActiveDesk(displayId)?.deskId
+
     /**
      * Adds task with [taskId] to the list of freeform tasks on [displayId]'s active desk.
      *
@@ -435,7 +439,7 @@ class DesktopRepository(
                 ?: error("Expected non-null desk in display $displayId")
             unminimizeTask(displayId, taskId)
         } else {
-            desktopData.getActiveDesk(displayId)?.visibleTasks?.remove(taskId)
+            desktopData.getDefaultDesk(displayId)?.visibleTasks?.remove(taskId)
         }
         val newCount = getVisibleTaskCount(displayId)
         if (prevCount != newCount) {

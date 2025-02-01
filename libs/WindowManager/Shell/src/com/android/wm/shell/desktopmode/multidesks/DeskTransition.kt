@@ -30,4 +30,8 @@ sealed class DeskTransition {
         val tasks: Set<Int>,
         val onDeskRemovedListener: OnDeskRemovedListener?,
     ) : DeskTransition()
+
+    /** A transition to activate a desk in its display. */
+    data class ActivateDesk(override val token: IBinder, val displayId: Int, val deskId: Int) :
+        DeskTransition()
 }

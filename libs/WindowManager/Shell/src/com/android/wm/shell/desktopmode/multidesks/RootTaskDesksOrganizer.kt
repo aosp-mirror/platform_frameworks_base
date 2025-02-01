@@ -22,6 +22,7 @@ import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.util.SparseArray
 import android.view.SurfaceControl
+import android.view.WindowManager.TRANSIT_TO_FRONT
 import android.window.TransitionInfo
 import android.window.WindowContainerTransaction
 import androidx.core.util.forEach
@@ -93,6 +94,11 @@ class RootTaskDesksOrganizer(
 
     override fun getDeskAtEnd(change: TransitionInfo.Change): Int? =
         change.taskInfo?.parentTaskId?.takeIf { it in roots }
+
+    override fun isDeskActiveAtEnd(change: TransitionInfo.Change, deskId: Int): Boolean =
+        change.taskInfo?.taskId == deskId &&
+            change.taskInfo?.isVisibleRequested == true &&
+            change.mode == TRANSIT_TO_FRONT
 
     override fun onTaskAppeared(taskInfo: RunningTaskInfo, leash: SurfaceControl) {
         if (taskInfo.parentTaskId in roots) {

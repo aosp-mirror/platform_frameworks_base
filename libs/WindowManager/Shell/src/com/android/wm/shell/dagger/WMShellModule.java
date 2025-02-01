@@ -1157,9 +1157,10 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     static DesksTransitionObserver provideDesksTransitionObserver(
-            @NonNull @DynamicOverride DesktopUserRepositories desktopUserRepositories
+            @NonNull @DynamicOverride DesktopUserRepositories desktopUserRepositories,
+            @NonNull DesksOrganizer desksOrganizer
     ) {
-        return new DesksTransitionObserver(desktopUserRepositories);
+        return new DesksTransitionObserver(desktopUserRepositories, desksOrganizer);
     }
 
     @WMSingleton
