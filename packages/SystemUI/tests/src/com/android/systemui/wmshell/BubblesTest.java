@@ -1923,13 +1923,13 @@ public class BubblesTest extends SysuiTestCase {
     public void testShowStackEdu_isNotConversationBubble() {
         // Setup
         setPrefBoolean(StackEducationView.PREF_STACK_EDUCATION, false);
-        BubbleEntry bubbleEntry = createBubbleEntry(false /* isConversation */);
-        mBubbleController.updateBubble(bubbleEntry);
+        mBubbleController.showOrHideNotesBubble(mNotesBubbleIntent, mUser0, mNotesBubbleIcon);
         assertTrue(mBubbleController.hasBubbles());
-
+        String noteBubbleKey = Bubble.getNoteBubbleKeyForApp(mNotesBubbleIntent.getPackage(),
+                mUser0);
         // Click on bubble
-        Bubble bubble = mBubbleData.getBubbleInStackWithKey(bubbleEntry.getKey());
-        assertFalse(bubble.isConversation());
+        Bubble bubble = mBubbleData.getBubbleInStackWithKey(noteBubbleKey);
+        assertFalse(bubble.isChat());
         bubble.getIconView().callOnClick();
 
         // Check education is not shown
@@ -1941,13 +1941,13 @@ public class BubblesTest extends SysuiTestCase {
     public void testShowStackEdu_isConversationBubble() {
         // Setup
         setPrefBoolean(StackEducationView.PREF_STACK_EDUCATION, false);
-        BubbleEntry bubbleEntry = createBubbleEntry(true /* isConversation */);
+        BubbleEntry bubbleEntry = createBubbleEntry();
         mBubbleController.updateBubble(bubbleEntry);
         assertTrue(mBubbleController.hasBubbles());
 
         // Click on bubble
         Bubble bubble = mBubbleData.getBubbleInStackWithKey(bubbleEntry.getKey());
-        assertTrue(bubble.isConversation());
+        assertTrue(bubble.isChat());
         bubble.getIconView().callOnClick();
 
         // Check education is shown
@@ -1959,13 +1959,13 @@ public class BubblesTest extends SysuiTestCase {
     public void testShowStackEdu_isSeenConversationBubble() {
         // Setup
         setPrefBoolean(StackEducationView.PREF_STACK_EDUCATION, true);
-        BubbleEntry bubbleEntry = createBubbleEntry(true /* isConversation */);
+        BubbleEntry bubbleEntry = createBubbleEntry();
         mBubbleController.updateBubble(bubbleEntry);
         assertTrue(mBubbleController.hasBubbles());
 
         // Click on bubble
         Bubble bubble = mBubbleData.getBubbleInStackWithKey(bubbleEntry.getKey());
-        assertTrue(bubble.isConversation());
+        assertTrue(bubble.isChat());
         bubble.getIconView().callOnClick();
 
         // Check education is not shown
@@ -2690,17 +2690,19 @@ public class BubblesTest extends SysuiTestCase {
                 mock(Bubbles.PendingIntentCanceledListener.class), executor, executor);
     }
 
-    private BubbleEntry createBubbleEntry(boolean isConversation) {
+    /**
+     * Creates a BubbleEntry, which will represent a chat bubble.
+     * All bubble entries are notification based & therefore are chat bubbles.
+     */
+    private BubbleEntry createBubbleEntry() {
         NotificationEntry notificationEntry = mNotificationTestHelper.createBubble(mDeleteIntent);
-        if (isConversation) {
-            ShortcutInfo shortcutInfo = new ShortcutInfo.Builder(mContext)
-                    .setId("shortcutId")
-                    .build();
-            NotificationEntryHelper.modifyRanking(notificationEntry)
-                    .setIsConversation(true)
-                    .setShortcutInfo(shortcutInfo)
-                    .build();
-        }
+        ShortcutInfo shortcutInfo = new ShortcutInfo.Builder(mContext)
+                .setId("shortcutId")
+                .build();
+        NotificationEntryHelper.modifyRanking(notificationEntry)
+                .setIsConversation(true)
+                .setShortcutInfo(shortcutInfo)
+                .build();
         return mBubblesManager.notifToBubbleEntry(notificationEntry);
     }
 

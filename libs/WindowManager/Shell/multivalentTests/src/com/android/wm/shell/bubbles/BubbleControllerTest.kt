@@ -64,7 +64,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import java.util.Optional
 
-/** Tests for [BubbleControllerTest] */
+/** Tests for [BubbleController] */
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class BubbleControllerTest {
@@ -140,7 +140,7 @@ class BubbleControllerTest {
 
         assertThat(bubbleController.hasBubbles()).isTrue()
         assertThat(bubbleData.getAnyBubbleWithKey(expectedKey)).isNotNull()
-        assertThat(bubbleData.getAnyBubbleWithKey(expectedKey)!!.isNoteBubble).isTrue()
+        assertThat(bubbleData.getAnyBubbleWithKey(expectedKey)!!.isNote).isTrue()
     }
 
 
