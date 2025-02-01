@@ -93,6 +93,7 @@ import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.bubbles.bar.BubbleBarDragListener;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
 import com.android.wm.shell.bubbles.shortcut.BubbleShortcutHelper;
 import com.android.wm.shell.common.DisplayController;
@@ -148,7 +149,8 @@ import java.util.function.IntConsumer;
  * The controller manages addition, removal, and visible state of bubbles on screen.
  */
 public class BubbleController implements ConfigurationChangeListener,
-        RemoteCallable<BubbleController>, Bubbles.SysuiProxy.Provider {
+        RemoteCallable<BubbleController>, Bubbles.SysuiProxy.Provider,
+        BubbleBarDragListener {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleController" : TAG_BUBBLES;
 
@@ -416,7 +418,6 @@ public class BubbleController implements ConfigurationChangeListener,
         mBubbleData.setListener(mBubbleDataListener);
         mBubbleData.setSuppressionChangedListener(this::onBubbleMetadataFlagChanged);
         mDataRepository.setSuppressionChangedListener(this::onBubbleMetadataFlagChanged);
-
         mBubbleData.setPendingIntentCancelledListener(bubble -> {
             if (bubble.getBubbleIntent() == null) {
                 return;
@@ -842,6 +843,47 @@ public class BubbleController implements ConfigurationChangeListener,
         if (isShowingAsBubbleBar()) {
             mBubbleStateListener.animateBubbleBarLocation(bubbleBarLocation);
         }
+    }
+
+    @Override
+    public void onDragItemOverBubbleBarDragZone(@Nullable BubbleBarLocation bubbleBarLocation) {
+        if (bubbleBarLocation == null) return;
+        if (isShowingAsBubbleBar() && BubbleAnythingFlagHelper.enableCreateAnyBubble()) {
+            //TODO(b/388894910) show expanded view drop
+            mBubbleStateListener.onDragItemOverBubbleBarDragZone(bubbleBarLocation);
+        }
+    }
+
+    @Override
+    public void onItemDraggedOutsideBubbleBarDropZone() {
+        if (isShowingAsBubbleBar() && BubbleAnythingFlagHelper.enableCreateAnyBubble()) {
+            //TODO(b/388894910) hide expanded view drop
+            mBubbleStateListener.onItemDraggedOutsideBubbleBarDropZone();
+        }
+    }
+
+    @Override
+    public void onItemDroppedOverBubbleBarDragZone(@Nullable BubbleBarLocation bubbleBarLocation) {
+        if (bubbleBarLocation == null) return;
+        if (isShowingAsBubbleBar() && BubbleAnythingFlagHelper.enableCreateAnyBubble()) {
+            //TODO(b/388894910) handle item drop with expandStackAndSelectBubble()
+        }
+    }
+
+    @Override
+    public Map<BubbleBarLocation, Rect> getBubbleBarDropZones(int l, int t, int r, int b) {
+        Map<BubbleBarLocation, Rect> result = new HashMap<>();
+        if (isShowingAsBubbleBar() && BubbleAnythingFlagHelper.enableCreateAnyBubble()) {
+            // TODO(b/393172431) : Utilise DragZoneFactory once it is ready
+            final int bubbleBarDropZoneSideSize = getContext().getResources().getDimensionPixelSize(
+                    R.dimen.bubble_bar_drop_zone_side_size);
+            int top = t - bubbleBarDropZoneSideSize;
+            result.put(BubbleBarLocation.LEFT,
+                    new Rect(l, top, l + bubbleBarDropZoneSideSize, b));
+            result.put(BubbleBarLocation.RIGHT,
+                    new Rect(r - bubbleBarDropZoneSideSize, top, r, b));
+        }
+        return result;
     }
 
     /** Whether this userId belongs to the current user. */

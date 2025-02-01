@@ -62,6 +62,7 @@ import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.bubbles.bar.BubbleBarDragListener;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
@@ -79,6 +80,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import dagger.Lazy;
 
 /**
  * Handles the global drag and drop handling for the Shell.
@@ -101,6 +104,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
     private final GlobalDragListener mGlobalDragListener;
     private final Transitions mTransitions;
     private SplitScreenController mSplitScreen;
+    private Lazy<BubbleBarDragListener> mBubbleBarDragController;
     private ShellExecutor mMainExecutor;
     private ArrayList<DragAndDropListener> mListeners = new ArrayList<>();
 
@@ -143,6 +147,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
             IconProvider iconProvider,
             GlobalDragListener globalDragListener,
             Transitions transitions,
+            Lazy<BubbleBarDragListener> bubbleBarDragController,
             ShellExecutor mainExecutor) {
         mContext = context;
         mShellController = shellController;
@@ -153,6 +158,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
         mIconProvider = iconProvider;
         mGlobalDragListener = globalDragListener;
         mTransitions = transitions;
+        mBubbleBarDragController = bubbleBarDragController;
         mMainExecutor = mainExecutor;
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -246,7 +252,8 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
                 R.layout.global_drop_target, null);
         rootView.setOnDragListener(this);
         rootView.setVisibility(View.INVISIBLE);
-        DragLayoutProvider dragLayout = new DragLayout(context, mSplitScreen, mIconProvider);
+        DragLayoutProvider dragLayout = new DragLayout(context, mSplitScreen,
+                mBubbleBarDragController.get(), mIconProvider);
         dragLayout.addDraggingView(rootView);
         try {
             wm.addView(rootView, layoutParams);

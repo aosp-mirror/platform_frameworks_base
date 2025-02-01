@@ -270,6 +270,8 @@
     <dimen name="bubble_bar_expanded_view_switch_offset">48dp</dimen>
     <!-- Minimum width of the bubble bar manage menu. -->
     <dimen name="bubble_bar_manage_menu_min_width">200dp</dimen>
+    <!-- The Bubble Bar drop zone square size. -->
+    <dimen name="bubble_bar_drop_zone_side_size">200dp</dimen>
     <!-- Size of the dismiss icon in the bubble bar manage menu. -->
     <dimen name="bubble_bar_manage_menu_dismiss_icon_size">16dp</dimen>
     <!-- Padding of the bubble bar manage menu, provides space for menu shadows -->
