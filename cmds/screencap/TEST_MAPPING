@@ -1,0 +1,12 @@
+{
+  "presubmit": [
+    {
+      "name": "libscreencap_test"
+    }
+  ],
+  "hwasan-presubmit": [
+    {
+      "name": "libscreencap_test"
+    }
+  ]
+}
