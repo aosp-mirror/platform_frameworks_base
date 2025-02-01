@@ -16,6 +16,7 @@
 
 package com.android.server.hdmi;
 
+import static android.content.pm.PackageManager.FEATURE_HDMI_CEC;
 import static android.hardware.hdmi.HdmiControlManager.POWER_STATUS_ON;
 import static android.hardware.hdmi.HdmiControlManager.POWER_STATUS_STANDBY;
 import static android.hardware.hdmi.HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON;
@@ -29,6 +30,8 @@ import static com.android.server.hdmi.DeviceSelectActionFromTv.STATE_WAIT_FOR_PO
 import static com.android.server.hdmi.DeviceSelectActionFromTv.STATE_WAIT_FOR_REPORT_POWER_STATUS;
 
 import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assume.assumeTrue;
 
 import android.annotation.RequiresPermission;
 import android.content.Context;
@@ -106,6 +109,9 @@ public class DeviceSelectActionFromTvTest {
 
     @Before
     public void setUp() {
+        assumeTrue("Test requires FEATURE_HDMI_CEC",
+                InstrumentationRegistry.getTargetContext().getPackageManager()
+                        .hasSystemFeature(FEATURE_HDMI_CEC));
         Context context = InstrumentationRegistry.getTargetContext();
         mMyLooper = mTestLooper.getLooper();
 

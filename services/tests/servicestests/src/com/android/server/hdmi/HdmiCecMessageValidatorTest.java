@@ -16,6 +16,8 @@
 
 package com.android.server.hdmi;
 
+import static android.content.pm.PackageManager.FEATURE_HDMI_CEC;
+
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.HdmiCecMessageValidator.ERROR_DESTINATION;
@@ -26,6 +28,8 @@ import static com.android.server.hdmi.HdmiCecMessageValidator.ERROR_SOURCE;
 import static com.android.server.hdmi.HdmiCecMessageValidator.OK;
 
 import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assume.assumeTrue;
 
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -53,6 +57,9 @@ public class HdmiCecMessageValidatorTest {
 
     @Before
     public void setUp() throws Exception {
+        assumeTrue("Test requires FEATURE_HDMI_CEC",
+                InstrumentationRegistry.getTargetContext().getPackageManager()
+                        .hasSystemFeature(FEATURE_HDMI_CEC));
         FakeAudioFramework audioFramework = new FakeAudioFramework();
 
         HdmiControlService mHdmiControlService = new HdmiControlService(
