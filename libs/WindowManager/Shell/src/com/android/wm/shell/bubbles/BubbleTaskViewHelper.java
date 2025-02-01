@@ -109,7 +109,7 @@ public class BubbleTaskViewHelper {
                     options.setPendingIntentBackgroundActivityStartMode(
                             MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
                     final boolean isShortcutBubble = (mBubble.hasMetadataShortcutId()
-                            || (mBubble.getShortcutInfo() != null
+                            || (mBubble.isShortcut()
                             && BubbleAnythingFlagHelper.enableCreateAnyBubble()));
                     if (mBubble.getPreparingTransition() != null) {
                         mBubble.getPreparingTransition().surfaceCreated();

@@ -227,7 +227,7 @@ public class BubbleExpandedView extends LinearLayout {
                             MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
 
                     final boolean isShortcutBubble = (mBubble.hasMetadataShortcutId()
-                            || (mBubble.getShortcutInfo() != null
+                            || (mBubble.isShortcut()
                             && BubbleAnythingFlagHelper.enableCreateAnyBubble()));
 
                     // TODO - currently based on type, really it's what the "launch item" is.
