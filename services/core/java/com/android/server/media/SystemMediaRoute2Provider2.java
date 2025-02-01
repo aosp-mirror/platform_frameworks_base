@@ -58,6 +58,8 @@ import java.util.stream.Stream;
 
     private static final String UNIQUE_SYSTEM_ID_PREFIX = "SYSTEM";
     private static final String UNIQUE_SYSTEM_ID_SEPARATOR = "-";
+    private static final boolean FORCE_GLOBAL_ROUTING_SESSION = true;
+    private static final String PACKAGE_NAME_FOR_GLOBAL_SESSION = "";
 
     private final PackageManager mPackageManager;
 
@@ -118,6 +120,9 @@ import java.util.stream.Stream;
             String routeOriginalId,
             int transferReason) {
         synchronized (mLock) {
+            if (FORCE_GLOBAL_ROUTING_SESSION) {
+                clientPackageName = PACKAGE_NAME_FOR_GLOBAL_SESSION;
+            }
             var targetProviderProxyId = mOriginalRouteIdToProviderId.get(routeOriginalId);
             var targetProviderProxyRecord = mProxyRecords.get(targetProviderProxyId);
             // Holds the target route, if it's managed by a provider service. Holds null otherwise.
@@ -125,7 +130,7 @@ import java.util.stream.Stream;
                     targetProviderProxyRecord != null
                             ? targetProviderProxyRecord.getRouteByOriginalId(routeOriginalId)
                             : null;
-            var existingSessionRecord = mPackageNameToSessionRecord.get(clientPackageName);
+            var existingSessionRecord = getSessionRecordByPackageName(clientPackageName);
             if (existingSessionRecord != null) {
                 var existingSession = existingSessionRecord.mSourceSessionInfo;
                 if (targetProviderProxyId != null
@@ -206,7 +211,7 @@ import java.util.stream.Stream;
             if (systemSession == null) {
                 return null;
             }
-            var overridingSession = mPackageNameToSessionRecord.get(packageName);
+            var overridingSession = getSessionRecordByPackageName(packageName);
             if (overridingSession != null) {
                 var builder =
                         new RoutingSessionInfo.Builder(overridingSession.mTranslatedSessionInfo)
@@ -251,7 +256,7 @@ import java.util.stream.Stream;
             return;
         }
         synchronized (mLock) {
-            var sessionRecord = mSessionOriginalIdToSessionRecord.get(sessionOriginalId);
+            var sessionRecord = getSessionRecordByOriginalId(sessionOriginalId);
             var proxyRecord = sessionRecord != null ? sessionRecord.getProxyRecord() : null;
             if (proxyRecord != null) {
                 proxyRecord.mProxy.setSessionVolume(
@@ -260,6 +265,23 @@ import java.util.stream.Stream;
             }
         }
         notifyRequestFailed(requestId, MediaRoute2ProviderService.REASON_ROUTE_NOT_AVAILABLE);
+    }
+
+    @GuardedBy("mLock")
+    private SystemMediaSessionRecord getSessionRecordByOriginalId(String sessionOriginalId) {
+        if (FORCE_GLOBAL_ROUTING_SESSION) {
+            return getSessionRecordByPackageName(PACKAGE_NAME_FOR_GLOBAL_SESSION);
+        } else {
+            return mSessionOriginalIdToSessionRecord.get(sessionOriginalId);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private SystemMediaSessionRecord getSessionRecordByPackageName(String clientPackageName) {
+        if (FORCE_GLOBAL_ROUTING_SESSION) {
+            clientPackageName = PACKAGE_NAME_FOR_GLOBAL_SESSION;
+        }
+        return mPackageNameToSessionRecord.get(clientPackageName);
     }
 
     /**
@@ -319,16 +341,34 @@ import java.util.stream.Stream;
      */
     private void updateSessionInfo() {
         synchronized (mLock) {
-            var systemSessionInfo = mSystemSessionInfo;
-            if (systemSessionInfo == null) {
+            var globalSessionInfoRecord =
+                    getSessionRecordByPackageName(PACKAGE_NAME_FOR_GLOBAL_SESSION);
+            var globalSessionInfo =
+                    globalSessionInfoRecord != null
+                            ? globalSessionInfoRecord.mTranslatedSessionInfo
+                            : null;
+            if (globalSessionInfo == null) {
+                globalSessionInfo = mSystemSessionInfo;
+            }
+            if (globalSessionInfo == null) {
                 // The system session info hasn't been initialized yet. Do nothing.
                 return;
             }
-            var builder = new RoutingSessionInfo.Builder(systemSessionInfo);
-            mProxyRecords.values().stream()
-                    .flatMap(ProviderProxyRecord::getRoutesStream)
-                    .map(MediaRoute2Info::getOriginalId)
-                    .forEach(builder::addTransferableRoute);
+            var builder = new RoutingSessionInfo.Builder(globalSessionInfo);
+            if (globalSessionInfo == mSystemSessionInfo) {
+                // The session is the system one. So we make all the service-provided routes
+                // available for transfer. The system transferable routes are already there.
+                mProxyRecords.values().stream()
+                        .flatMap(ProviderProxyRecord::getRoutesStream)
+                        .map(MediaRoute2Info::getOriginalId)
+                        .forEach(builder::addTransferableRoute);
+            } else {
+                // The session is service-provided. So we add the system-provided routes as
+                // transferable.
+                mLastSystemProviderInfo.getRoutes().stream()
+                        .map(MediaRoute2Info::getOriginalId)
+                        .forEach(builder::addTransferableRoute);
+            }
             mSessionInfos.clear();
             mSessionInfos.add(builder.build());
             for (var sessionRecords : mPackageNameToSessionRecord.values()) {
