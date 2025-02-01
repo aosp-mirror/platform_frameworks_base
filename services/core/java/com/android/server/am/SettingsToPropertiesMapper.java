@@ -189,6 +189,7 @@ public class SettingsToPropertiesMapper {
         "desktop_connectivity",
         "desktop_hwsec",
         "desktop_stats",
+        "desktop_wifi",
         "devoptions_settings",
         "game",
         "gpu",
