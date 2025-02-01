@@ -70,6 +70,7 @@ enum class BubbleBarLocation : Parcelable {
         UpdateSource.A11Y_ACTION_BAR,
         UpdateSource.A11Y_ACTION_BUBBLE,
         UpdateSource.A11Y_ACTION_EXP_VIEW,
+        UpdateSource.APP_ICON_DRAG
     )
     @Retention(AnnotationRetention.SOURCE)
     annotation class UpdateSource {
@@ -91,6 +92,9 @@ enum class BubbleBarLocation : Parcelable {
 
             /** Location changed via a11y action on the expanded view */
             const val A11Y_ACTION_EXP_VIEW = 6
+
+            /** Location changed from dragging the application icon to the bubble bar */
+            const val APP_ICON_DRAG = 7
         }
     }
 }
