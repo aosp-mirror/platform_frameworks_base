@@ -648,7 +648,7 @@ java_api_library {
 
 java_api_library {
     name: "android-non-updatable.stubs.module_lib.from-text",
-    api_surface: "module_lib",
+    api_surface: "module-lib",
     api_contributions: [
         "api-stubs-docs-non-updatable.api.contribution",
         "system-api-stubs-docs-non-updatable.api.contribution",
@@ -668,7 +668,7 @@ java_api_library {
 // generated from this module, as this module is strictly used for hiddenapi only.
 java_api_library {
     name: "android-non-updatable.stubs.test_module_lib",
-    api_surface: "module_lib",
+    api_surface: "module-lib",
     api_contributions: [
         "api-stubs-docs-non-updatable.api.contribution",
         "system-api-stubs-docs-non-updatable.api.contribution",
@@ -689,7 +689,7 @@ java_api_library {
 
 java_api_library {
     name: "android-non-updatable.stubs.system_server.from-text",
-    api_surface: "system_server",
+    api_surface: "system-server",
     api_contributions: [
         "api-stubs-docs-non-updatable.api.contribution",
         "system-api-stubs-docs-non-updatable.api.contribution",

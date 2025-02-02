@@ -27,6 +27,7 @@ import com.android.hoststubgen.executableName
 import com.android.hoststubgen.log
 import com.android.hoststubgen.runMainWithBoilerplate
 import com.android.platform.test.ravenwood.ravenhelper.policytoannot.PtaProcessor
+import com.android.platform.test.ravenwood.ravenhelper.sourcemap.MarkMethodHandler
 
 interface SubcommandHandler {
     fun handle(args: List<String>)
@@ -39,7 +40,10 @@ fun usage() {
 
         Subcommands:
           pta:        "policy-to-annotations" Convert policy file to annotations.
-                      (See the pta-framework.sh script for usage.) 1
+                      (See the pta-framework.sh script for usage.)
+
+          mm:         "mark methods" Used to add annotations (such as @DisabledOnRavenwood)
+                      to methods.
 
         """.trimIndent())
 }
@@ -60,6 +64,7 @@ fun main(args: Array<String>) {
         val subcommand = args[0]
         val handler: SubcommandHandler = when (subcommand) {
             "pta" -> PtaProcessor()
+            "mm" -> MarkMethodHandler()
             else -> {
                 usage()
                 throw GeneralUserErrorException("Unknown subcommand '$subcommand'")

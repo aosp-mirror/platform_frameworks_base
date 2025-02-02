@@ -1,6 +1,7 @@
 # Bug component: 1344
-fgoldfain@google.com
+pshehane@google.com
 elaurent@google.com
+etalvala@google.com
 lajos@google.com
 jmtrivi@google.com
 
@@ -15,4 +16,5 @@ per-file ExifInterface.java,ExifInterfaceUtils.java,IMediaHTTPConnection.aidl,IM
 # Haptics team also works on Ringtone
 per-file *Ringtone* = file:/services/core/java/com/android/server/vibrator/OWNERS
 
+per-file flags/media_better_together.aconfig = file:platform/frameworks/av:/media/janitors/better_together_OWNERS
 per-file flags/projection.aconfig = file:projection/OWNERS
