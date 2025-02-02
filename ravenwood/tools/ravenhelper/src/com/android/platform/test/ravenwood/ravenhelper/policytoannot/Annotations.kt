@@ -45,7 +45,8 @@ class Annotations {
                 "@android.ravenwood.annotation.RavenwoodRedirect"
             FilterPolicy.Throw ->
                 "@android.ravenwood.annotation.RavenwoodThrow"
-            FilterPolicy.Ignore -> null // Ignore has no annotation. (because it's not very safe.)
+            FilterPolicy.Ignore ->
+                "@android.ravenwood.annotation.RavenwoodIgnore"
             FilterPolicy.Remove ->
                 "@android.ravenwood.annotation.RavenwoodRemove"
         }
