@@ -1781,6 +1781,7 @@
     <dimen name="wallet_button_vertical_padding">8dp</dimen>
 
     <!-- Ongoing activity chip -->
+    <dimen name="ongoing_activity_chip_min_text_width">12dp</dimen>
     <dimen name="ongoing_activity_chip_max_text_width">74dp</dimen>
     <dimen name="ongoing_activity_chip_margin_start">5dp</dimen>
     <!-- The activity chip side padding, used with the default phone icon. -->

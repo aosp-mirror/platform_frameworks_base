@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.semantics.contentDescription
@@ -42,6 +43,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.Expandable
+import com.android.compose.modifiers.thenIf
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.common.ui.compose.load
@@ -79,12 +81,11 @@ fun OngoingActivityChip(model: OngoingActivityChipModel.Shown, modifier: Modifie
 private fun ChipBody(
     model: OngoingActivityChipModel.Shown,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {},
+    onClick: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
-    val isClickable = onClick != {}
+    val isClickable = onClick != null
     val hasEmbeddedIcon = model.icon is OngoingActivityChipModel.ChipIcon.StatusBarView
-
     val contentDescription =
         when (val icon = model.icon) {
             is OngoingActivityChipModel.ChipIcon.StatusBarView -> icon.contentDescription.load()
@@ -93,17 +94,28 @@ private fun ChipBody(
             is OngoingActivityChipModel.ChipIcon.SingleColorIcon -> null
             null -> null
         }
-
+    val chipSidePadding = dimensionResource(id = R.dimen.ongoing_activity_chip_side_padding)
+    val minWidth =
+        if (isClickable) {
+            dimensionResource(id = R.dimen.min_clickable_item_size)
+        } else if (model.icon != null) {
+            dimensionResource(id = R.dimen.ongoing_activity_chip_icon_size) + chipSidePadding
+        } else {
+            dimensionResource(id = R.dimen.ongoing_activity_chip_min_text_width) + chipSidePadding
+        }
     // Use a Box with `fillMaxHeight` to create a larger click surface for the chip. The visible
     // height of the chip is determined by the height of the background of the Row below.
     Box(
         contentAlignment = Alignment.Center,
         modifier =
-            modifier.fillMaxHeight().clickable(enabled = isClickable, onClick = onClick).semantics {
-                if (contentDescription != null) {
-                    this.contentDescription = contentDescription
-                }
-            },
+            modifier
+                .fillMaxHeight()
+                .clickable(enabled = isClickable, onClick = onClick ?: {})
+                .semantics {
+                    if (contentDescription != null) {
+                        this.contentDescription = contentDescription
+                    }
+                },
     ) {
         Row(
             horizontalArrangement = Arrangement.Center,
@@ -115,14 +127,15 @@ private fun ChipBody(
                         )
                     )
                     .height(dimensionResource(R.dimen.ongoing_appops_chip_height))
-                    .widthIn(
-                        min =
-                            if (isClickable) {
-                                dimensionResource(id = R.dimen.min_clickable_item_size)
-                            } else {
-                                0.dp
+                    .thenIf(isClickable) { Modifier.widthIn(min = minWidth) }
+                    .layout { measurable, constraints ->
+                        val placeable = measurable.measure(constraints)
+                        layout(placeable.width, placeable.height) {
+                            if (constraints.maxWidth >= minWidth.roundToPx()) {
+                                placeable.place(0, 0)
                             }
-                    )
+                        }
+                    }
                     .background(Color(model.colors.background(context).defaultColor))
                     .padding(
                         horizontal =
