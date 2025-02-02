@@ -29,6 +29,7 @@ import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
@@ -80,6 +81,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     @Mock private lateinit var blurUtils: BlurUtils
     @Mock private lateinit var biometricUnlockController: BiometricUnlockController
     @Mock private lateinit var keyguardStateController: KeyguardStateController
+    @Mock private lateinit var keyguardInteractor: KeyguardInteractor
     @Mock private lateinit var choreographer: Choreographer
     @Mock private lateinit var wallpaperController: WallpaperController
     @Mock private lateinit var notificationShadeWindowController: NotificationShadeWindowController
@@ -123,6 +125,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
                 blurUtils,
                 biometricUnlockController,
                 keyguardStateController,
+                keyguardInteractor,
                 choreographer,
                 wallpaperController,
                 notificationShadeWindowController,

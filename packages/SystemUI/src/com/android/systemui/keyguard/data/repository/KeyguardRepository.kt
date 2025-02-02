@@ -79,6 +79,8 @@ interface KeyguardRepository {
 
     val panelAlpha: MutableStateFlow<Float>
 
+    val zoomOut: StateFlow<Float>
+
     /**
      * Observable for whether the keyguard is showing.
      *
@@ -278,6 +280,9 @@ interface KeyguardRepository {
     /** Temporary shim for fading out content when the brightness slider is used */
     fun setPanelAlpha(alpha: Float)
 
+    /** Sets the zoom out scale of spatial model pushback from e.g. pulling down the shade. */
+    fun setZoomOut(zoomOutFromShadeRadius: Float)
+
     /** Whether the device is actively dreaming */
     fun setDreaming(isDreaming: Boolean)
 
@@ -384,6 +389,7 @@ constructor(
     override val onCameraLaunchDetected = MutableStateFlow(CameraLaunchSourceModel())
 
     override val panelAlpha: MutableStateFlow<Float> = MutableStateFlow(1f)
+    override val zoomOut: MutableStateFlow<Float> = MutableStateFlow(0f)
     override val topClippingBounds = MutableStateFlow<Int?>(null)
 
     override val isKeyguardShowing: MutableStateFlow<Boolean> =
@@ -663,6 +669,10 @@ constructor(
 
     override fun setPanelAlpha(alpha: Float) {
         panelAlpha.value = alpha
+    }
+
+    override fun setZoomOut(zoomOutFromShadeRadius: Float) {
+        zoomOut.value = zoomOutFromShadeRadius
     }
 
     override fun setDreaming(isDreaming: Boolean) {
