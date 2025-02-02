@@ -26,7 +26,6 @@ import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.Flags.communalHub
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.statusbar.notification.collection.SortBySectionTimeFlag
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionRefactor
@@ -58,9 +57,6 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
 
         // SceneContainer dependencies
         SceneContainerFlag.getFlagDependencies().forEach { (alpha, beta) -> alpha dependsOn beta }
-
-        // DualShade dependencies
-        DualShade.token dependsOn SceneContainerFlag.getMainAconfigFlag()
     }
 
     private inline val politeNotifications
