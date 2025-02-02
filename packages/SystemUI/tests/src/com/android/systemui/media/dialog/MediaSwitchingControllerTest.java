@@ -891,6 +891,13 @@ public class MediaSwitchingControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void getTransferableMediaDevice_triggersFromLocalMediaManager() {
+        mMediaSwitchingController.getTransferableMediaDevices();
+
+        verify(mLocalMediaManager).getTransferableMediaDevices();
+    }
+
+    @Test
     public void getDeselectableMediaDevice_triggersFromLocalMediaManager() {
         mMediaSwitchingController.getDeselectableMediaDevice();
 

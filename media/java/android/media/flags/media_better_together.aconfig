@@ -21,6 +21,16 @@ flag {
 }
 
 flag {
+    name: "disable_transfer_when_apps_do_not_support"
+    namespace: "media_better_together"
+    description: "Fixes a bug causing output switcher routes to be incorrectly enabled for media transfer."
+    bug: "373404114"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_audio_input_device_routing_and_volume_control"
     namespace: "media_better_together"
     description: "Allows audio input devices routing and volume control via system settings."

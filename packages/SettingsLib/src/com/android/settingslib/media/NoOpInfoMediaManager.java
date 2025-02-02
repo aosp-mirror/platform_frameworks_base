@@ -114,6 +114,12 @@ import java.util.List;
 
     @NonNull
     @Override
+    protected List<MediaRoute2Info> getTransferableRoutes(@NonNull RoutingSessionInfo info) {
+        return Collections.emptyList();
+    }
+
+    @NonNull
+    @Override
     protected List<MediaRoute2Info> getDeselectableRoutes(@NonNull RoutingSessionInfo info) {
         return Collections.emptyList();
     }

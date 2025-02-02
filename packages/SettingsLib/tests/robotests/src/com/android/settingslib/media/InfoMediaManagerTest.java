@@ -65,7 +65,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -78,6 +79,7 @@ import java.util.Set;
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = {ShadowRouter2Manager.class})
 public class InfoMediaManagerTest {
+    @Rule public final MockitoRule mockito = MockitoJUnit.rule();
 
     private static final String TEST_PACKAGE_NAME = "com.test.packagename";
     private static final String TEST_PACKAGE_NAME_2 = "com.test.packagename2";
@@ -146,7 +148,6 @@ public class InfoMediaManagerTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         mContext = spy(RuntimeEnvironment.application);
 
         doReturn(mMediaSessionManager).when(mContext).getSystemService(
@@ -660,6 +661,26 @@ public class InfoMediaManagerTest {
         when(info.getClientPackageName()).thenReturn("com.fake.packagename");
 
         assertThat(mInfoMediaManager.getSelectableMediaDevices()).isEmpty();
+    }
+
+    @Test
+    public void getTransferableMediaDevice_checkList() {
+        final List<MediaRoute2Info> mediaRoute2Infos = new ArrayList<>();
+        final MediaRoute2Info mediaRoute2Info = mock(MediaRoute2Info.class);
+        mediaRoute2Infos.add(mediaRoute2Info);
+        mShadowRouter2Manager.setTransferableRoutes(mediaRoute2Infos);
+        when(mediaRoute2Info.getName()).thenReturn(TEST_NAME);
+        when(mediaRoute2Info.getId()).thenReturn(TEST_ID);
+        mInfoMediaManager.mRouterManager = mRouterManager;
+        when(mRouterManager.getRoutingSessions(TEST_PACKAGE_NAME))
+                .thenReturn(List.of(TEST_REMOTE_ROUTING_SESSION));
+        when(mRouterManager.getTransferableRoutes(any(RoutingSessionInfo.class)))
+                .thenReturn(mediaRoute2Infos);
+
+        final List<MediaDevice> mediaDevices = mInfoMediaManager.getTransferableMediaDevices();
+
+        assertThat(mediaDevices.size()).isEqualTo(1);
+        assertThat(mediaDevices.get(0).getName()).isEqualTo(TEST_NAME);
     }
 
     @Test
