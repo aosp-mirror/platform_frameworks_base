@@ -5979,10 +5979,19 @@ public final class PowerManagerService extends SystemService
 
             if (uids != null) {
                 ws = new WorkSource();
-                // XXX should WorkSource have a way to set uids as an int[] instead of adding them
-                // one at a time?
-                for (int uid : uids) {
-                    ws.add(uid);
+                if (mFeatureFlags.isWakelockAttributionViaWorkchainEnabled()) {
+                    int callingUid = Binder.getCallingUid();
+                    for (int uid : uids) {
+                        WorkChain workChain = ws.createWorkChain();
+                        workChain.addNode(uid, null);
+                        workChain.addNode(callingUid, null);
+                    }
+                } else {
+                    // XXX should WorkSource have a way to set uids as an int[] instead of
+                    // adding them one at a time?
+                    for (int uid : uids) {
+                        ws.add(uid);
+                    }
                 }
             }
             updateWakeLockWorkSource(lock, ws, null);

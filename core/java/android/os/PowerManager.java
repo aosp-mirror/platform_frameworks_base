@@ -4213,6 +4213,17 @@ public final class PowerManager {
             else mFlags &= ~UNIMPORTANT_FOR_LOGGING;
         }
 
+        /** @hide */
+        public void updateUids(int[] uids) {
+            synchronized (mToken) {
+                try {
+                    mService.updateWakeLockUids(mToken, uids);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+        }
+
         @Override
         public String toString() {
             synchronized (mToken) {

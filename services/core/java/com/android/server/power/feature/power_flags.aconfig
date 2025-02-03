@@ -23,6 +23,17 @@ flag {
 }
 
 flag {
+    name: "wakelock_attribution_via_workchain"
+    namespace: "power"
+    description: "Enables the attribution of wakelocks via WorkChain for updateWakelockUids"
+    bug: "331304805"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "improve_wakelock_latency"
     namespace: "power"
     description: "Feature flag for tracking the optimizations to improve the latency of acquiring and releasing a wakelock."

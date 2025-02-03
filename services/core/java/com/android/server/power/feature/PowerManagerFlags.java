@@ -63,6 +63,10 @@ public class PowerManagerFlags {
     private final FlagState mMoveWscLoggingToNotifier =
             new FlagState(Flags.FLAG_MOVE_WSC_LOGGING_TO_NOTIFIER, Flags::moveWscLoggingToNotifier);
 
+    private final FlagState mWakelockAttributionViaWorkchain =
+            new FlagState(Flags.FLAG_WAKELOCK_ATTRIBUTION_VIA_WORKCHAIN,
+                    Flags::wakelockAttributionViaWorkchain);
+
     /** Returns whether early-screen-timeout-detector is enabled on not. */
     public boolean isEarlyScreenTimeoutDetectorEnabled() {
         return mEarlyScreenTimeoutDetectorFlagState.isEnabled();
@@ -110,6 +114,13 @@ public class PowerManagerFlags {
     }
 
     /**
+     * @return Whether the wakelock attribution via workchain is enabled
+     */
+    public boolean isWakelockAttributionViaWorkchainEnabled() {
+        return mWakelockAttributionViaWorkchain.isEnabled();
+    }
+
+    /**
      * dumps all flagstates
      * @param pw printWriter
      */
@@ -120,6 +131,7 @@ public class PowerManagerFlags {
         pw.println(" " + mPerDisplayWakeByTouch);
         pw.println(" " + mFrameworkWakelockInfo);
         pw.println(" " + mMoveWscLoggingToNotifier);
+        pw.println(" " + mWakelockAttributionViaWorkchain);
     }
 
     private static class FlagState {
