@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.ui.viewmodel
 
-import android.platform.test.annotations.DisableFlags
 import android.testing.TestableLooper.RunWithLooper
 import androidx.lifecycle.LifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -39,6 +38,7 @@ import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModelFactory
 import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.domain.interactor.disableDualShade
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.ui.viewmodel.shadeHeaderViewModelFactory
 import com.android.systemui.testKosmos
@@ -58,7 +58,6 @@ import org.mockito.Mockito.verify
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
 @EnableSceneContainer
-@DisableFlags(com.android.systemui.Flags.FLAG_DUAL_SHADE)
 class QuickSettingsSceneContentViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
@@ -94,6 +93,7 @@ class QuickSettingsSceneContentViewModelTest : SysuiTestCase() {
                 sceneInteractor = sceneInteractor,
             )
         underTest.activateIn(testScope)
+        kosmos.disableDualShade()
     }
 
     @Test
