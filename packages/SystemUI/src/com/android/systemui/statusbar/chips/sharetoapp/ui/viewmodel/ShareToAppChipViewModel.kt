@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel
 
 import android.content.Context
 import androidx.annotation.DrawableRes
+import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.Cuj
 import com.android.systemui.CoreStartable
 import com.android.systemui.animation.DialogCuj
@@ -220,6 +221,7 @@ constructor(
         state: ProjectionChipModel.Projecting
     ): OngoingActivityChipModel.Shown {
         return OngoingActivityChipModel.Shown.Timer(
+            key = KEY,
             icon =
                 OngoingActivityChipModel.ChipIcon.SingleColorIcon(
                     Icon.Resource(
@@ -254,6 +256,7 @@ constructor(
 
     private fun createIconOnlyShareToAppChip(): OngoingActivityChipModel.Shown {
         return OngoingActivityChipModel.Shown.IconOnly(
+            key = KEY,
             icon =
                 OngoingActivityChipModel.ChipIcon.SingleColorIcon(
                     Icon.Resource(
@@ -301,6 +304,7 @@ constructor(
         )
 
     companion object {
+        @VisibleForTesting const val KEY = "ShareToApp"
         @DrawableRes val SHARE_TO_APP_ICON = R.drawable.ic_present_to_all
         private val DIALOG_CUJ =
             DialogCuj(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP, tag = "Share to app")

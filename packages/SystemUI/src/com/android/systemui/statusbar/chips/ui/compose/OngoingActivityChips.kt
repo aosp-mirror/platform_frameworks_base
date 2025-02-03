@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -38,10 +39,12 @@ fun OngoingActivityChips(chips: MultipleOngoingActivityChipsModel, modifier: Mod
         // TODO(b/372657935): Make sure chips are only shown when there is enough horizontal
         // space.
         if (chips.primary is OngoingActivityChipModel.Shown) {
-            OngoingActivityChip(model = chips.primary)
+            val chip = chips.primary
+            key(chip.key) { OngoingActivityChip(model = chip) }
         }
         if (chips.secondary is OngoingActivityChipModel.Shown) {
-            OngoingActivityChip(model = chips.secondary)
+            val chip = chips.secondary
+            key(chip.key) { OngoingActivityChip(model = chip) }
         }
     }
 }

@@ -68,6 +68,7 @@ constructor(
                     is OngoingCallModel.NoCall,
                     is OngoingCallModel.InCallWithVisibleApp -> OngoingActivityChipModel.Hidden()
                     is OngoingCallModel.InCall -> {
+                        val key = state.notificationKey
                         val contentDescription = getContentDescription(state.appName)
                         val icon =
                             if (state.notificationIconView != null) {
@@ -97,6 +98,7 @@ constructor(
                             // If the start time is invalid, don't show a timer and show just an
                             // icon. See b/192379214.
                             OngoingActivityChipModel.Shown.IconOnly(
+                                key = key,
                                 icon = icon,
                                 colors = colors,
                                 onClickListenerLegacy = getOnClickListener(state),
@@ -107,6 +109,7 @@ constructor(
                                 state.startTimeMs - systemClock.currentTimeMillis() +
                                     systemClock.elapsedRealtime()
                             OngoingActivityChipModel.Shown.Timer(
+                                key = key,
                                 icon = icon,
                                 colors = colors,
                                 startTimeMs = startTimeInElapsedRealtime,

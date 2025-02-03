@@ -166,6 +166,8 @@ private fun ChipIcon(
 
     when (viewModel) {
         is OngoingActivityChipModel.ChipIcon.StatusBarView -> {
+            // TODO(b/364653005): If the notification updates their small icon, ensure it's updated
+            // in the chip.
             val originalIcon = viewModel.impl
             val iconSizePx =
                 context.resources.getDimensionPixelSize(
@@ -178,6 +180,15 @@ private fun ChipIcon(
                         layoutParams = ViewGroup.LayoutParams(iconSizePx, iconSizePx)
                         imageTintList = ColorStateList.valueOf(colors.text(context))
                     }
+
+                    // If needed, remove the icon from its old parent (views can only be attached
+                    // to 1 parent at a time)
+                    (originalIcon.parent as? ViewGroup)?.apply {
+                        this.removeView(originalIcon)
+                        this.removeTransientView(originalIcon)
+                    }
+
+                    originalIcon
                 },
             )
         }

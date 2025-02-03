@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel
 
 import android.content.Context
 import androidx.annotation.DrawableRes
+import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.Cuj
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
@@ -192,6 +193,7 @@ constructor(
         state: ProjectionChipModel.Projecting
     ): OngoingActivityChipModel.Shown {
         return OngoingActivityChipModel.Shown.Timer(
+            key = KEY,
             icon =
                 OngoingActivityChipModel.ChipIcon.SingleColorIcon(
                     Icon.Resource(
@@ -229,6 +231,7 @@ constructor(
 
     private fun createIconOnlyCastChip(deviceName: String?): OngoingActivityChipModel.Shown {
         return OngoingActivityChipModel.Shown.IconOnly(
+            key = KEY,
             icon =
                 OngoingActivityChipModel.ChipIcon.SingleColorIcon(
                     Icon.Resource(
@@ -276,6 +279,7 @@ constructor(
         )
 
     companion object {
+        @VisibleForTesting const val KEY = "CastToOtherDevice"
         @DrawableRes val CAST_TO_OTHER_DEVICE_ICON = R.drawable.ic_cast_connected
         private val DIALOG_CUJ =
             DialogCuj(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP, tag = "Cast to other device")

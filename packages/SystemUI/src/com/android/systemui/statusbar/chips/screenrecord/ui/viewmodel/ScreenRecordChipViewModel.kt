@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel
 import android.app.ActivityManager
 import android.content.Context
 import androidx.annotation.DrawableRes
+import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.Cuj
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
@@ -75,12 +76,14 @@ constructor(
                     is ScreenRecordChipModel.DoingNothing -> OngoingActivityChipModel.Hidden()
                     is ScreenRecordChipModel.Starting -> {
                         OngoingActivityChipModel.Shown.Countdown(
+                            key = KEY,
                             colors = ColorsModel.Red,
                             secondsUntilStarted = state.millisUntilStarted.toCountdownSeconds(),
                         )
                     }
                     is ScreenRecordChipModel.Recording -> {
                         OngoingActivityChipModel.Shown.Timer(
+                            key = KEY,
                             icon =
                                 OngoingActivityChipModel.ChipIcon.SingleColorIcon(
                                     Icon.Resource(
@@ -162,6 +165,7 @@ constructor(
     }
 
     companion object {
+        @VisibleForTesting const val KEY = "ScreenRecord"
         @DrawableRes val ICON = R.drawable.ic_screenrecord
         private val DIALOG_CUJ =
             DialogCuj(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP, tag = "Screen record")

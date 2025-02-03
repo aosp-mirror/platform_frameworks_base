@@ -252,6 +252,7 @@ constructor(
         // against it just in case.)
         val currentIcon = icon ?: return this
         return OngoingActivityChipModel.Shown.IconOnly(
+            key,
             currentIcon,
             colors,
             onClickListenerLegacy,
