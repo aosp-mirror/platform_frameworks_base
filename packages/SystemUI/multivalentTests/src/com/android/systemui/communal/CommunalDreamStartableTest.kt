@@ -42,7 +42,6 @@ import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.power.shared.model.ScreenPowerState
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -54,7 +53,6 @@ import org.mockito.Mockito.verify
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @EnableFlags(Flags.FLAG_COMMUNAL_HUB)
 @RunWith(ParameterizedAndroidJunit4::class)

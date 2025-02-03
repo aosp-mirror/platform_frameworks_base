@@ -31,7 +31,6 @@ import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.fakeMobi
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.argThat
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -44,7 +43,6 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @EnableSceneContainer

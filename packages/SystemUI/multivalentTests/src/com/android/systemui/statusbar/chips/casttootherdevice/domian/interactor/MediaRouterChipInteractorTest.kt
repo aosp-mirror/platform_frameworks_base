@@ -28,14 +28,12 @@ import com.android.systemui.statusbar.chips.casttootherdevice.domain.model.Media
 import com.android.systemui.statusbar.policy.CastDevice
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class MediaRouterChipInteractorTest : SysuiTestCase() {
     val kosmos = Kosmos()
     val testScope = kosmos.testScope

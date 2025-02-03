@@ -28,7 +28,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -45,7 +44,6 @@ import org.mockito.kotlin.eq
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 @TestableLooper.RunWithLooper
-@OptIn(ExperimentalCoroutinesApi::class)
 class SettingsProxyTest : SysuiTestCase() {
 
     private val testDispatcher = StandardTestDispatcher()

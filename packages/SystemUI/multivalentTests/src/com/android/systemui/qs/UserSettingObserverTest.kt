@@ -28,7 +28,6 @@ import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.fail
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -40,7 +39,6 @@ import platform.test.runner.parameterized.Parameters
 
 private typealias Callback = (Int, Boolean) -> Unit
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 @TestableLooper.RunWithLooper

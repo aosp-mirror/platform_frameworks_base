@@ -41,7 +41,6 @@ import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import javax.inject.Provider
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.resetMain
@@ -62,7 +61,6 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 @RunWithLooper
-@OptIn(ExperimentalCoroutinesApi::class)
 @EnableSceneContainer
 class QSPanelControllerBaseSceneContainerTest : SysuiTestCase() {
 

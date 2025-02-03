@@ -51,7 +51,6 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class KeyguardBouncerViewModelTest : SysuiTestCase() {
 
     @Mock lateinit var bouncerView: BouncerView

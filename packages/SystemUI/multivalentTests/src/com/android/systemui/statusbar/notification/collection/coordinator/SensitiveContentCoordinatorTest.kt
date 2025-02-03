@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.app.Notification
@@ -74,7 +72,6 @@ import com.android.systemui.statusbar.policy.mockSensitiveNotificationProtection
 import com.android.systemui.statusbar.policy.sensitiveNotificationProtectionController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.withArgCaptor
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent

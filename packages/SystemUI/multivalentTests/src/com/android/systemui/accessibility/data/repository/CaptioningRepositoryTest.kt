@@ -27,7 +27,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.userRepository
 import com.android.systemui.user.utils.FakeUserScopedService
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -41,7 +40,6 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CaptioningRepositoryTest : SysuiTestCase() {

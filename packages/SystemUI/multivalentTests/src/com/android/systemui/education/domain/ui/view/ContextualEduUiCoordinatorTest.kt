@@ -63,7 +63,6 @@ import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class ContextualEduUiCoordinatorTest(private val gestureType: GestureType) : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope

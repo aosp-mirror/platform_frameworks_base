@@ -37,7 +37,6 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -54,7 +53,6 @@ import org.mockito.MockitoAnnotations
 /** Tests all possible [QSTileUserAction]s. If you need */
 @MediumTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class QSTileViewModelUserInputTest : SysuiTestCase() {
 
     @Mock private lateinit var qsTileLogger: QSTileLogger

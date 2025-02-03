@@ -31,7 +31,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.volume.data.repository.audioSharingRepository
 import com.android.systemui.volume.domain.interactor.audioSharingInteractor
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -39,7 +38,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class AudioSharingStreamSliderViewModelTest : SysuiTestCase() {

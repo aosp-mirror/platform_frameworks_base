@@ -16,7 +16,6 @@ package com.android.systemui.statusbar.policy.bluetooth
 
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
@@ -28,7 +27,6 @@ import kotlinx.coroutines.test.TestScope
  * [StandardTestDispatcher], etc. to create a test version of the repo. This class uses those test
  * items under-the-hood so Java classes can indirectly access them.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class FakeBluetoothRepository(localBluetoothManager: LocalBluetoothManager) : BluetoothRepository {
 
     private val scheduler = TestCoroutineScheduler()

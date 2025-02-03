@@ -40,7 +40,6 @@ import com.android.systemui.qs.qsTileFactory
 import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.settings.userTracker
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -52,7 +51,6 @@ import org.junit.runner.RunWith
  * from a device that uses different specs for tiles, we may end up with empty (or mostly empty) QS.
  * In that case, we want to prepend the default tiles instead.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @MediumTest
 @RunWith(AndroidJUnit4::class)
 class NoLowNumberOfTilesTest : SysuiTestCase() {

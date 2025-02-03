@@ -33,7 +33,6 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -45,7 +44,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class EndGenericShareToAppDialogDelegateTest : SysuiTestCase() {
     private val kosmos = testKosmos()

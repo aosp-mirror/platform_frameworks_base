@@ -28,7 +28,6 @@ import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -47,7 +46,6 @@ class SizedTilesResetInteractorTest : SysuiTestCase() {
         }
     private val underTest = with(kosmos) { sizedTilesResetInteractor }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun changeTiles_resetsCorrectly() {
         with(kosmos) {

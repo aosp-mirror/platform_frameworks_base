@@ -26,7 +26,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.screenrecord.RecordingController
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -38,7 +37,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class ScreenRecordRepositoryTest : SysuiTestCase() {
     private val kosmos = Kosmos()

@@ -39,7 +39,6 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
@@ -53,7 +52,6 @@ import org.mockito.Mockito.anyInt
 
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 class ConnectedDisplayInteractorTest : SysuiTestCase() {
 

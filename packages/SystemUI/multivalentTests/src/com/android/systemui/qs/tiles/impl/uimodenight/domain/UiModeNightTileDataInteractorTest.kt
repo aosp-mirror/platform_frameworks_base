@@ -39,7 +39,6 @@ import com.android.systemui.utils.leaks.FakeBatteryController
 import com.android.systemui.utils.leaks.FakeLocationController
 import com.google.common.truth.Truth.assertThat
 import java.time.LocalTime
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -49,7 +48,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class UiModeNightTileDataInteractorTest : SysuiTestCase() {

@@ -49,7 +49,6 @@ import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCall
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -69,7 +68,6 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
-@OptIn(ExperimentalCoroutinesApi::class)
 @DisableFlags(StatusBarChipsModernization.FLAG_NAME)
 class OngoingCallControllerTest : SysuiTestCase() {
     private val kosmos = Kosmos()

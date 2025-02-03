@@ -24,14 +24,12 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository
 import com.android.systemui.keyboard.shared.model.BacklightModel
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class KeyboardBacklightInteractorTest : SysuiTestCase() {

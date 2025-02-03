@@ -44,7 +44,6 @@ import com.android.systemui.touchpad.tutorial.touchpadGesturesInteractor
 import com.android.systemui.util.coroutines.MainDispatcherRule
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -55,7 +54,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class KeyboardTouchpadTutorialViewModelTest : SysuiTestCase() {

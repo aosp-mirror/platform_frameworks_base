@@ -65,7 +65,6 @@ import com.android.wm.shell.splitscreen.SplitScreen
 import com.android.wm.shell.sysui.ShellInterface
 import java.util.Optional
 import java.util.concurrent.Executor
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -82,7 +81,6 @@ import org.mockito.MockitoAnnotations
  *
  * Build/Install/Run: atest SystemUITests:WMShellTest
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class WMShellTest : SysuiTestCase() {

@@ -67,7 +67,6 @@ import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.time.DateFormatUtil
 import com.android.systemui.util.time.FakeSystemClock
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runCurrent
@@ -93,7 +92,6 @@ import org.mockito.kotlin.reset
 
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 class PhoneStatusBarPolicyTest : SysuiTestCase() {
 

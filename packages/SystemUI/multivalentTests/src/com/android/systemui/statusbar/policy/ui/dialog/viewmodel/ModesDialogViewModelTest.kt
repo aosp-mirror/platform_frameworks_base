@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.policy.ui.dialog.viewmodel
 
 import android.app.AutomaticZenRule
@@ -41,7 +39,6 @@ import com.android.systemui.statusbar.policy.ui.dialog.mockModesDialogEventLogge
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import java.util.Calendar
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest

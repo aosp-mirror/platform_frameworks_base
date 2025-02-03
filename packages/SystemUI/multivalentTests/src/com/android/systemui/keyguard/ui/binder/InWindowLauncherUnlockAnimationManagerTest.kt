@@ -41,7 +41,6 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class InWindowLauncherUnlockAnimationManagerTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private lateinit var underTest: InWindowLauncherUnlockAnimationManager

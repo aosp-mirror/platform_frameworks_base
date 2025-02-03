@@ -48,7 +48,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.unfold.compat.ScreenSizeFoldProvider
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -63,7 +62,6 @@ import org.mockito.Mockito.spy
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class SideFpsOverlayViewModelTest : SysuiTestCase() {

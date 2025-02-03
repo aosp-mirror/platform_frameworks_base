@@ -26,7 +26,6 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -42,7 +41,6 @@ import org.mockito.kotlin.verify
 /** Tests for [SettingsProxyExt]. */
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 class SettingsProxyExtTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
