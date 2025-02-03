@@ -145,7 +145,6 @@ open class ClockRegistry(
                 var isCurrentClock = false
                 var isClockListChanged = false
                 for (metadata in knownClocks) {
-                    isCurrentClock = isCurrentClock || currentClockId == metadata.clockId
                     val id = metadata.clockId
                     val info =
                         availableClocks.concurrentGetOrPut(id, ClockInfo(metadata, null, manager)) {
@@ -156,15 +155,17 @@ open class ClockRegistry(
                     if (manager != info.manager) {
                         logger.e({
                             "Clock Id conflict on attach: " +
-                                "$str1 is double registered by $str2 and $str3"
+                                "$str1 is double registered by $str2 and $str3. " +
+                                "Using $str2 since it was attached first."
                         }) {
                             str1 = id
-                            str2 = info.manager.toString()
+                            str2 = info.manager?.toString() ?: info.provider?.toString()
                             str3 = manager.toString()
                         }
                         continue
                     }
 
+                    isCurrentClock = isCurrentClock || currentClockId == metadata.clockId
                     info.provider = null
                 }
 
@@ -197,10 +198,11 @@ open class ClockRegistry(
                     if (manager != info.manager) {
                         logger.e({
                             "Clock Id conflict on load: " +
-                                "$str1 is double registered by $str2 and $str3"
+                                "$str1 is double registered by $str2 and $str3. " +
+                                "Using $str2 since it was attached first."
                         }) {
                             str1 = id
-                            str2 = info.manager.toString()
+                            str2 = info.manager?.toString() ?: info.provider?.toString()
                             str3 = manager.toString()
                         }
                         manager.unloadPlugin()
@@ -227,10 +229,11 @@ open class ClockRegistry(
                     if (info?.manager != manager) {
                         logger.e({
                             "Clock Id conflict on unload: " +
-                                "$str1 is double registered by $str2 and $str3"
+                                "$str1 is double registered by $str2 and $str3. " +
+                                "Using $str2 since it was attached first."
                         }) {
                             str1 = id
-                            str2 = info?.manager.toString()
+                            str2 = info?.manager?.toString() ?: info?.provider?.toString()
                             str3 = manager.toString()
                         }
                         continue

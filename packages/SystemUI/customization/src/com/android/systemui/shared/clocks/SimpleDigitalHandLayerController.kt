@@ -78,8 +78,9 @@ enum class DigitalTimespec {
 open class SimpleDigitalHandLayerController(
     private val clockCtx: ClockContext,
     private val layerCfg: LayerConfig,
+    isLargeClock: Boolean,
 ) : SimpleClockLayerController {
-    override val view = SimpleDigitalClockTextView(clockCtx)
+    override val view = SimpleDigitalClockTextView(clockCtx, isLargeClock)
     private val logger = Logger(clockCtx.messageBuffer, TAG)
     val timespec = DigitalTimespecHandler(layerCfg.timespec, layerCfg.dateTimeFormat)
 
