@@ -9377,6 +9377,16 @@ public final class ViewRootImpl implements ViewParent,
         return mVibrator;
     }
 
+    /**
+     * Clears the system vibrator.
+     *
+     * <p>This method releases the reference to the system vibrator. It's crucial to call this
+     * method when the vibrator is no longer needed to prevent any potential memory leaks.
+     */
+    public void clearSystemVibrator() {
+        mVibrator = null;
+    }
+
     private @Nullable AutofillManager getAutofillManager() {
         if (mView instanceof ViewGroup) {
             ViewGroup decorView = (ViewGroup) mView;

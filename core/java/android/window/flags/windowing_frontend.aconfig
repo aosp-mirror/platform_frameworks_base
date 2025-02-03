@@ -461,3 +461,14 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "clear_system_vibrator"
+    namespace: "windowing_frontend"
+    description: "Clears the system vibrator before attaching new window, to avoid leaks."
+    bug: "393190314"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
