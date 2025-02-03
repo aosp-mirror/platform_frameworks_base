@@ -53,12 +53,17 @@ constructor(
     ) {
     private val hydrator = Hydrator("AODPromotedNotificationViewModel.hydrator")
 
+    private val contentFlow =
+        interactor.content.let {
+            if (DUMP_CONTENT) {
+                it.dumpWhileCollecting("content")
+            } else {
+                it
+            }
+        }
+
     val content: PromotedNotificationContentModel? by
-        hydrator.hydratedStateOf(
-            traceName = "content",
-            initialValue = null,
-            source = interactor.content,
-        )
+        hydrator.hydratedStateOf(traceName = "content", initialValue = null, source = contentFlow)
 
     private val audiblyAlertedIconVisibleUntil: Flow<Duration?> =
         interactor.content
@@ -107,5 +112,8 @@ constructor(
 
     companion object {
         private val RECENTLY_ALERTED_THRESHOLD = 30.seconds
+
+        // For local debugging only!
+        private const val DUMP_CONTENT = false
     }
 }
