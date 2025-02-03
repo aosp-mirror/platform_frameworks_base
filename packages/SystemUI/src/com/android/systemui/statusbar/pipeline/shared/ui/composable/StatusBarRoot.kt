@@ -25,16 +25,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.view.isVisible
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.theme.PlatformTheme
 import com.android.keyguard.AlphaOptimizedLinearLayout
 import com.android.systemui.plugins.DarkIconDispatcher
@@ -56,7 +53,6 @@ import com.android.systemui.statusbar.phone.ui.DarkIconManager
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarIconBlockListBinder
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinder
-import com.android.systemui.statusbar.pipeline.shared.ui.binder.StatusBarVisibilityChangeListener
 import com.android.systemui.statusbar.pipeline.shared.ui.model.VisibilityModel
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.HomeStatusBarViewModelFactory
@@ -124,25 +120,6 @@ fun StatusBarRoot(
     eventAnimationInteractor: SystemStatusEventAnimationInteractor,
     onViewCreated: (ViewGroup) -> Unit,
 ) {
-    // None of these methods are used when [StatusBarRootModernization] is on.
-    // This can be deleted once the fragment is gone
-    val nopVisibilityChangeListener =
-        object : StatusBarVisibilityChangeListener {
-            override fun onStatusBarVisibilityMaybeChanged() {}
-
-            override fun onTransitionFromLockscreenToDreamStarted() {}
-
-            override fun onOngoingActivityStatusChanged(
-                hasPrimaryOngoingActivity: Boolean,
-                hasSecondaryOngoingActivity: Boolean,
-                shouldAnimate: Boolean,
-            ) {}
-
-            override fun onIsHomeStatusBarAllowedBySceneChanged(
-                isHomeStatusBarAllowedByScene: Boolean
-            ) {}
-        }
-
     Box(Modifier.fillMaxSize()) {
         // TODO(b/364360986): remove this before rolling the flag forward
         if (StatusBarRootModernization.SHOW_DISAMBIGUATION) {
@@ -150,9 +127,6 @@ fun StatusBarRoot(
         }
 
         Row(Modifier.fillMaxSize()) {
-            val scope = rememberCoroutineScope()
-            val visible =
-                statusBarViewModel.shouldHomeStatusBarBeVisible.collectAsStateWithLifecycle(false)
             AndroidView(
                 factory = { context ->
                     val inflater = LayoutInflater.from(context)
@@ -267,32 +241,23 @@ fun StatusBarRoot(
                         endSideContent.addView(composeView, 0)
                     }
 
-                    scope.launch {
-                        notificationIconsBinder.bindWhileAttached(
-                            notificationIconContainer,
-                            context.displayId,
-                        )
-                    }
+                    notificationIconsBinder.bindWhileAttached(
+                        notificationIconContainer,
+                        context.displayId,
+                    )
 
                     // This binder handles everything else
-                    scope.launch {
-                        statusBarViewBinder.bind(
-                            context.displayId,
-                            phoneStatusBarView,
-                            statusBarViewModel,
-                            eventAnimationInteractor::animateStatusBarContentForChipEnter,
-                            eventAnimationInteractor::animateStatusBarContentForChipExit,
-                            nopVisibilityChangeListener,
-                        )
-                    }
+                    statusBarViewBinder.bind(
+                        context.displayId,
+                        phoneStatusBarView,
+                        statusBarViewModel,
+                        eventAnimationInteractor::animateStatusBarContentForChipEnter,
+                        eventAnimationInteractor::animateStatusBarContentForChipExit,
+                        listener = null,
+                    )
                     onViewCreated(phoneStatusBarView)
                     phoneStatusBarView
-                },
-                update = { view ->
-                    // Show or hide the entire status bar. This is important so that we aren't
-                    // visible when first inflated
-                    view.isVisible = visible.value
-                },
+                }
             )
         }
     }

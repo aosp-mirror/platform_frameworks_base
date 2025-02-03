@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 import android.annotation.ColorInt
 import android.graphics.Rect
 import android.view.View
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
@@ -61,6 +61,7 @@ import com.android.systemui.statusbar.pipeline.shared.ui.model.VisibilityModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -71,6 +72,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -85,9 +87,6 @@ import kotlinx.coroutines.flow.stateIn
  * so that it's all in one place and easily testable outside of the fragment.
  */
 interface HomeStatusBarViewModel {
-    /** Should the entire status bar be hidden? */
-    val shouldHomeStatusBarBeVisible: Flow<Boolean>
-
     /**
      * True if the device is currently transitioning from lockscreen to occluded and false
      * otherwise.
@@ -193,7 +192,8 @@ constructor(
     statusBarPopupChipsViewModel: StatusBarPopupChipsViewModel,
     animations: SystemStatusEventAnimationInteractor,
     statusBarContentInsetsViewModelStore: StatusBarContentInsetsViewModelStore,
-    @Application coroutineScope: CoroutineScope,
+    @Background bgScope: CoroutineScope,
+    @Background bgDispatcher: CoroutineDispatcher,
 ) : HomeStatusBarViewModel {
 
     val tableLogger = tableLoggerFactory.getOrCreate(tableLogBufferName(thisDisplayId), 200)
@@ -207,13 +207,14 @@ constructor(
                 columnName = COL_LOCK_TO_OCCLUDED,
                 initialValue = false,
             )
-            .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), initialValue = false)
+            .stateIn(bgScope, SharingStarted.WhileSubscribed(), initialValue = false)
 
     override val transitionFromLockscreenToDreamStartedEvent: Flow<Unit> =
         keyguardTransitionInteractor
             .transition(Edge.create(from = LOCKSCREEN, to = DREAMING))
             .filter { it.transitionState == TransitionState.STARTED }
             .map {}
+            .flowOn(bgDispatcher)
 
     override val mediaProjectionStopDialogDueToCallEndedState =
         shareToAppChipViewModel.stopDialogToShow
@@ -242,7 +243,7 @@ constructor(
                 columnName = COL_ALLOWED_BY_SCENE,
                 initialValue = false,
             )
-            .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), initialValue = false)
+            .stateIn(bgScope, SharingStarted.WhileSubscribed(), initialValue = false)
 
     override val areNotificationsLightsOut: Flow<Boolean> =
         if (NotificationsLiveDataStoreRefactor.isUnexpectedlyInLegacyMode()) {
@@ -261,6 +262,7 @@ constructor(
                 columnName = COL_NOTIF_LIGHTS_OUT,
                 initialValue = false,
             )
+            .flowOn(bgDispatcher)
 
     override val areaTint: Flow<StatusBarTintColor> =
         darkIconInteractor
@@ -276,6 +278,7 @@ constructor(
             }
             .conflate()
             .distinctUntilChanged()
+            .flowOn(bgDispatcher)
 
     /**
      * True if the current SysUI state can show the home status bar (aka this status bar), and false
@@ -297,7 +300,7 @@ constructor(
             isHomeScreenStatusBarAllowedLegacy
         }
 
-    override val shouldHomeStatusBarBeVisible =
+    private val shouldHomeStatusBarBeVisible =
         combine(
                 isHomeStatusBarAllowed,
                 keyguardInteractor.isSecureCameraActive,
@@ -318,6 +321,7 @@ constructor(
                 columnName = COL_VISIBLE,
                 initialValue = false,
             )
+            .flowOn(bgDispatcher)
 
     private val isAnyChipVisible =
         if (StatusBarNotifChips.isEnabled) {
@@ -361,6 +365,7 @@ constructor(
                 columnName = COL_SHOW_OPERATOR_NAME,
                 initialValue = false,
             )
+            .flowOn(bgDispatcher)
 
     override val isClockVisible: Flow<VisibilityModel> =
         combine(
@@ -382,6 +387,7 @@ constructor(
                 columnPrefix = COL_PREFIX_CLOCK,
                 initialValue = VisibilityModel(false.toVisibleOrInvisible(), false),
             )
+            .flowOn(bgDispatcher)
 
     override val isNotificationIconContainerVisible: Flow<VisibilityModel> =
         combine(
@@ -407,6 +413,7 @@ constructor(
                 columnPrefix = COL_PREFIX_NOTIF_CONTAINER,
                 initialValue = VisibilityModel(false.toVisibleOrInvisible(), false),
             )
+            .flowOn(bgDispatcher)
 
     private val isSystemInfoVisible =
         combine(shouldHomeStatusBarBeVisible, homeStatusBarInteractor.visibilityViaDisableFlags) {
@@ -429,17 +436,17 @@ constructor(
                     SystemInfoCombinedVisibilityModel(VisibilityModel(View.VISIBLE, false), Idle),
             )
             .stateIn(
-                coroutineScope,
+                bgScope,
                 SharingStarted.WhileSubscribed(),
                 SystemInfoCombinedVisibilityModel(VisibilityModel(View.VISIBLE, false), Idle),
             )
 
     override val iconBlockList: Flow<List<String>> =
-        homeStatusBarIconBlockListInteractor.iconBlockList
+        homeStatusBarIconBlockListInteractor.iconBlockList.flowOn(bgDispatcher)
 
     override val contentArea: Flow<Rect> =
         statusBarContentInsetsViewModelStore.forDisplay(thisDisplayId)?.contentArea
-            ?: flowOf(Rect(0, 0, 0, 0))
+            ?: flowOf(Rect(0, 0, 0, 0)).flowOn(bgDispatcher)
 
     @View.Visibility
     private fun Boolean.toVisibleOrGone(): Int {

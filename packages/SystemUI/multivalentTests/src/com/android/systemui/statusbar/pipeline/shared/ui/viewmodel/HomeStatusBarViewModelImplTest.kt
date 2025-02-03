@@ -88,16 +88,13 @@ import com.android.systemui.statusbar.pipeline.shared.domain.interactor.setHomeS
 import com.android.systemui.statusbar.pipeline.shared.ui.model.VisibilityModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     private val kosmos = testKosmos().useUnconfinedTestDispatcher()
@@ -648,98 +645,6 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
             // THEN we still show the operator name view if NoHunBehavior flag is enabled
             assertThat(latest).isTrue()
-        }
-
-    @Test
-    fun shouldHomeStatusBarBeVisible_keyguardNotGone_noHun_false() =
-        kosmos.runTest {
-            // Do not transition from keyguard. i.e., we don't call transitionKeyguardToGone()
-
-            // Nothing disabled
-            fakeDisableFlagsRepository.disableFlags.value =
-                DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
-
-            val latest by collectLastValue(underTest.shouldHomeStatusBarBeVisible)
-            assertThat(latest).isFalse()
-        }
-
-    @Test
-    fun shouldHomeStatusBarBeVisible_keyguardNotGone_hun_true() =
-        kosmos.runTest {
-            // Keyguard gone
-            transitionKeyguardToGone()
-
-            // Nothing disabled
-            fakeDisableFlagsRepository.disableFlags.value =
-                DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
-
-            // there is an active HUN
-            headsUpNotificationRepository.setNotifications(
-                UnconfinedFakeHeadsUpRowRepository(
-                    key = "key",
-                    pinnedStatus = MutableStateFlow(PinnedStatus.PinnedByUser),
-                )
-            )
-
-            val latest by collectLastValue(underTest.shouldHomeStatusBarBeVisible)
-            assertThat(latest).isTrue()
-        }
-
-    @Test
-    fun shouldHomeStatusBarBeVisible_keyguardGone_noHun_notInCamera_true() =
-        kosmos.runTest {
-            // Keyguard gone
-            transitionKeyguardToGone()
-
-            // Nothing disabled
-            fakeDisableFlagsRepository.disableFlags.value =
-                DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
-
-            val latest by collectLastValue(underTest.shouldHomeStatusBarBeVisible)
-            assertThat(latest).isTrue()
-        }
-
-    @Test
-    fun shouldHomeStatusBarBeVisible_keyguardGone_hun_notInCamera_true() =
-        kosmos.runTest {
-            // Keyguard gone
-            transitionKeyguardToGone()
-
-            // Nothing disabled
-            fakeDisableFlagsRepository.disableFlags.value =
-                DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
-
-            // there is an active HUN
-            headsUpNotificationRepository.setNotifications(
-                UnconfinedFakeHeadsUpRowRepository(
-                    key = "key",
-                    pinnedStatus = MutableStateFlow(PinnedStatus.PinnedByUser),
-                )
-            )
-
-            val latest by collectLastValue(underTest.shouldHomeStatusBarBeVisible)
-            assertThat(latest).isTrue()
-        }
-
-    @Test
-    fun shouldHomeStatusBarBeVisible_keyguardGone_noHun_inCamera_false() =
-        kosmos.runTest {
-            // Keyguard gone
-            transitionKeyguardToGone()
-
-            // Nothing disabled
-            fakeDisableFlagsRepository.disableFlags.value =
-                DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
-
-            fakeKeyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.LOCKSCREEN,
-                to = KeyguardState.OCCLUDED,
-                testScope = testScope,
-            )
-            kosmos.keyguardInteractor.onCameraLaunchDetected(CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
-
-            val latest by collectLastValue(underTest.shouldHomeStatusBarBeVisible)
-            assertThat(latest).isFalse()
         }
 
     @Test

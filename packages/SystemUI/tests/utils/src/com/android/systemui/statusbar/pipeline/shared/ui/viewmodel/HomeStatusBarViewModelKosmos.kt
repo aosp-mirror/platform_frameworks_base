@@ -20,7 +20,8 @@ import android.content.testableContext
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.backgroundScope
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.log.table.tableLogBufferFactory
 import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
@@ -59,6 +60,7 @@ var Kosmos.homeStatusBarViewModel: HomeStatusBarViewModel by
             statusBarPopupChipsViewModel,
             systemStatusEventAnimationInteractor,
             multiDisplayStatusBarContentInsetsViewModelStore,
-            applicationCoroutineScope,
+            backgroundScope,
+            testDispatcher,
         )
     }
