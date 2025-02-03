@@ -74,7 +74,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.shade.ShadeViewController;
-import com.android.systemui.shade.shared.flag.DualShade;
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.notification.stack.ViewState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -218,6 +218,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final KeyguardInteractor mKeyguardInteractor;
+    private final ShadeModeInteractor mShadeModeInteractor;
 
     private GradientColors mColors;
     private boolean mNeedsDrawableColorUpdate;
@@ -338,6 +339,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             AlternateBouncerToGoneTransitionViewModel alternateBouncerToGoneTransitionViewModel,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             KeyguardInteractor keyguardInteractor,
+            ShadeModeInteractor shadeModeInteractor,
             @Main CoroutineDispatcher mainDispatcher,
             LargeScreenShadeInterpolator largeScreenShadeInterpolator,
             BlurConfig blurConfig) {
@@ -387,6 +389,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         mAlternateBouncerToGoneTransitionViewModel = alternateBouncerToGoneTransitionViewModel;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
         mKeyguardInteractor = keyguardInteractor;
+        mShadeModeInteractor = shadeModeInteractor;
         mMainDispatcher = mainDispatcher;
     }
 
@@ -426,6 +429,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         hydrateStateInternally(behindScrim);
 
         mViewsAttached = true;
+    }
+
+    private boolean isDualShade() {
+        return SceneContainerFlag.isEnabled() && mShadeModeInteractor.isDualShade();
     }
 
     private void hydrateStateInternally(ScrimView behindScrim) {
@@ -956,7 +963,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             if (!mScreenOffAnimationController.shouldExpandNotifications()
                     && !mAnimatingPanelExpansionOnUnlock
                     && !occluding) {
-                if (mTransparentScrimBackground || DualShade.isEnabled()) {
+                if (mTransparentScrimBackground || isDualShade()) {
                     mBehindAlpha = 0;
                     mNotificationsAlpha = 0;
                 } else if (mClipsQsScrim) {
@@ -1015,7 +1022,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 behindAlpha = 0f;
             }
             mInFrontAlpha = mState.getFrontAlpha();
-            if (DualShade.isEnabled() && mState == ScrimState.SHADE_LOCKED) {
+            if (isDualShade() && mState == ScrimState.SHADE_LOCKED) {
                 mBehindAlpha = 0;
                 mNotificationsTint = Color.TRANSPARENT;
                 mNotificationsAlpha = 0;
