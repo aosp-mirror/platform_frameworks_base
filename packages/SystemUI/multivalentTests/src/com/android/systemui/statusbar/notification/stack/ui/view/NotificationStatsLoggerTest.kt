@@ -172,6 +172,41 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
         }
 
     @Test
+    fun onNotificationVisibilityChanged_thenShadeNotInteractive_noDuplicateLogs() =
+        testScope.runTest {
+            // GIVEN a visible Notifications is reported
+            val (ranks, locations) = fakeNotificationMaps("key0")
+            val callable = Callable { locations }
+            underTest.onNotificationLocationsChanged(callable, ranks)
+            runCurrent()
+            clearInvocations(mockStatusBarService, mockNotificationListenerService)
+
+            // WHEN the same Notification becomins invisible
+            val emptyCallable = Callable { emptyMap<String, Int>() }
+            underTest.onNotificationLocationsChanged(emptyCallable, ranks)
+            // AND notifications become non interactible
+            underTest.onLockscreenOrShadeNotInteractive(emptyList())
+            runCurrent()
+
+            // THEN visibility changes are reported
+            verify(mockStatusBarService)
+                .onNotificationVisibilityChanged(eq(emptyArray()), visibilityArrayCaptor.capture())
+            val noLongerVisible = visibilityArrayCaptor.value
+            assertThat(noLongerVisible).hasLength(1)
+            assertThat(noLongerVisible[0]).apply {
+                isKeyEqualTo("key0")
+                isRankEqualTo(0)
+                notVisible()
+                isInMainArea()
+                isCountEqualTo(1)
+            }
+
+            // AND nothing else is logged
+            verifyNoMoreInteractions(mockStatusBarService)
+            verifyNoMoreInteractions(mockNotificationListenerService)
+        }
+
+    @Test
     fun onNotificationListUpdated_itemsChangedPositions_nothingLogged() =
         testScope.runTest {
             // GIVEN some visible Notifications are reported
@@ -255,14 +290,14 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "key0",
                         uid = 0,
-                        packageName = "com.android.first"
+                        packageName = "com.android.first",
                     ),
                     activeNotificationModel(
                         key = "key1",
                         uid = 1,
-                        packageName = "com.android.second"
+                        packageName = "com.android.second",
                     ),
-                )
+                ),
             )
             runCurrent()
 
@@ -288,7 +323,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
                 key = "key",
                 isExpanded = true,
                 location = ExpandableViewState.LOCATION_MAIN_AREA,
-                isUserAction = true
+                isUserAction = true,
             )
             runCurrent()
 
@@ -298,7 +333,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
                     /* key = */ "key",
                     /* userAction = */ true,
                     /* expanded = */ true,
-                    NotificationVisibility.NotificationLocation.LOCATION_MAIN_AREA.ordinal
+                    NotificationVisibility.NotificationLocation.LOCATION_MAIN_AREA.ordinal,
                 )
         }
 
@@ -310,7 +345,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
                 key = "key",
                 isExpanded = true,
                 location = ExpandableViewState.LOCATION_MAIN_AREA,
-                isUserAction = true
+                isUserAction = true,
             )
             runCurrent()
             clearInvocations(mockStatusBarService)
@@ -320,7 +355,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
                 key = "key",
                 isExpanded = true,
                 location = ExpandableViewState.LOCATION_MAIN_AREA,
-                isUserAction = true
+                isUserAction = true,
             )
             runCurrent()
 
@@ -336,7 +371,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
                 key = "key",
                 isExpanded = true,
                 location = ExpandableViewState.LOCATION_BOTTOM_STACK_HIDDEN,
-                isUserAction = true
+                isUserAction = true,
             )
             runCurrent()
 
@@ -352,7 +387,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
                 key = "key",
                 isExpanded = true,
                 location = ExpandableViewState.LOCATION_GONE,
-                isUserAction = false
+                isUserAction = false,
             )
             runCurrent()
 
@@ -368,7 +403,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
                     /* key = */ "key",
                     /* userAction = */ false,
                     /* expanded = */ true,
-                    NotificationVisibility.NotificationLocation.LOCATION_MAIN_AREA.ordinal
+                    NotificationVisibility.NotificationLocation.LOCATION_MAIN_AREA.ordinal,
                 )
         }
 
@@ -380,7 +415,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
                 key = "key",
                 isExpanded = true,
                 location = ExpandableViewState.LOCATION_GONE,
-                isUserAction = false
+                isUserAction = false,
             )
             runCurrent()
             // AND we open the shade, so we log its events
@@ -406,7 +441,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
                     /* key = */ "key",
                     /* userAction = */ false,
                     /* expanded = */ true,
-                    NotificationVisibility.NotificationLocation.LOCATION_MAIN_AREA.ordinal
+                    NotificationVisibility.NotificationLocation.LOCATION_MAIN_AREA.ordinal,
                 )
         }
 
@@ -418,7 +453,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
                 key = "key",
                 isExpanded = false,
                 location = ExpandableViewState.LOCATION_MAIN_AREA,
-                isUserAction = false
+                isUserAction = false,
             )
             runCurrent()
 
@@ -435,7 +470,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
                 key = "key",
                 isExpanded = true,
                 location = ExpandableViewState.LOCATION_MAIN_AREA,
-                isUserAction = true
+                isUserAction = true,
             )
             runCurrent()
 
@@ -445,7 +480,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
                     /* key = */ "key",
                     /* userAction = */ true,
                     /* expanded = */ true,
-                    NotificationVisibility.NotificationLocation.LOCATION_MAIN_AREA.ordinal
+                    NotificationVisibility.NotificationLocation.LOCATION_MAIN_AREA.ordinal,
                 )
 
             // AND the Notification is expanded again
@@ -453,7 +488,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
                 key = "key",
                 isExpanded = false,
                 location = ExpandableViewState.LOCATION_MAIN_AREA,
-                isUserAction = true
+                isUserAction = true,
             )
             runCurrent()
 
@@ -463,7 +498,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
                     /* key = */ "key",
                     /* userAction = */ true,
                     /* expanded = */ false,
-                    NotificationVisibility.NotificationLocation.LOCATION_MAIN_AREA.ordinal
+                    NotificationVisibility.NotificationLocation.LOCATION_MAIN_AREA.ordinal,
                 )
         }
 
@@ -475,14 +510,14 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
                 key = "key1",
                 isExpanded = true,
                 location = ExpandableViewState.LOCATION_MAIN_AREA,
-                isUserAction = true
+                isUserAction = true,
             )
             runCurrent()
             underTest.onNotificationExpansionChanged(
                 key = "key2",
                 isExpanded = true,
                 location = ExpandableViewState.LOCATION_MAIN_AREA,
-                isUserAction = true
+                isUserAction = true,
             )
             runCurrent()
             clearInvocations(mockStatusBarService)
@@ -502,14 +537,14 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
                 key = "key1",
                 isExpanded = true,
                 location = ExpandableViewState.LOCATION_MAIN_AREA,
-                isUserAction = true
+                isUserAction = true,
             )
             runCurrent()
             underTest.onNotificationExpansionChanged(
                 key = "key2",
                 isExpanded = true,
                 location = ExpandableViewState.LOCATION_MAIN_AREA,
-                isUserAction = true
+                isUserAction = true,
             )
             runCurrent()
             clearInvocations(mockStatusBarService)
@@ -537,10 +572,15 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
 
 private class NotificationVisibilitySubject(private val visibility: NotificationVisibility) {
     fun isKeyEqualTo(key: String) = assertThat(visibility.key).isEqualTo(key)
+
     fun isRankEqualTo(rank: Int) = assertThat(visibility.rank).isEqualTo(rank)
+
     fun isCountEqualTo(count: Int) = assertThat(visibility.count).isEqualTo(count)
+
     fun isVisible() = assertThat(this.visibility.visible).isTrue()
+
     fun notVisible() = assertThat(this.visibility.visible).isFalse()
+
     fun isInMainArea() =
         assertThat(this.visibility.location)
             .isEqualTo(NotificationVisibility.NotificationLocation.LOCATION_MAIN_AREA)
