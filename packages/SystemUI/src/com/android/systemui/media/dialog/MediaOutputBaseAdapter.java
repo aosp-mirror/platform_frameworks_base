@@ -195,14 +195,15 @@ public abstract class MediaOutputBaseAdapter extends
             mIconAreaLayout.setBackground(null);
             mSeekBar.setProgressTintList(
                     ColorStateList.valueOf(mController.getColorSeekbarProgress()));
+            enableFocusPropertyForView(mContainerLayout);
         }
 
-        void setSingleLineLayout(CharSequence title) {
+        void updateTitle(CharSequence title) {
             mTitleText.setText(title);
         }
 
         void updateSeekBar(@NonNull MediaDevice device, ConnectionState connectionState,
-                boolean restrictVolumeAdjustment) {
+                boolean restrictVolumeAdjustment, String contentDescription) {
             boolean showSeekBar =
                     connectionState == ConnectionState.CONNECTED && !restrictVolumeAdjustment;
             if (!mCornerAnimator.isRunning()) {
@@ -214,20 +215,35 @@ public abstract class MediaOutputBaseAdapter extends
             mSeekBar.setVisibility(showSeekBar ? View.VISIBLE : View.GONE);
             if (showSeekBar) {
                 initSeekbar(device, isCurrentSeekbarInvisible);
+                disableFocusPropertyForView(mContainerLayout);
+                mSeekBar.setContentDescription(contentDescription);
+            } else {
+                enableFocusPropertyForView(mContainerLayout);
             }
         }
 
-        void updateGroupSeekBar() {
+        void updateGroupSeekBar(String contentDescription) {
             updateSeekbarProgressBackground();
             boolean isCurrentSeekbarInvisible = mSeekBar.getVisibility() == View.GONE;
             mSeekBar.setVisibility(View.VISIBLE);
             initGroupSeekbar(isCurrentSeekbarInvisible);
+            disableFocusPropertyForView(mContainerLayout);
+            mSeekBar.setContentDescription(contentDescription);
         }
 
-        void setTwoLineLayout(CharSequence title, boolean showSubtitle, boolean showStatus) {
+        private void disableFocusPropertyForView(View view) {
+            view.setFocusable(false);
+            view.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        }
+
+        private void enableFocusPropertyForView(View view) {
+            view.setFocusable(true);
+            view.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+        }
+
+        void setSubtextAndStatus(boolean showSubtitle, boolean showStatus) {
             mStatusIcon.setVisibility(showStatus ? View.VISIBLE : View.GONE);
             mSubTitleText.setVisibility(showSubtitle ? View.VISIBLE : View.GONE);
-            mTitleText.setText(title);
         }
 
         protected void updateLoadingIndicator(ConnectionState connectionState) {
