@@ -55,6 +55,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -289,7 +290,7 @@ constructor(
         }
 
     private val areBiometricsEnabledForDeviceEntryFromUserSetting: Flow<Triple<Int, Boolean, Int>> =
-        conflatedCallbackFlow {
+        callbackFlow {
                 val callback =
                     object : IBiometricEnabledOnKeyguardCallback.Stub() {
                         override fun onChanged(enabled: Boolean, userId: Int, modality: Int) {
