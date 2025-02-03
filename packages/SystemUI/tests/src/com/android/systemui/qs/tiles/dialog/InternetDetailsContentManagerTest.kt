@@ -63,7 +63,7 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 @EnableSceneContainer
-@EnableFlags(Flags.FLAG_QS_TILE_DETAILED_VIEW, Flags.FLAG_DUAL_SHADE)
+@EnableFlags(Flags.FLAG_QS_TILE_DETAILED_VIEW)
 @UiThreadTest
 class InternetDetailsContentManagerTest : SysuiTestCase() {
     private val kosmos = Kosmos()

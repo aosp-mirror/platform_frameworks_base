@@ -41,7 +41,6 @@ import com.android.systemui.qs.tiles.dialog.InternetDetailsViewModel
 import com.android.systemui.qs.tiles.dialog.InternetDialogManager
 import com.android.systemui.qs.tiles.dialog.WifiStateWorker
 import com.android.systemui.res.R
-import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.statusbar.connectivity.AccessPointController
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
@@ -145,7 +144,7 @@ class InternetTileNewImplTest(flags: FlagsParameterization) : SysuiTestCase() {
                 dialogManager,
                 wifiStateWorker,
                 accessPointController,
-                internetDetailsViewModelFactory
+                internetDetailsViewModelFactory,
             )
 
         underTest.initialize()
@@ -295,7 +294,6 @@ class InternetTileNewImplTest(flags: FlagsParameterization) : SysuiTestCase() {
                 FLAG_SCENE_CONTAINER,
                 KeyguardWmStateRefactor.FLAG_NAME,
                 NotificationThrottleHun.FLAG_NAME,
-                DualShade.FLAG_NAME,
             ]
     )
     fun click_withQsDetailedViewEnabled() {
