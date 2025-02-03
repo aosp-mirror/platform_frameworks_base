@@ -18,8 +18,10 @@ package com.android.systemui.inputdevice.tutorial.data.repository
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.android.systemui.dagger.SysUISingleton
@@ -45,7 +47,12 @@ class TutorialSchedulerRepository(
     ) : this(applicationContext, backgroundScope, dataStoreName = DATASTORE_NAME)
 
     private val Context.dataStore: DataStore<Preferences> by
-        preferencesDataStore(name = dataStoreName, scope = backgroundScope)
+        preferencesDataStore(
+            name = dataStoreName,
+            corruptionHandler =
+                ReplaceFileCorruptionHandler(produceNewData = { emptyPreferences() }),
+            scope = backgroundScope,
+        )
 
     suspend fun setScheduledTutorialLaunchTime(device: DeviceType, time: Instant) {
         updateData(key = getLaunchedKey(device), value = time.epochSecond)
