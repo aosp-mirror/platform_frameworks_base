@@ -992,35 +992,26 @@ public class InputMethodServiceTest {
      * @param expected whether the runnable is expected to trigger the signal.
      * @param orientationPortrait whether the orientation is expected to be portrait.
      */
-    private void verifyFullscreenMode(
-            Runnable runnable, boolean expected, boolean orientationPortrait)
-            throws InterruptedException {
-        CountDownLatch signal = new CountDownLatch(1);
-        mInputMethodService.setCountDownLatchForTesting(signal);
-
-        // Runnable to trigger onConfigurationChanged()
-        try {
-            runnable.run();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        // Waits for onConfigurationChanged() to finish.
-        mInstrumentation.waitForIdleSync();
-        boolean completed = signal.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
-        if (expected && !completed) {
-            fail("Timed out waiting for onConfigurationChanged()");
-        } else if (!expected && completed) {
-            fail("Unexpected call onConfigurationChanged()");
+    private void verifyFullscreenMode(@NonNull Runnable runnable, boolean expected,
+            boolean orientationPortrait) throws InterruptedException {
+        verifyInputViewStatus(runnable, expected, false /* inputViewStarted */);
+        if (expected) {
+            // Wait for the TestActivity to be recreated.
+            eventually(() ->
+                    assertThat(TestActivity.getLastCreatedInstance()).isNotEqualTo(mActivity));
+            // Get the new TestActivity.
+            mActivity = TestActivity.getLastCreatedInstance();
         }
 
-        clickOnEditorText();
-        eventually(() -> assertThat(mInputMethodService.isInputViewShown()).isTrue());
+        verifyInputViewStatusOnMainSync(
+                () -> mActivity.showImeWithWindowInsetsController(),
+                true /* expected */,
+                true /* inputViewStarted */);
+        assertThat(mInputMethodService.isInputViewShown()).isTrue();
 
         assertThat(mInputMethodService.getResources().getConfiguration().orientation)
-                .isEqualTo(
-                        orientationPortrait
-                                ? Configuration.ORIENTATION_PORTRAIT
-                                : Configuration.ORIENTATION_LANDSCAPE);
+                .isEqualTo(orientationPortrait
+                        ? Configuration.ORIENTATION_PORTRAIT : Configuration.ORIENTATION_LANDSCAPE);
         EditorInfo editorInfo = mInputMethodService.getCurrentInputEditorInfo();
         assertThat(editorInfo.imeOptions & EditorInfo.IME_FLAG_NO_FULLSCREEN).isEqualTo(0);
         assertThat(editorInfo.internalImeOptions & EditorInfo.IME_INTERNAL_FLAG_APP_WINDOW_PORTRAIT)
@@ -1029,7 +1020,19 @@ public class InputMethodServiceTest {
         assertThat(mInputMethodService.onEvaluateFullscreenMode()).isEqualTo(!orientationPortrait);
         assertThat(mInputMethodService.isFullscreenMode()).isEqualTo(!orientationPortrait);
 
-        mUiDevice.pressBack();
+        // Hide IME before finishing the run.
+        verifyInputViewStatusOnMainSync(
+                () -> mActivity.hideImeWithWindowInsetsController(),
+                true /* expected */,
+                false /* inputViewStarted */);
+
+        if (mFlagsValueProvider.getBoolean(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)) {
+            // The IME visibility is only sent at the end of the animation. Therefore, we have to
+            // wait until the visibility was sent to the server and the IME window hidden.
+            eventually(() -> assertThat(mInputMethodService.isInputViewShown()).isFalse());
+        } else {
+            assertThat(mInputMethodService.isInputViewShown()).isFalse();
+        }
     }
 
     private void prepareIme() throws Exception {
