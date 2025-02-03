@@ -171,10 +171,6 @@ public class MediaSwitchingController
     private int mColorConnectedItemBackground;
     private int mColorPositiveButtonText;
     private int mColorDialogBackground;
-    private int mItemMarginEndDefault;
-    private int mItemMarginEndSelectable;
-    private float mInactiveRadius;
-    private float mActiveRadius;
     private FeatureFlags mFeatureFlags;
     private UserTracker mUserTracker;
     private VolumePanelGlobalStateInteractor mVolumePanelGlobalStateInteractor;
@@ -246,16 +242,8 @@ public class MediaSwitchingController
                 R.color.media_dialog_connected_item_background);
         mColorPositiveButtonText = Utils.getColorStateListDefaultColor(mContext,
                 R.color.media_dialog_solid_button_text);
-        mInactiveRadius = mContext.getResources().getDimension(
-                R.dimen.media_output_dialog_background_radius);
-        mActiveRadius = mContext.getResources().getDimension(
-                R.dimen.media_output_dialog_active_background_radius);
         mColorDialogBackground = Utils.getColorStateListDefaultColor(mContext,
                 R.color.media_dialog_background);
-        mItemMarginEndDefault = (int) mContext.getResources().getDimension(
-                R.dimen.media_output_dialog_default_margin_end);
-        mItemMarginEndSelectable = (int) mContext.getResources().getDimension(
-                R.dimen.media_output_dialog_selectable_margin_end);
 
         if (enableInputRouting()) {
             mInputRouteManager = new InputRouteManager(mContext, audioManager);
@@ -636,22 +624,6 @@ public class MediaSwitchingController
 
     public int getColorItemBackground() {
         return mColorItemBackground;
-    }
-
-    public float getInactiveRadius() {
-        return mInactiveRadius;
-    }
-
-    public float getActiveRadius() {
-        return mActiveRadius;
-    }
-
-    public int getItemMarginEndDefault() {
-        return mItemMarginEndDefault;
-    }
-
-    public int getItemMarginEndSelectable() {
-        return mItemMarginEndSelectable;
     }
 
     private void buildMediaItems(List<MediaDevice> devices) {

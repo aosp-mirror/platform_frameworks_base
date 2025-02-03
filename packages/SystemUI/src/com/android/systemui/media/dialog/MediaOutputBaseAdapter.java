@@ -141,6 +141,8 @@ public abstract class MediaOutputBaseAdapter extends
         final ImageView mEndClickIcon;
         @VisibleForTesting
         MediaOutputSeekbar mSeekBar;
+        private final float mInactiveRadius;
+        private final float mActiveRadius;
         private String mDeviceId;
         private ValueAnimator mCornerAnimator;
         private ValueAnimator mVolumeAnimator;
@@ -161,6 +163,10 @@ public abstract class MediaOutputBaseAdapter extends
             mEndClickIcon = view.requireViewById(R.id.media_output_item_end_click_icon);
             mVolumeValueText = view.requireViewById(R.id.volume_value);
             mIconAreaLayout = view.requireViewById(R.id.icon_area);
+            mInactiveRadius = mContext.getResources().getDimension(
+                    R.dimen.media_output_dialog_background_radius);
+            mActiveRadius = mContext.getResources().getDimension(
+                    R.dimen.media_output_dialog_active_background_radius);
             initAnimator();
         }
 
@@ -216,10 +222,6 @@ public abstract class MediaOutputBaseAdapter extends
                 mEndClickIcon.setVisibility(
                         !showCheckBox && showEndTouchArea ? View.VISIBLE : View.GONE);
             }
-            ViewGroup.MarginLayoutParams params =
-                    (ViewGroup.MarginLayoutParams) mItemLayout.getLayoutParams();
-            params.rightMargin = showEndTouchArea ? mController.getItemMarginEndSelectable()
-                    : mController.getItemMarginEndDefault();
         }
 
         void setTwoLineLayout(CharSequence title, boolean showSeekBar,
@@ -247,10 +249,6 @@ public abstract class MediaOutputBaseAdapter extends
             //update end click area by isActive
             mEndTouchArea.setVisibility(showEndTouchArea ? View.VISIBLE : View.GONE);
             mEndClickIcon.setVisibility(showEndTouchArea ? View.VISIBLE : View.GONE);
-            ViewGroup.MarginLayoutParams params =
-                    (ViewGroup.MarginLayoutParams) mItemLayout.getLayoutParams();
-            params.rightMargin = showEndTouchArea ? mController.getItemMarginEndSelectable()
-                    : mController.getItemMarginEndDefault();
             mItemLayout.setBackground(backgroundDrawable);
             mProgressBar.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
             mSubTitleText.setVisibility(showSubtitle ? View.VISIBLE : View.GONE);
@@ -264,10 +262,10 @@ public abstract class MediaOutputBaseAdapter extends
             final GradientDrawable progressDrawable =
                     (GradientDrawable) clipDrawable.getDrawable();
             progressDrawable.setCornerRadii(
-                    new float[]{0, 0, mController.getActiveRadius(),
-                            mController.getActiveRadius(),
-                            mController.getActiveRadius(),
-                            mController.getActiveRadius(), 0, 0});
+                    new float[]{0, 0, mActiveRadius,
+                            mActiveRadius,
+                            mActiveRadius,
+                            mActiveRadius, 0, 0});
         }
 
         private void initializeSeekbarVolume(
@@ -431,8 +429,7 @@ public abstract class MediaOutputBaseAdapter extends
         }
 
         private void initAnimator() {
-            mCornerAnimator = ValueAnimator.ofFloat(mController.getInactiveRadius(),
-                    mController.getActiveRadius());
+            mCornerAnimator = ValueAnimator.ofFloat(mInactiveRadius, mActiveRadius);
             mCornerAnimator.setDuration(ANIM_DURATION);
             mCornerAnimator.setInterpolator(new LinearInterpolator());
 
