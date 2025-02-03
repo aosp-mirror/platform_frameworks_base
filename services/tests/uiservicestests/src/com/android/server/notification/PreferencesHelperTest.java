@@ -3903,11 +3903,11 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         notExpected.add(PKG_P + " (" + UID_P + ") importance=");  // no importance for PKG_P
 
         for (String exp : expected) {
-            assertTrue(actual.contains(exp));
+            assertThat(actual).contains(exp);
         }
 
         for (String notExp : notExpected) {
-            assertFalse(actual.contains(notExp));
+            assertThat(actual).doesNotContain(notExp);
         }
     }
 
@@ -3920,14 +3920,21 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.canShowBadge(PKG_P, UID_P);
 
         // get dump output
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        mHelper.dump(pw, "", new NotificationManagerService.DumpFilter(), null);
-        pw.flush();
-        String actual = sw.toString();
+        String actual = dumpToString(mHelper);
 
         // nobody gets any importance
-        assertFalse(actual.contains("importance="));
+        assertThat(actual).doesNotContain("importance=");
+    }
+
+    @Test
+    public void testDumpString_includesDelegates() {
+        mHelper.setNotificationDelegate(PKG_P, UID_P, "the.delegate.package", 456);
+
+        String dump = dumpToString(mHelper);
+
+        assertThat(dump).contains(
+                "AppSettings: com.example.p (10003)\n"
+                + "    Delegate: the.delegate.package (456) enabled=true");
     }
 
     @Test
@@ -6846,6 +6853,15 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         ParceledListSlice<NotificationChannel> channels = mHelper.getNotificationChannels(PKG_N_MR1,
                 UID_N_MR1, false, false);
         assertThat(channels.getList().size()).isEqualTo(0);
+    }
+
+    private static String dumpToString(PreferencesHelper helper) {
+        StringWriter sw = new StringWriter();
+        try (PrintWriter pw = new PrintWriter(sw)) {
+            helper.dump(pw, "", new NotificationManagerService.DumpFilter(), null);
+            pw.flush();
+            return sw.toString();
+        }
     }
 
     // Test version of PreferencesHelper whose only functional difference is that it does not
