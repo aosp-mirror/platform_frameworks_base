@@ -75,7 +75,6 @@ import static com.android.server.wm.ActivityRecord.TRANSFER_SPLASH_SCREEN_COPYIN
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TRANSITION;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_USER_LEAVING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
@@ -5257,7 +5256,6 @@ class Task extends TaskFragment {
 
         final boolean[] resumed = new boolean[1];
         final TaskFragment topFragment = topActivity.getTaskFragment();
-        resumed[0] = topFragment.resumeTopActivity(prev, options, deferPause);
         forAllLeafTaskFragments(f -> {
             if (topFragment == f) {
                 return;
@@ -5267,6 +5265,7 @@ class Task extends TaskFragment {
             }
             resumed[0] |= f.resumeTopActivity(prev, options, deferPause);
         }, true);
+        resumed[0] |= topFragment.resumeTopActivity(prev, options, deferPause);
         return resumed[0];
     }
 
