@@ -114,6 +114,7 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     override val keyguardAlpha: StateFlow<Float> = _keyguardAlpha
 
     override val panelAlpha: MutableStateFlow<Float> = MutableStateFlow(1f)
+    override val zoomOut: MutableStateFlow<Float> = MutableStateFlow(0f)
 
     override val lastRootViewTapPosition: MutableStateFlow<Point?> = MutableStateFlow(null)
 
@@ -270,6 +271,10 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override fun setPanelAlpha(alpha: Float) {
         panelAlpha.value = alpha
+    }
+
+    override fun setZoomOut(zoomOutFromShadeRadius: Float) {
+        zoomOut.value = zoomOutFromShadeRadius
     }
 
     fun setIsEncryptedOrLockdown(value: Boolean) {

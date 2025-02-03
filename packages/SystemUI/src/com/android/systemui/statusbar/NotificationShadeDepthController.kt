@@ -40,6 +40,7 @@ import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.shade.ShadeExpansionListener
@@ -74,6 +75,7 @@ constructor(
     private val blurUtils: BlurUtils,
     private val biometricUnlockController: BiometricUnlockController,
     private val keyguardStateController: KeyguardStateController,
+    private val keyguardInteractor: KeyguardInteractor,
     private val choreographer: Choreographer,
     private val wallpaperController: WallpaperController,
     private val notificationShadeWindowController: NotificationShadeWindowController,
@@ -281,6 +283,7 @@ constructor(
             appZoomOutOptional.ifPresent { appZoomOut ->
                 appZoomOut.setProgress(zoomOutFromShadeRadius)
             }
+            keyguardInteractor.setZoomOut(zoomOutFromShadeRadius)
         }
         listeners.forEach {
             it.onWallpaperZoomOutChanged(zoomOutFromShadeRadius)

@@ -287,6 +287,9 @@ constructor(
             .distinctUntilChanged()
     }
 
+    val scaleFromZoomOut: Flow<Float> =
+        keyguardInteractor.zoomOut.map { 1 - it * PUSHBACK_SCALE_FOR_LOCKSCREEN }
+
     val translationY: Flow<Float> = aodBurnInViewModel.movement.map { it.translationY.toFloat() }
 
     val translationX: Flow<StateToValue> =
@@ -418,5 +421,6 @@ constructor(
 
     companion object {
         private const val TAG = "KeyguardRootViewModel"
+        private const val PUSHBACK_SCALE_FOR_LOCKSCREEN = 0.05f
     }
 }

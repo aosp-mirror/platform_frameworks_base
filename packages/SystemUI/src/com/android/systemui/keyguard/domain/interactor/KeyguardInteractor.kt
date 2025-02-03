@@ -337,6 +337,9 @@ constructor(
     @Deprecated("SceneContainer uses NotificationStackAppearanceInteractor")
     val panelAlpha: StateFlow<Float> = repository.panelAlpha.asStateFlow()
 
+    /** Sets the zoom out scale of spatial model pushback from e.g. pulling down the shade. */
+    val zoomOut: StateFlow<Float> = repository.zoomOut
+
     /**
      * When the lockscreen can be dismissed, emit an alpha value as the user swipes up. This is
      * useful just before the code commits to moving to GONE.
@@ -473,6 +476,10 @@ constructor(
 
     fun setPanelAlpha(alpha: Float) {
         repository.setPanelAlpha(alpha)
+    }
+
+    fun setZoomOut(zoomOutFromShadeRadius: Float) {
+        repository.setZoomOut(zoomOutFromShadeRadius)
     }
 
     fun setAnimateDozingTransitions(animate: Boolean) {

@@ -172,6 +172,13 @@ object KeyguardRootViewBinder {
                         }
                     }
 
+                    launch("$TAG#zoomOut") {
+                        viewModel.scaleFromZoomOut.collect { scaleFromZoomOut ->
+                            view.scaleX = scaleFromZoomOut
+                            view.scaleY = scaleFromZoomOut
+                        }
+                    }
+
                     launch("$TAG#translationY") {
                         // When translation happens in burnInLayer, it won't be weather clock large
                         // clock isn't added to burnInLayer due to its scale transition so we also
