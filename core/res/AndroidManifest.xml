@@ -8446,6 +8446,14 @@
                 android:protectionLevel="signature"
                 android:featureFlag="com.android.hardware.input.manage_key_gestures" />
 
+    <!-- Allows applications to register listeners for key activeness through
+         InputManagerService.
+         <p>Protection level: signature
+         @hide -->
+    <permission android:name="android.permission.LISTEN_FOR_KEY_ACTIVITY"
+                android:protectionLevel="signature"
+                android:featureFlag="com.android.hardware.input.key_event_activity_detection" />
+
     <uses-permission android:name="android.permission.HANDLE_QUERY_PACKAGE_RESTART" />
 
     <!-- Allows financed device kiosk apps to perform actions on the Device Lock service

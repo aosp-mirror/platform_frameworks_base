@@ -295,6 +295,8 @@ applications that come with the platform
         <permission name="android.permission.INSTALL_PACKAGE_UPDATES"/>
         <permission name="android.permission.KILL_ALL_BACKGROUND_PROCESSES"/>
         <!-- Needed for test only -->
+        <permission name="android.permission.LISTEN_FOR_KEY_ACTIVITY" />
+        <!-- Needed for test only -->
         <permission name="android.permission.ACCESS_MTP"/>
         <!-- Needed for test only -->
         <permission name="android.permission.INTERACT_ACROSS_PROFILES"/>
