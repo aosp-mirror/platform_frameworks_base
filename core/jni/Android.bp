@@ -42,6 +42,8 @@ cc_library_shared_for_libandroid_runtime {
 
         "-DU_USING_ICU_NAMESPACE=0",
 
+        "-DANDROID_UTILS_REF_BASE_DISABLE_IMPLICIT_CONSTRUCTION",
+
         "-Wall",
         "-Werror",
         "-Wextra",
