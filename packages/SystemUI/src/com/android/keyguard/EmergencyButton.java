@@ -16,8 +16,6 @@
 
 package com.android.keyguard;
 
-import static com.android.systemui.Flags.gsfBouncer;
-
 import android.content.Context;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -30,6 +28,7 @@ import android.widget.Button;
 
 import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.systemui.Flags;
+import com.android.systemui.FontStyles;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 
 /**
@@ -75,10 +74,8 @@ public class EmergencyButton extends Button {
                 return false;
             });
         }
-        if (gsfBouncer() || Flags.bouncerUiRevamp2()) {
-            setTypeface(Typeface.create("gsf-title-medium", Typeface.NORMAL));
-        }
         if (Flags.bouncerUiRevamp2()) {
+            setTypeface(Typeface.create(FontStyles.GSF_TITLE_MEDIUM, Typeface.NORMAL));
             Drawable background = getBackground();
             int bgColor = mContext.getColor(KeyguardBouncerConstants.Color.actionButtonBg);
             if (background != null) {
