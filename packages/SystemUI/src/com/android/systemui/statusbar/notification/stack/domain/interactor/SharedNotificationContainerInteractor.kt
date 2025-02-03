@@ -26,6 +26,7 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.ShadeDisplayAware
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import dagger.Lazy
 import javax.inject.Inject
@@ -79,8 +80,7 @@ constructor(
                             getBoolean(R.bool.config_use_large_screen_shade_header),
                         marginHorizontal =
                             getDimensionPixelSize(R.dimen.notification_panel_margin_horizontal),
-                        marginBottom =
-                            getDimensionPixelSize(R.dimen.notification_panel_margin_bottom),
+                        marginBottom = NotificationStackScrollLayout.getBottomMargin(context),
                         marginTop = getDimensionPixelSize(R.dimen.notification_panel_margin_top),
                         marginTopLargeScreen =
                             largeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight(),

@@ -39,6 +39,7 @@ import com.android.systemui.recents.LauncherProxyService.LauncherProxyListener
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.system.QuickStepContract
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.LargeScreenUtils
@@ -155,8 +156,7 @@ constructor(
         val splitShadeEnabledChanged = newSplitShadeEnabled != splitShadeEnabled
         splitShadeEnabled = newSplitShadeEnabled
         largeScreenShadeHeaderActive = LargeScreenUtils.shouldUseLargeScreenShadeHeader(resources)
-        notificationsBottomMargin =
-            resources.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom)
+        notificationsBottomMargin = NotificationStackScrollLayout.getBottomMargin(context)
         largeScreenShadeHeaderHeight = calculateLargeShadeHeaderHeight()
         shadeHeaderHeight = calculateShadeHeaderHeight()
         panelMarginHorizontal =
