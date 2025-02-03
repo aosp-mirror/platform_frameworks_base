@@ -189,7 +189,7 @@ public class DesktopModeStatus {
      * there should be no pooling.
      */
     public static int getWindowDecorScvhPoolSize(@NonNull Context context) {
-        if (!Flags.enableDesktopWindowingScvhCacheBugFix()) return 0;
+        if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_SCVH_CACHE.isTrue()) return 0;
         final int maxTaskLimit = getMaxTaskLimit(context);
         if (maxTaskLimit > 0) {
             return maxTaskLimit;
