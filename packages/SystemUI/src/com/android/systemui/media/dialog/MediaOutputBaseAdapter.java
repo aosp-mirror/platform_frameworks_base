@@ -241,9 +241,13 @@ public abstract class MediaOutputBaseAdapter extends
             view.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
         }
 
-        void setSubtextAndStatus(boolean showSubtitle, boolean showStatus) {
-            mStatusIcon.setVisibility(showStatus ? View.VISIBLE : View.GONE);
-            mSubTitleText.setVisibility(showSubtitle ? View.VISIBLE : View.GONE);
+        void updateSubtitle(@Nullable String subtitle) {
+            if (subtitle == null) {
+                mSubTitleText.setVisibility(View.GONE);
+            } else {
+                mSubTitleText.setText(subtitle);
+                mSubTitleText.setVisibility(View.VISIBLE);
+            }
         }
 
         protected void updateLoadingIndicator(ConnectionState connectionState) {

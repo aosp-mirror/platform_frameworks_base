@@ -189,6 +189,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             OngoingSessionStatus ongoingSessionStatus = null;
             ConnectionState connectionState = ConnectionState.DISCONNECTED;
             boolean restrictVolumeAdjustment = false;
+            String subtitle = null;
+            Drawable deviceStatusIcon = null;
             boolean deviceDisabled = false;
             View.OnClickListener clickListener = null;
 
@@ -196,7 +198,6 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 mCurrentActivePosition = -1;
             }
             mItemLayout.setVisibility(View.VISIBLE);
-            mStatusIcon.setVisibility(View.GONE);
 
             if (mController.isAnyDeviceTransferring()) {
                 if (device.getState() == MediaDeviceState.STATE_CONNECTING
@@ -221,40 +222,27 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         isDeviceGroup = true;
                     }
                 } else if (device.hasSubtext()) {
+                    subtitle = device.getSubtextString();
                     boolean isActiveWithOngoingSession =
                             device.hasOngoingSession() && (currentlyConnected || isSelected);
                     if (isActiveWithOngoingSession) {
                         mCurrentActivePosition = position;
-                        mSubTitleText.setText(device.getSubtextString());
                         ongoingSessionStatus = new OngoingSessionStatus(
                                 device.isHostForOngoingSession());
-                        setSubtextAndStatus(true /* showSubtitle */, false /* showStatus */);
                         connectionState = ConnectionState.CONNECTED;
                     } else {
                         if (currentlyConnected) {
                             mCurrentActivePosition = position;
                             connectionState = ConnectionState.CONNECTED;
                         }
-                        mSubTitleText.setText(device.getSubtextString());
-                        Drawable deviceStatusIcon =
-                                device.hasOngoingSession() ? mContext.getDrawable(
-                                        R.drawable.ic_sound_bars_anim)
-                                        : Api34Impl.getDeviceStatusIconBasedOnSelectionBehavior(
-                                                device,
-                                                mContext);
-                        if (deviceStatusIcon != null) {
-                            updateDeviceStatusIcon(deviceStatusIcon);
-                        }
                         clickListener = getClickListenerBasedOnSelectionBehavior(device);
                         deviceDisabled = clickListener == null;
-                        setSubtextAndStatus(true /* showSubtitle */,
-                                deviceStatusIcon != null /* showStatus */);
+                        deviceStatusIcon = getDeviceStatusIcon(device, device.hasOngoingSession());
                     }
                 } else if (device.getState() == MediaDeviceState.STATE_CONNECTING_FAILED) {
-                    updateConnectionFailedStatusIcon();
-                    mSubTitleText.setText(R.string.media_output_dialog_connect_failed);
+                    deviceStatusIcon = mContext.getDrawable(R.drawable.media_output_status_failed);
+                    subtitle = mContext.getString(R.string.media_output_dialog_connect_failed);
                     clickListener = v -> onItemClick(v, device);
-                    setSubtextAndStatus(true /* showSubtitle */, true /* showStatus */);
                 } else if (device.getState() == MediaDeviceState.STATE_GROUPING) {
                     connectionState = ConnectionState.CONNECTING;
                 } else if (mController.getSelectedMediaDevice().size() > 1 && isSelected) {
@@ -297,16 +285,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     }
                     deviceDisabled = clickListener == null;
                 } else {
-                    Drawable deviceStatusIcon =
-                            device.hasOngoingSession() ? mContext.getDrawable(
-                                    R.drawable.ic_sound_bars_anim)
-                                    : Api34Impl.getDeviceStatusIconBasedOnSelectionBehavior(
-                                            device,
-                                            mContext);
-                    if (deviceStatusIcon != null) {
-                        updateDeviceStatusIcon(deviceStatusIcon);
-                        mStatusIcon.setVisibility(View.VISIBLE);
-                    }
+                    deviceStatusIcon = getDeviceStatusIcon(device, device.hasOngoingSession());
                     clickListener = getClickListenerBasedOnSelectionBehavior(device);
                     deviceDisabled = clickListener == null;
                 }
@@ -329,6 +308,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 updateLoadingIndicator(connectionState);
                 updateFullItemClickListener(clickListener);
                 updateContentAlpha(deviceDisabled);
+                updateSubtitle(subtitle);
+                updateDeviceStatusIcon(deviceStatusIcon);
                 updateItemBackground(connectionState);
             }
         }
@@ -429,19 +410,26 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     device, mController, v -> onItemClick(v, device));
         }
 
-        private void updateConnectionFailedStatusIcon() {
-            mStatusIcon.setImageDrawable(
-                    mContext.getDrawable(R.drawable.media_output_status_failed));
-            mStatusIcon.setImageTintList(
-                    ColorStateList.valueOf(mController.getColorItemContent()));
+        @Nullable
+        private Drawable getDeviceStatusIcon(MediaDevice device, boolean hasOngoingSession) {
+            if (hasOngoingSession) {
+                return mContext.getDrawable(R.drawable.ic_sound_bars_anim);
+            } else {
+                return Api34Impl.getDeviceStatusIconBasedOnSelectionBehavior(device, mContext);
+            }
         }
 
-        private void updateDeviceStatusIcon(Drawable drawable) {
-            mStatusIcon.setImageDrawable(drawable);
-            mStatusIcon.setImageTintList(
-                    ColorStateList.valueOf(mController.getColorItemContent()));
-            if (drawable instanceof AnimatedVectorDrawable) {
-                ((AnimatedVectorDrawable) drawable).start();
+        void updateDeviceStatusIcon(@Nullable Drawable deviceStatusIcon) {
+            if (deviceStatusIcon == null) {
+                mStatusIcon.setVisibility(View.GONE);
+            } else {
+                mStatusIcon.setImageDrawable(deviceStatusIcon);
+                mStatusIcon.setImageTintList(
+                        ColorStateList.valueOf(mController.getColorItemContent()));
+                if (deviceStatusIcon instanceof AnimatedVectorDrawable) {
+                    ((AnimatedVectorDrawable) deviceStatusIcon).start();
+                }
+                mStatusIcon.setVisibility(View.VISIBLE);
             }
         }
 
@@ -571,6 +559,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         }
 
         @DoNotInline
+        @Nullable
         static Drawable getDeviceStatusIconBasedOnSelectionBehavior(MediaDevice device,
                 Context context) {
             switch (device.getSelectionBehavior()) {
