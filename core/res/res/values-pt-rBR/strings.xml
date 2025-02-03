@@ -96,7 +96,7 @@
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Status dos dados móveis"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"Mensagens SMS"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Mensagens do correio de voz"</string>
-    <string name="notification_channel_wfc" msgid="9048240466765169038">"Chamadas por Wi-Fi"</string>
+    <string name="notification_channel_wfc" msgid="9048240466765169038">"Ligação pelo Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"Status do chip"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"Status de prioridade alta do chip"</string>
     <string name="peerTtyModeFull" msgid="337553730440832160">"TTD modo COMPLETO solicitado"</string>
@@ -148,7 +148,7 @@
     <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Ligação pelo Wi-Fi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Desativado"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Chamar via Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Chamar via rede móvel"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Ligar via rede móvel"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Somente Wi-Fi"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />

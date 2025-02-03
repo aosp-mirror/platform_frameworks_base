@@ -1411,7 +1411,7 @@
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"Dodirnite da biste je postavili"</string>
     <string name="time_zone_change_notification_title" msgid="5232503069219193218">"Vaša je vremenska zona promijenjena"</string>
     <string name="time_zone_change_notification_body" msgid="6135793674904665585">"Sada ste u vremenskoj zoni <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>)"</string>
-    <string name="time_picker_dialog_title" msgid="9053376764985220821">"Postavljanje vremena"</string>
+    <string name="time_picker_dialog_title" msgid="9053376764985220821">"Postavite vrijeme"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"Postavi datum"</string>
     <string name="date_time_set" msgid="4603445265164486816">"Postavi"</string>
     <string name="date_time_done" msgid="8363155889402873463">"Gotovo"</string>
@@ -2108,7 +2108,7 @@
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Otklanjanje pogrešaka putem USB-a"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"sat"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"minuta"</string>
-    <string name="time_picker_header_text" msgid="9073802285051516688">"Postavljanje vremena"</string>
+    <string name="time_picker_header_text" msgid="9073802285051516688">"Postavite vrijeme"</string>
     <string name="time_picker_input_error" msgid="8386271930742451034">"Unesite važeće vrijeme"</string>
     <string name="time_picker_prompt_label" msgid="303588544656363889">"Unesite vrijeme"</string>
     <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"Prijeđite na način unosa teksta da biste unijeli vrijeme."</string>

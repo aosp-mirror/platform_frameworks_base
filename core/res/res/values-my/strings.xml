@@ -2109,7 +2109,7 @@
     <string name="time_picker_minute_label" msgid="8307452311269824553">"မိ​နစ်​"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"အချိန်သတ်မှတ်ရန်"</string>
     <string name="time_picker_input_error" msgid="8386271930742451034">"မှန်ကန်သည့် အမည်တစ်ခု ထည့်ရန်"</string>
-    <string name="time_picker_prompt_label" msgid="303588544656363889">"အချိန်ကို ထည့်ရန်"</string>
+    <string name="time_picker_prompt_label" msgid="303588544656363889">"အချိန်ရိုက်ထည့်ပါ"</string>
     <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"အချိန်ထည့်သွင်းရန် စာသားထည့်သွင်းမှုမုဒ်သို့ ပြောင်းပါ။"</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"အချိန်ထည့်သွင်းမှုအတွက် နာရီမုဒ်သို့ ပြောင်းပါ။"</string>
     <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"အော်တိုဖြည့် ရွေးချယ်စရာများ"</string>

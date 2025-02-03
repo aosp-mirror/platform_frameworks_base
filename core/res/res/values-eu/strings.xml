@@ -1794,8 +1794,8 @@
     <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"Aukeratu eginbide bat"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"Aukeratu eginbide bat"</string>
     <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"Erabilerraztasuna botoia sakatzen duzun hurrengoan irekiko da eginbidea"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Lasterbidea erabiltzen duzun hurrengoan irekiko da eginbidea. Pasatu 2 hatz pantailaren behealdetik gorantz eta askatu bizkor."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Lasterbidea erabiltzen duzun hurrengoan irekiko da eginbidea. Pasatu 3 hatz pantailaren behealdetik gorantz eta askatu bizkor."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Lasterbidea erabiltzen duzun hurrengoan irekiko da eginbidea. Pasatu 2 hatz pantailaren behealdetik gora eta askatu bizkor."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Lasterbidea erabiltzen duzun hurrengoan irekiko da eginbidea. Pasatu 3 hatz pantailaren behealdetik gora eta askatu bizkor."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Lupa"</string>
     <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"Telefonoaren mikrofonora aldatu nahi duzu?"</string>
     <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"Audifonoaren mikrofonora aldatu nahi duzu?"</string>
