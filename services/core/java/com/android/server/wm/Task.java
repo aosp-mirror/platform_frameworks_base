@@ -166,6 +166,7 @@ import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.window.DesktopModeFlags;
 import android.window.ITaskOrganizer;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.StartingWindowInfo;
@@ -3442,8 +3443,10 @@ class Task extends TaskFragment {
         info.lastNonFullscreenBounds = topTask.mLastNonFullscreenBounds;
         final WindowState windowState = top != null
                 ? top.findMainWindow(/* includeStartingApp= */ false) : null;
-        info.requestedVisibleTypes = (windowState != null && Flags.enableFullyImmersiveInDesktop())
-                ? windowState.getRequestedVisibleTypes() : WindowInsets.Type.defaultVisible();
+        info.requestedVisibleTypes =
+                (windowState != null && DesktopModeFlags.ENABLE_FULLY_IMMERSIVE_IN_DESKTOP.isTrue())
+                        ? windowState.getRequestedVisibleTypes()
+                        : WindowInsets.Type.defaultVisible();
         AppCompatUtils.fillAppCompatTaskInfo(this, info, top);
         info.topActivityMainWindowFrame = calculateTopActivityMainWindowFrameForTaskInfo(top);
     }

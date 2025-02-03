@@ -49,7 +49,6 @@ import com.android.internal.R.color.materialColorSecondaryContainer
 import com.android.internal.R.color.materialColorSurfaceContainerHigh
 import com.android.internal.R.color.materialColorSurfaceContainerLow
 import com.android.internal.R.color.materialColorSurfaceDim
-import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import android.window.DesktopModeFlags
 import androidx.core.view.ViewCompat
@@ -463,7 +462,8 @@ class AppHeaderViewHolder(
     private fun shouldShowExitFullImmersiveOrMaximizeIcon(
         isTaskMaximized: Boolean,
         inFullImmersiveState: Boolean
-    ): Boolean = (Flags.enableFullyImmersiveInDesktop() && inFullImmersiveState) || isTaskMaximized
+    ): Boolean = (DesktopModeFlags.ENABLE_FULLY_IMMERSIVE_IN_DESKTOP.isTrue && inFullImmersiveState)
+            || isTaskMaximized
 
     private fun getHeaderStyle(header: Header): HeaderStyle {
         return HeaderStyle(

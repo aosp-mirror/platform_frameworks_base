@@ -906,7 +906,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         relayoutParams.mAsyncViewHost = isAppHandle;
 
         final boolean showCaption;
-        if (Flags.enableFullyImmersiveInDesktop()) {
+        if (DesktopModeFlags.ENABLE_FULLY_IMMERSIVE_IN_DESKTOP.isTrue()) {
             if (inFullImmersiveMode) {
                 showCaption = isStatusBarVisible && !isKeyguardVisibleAndOccluded;
             } else {
@@ -958,7 +958,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 // including non-immersive apps that just don't handle caption insets properly.
                 relayoutParams.mInsetSourceFlags |= FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR;
             }
-            if (Flags.enableFullyImmersiveInDesktop() && inFullImmersiveMode) {
+            if (DesktopModeFlags.ENABLE_FULLY_IMMERSIVE_IN_DESKTOP.isTrue()
+                    && inFullImmersiveMode) {
                 final Insets systemBarInsets = displayInsetsState.calculateInsets(
                         taskInfo.getConfiguration().windowConfiguration.getBounds(),
                         WindowInsets.Type.systemBars() & ~WindowInsets.Type.captionBar(),
@@ -1050,7 +1051,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     private int calculateMaximizeMenuWidth() {
-        final boolean showImmersive = Flags.enableFullyImmersiveInDesktop()
+        final boolean showImmersive = DesktopModeFlags.ENABLE_FULLY_IMMERSIVE_IN_DESKTOP.isTrue()
                 && TaskInfoKt.getRequestingImmersive(mTaskInfo);
         final boolean showMaximize = true;
         final boolean showSnaps = mTaskInfo.isResizeable;
@@ -1278,11 +1279,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 calculateMaximizeMenuPosition(menuWidth), mSurfaceControlTransactionSupplier);
 
         mMaximizeMenu.show(
-                /* isTaskInImmersiveMode= */ Flags.enableFullyImmersiveInDesktop()
+                /* isTaskInImmersiveMode= */
+                DesktopModeFlags.ENABLE_FULLY_IMMERSIVE_IN_DESKTOP.isTrue()
                         && mDesktopUserRepositories.getProfile(mTaskInfo.userId)
                             .isTaskInFullImmersiveState(mTaskInfo.taskId),
                 /* menuWidth= */ menuWidth,
-                /* showImmersiveOption= */ Flags.enableFullyImmersiveInDesktop()
+                /* showImmersiveOption= */
+                DesktopModeFlags.ENABLE_FULLY_IMMERSIVE_IN_DESKTOP.isTrue()
                         && TaskInfoKt.getRequestingImmersive(mTaskInfo),
                 /* showSnapOptions= */ mTaskInfo.isResizeable,
                 mOnMaximizeOrRestoreClickListener,
@@ -1790,7 +1793,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     private boolean canOpenMaximizeMenu(boolean animatingTaskResizeOrReposition) {
-        if (!Flags.enableFullyImmersiveInDesktop()) {
+        if (!DesktopModeFlags.ENABLE_FULLY_IMMERSIVE_IN_DESKTOP.isTrue()) {
             return !animatingTaskResizeOrReposition;
         }
         final boolean inImmersiveAndRequesting =

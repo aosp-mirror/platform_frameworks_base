@@ -153,7 +153,7 @@ class DesktopImmersiveController(
         displayId: Int,
         reason: ExitReason,
     ) {
-        if (!Flags.enableFullyImmersiveInDesktop()) return
+        if (!DesktopModeFlags.ENABLE_FULLY_IMMERSIVE_IN_DESKTOP.isTrue) return
         val result = exitImmersiveIfApplicable(wct, displayId, excludeTaskId = null, reason)
         result.asExit()?.runOnTransitionStart?.invoke(transition)
     }
@@ -172,7 +172,7 @@ class DesktopImmersiveController(
         excludeTaskId: Int? = null,
         reason: ExitReason,
     ): ExitResult {
-        if (!Flags.enableFullyImmersiveInDesktop()) return ExitResult.NoExit
+        if (!DesktopModeFlags.ENABLE_FULLY_IMMERSIVE_IN_DESKTOP.isTrue) return ExitResult.NoExit
         val immersiveTask =
             desktopUserRepositories.current.getTaskInFullImmersiveState(displayId)
                 ?: return ExitResult.NoExit
@@ -214,7 +214,7 @@ class DesktopImmersiveController(
         taskInfo: RunningTaskInfo,
         reason: ExitReason,
     ): ExitResult {
-        if (!Flags.enableFullyImmersiveInDesktop()) return ExitResult.NoExit
+        if (!DesktopModeFlags.ENABLE_FULLY_IMMERSIVE_IN_DESKTOP.isTrue) return ExitResult.NoExit
         if (desktopUserRepositories.current.isTaskInFullImmersiveState(taskInfo.taskId)) {
             // A full immersive task is being minimized, make sure the immersive state is broken
             // (i.e. resize back to max bounds).
