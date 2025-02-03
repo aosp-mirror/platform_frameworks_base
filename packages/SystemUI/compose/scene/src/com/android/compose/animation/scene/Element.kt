@@ -285,7 +285,9 @@ internal class ElementNode(
             val elementState = Element.State(contents)
             element.stateByContent[content.key] = elementState
 
-            layoutImpl.ancestors.fastForEach { element.stateByContent[it.inContent] = elementState }
+            layoutImpl.ancestors.fastForEach {
+                element.stateByContent.putIfAbsent(it.inContent, elementState)
+            }
         }
     }
 
@@ -402,6 +404,7 @@ internal class ElementNode(
                 doNotPlace(measurable, constraints)
             }
         }
+        syncAncestorElementState()
 
         val transition = elementState as? TransitionState.Transition
 
@@ -539,6 +542,75 @@ internal class ElementNode(
     }
 
     /**
+     * This method makes sure that the ancestor element state is *roughly* in sync. Assume we have
+     * the following nested scenes:
+     * ```
+     *       /   \
+     *     P1     P2
+     *   /   \
+     *  C1   C2
+     * ```
+     *
+     * We write the state of the shared element into its parent P1 even though P1 does not contain
+     * the element directly but it's part of its NestedSTL instead. This value is used to
+     * interpolate transitions on higher levels, e.g. between P1 and P2. Technically the best
+     * solution would be to always write the fully interpolated state into P1 but because this
+     * interferes with `computeValue` computations of other transitions this solution requires more
+     * sophistication and additional invocations of `computeValue`. We might want to aim for such a
+     * solution in the future when we allocate resources to that feature. For now, we only roughly
+     * set the state of P1 to either C1 or C2 based on heuristics.
+     *
+     * If we assign the P1 state just on attach/detach of a scene like we do for C1 and C2, this
+     * leads to problems where P1 can either become stale or is erased. This leads to situations
+     * where a shared element is not animated anymore.
+     *
+     * With this solution we track the transition state of the local transition at all times and set
+     * P1 based on the currentScene or overlay. In certain sequences of transition this may create
+     * jump cuts of a shared element mainly because of two reasons:
+     *
+     * a) P1 state is modified during a transition of P1 and X. Due to the new value it may jump cut
+     * when the interruption system is not triggered correctly. b) A dominant parent transition ends
+     * (P1 - X) but a local transition is still running, resulting in a different state of the
+     * element.
+     *
+     * Both issues can be addressed by interpolating P1 in the future.
+     */
+    private fun syncAncestorElementState() {
+        // every nested STL syncs only the level above it
+        layoutImpl.ancestors.lastOrNull()?.also { ancestor ->
+            val localTransition =
+                localElementState(
+                    currentTransitionStates.last(),
+                    isInContent = { it in element.stateByContent },
+                )
+            when (localTransition) {
+                is TransitionState.Idle ->
+                    assignState(ancestor.inContent, localTransition.currentScene)
+                is TransitionState.Transition.ChangeScene ->
+                    assignState(ancestor.inContent, localTransition.currentScene)
+                is TransitionState.Transition.ReplaceOverlay ->
+                    assignState(ancestor.inContent, localTransition.effectivelyShownOverlay)
+                is TransitionState.Transition.ShowOrHideOverlay ->
+                    if (localTransition.isEffectivelyShown) {
+                        assignState(ancestor.inContent, localTransition.overlay)
+                    } else {
+                        assignState(ancestor.inContent, localTransition.fromOrToScene)
+                    }
+                null -> {}
+            }
+        }
+    }
+
+    private fun assignState(toContent: ContentKey, fromContent: ContentKey) {
+        val fromState = element.stateByContent[fromContent]
+        if (fromState != null) {
+            element.stateByContent[toContent] = fromState
+        } else {
+            element.stateByContent.remove(toContent)
+        }
+    }
+
+    /**
      * Recursively clear the last placement values on this node and all descendants ElementNodes.
      * This should be called when this node is not placed anymore, so that we correctly clear values
      * for the descendants for which approachMeasure() won't be called.
@@ -661,22 +733,31 @@ internal inline fun elementState(
                 }
             }
         } else {
-            // the last state of the list, is the state of the local STL
-            val lastState = states.last()
-            if (lastState is TransitionState.Idle) {
-                check(states.size == 1)
-                return lastState
-            }
-
-            // Find the last transition with a content that contains the element.
-            states.fastForEachReversed { state ->
-                val transition = state as TransitionState.Transition
-                if (isInContent(transition.fromContent) || isInContent(transition.toContent)) {
-                    return transition
-                }
-            }
+            return localElementState(states, isInContent)
         }
     }
+    return null
+}
+
+private inline fun localElementState(
+    states: List<TransitionState>,
+    isInContent: (ContentKey) -> Boolean,
+): TransitionState? {
+    // the last state of the list is the state of the local STL
+    val lastState = states.last()
+    if (lastState is TransitionState.Idle) {
+        check(states.size == 1)
+        return lastState
+    }
+
+    // Find the last transition with a content that contains the element.
+    states.fastForEachReversed { state ->
+        val transition = state as TransitionState.Transition
+        if (isInContent(transition.fromContent) || isInContent(transition.toContent)) {
+            return transition
+        }
+    }
+
     // We are running a transition where both from and to don't contain the element. The element
     // may still be rendered as e.g. it can be part of a idle scene where two overlays are currently
     // transitioning above it.
