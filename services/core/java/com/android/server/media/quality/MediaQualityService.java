@@ -1160,6 +1160,9 @@ public class MediaQualityService extends SystemService {
 
         private Bundle convertToCaps(ParameterRange range) {
             Bundle bundle = new Bundle();
+            if (range == null || range.numRange == null) {
+                return bundle;
+            }
             bundle.putObject("INT_MIN_MAX", range.numRange.getIntMinMax());
             bundle.putObject("INT_VALUES_SUPPORTED", range.numRange.getIntValuesSupported());
             bundle.putObject("DOUBLE_MIN_MAX", range.numRange.getDoubleMinMax());
@@ -1351,7 +1354,7 @@ public class MediaQualityService extends SystemService {
             RemoteCallbackList<IPictureProfileCallback> {
         @Override
         public void onCallbackDied(IPictureProfileCallback callback) {
-            synchronized ("mPictureProfileLock") {    //TODO: Change to lock
+            synchronized (mPictureProfileLock) {
                 for (int i = 0; i < mUserStates.size(); i++) {
                     int userId = mUserStates.keyAt(i);
                     UserState userState = getOrCreateUserStateLocked(userId);
@@ -1365,7 +1368,7 @@ public class MediaQualityService extends SystemService {
             RemoteCallbackList<ISoundProfileCallback> {
         @Override
         public void onCallbackDied(ISoundProfileCallback callback) {
-            synchronized ("mSoundProfileLock") {    //TODO: Change to lock
+            synchronized (mSoundProfileLock) {
                 for (int i = 0; i < mUserStates.size(); i++) {
                     int userId = mUserStates.keyAt(i);
                     UserState userState = getOrCreateUserStateLocked(userId);

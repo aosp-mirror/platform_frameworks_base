@@ -357,6 +357,9 @@ public final class MediaQualityUtils {
      */
     public static PictureParameter[] convertPersistableBundleToPictureParameterList(
             PersistableBundle params) {
+        if (params == null) {
+            return null;
+        }
         List<PictureParameter> pictureParams = new ArrayList<>();
         if (params.containsKey(PictureQuality.PARAMETER_BRIGHTNESS)) {
             pictureParams.add(PictureParameter.brightness(params.getLong(
@@ -784,6 +787,9 @@ public final class MediaQualityUtils {
      */
     public static SoundParameter[] convertPersistableBundleToSoundParameterList(
             PersistableBundle params) {
+        if (params == null) {
+            return null;
+        }
         //TODO: set EqualizerDetail
         List<SoundParameter> soundParams = new ArrayList<>();
         if (params.containsKey(SoundQuality.PARAMETER_BALANCE)) {
