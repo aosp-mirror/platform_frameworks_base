@@ -1,1 +1,4 @@
+# Bug component: 987260
+set noparent
+
 include /BATTERY_STATS_OWNERS
