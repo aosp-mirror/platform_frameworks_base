@@ -106,20 +106,19 @@ interface SceneContainerFrameworkModule {
                         Scenes.Shade,
                     ),
                 initialSceneKey = Scenes.Lockscreen,
-                transitions = SceneContainerTransitions,
                 overlayKeys =
                     listOfNotNull(Overlays.NotificationsShade, Overlays.QuickSettingsShade),
                 navigationDistances =
                     mapOf(
-                            Scenes.Gone to 0,
-                            Scenes.Lockscreen to 0,
-                            Scenes.Communal to 1,
-                            Scenes.Dream to 2,
-                            Scenes.Shade to 3,
-                            Scenes.QuickSettings to 4,
-                            Scenes.Bouncer to 5,
-                        )
-                        .mapValues { it.value },
+                        Scenes.Gone to 0,
+                        Scenes.Lockscreen to 0,
+                        Scenes.Communal to 1,
+                        Scenes.Dream to 2,
+                        Scenes.Shade to 3,
+                        Scenes.QuickSettings to 4,
+                        Scenes.Bouncer to 5,
+                    ),
+                transitionsBuilder = SceneContainerTransitions(),
             )
         }
 

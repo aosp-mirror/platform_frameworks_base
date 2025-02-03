@@ -34,13 +34,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
-import com.android.compose.animation.scene.SceneTransitions
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.observableTransitionState
@@ -85,7 +85,7 @@ fun SceneContainer(
     sceneByKey: Map<SceneKey, Scene>,
     overlayByKey: Map<OverlayKey, Overlay>,
     initialSceneKey: SceneKey,
-    sceneTransitions: SceneTransitions,
+    transitionsBuilder: SceneContainerTransitionsBuilder,
     dataSourceDelegator: SceneDataSourceDelegator,
     qsSceneAdapter: Provider<QSSceneAdapter>,
     sceneJankMonitorFactory: SceneJankMonitor.Factory,
@@ -96,6 +96,12 @@ fun SceneContainer(
     val view = LocalView.current
     val sceneJankMonitor =
         rememberActivated(traceName = "sceneJankMonitor") { sceneJankMonitorFactory.create() }
+
+    val hapticFeedback = LocalHapticFeedback.current
+    val sceneTransitions =
+        remember(hapticFeedback) {
+            transitionsBuilder.build(viewModel.hapticsViewModel.getRevealHaptics(hapticFeedback))
+        }
 
     val state =
         rememberMutableSceneTransitionLayoutState(
@@ -161,7 +167,7 @@ fun SceneContainer(
         if (isFullWidthShade()) stretchOverscrollEffectFactory else offsetOverscrollEffectFactory
 
     // Inflate qsView here so that shade has the correct qqs height in the first measure pass after
-    // rebooting
+    // rebooting.
     if (
         viewModel.allContentKeys.contains(Scenes.QuickSettings) ||
             viewModel.allContentKeys.contains(Scenes.Shade)

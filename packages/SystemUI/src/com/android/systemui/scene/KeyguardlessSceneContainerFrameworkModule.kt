@@ -93,10 +93,10 @@ interface KeyguardlessSceneContainerFrameworkModule {
                 // one is top-most.
                 sceneKeys = listOf(Scenes.Gone, Scenes.QuickSettings, Scenes.Shade),
                 initialSceneKey = Scenes.Gone,
-                transitions = SceneContainerTransitions,
                 overlayKeys = listOf(Overlays.NotificationsShade, Overlays.QuickSettingsShade),
                 navigationDistances =
                     mapOf(Scenes.Gone to 0, Scenes.Shade to 1, Scenes.QuickSettings to 2),
+                transitionsBuilder = SceneContainerTransitions(),
             )
         }
 

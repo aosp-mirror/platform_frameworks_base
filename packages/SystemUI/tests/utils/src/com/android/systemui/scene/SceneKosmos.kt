@@ -15,7 +15,7 @@ import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.FakeOverlay
-import com.android.systemui.scene.ui.composable.SceneContainerTransitions
+import com.android.systemui.scene.ui.composable.ConstantSceneContainerTransitionsBuilder
 import com.android.systemui.scene.ui.viewmodel.SceneContainerHapticsViewModel
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.scene.ui.viewmodel.splitEdgeDetector
@@ -49,6 +49,8 @@ val Kosmos.fakeOverlays by Fixture { fakeOverlaysByKeys.values.toSet() }
 
 val Kosmos.overlays by Fixture { fakeOverlays }
 
+val Kosmos.sceneTransitionsBuilder by Fixture { ConstantSceneContainerTransitionsBuilder() }
+
 var Kosmos.sceneContainerConfig by Fixture {
     val navigationDistances =
         mapOf(
@@ -64,9 +66,9 @@ var Kosmos.sceneContainerConfig by Fixture {
     SceneContainerConfig(
         sceneKeys = sceneKeys,
         initialSceneKey = initialSceneKey,
-        transitions = SceneContainerTransitions,
         overlayKeys = overlayKeys,
         navigationDistances = navigationDistances,
+        transitionsBuilder = sceneTransitionsBuilder,
     )
 }
 
