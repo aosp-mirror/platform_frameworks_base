@@ -3953,8 +3953,7 @@
     <public name="pageSizeCompat" />
     <!-- @FlaggedApi(android.nfc.Flags.FLAG_NFC_ASSOCIATED_ROLE_SERVICES) -->
     <public name="wantsRoleHolderPriority"/>
-    <!-- @FlaggedApi(android.sdk.Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME) -->
-    <public name="minSdkVersionFull"/>
+    <public name="removed_"/>
     <public name="removed_" />
     <public name="removed_" />
     <public name="removed_" />
@@ -3980,8 +3979,6 @@
   <public type="attr" name="pageSizeCompat" id="0x010106ab" />
   <!-- @FlaggedApi(android.nfc.Flags.FLAG_NFC_ASSOCIATED_ROLE_SERVICES) -->
   <public type="attr" name="wantsRoleHolderPriority" id="0x010106ac" />
-  <!-- @FlaggedApi(android.sdk.Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME) -->
-  <public type="attr" name="minSdkVersionFull" id="0x010106ad" />
 
   <staging-public-group-final type="string" first-id="0x01b40000">
     <!-- @FlaggedApi(android.content.pm.Flags.FLAG_SDK_DEPENDENCY_INSTALLER)

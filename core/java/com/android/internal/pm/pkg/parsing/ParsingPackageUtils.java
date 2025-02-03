@@ -29,7 +29,6 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_
 import static android.os.Build.VERSION_CODES.DONUT;
 import static android.os.Build.VERSION_CODES.O;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
-import static android.sdk.Flags.majorMinorVersioningScheme;
 
 import static com.android.internal.pm.pkg.parsing.ParsingUtils.parseKnownActivityEmbeddingCerts;
 
@@ -1688,21 +1687,6 @@ public class ParsingPackageUtils {
                 } else {
                     targetVers = minVers;
                     targetCode = minCode;
-                }
-
-                if (majorMinorVersioningScheme()) {
-                    val = sa.peekValue(R.styleable.AndroidManifestUsesSdk_minSdkVersionFull);
-                    if (val != null) {
-                        if (val.type == TypedValue.TYPE_STRING && val.string != null) {
-                            String minSdkVersionFullString = val.string.toString();
-                            ParseResult<Void> minSdkVersionFullResult =
-                                    FrameworkParsingPackageUtils.verifyMinSdkVersionFull(
-                                        minSdkVersionFullString, Build.VERSION.SDK_INT_FULL, input);
-                            if (minSdkVersionFullResult.isError()) {
-                                return input.error(minSdkVersionFullResult);
-                            }
-                        }
-                    }
                 }
 
                 if (isApkInApex) {
