@@ -156,7 +156,6 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             super.onBind(device, position);
             boolean isMutingExpectedDeviceExist = mController.hasMutingExpectedDevice();
             final boolean currentlyConnected = isCurrentlyConnected(device);
-            boolean isCurrentSeekbarInvisible = mSeekBar.getVisibility() == View.GONE;
             boolean isSelected = isDeviceIncluded(mController.getSelectedMediaDevice(), device);
             boolean isDeselectable =
                     isDeviceIncluded(mController.getDeselectableMediaDevice(), device);
@@ -189,6 +188,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             GroupStatus groupStatus = null;
             OngoingSessionStatus ongoingSessionStatus = null;
             ConnectionState connectionState = ConnectionState.DISCONNECTED;
+            boolean restrictVolumeAdjustment = false;
 
             if (mCurrentActivePosition == position) {
                 mCurrentActivePosition = -1;
@@ -201,10 +201,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 if (device.getState() == MediaDeviceState.STATE_CONNECTING
                         && !mController.hasAdjustVolumeUserRestriction()) {
                     connectionState = ConnectionState.CONNECTING;
-                    setUpDeviceIcon(device);
-                    setSingleLineLayout(device.getName(), false /* showSeekBar*/);
+                    setSingleLineLayout(device.getName());
                 } else {
-                    setUpDeviceIcon(device);
                     setSingleLineLayout(device.getName());
                 }
             } else {
@@ -212,11 +210,10 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 if (device.isMutingExpectedDevice()
                         && !mController.isCurrentConnectedDeviceRemote()) {
                     connectionState = ConnectionState.CONNECTED;
-                    updateUnmutedVolumeIcon(device);
+                    restrictVolumeAdjustment = true;
                     mCurrentActivePosition = position;
                     updateFullItemClickListener(v -> onItemClick(v, device));
                     setSingleLineLayout(device.getName());
-                    initFakeActiveDevice(device);
                 } else if (mShouldGroupSelectedMediaItems
                         && mController.getSelectedMediaDevice().size() > 1
                         && isDeviceIncluded(mController.getSelectedMediaDevice(), device)) {
@@ -226,35 +223,27 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     } else {
                         isDeviceGroup = true;
                         String sessionName = mController.getSessionName().toString();
-                        updateUnmutedVolumeIcon(null);
                         disableFocusPropertyForView(mContainerLayout);
                         setUpContentDescriptionForView(mSeekBar, mContext.getString(
                                 R.string.accessibility_cast_name, sessionName));
-                        setSingleLineLayout(sessionName, true /* showSeekBar */);
-                        initGroupSeekbar(isCurrentSeekbarInvisible);
+                        setSingleLineLayout(sessionName);
                     }
                 } else if (device.hasSubtext()) {
                     boolean isActiveWithOngoingSession =
                             device.hasOngoingSession() && (currentlyConnected || isSelected);
                     if (isActiveWithOngoingSession) {
                         mCurrentActivePosition = position;
-                        updateUnmutedVolumeIcon(device);
                         mSubTitleText.setText(device.getSubtextString());
                         updateContentAlpha(DEVICE_CONNECTED_ALPHA);
                         ongoingSessionStatus = new OngoingSessionStatus(
                                 device.isHostForOngoingSession());
                         setTwoLineLayout(device.getName() /* title */,
-                                true /* showSeekBar */,
                                 true /* showSubtitle */, false /* showStatus */);
                         connectionState = ConnectionState.CONNECTED;
-                        initSeekbar(device, isCurrentSeekbarInvisible);
                     } else {
                         if (currentlyConnected) {
                             mCurrentActivePosition = position;
-                            updateUnmutedVolumeIcon(device);
                             connectionState = ConnectionState.CONNECTED;
-                        } else {
-                            setUpDeviceIcon(device);
                         }
                         mSubTitleText.setText(device.getSubtextString());
                         Drawable deviceStatusIcon =
@@ -270,84 +259,70 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                                 updateClickActionBasedOnSelectionBehavior(device)
                                         ? DEVICE_CONNECTED_ALPHA : DEVICE_DISCONNECTED_ALPHA);
                         setTwoLineLayout(device.getName(),
-                                currentlyConnected  /* showSeekBar */,
                                 true /* showSubtitle */,
                                 deviceStatusIcon != null /* showStatus */);
                     }
                 } else if (device.getState() == MediaDeviceState.STATE_CONNECTING_FAILED) {
-                    setUpDeviceIcon(device);
                     updateConnectionFailedStatusIcon();
                     mSubTitleText.setText(R.string.media_output_dialog_connect_failed);
                     updateFullItemClickListener(v -> onItemClick(v, device));
-                    setTwoLineLayout(device.getName(), false /* showSeekBar */,
+                    setTwoLineLayout(device.getName(),
                             true /* showSubtitle */,
                             true /* showStatus */);
                 } else if (device.getState() == MediaDeviceState.STATE_GROUPING) {
                     connectionState = ConnectionState.CONNECTING;
-                    setUpDeviceIcon(device);
-                    setSingleLineLayout(device.getName(), false /* showSeekBar*/);
+                    setSingleLineLayout(device.getName());
                 } else if (mController.getSelectedMediaDevice().size() > 1 && isSelected) {
                     // selected device in group
-                    updateUnmutedVolumeIcon(device);
                     groupStatus = new GroupStatus(
                             true /* selected */,
                             isDeselectable /* deselectable */);
                     disableFocusPropertyForView(mContainerLayout);
                     setUpContentDescriptionForView(mSeekBar, device);
-                    setSingleLineLayout(device.getName(), true /* showSeekBar */);
+                    setSingleLineLayout(device.getName());
                     connectionState = ConnectionState.CONNECTED;
-                    initSeekbar(device, isCurrentSeekbarInvisible);
                 } else if (!mController.hasAdjustVolumeUserRestriction()
                         && currentlyConnected) {
                     // single selected device
                     if (isMutingExpectedDeviceExist
                             && !mController.isCurrentConnectedDeviceRemote()) {
                         // mark as disconnected and set special click listener
-                        setUpDeviceIcon(device);
                         updateFullItemClickListener(v -> cancelMuteAwaitConnection());
                         setSingleLineLayout(device.getName());
                     } else if (device.hasOngoingSession()) {
                         mCurrentActivePosition = position;
-                        updateUnmutedVolumeIcon(device);
                         ongoingSessionStatus = new OngoingSessionStatus(
                                 device.isHostForOngoingSession());
-                        setSingleLineLayout(device.getName(), true /* showSeekBar */);
+                        setSingleLineLayout(device.getName());
                         connectionState = ConnectionState.CONNECTED;
-                        initSeekbar(device, isCurrentSeekbarInvisible);
                     } else if (mController.isCurrentConnectedDeviceRemote()
                             && !mController.getSelectableMediaDevice().isEmpty()) {
                         //If device is connected and there's other selectable devices, layout as
                         // one of selected devices.
-                        updateUnmutedVolumeIcon(device);
                         groupStatus = new GroupStatus(
                                 true /* selected */,
                                 isDeselectable /* isDeselectable */);
                         disableFocusPropertyForView(mContainerLayout);
                         setUpContentDescriptionForView(mSeekBar, device);
-                        setSingleLineLayout(device.getName(), true /* showSeekBar */);
+                        setSingleLineLayout(device.getName());
                         connectionState = ConnectionState.CONNECTED;
-                        initSeekbar(device, isCurrentSeekbarInvisible);
                     } else {
-                        updateUnmutedVolumeIcon(device);
                         disableFocusPropertyForView(mContainerLayout);
                         setUpContentDescriptionForView(mSeekBar, device);
                         mCurrentActivePosition = position;
-                        setSingleLineLayout(device.getName(), true /* showSeekBar */);
+                        setSingleLineLayout(device.getName());
                         connectionState = ConnectionState.CONNECTED;
-                        initSeekbar(device, isCurrentSeekbarInvisible);
                     }
                 } else if (isSelectable) {
                     //groupable device
-                    setUpDeviceIcon(device);
                     groupStatus = new GroupStatus(false /* selected */, true /* deselectable */);
                     if (!Flags.disableTransferWhenAppsDoNotSupport()
                             || isTransferable
                             || hasRouteListingPreferenceItem) {
                         updateFullItemClickListener(v -> onItemClick(v, device));
                     }
-                    setSingleLineLayout(device.getName(), false /* showSeekBar */);
+                    setSingleLineLayout(device.getName());
                 } else {
-                    setUpDeviceIcon(device);
                     setSingleLineLayout(device.getName());
                     Drawable deviceStatusIcon =
                             device.hasOngoingSession() ? mContext.getDrawable(
@@ -366,9 +341,13 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             }
 
             if (isDeviceGroup) {
+                updateUnmutedVolumeIcon(null /* device */);
+                updateGroupSeekBar();
                 updateEndAreaForDeviceGroup();
                 updateItemBackground(ConnectionState.CONNECTED);
             } else {
+                updateTitleIcon(device, connectionState, restrictVolumeAdjustment);
+                updateSeekBar(device, connectionState, restrictVolumeAdjustment);
                 updateEndArea(device, connectionState, groupStatus, ongoingSessionStatus);
                 updateLoadingIndicator(connectionState);
                 updateItemBackground(connectionState);

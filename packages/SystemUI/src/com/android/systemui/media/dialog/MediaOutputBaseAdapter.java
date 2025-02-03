@@ -38,6 +38,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -197,31 +198,34 @@ public abstract class MediaOutputBaseAdapter extends
         }
 
         void setSingleLineLayout(CharSequence title) {
-            setSingleLineLayout(title, false);
+            mTitleText.setText(title);
         }
 
-        void setSingleLineLayout(CharSequence title, boolean showSeekBar) {
+        void updateSeekBar(@NonNull MediaDevice device, ConnectionState connectionState,
+                boolean restrictVolumeAdjustment) {
+            boolean showSeekBar =
+                    connectionState == ConnectionState.CONNECTED && !restrictVolumeAdjustment;
             if (!mCornerAnimator.isRunning()) {
                 if (showSeekBar) {
                     updateSeekbarProgressBackground();
                 }
             }
-            mSeekBar.setAlpha(1);
-            mSeekBar.setVisibility(showSeekBar ? View.VISIBLE : View.GONE);
-            if (!showSeekBar) {
-                mSeekBar.resetVolume();
-            }
-            mTitleText.setText(title);
-        }
-
-        void setTwoLineLayout(CharSequence title,
-                boolean showSeekBar, boolean showSubtitle, boolean showStatus) {
-            mStatusIcon.setVisibility(showStatus ? View.VISIBLE : View.GONE);
-            mSeekBar.setAlpha(1);
+            boolean isCurrentSeekbarInvisible = mSeekBar.getVisibility() == View.GONE;
             mSeekBar.setVisibility(showSeekBar ? View.VISIBLE : View.GONE);
             if (showSeekBar) {
-                updateSeekbarProgressBackground();
+                initSeekbar(device, isCurrentSeekbarInvisible);
             }
+        }
+
+        void updateGroupSeekBar() {
+            updateSeekbarProgressBackground();
+            boolean isCurrentSeekbarInvisible = mSeekBar.getVisibility() == View.GONE;
+            mSeekBar.setVisibility(View.VISIBLE);
+            initGroupSeekbar(isCurrentSeekbarInvisible);
+        }
+
+        void setTwoLineLayout(CharSequence title, boolean showSubtitle, boolean showStatus) {
+            mStatusIcon.setVisibility(showStatus ? View.VISIBLE : View.GONE);
             mSubTitleText.setVisibility(showSubtitle ? View.VISIBLE : View.GONE);
             mTitleText.setText(title);
         }
@@ -277,7 +281,8 @@ public abstract class MediaOutputBaseAdapter extends
         }
 
         private void initializeSeekbarVolume(
-                MediaDevice device, int currentVolume, boolean isCurrentSeekbarInvisible) {
+                @Nullable MediaDevice device, int currentVolume,
+                boolean isCurrentSeekbarInvisible) {
             if (!mIsDragging) {
                 if (mSeekBar.getVolume() != currentVolume && (mLatestUpdateVolume == -1
                         || currentVolume == mLatestUpdateVolume)) {
@@ -314,7 +319,7 @@ public abstract class MediaOutputBaseAdapter extends
             }
         }
 
-        void initSeekbar(MediaDevice device, boolean isCurrentSeekbarInvisible) {
+        void initSeekbar(@NonNull MediaDevice device, boolean isCurrentSeekbarInvisible) {
             SeekBarVolumeControl volumeControl = new SeekBarVolumeControl() {
                 @Override
                 public int getVolume() {
@@ -385,20 +390,34 @@ public abstract class MediaOutputBaseAdapter extends
             });
         }
 
-        void updateMutedVolumeIcon(MediaDevice device) {
-            mIconAreaLayout.setBackground(
-                    mContext.getDrawable(R.drawable.media_output_item_background_active));
-            updateTitleIcon(device, true /* isMutedVolumeIcon */);
+        protected void updateTitleIcon(@NonNull MediaDevice device,
+                ConnectionState connectionState, boolean restrictVolumeAdjustment) {
+            if (connectionState == ConnectionState.CONNECTED) {
+                if (restrictVolumeAdjustment) {
+                    // Volume icon without a background that makes it looks like part of a seekbar.
+                    updateVolumeIcon(device, false /* isMutedIcon */);
+                } else {
+                    updateUnmutedVolumeIcon(device);
+                }
+            } else {
+                setUpDeviceIcon(device);
+            }
         }
 
-        void updateUnmutedVolumeIcon(MediaDevice device) {
+        void updateMutedVolumeIcon(@Nullable MediaDevice device) {
+            mIconAreaLayout.setBackground(
+                    mContext.getDrawable(R.drawable.media_output_item_background_active));
+            updateVolumeIcon(device, true /* isMutedVolumeIcon */);
+        }
+
+        void updateUnmutedVolumeIcon(@Nullable MediaDevice device) {
             mIconAreaLayout.setBackground(
                     mContext.getDrawable(R.drawable.media_output_title_icon_area)
             );
-            updateTitleIcon(device, false /* isMutedVolumeIcon */);
+            updateVolumeIcon(device, false /* isMutedVolumeIcon */);
         }
 
-        void updateTitleIcon(MediaDevice device, boolean isMutedVolumeIcon) {
+        void updateVolumeIcon(@Nullable MediaDevice device, boolean isMutedVolumeIcon) {
             boolean isInputMediaDevice = device instanceof InputMediaDevice;
             int id = getDrawableId(isInputMediaDevice, isMutedVolumeIcon);
             mTitleIcon.setImageDrawable(mContext.getDrawable(id));
@@ -422,12 +441,6 @@ public abstract class MediaOutputBaseAdapter extends
 
         void updateIconAreaClickListener(View.OnClickListener listener) {
             mIconAreaLayout.setOnClickListener(listener);
-        }
-
-        void initFakeActiveDevice(MediaDevice device) {
-            disableSeekBar();
-            updateTitleIcon(device, false /* isMutedIcon */);
-            mIconAreaLayout.setBackground(null);
         }
 
         private void initAnimator() {
@@ -495,7 +508,7 @@ public abstract class MediaOutputBaseAdapter extends
 
         }
 
-        protected void setUpDeviceIcon(MediaDevice device) {
+        protected void setUpDeviceIcon(@NonNull MediaDevice device) {
             ThreadUtils.postOnBackgroundThread(() -> {
                 Icon icon = mController.getDeviceIconCompat(device).toIcon(mContext);
                 ThreadUtils.postOnMainThread(() -> {
