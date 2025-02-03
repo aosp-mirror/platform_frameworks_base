@@ -23,6 +23,7 @@ import android.os.IBinder
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.animation.DecelerateInterpolator
+import android.window.DesktopModeFlags
 import android.window.DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
 import android.window.TransitionInfo
 import android.window.TransitionRequestInfo
@@ -396,7 +397,7 @@ class DesktopImmersiveController(
                 taskId = taskId,
                 immersive = pendingTransition.direction == Direction.ENTER,
             )
-            if (Flags.enableRestoreToPreviousSizeFromDesktopImmersive()) {
+            if (DesktopModeFlags.ENABLE_RESTORE_TO_PREVIOUS_SIZE_FROM_DESKTOP_IMMERSIVE.isTrue) {
                 when (pendingTransition.direction) {
                     Direction.EXIT -> {
                         desktopRepository.removeBoundsBeforeFullImmersive(taskId)
@@ -457,7 +458,7 @@ class DesktopImmersiveController(
         val displayLayout =
             displayController.getDisplayLayout(taskInfo.displayId)
                 ?: error("Expected non-null display layout for displayId: ${taskInfo.displayId}")
-        return if (Flags.enableRestoreToPreviousSizeFromDesktopImmersive()) {
+        return if (DesktopModeFlags.ENABLE_RESTORE_TO_PREVIOUS_SIZE_FROM_DESKTOP_IMMERSIVE.isTrue) {
             desktopUserRepositories.current.removeBoundsBeforeFullImmersive(taskInfo.taskId)
                 ?: if (ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()) {
                     calculateInitialBounds(displayLayout, taskInfo)
