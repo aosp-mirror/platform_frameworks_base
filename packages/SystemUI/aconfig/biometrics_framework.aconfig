@@ -4,6 +4,13 @@ container: "system"
 # NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
 
 flag {
+    name: "bp_colors"
+    namespace: "biometrics_framework"
+    description: "Updates colors in biometric prompt"
+    bug: "389744739"
+}
+
+flag {
     name: "cont_auth_plugin"
     namespace: "biometrics_framework"
     description: "Plugin and related API hooks for contextual auth plugins"
