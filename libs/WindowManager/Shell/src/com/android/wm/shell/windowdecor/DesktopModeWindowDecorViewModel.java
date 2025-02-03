@@ -1659,8 +1659,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         if (mDesktopModeCompatPolicy.isTopActivityExemptFromDesktopWindowing(taskInfo)) {
             return false;
         }
-        final boolean isOnLargeScreen = taskInfo.getConfiguration().smallestScreenWidthDp
-                >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP;
+        final boolean isOnLargeScreen =
+                mDisplayController.getDisplay(taskInfo.displayId).getMinSizeDimensionDp()
+                        >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP;
         if (!DesktopModeStatus.canEnterDesktopMode(mContext)
                 && DesktopModeStatus.overridesShowAppHandle(mContext) && !isOnLargeScreen) {
             // Devices with multiple screens may enable the app handle but it should not show on

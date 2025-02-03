@@ -25,6 +25,7 @@ import android.content.pm.ActivityInfo
 import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import android.view.Display
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.SurfaceControl
 import androidx.test.filters.SmallTest
@@ -38,10 +39,13 @@ import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mockito.times
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 
 /**
@@ -59,6 +63,8 @@ import org.mockito.quality.Strictness
 class DesktopModeWindowDecorViewModelAppHandleOnlyTest :
     DesktopModeWindowDecorViewModelTestsBase() {
 
+    protected val mockDisplay = mock<Display>()
+
     @Before
     fun setUp() {
         mockitoSession =
@@ -70,6 +76,7 @@ class DesktopModeWindowDecorViewModelAppHandleOnlyTest :
         doReturn(false).`when` { DesktopModeStatus.isDeviceEligibleForDesktopMode(any()) }
         doReturn(true).`when` { DesktopModeStatus.overridesShowAppHandle(any())}
         setUpCommon()
+        whenever(mockDisplayController.getDisplay(anyInt())).thenReturn(mockDisplay)
     }
 
     @Test
@@ -156,7 +163,7 @@ class DesktopModeWindowDecorViewModelAppHandleOnlyTest :
         assertTrue(windowDecorByTaskIdSpy.contains(task.taskId))
 
 
-        task.setOnLargeScreen(false)
+        setLargeScreen(false)
         setUpMockDecorationForTask(task)
         onTaskChanging(task, taskSurface)
         assertFalse(windowDecorByTaskIdSpy.contains(task.taskId))
@@ -172,11 +179,12 @@ class DesktopModeWindowDecorViewModelAppHandleOnlyTest :
     ): RunningTaskInfo {
         val task = createTask(
             displayId, windowingMode, activityType, activityInfo, requestingImmersive)
-        task.setOnLargeScreen(shouldShowAspectRatioButton)
+        setLargeScreen(shouldShowAspectRatioButton)
         return task
     }
 
-    private fun RunningTaskInfo.setOnLargeScreen(large: Boolean) {
-        configuration.smallestScreenWidthDp = if (large) 1000 else 100
+    private fun setLargeScreen(large: Boolean) {
+        val size: Float = if (large) 1000f else 100f
+        whenever(mockDisplay.getMinSizeDimensionDp()).thenReturn(size)
     }
 }
