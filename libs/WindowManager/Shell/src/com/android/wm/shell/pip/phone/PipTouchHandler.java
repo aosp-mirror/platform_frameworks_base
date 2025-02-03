@@ -909,10 +909,6 @@ public class PipTouchHandler {
                     && mMenuState != MENU_STATE_FULL) {
                 // If using pinch to zoom, double-tap functions as resizing between max/min size
                 if (mPipResizeGestureHandler.isUsingPinchToZoom()) {
-                    final boolean toExpand = mPipBoundsState.getBounds().width()
-                            < mPipBoundsState.getMaxSize().x
-                            && mPipBoundsState.getBounds().height()
-                            < mPipBoundsState.getMaxSize().y;
                     if (mMenuController.isMenuVisible()) {
                         mMenuController.hideMenu(ANIM_TYPE_NONE, false /* resize */);
                     }
@@ -931,6 +927,7 @@ public class PipTouchHandler {
                     } else {
                         animateToUnexpandedState(getUserResizeBounds());
                     }
+                    mPipBoundsState.setHasUserResizedPip(true);
                 } else {
                     // Expand to fullscreen if this is a double tap
                     // the PiP should be frozen until the transition ends
