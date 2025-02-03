@@ -19,8 +19,11 @@ package com.android.server.display;
 import static android.hardware.display.DisplayTopology.pxToDp;
 
 import android.hardware.display.DisplayTopology;
+import android.hardware.display.DisplayTopologyGraph;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 
@@ -53,6 +56,12 @@ class DisplayTopologyCoordinator {
 
     @GuardedBy("mSyncRoot")
     private DisplayTopology mTopology;
+
+    // Map from logical display ID to logical display density. Should always be consistent with
+    // mTopology.
+    @GuardedBy("mSyncRoot")
+    private final SparseIntArray mDensities = new SparseIntArray();
+
     @GuardedBy("mSyncRoot")
     private final Map<String, Integer> mUniqueIdToDisplayIdMapping = new HashMap<>();
 
@@ -69,13 +78,13 @@ class DisplayTopologyCoordinator {
      * Should be invoked from the corresponding executor.
      * A copy of the topology should be sent that will not be modified by the system.
      */
-    private final Consumer<DisplayTopology> mOnTopologyChangedCallback;
+    private final Consumer<Pair<DisplayTopology, DisplayTopologyGraph>> mOnTopologyChangedCallback;
     private final Executor mTopologyChangeExecutor;
     private final DisplayManagerService.SyncRoot mSyncRoot;
     private final Runnable mTopologySavedCallback;
 
     DisplayTopologyCoordinator(BooleanSupplier isExtendedDisplayEnabled,
-            Consumer<DisplayTopology> onTopologyChangedCallback,
+            Consumer<Pair<DisplayTopology, DisplayTopologyGraph>> onTopologyChangedCallback,
             Executor topologyChangeExecutor, DisplayManagerService.SyncRoot syncRoot,
             Runnable topologySavedCallback) {
         this(new Injector(), isExtendedDisplayEnabled, onTopologyChangedCallback,
@@ -84,7 +93,7 @@ class DisplayTopologyCoordinator {
 
     @VisibleForTesting
     DisplayTopologyCoordinator(Injector injector, BooleanSupplier isExtendedDisplayEnabled,
-            Consumer<DisplayTopology> onTopologyChangedCallback,
+            Consumer<Pair<DisplayTopology, DisplayTopologyGraph>> onTopologyChangedCallback,
             Executor topologyChangeExecutor, DisplayManagerService.SyncRoot syncRoot,
             Runnable topologySavedCallback) {
         mTopology = injector.getTopology();
@@ -107,7 +116,7 @@ class DisplayTopologyCoordinator {
         }
         synchronized (mSyncRoot) {
             addDisplayIdMappingLocked(info);
-
+            mDensities.put(info.displayId, info.logicalDensityDpi);
             mTopology.addDisplay(info.displayId, getWidth(info), getHeight(info));
             restoreTopologyLocked();
             sendTopologyUpdateLocked();
@@ -119,7 +128,13 @@ class DisplayTopologyCoordinator {
      * @param info The new display info
      */
     void onDisplayChanged(DisplayInfo info) {
+        if (!isDisplayAllowedInTopology(info)) {
+            return;
+        }
         synchronized (mSyncRoot) {
+            if (mDensities.indexOfKey(info.displayId) >= 0) {
+                mDensities.put(info.displayId, info.logicalDensityDpi);
+            }
             if (mTopology.updateDisplay(info.displayId, getWidth(info), getHeight(info))) {
                 sendTopologyUpdateLocked();
             }
@@ -132,6 +147,7 @@ class DisplayTopologyCoordinator {
      */
     void onDisplayRemoved(int displayId) {
         synchronized (mSyncRoot) {
+            mDensities.delete(displayId);
             if (mTopology.removeDisplay(displayId)) {
                 removeDisplayIdMappingLocked(displayId);
                 restoreTopologyLocked();
@@ -256,7 +272,9 @@ class DisplayTopologyCoordinator {
     @GuardedBy("mSyncRoot")
     private void sendTopologyUpdateLocked() {
         DisplayTopology copy = mTopology.copy();
-        mTopologyChangeExecutor.execute(() -> mOnTopologyChangedCallback.accept(copy));
+        SparseIntArray densities = mDensities.clone();
+        mTopologyChangeExecutor.execute(() -> mOnTopologyChangedCallback.accept(
+                new Pair<>(copy, copy.getGraph(densities))));
     }
 
     @VisibleForTesting

@@ -750,7 +750,7 @@ public final class DisplayTopology implements Parcelable {
                 new SparseArray<>();
         for (int id : displayIds) {
             if (densityPerDisplay.get(id) == 0) {
-                Slog.w(TAG, "Cannot construct graph, no density for display " + id);
+                Slog.e(TAG, "Cannot construct graph, no density for display " + id);
                 return null;
             }
             adjacentDisplaysPerId.append(id, new ArrayList<>(Math.min(10, displayIds.size())));

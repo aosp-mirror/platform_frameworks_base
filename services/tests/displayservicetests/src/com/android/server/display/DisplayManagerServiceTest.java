@@ -107,6 +107,7 @@ import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayOffloader;
 import android.hardware.display.DisplayTopology;
+import android.hardware.display.DisplayTopologyGraph;
 import android.hardware.display.DisplayViewport;
 import android.hardware.display.DisplayedContentSample;
 import android.hardware.display.DisplayedContentSamplingAttributes;
@@ -136,6 +137,7 @@ import android.provider.Settings.SettingNotFoundException;
 import android.test.mock.MockContentResolver;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.Spline;
 import android.view.ContentRecordingSession;
 import android.view.Display;
@@ -3875,8 +3877,16 @@ public class DisplayManagerServiceTest {
                 displayManager.new BinderService();
         registerDefaultDisplays(displayManager);
         initDisplayPowerController(localService);
+        displayManager.windowManagerAndInputReady();
 
-        displayManagerBinderService.setDisplayTopology(new DisplayTopology());
+        DisplayTopology topology = mock(DisplayTopology.class);
+        when(topology.copy()).thenReturn(topology);
+        DisplayTopologyGraph graph = mock(DisplayTopologyGraph.class);
+        when(topology.getGraph(any(SparseIntArray.class))).thenReturn(graph);
+        displayManagerBinderService.setDisplayTopology(topology);
+        waitForIdleHandler(displayManager.getDisplayHandler());
+
+        verify(mMockInputManagerInternal).setDisplayTopology(graph);
     }
 
     @Test
