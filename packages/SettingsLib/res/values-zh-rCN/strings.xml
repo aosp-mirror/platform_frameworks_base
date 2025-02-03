@@ -523,6 +523,8 @@
     <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"正在快速充电"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"由管理员控制"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"由受限设置控制"</string>
+    <!-- no translation found for disabled_in_phone_call_text (6568931334337318320) -->
+    <skip />
     <string name="disabled" msgid="8017887509554714950">"已停用"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"允许"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"不允许"</string>
@@ -681,7 +683,7 @@
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"退出访客模式"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"退出时所有活动记录都将被删除"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"您可以在退出时保存或删除您的活动"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"请立即重置以删除会话活动记录；或者，您也可以在退出时保存或删除活动记录"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"重置可立即删除会话活动记录，您也可以在退出时保存或删除活动记录"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"选择照片"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"错误次数过多。系统将删除此设备上的数据。"</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"错误次数过多。系统将删除此用户。"</string>

@@ -223,7 +223,7 @@
     <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"મનપસંદ એન્જિન"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"સામાન્ય"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"સ્પીચની પિચ ફરીથી સેટ કરો"</string>
-    <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"ટેક્સ્ટ બોલાયેલ છે તે પિચને ડિફોલ્ટ પર ફરીથી સેટ કરો."</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"ટેક્સ્ટ બોલાયેલી છે તે પિચને ડિફૉલ્ટ પર રીસેટ કરો."</string>
   <string-array name="tts_rate_entries">
     <item msgid="4563475121751694801">"60%"</item>
     <item msgid="6323184326270638754">"80%"</item>
@@ -446,7 +446,7 @@
     <string name="local_backup_password_toast_validation_failure" msgid="714669442363647122">"નિષ્ફળતા સેટિંગ બેકઅપ પાસવર્ડ"</string>
     <string name="loading_injected_setting_summary" msgid="8394446285689070348">"લોડ થઈ રહ્યું છે…"</string>
   <string-array name="color_mode_names">
-    <item msgid="3836559907767149216">"વાઇબ્રન્ટ (ડિફોલ્ટ)"</item>
+    <item msgid="3836559907767149216">"વાઇબ્રન્ટ (ડિફૉલ્ટ)"</item>
     <item msgid="9112200311983078311">"કુદરતી"</item>
     <item msgid="6564241960833766170">"સ્ટૅન્ડર્ડ"</item>
   </string-array>
@@ -523,6 +523,8 @@
     <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"ઝડપી ચાર્જિંગ"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"વ્યવસ્થાપક દ્વારા નિયંત્રિત"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"પ્રતિબંધિત સેટિંગ દ્વારા નિયંત્રિત"</string>
+    <!-- no translation found for disabled_in_phone_call_text (6568931334337318320) -->
+    <skip />
     <string name="disabled" msgid="8017887509554714950">"બંધ કરી"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"મંજૂરી છે"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"મંજૂરી નથી"</string>
