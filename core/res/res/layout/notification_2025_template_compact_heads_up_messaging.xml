@@ -49,7 +49,7 @@
         android:importantForAccessibility="no"
         />
     <ViewStub
-        android:layout="@layout/conversation_face_pile_layout"
+        android:layout="@layout/notification_2025_conversation_face_pile_layout"
         android:layout_gravity="center_vertical|start"
         android:layout_width="@dimen/conversation_compact_face_pile_size"
         android:layout_height="@dimen/conversation_compact_face_pile_size"
