@@ -812,11 +812,6 @@ public final class NotificationEntry extends ListEntry {
         return !mSbn.isOngoing() || !isLocked;
     }
 
-    public boolean canViewBeDismissed() {
-        if (row == null) return true;
-        return row.canViewBeDismissed();
-    }
-
     @VisibleForTesting
     boolean isExemptFromDndVisualSuppression() {
         if (isNotificationBlockedByPolicy(mSbn.getNotification())) {
