@@ -8937,16 +8937,6 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @hide
-         */
-        public boolean displayCustomViewInline() {
-            // This is a lie; True is returned for conversations to make sure that the custom
-            // view is not used instead of the template, but it will not actually be included.
-            return Flags.notificationNoCustomViewConversations()
-                    && mConversationType != CONVERSATION_TYPE_LEGACY;
-        }
-
-        /**
          * @return the text that should be displayed in the statusBar when heads upped.
          * If {@code null} is returned, the default implementation will be used.
          *
