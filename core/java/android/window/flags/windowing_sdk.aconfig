@@ -185,3 +185,14 @@ flag {
     description: "Enables letterboxing for a safe region"
     bug: "380132497"
 }
+
+flag {
+    namespace: "windowing_sdk"
+    name: "fix_layout_existing_task"
+    description: "Layout the existing task to ensure the bounds are updated."
+    bug: "390291971"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
