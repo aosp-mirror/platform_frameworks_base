@@ -73,8 +73,8 @@
         </com.android.internal.widget.RemeasuringLinearLayout>
 
         <ViewStub
-            android:layout="@layout/notification_material_reply_text"
-            android:id="@+id/notification_2025_reply_container"
+            android:layout="@layout/notification_2025_reply_history_container"
+            android:id="@+id/notification_material_reply_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             />
