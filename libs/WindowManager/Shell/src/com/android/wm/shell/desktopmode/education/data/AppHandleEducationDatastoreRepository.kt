@@ -22,6 +22,7 @@ import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.Serializer
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.dataStoreFile
 import com.android.framework.protobuf.InvalidProtocolBufferException
 import com.android.internal.annotations.VisibleForTesting
@@ -48,6 +49,10 @@ constructor(private val dataStore: DataStore<WindowingEducationProto>) {
         DataStoreFactory.create(
             serializer = WindowingEducationProtoSerializer,
             produceFile = { context.dataStoreFile(APP_HANDLE_EDUCATION_DATASTORE_FILEPATH) },
+            corruptionHandler =
+                ReplaceFileCorruptionHandler(
+                    produceNewData = { WindowingEducationProto.getDefaultInstance() }
+                ),
         )
     )
 
