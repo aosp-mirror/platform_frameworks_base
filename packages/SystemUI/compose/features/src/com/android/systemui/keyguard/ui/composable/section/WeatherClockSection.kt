@@ -16,8 +16,6 @@
 
 package com.android.systemui.keyguard.ui.composable.section
 
-import android.view.View
-import android.view.ViewGroup
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -26,10 +24,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
 import com.android.systemui.customization.R as customR
@@ -112,21 +110,11 @@ constructor(
     ) {
         Element(key = elementKey, modifier) {
             content {
-                AndroidView(
-                    factory = {
-                        try {
-                            val view =
-                                clock.largeClock.layout.views.first {
-                                    it.id == weatherClockElementViewId
-                                }
-                            (view.parent as? ViewGroup)?.removeView(view)
-                            view
-                        } catch (e: NoSuchElementException) {
-                            View(it)
-                        }
+                ClockView(
+                    clock.largeClock.layout.views.firstOrNull {
+                        it.id == weatherClockElementViewId
                     },
-                    update = {},
-                    modifier = modifier,
+                    modifier,
                 )
             }
         }
