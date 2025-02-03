@@ -23,7 +23,6 @@ import android.view.View
 import androidx.preference.Preference
 import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceViewHolder
-
 import com.android.settingslib.widget.preference.banner.R
 
 /**
@@ -68,6 +67,11 @@ class BannerMessagePreferenceGroup @JvmOverloads constructor(
         }
 
         childPreferences.add(preference)
+        expandPreference?.let {
+            it.count = childPreferences.size - 1
+        }
+        updateExpandCollapsePreference()
+        updateChildrenVisibility()
         return super.addPreference(preference)
     }
 
@@ -76,18 +80,40 @@ class BannerMessagePreferenceGroup @JvmOverloads constructor(
             return false
         }
         childPreferences.remove(preference)
+        expandPreference?.let {
+            it.count = childPreferences.size - 1
+        }
+        updateChildrenVisibility()
+        updateExpandCollapsePreference()
         return super.removePreference(preference)
+    }
+
+    override fun removePreferenceRecursively(key: CharSequence): Boolean {
+        val preference = findPreference<Preference>(key) ?: return false
+
+        if (preference !is BannerMessagePreference) {
+            return false
+        }
+
+        childPreferences.remove(preference)
+        expandPreference?.let {
+            it.count = childPreferences.size - 1
+        }
+        updateChildrenVisibility()
+        updateExpandCollapsePreference()
+        return super.removePreferenceRecursively(key)
     }
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
-        if (childPreferences.size >= MAX_CHILDREN - 1) {
+        if (childPreferences.size >= 2) {
             if (expandPreference == null) {
                 expandPreference = NumberButtonPreference(context).apply {
                     key = expandKey
                     title = expandTitle
                     count = childPreferences.size - 1
                     btnContentDescription = expandContentDescription
+                    order = EXPAND_ORDER
                     clickListener = View.OnClickListener {
                         toggleExpansion()
                     }
@@ -100,6 +126,7 @@ class BannerMessagePreferenceGroup @JvmOverloads constructor(
                     key = collapseKey
                     title = collapseTitle
                     icon = collapseIcon
+                    order = COLLAPSE_ORDER
                     setOnClickListener {
                         toggleExpansion()
                     }
@@ -112,14 +139,20 @@ class BannerMessagePreferenceGroup @JvmOverloads constructor(
     }
 
     private fun updateExpandCollapsePreference() {
-        expandPreference?.isVisible = !isExpanded
-        collapsePreference?.isVisible = isExpanded
+        expandPreference?.isVisible = !isExpanded && childPreferences.size > 1
+        collapsePreference?.isVisible = isExpanded && childPreferences.size > 1
     }
 
     private fun updateChildrenVisibility() {
-        for (i in 1 until childPreferences.size) {
+        for (i in 0 until childPreferences.size) {
             val child = childPreferences[i]
-            child.isVisible = isExpanded
+            if (i == 0) {
+                // Make this explicitly visible when e.g. the first BannerMessagePreference
+                // in the group is dismissed
+                child.isVisible = true
+            } else {
+                child.isVisible = isExpanded
+            }
         }
     }
 
@@ -145,5 +178,9 @@ class BannerMessagePreferenceGroup @JvmOverloads constructor(
 
     companion object {
         private const val MAX_CHILDREN = 3
+        // Arbitrary large order numbers for the two preferences
+        // needed to make sure any Banners are added above them
+        private const val EXPAND_ORDER = 99
+        private const val COLLAPSE_ORDER = 100
     }
 }
