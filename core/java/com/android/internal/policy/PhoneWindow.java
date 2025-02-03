@@ -436,6 +436,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (viewRoot != null) {
                 // Clear the old callbacks and attach to the new window.
                 viewRoot.getOnBackInvokedDispatcher().clear();
+                if (Flags.clearSystemVibrator()) {
+                    viewRoot.clearSystemVibrator();
+                }
                 onViewRootImplSet(viewRoot);
             }
         }
