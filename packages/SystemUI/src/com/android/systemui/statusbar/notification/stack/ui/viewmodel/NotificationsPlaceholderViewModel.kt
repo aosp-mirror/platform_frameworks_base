@@ -30,6 +30,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
@@ -58,6 +59,7 @@ constructor(
     private val interactor: NotificationStackAppearanceInteractor,
     private val sceneInteractor: SceneInteractor,
     private val shadeInteractor: ShadeInteractor,
+    shadeModeInteractor: ShadeModeInteractor,
     private val headsUpNotificationInteractor: HeadsUpNotificationInteractor,
     remoteInputInteractor: RemoteInputInteractor,
     featureFlags: FeatureFlagsClassic,
@@ -75,16 +77,16 @@ constructor(
     val notificationsShadeContentKey: ContentKey by
         hydrator.hydratedStateOf(
             traceName = "notificationsShadeContentKey",
-            initialValue = getNotificationsShadeContentKey(shadeInteractor.shadeMode.value),
-            source = shadeInteractor.shadeMode.map { getNotificationsShadeContentKey(it) },
+            initialValue = getNotificationsShadeContentKey(shadeModeInteractor.shadeMode.value),
+            source = shadeModeInteractor.shadeMode.map { getNotificationsShadeContentKey(it) },
         )
 
     /** The content key to use for the quick settings shade. */
     val quickSettingsShadeContentKey: ContentKey by
         hydrator.hydratedStateOf(
             traceName = "quickSettingsShadeContentKey",
-            initialValue = getQuickSettingsShadeContentKey(shadeInteractor.shadeMode.value),
-            source = shadeInteractor.shadeMode.map { getQuickSettingsShadeContentKey(it) },
+            initialValue = getQuickSettingsShadeContentKey(shadeModeInteractor.shadeMode.value),
+            source = shadeModeInteractor.shadeMode.map { getQuickSettingsShadeContentKey(it) },
         )
 
     /** DEBUG: whether the placeholder should be made slightly visible for positional debugging. */

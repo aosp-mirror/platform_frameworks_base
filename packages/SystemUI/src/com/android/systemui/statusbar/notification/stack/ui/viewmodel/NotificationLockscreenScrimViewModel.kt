@@ -29,7 +29,7 @@ import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.notifications.ui.composable.Notifications
 import com.android.systemui.res.R
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.composable.Shade
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
@@ -46,7 +46,7 @@ class NotificationLockscreenScrimViewModel
 @AssistedInject
 constructor(
     dumpManager: DumpManager,
-    shadeInteractor: ShadeInteractor,
+    shadeModeInteractor: ShadeModeInteractor,
     private val stackAppearanceInteractor: NotificationStackAppearanceInteractor,
 ) :
     ActivatableFlowDumper by ActivatableFlowDumperImpl(dumpManager, "NotificationScrollViewModel"),
@@ -54,7 +54,7 @@ constructor(
 
     private val hydrator = Hydrator("NotificationLockscreenScrimViewModel.hydrator")
 
-    val shadeMode: StateFlow<ShadeMode> = shadeInteractor.shadeMode
+    val shadeMode: StateFlow<ShadeMode> = shadeModeInteractor.shadeMode
 
     /** The [ElementKey] to use for the scrim. */
     val element: ElementViewModel by

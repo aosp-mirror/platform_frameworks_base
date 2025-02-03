@@ -17,6 +17,7 @@
 package com.android.systemui.qs.ui.viewmodel
 
 import androidx.lifecycle.LifecycleOwner
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.qs.FooterActionsController
@@ -25,7 +26,7 @@ import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.brightness.ui.viewModel.BrightnessMirrorViewModel
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import dagger.assisted.AssistedFactory
@@ -34,7 +35,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.StateFlow
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Models UI state needed for rendering the content of the quick settings scene.
@@ -51,7 +51,7 @@ constructor(
     private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
     val mediaCarouselInteractor: MediaCarouselInteractor,
-    private val shadeInteractor: ShadeInteractor,
+    private val shadeModeInteractor: ShadeModeInteractor,
     private val sceneInteractor: SceneInteractor,
 ) : ExclusiveActivatable() {
 
@@ -69,8 +69,8 @@ constructor(
     override suspend fun onActivated(): Nothing {
         coroutineScope {
             launch {
-                shadeInteractor.shadeMode.collect { shadeMode ->
-                    if (shadeMode == ShadeMode.Split) {
+                shadeModeInteractor.shadeMode.collect { shadeMode ->
+                    if (shadeMode is ShadeMode.Split) {
                         sceneInteractor.snapToScene(Scenes.Shade, "Unfold while on QS")
                     }
                 }

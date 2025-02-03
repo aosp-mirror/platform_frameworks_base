@@ -25,6 +25,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import dagger.Lazy
 import javax.inject.Inject
@@ -36,6 +37,7 @@ class ShadeStateTraceLogger
 @Inject
 constructor(
     private val shadeInteractor: ShadeInteractor,
+    private val shadeModeInteractor: ShadeModeInteractor,
     private val shadeDisplaysRepository: Lazy<ShadeDisplaysRepository>,
     @Application private val scope: CoroutineScope,
 ) : CoreStartable {
@@ -47,7 +49,7 @@ constructor(
             }
             launch {
                 val stateLogger = createTraceStateLogger("shadeMode")
-                shadeInteractor.shadeMode.collect { stateLogger.log(it.toString()) }
+                shadeModeInteractor.shadeMode.collect { stateLogger.log(it.toString()) }
             }
             launch {
                 shadeInteractor.shadeExpansion.collect {

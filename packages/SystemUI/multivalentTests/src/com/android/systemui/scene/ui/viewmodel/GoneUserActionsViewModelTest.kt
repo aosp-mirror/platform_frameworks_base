@@ -33,7 +33,7 @@ import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.shade.domain.interactor.enableDualShade
 import com.android.systemui.shade.domain.interactor.enableSingleShade
 import com.android.systemui.shade.domain.interactor.enableSplitShade
-import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -56,7 +56,7 @@ class GoneUserActionsViewModelTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        underTest = GoneUserActionsViewModel(shadeInteractor = kosmos.shadeInteractor)
+        underTest = GoneUserActionsViewModel(shadeModeInteractor = kosmos.shadeModeInteractor)
         underTest.activateIn(testScope)
     }
 

@@ -36,6 +36,8 @@ val Kosmos.shadeModeInteractor by Fixture {
     )
 }
 
+val Kosmos.shadeMode by Fixture { shadeModeInteractor.shadeMode }
+
 // TODO(b/391578667): Make this user-aware once supported by FakeSecureSettingsRepository.
 /**
  * Enables the Dual Shade setting, and (optionally) sets the shade layout to be wide (`true`) or

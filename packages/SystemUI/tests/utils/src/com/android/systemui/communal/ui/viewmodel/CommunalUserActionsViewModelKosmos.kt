@@ -20,10 +20,12 @@ import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteract
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 
 val Kosmos.communalUserActionsViewModel by Fixture {
     CommunalUserActionsViewModel(
         deviceUnlockedInteractor = deviceUnlockedInteractor,
         shadeInteractor = shadeInteractor,
+        shadeModeInteractor = shadeModeInteractor,
     )
 }

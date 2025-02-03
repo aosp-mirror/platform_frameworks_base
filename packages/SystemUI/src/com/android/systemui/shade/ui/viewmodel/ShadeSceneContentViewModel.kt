@@ -26,7 +26,7 @@ import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.brightness.ui.viewModel.BrightnessMirrorViewModel
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.disableflags.domain.interactor.DisableFlagsInteractor
 import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
@@ -56,7 +56,7 @@ constructor(
     val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
     val brightnessMirrorViewModelFactory: BrightnessMirrorViewModel.Factory,
     val mediaCarouselInteractor: MediaCarouselInteractor,
-    shadeInteractor: ShadeInteractor,
+    shadeModeInteractor: ShadeModeInteractor,
     private val disableFlagsInteractor: DisableFlagsInteractor,
     private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
@@ -65,7 +65,7 @@ constructor(
     private val sceneInteractor: SceneInteractor,
 ) : ExclusiveActivatable() {
 
-    val shadeMode: StateFlow<ShadeMode> = shadeInteractor.shadeMode
+    val shadeMode: StateFlow<ShadeMode> = shadeModeInteractor.shadeMode
 
     private val _isEmptySpaceClickable =
         MutableStateFlow(!deviceEntryInteractor.isDeviceEntered.value)

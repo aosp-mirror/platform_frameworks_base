@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.notification.stack.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.data.repository.NotificationPlaceholderRepository
 import com.android.systemui.statusbar.notification.stack.data.repository.NotificationViewHeightRepository
@@ -45,7 +45,7 @@ constructor(
     private val viewHeightRepository: NotificationViewHeightRepository,
     private val placeholderRepository: NotificationPlaceholderRepository,
     sceneInteractor: SceneInteractor,
-    shadeInteractor: ShadeInteractor,
+    shadeModeInteractor: ShadeModeInteractor,
 ) {
     /** The bounds of the notification stack in the current scene. */
     val notificationShadeScrimBounds: StateFlow<ShadeScrimBounds?> =
@@ -60,7 +60,7 @@ constructor(
 
     /** The rounding of the notification stack. */
     val shadeScrimRounding: Flow<ShadeScrimRounding> =
-        combine(shadeInteractor.shadeMode, isExpandingFromHeadsUp) {
+        combine(shadeModeInteractor.shadeMode, isExpandingFromHeadsUp) {
                 shadeMode,
                 isExpandingFromHeadsUp ->
                 ShadeScrimRounding(

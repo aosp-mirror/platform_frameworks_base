@@ -24,6 +24,7 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteract
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.viewmodel.dualShadeActions
 import com.android.systemui.shade.ui.viewmodel.singleShadeActions
@@ -42,6 +43,7 @@ constructor(
     private val communalInteractor: CommunalInteractor,
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
     private val shadeInteractor: ShadeInteractor,
+    private val shadeModeInteractor: ShadeModeInteractor,
 ) : UserActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
@@ -53,7 +55,7 @@ constructor(
                     combine(
                         deviceUnlockedInteractor.deviceUnlockStatus.map { it.isUnlocked },
                         communalInteractor.isCommunalAvailable,
-                        shadeInteractor.shadeMode,
+                        shadeModeInteractor.shadeMode,
                     ) { isDeviceUnlocked, isCommunalAvailable, shadeMode ->
                         buildList {
                                 if (isCommunalAvailable) {

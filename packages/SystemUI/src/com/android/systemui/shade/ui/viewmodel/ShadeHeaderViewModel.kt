@@ -41,7 +41,7 @@ import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.PrivacyChipInteractor
 import com.android.systemui.shade.domain.interactor.ShadeHeaderClockInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
@@ -69,6 +69,7 @@ constructor(
     private val activityStarter: ActivityStarter,
     private val sceneInteractor: SceneInteractor,
     private val shadeInteractor: ShadeInteractor,
+    private val shadeModeInteractor: ShadeModeInteractor,
     private val mobileIconsInteractor: MobileIconsInteractor,
     val mobileIconsViewModel: MobileIconsViewModel,
     private val privacyChipInteractor: PrivacyChipInteractor,
@@ -206,7 +207,7 @@ constructor(
 
     /** Notifies that the system icons container was clicked. */
     fun onNotificationIconChipClicked() {
-        if (shadeInteractor.shadeMode.value !is ShadeMode.Dual) {
+        if (!shadeModeInteractor.isDualShade) {
             return
         }
         val loggingReason = "ShadeHeaderViewModel.onNotificationIconChipClicked"
@@ -224,7 +225,7 @@ constructor(
     /** Notifies that the system icons container was clicked. */
     fun onSystemIconChipClicked() {
         val loggingReason = "ShadeHeaderViewModel.onSystemIconChipClicked"
-        if (shadeInteractor.shadeMode.value is ShadeMode.Dual) {
+        if (shadeModeInteractor.isDualShade) {
             val currentOverlays = sceneInteractor.currentOverlays.value
             if (Overlays.QuickSettingsShade in currentOverlays) {
                 shadeInteractor.collapseQuickSettingsShade(
