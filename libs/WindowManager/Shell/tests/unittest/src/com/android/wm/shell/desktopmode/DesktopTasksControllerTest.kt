@@ -4231,6 +4231,76 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun dragToDesktop_movesTaskToDesk() {
+        val spyController = spy(controller)
+        whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
+        whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
+            .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
+        val task = setUpFullscreenTask(displayId = DEFAULT_DISPLAY)
+
+        spyController.onDragPositioningEndThroughStatusBar(PointF(200f, 200f), task, mockSurface)
+
+        val wct = getLatestDragToDesktopWct()
+        verify(desksOrganizer).moveTaskToDesk(wct, deskId = 0, task)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun dragToDesktop_activatesDesk() {
+        val spyController = spy(controller)
+        whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
+        whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
+            .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
+        val task = setUpFullscreenTask(displayId = DEFAULT_DISPLAY)
+
+        spyController.onDragPositioningEndThroughStatusBar(PointF(200f, 200f), task, mockSurface)
+
+        val wct = getLatestDragToDesktopWct()
+        verify(desksOrganizer).activateDesk(wct, deskId = 0)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun dragToDesktop_triggersEnterDesktopListener() {
+        val spyController = spy(controller)
+        whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
+        whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
+            .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
+        val task = setUpFullscreenTask(displayId = DEFAULT_DISPLAY)
+
+        spyController.onDragPositioningEndThroughStatusBar(PointF(200f, 200f), task, mockSurface)
+
+        verify(desktopModeEnterExitTransitionListener)
+            .onEnterDesktopModeTransitionStarted(FREEFORM_ANIMATION_DURATION)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun dragToDesktop_multipleDesks_addsPendingTransition() {
+        val transition = Binder()
+        val spyController = spy(controller)
+        whenever(dragToDesktopTransitionHandler.finishDragToDesktopTransition(any()))
+            .thenReturn(transition)
+        whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
+        whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
+            .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
+        val task = setUpFullscreenTask(displayId = DEFAULT_DISPLAY)
+
+        spyController.onDragPositioningEndThroughStatusBar(PointF(200f, 200f), task, mockSurface)
+
+        verify(desksTransitionsObserver)
+            .addPendingTransition(
+                argThat {
+                    this is DeskTransition.ActiveDeskWithTask &&
+                        this.token == transition &&
+                        this.deskId == 0 &&
+                        this.enterTaskId == task.taskId
+                }
+            )
+    }
+
+    @Test
     fun onDesktopDragMove_endsOutsideValidDragArea_snapsToValidBounds() {
         val task = setUpFreeformTask()
         val spyController = spy(controller)
