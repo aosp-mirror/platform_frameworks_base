@@ -295,6 +295,10 @@
     <dimen name="bubble_bar_dismiss_zone_width">192dp</dimen>
     <!-- Height of the box around bottom center of the screen where drag only leads to dismiss -->
     <dimen name="bubble_bar_dismiss_zone_height">242dp</dimen>
+    <!-- Height of the box at the corner of the screen where drag leads to app moving to bubble -->
+    <dimen name="bubble_transform_area_width">140dp</dimen>
+    <!-- Width of the box at the corner of the screen where drag leads to app moving to bubble -->
+    <dimen name="bubble_transform_area_height">140dp</dimen>
 
     <!-- Bottom and end margin for compat buttons. -->
     <dimen name="compat_button_margin">24dp</dimen>

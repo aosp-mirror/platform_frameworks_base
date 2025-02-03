@@ -194,6 +194,40 @@ class DesktopModeVisualIndicatorTest : ShellTestCase() {
     }
 
     @Test
+    fun testBubbleLeftRegionCalculation() {
+        val bubbleRegionWidth =
+            context.resources.getDimensionPixelSize(R.dimen.bubble_transform_area_width)
+        val bubbleRegionHeight =
+            context.resources.getDimensionPixelSize(R.dimen.bubble_transform_area_height)
+        val expectedRect = Rect(0, 1600 - bubbleRegionHeight, bubbleRegionWidth, 1600)
+
+        createVisualIndicator(DesktopModeVisualIndicator.DragStartState.FROM_FULLSCREEN)
+        var testRegion = visualIndicator.calculateBubbleLeftRegion(displayLayout)
+        assertThat(testRegion.bounds).isEqualTo(expectedRect)
+
+        createVisualIndicator(DesktopModeVisualIndicator.DragStartState.FROM_SPLIT)
+        testRegion = visualIndicator.calculateBubbleLeftRegion(displayLayout)
+        assertThat(testRegion.bounds).isEqualTo(expectedRect)
+    }
+
+    @Test
+    fun testBubbleRightRegionCalculation() {
+        val bubbleRegionWidth =
+            context.resources.getDimensionPixelSize(R.dimen.bubble_transform_area_width)
+        val bubbleRegionHeight =
+            context.resources.getDimensionPixelSize(R.dimen.bubble_transform_area_height)
+        val expectedRect = Rect(2400 - bubbleRegionWidth, 1600 - bubbleRegionHeight, 2400, 1600)
+
+        createVisualIndicator(DesktopModeVisualIndicator.DragStartState.FROM_FULLSCREEN)
+        var testRegion = visualIndicator.calculateBubbleRightRegion(displayLayout)
+        assertThat(testRegion.bounds).isEqualTo(expectedRect)
+
+        createVisualIndicator(DesktopModeVisualIndicator.DragStartState.FROM_SPLIT)
+        testRegion = visualIndicator.calculateBubbleRightRegion(displayLayout)
+        assertThat(testRegion.bounds).isEqualTo(expectedRect)
+    }
+
+    @Test
     fun testDefaultIndicators() {
         createVisualIndicator(DesktopModeVisualIndicator.DragStartState.FROM_FULLSCREEN)
         var result = visualIndicator.updateIndicatorType(PointF(-10000f, 500f))
@@ -219,26 +253,40 @@ class DesktopModeVisualIndicatorTest : ShellTestCase() {
     fun testDefaultIndicatorWithNoDesktop() {
         whenever(DesktopModeStatus.canEnterDesktopMode(any())).thenReturn(false)
 
+        // Fullscreen to center, no desktop indicator
         createVisualIndicator(DesktopModeVisualIndicator.DragStartState.FROM_FULLSCREEN)
         var result = visualIndicator.updateIndicatorType(PointF(500f, 500f))
         assertThat(result).isEqualTo(DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR)
-
+        // Fullscreen to split
         result = visualIndicator.updateIndicatorType(PointF(10000f, 500f))
         assertThat(result)
             .isEqualTo(DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_RIGHT_INDICATOR)
-
         result = visualIndicator.updateIndicatorType(PointF(-10000f, 500f))
         assertThat(result)
             .isEqualTo(DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR)
-
+        // Fullscreen to bubble
+        result = visualIndicator.updateIndicatorType(PointF(100f, 1500f))
+        assertThat(result)
+            .isEqualTo(DesktopModeVisualIndicator.IndicatorType.TO_BUBBLE_LEFT_INDICATOR)
+        result = visualIndicator.updateIndicatorType(PointF(2300f, 1500f))
+        assertThat(result)
+            .isEqualTo(DesktopModeVisualIndicator.IndicatorType.TO_BUBBLE_RIGHT_INDICATOR)
+        // Split to center, no desktop indicator
         createVisualIndicator(DesktopModeVisualIndicator.DragStartState.FROM_SPLIT)
         result = visualIndicator.updateIndicatorType(PointF(500f, 500f))
         assertThat(result).isEqualTo(DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR)
-
+        // Split to fullscreen
         result = visualIndicator.updateIndicatorType(PointF(500f, 0f))
         assertThat(result)
             .isEqualTo(DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR)
-
+        // Split to bubble
+        result = visualIndicator.updateIndicatorType(PointF(100f, 1500f))
+        assertThat(result)
+            .isEqualTo(DesktopModeVisualIndicator.IndicatorType.TO_BUBBLE_LEFT_INDICATOR)
+        result = visualIndicator.updateIndicatorType(PointF(2300f, 1500f))
+        assertThat(result)
+            .isEqualTo(DesktopModeVisualIndicator.IndicatorType.TO_BUBBLE_RIGHT_INDICATOR)
+        // Drag app to center, no desktop indicator
         createVisualIndicator(DesktopModeVisualIndicator.DragStartState.DRAGGED_INTENT)
         result = visualIndicator.updateIndicatorType(PointF(500f, 500f))
         assertThat(result).isEqualTo(DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR)
