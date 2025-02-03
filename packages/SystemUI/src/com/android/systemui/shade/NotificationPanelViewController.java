@@ -527,6 +527,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final ActivityStarter mActivityStarter;
     private final BrightnessMirrorShowingInteractor mBrightnessMirrorShowingInteractor;
 
+    @Nullable
+    private RenderEffect mBlurRenderEffect = null;
+
     @Inject
     public NotificationPanelViewController(NotificationPanelView view,
             NotificationWakeUpCoordinator coordinator,
@@ -912,13 +915,14 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private void handleBouncerShowingChanged(Boolean isBouncerShowing) {
         if (!com.android.systemui.Flags.bouncerUiRevamp()) return;
-
         if (isBouncerShowing && isExpanded()) {
-            float shadeBlurEffect = mDepthController.getMaxBlurRadiusPx();
-            mView.setRenderEffect(RenderEffect.createBlurEffect(
-                    shadeBlurEffect,
-                    shadeBlurEffect,
-                    Shader.TileMode.CLAMP));
+            if (mBlurRenderEffect == null) {
+                mBlurRenderEffect = RenderEffect.createBlurEffect(
+                        mDepthController.getMaxBlurRadiusPx(),
+                        mDepthController.getMaxBlurRadiusPx(),
+                        Shader.TileMode.CLAMP);
+            }
+            mView.setRenderEffect(mBlurRenderEffect);
         } else {
             mView.setRenderEffect(null);
         }
