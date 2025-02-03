@@ -3728,12 +3728,13 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             // windows that appear on top, ever
             int flags = StatusBarManager.DISABLE_NONE;
 
-            // TODO (b/155663717) After restart, status bar will not properly hide home button
+            // TODO(b/155663717): After restart, status bar will not properly hide home button
             //  unless disable is called to show un-hide it once first
             if (forceClearFlags) {
                 if (UserManager.isVisibleBackgroundUsersEnabled()
-                        && !mProcessWrapper.isSystemUser() && !mProcessWrapper.isForegroundUser()) {
-                    // TODO: b/341604160 - Support visible background users properly.
+                        && !mProcessWrapper.isSystemUser()
+                        && !mProcessWrapper.isForegroundUserOrProfile()) {
+                    // TODO(b/341604160): Support visible background users properly.
                     if (DEBUG) {
                         Log.d(TAG, "Status bar manager is disabled for visible background users");
                     }
@@ -3769,8 +3770,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
             if (!SceneContainerFlag.isEnabled()) {
                 if (UserManager.isVisibleBackgroundUsersEnabled()
-                        && !mProcessWrapper.isSystemUser() && !mProcessWrapper.isForegroundUser()) {
-                    // TODO: b/341604160 - Support visible background users properly.
+                        && !mProcessWrapper.isSystemUser()
+                        && !mProcessWrapper.isForegroundUserOrProfile()) {
+                    // TODO(b/341604160): Support visible background users properly.
                     if (DEBUG) {
                         Log.d(TAG, "Status bar manager is disabled for visible background users");
                     }
