@@ -904,8 +904,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
          * Whether to pilfer the next motion event to send cancellations to the windows below.
          * Useful when the caption window is spy and the gesture should be handled by the system
          * instead of by the app for their custom header content.
-         * Should not have any effect when {@link Flags#enableAccessibleCustomHeaders()}, because
-         * a spy window is not used then.
+         * Should not have any effect when
+         * {@link DesktopModeFlags#ENABLE_ACCESSIBLE_CUSTOM_HEADERS}, because a spy window is not
+         * used then.
          */
         private boolean mIsCustomHeaderGesture;
         private boolean mIsResizeGesture;
@@ -1047,7 +1048,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 return false;
             }
             if (mInputManager != null
-                    && !Flags.enableAccessibleCustomHeaders()) {
+                    && !DesktopModeFlags.ENABLE_ACCESSIBLE_CUSTOM_HEADERS.isTrue()) {
                 ViewRootImpl viewRootImpl = v.getViewRootImpl();
                 if (viewRootImpl != null) {
                     // Pilfer so that windows below receive cancellations for this gesture.

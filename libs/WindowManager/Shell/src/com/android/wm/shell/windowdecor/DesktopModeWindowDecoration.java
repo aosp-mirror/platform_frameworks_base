@@ -935,7 +935,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 // The app is requesting to customize the caption bar, which means input on
                 // customizable/exclusion regions must go to the app instead of to the system.
                 // This may be accomplished with spy windows or custom touchable regions:
-                if (Flags.enableAccessibleCustomHeaders()) {
+                if (DesktopModeFlags.ENABLE_ACCESSIBLE_CUSTOM_HEADERS.isTrue()) {
                     // Set the touchable region of the caption to only the areas where input should
                     // be handled by the system (i.e. non custom-excluded areas). The region will
                     // be calculated based on occluding caption elements and exclusion areas
