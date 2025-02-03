@@ -546,5 +546,29 @@ class DesktopModeFlickerScenarios {
                         AppWindowBecomesPinned(DESKTOP_MODE_APP),
                     ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
             )
+
+        val OPEN_APP_WHEN_EXTERNAL_DISPLAY_CONNECTED =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("OPEN_APP_WHEN_EXTERNAL_DISPLAY_CONNECTED"),
+                extractor =
+                ShellTransitionScenarioExtractor(
+                    transitionMatcher =
+                    object : ITransitionMatcher {
+                        override fun findAll(
+                            transitions: Collection<Transition>
+                        ): Collection<Transition> {
+                                return listOf(transitions
+                                    .filter { it.type == TransitionType.OPEN }
+                                    .maxByOrNull { it.id }!!)
+                        }
+                    }
+                ),
+                assertions =
+                        listOf(
+                            AppWindowBecomesVisible(DESKTOP_MODE_APP),
+                            AppWindowOnTopAtEnd(DESKTOP_MODE_APP),
+                            AppWindowBecomesVisible(DESKTOP_WALLPAPER),
+                        ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
     }
 }
