@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="ringtone_default" msgid="798836092118824500">"ડિફોલ્ટ રિંગટોન"</string>
+    <string name="ringtone_default" msgid="798836092118824500">"ડિફૉલ્ટ રિંગટોન"</string>
     <string name="notification_sound_default" msgid="8133121186242636840">"ડિફૉલ્ટ નોટિફિકેશન સાઉન્ડ"</string>
     <string name="alarm_sound_default" msgid="4787646764557462649">"ડિફૉલ્ટ અલાર્મ સાઉન્ડ"</string>
     <string name="add_ringtone_text" msgid="6642389991738337529">"રિંગટોન ઉમેરો"</string>
