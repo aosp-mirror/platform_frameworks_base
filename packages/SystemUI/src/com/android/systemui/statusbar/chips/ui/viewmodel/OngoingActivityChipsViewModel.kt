@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.chips.ui.viewmodel
 
+import android.content.res.Configuration
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
@@ -30,6 +33,7 @@ import com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel.ScreenReco
 import com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.ShareToAppChipViewModel
 import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -37,7 +41,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -56,8 +62,30 @@ constructor(
     castToOtherDeviceChipViewModel: CastToOtherDeviceChipViewModel,
     callChipViewModel: CallChipViewModel,
     notifChipsViewModel: NotifChipsViewModel,
+    displayStateInteractor: DisplayStateInteractor,
+    configurationInteractor: ConfigurationInteractor,
     @StatusBarChipsLog private val logger: LogBuffer,
 ) {
+    private val isLandscape: Flow<Boolean> =
+        configurationInteractor.configurationValues
+            .map { it.isLandscape }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    private val isScreenReasonablyLarge: Flow<Boolean> =
+        combine(isLandscape, displayStateInteractor.isLargeScreen) { isLandscape, isLargeScreen ->
+                isLandscape || isLargeScreen
+            }
+            .distinctUntilChanged()
+            .onEach {
+                logger.log(
+                    TAG,
+                    LogLevel.DEBUG,
+                    { bool1 = it },
+                    { "isScreenReasonablyLarge: $bool1" },
+                )
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
     private enum class ChipType {
         ScreenRecord,
         ShareToApp,
@@ -165,21 +193,71 @@ constructor(
     )
 
     private val internalChips: Flow<InternalMultipleOngoingActivityChipsModel> =
-        incomingChipBundle.map { bundle ->
+        combine(incomingChipBundle, isScreenReasonablyLarge) { bundle, isScreenReasonablyLarge ->
             // First: Find the most important chip.
             val primaryChipResult = pickMostImportantChip(bundle)
-            val primaryChip = primaryChipResult.mostImportantChip
-            if (primaryChip is InternalChipModel.Hidden) {
-                // If the primary chip is hidden, the secondary chip will also be hidden, so just
-                // pass the same Hidden model for both.
-                InternalMultipleOngoingActivityChipsModel(primaryChip, primaryChip)
-            } else {
-                // Then: Find the next most important chip.
-                val secondaryChip =
-                    pickMostImportantChip(primaryChipResult.remainingChips).mostImportantChip
-                InternalMultipleOngoingActivityChipsModel(primaryChip, secondaryChip)
+            when (val primaryChip = primaryChipResult.mostImportantChip) {
+                is InternalChipModel.Hidden -> {
+                    // If the primary chip is hidden, the secondary chip will also be hidden, so
+                    // just pass the same Hidden model for both.
+                    InternalMultipleOngoingActivityChipsModel(primaryChip, primaryChip)
+                }
+                is InternalChipModel.Shown -> {
+                    // Otherwise: Find the next most important chip.
+                    val secondaryChip =
+                        pickMostImportantChip(primaryChipResult.remainingChips).mostImportantChip
+                    if (
+                        secondaryChip is InternalChipModel.Shown &&
+                            StatusBarNotifChips.isEnabled &&
+                            !StatusBarChipsModernization.isEnabled &&
+                            !isScreenReasonablyLarge
+                    ) {
+                        // If we have two showing chips and we don't have a ton of room
+                        // (!isScreenReasonablyLarge), then we want to make both of them as small as
+                        // possible so that we have the highest chance of showing both chips (as
+                        // opposed to showing the primary chip with a lot of text and completely
+                        // hiding the secondary chip).
+                        // Also: If StatusBarChipsModernization is enabled, then we'll do the
+                        // squishing in Compose instead.
+                        InternalMultipleOngoingActivityChipsModel(
+                            primaryChip.squish(),
+                            secondaryChip.squish(),
+                        )
+                    } else {
+                        InternalMultipleOngoingActivityChipsModel(primaryChip, secondaryChip)
+                    }
+                }
             }
         }
+
+    /** Squishes the chip down to the smallest content possible. */
+    private fun InternalChipModel.Shown.squish(): InternalChipModel.Shown {
+        return when (model) {
+            // Icon-only is already maximum squished
+            is OngoingActivityChipModel.Shown.IconOnly -> this
+            // Countdown shows just a single digit, so already maximum squished
+            is OngoingActivityChipModel.Shown.Countdown -> this
+            // The other chips have icon+text, so we should hide the text
+            is OngoingActivityChipModel.Shown.Timer,
+            is OngoingActivityChipModel.Shown.ShortTimeDelta,
+            is OngoingActivityChipModel.Shown.Text ->
+                InternalChipModel.Shown(this.type, this.model.toIconOnly())
+        }
+    }
+
+    private fun OngoingActivityChipModel.Shown.toIconOnly(): OngoingActivityChipModel.Shown {
+        // If this chip doesn't have an icon, then it only has text and we should continue showing
+        // its text. (This is theoretically impossible because
+        // [OngoingActivityChipModel.Shown.Countdown] is the only chip without an icon, but protect
+        // against it just in case.)
+        val currentIcon = icon ?: return this
+        return OngoingActivityChipModel.Shown.IconOnly(
+            currentIcon,
+            colors,
+            onClickListenerLegacy,
+            clickBehavior,
+        )
+    }
 
     /**
      * A flow modeling the primary chip that should be shown in the status bar after accounting for
@@ -326,6 +404,9 @@ constructor(
             OngoingActivityChipModel.Hidden()
         }
     }
+
+    private val Configuration.isLandscape: Boolean
+        get() = orientation == Configuration.ORIENTATION_LANDSCAPE
 
     companion object {
         private val TAG = "ChipsViewModel".pad()

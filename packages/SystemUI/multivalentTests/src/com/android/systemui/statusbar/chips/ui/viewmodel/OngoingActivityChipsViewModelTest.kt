@@ -404,7 +404,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
         }
 
         fun assertIsCallChip(latest: OngoingActivityChipModel?, notificationKey: String) {
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
             if (StatusBarConnectedDisplays.isEnabled) {
                 assertNotificationIcon(latest, notificationKey)
                 return
