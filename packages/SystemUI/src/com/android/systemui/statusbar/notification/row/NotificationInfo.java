@@ -17,9 +17,12 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static android.app.Notification.EXTRA_BUILDER_APPLICATION_INFO;
+import static android.app.NotificationChannel.SYSTEM_RESERVED_IDS;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
+import static android.service.notification.Adjustment.KEY_SUMMARIZATION;
+import static android.service.notification.Adjustment.KEY_TYPE;
 
 import static com.android.app.animation.Interpolators.FAST_OUT_SLOW_IN;
 
@@ -27,10 +30,12 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.app.Flags;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -41,6 +46,7 @@ import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.service.notification.NotificationAssistantService;
 import android.service.notification.StatusBarNotification;
 import android.text.Html;
 import android.text.TextUtils;
@@ -50,6 +56,7 @@ import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Slog;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
@@ -63,6 +70,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
+import com.android.systemui.statusbar.notification.NmSummarizationUiFlag;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.lang.annotation.Retention;
@@ -126,6 +134,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     private OnSettingsClickListener mOnSettingsClickListener;
     private OnAppSettingsClickListener mAppSettingsClickListener;
+    private OnFeedbackClickListener mFeedbackClickListener;
     private NotificationGuts mGutsContainer;
     private Drawable mPkgIcon;
     private UiEventLogger mUiEventLogger;
@@ -187,6 +196,10 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         void onClick(View v, Intent intent);
     }
 
+    public interface OnFeedbackClickListener {
+        void onClick(View v, Intent intent);
+    }
+
     public void bindNotification(
             PackageManager pm,
             INotificationManager iNotificationManager,
@@ -197,6 +210,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             NotificationEntry entry,
             OnSettingsClickListener onSettingsClick,
             OnAppSettingsClickListener onAppSettingsClick,
+            OnFeedbackClickListener onFeedbackClickListener,
             UiEventLogger uiEventLogger,
             boolean isDeviceProvisioned,
             boolean isNonblockable,
@@ -214,6 +228,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         mSbn = entry.getSbn();
         mPm = pm;
         mAppSettingsClickListener = onAppSettingsClick;
+        mFeedbackClickListener = onFeedbackClickListener;
         mAppName = mPackageName;
         mOnSettingsClickListener = onSettingsClick;
         mSingleNotificationChannel = notificationChannel;
@@ -318,25 +333,76 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         // Delegate
         bindDelegate();
 
-        // Set up app settings link (i.e. Customize)
-        View settingsLinkView = findViewById(R.id.app_settings);
-        Intent settingsIntent = getAppSettingsIntent(mPm, mPackageName,
-                mSingleNotificationChannel,
-                mSbn.getId(), mSbn.getTag());
-        if (settingsIntent != null
-                && !TextUtils.isEmpty(mSbn.getNotification().getSettingsText())) {
-            settingsLinkView.setVisibility(VISIBLE);
-            settingsLinkView.setOnClickListener((View view) -> {
-                mAppSettingsClickListener.onClick(view, settingsIntent);
-            });
+
+        if (Flags.notificationClassificationUi() &&
+                SYSTEM_RESERVED_IDS.contains(mSingleNotificationChannel.getId())) {
+            bindFeedback();
         } else {
-            settingsLinkView.setVisibility(View.GONE);
+            // Set up app settings link (i.e. Customize)
+            View settingsLinkView = findViewById(R.id.app_settings);
+            Intent settingsIntent = getAppSettingsIntent(mPm, mPackageName,
+                    mSingleNotificationChannel,
+                    mSbn.getId(), mSbn.getTag());
+            if (settingsIntent != null
+                    && !TextUtils.isEmpty(mSbn.getNotification().getSettingsText())) {
+                settingsLinkView.setVisibility(VISIBLE);
+                settingsLinkView.setOnClickListener((View view) -> {
+                    mAppSettingsClickListener.onClick(view, settingsIntent);
+                });
+            } else {
+                settingsLinkView.setVisibility(View.GONE);
+            }
         }
 
         // System Settings button.
         final View settingsButton = findViewById(R.id.info);
         settingsButton.setOnClickListener(getSettingsOnClickListener());
         settingsButton.setVisibility(settingsButton.hasOnClickListeners() ? VISIBLE : GONE);
+    }
+
+    private void bindFeedback() {
+        View feedbackButton = findViewById(R.id.feedback);
+        Intent intent = getAssistantFeedbackIntent(mINotificationManager, mPm, mEntry);
+        if (!android.app.Flags.notificationClassificationUi() || intent == null) {
+            feedbackButton.setVisibility(GONE);
+        } else {
+            feedbackButton.setVisibility(VISIBLE);
+            feedbackButton.setOnClickListener((View v) -> {
+                if (mFeedbackClickListener != null) {
+                    mFeedbackClickListener.onClick(v, intent);
+                }
+            });
+        }
+    }
+
+    public static Intent getAssistantFeedbackIntent(INotificationManager inm, PackageManager pm,
+            NotificationEntry entry) {
+        try {
+            ComponentName assistant = inm.getAllowedNotificationAssistant();
+            if (assistant == null) {
+                return null;
+            }
+            Intent intent = new Intent(
+                    NotificationAssistantService.ACTION_NOTIFICATION_ASSISTANT_FEEDBACK_SETTINGS)
+                    .setPackage(assistant.getPackageName());
+            final List<ResolveInfo> resolveInfos = pm.queryIntentActivities(
+                    intent,
+                    PackageManager.MATCH_DEFAULT_ONLY
+            );
+            if (resolveInfos == null || resolveInfos.size() == 0 || resolveInfos.get(0) == null) {
+                return null;
+            }
+            final ActivityInfo activityInfo = resolveInfos.get(0).activityInfo;
+            intent.setClassName(activityInfo.packageName, activityInfo.name);
+
+            intent.putExtra(NotificationAssistantService.EXTRA_NOTIFICATION_KEY, entry.getKey());
+            intent.putExtra(NotificationAssistantService.EXTRA_NOTIFICATION_ADJUSTMENT,
+                    entry.getRanking().getSummarization() != null ? KEY_SUMMARIZATION : KEY_TYPE);
+            return intent;
+        } catch (Exception e) {
+            Slog.d(TAG, "no assistant?", e);
+            return null;
+        }
     }
 
     private OnClickListener getSettingsOnClickListener() {
