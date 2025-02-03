@@ -71,7 +71,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.dynamicanimation.animation.FloatPropertyCompat;
 import androidx.dynamicanimation.animation.SpringAnimation;
-import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
@@ -361,39 +360,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     };
 
-    private final SpringAnimation mMagneticAnimator = new SpringAnimation(
-            this, FloatPropertyCompat.createFloatPropertyCompat(TRANSLATE_CONTENT));
-
-    private final MagneticRowListener mMagneticRowListener = new MagneticRowListener() {
-
-        @Override
-        public void setMagneticTranslation(float translation) {
-            if (mMagneticAnimator.isRunning()) {
-                mMagneticAnimator.animateToFinalPosition(translation);
-            } else {
-                setTranslation(translation);
-            }
-        }
-
-        @Override
-        public void triggerMagneticForce(float endTranslation, @NonNull SpringForce springForce,
-                float startVelocity) {
-            cancelMagneticAnimations();
-            mMagneticAnimator.setSpring(springForce);
-            mMagneticAnimator.setStartVelocity(startVelocity);
-            mMagneticAnimator.animateToFinalPosition(endTranslation);
-        }
-
-        @Override
-        public void cancelMagneticAnimations() {
-            cancelSnapBackAnimation();
-            cancelTranslateAnimation();
-            mMagneticAnimator.cancel();
-        }
-    };
+    @Override
+    protected void cancelTranslationAnimations() {
+        cancelSnapBackAnimation();
+        cancelTranslateAnimation();
+    }
 
     private void cancelSnapBackAnimation() {
-        PhysicsAnimator<ExpandableNotificationRow> animator =
+        PhysicsAnimator<ExpandableView> animator =
                 PhysicsAnimator.getInstanceIfExists(this /* target */);
         if (animator != null) {
             animator.cancel();
@@ -2044,6 +2018,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 new NotificationInlineImageCache());
         float radius = getResources().getDimension(R.dimen.notification_corner_radius_small);
         mSmallRoundness = radius / getMaxRadius();
+        mMagneticAnimator = new SpringAnimation(
+                this, FloatPropertyCompat.createFloatPropertyCompat(TRANSLATE_CONTENT));
         initDimens();
     }
 
@@ -3300,6 +3276,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     /**
+     * For the case of an {@link ExpandableNotificationRow}, the dismissibility of the row considers
+     * the exposure of guts, the state of the  notification entry, and if the view itself is allowed
+     * to be dismissed.
+     */
+    @Override
+    public boolean canExpandableViewBeDismissed() {
+        if (areGutsExposed() || !mEntry.hasFinishedInitialization()) {
+            return false;
+        }
+        return canViewBeDismissed();
+    }
+
+    /**
      * @return Whether this view is allowed to be dismissed. Only valid for visible notifications as
      * otherwise some state might not be updated.
      */
@@ -4067,6 +4056,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mLayouts = new NotificationContentView[]{mPrivateLayout, mPublicLayout};
     }
 
+    @VisibleForTesting
+    public void setMagneticRowListener(MagneticRowListener listener) {
+        mMagneticRowListener = listener;
+    }
+
     /**
      * Equivalent to View.OnLongClickListener with coordinates
      */
@@ -4316,9 +4310,5 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             return;
         }
         mLogger.logRemoveTransientRow(row.getEntry(), getEntry());
-    }
-
-    public MagneticRowListener getMagneticRowListener() {
-        return mMagneticRowListener;
     }
 }

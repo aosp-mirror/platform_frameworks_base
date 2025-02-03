@@ -57,7 +57,7 @@ constructor(
         SpringForce().setStiffness(SNAP_BACK_STIFFNESS).setDampingRatio(SNAP_BACK_DAMPING_RATIO)
 
     // Multiplier applied to the translation of a row while swiped
-    private val swipedRowMultiplier =
+    val swipedRowMultiplier =
         MAGNETIC_TRANSLATION_MULTIPLIERS[MAGNETIC_TRANSLATION_MULTIPLIERS.size / 2]
 
     override fun setSwipeThresholdPx(thresholdPx: Float) {
@@ -111,24 +111,22 @@ constructor(
     ): Boolean {
         if (!row.isSwipedTarget()) return false
 
+        val canTargetBeDismissed =
+            currentMagneticListeners.swipedListener()?.canRowBeDismissed() ?: false
         when (currentState) {
             State.IDLE -> {
                 logger.logMagneticRowTranslationNotSet(currentState, row.entry)
                 return false
             }
             State.TARGETS_SET -> {
-                pullTargets(translation)
+                pullTargets(translation, canTargetBeDismissed)
                 currentState = State.PULLING
             }
             State.PULLING -> {
-                val targetTranslation = swipedRowMultiplier * translation
-                val crossedThreshold = abs(targetTranslation) >= magneticDetachThreshold
-                if (crossedThreshold) {
-                    snapNeighborsBack()
-                    currentMagneticListeners.swipedListener()?.let { detach(it, translation) }
-                    currentState = State.DETACHED
+                if (canTargetBeDismissed) {
+                    pullDismissibleRow(translation)
                 } else {
-                    pullTargets(translation)
+                    pullTargets(translation, canSwipedBeDismissed = false)
                 }
             }
             State.DETACHED -> {
@@ -139,23 +137,49 @@ constructor(
         return true
     }
 
-    private fun pullTargets(translation: Float) {
-        var targetTranslation: Float
-        currentMagneticListeners.forEachIndexed { i, listener ->
-            targetTranslation = MAGNETIC_TRANSLATION_MULTIPLIERS[i] * translation
-            listener?.setMagneticTranslation(targetTranslation)
+    private fun pullDismissibleRow(translation: Float) {
+        val targetTranslation = swipedRowMultiplier * translation
+        val crossedThreshold = abs(targetTranslation) >= magneticDetachThreshold
+        if (crossedThreshold) {
+            snapNeighborsBack()
+            currentMagneticListeners.swipedListener()?.let { detach(it, translation) }
+            currentState = State.DETACHED
+        } else {
+            pullTargets(translation, canSwipedBeDismissed = true)
         }
-        playPullHaptics(mappedTranslation = swipedRowMultiplier * translation)
     }
 
-    private fun playPullHaptics(mappedTranslation: Float) {
+    private fun pullTargets(translation: Float, canSwipedBeDismissed: Boolean) {
+        var targetTranslation: Float
+        currentMagneticListeners.forEachIndexed { i, listener ->
+            listener?.let {
+                if (!canSwipedBeDismissed || !it.canRowBeDismissed()) {
+                    // Use a reduced translation if the target swiped can't be dismissed or if the
+                    // target itself can't be dismissed
+                    targetTranslation =
+                        MAGNETIC_TRANSLATION_MULTIPLIERS[i] * translation * MAGNETIC_REDUCTION
+                } else {
+                    targetTranslation = MAGNETIC_TRANSLATION_MULTIPLIERS[i] * translation
+                }
+                it.setMagneticTranslation(targetTranslation)
+            }
+        }
+        playPullHaptics(mappedTranslation = swipedRowMultiplier * translation, canSwipedBeDismissed)
+    }
+
+    private fun playPullHaptics(mappedTranslation: Float, canSwipedBeDismissed: Boolean) {
         val normalizedTranslation = abs(mappedTranslation) / magneticDetachThreshold
-        val vibrationScale =
-            (normalizedTranslation * MAX_VIBRATION_SCALE).pow(VIBRATION_PERCEPTION_EXPONENT)
+        val scaleFactor =
+            if (canSwipedBeDismissed) {
+                WEAK_VIBRATION_SCALE
+            } else {
+                STRONG_VIBRATION_SCALE
+            }
+        val vibrationScale = scaleFactor * normalizedTranslation
         msdlPlayer.playToken(
             MSDLToken.DRAG_INDICATOR_CONTINUOUS,
             InteractionProperties.DynamicVibrationScale(
-                scale = vibrationScale,
+                scale = vibrationScale.pow(VIBRATION_PERCEPTION_EXPONENT),
                 vibrationAttributes = VIBRATION_ATTRIBUTES_PIPELINING,
             ),
         )
@@ -233,6 +257,8 @@ constructor(
          */
         private val MAGNETIC_TRANSLATION_MULTIPLIERS = listOf(0.18f, 0.28f, 0.5f, 0.28f, 0.18f)
 
+        const val MAGNETIC_REDUCTION = 0.65f
+
         /** Spring parameters for physics animators */
         private const val DETACH_STIFFNESS = 800f
         private const val DETACH_DAMPING_RATIO = 0.95f
@@ -244,7 +270,8 @@ constructor(
                 .setUsage(VibrationAttributes.USAGE_TOUCH)
                 .setFlags(VibrationAttributes.FLAG_PIPELINED_EFFECT)
                 .build()
-        private const val MAX_VIBRATION_SCALE = 0.2f
         private const val VIBRATION_PERCEPTION_EXPONENT = 1 / 0.89f
+        private const val WEAK_VIBRATION_SCALE = 0.2f
+        private const val STRONG_VIBRATION_SCALE = 0.45f
     }
 }

@@ -6609,10 +6609,7 @@ public class NotificationStackScrollLayout
 
     static boolean canChildBeDismissed(View v) {
         if (v instanceof ExpandableNotificationRow row) {
-            if (row.areGutsExposed() || !row.getEntry().hasFinishedInitialization()) {
-                return false;
-            }
-            return row.canViewBeDismissed();
+            return row.canExpandableViewBeDismissed();
         }
         return false;
     }
