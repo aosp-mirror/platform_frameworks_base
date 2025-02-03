@@ -5605,7 +5605,6 @@ final class ActivityRecord extends WindowToken {
         }
 
         mAtmService.mBackNavigationController.onAppVisibilityChanged(this, visible);
-        onChildVisibilityRequested(visible);
 
         final DisplayContent displayContent = getDisplayContent();
         displayContent.mOpeningApps.remove(this);

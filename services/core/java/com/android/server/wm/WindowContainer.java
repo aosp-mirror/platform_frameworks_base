@@ -138,7 +138,7 @@ import java.util.function.Predicate;
  * changes are made to this class.
  */
 class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<E>
-        implements Comparable<WindowContainer>, Animatable, SurfaceFreezer.Freezable,
+        implements Comparable<WindowContainer>, Animatable,
         InsetsControlTarget {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowContainer" : TAG_WM;
@@ -226,7 +226,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @Nullable
     private SurfaceControl mAnimationLeash;
 
-    final SurfaceFreezer mSurfaceFreezer;
     protected final WindowManagerService mWmService;
     final TransitionController mTransitionController;
 
@@ -361,7 +360,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mTransitionController = mWmService.mAtmService.getTransitionController();
         mSyncTransaction = wms.mTransactionFactory.get();
         mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished, wms);
-        mSurfaceFreezer = new SurfaceFreezer(this, wms);
     }
 
     /**
@@ -908,7 +906,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         final DisplayContent dc = getDisplayContent();
         if (dc != null) {
             dc.mClosingChangingContainers.remove(this);
-            mSurfaceFreezer.unfreeze(getSyncTransaction());
         }
         while (!mChildren.isEmpty()) {
             final E child = mChildren.getLast();
@@ -1124,9 +1121,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             // Cancel any change transition queued-up for this container on the old display when
             // this container is moved from the old display.
             mDisplayContent.mClosingChangingContainers.remove(this);
-            if (mDisplayContent.mChangingContainers.remove(this)) {
-                mSurfaceFreezer.unfreeze(getSyncTransaction());
-            }
+            mDisplayContent.mChangingContainers.remove(this);
         }
         mDisplayContent = dc;
         if (dc != null && dc != this && mPendingTransaction != null) {
@@ -1434,33 +1429,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return setVisibleRequested(newVisReq);
     }
 
-    /**
-     * Called when the visibility of a child is asked to change. This is before visibility actually
-     * changes (eg. a transition animation might play out first).
-     */
-    void onChildVisibilityRequested(boolean visible) {
-        // If we are losing visibility, then a snapshot isn't necessary and we are no-longer
-        // part of a change transition.
-        if (!visible) {
-            boolean skipUnfreeze = false;
-            if (asTaskFragment() != null) {
-                // If the organized TaskFragment is closing while resizing, we want to keep track of
-                // its starting bounds to make sure the animation starts at the correct position.
-                // This should be called before unfreeze() because we record the starting bounds
-                // in SurfaceFreezer.
-                skipUnfreeze = asTaskFragment().setClosingChangingStartBoundsIfNeeded();
-            }
-
-            if (!skipUnfreeze) {
-                mSurfaceFreezer.unfreeze(getSyncTransaction());
-            }
-        }
-        WindowContainer parent = getParent();
-        if (parent != null) {
-            parent.onChildVisibilityRequested(visible);
-        }
-    }
-
     /** Whether this window is closing while resizing. */
     boolean isClosingWhenResizing() {
         return mDisplayContent != null
@@ -1545,9 +1513,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void onAppTransitionDone() {
-        if (mSurfaceFreezer.hasLeash()) {
-            mSurfaceFreezer.unfreeze(getSyncTransaction());
-        }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
             wc.onAppTransitionDone();
@@ -2773,15 +2738,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     protected void setLayer(Transaction t, int layer) {
-        if (mSurfaceFreezer.hasLeash()) {
-            // When the freezer has created animation leash parent for the window, set the layer
-            // there instead.
-            mSurfaceFreezer.setLayer(t, layer);
-        } else {
-            // Route through surface animator to accommodate that our surface control might be
-            // attached to the leash, and leash is attached to parent container.
-            mSurfaceAnimator.setLayer(t, layer);
-        }
+        // Route through surface animator to accommodate that our surface control might be
+        // attached to the leash, and leash is attached to parent container.
+        mSurfaceAnimator.setLayer(t, layer);
     }
 
     int getLastLayer() {
@@ -2793,20 +2752,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     protected void setRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer) {
-        if (mSurfaceFreezer.hasLeash()) {
-            // When the freezer has created animation leash parent for the window, set the layer
-            // there instead.
-            mSurfaceFreezer.setRelativeLayer(t, relativeTo, layer);
-        } else {
-            // Route through surface animator to accommodate that our surface control might be
-            // attached to the leash, and leash is attached to parent container.
-            mSurfaceAnimator.setRelativeLayer(t, relativeTo, layer);
-        }
+        // Route through surface animator to accommodate that our surface control might be
+        // attached to the leash, and leash is attached to parent container.
+        mSurfaceAnimator.setRelativeLayer(t, relativeTo, layer);
     }
 
     protected void reparentSurfaceControl(Transaction t, SurfaceControl newParent) {
         // Don't reparent active leashes since the animator won't know about the change.
-        if (mSurfaceFreezer.hasLeash() || mSurfaceAnimator.hasLeash()) return;
+        if (mSurfaceAnimator.hasLeash()) return;
         t.reparent(getSurfaceControl(), newParent);
     }
 
@@ -3044,7 +2997,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // TODO: This should use isVisible() but because isVisible has a really weird meaning at
         // the moment this doesn't work for all animatable window containers.
         mSurfaceAnimator.startAnimation(t, anim, hidden, type, animationFinishedCallback,
-                animationCancelledCallback, snapshotAnim, mSurfaceFreezer);
+                animationCancelledCallback, snapshotAnim);
     }
 
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
@@ -3066,7 +3019,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void cancelAnimation() {
         doAnimationFinished(mSurfaceAnimator.getAnimationType(), mSurfaceAnimator.getAnimation());
         mSurfaceAnimator.cancelAnimation();
-        mSurfaceFreezer.unfreeze(getSyncTransaction());
     }
 
     /** Whether we can start change transition with this window and current display status. */
@@ -3097,7 +3049,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
-     * Initializes a change transition. See {@link SurfaceFreezer} for more information.
+     * Initializes a change transition.
      *
      * For now, this will only be called for the following cases:
      * 1. {@link Task} is changing windowing mode between fullscreen and freeform.
@@ -3109,8 +3061,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * use case.
      *
      * @param startBounds The original bounds (on screen) of the surface we are snapshotting.
-     * @param freezeTarget The surface to take snapshot from. If {@code null}, we will take a
-     *                     snapshot from {@link #getFreezeSnapshotTarget()}.
      */
     void initializeChangeTransition(Rect startBounds, @Nullable SurfaceControl freezeTarget) {
         if (mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
@@ -3122,7 +3072,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // Calculate the relative position in parent container.
         final Rect parentBounds = getParent().getBounds();
         mTmpPoint.set(startBounds.left - parentBounds.left, startBounds.top - parentBounds.top);
-        mSurfaceFreezer.freeze(getSyncTransaction(), startBounds, mTmpPoint, freezeTarget);
     }
 
     void initializeChangeTransition(Rect startBounds) {
@@ -3131,23 +3080,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     ArraySet<WindowContainer> getAnimationSources() {
         return mSurfaceAnimationSources;
-    }
-
-    @Override
-    public SurfaceControl getFreezeSnapshotTarget() {
-        // Only allow freezing if this window is in a TRANSIT_CHANGE
-        if (!mDisplayContent.mAppTransition.containsTransitRequest(TRANSIT_CHANGE)
-                || !mDisplayContent.mChangingContainers.contains(this)) {
-            return null;
-        }
-        return getSurfaceControl();
-    }
-
-    @Override
-    public void onUnfrozen() {
-        if (mDisplayContent != null) {
-            mDisplayContent.mChangingContainers.remove(this);
-        }
     }
 
     @Override
@@ -3279,7 +3211,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                         this, mTmpPoint, localBounds, screenBounds, closingStartBounds,
                         showBackdrop, false /* shouldCreateSnapshot */);
             } else {
-                final Rect startBounds = isChanging ? mSurfaceFreezer.mFreezeBounds : null;
+                final Rect startBounds = null;
                 adapters = controller.createRemoteAnimationRecord(
                         this, mTmpPoint, localBounds, screenBounds, startBounds, showBackdrop);
             }
@@ -3298,16 +3230,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             mTmpRect.offsetTo(mTmpPoint.x, mTmpPoint.y);
 
             final AnimationAdapter adapter = new LocalAnimationAdapter(
-                    new WindowChangeAnimationSpec(mSurfaceFreezer.mFreezeBounds, mTmpRect,
+                    new WindowChangeAnimationSpec(null /* startBounds */, mTmpRect,
                             displayInfo, durationScale, true /* isAppAnimation */,
                             false /* isThumbnail */),
                     getSurfaceAnimationRunner());
 
-            final AnimationAdapter thumbnailAdapter = mSurfaceFreezer.mSnapshot != null
-                    ? new LocalAnimationAdapter(new WindowChangeAnimationSpec(
-                    mSurfaceFreezer.mFreezeBounds, mTmpRect, displayInfo, durationScale,
-                    true /* isAppAnimation */, true /* isThumbnail */), getSurfaceAnimationRunner())
-                    : null;
+            final AnimationAdapter thumbnailAdapter = null;
             resultAdapters = new Pair<>(adapter, thumbnailAdapter);
             mTransit = transit;
             mTransitFlags = getDisplayContent().mAppTransition.getTransitFlags();
@@ -3731,7 +3659,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
     void updateSurfacePosition(Transaction t) {
-        if (mSurfaceControl == null || mSurfaceAnimator.hasLeash() || mSurfaceFreezer.hasLeash()) {
+        if (mSurfaceControl == null || mSurfaceAnimator.hasLeash()) {
             return;
         }
 

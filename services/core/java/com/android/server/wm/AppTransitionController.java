@@ -80,7 +80,6 @@ import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
-import android.view.Display;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
@@ -252,7 +251,6 @@ public class AppTransitionController {
         // Check if there is any override
         if (!overrideWithTaskFragmentRemoteAnimation(transit, activityTypes)) {
             // Unfreeze the windows that were previously frozen for TaskFragment animation.
-            unfreezeEmbeddedChangingWindows();
             overrideWithRemoteAnimationIfSet(animLpActivity, transit, activityTypes);
         }
 
@@ -543,16 +541,6 @@ public class AppTransitionController {
         return mRemoteAnimationDefinition != null
                 ? mRemoteAnimationDefinition.getAdapter(transit, activityTypes)
                 : null;
-    }
-
-    private void unfreezeEmbeddedChangingWindows() {
-        final ArraySet<WindowContainer> changingContainers = mDisplayContent.mChangingContainers;
-        for (int i = changingContainers.size() - 1; i >= 0; i--) {
-            final WindowContainer wc = changingContainers.valueAt(i);
-            if (wc.isEmbedded()) {
-                wc.mSurfaceFreezer.unfreeze(wc.getSyncTransaction());
-            }
-        }
     }
 
     private boolean transitionMayContainNonAppWindows(@TransitionOldType int transit) {

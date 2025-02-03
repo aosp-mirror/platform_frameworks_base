@@ -78,7 +78,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.Rect;
-import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.Build;
@@ -113,7 +112,6 @@ import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
 import android.window.ITaskFragmentOrganizer;
 import android.window.ITransitionPlayer;
-import android.window.ScreenCapture;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowRemovalInfo;
 import android.window.TaskFragmentOrganizer;
@@ -1110,21 +1108,6 @@ public class WindowTestsBase extends SystemServiceTestsBase {
     public void removeGlobalMinSizeRestriction() {
         mAtm.mRootWindowContainer.forAllDisplays(
                 displayContent -> displayContent.mMinSizeOfResizeableTaskDp = 1);
-    }
-
-    /** Mocks the behavior of taking a snapshot. */
-    void mockSurfaceFreezerSnapshot(SurfaceFreezer surfaceFreezer) {
-        final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
-                mock(ScreenCapture.ScreenshotHardwareBuffer.class);
-        final HardwareBuffer hardwareBuffer = mock(HardwareBuffer.class);
-        spyOn(surfaceFreezer);
-        doReturn(screenshotBuffer).when(surfaceFreezer)
-                .createSnapshotBufferInner(any(), any());
-        doReturn(null).when(surfaceFreezer)
-                .createFromHardwareBufferInner(any());
-        doReturn(hardwareBuffer).when(screenshotBuffer).getHardwareBuffer();
-        doReturn(100).when(hardwareBuffer).getWidth();
-        doReturn(100).when(hardwareBuffer).getHeight();
     }
 
     static ComponentName getUniqueComponentName() {

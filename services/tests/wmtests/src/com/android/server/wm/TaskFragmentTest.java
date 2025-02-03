@@ -152,7 +152,6 @@ public class TaskFragmentTest extends WindowTestsBase {
                 ACTIVITY_TYPE_STANDARD);
         task.setBoundsUnchecked(new Rect(0, 0, 1000, 1000));
         mTaskFragment = createTaskFragmentWithEmbeddedActivity(task, mOrganizer);
-        mockSurfaceFreezerSnapshot(mTaskFragment.mSurfaceFreezer);
         final Rect startBounds = new Rect(0, 0, 500, 1000);
         final Rect endBounds = new Rect(500, 0, 1000, 1000);
         mTaskFragment.setRelativeEmbeddedBounds(startBounds);
@@ -179,44 +178,6 @@ public class TaskFragmentTest extends WindowTestsBase {
     }
 
     @Test
-    public void testStartChangeTransition_resetSurface() {
-        final Task task = createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW,
-                ACTIVITY_TYPE_STANDARD);
-        task.setBoundsUnchecked(new Rect(0, 0, 1000, 1000));
-        mTaskFragment = createTaskFragmentWithEmbeddedActivity(task, mOrganizer);
-        doReturn(mTransaction).when(mTaskFragment).getSyncTransaction();
-        doReturn(mTransaction).when(mTaskFragment).getPendingTransaction();
-        mLeash = mTaskFragment.getSurfaceControl();
-        mockSurfaceFreezerSnapshot(mTaskFragment.mSurfaceFreezer);
-        final Rect startBounds = new Rect(0, 0, 1000, 1000);
-        final Rect endBounds = new Rect(500, 500, 1000, 1000);
-        mTaskFragment.setRelativeEmbeddedBounds(startBounds);
-        mTaskFragment.recomputeConfiguration();
-        doReturn(true).when(mTaskFragment).isVisible();
-        doReturn(true).when(mTaskFragment).isVisibleRequested();
-
-        clearInvocations(mTransaction);
-        final Rect relStartBounds = new Rect(mTaskFragment.getRelativeEmbeddedBounds());
-        mTaskFragment.deferOrganizedTaskFragmentSurfaceUpdate();
-        mTaskFragment.setRelativeEmbeddedBounds(endBounds);
-        mTaskFragment.recomputeConfiguration();
-        assertTrue(mTaskFragment.shouldStartChangeTransition(startBounds, relStartBounds));
-        mTaskFragment.initializeChangeTransition(startBounds);
-        mTaskFragment.continueOrganizedTaskFragmentSurfaceUpdate();
-
-        // Surface reset when prepare transition.
-        verify(mTransaction).setPosition(mLeash, 0, 0);
-        verify(mTransaction).setWindowCrop(mLeash, 0, 0);
-
-        clearInvocations(mTransaction);
-        mTaskFragment.mSurfaceFreezer.unfreeze(mTransaction);
-
-        // Update surface after animation.
-        verify(mTransaction).setPosition(mLeash, 500, 500);
-        verify(mTransaction).setWindowCrop(mLeash, 500, 500);
-    }
-
-    @Test
     public void testStartChangeTransition_doNotFreezeWhenOnlyMoved() {
         final Rect startBounds = new Rect(0, 0, 1000, 1000);
         final Rect endBounds = new Rect(startBounds);
@@ -235,7 +196,6 @@ public class TaskFragmentTest extends WindowTestsBase {
 
     @Test
     public void testNotOkToAnimate_doNotStartChangeTransition() {
-        mockSurfaceFreezerSnapshot(mTaskFragment.mSurfaceFreezer);
         final Rect startBounds = new Rect(0, 0, 1000, 1000);
         final Rect endBounds = new Rect(500, 500, 1000, 1000);
         mTaskFragment.setRelativeEmbeddedBounds(startBounds);
