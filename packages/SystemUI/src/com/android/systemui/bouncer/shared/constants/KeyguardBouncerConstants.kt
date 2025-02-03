@@ -24,6 +24,7 @@ import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.Co
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_BUTTON
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_KEY
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_PRESSED
+import com.android.systemui.res.R
 
 object KeyguardBouncerConstants {
     /**
@@ -87,6 +88,13 @@ private fun <T> c(old: T, new: T): T {
 }
 
 object PinBouncerConstants {
+    @JvmField
+    val pinShapes = c(old = R.array.bouncer_pin_shapes, new = R.array.updated_bouncer_pin_shapes)
+    @JvmField
+    val pinDotAvd = c(old = R.drawable.pin_dot_avd, new = R.drawable.bouncer_shape_outline)
+    @JvmField
+    val pinDeleteAvd = c(old = R.drawable.pin_dot_delete_avd, new = R.drawable.bouncer_shape_delete)
+
     object Color {
         @JvmField val hintDot = colors.materialColorOnSurfaceVariant
         @JvmField val shape = colors.materialColorPrimary

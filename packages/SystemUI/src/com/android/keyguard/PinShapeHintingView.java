@@ -29,6 +29,7 @@ import android.widget.LinearLayout;
 import androidx.core.graphics.drawable.DrawableCompat;
 
 import com.android.systemui.Flags;
+import com.android.systemui.bouncer.shared.constants.PinBouncerConstants;
 import com.android.systemui.bouncer.shared.constants.PinBouncerConstants.Color;
 import com.android.systemui.res.R;
 
@@ -56,7 +57,7 @@ public class PinShapeHintingView extends LinearLayout implements PinShapeInput {
             ImageView pinDot = new ImageView(context, attrs);
             LayoutParams layoutParams = new LayoutParams(mDotDiameter, mDotDiameter);
             pinDot.setLayoutParams(layoutParams);
-            pinDot.setImageResource(R.drawable.pin_dot_avd);
+            pinDot.setImageResource(PinBouncerConstants.pinDotAvd);
             if (pinDot.getDrawable() != null) {
                 Drawable drawable = DrawableCompat.wrap(pinDot.getDrawable());
                 DrawableCompat.setTint(drawable, getPinHintDotColor());
@@ -81,7 +82,7 @@ public class PinShapeHintingView extends LinearLayout implements PinShapeInput {
             return;
         }
         mPosition--;
-        setAnimatedDrawable((ImageView) getChildAt(mPosition), R.drawable.pin_dot_delete_avd,
+        setAnimatedDrawable((ImageView) getChildAt(mPosition), PinBouncerConstants.pinDeleteAvd,
                 getPinHintDotColor());
     }
 
