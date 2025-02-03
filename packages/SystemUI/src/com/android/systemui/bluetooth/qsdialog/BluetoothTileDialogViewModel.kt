@@ -66,7 +66,7 @@ import kotlinx.coroutines.withContext
  *   by the dialog view.
  */
 @SysUISingleton
-internal class BluetoothTileDialogViewModel
+class BluetoothTileDialogViewModel
 @Inject
 constructor(
     private val deviceItemInteractor: DeviceItemInteractor,
@@ -396,7 +396,7 @@ constructor(
             else R.string.bt_is_off
     }
 
-    internal data class UiProperties(
+    data class UiProperties(
         @StringRes val subTitleResId: Int,
         val autoOnToggleVisibility: Int,
         @DimenRes val scrollViewMinHeightResId: Int,

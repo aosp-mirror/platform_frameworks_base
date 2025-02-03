@@ -125,7 +125,8 @@ private fun MapTileDetailsContent(tileDetailsViewModel: TileDetailsViewModel) {
     when (tileDetailsViewModel) {
         is InternetDetailsViewModel -> InternetDetailsContent(tileDetailsViewModel)
         is ScreenRecordDetailsViewModel -> ScreenRecordDetailsContent(tileDetailsViewModel)
-        is BluetoothDetailsViewModel -> BluetoothDetailsContent()
+        is BluetoothDetailsViewModel ->
+            BluetoothDetailsContent(tileDetailsViewModel.detailsContentViewModel)
         is ModesDetailsViewModel -> ModesDetailsContent(tileDetailsViewModel)
     }
 }

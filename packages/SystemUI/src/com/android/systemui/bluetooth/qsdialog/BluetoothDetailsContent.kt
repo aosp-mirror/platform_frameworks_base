@@ -24,13 +24,17 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.android.systemui.res.R
 
 @Composable
-fun BluetoothDetailsContent() {
+fun BluetoothDetailsContent(detailsContentViewModel: BluetoothTileDialogViewModel) {
     AndroidView(
         modifier = Modifier.fillMaxSize(),
         factory = { context ->
             // Inflate with the existing dialog xml layout
-            LayoutInflater.from(context).inflate(R.layout.bluetooth_tile_dialog, null)
-            // TODO: b/378513956 - Implement the bluetooth details view
+            val view =
+                LayoutInflater.from(context)
+                    .inflate(R.layout.bluetooth_tile_dialog, /* root= */ null)
+            detailsContentViewModel.showDetailsContent(/* expandable= */ null, view)
+            view
         },
+        onRelease = { detailsContentViewModel.contentManager.releaseView() },
     )
 }
