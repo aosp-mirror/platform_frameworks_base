@@ -5744,6 +5744,16 @@
     <string name="unpin_specific_target">Unpin <xliff:g id="label" example="Tweet">%1$s</xliff:g></string>
     <!-- View application info for a target. -->
     <string name="app_info">App info</string>
+    <!-- Accessibility announcement for the shortcut group (https://developer.android.com/training/sharing/direct-share-targets)
+     in the list of targets. [CHAR LIMIT=NONE]-->
+    <string name="shortcut_group_a11y_title">Direct share targets</string>
+    <!-- Accessibility announcement for the suggested application group in the list of targets.
+    [CHAR LIMIT=NONE] -->
+    <string name="suggested_apps_group_a11y_title">App suggestions</string>
+    <!-- Accessibility announcement for the all-applications group in the list of targets.
+    [CHAR LIMIT=NONE] -->
+    <string name="all_apps_group_a11y_title">App list</string>
+
 
     <!-- The representation of a time duration when negative. An example is -1:14. This can be used with a countdown timer for example.-->
     <string name="negative_duration">\u2212<xliff:g id="time" example="1:14">%1$s</xliff:g></string>

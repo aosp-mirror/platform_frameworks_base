@@ -4730,6 +4730,8 @@
   <java-symbol type="id" name="resolver_empty_state_container" />
   <java-symbol type="id" name="button_bar_container" />
   <java-symbol type="id" name="title_container" />
+  <java-symbol type="id" name="shortcuts_container" />
+  <java-symbol type="id" name="chooser_row" />
   <java-symbol type="string" name="resolver_cross_profile_blocked" />
   <java-symbol type="string" name="resolver_cant_share_with_work_apps_explanation" />
   <java-symbol type="string" name="resolver_cant_share_with_personal_apps_explanation" />
@@ -4739,6 +4741,9 @@
   <java-symbol type="string" name="resolver_no_work_apps_available" />
   <java-symbol type="string" name="resolver_no_personal_apps_available" />
   <java-symbol type="string" name="resolver_switch_on_work" />
+  <java-symbol type="string" name="shortcut_group_a11y_title" />
+  <java-symbol type="string" name="suggested_apps_group_a11y_title" />
+  <java-symbol type="string" name="all_apps_group_a11y_title" />
   <java-symbol type="drawable" name="ic_screenshot_edit" />
   <java-symbol type="dimen" name="resolver_empty_state_height" />
   <java-symbol type="dimen" name="resolver_empty_state_height_with_tabs" />
