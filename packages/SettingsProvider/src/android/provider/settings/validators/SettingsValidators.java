@@ -188,6 +188,38 @@ public class SettingsValidators {
         }
     };
 
+    /**
+     * Similar to {@link #LOCALE_VALIDATOR} but allows loose/subset matches against the list
+     * from {@link Locale#getAvailableLocales()}.
+     *
+     * <p>Expects that the string is '_'-separated with 1 to 3 parts. Then checks the parts against
+     * the locale list, returning true if any available locale matches the parts provided using
+     * case insensitive string comparison.
+     * <li>Part 1: match against {@link Locale#getLanguage()}</li>
+     * <li>Part 2, if present: match against {@link Locale#getCountry()}</li>
+     * <li>Part 3, if present: match against {@link Locale#getVariant()}</li>
+     */
+    public static final Validator LOCALE_LOOSE_VALIDATOR = value -> {
+        if (value == null) {
+            return true;
+        }
+        String[] parts = value.split("_", 3);
+        Locale[] validLocales = Locale.getAvailableLocales();
+        for (Locale locale : validLocales) {
+            if (!parts[0].equalsIgnoreCase(locale.getLanguage())) {
+                continue;
+            }
+            if (parts.length >= 2 && !parts[1].equalsIgnoreCase(locale.getCountry())) {
+                continue;
+            }
+            if (parts.length == 3 && !parts[2].equalsIgnoreCase(locale.getVariant())) {
+                continue;
+            }
+            return true;
+        }
+        return false;
+    };
+
     /** {@link Validator} that checks whether a value is a valid {@link JSONObject}. */
     public static final Validator JSON_OBJECT_VALIDATOR = (value) -> {
         if (value == null) {
