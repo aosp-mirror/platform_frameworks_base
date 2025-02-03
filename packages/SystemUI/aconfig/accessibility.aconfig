@@ -120,6 +120,16 @@ flag {
 }
 
 flag {
+    name: "update_window_magnifier_bottom_boundary"
+    namespace: "accessibility"
+    description: "Update the window magnifier boundary at the bottom to the top of the system gesture inset."
+    bug: "380320995"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "hearing_devices_dialog_related_tools"
     namespace: "accessibility"
     description: "Shows the related tools for hearing devices dialog."
