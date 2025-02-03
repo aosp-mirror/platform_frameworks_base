@@ -271,8 +271,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             @NonNull String permissionName, int deviceId) {
         Objects.requireNonNull(permissionName, "permission can't be null.");
         Objects.requireNonNull(packageName, "package name can't be null.");
+
         return mPermissionManagerServiceImpl.getPermissionRequestState(packageName, permissionName,
-                getPersistentDeviceId(deviceId));
+                deviceId, getPersistentDeviceId(deviceId));
     }
 
     private String getPersistentDeviceId(int deviceId) {
