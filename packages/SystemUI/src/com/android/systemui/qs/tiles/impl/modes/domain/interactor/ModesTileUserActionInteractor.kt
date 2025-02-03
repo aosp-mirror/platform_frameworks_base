@@ -21,6 +21,7 @@ import android.provider.Settings
 import android.util.Log
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.flags.QSComposeFragment
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.base.interactor.QSTileInput
@@ -31,11 +32,14 @@ import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
 import com.android.systemui.statusbar.policy.ui.dialog.ModesDialogDelegate
 import com.android.systemui.statusbar.policy.ui.dialog.ModesDialogEventLogger
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.withContext
 
 @SysUISingleton
 class ModesTileUserActionInteractor
 @Inject
 constructor(
+    @Main private val mainContext: CoroutineContext,
     private val qsTileIntentUserInputHandler: QSTileIntentUserInputHandler,
     // TODO(b/353896370): The domain layer should not have to depend on the UI layer.
     private val dialogDelegate: ModesDialogDelegate,
@@ -65,7 +69,7 @@ constructor(
         dialogDelegate.showDialog(expandable)
     }
 
-    fun handleToggleClick(modesTileModel: ModesTileModel) {
+    suspend fun handleToggleClick(modesTileModel: ModesTileModel) {
         if (QSComposeFragment.isUnexpectedlyInLegacyMode()) {
             return
         }
@@ -83,9 +87,11 @@ constructor(
 
             if (zenModeInteractor.shouldAskForZenDuration(dnd)) {
                 dialogEventLogger.logOpenDurationDialog(dnd)
-                // NOTE: The dialog handles turning on the mode itself.
-                val dialog = dialogDelegate.makeDndDurationDialog()
-                dialog.show()
+                withContext(mainContext) {
+                    // NOTE: The dialog handles turning on the mode itself.
+                    val dialog = dialogDelegate.makeDndDurationDialog()
+                    dialog.show()
+                }
             } else {
                 dialogEventLogger.logModeOn(dnd)
                 zenModeInteractor.activateMode(dnd)

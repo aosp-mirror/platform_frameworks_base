@@ -30,6 +30,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.asIcon
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.mainCoroutineContext
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandlerSubject
 import com.android.systemui.qs.tiles.base.actions.qsTileIntentUserInputHandler
@@ -62,6 +63,7 @@ class ModesTileUserActionInteractorTest : SysuiTestCase() {
 
     private val underTest =
         ModesTileUserActionInteractor(
+            kosmos.mainCoroutineContext,
             inputHandler,
             mockDialogDelegate,
             zenModeInteractor,

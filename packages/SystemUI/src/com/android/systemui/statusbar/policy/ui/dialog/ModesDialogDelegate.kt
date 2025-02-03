@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy.ui.dialog
 
+import android.annotation.UiThread;
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
@@ -205,6 +206,7 @@ constructor(
      * Special dialog to ask the user for the duration of DND. Not to be confused with the modes
      * dialog itself.
      */
+    @UiThread
     fun makeDndDurationDialog(): Dialog {
         val dialog =
             EnableDndDialogFactory(
