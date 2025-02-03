@@ -79,6 +79,7 @@ public enum DesktopModeFlags {
             Flags::enableDesktopWindowingMultiInstanceFeatures, true),
     ENABLE_DESKTOP_WINDOWING_PERSISTENCE(Flags::enableDesktopWindowingPersistence, true),
     ENABLE_DESKTOP_WINDOWING_QUICK_SWITCH(Flags::enableDesktopWindowingQuickSwitch, true),
+    ENABLE_DESKTOP_WINDOWING_SCVH_CACHE(Flags::enableDesktopWindowingScvhCacheBugFix, true),
     ENABLE_DESKTOP_WINDOWING_SIZE_CONSTRAINTS(Flags::enableDesktopWindowingSizeConstraints, true),
     ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS(Flags::enableDesktopWindowingTaskbarRunningApps,
             true),
