@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 
 /** Handles start activity logic in SystemUI. */
 @SysUISingleton
@@ -52,9 +53,10 @@ constructor(
     override fun registerTransition(
         cookie: ActivityTransitionAnimator.TransitionCookie,
         controllerFactory: ActivityTransitionAnimator.ControllerFactory,
+        scope: CoroutineScope,
     ) {
         if (!TransitionAnimator.longLivedReturnAnimationsEnabled()) return
-        activityStarterInternal.registerTransition(cookie, controllerFactory)
+        activityStarterInternal.registerTransition(cookie, controllerFactory, scope)
     }
 
     override fun unregisterTransition(cookie: ActivityTransitionAnimator.TransitionCookie) {

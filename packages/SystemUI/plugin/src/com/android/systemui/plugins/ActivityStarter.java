@@ -25,6 +25,8 @@ import android.view.View;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
+import kotlinx.coroutines.CoroutineScope;
+
 /**
  * An interface to start activities. This is used as a callback from the views to
  * {@link PhoneStatusBar} to allow custom handling for starting the activity, i.e. dismissing the
@@ -37,11 +39,12 @@ public interface ActivityStarter {
     /**
      * Registers the given {@link ActivityTransitionAnimator.ControllerFactory} for launching and
      * closing transitions matching the {@link ActivityTransitionAnimator.TransitionCookie} and the
-     * {@link ComponentName} that it contains.
+     * {@link ComponentName} that it contains, within the given {@link CoroutineScope}.
      */
     void registerTransition(
             ActivityTransitionAnimator.TransitionCookie cookie,
-            ActivityTransitionAnimator.ControllerFactory controllerFactory);
+            ActivityTransitionAnimator.ControllerFactory controllerFactory,
+            CoroutineScope scope);
 
     /**
      * Unregisters the {@link ActivityTransitionAnimator.ControllerFactory} previously registered

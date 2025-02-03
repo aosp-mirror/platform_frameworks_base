@@ -25,11 +25,14 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.flags.EnableSceneContainer
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.shared.Flags as SharedFlags
 import com.android.systemui.statusbar.SysuiStatusBarStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,6 +51,7 @@ class ActivityStarterImplTest : SysuiTestCase() {
     @Mock private lateinit var activityStarterInternal: ActivityStarterInternalImpl
     @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
     private lateinit var underTest: ActivityStarterImpl
+    private val kosmos = testKosmos()
     private val mainExecutor = FakeExecutor(FakeSystemClock())
 
     @Before
@@ -69,12 +73,18 @@ class ActivityStarterImplTest : SysuiTestCase() {
     @EnableSceneContainer
     @Test
     fun registerTransition_forwardsTheRequest() {
-        val cookie = mock(ActivityTransitionAnimator.TransitionCookie::class.java)
-        val controllerFactory = mock(ActivityTransitionAnimator.ControllerFactory::class.java)
+        with(kosmos) {
+            testScope.runTest {
+                val cookie = mock(ActivityTransitionAnimator.TransitionCookie::class.java)
+                val controllerFactory =
+                    mock(ActivityTransitionAnimator.ControllerFactory::class.java)
 
-        underTest.registerTransition(cookie, controllerFactory)
+                underTest.registerTransition(cookie, controllerFactory, testScope)
 
-        verify(activityStarterInternal).registerTransition(eq(cookie), eq(controllerFactory))
+                verify(activityStarterInternal)
+                    .registerTransition(eq(cookie), eq(controllerFactory), eq(testScope))
+            }
+        }
     }
 
     @DisableFlags(
@@ -83,12 +93,17 @@ class ActivityStarterImplTest : SysuiTestCase() {
     )
     @Test
     fun registerTransition_doesNotForwardTheRequest_whenFlaggedOff() {
-        val cookie = mock(ActivityTransitionAnimator.TransitionCookie::class.java)
-        val controllerFactory = mock(ActivityTransitionAnimator.ControllerFactory::class.java)
+        with(kosmos) {
+            testScope.runTest {
+                val cookie = mock(ActivityTransitionAnimator.TransitionCookie::class.java)
+                val controllerFactory =
+                    mock(ActivityTransitionAnimator.ControllerFactory::class.java)
 
-        underTest.registerTransition(cookie, controllerFactory)
+                underTest.registerTransition(cookie, controllerFactory, testScope)
 
-        verify(activityStarterInternal, never()).registerTransition(any(), any())
+                verify(activityStarterInternal, never()).registerTransition(any(), any(), any())
+            }
+        }
     }
 
     @EnableFlags(
