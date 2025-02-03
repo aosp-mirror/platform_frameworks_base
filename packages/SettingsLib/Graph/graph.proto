@@ -93,6 +93,8 @@ message PreferenceProto {
   optional PermissionsProto read_permissions = 17;
   // The required permissions to write preference value.
   optional PermissionsProto write_permissions = 18;
+  // Tag constants associated with the preference.
+  repeated string tags = 19;
 
   // Target of an Intent
   message ActionTarget {

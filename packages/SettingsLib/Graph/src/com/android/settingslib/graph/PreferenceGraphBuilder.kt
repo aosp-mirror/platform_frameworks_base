@@ -412,6 +412,7 @@ fun PreferenceMetadata.toProto(
         }
         metadata.intent(context)?.let { actionTarget = it.toActionTarget(context) }
         screenMetadata.getLaunchIntent(context, metadata)?.let { launchIntent = it.toProto() }
+        for (tag in metadata.tags(context)) addTags(tag)
     }
     persistent = metadata.isPersistent(context)
     if (persistent) {
