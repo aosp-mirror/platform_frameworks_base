@@ -192,10 +192,10 @@ public class Bubble implements BubbleViewProvider {
      * that bubble being added back to the stack anyways.
      */
     @Nullable
-    private PendingIntent mIntent;
-    private boolean mIntentActive;
+    private PendingIntent mPendingIntent;
+    private boolean mPendingIntentActive;
     @Nullable
-    private PendingIntent.CancelListener mIntentCancelListener;
+    private PendingIntent.CancelListener mPendingIntentCancelListener;
 
     /**
      * Sent when the bubble & notification are no longer visible to the user (i.e. no
@@ -205,12 +205,10 @@ public class Bubble implements BubbleViewProvider {
     private PendingIntent mDeleteIntent;
 
     /**
-     * Used only for a special bubble in the stack that has {@link #mIsAppBubble} set to true.
-     * There can only be one of these bubbles in the stack and this intent will be populated for
-     * that bubble.
+     * Used for app & note bubbles.
      */
     @Nullable
-    private Intent mAppIntent;
+    private Intent mIntent;
 
     /**
      * Set while preparing a transition for animation. Several steps are needed before animation
@@ -275,7 +273,7 @@ public class Bubble implements BubbleViewProvider {
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
         mTaskId = INVALID_TASK_ID;
-        mAppIntent = intent;
+        mIntent = intent;
         mDesiredHeight = Integer.MAX_VALUE;
         mPackageName = intent.getPackage();
     }
@@ -294,7 +292,7 @@ public class Bubble implements BubbleViewProvider {
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
         mTaskId = INVALID_TASK_ID;
-        mAppIntent = null;
+        mIntent = null;
         mDesiredHeight = Integer.MAX_VALUE;
         mPackageName = info.getPackage();
         mShortcutInfo = info;
@@ -319,7 +317,7 @@ public class Bubble implements BubbleViewProvider {
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
         mTaskId = task.taskId;
-        mAppIntent = null;
+        mIntent = null;
         mDesiredHeight = Integer.MAX_VALUE;
         mPackageName = task.baseActivity.getPackageName();
     }
@@ -413,9 +411,9 @@ public class Bubble implements BubbleViewProvider {
         mGroupKey = entry.getGroupKey();
         mLocusId = entry.getLocusId();
         mBubbleMetadataFlagListener = listener;
-        mIntentCancelListener = intent -> {
-            if (mIntent != null) {
-                mIntent.unregisterCancelListener(mIntentCancelListener);
+        mPendingIntentCancelListener = intent -> {
+            if (mPendingIntent != null) {
+                mPendingIntent.unregisterCancelListener(mPendingIntentCancelListener);
             }
             mainExecutor.execute(() -> {
                 intentCancelListener.onPendingIntentCanceled(this);
@@ -601,10 +599,10 @@ public class Bubble implements BubbleViewProvider {
         if (cleanupTaskView) {
             cleanupTaskView();
         }
-        if (mIntent != null) {
-            mIntent.unregisterCancelListener(mIntentCancelListener);
+        if (mPendingIntent != null) {
+            mPendingIntent.unregisterCancelListener(mPendingIntentCancelListener);
         }
-        mIntentActive = false;
+        mPendingIntentActive = false;
     }
 
     /** Cleans-up the taskview associated with this bubble (possibly removing the task from wm) */
@@ -874,19 +872,19 @@ public class Bubble implements BubbleViewProvider {
             mDesiredHeightResId = entry.getBubbleMetadata().getDesiredHeightResId();
             mIcon = entry.getBubbleMetadata().getIcon();
 
-            if (!mIntentActive || mIntent == null) {
-                if (mIntent != null) {
-                    mIntent.unregisterCancelListener(mIntentCancelListener);
+            if (!mPendingIntentActive || mPendingIntent == null) {
+                if (mPendingIntent != null) {
+                    mPendingIntent.unregisterCancelListener(mPendingIntentCancelListener);
                 }
-                mIntent = entry.getBubbleMetadata().getIntent();
-                if (mIntent != null) {
-                    mIntent.registerCancelListener(mIntentCancelListener);
+                mPendingIntent = entry.getBubbleMetadata().getIntent();
+                if (mPendingIntent != null) {
+                    mPendingIntent.registerCancelListener(mPendingIntentCancelListener);
                 }
-            } else if (mIntent != null && entry.getBubbleMetadata().getIntent() == null) {
+            } else if (mPendingIntent != null && entry.getBubbleMetadata().getIntent() == null) {
                 // Was an intent bubble now it's a shortcut bubble... still unregister the listener
-                mIntent.unregisterCancelListener(mIntentCancelListener);
-                mIntentActive = false;
-                mIntent = null;
+                mPendingIntent.unregisterCancelListener(mPendingIntentCancelListener);
+                mPendingIntentActive = false;
+                mPendingIntent = null;
             }
             mDeleteIntent = entry.getBubbleMetadata().getDeleteIntent();
         }
@@ -926,12 +924,15 @@ public class Bubble implements BubbleViewProvider {
      * Sets if the intent used for this bubble is currently active (i.e. populating an
      * expanded view, expanded or not).
      */
-    void setIntentActive() {
-        mIntentActive = true;
+    void setPendingIntentActive() {
+        mPendingIntentActive = true;
     }
 
-    boolean isIntentActive() {
-        return mIntentActive;
+    /**
+     * Whether the pending intent of this bubble is active (i.e. has been sent).
+     */
+    boolean isPendingIntentActive() {
+        return mPendingIntentActive;
     }
 
     public InstanceId getInstanceId() {
@@ -1118,9 +1119,12 @@ public class Bubble implements BubbleViewProvider {
         }
     }
 
+    /**
+     * Returns the pending intent used to populate the bubble.
+     */
     @Nullable
-    PendingIntent getBubbleIntent() {
-        return mIntent;
+    PendingIntent getPendingIntent() {
+        return mPendingIntent;
     }
 
     /**
@@ -1128,31 +1132,33 @@ public class Bubble implements BubbleViewProvider {
      * intent for an app. In this case we don't show a badge on the icon.
      */
     public boolean isAppLaunchIntent() {
-        if (BubbleAnythingFlagHelper.enableCreateAnyBubble() && mAppIntent != null) {
-            return mAppIntent.hasCategory("android.intent.category.LAUNCHER");
+        if (BubbleAnythingFlagHelper.enableCreateAnyBubble() && mIntent != null) {
+            return mIntent.hasCategory("android.intent.category.LAUNCHER");
         }
         return false;
     }
 
+    /**
+     * Returns the pending intent to send when a bubble is dismissed (set via the notification API).
+     */
     @Nullable
     PendingIntent getDeleteIntent() {
         return mDeleteIntent;
     }
 
+    /**
+     * Returns the intent used to populate the bubble.
+     */
     @Nullable
-    @VisibleForTesting
-    public Intent getAppBubbleIntent() {
-        return mAppIntent;
+    public Intent getIntent() {
+        return mIntent;
     }
 
     /**
-     * Sets the intent for a bubble that is an app bubble (one for which {@link #mIsAppBubble} is
-     * true).
-     *
-     * @param appIntent The intent to set for the app bubble.
+     * Sets the intent used to populate the bubble.
      */
-    void setAppBubbleIntent(Intent appIntent) {
-        mAppIntent = appIntent;
+    void setIntent(Intent intent) {
+        mIntent = intent;
     }
 
     /**

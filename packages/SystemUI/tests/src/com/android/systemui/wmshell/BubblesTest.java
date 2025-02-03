@@ -2110,7 +2110,7 @@ public class BubblesTest extends SysuiTestCase {
         assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(noteBubbleKey);
         assertThat(mBubbleController.isStackExpanded()).isTrue();
         assertThat(mBubbleData.getBubbles().size()).isEqualTo(1);
-        assertThat(mBubbleData.getBubbles().get(0).getAppBubbleIntent()
+        assertThat(mBubbleData.getBubbles().get(0).getIntent()
                 .getStringExtra("hello")).isEqualTo("world");
         assertThat(mBubbleData.getOverflowBubbleWithKey(noteBubbleKey)).isNull();
     }
