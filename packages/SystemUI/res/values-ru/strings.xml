@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Уровень заряда батареи в процентах неизвестен."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>: подключено."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Подключено к: <xliff:g id="CAST">%s</xliff:g>."</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Не подключено"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Роуминг"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Отключен"</string>
@@ -536,11 +540,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Чтобы открыть приложение, используя виджет, вам нужно будет подтвердить свою личность. Обратите внимание, что виджеты видны всем, даже если планшет заблокирован. Некоторые виджеты не предназначены для использования на заблокированном экране. Добавлять их туда может быть небезопасно."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"ОК"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Кнопка \"Показать заставку\""</string>
-    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"Попробуйте режим домашнего центра"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"Пока устройство заряжается, будут показываться любимые заставки и вы сможете пользоваться привычными виджетами."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Попробовать"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Сменить пользователя."</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"раскрывающееся меню"</string>
@@ -804,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Появляется в верхней части уведомлений о сообщениях, в виде всплывающего чата, а также в качестве фото профиля на заблокированном экране, прерывает режим \"Не беспокоить\"."</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" не поддерживает функции разговоров."</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"Закрыть"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"Больше не показывать"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Эти уведомления нельзя изменить."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Уведомления о звонках нельзя изменить."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Эту группу уведомлений нельзя настроить здесь."</string>
@@ -918,16 +919,14 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Календарь"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Калькулятор"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Карты"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
-    <skip />
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"Включить или отключить контроль повторного нажатия"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"Включить или отключить управление указателем с клавиатуры"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"Включить или отключить залипание клавиш"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"Включить или отключить долгие нажатия клавиш"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Включить или отключить Voice Access"</string>
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"Включить или отключить TalkBack"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"Включить или отключить увеличение"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"Включить Озвучивание при нажатии"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Не беспокоить"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Кнопки регулировки громкости"</string>
     <string name="battery" msgid="769686279459897127">"Батарея"</string>
@@ -1290,7 +1289,7 @@
     <string name="missed_call" msgid="4228016077700161689">"Пропущенный вызов"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Будьте в курсе последних сообщений, пропущенных вызовов и обновлений статуса."</string>
-    <string name="people_tile_title" msgid="6589377493334871272">"Чат"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"Разговор"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Приостановлено в режиме \"Не беспокоить\""</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"Пользователь <xliff:g id="NAME">%1$s</xliff:g> отправил сообщение: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"Пользователь <xliff:g id="NAME">%1$s</xliff:g> отправил изображение"</string>
@@ -1307,6 +1306,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Используйте отпечаток пальца для входа."</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Требуется аутентификация. Приложите палец к сканеру отпечатков."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"Текущий вызов"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Мобильный интернет"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Подключено"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Временное подключение"</string>
@@ -1454,7 +1455,7 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Это приложение"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Специальные возможности"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Сочетания клавиш"</string>
-    <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"Настройки сочетаний клавиш"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"Настройка сочетаний клавиш"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Удалить сочетание клавиш?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Сбросить настройки?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="7636040209946696120">"Чтобы сохранить сочетание клавиш, нажмите одновременно клавишу действия и одну или несколько дополнительных клавиш"</string>
@@ -1512,12 +1513,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Вы выполнили жест для просмотра недавних приложений."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Чтобы увидеть недавние приложения, проведите по сенсорной панели тремя пальцами вверх и удерживайте."</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"Переход в другое приложение"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"Проведите по сенсорной панели четырьмя пальцами вправо."</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"Отлично!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"Вы выполнили жест перехода в другое приложение."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"Для перехода в другое приложение проведите по сенсорной панели четырьмя пальцами вправо."</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Все приложения"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Нажмите клавишу действия на клавиатуре."</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Блестяще!"</string>

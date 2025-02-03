@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Procentajul bateriei este necunoscut."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Conectat la <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"S-a stabilit conexiunea la <xliff:g id="CAST">%s</xliff:g>."</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Neconectat."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Dezactivate"</string>
@@ -536,11 +540,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Pentru a deschide o aplicație folosind un widget, va trebui să-ți confirmi identitatea. În plus, reține că oricine poate să vadă widgeturile, chiar dacă tableta este blocată. Este posibil ca unele widgeturi să nu fi fost create pentru ecranul de blocare și poate fi nesigur să le adaugi aici."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Butonul Afișează screensaverul"</string>
-    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"Explorează modul hub"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"Accesează widgeturile și screensaverele preferate în timpul încărcării."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Să începem"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Schimbă utilizatorul"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"meniu vertical"</string>
@@ -804,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Se afișează în partea de sus a notificărilor pentru conversații și ca fotografie de profil pe ecranul de blocare, apare ca un balon, întrerupe funcția Nu deranja"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritate"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> nu acceptă funcții pentru conversații"</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"Închide"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"Nu mai afișa"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Aceste notificări nu pot fi modificate."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Notificările pentru apeluri nu pot fi modificate."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Acest grup de notificări nu poate fi configurat aici"</string>
@@ -918,15 +919,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Calculator"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"Comută evitarea apăsării repetate"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"Comută tastele pentru mouse"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"Comută tastele adezive"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"Comută tastele lente"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Comută Accesul vocal"</string>
+    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
     <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Nu deranja"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Comandă rapidă din butoanele de volum"</string>
@@ -1307,6 +1309,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Folosește amprenta ca să deschizi"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Autentificare obligatorie. Atinge senzorul de amprentă pentru a te autentifica."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"Apel în desfășurare"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Date mobile"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Conectat"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Conectat temporar"</string>
@@ -1512,12 +1516,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Ai finalizat gestul pentru afișarea aplicațiilor recente."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Ca să vezi aplicațiile recente, glisează în sus și ține apăsat cu trei degete pe touchpad"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"Comută între aplicații"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"Glisează spre dreapta cu patru degete pe touchpad"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"Excelent!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"Ai finalizat gestul de trecere la altă aplicație."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"Glisează la dreapta cu patru degete pe touchpad pentru a comuta între aplicații"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Vezi toate aplicațiile"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Apasă tasta de acțiuni de pe tastatură"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Felicitări!"</string>

@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Porcentaje de batería desconocido."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Conectado a <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Conectado a <xliff:g id="CAST">%s</xliff:g>."</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"No conectado."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Desactivados"</string>
@@ -536,11 +540,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Para abrir una aplicación usando un widget, deberás verificar que eres tú. Además, ten en cuenta que cualquier persona podrá verlos, incluso aunque tu tablet esté bloqueada. Es posible que algunos widgets no estén pensados para la pantalla de bloqueo y no sea seguro añadirlos aquí."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Entendido"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Botón para mostrar el salvapantallas"</string>
-    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"Descubre el modo Base"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"Accede a tus widgets y salvapantallas favoritos mientras se carga."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Vamos allá"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Cambiar de usuario"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menú desplegable"</string>
@@ -804,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Se muestra encima de las notificaciones de conversaciones y como imagen de perfil en la pantalla de bloqueo, aparece como burbuja e interrumpe el modo No molestar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridad"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admite funciones de conversación"</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"Cerrar"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"No volver a mostrar"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Estas notificaciones no se pueden modificar."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Las notificaciones de llamada no se pueden modificar."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Este grupo de notificaciones no se puede configurar aquí"</string>
@@ -918,15 +919,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendario"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Calculadora"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"Activar/Desactivar teclas de rebote"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"Activar/Desactivar teclas del ratón"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"Activar/Desactivar teclas persistentes"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"Activar/Desactivar teclas lentas"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Activar/Desactivar Voice Access"</string>
+    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
     <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"No molestar"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Acceso directo de los botones de volumen"</string>
@@ -1307,6 +1309,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Usa la huella digital para abrir"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Autenticación obligatoria. Toca el sensor de huellas digitales para autenticarte."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"Llamada en curso"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Datos móviles"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Conectado"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Conectada temporalmente"</string>
@@ -1454,7 +1458,7 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Aplicación en uso"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Accesibilidad"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Combinaciones de teclas"</string>
-    <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"Personalizar combinaciones de teclas"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"Personalizar combinaciones"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"¿Eliminar combinación de teclas?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"¿Restablecer valores predeterminados?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="7636040209946696120">"Para crear esta combinación de teclas, pulsa la tecla de acción y una o varias teclas a la vez"</string>
@@ -1512,12 +1516,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Has completado el gesto para ver las aplicaciones recientes."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Para ver las aplicaciones recientes, desliza tres dedos hacia arriba y mantén pulsado en el panel táctil"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"Cambiar de aplicación"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"Desliza hacia la derecha con cuatro dedos en el panel táctil"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"¡Bien hecho!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"Has completado el gesto para cambiar de aplicación."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"Desliza hacia la derecha con cuatro dedos en el panel táctil para cambiar de aplicación"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Ver todas las aplicaciones"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Pulsa la tecla de acción de tu teclado"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"¡Muy bien!"</string>

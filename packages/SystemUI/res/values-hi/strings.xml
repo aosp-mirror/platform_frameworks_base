@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"इस बारे में जानकारी नहीं है कि अभी बैटरी कितने प्रतिशत चार्ज है."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> से कनेक्ट किया गया."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> से कनेक्ट है."</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"कनेक्ट नहीं है."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"रोमिंग"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"बंद है"</string>
@@ -536,11 +540,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"किसी विजेट से कोई ऐप्लिकेशन खोलने के लिए, आपको अपनी पहचान की पुष्टि करनी होगी. ध्यान रखें कि आपके टैबलेट के लॉक होने पर भी, कोई व्यक्ति विजेट देख सकता है. ऐसा हो सकता है कि कुछ विजेट, लॉक स्क्रीन पर दिखाने के लिए न बने हों. इन्हें लॉक स्क्रीन पर जोड़ना असुरक्षित हो सकता है."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"ठीक है"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"स्क्रीन सेवर दिखाने का बटन"</string>
-    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"हब मोड को एक्सप्लोर करें"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"चार्जिंग के दौरान, अपने पसंदीदा विजेट और स्क्रीन सेवर को ऐक्सेस करें."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"आइए शुरू करें"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"उपयोगकर्ता बदलें"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"पुलडाउन मेन्यू"</string>
@@ -804,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"यह कई तरीकों से दिखती है, जैसे कि बातचीत वाली सूचनाओं में सबसे ऊपर, बबल के तौर पर, और लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो के तौर पर. साथ ही, यह \'परेशान न करें\' मोड को बायपास कर सकती है"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर बातचीत की सुविधाएं काम नहीं करतीं"</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"खारिज करें"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"फिर से न दिखाएं"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ये सूचनाएं नहीं बदली जा सकती हैं."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"कॉल से जुड़ी सूचनाओं को ब्लॉक नहीं किया जा सकता."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"सूचनाओं के इस समूह को यहां कॉन्फ़िगर नहीं किया जा सकता"</string>
@@ -918,16 +919,14 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"कैलकुलेटर"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"मैप"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
-    <skip />
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"बाउंस बटन को टॉगल करें"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"कीबोर्ड पर माउस के बटन को टॉगल करें"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"स्टिकी बटन को टॉगल करें"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"स्लो बटन को टॉगल करें"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Voice Access को टॉगल करें"</string>
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"TalkBack को टॉगल करें"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"ज़ूम करने की सुविधा टॉगल करें"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"\'चुनें और सुनें\' सुविधा चालू करें"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"परेशान न करें"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"वॉल्यूम बटन का शॉर्टकट"</string>
     <string name="battery" msgid="769686279459897127">"बैटरी"</string>
@@ -1307,6 +1306,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"खोलने के लिए, फ़िंगरप्रिंट का इस्तेमाल करें"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"पुष्टि करना ज़रूरी है. पुष्टि करने के लिए, फ़िंगरप्रिंट सेंसर को छुएं."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"पहले से जारी कॉल"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"मोबाइल डेटा"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"कनेक्ट हो गया"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"इंटरनेट कनेक्शन कुछ समय के लिए है"</string>
@@ -1454,9 +1455,9 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"मौजूदा ऐप्लिकेशन"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"सुलभता"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"कीबोर्ड शॉर्टकट"</string>
-    <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"पसंद के मुताबिक शॉर्टकट बनाएं"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"शॉर्टकट पसंद के मुताबिक बनाएं"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"क्या आपको शॉर्टकट हटाना है?"</string>
-    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"क्या आपको फिर से डिफ़ॉल्ट सेटिंग चालू करनी है?"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"क्या आपको फिर से डिफ़ॉल्ट शॉर्टकट चालू करने हैं?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="7636040209946696120">"यह शॉर्टकट बनाने के लिए, ऐक्शन बटन और एक या उससे ज़्यादा अन्य बटन एक साथ दबाएं"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"ऐसा करने पर, पसंद के मुताबिक बनाया गया आपका शॉर्टकट हमेशा के लिए मिट जाएगा."</string>
     <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"ऐसा करने पर, पसंद के मुताबिक बनाए गए आपके सभी शॉर्टकट हमेशा के लिए मिट जाएंगे."</string>
@@ -1512,12 +1513,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"अब आपको हाथ के जेस्चर का इस्तेमाल करके, हाल ही में इस्तेमाल किए गए ऐप्लिकेशन देखने का तरीका पता चल गया है."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"हाल ही में इस्तेमाल किए गए ऐप्लिकेशन देखने के लिए, अपने टचपैड पर तीन उंगलियों से ऊपर की ओर स्वाइप करें और दबाकर रखें"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"ऐप्लिकेशन के बीच स्विच करें"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"अपने टचपैड पर चार उंगलियों से दाईं ओर स्वाइप करें"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"बहुत बढ़िया!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"आपने जान लिया है कि हाथ का जेस्चर इस्तेमाल करके ऐप्लिकेशन के बीच स्विच कैसे करें."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"ऐप्लिकेशन स्विच करने के लिए, अपने टचपैड पर चार उंगलियों से दाईं ओर स्वाइप करें"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"सभी ऐप्लिकेशन देखें"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"अपने कीबोर्ड पर ऐक्शन बटन दबाएं"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"बहुत खूब!"</string>

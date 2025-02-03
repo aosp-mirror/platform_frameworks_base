@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ବ୍ୟାଟେରୀ ଶତକଡ଼ା ଅଜଣା ଅଟେ।"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> ସହ ସଂଯୁକ୍ତ"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> ସହିତ ସଂଯୁକ୍ତ।"</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"କନେକ୍ଟ ହୋଇନାହିଁ।"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"ରୋମିଙ୍ଗ"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"ବନ୍ଦ ଅଛି"</string>
@@ -536,11 +540,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ଏକ ୱିଜେଟ ବ୍ୟବହାର କରି ଗୋଟିଏ ଆପ ଖୋଲିବା ପାଇଁ ଏହା ଆପଣ ଅଟନ୍ତି ବୋଲି ଆପଣଙ୍କୁ ଯାଞ୍ଚ କରିବାକୁ ହେବ। ଆହୁରି ମଧ୍ୟ, ଆପଣଙ୍କ ଟାବଲେଟ ଲକ ଥିଲେ ମଧ୍ୟ ଯେ କୌଣସି ବ୍ୟକ୍ତି ଏହାକୁ ଭ୍ୟୁ କରିପାରିବେ ବୋଲି ମନେ ରଖନ୍ତୁ। କିଛି ୱିଜେଟ ଆପଣଙ୍କ ଲକ ସ୍କ୍ରିନ ପାଇଁ ଉଦ୍ଦିଷ୍ଟ ହୋଇନଥାଇପାରେ ଏବଂ ଏଠାରେ ଯୋଗ କରିବା ଅସୁରକ୍ଷିତ ହୋଇପାରେ।"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"ବୁଝିଗଲି"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"ସ୍କ୍ରିନସେଭର ବଟନ ଦେଖାନ୍ତୁ"</string>
-    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"ହବ ମୋଡକୁ ଏକ୍ସପ୍ଲୋର କରନ୍ତୁ"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"ଚାର୍ଜ କରିବା ସମୟରେ ଆପଣଙ୍କ ପସନ୍ଦର ୱିଜେଟ ଏବଂ ସ୍କ୍ରିନ ସେଭରଗୁଡ଼ିକୁ ଆକ୍ସେସ କରନ୍ତୁ।"</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"ଚାଲନ୍ତୁ ଆରମ୍ଭ କରିବା"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ୟୁଜର୍‍ ବଦଳାନ୍ତୁ"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ପୁଲଡାଉନ ମେନୁ"</string>
@@ -804,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"ବାର୍ତ୍ତାଳାପ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ଶୀର୍ଷରେ ଏବଂ ଲକ୍ ସ୍କ୍ରିନରେ ଏକ ପ୍ରୋଫାଇଲ୍ ଛବି ଭାବେ ଦେଖାଏ, ଏକ ବବଲ୍ ଭାବେ ଦେଖାଯାଏ, \'ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\'କୁ ବାଧା ଦିଏ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ପ୍ରାଥମିକତା"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବାର୍ତ୍ତାଳାପ ଫିଚରଗୁଡ଼ିକୁ ସମର୍ଥନ କରେ ନାହିଁ"</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"ଖାରଜ କରନ୍ତୁ"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"ପୁଣି ଶୋ କରନ୍ତୁ ନାହିଁ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ପରିବର୍ତ୍ତନ କରିହେବ ନାହିଁ।"</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"କଲ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ପରିବର୍ତ୍ତନ କରାଯାଇପାରିବ ନାହିଁ।"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ଏଠାରେ ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ଗ୍ରୁପ୍ କନଫ୍ୟୁଗର୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
@@ -918,15 +919,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"କାଲକୁଲେଟର"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"ବାଉନ୍ସ କୀ ଟୋଗଲ କରନ୍ତୁ"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"ମାଉସ କୀ ଟୋଗଲ କରନ୍ତୁ"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"ଷ୍ଟିକି କୀ ଟୋଗଲ କରନ୍ତୁ"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"ଧିର କୀ ଟୋଗଲ କରନ୍ତୁ"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Voice Access ଟୋଗଲ କରନ୍ତୁ"</string>
+    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
     <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ଭଲ୍ୟୁମ ବଟନ୍‍ ଶର୍ଟକଟ୍‍"</string>
@@ -1307,6 +1309,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ଖୋଲିବାକୁ ଟିପଚିହ୍ନ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"ପ୍ରମାଣୀକରଣ ଆବଶ୍ୟକ। ପ୍ରମାଣୀକରଣ କରିବାକୁ ଟିପଚିହ୍ନ ସେନ୍ସରକୁ ସ୍ପର୍ଶ କରନ୍ତୁ।"</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"ଚାଲିଥିବା କଲ"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"ମୋବାଇଲ ଡାଟା"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"ସଂଯୋଗ କରାଯାଇଛି"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"ଅସ୍ଥାୟୀ ରୂପେ କନେକ୍ଟ କରାଯାଇଛି"</string>
@@ -1512,12 +1516,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"ଆପଣ ବର୍ତ୍ତମାନର ଆପ୍ସ ଜେଶ୍ଚରକୁ ଭ୍ୟୁ କରିବା ସମ୍ପୂର୍ଣ୍ଣ କରିଛନ୍ତି।"</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"ବର୍ତ୍ତମାନର ଆପ୍ସ ଭ୍ୟୁ କରିବାକୁ, ଆପଣଙ୍କ ଟଚପେଡରେ ତିନୋଟି ଆଙ୍ଗୁଠି ବ୍ୟବହାର କରି ଉପରକୁ ସ୍ୱାଇପ କରି ଧରି ରଖନ୍ତୁ"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"ଆପ୍ସକୁ ସୁଇଚ କରନ୍ତୁ"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"ଆପଣଙ୍କ ଟଚପେଡରେ ଚାରି ଆଙ୍ଗୁଠି ବ୍ୟବହାର କରି ଡାହାଣକୁ ସ୍ୱାଇପ କରନ୍ତୁ"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"ବଢ଼ିଆ କାମ!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"ଆପଣ ସୁଇଚ ଆପ୍ସ ଜେଶ୍ଚର ସମ୍ପୂର୍ଣ୍ଣ କରିଛନ୍ତି।"</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"ଆପ୍ସକୁ ସୁଇଚ କରିବାକୁ ଆପଣଙ୍କ ଟଚପେଡରେ ଚାରି ଆଙ୍ଗୁଠି ବ୍ୟବହାର କରି ଡାହାଣକୁ ସ୍ୱାଇପ କରନ୍ତୁ"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"ସବୁ ଆପ ଭ୍ୟୁ କରନ୍ତୁ"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"ଆପଣଙ୍କର କୀବୋର୍ଡରେ ଆକ୍ସନ କୀ\'କୁ ଦବାନ୍ତୁ"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"ବହୁତ ବଢ଼ିଆ!"</string>

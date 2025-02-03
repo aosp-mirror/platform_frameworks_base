@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"బ్యాటరీ శాతం తెలియదు."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>కి కనెక్ట్ చేయబడింది."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g>కి కనెక్ట్ చేయబడింది."</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"కనెక్ట్ చేయబడలేదు."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"రోమింగ్"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"ఆఫ్ చేయండి"</string>
@@ -539,6 +543,8 @@
     <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"హబ్ మోడ్‌ను అన్వేషించండి"</string>
     <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"ఛార్జింగ్ అయ్యే సమయంలో మీకు ఇష్టమైన విడ్జెట్‌లను, స్క్రీన్ సేవర్‌లను యాక్సెస్ చేయండి."</string>
     <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"ప్రారంభించండి"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"వినియోగదారుని మార్చు"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"పుల్‌డౌన్ మెనూ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ఈ సెషన్‌లోని అన్ని యాప్‌లు మరియు డేటా తొలగించబడతాయి."</string>
@@ -801,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"సంభాషణ నోటిఫికేషన్‌ల ఎగువున, లాక్ స్క్రీన్‌లో ప్రొఫైల్ ఫోటో‌గా చూపిస్తుంది, బబుల్‌గా కనిపిస్తుంది, \'అంతరాయం కలిగించవద్దు\'ను అంతరాయం కలిగిస్తుంది"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ప్రాధాన్యత"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> సంభాషణ ఫీచర్‌లను సపోర్ట్ చేయదు"</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"విస్మరించండి"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"మళ్లీ చూపవద్దు"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ఈ నోటిఫికేషన్‌లను ఎడిట్ చేయడం వీలుపడదు."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"కాల్ నోటిఫికేషన్‌లను ఎడిట్ చేయడం సాధ్యం కాదు."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ఈ నోటిఫికేషన్‌ల గ్రూప్‌ను ఇక్కడ కాన్ఫిగర్ చేయలేము"</string>
@@ -915,15 +919,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"క్యాలిక్యులేటర్"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"బౌన్స్ కీలను టోగుల్ చేయండి"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"మౌస్ కీలను టోగుల్ చేయండి"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"స్టిక్కీ కీలను టోగుల్ చేయండి"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"నిదానంగా పనిచేసే కీలను టోగుల్ చేయండి"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Voice Accessను టోగుల్ చేయండి"</string>
+    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
     <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"అంతరాయం కలిగించవద్దు"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"వాల్యూమ్ బటన్‌ల షార్ట్‌కట్"</string>
@@ -1304,6 +1309,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"తెరవడానికి వేలిముద్రను ఉపయోగించండి"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"ప్రామాణీకరణ అవసరం. ప్రామాణీకరించడానికి వేలిముద్ర సెన్సార్‌ను తాకండి."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"కాల్ కొనసాగుతోంది"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"మొబైల్ డేటా"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"కనెక్ట్ చేయబడింది"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"తాత్కాలికంగా కనెక్ట్ చేయబడింది"</string>

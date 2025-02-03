@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"பேட்டரி சதவீதம் தெரியவில்லை."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>க்கு இணைக்கப்பட்டது."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> உடன் இணைக்கப்பட்டுள்ளது."</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"இணைக்கப்படவில்லை."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"ரோமிங்"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"ஆஃப்"</string>
@@ -536,11 +540,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"விட்ஜெட்டைப் பயன்படுத்தி ஆப்ஸைத் திறக்க, அது நீங்கள்தான் என்பதை உறுதிசெய்ய வேண்டும். அத்துடன், உங்கள் டேப்லெட் பூட்டப்பட்டிருந்தாலும்கூட அவற்றை யார் வேண்டுமானாலும் பார்க்கலாம் என்பதை நினைவில்கொள்ளுங்கள். சில விட்ஜெட்கள் உங்கள் பூட்டுத் திரைக்காக உருவாக்கப்பட்டவை அல்ல என்பதையும் அவற்றை இங்கே சேர்ப்பது பாதுகாப்பற்றதாக இருக்கக்கூடும் என்பதையும் நினைவில்கொள்ளுங்கள்."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"சரி"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"ஸ்கிரீன் சேவரைக் காட்டும் பட்டன்"</string>
-    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"ஹப் பயன்முறையைக் கண்டறியுங்கள்"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"சார்ஜிங்கின்போது உங்களுக்குப் பிடித்த விட்ஜெட்களையும் ஸ்கிரீன் சேவர்களையும் அணுகலாம்."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"தொடங்குக"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"பயனரை மாற்று"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"கீழ் இழுக்கும் மெனு"</string>
@@ -804,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"உரையாடல் அறிவிப்புகளின் மேற்பகுதியில் காட்டப்படும், திரை பூட்டப்பட்டிருக்கும்போது சுயவிவரப் படமாகக் காட்டப்படும், குமிழாகத் தோன்றும், தொந்தரவு செய்ய வேண்டாம் அம்சம் இயக்கப்பட்டிருக்கும்போதும் காட்டப்படும்"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"முன்னுரிமை"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"உரையாடல் அம்சங்களை <xliff:g id="APP_NAME">%1$s</xliff:g> ஆதரிக்காது"</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"மூடுக"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"மீண்டும் காட்டாதே"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"இந்த அறிவிப்புகளை மாற்ற இயலாது."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"அழைப்பு அறிவிப்புகளை மாற்ற முடியாது."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"இந்த அறிவுப்புக் குழுக்களை இங்கே உள்ளமைக்க இயலாது"</string>
@@ -918,16 +919,14 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"கால்குலேட்டர்"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
-    <skip />
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"பவுன்ஸ் பட்டன்களை நிலைமாற்றுதல்"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"மவுஸ் பட்டன்களை நிலைமாற்றுதல்"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"ஸ்டிக்கி பட்டன்களை நிலைமாற்றுதல்"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"ஸ்லோ பட்டன்களை நிலைமாற்றுதல்"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"குரல் அணுகலை நிலைமாற்றுதல்"</string>
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"Talkback அம்சத்தை நிலைமாற்றுதல்"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"பெரிதாக்கலை நிலைமாற்றுதல்"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"பேசும் திரையை இயக்குதல்"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"தொந்தரவு செய்ய வேண்டாம்"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ஒலியளவுப் பொத்தான்களுக்கான ஷார்ட்கட்"</string>
     <string name="battery" msgid="769686279459897127">"பேட்டரி"</string>
@@ -1307,6 +1306,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"கைரேகையைப் பயன்படுத்தி திறந்திடுங்கள்"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"அங்கீகாரம் தேவை. கைரேகை சென்சாரைத் தொட்டு அங்கீகரியுங்கள்."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"செயலில் உள்ள அழைப்பு"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"மொபைல் டேட்டா"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"இணைக்கப்பட்டது"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"தற்காலிகமாக இணைக்கப்பட்டுள்ளது"</string>
@@ -1512,12 +1513,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"சமீபத்தில் பயன்படுத்திய ஆப்ஸுக்கான சைகை பயிற்சியை நிறைவுசெய்துவிட்டீர்கள்."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"சமீபத்திய ஆப்ஸைப் பார்க்க, உங்கள் டச்பேடில் மூன்று விரல்களால் மேல்நோக்கி ஸ்வைப் செய்து பிடிக்கவும்"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"ஆப்ஸுக்கிடையில் மாறுங்கள்"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"டச்பேடில் நான்கு விரல்களால் வலதுபுறம் ஸ்வைப் செய்யவும்"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"அருமை!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"ஆப்ஸுக்கிடையில் மாறும் சைகைப் பயிற்சியை முடித்துவிட்டீர்கள்."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"ஆப்ஸுக்கிடையே மாற டச்பேடில் நான்கு விரல்களால் வலதுபுறம் ஸ்வைப் செய்யவும்"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"அனைத்து ஆப்ஸையும் காட்டு"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"உங்கள் கீபோர்டில் ஆக்‌ஷன் பட்டனை அழுத்தவும்"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"அருமை!"</string>

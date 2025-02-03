@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"មិនដឹងអំពី​ភាគរយថ្មទេ។"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"បាន​ភ្ជាប់​ទៅ <xliff:g id="BLUETOOTH">%s</xliff:g> ។"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"បានភ្ជាប់ទៅ <xliff:g id="CAST">%s</xliff:g>"</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"មិន​បាន​តភ្ជាប់​។"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"រ៉ូ​មីង"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"បិទ"</string>
@@ -536,11 +540,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ដើម្បីបើកកម្មវិធីដោយប្រើធាតុ​ក្រាហ្វិក អ្នកនឹងត្រូវផ្ទៀងផ្ទាត់ថាជាអ្នក។ ទន្ទឹមនឹងនេះ សូមចងចាំថា នរណាក៏អាចមើលធាតុក្រាហ្វិកបាន សូម្បីពេលថេប្លេតរបស់អ្នកជាប់សោក៏ដោយ។ ធាតុ​ក្រាហ្វិកមួយចំនួនប្រហែលមិនត្រូវបានរចនាឡើងសម្រាប់អេក្រង់ចាក់សោរបស់អ្នកទេ និងមិនមានសុវត្ថិភាពឡើយ បើបញ្ចូលទៅទីនេះ។"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"យល់ហើយ"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"បង្ហាញប៊ូតុងធាតុ​រក្សា​អេក្រង់"</string>
-    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"រុករកមុខងារមណ្ឌល"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"ចូលប្រើប្រាស់ធាតុ​ក្រាហ្វិក និងធាតុរក្សាអេក្រង់ដែលអ្នកពេញចិត្តពេលសាកថ្ម។"</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"ចាប់ផ្ដើម"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ប្ដូរ​អ្នក​ប្រើ"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ម៉ឺនុយ​ទាញចុះ"</string>
@@ -804,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"បង្ហាញនៅខាងលើ​ការជូនដំណឹងអំពីការសន្ទនា និងជារូបភាព​កម្រង​ព័ត៌មាននៅលើអេក្រង់ចាក់សោ បង្ហាញជាពពុះ បង្អាក់មុខងារកុំ​រំខាន"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"អាទិភាព"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> មិនអាចប្រើ​មុខងារ​សន្ទនា​បានទេ"</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"ច្រានចោល"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"កុំបង្ហាញម្ដងទៀត"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"មិនអាច​កែប្រែ​ការជូនដំណឹង​ទាំងនេះ​បានទេ។"</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"មិនអាច​កែប្រែ​ការជូនដំណឹងអំពីការហៅទូរសព្ទបានទេ។"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"មិនអាច​កំណត់​រចនាសម្ព័ន្ធ​ក្រុមការជូនដំណឹងនេះ​នៅទីនេះ​បានទេ"</string>
@@ -918,15 +919,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"ប្រតិទិន"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"ម៉ាស៊ីនគិតលេខ"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"ផែនទី"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"បិទ/បើកគ្រាប់ចុចឡង"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"បិទ/បើកគ្រាប់ចុចម៉ៅស៍"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"បិទ/បើកគ្រាប់ចុចស្អិត"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"បិទ/បើកគ្រាប់ចុចយឺត"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"បិទ/បើកការចូល​ប្រើប្រាស់តាមរយៈ​សំឡេង"</string>
+    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
+    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
     <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
+    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
     <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"កុំ​រំខាន"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ផ្លូវកាត់ប៊ូតុងកម្រិតសំឡេង"</string>
@@ -1307,6 +1309,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ប្រើស្នាមម្រាមដៃ ដើម្បីបើក"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"តម្រូវឱ្យ​មាន​ការផ្ទៀងផ្ទាត់។ សូមចុច​ឧបករណ៍​ចាប់ស្នាមម្រាមដៃ ដើម្បី​ផ្ទៀងផ្ទាត់​។"</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"ការ​ហៅដែលកំពុងដំណើរការ"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"ទិន្នន័យ​ទូរសព្ទចល័ត"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"បានភ្ជាប់"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"បានភ្ជាប់ជាបណ្ដោះអាសន្ន"</string>
@@ -1512,12 +1516,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"អ្នកបានបញ្ចប់ការមើលចលនាកម្មវិធីថ្មីៗ។"</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"ដើម្បីមើលកម្មវិធីថ្មីៗ សូមអូសឡើងលើ រួចសង្កត់ឱ្យជាប់លើផ្ទាំងប៉ះរបស់អ្នក ដោយប្រើម្រាមដៃបី"</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"ប្ដូរ​កម្មវិធី"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"អូសទៅស្ដាំដោយប្រើ​ម្រាមដៃបួននៅលើផ្ទាំងប៉ះរបស់អ្នក"</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"ធ្វើបានល្អ!"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"អ្នក​បានបញ្ចប់​ចលនា​ប្ដូរកម្មវិធី​ហើយ។"</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"អូសទៅស្ដាំដោយប្រើ​ម្រាមដៃបួននៅលើផ្ទាំងប៉ះរបស់អ្នក ដើម្បីប្ដូរកម្មវិធី"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"មើល​កម្មវិធី​ទាំងអស់"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"ចុចគ្រាប់ចុចសកម្មភាពលើក្ដារចុចរបស់អ្នក"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"ធ្វើបាន​ល្អ!"</string>

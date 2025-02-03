@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Hindi alam ang porsyento ng baterya."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Nakakonekta sa <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Nakakonekta sa <xliff:g id="CAST">%s</xliff:g>."</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Hindi nakakonekta."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Naka-off"</string>
@@ -539,6 +543,8 @@
     <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"I-explore ang hub mode"</string>
     <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"I-access ang mga paborito mong widget at screen saver habang nagcha-charge."</string>
     <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Tara na"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Magpalit ng user"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"pulldown menu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Ide-delete ang lahat ng app at data sa session na ito."</string>
@@ -801,10 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Makikita sa itaas ng mga notification ng pag-uusap at bilang larawan sa profile sa lock screen, lumalabas bilang bubble, naaabala ang Huwag Istorbohin"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priyoridad"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Hindi sinusuportahan ng <xliff:g id="APP_NAME">%1$s</xliff:g> ang mga feature ng pag-uusap"</string>
-    <!-- no translation found for notification_inline_dismiss (88423586921134258) -->
-    <skip />
-    <!-- no translation found for notification_inline_disable_promotion (6880961831026048166) -->
-    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"I-dismiss"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"Huwag nang ipakita ulit"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Hindi puwedeng baguhin ang mga notification na ito."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Hindi mabago ang mga notification ng tawag."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Hindi mako-configure dito ang pangkat na ito ng mga notification"</string>
@@ -881,8 +885,8 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"Bumalik"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Pumunta sa home screen"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Tingnan ang mga kamakailang app"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Mag-cycle pasulong sa mga kamakailang app"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"Mag-cycle pabalik sa mga kamakailang app"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Mag-cycle forward sa mga kamakailang app"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Mag-cycle backward sa mga kamakailang app"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Buksan ang listahan ng mga app"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Buksan ang mga setting"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Buksan ang assistant"</string>
@@ -915,16 +919,14 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Calculator"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Mga mapa"</string>
-    <!-- no translation found for group_accessibility_toggle_bounce_keys (4183584952493519179) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_mouse_keys (534757719357514361) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_sticky_keys (7722214637652104184) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_slow_keys (8569881436531795062) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_voice_access (5436708239015479017) -->
-    <skip />
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"I-toggle ang mga bounce key"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"I-toggle ang mga mouse key"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"I-toggle ang mga sticky key"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"I-toggle ang mga slow key"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"I-toggle ang Pag-access gamit ang Boses"</string>
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"I-toggle ang Talkback"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"I-toggle ang Magnification"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"I-activate ang Select to Speak"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Huwag Istorbohin"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Shortcut ng mga button ng volume"</string>
     <string name="battery" msgid="769686279459897127">"Baterya"</string>
@@ -1304,6 +1306,8 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Gamitin ang fingerprint para buksan"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Kailangan ng pag-authenticate. Pindutin ang sensor para sa fingerprint para mag-authenticate."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"Kasalukuyang tawag"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobile data"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Nakakonekta"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Pansamantalang nakakonekta"</string>
