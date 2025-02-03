@@ -61,6 +61,7 @@ class DisplayTopologyCoordinatorTest {
             info.logicalWidth = i * 300
             info.logicalHeight = i * 200
             info.logicalDensityDpi = i * 100
+            info.type = Display.TYPE_EXTERNAL
             return@map info
         }
 
@@ -115,7 +116,98 @@ class DisplayTopologyCoordinatorTest {
     }
 
     @Test
-    fun addDisplay_extendedDisplaysDisabled() {
+    fun addDisplay_internal() {
+        displayInfos[0].displayId = Display.DEFAULT_DISPLAY
+        displayInfos[0].type = Display.TYPE_INTERNAL
+        coordinator.onDisplayAdded(displayInfos[0])
+
+        val widthDp =
+            pxToDp(displayInfos[0].logicalWidth.toFloat(), displayInfos[0].logicalDensityDpi)
+        val heightDp =
+            pxToDp(displayInfos[0].logicalHeight.toFloat(), displayInfos[0].logicalDensityDpi)
+        verify(mockTopology).addDisplay(displayInfos[0].displayId, widthDp, heightDp)
+        verify(mockTopologyChangedCallback).invoke(
+            android.util.Pair(
+                mockTopologyCopy,
+                mockTopologyGraph
+            )
+        )
+    }
+
+    @Test
+    fun addDisplay_overlay() {
+        displayInfos[0].type = Display.TYPE_OVERLAY
+        coordinator.onDisplayAdded(displayInfos[0])
+
+        val widthDp =
+            pxToDp(displayInfos[0].logicalWidth.toFloat(), displayInfos[0].logicalDensityDpi)
+        val heightDp =
+            pxToDp(displayInfos[0].logicalHeight.toFloat(), displayInfos[0].logicalDensityDpi)
+        verify(mockTopology).addDisplay(displayInfos[0].displayId, widthDp, heightDp)
+        verify(mockTopologyChangedCallback).invoke(
+            android.util.Pair(
+                mockTopologyCopy,
+                mockTopologyGraph
+            )
+        )
+    }
+
+    @Test
+    fun addDisplay_typeUnknown() {
+        displayInfos[0].type = Display.TYPE_UNKNOWN
+
+        coordinator.onDisplayAdded(displayInfos[0])
+
+        verify(mockTopology, never()).addDisplay(anyInt(), anyFloat(), anyFloat())
+        verify(mockTopologyChangedCallback, never()).invoke(any())
+    }
+
+    @Test
+    fun addDisplay_wifi() {
+        displayInfos[0].type = Display.TYPE_WIFI
+
+        coordinator.onDisplayAdded(displayInfos[0])
+
+        verify(mockTopology, never()).addDisplay(anyInt(), anyFloat(), anyFloat())
+        verify(mockTopologyChangedCallback, never()).invoke(any())
+    }
+
+    @Test
+    fun addDisplay_virtual() {
+        displayInfos[0].type = Display.TYPE_VIRTUAL
+
+        coordinator.onDisplayAdded(displayInfos[0])
+
+        verify(mockTopology, never()).addDisplay(anyInt(), anyFloat(), anyFloat())
+        verify(mockTopologyChangedCallback, never()).invoke(any())
+    }
+
+    @Test
+    fun addDisplay_internal_nonDefault() {
+        displayInfos[0].displayId = 2
+        displayInfos[0].type = Display.TYPE_INTERNAL
+
+        coordinator.onDisplayAdded(displayInfos[0])
+
+        verify(mockTopology, never()).addDisplay(anyInt(), anyFloat(), anyFloat())
+        verify(mockTopologyChangedCallback, never()).invoke(any())
+    }
+
+    @Test
+    fun addDisplay_external_extendedDisplaysDisabled() {
+        whenever(mockIsExtendedDisplayEnabled()).thenReturn(false)
+
+        for (displayInfo in displayInfos) {
+            coordinator.onDisplayAdded(displayInfo)
+        }
+
+        verify(mockTopology, never()).addDisplay(anyInt(), anyFloat(), anyFloat())
+        verify(mockTopologyChangedCallback, never()).invoke(any())
+    }
+
+    @Test
+    fun addDisplay_overlay_extendedDisplaysDisabled() {
+        displayInfos[0].type = Display.TYPE_OVERLAY
         whenever(mockIsExtendedDisplayEnabled()).thenReturn(false)
 
         for (displayInfo in displayInfos) {
@@ -144,8 +236,15 @@ class DisplayTopologyCoordinatorTest {
             .thenReturn(true)
         addDisplay()
 
-        displayInfos[0].logicalDensityDpi += 10
+        displayInfos[0].logicalWidth += 100
+        displayInfos[0].logicalHeight += 100
         coordinator.onDisplayChanged(displayInfos[0])
+
+        val widthDp =
+            pxToDp(displayInfos[0].logicalWidth.toFloat(), displayInfos[0].logicalDensityDpi)
+        val heightDp =
+            pxToDp(displayInfos[0].logicalHeight.toFloat(), displayInfos[0].logicalDensityDpi)
+        verify(mockTopology).updateDisplay(displayInfos[0].displayId, widthDp, heightDp)
 
         val captor = ArgumentCaptor.forClass(SparseIntArray::class.java)
         verify(mockTopologyCopy).getGraph(captor.capture())
@@ -180,11 +279,56 @@ class DisplayTopologyCoordinatorTest {
     }
 
     @Test
-    fun updateDisplay_extendedDisplaysDisabled() {
+    fun updateDisplay_typeUnknown() {
+        displayInfos[0].type = Display.TYPE_UNKNOWN
+
+        coordinator.onDisplayChanged(displayInfos[0])
+
+        verify(mockTopology, never()).updateDisplay(anyInt(), anyFloat(), anyFloat())
+        verify(mockTopologyCopy, never()).getGraph(any())
+        verify(mockTopologyChangedCallback, never()).invoke(any())
+    }
+
+    @Test
+    fun updateDisplay_wifi() {
+        displayInfos[0].type = Display.TYPE_WIFI
+
+        coordinator.onDisplayChanged(displayInfos[0])
+
+        verify(mockTopology, never()).updateDisplay(anyInt(), anyFloat(), anyFloat())
+        verify(mockTopologyCopy, never()).getGraph(any())
+        verify(mockTopologyChangedCallback, never()).invoke(any())
+    }
+
+    @Test
+    fun updateDisplay_virtual() {
+        displayInfos[0].type = Display.TYPE_VIRTUAL
+
+        coordinator.onDisplayChanged(displayInfos[0])
+
+        verify(mockTopology, never()).updateDisplay(anyInt(), anyFloat(), anyFloat())
+        verify(mockTopologyCopy, never()).getGraph(any())
+        verify(mockTopologyChangedCallback, never()).invoke(any())
+    }
+
+    @Test
+    fun updateDisplay_internal_nonDefault() {
+        displayInfos[0].displayId = 2
+        displayInfos[0].type = Display.TYPE_INTERNAL
+
+        coordinator.onDisplayChanged(displayInfos[0])
+
+        verify(mockTopology, never()).updateDisplay(anyInt(), anyFloat(), anyFloat())
+        verify(mockTopologyCopy, never()).getGraph(any())
+        verify(mockTopologyChangedCallback, never()).invoke(any())
+    }
+
+    @Test
+    fun updateDisplay_external_extendedDisplaysDisabled() {
         whenever(mockIsExtendedDisplayEnabled()).thenReturn(false)
 
         for (displayInfo in displayInfos) {
-            coordinator.onDisplayAdded(displayInfo)
+            coordinator.onDisplayChanged(displayInfo)
         }
 
         verify(mockTopology, never()).updateDisplay(anyInt(), anyFloat(), anyFloat())
@@ -193,10 +337,22 @@ class DisplayTopologyCoordinatorTest {
     }
 
     @Test
+    fun updateDisplay_overlay_extendedDisplaysDisabled() {
+        displayInfos[0].type = Display.TYPE_OVERLAY
+        whenever(mockIsExtendedDisplayEnabled()).thenReturn(false)
+
+        coordinator.onDisplayChanged(displayInfos[0])
+
+        verify(mockTopology, never()).updateDisplay(anyInt(), anyFloat(), anyFloat())
+        verify(mockTopologyChangedCallback, never()).invoke(any())
+        verify(mockTopologyStore, never()).restoreTopology(any())
+    }
+
+    @Test
     fun updateDisplay_notInDefaultDisplayGroup() {
         displayInfos[0].displayGroupId = Display.DEFAULT_DISPLAY_GROUP + 1
 
-        coordinator.onDisplayAdded(displayInfos[0])
+        coordinator.onDisplayChanged(displayInfos[0])
 
         verify(mockTopology, never()).updateDisplay(anyInt(), anyFloat(), anyFloat())
         verify(mockTopologyCopy, never()).getGraph(any())
@@ -233,9 +389,7 @@ class DisplayTopologyCoordinatorTest {
 
     @Test
     fun removeDisplay_notChanged() {
-        for (displayInfo in displayInfos) {
-            coordinator.onDisplayRemoved(displayInfo.displayId)
-        }
+        coordinator.onDisplayRemoved(100)
 
         verify(mockTopologyChangedCallback, never()).invoke(any())
         verify(mockTopologyStore, never()).restoreTopology(any())
