@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -71,6 +72,8 @@ constructor(
             return
         }
 
+        val buttonSize = dimensionResource(R.dimen.communal_to_dream_button_size)
+
         if (viewModel.shouldShowTooltip) {
             Column(
                 modifier =
@@ -96,7 +99,6 @@ constructor(
     }
 
     companion object {
-        private val buttonSize = 64.dp
         private val tooltipMaxWidth = 350.dp
     }
 }
