@@ -2353,6 +2353,12 @@ public class PreferencesHelper implements RankingConfig {
                     pw.print(r.canHavePromotedNotifs);
                 }
                 pw.println();
+                if (r.delegate != null) {
+                    pw.print(prefix);
+                    pw.printf("    Delegate: %s (%s) enabled=%s", r.delegate.mPkg, r.delegate.mUid,
+                            r.delegate.mEnabled);
+                    pw.println();
+                }
                 for (NotificationChannel channel : r.channels.values()) {
                     pw.print(prefix);
                     channel.dump(pw, "    ", filter.redact);
