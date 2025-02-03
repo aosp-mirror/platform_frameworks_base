@@ -606,7 +606,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Parameters(name = "{0}")
     public static List<FlagsParameterization> getParams() {
-        return FlagsParameterization.allCombinationsOf();
+        return FlagsParameterization.allCombinationsOf(
+            FLAG_NOTIFICATION_CLASSIFICATION, FLAG_NM_BINDER_PERF_CACHE_CHANNELS);
     }
 
     public NotificationManagerServiceTest(FlagsParameterization flags) {
