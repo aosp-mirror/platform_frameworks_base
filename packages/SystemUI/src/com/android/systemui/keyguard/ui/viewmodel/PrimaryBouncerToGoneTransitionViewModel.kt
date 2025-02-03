@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.util.MathUtils
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.dagger.SysUISingleton
@@ -63,10 +64,12 @@ constructor(
     val showAllNotifications: Flow<Boolean> =
         bouncerToGoneFlows.showAllNotifications(TO_GONE_DURATION, PRIMARY_BOUNCER)
 
-    val notificationAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
+    fun notificationAlpha(viewState: ViewStateAccessor): Flow<Float> {
+        var startAlpha = 1f
+        return transitionAnimation.sharedFlow(
             duration = 200.milliseconds,
             onStart = {
+                startAlpha = viewState.alpha()
                 leaveShadeOpen = statusBarStateController.leaveOpenOnKeyguardHide()
                 willRunDismissFromKeyguard = primaryBouncerInteractor.willRunDismissFromKeyguard()
             },
@@ -74,11 +77,12 @@ constructor(
                 if (willRunDismissFromKeyguard || leaveShadeOpen) {
                     1f
                 } else {
-                    1f - it
+                    MathUtils.lerp(startAlpha, 0f, it)
                 }
             },
             onFinish = { 1f },
         )
+    }
 
     /** Bouncer container alpha */
     val bouncerAlpha: Flow<Float> =
