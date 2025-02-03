@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.stack.ui.view
 import android.service.notification.NotificationListenerService
 import androidx.annotation.VisibleForTesting
 import com.android.app.tracing.coroutines.TrackTracer
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.statusbar.IStatusBarService
 import com.android.internal.statusbar.NotificationVisibility
 import com.android.systemui.dagger.SysUISingleton
@@ -33,8 +34,9 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import com.android.app.tracing.coroutines.launchTraced as launch
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.withContext
 
 @VisibleForTesting const val UNKNOWN_RANK = -1
@@ -49,32 +51,56 @@ constructor(
     private val notificationPanelLogger: NotificationPanelLogger,
     private val statusBarService: IStatusBarService,
 ) : NotificationStatsLogger {
-    private val lastLoggedVisibilities = mutableMapOf<String, VisibilityState>()
-    private var logVisibilitiesJob: Job? = null
-
     private val expansionStates: MutableMap<String, ExpansionState> =
         ConcurrentHashMap<String, ExpansionState>()
     @VisibleForTesting
     val lastReportedExpansionValues: MutableMap<String, Boolean> =
         ConcurrentHashMap<String, Boolean>()
 
+    private val visibilityLogger =
+        Channel<VisibilityAction>(capacity = 2, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+
+    init {
+        applicationScope.launch { consumeVisibilityActions() }
+    }
+
+    private suspend fun consumeVisibilityActions() {
+        val lastLoggedVisibilities = mutableMapOf<String, VisibilityState>()
+
+        visibilityLogger.consumeEach { action ->
+            val newVisibilities =
+                when (action) {
+                    is VisibilityAction.Change -> action.visibilities
+                    is VisibilityAction.Clear -> emptyMap()
+                }
+
+            val newlyVisible = newVisibilities - lastLoggedVisibilities.keys
+            val noLongerVisible = lastLoggedVisibilities - newVisibilities.keys
+
+            maybeLogVisibilityChanges(newlyVisible, noLongerVisible, action.activeCount)
+            updateExpansionStates(newlyVisible, noLongerVisible)
+            TrackTracer.instantForGroup("Notifications", "Active", action.activeCount)
+            TrackTracer.instantForGroup("Notifications", "Visible", newVisibilities.size)
+
+            lastLoggedVisibilities.clear()
+            lastLoggedVisibilities.putAll(newVisibilities)
+        }
+    }
+
     override fun onNotificationLocationsChanged(
         locationsProvider: Callable<Map<String, Int>>,
         notificationRanks: Map<String, Int>,
     ) {
-        if (logVisibilitiesJob?.isActive == true) {
-            return
-        }
-
-        logVisibilitiesJob =
-            startLogVisibilitiesJob(
-                newVisibilities =
+        visibilityLogger.trySend(
+            VisibilityAction.Change(
+                visibilities =
                     combine(
                         visibilities = locationsProvider.call(),
-                        rankingsMap = notificationRanks
+                        rankingsMap = notificationRanks,
                     ),
-                activeNotifCount = notificationRanks.size,
+                activeCount = notificationRanks.size,
             )
+        )
     }
 
     override fun onNotificationExpansionChanged(
@@ -125,7 +151,7 @@ constructor(
                     /* expanded = */ expansionState.isExpanded,
                     /* notificationLocation = */ expansionState.location
                         .toNotificationLocation()
-                        .ordinal
+                        .ordinal,
                 )
             }
         }
@@ -138,7 +164,7 @@ constructor(
             withContext(bgDispatcher) {
                 notificationPanelLogger.logPanelShown(
                     isOnLockScreen,
-                    activeNotifications.toNotificationProto()
+                    activeNotifications.toNotificationProto(),
                 )
             }
         }
@@ -147,11 +173,7 @@ constructor(
     override fun onLockscreenOrShadeNotInteractive(
         activeNotifications: List<ActiveNotificationModel>
     ) {
-        logVisibilitiesJob =
-            startLogVisibilitiesJob(
-                newVisibilities = emptyMap(),
-                activeNotifCount = activeNotifications.size
-            )
+        visibilityLogger.trySend(VisibilityAction.Clear(activeCount = activeNotifications.size))
     }
 
     override fun onNotificationRemoved(key: String) {
@@ -167,27 +189,10 @@ constructor(
 
     private fun combine(
         visibilities: Map<String, Int>,
-        rankingsMap: Map<String, Int>
+        rankingsMap: Map<String, Int>,
     ): Map<String, VisibilityState> =
         visibilities.mapValues { entry ->
             VisibilityState(entry.key, entry.value, rankingsMap[entry.key] ?: UNKNOWN_RANK)
-        }
-
-    private fun startLogVisibilitiesJob(
-        newVisibilities: Map<String, VisibilityState>,
-        activeNotifCount: Int,
-    ) =
-        applicationScope.launch {
-            val newlyVisible = newVisibilities - lastLoggedVisibilities.keys
-            val noLongerVisible = lastLoggedVisibilities - newVisibilities.keys
-
-            maybeLogVisibilityChanges(newlyVisible, noLongerVisible, activeNotifCount)
-            updateExpansionStates(newlyVisible, noLongerVisible)
-            TrackTracer.instantForGroup("Notifications", "Active", activeNotifCount)
-            TrackTracer.instantForGroup("Notifications", "Visible", newVisibilities.size)
-
-            lastLoggedVisibilities.clear()
-            lastLoggedVisibilities.putAll(newVisibilities)
         }
 
     private suspend fun maybeLogVisibilityChanges(
@@ -205,7 +210,7 @@ constructor(
         val noLongerVisibleAr =
             noLongerVisible.mapToNotificationVisibilitiesAr(
                 visible = false,
-                count = activeNotifCount
+                count = activeNotifCount,
             )
 
         withContext(bgDispatcher) {
@@ -218,7 +223,7 @@ constructor(
 
     private fun updateExpansionStates(
         newlyVisible: Map<String, VisibilityState>,
-        noLongerVisible: Map<String, VisibilityState>
+        noLongerVisible: Map<String, VisibilityState>,
     ) {
         expansionStates.forEach { (key, expansionState) ->
             if (newlyVisible.contains(key)) {
@@ -241,11 +246,16 @@ constructor(
         }
     }
 
-    private data class VisibilityState(
-        val key: String,
-        val location: Int,
-        val rank: Int,
-    )
+    private sealed class VisibilityAction(open val activeCount: Int) {
+        data class Change(
+            val visibilities: Map<String, VisibilityState>,
+            override val activeCount: Int,
+        ) : VisibilityAction(activeCount)
+
+        data class Clear(override val activeCount: Int) : VisibilityAction(activeCount)
+    }
+
+    private data class VisibilityState(val key: String, val location: Int, val rank: Int)
 
     private data class ExpansionState(
         val key: String,
@@ -278,7 +288,7 @@ constructor(
                     /* rank = */ state.rank,
                     /* count = */ count,
                     /* visible = */ visible,
-                    /* location = */ state.location.toNotificationLocation()
+                    /* location = */ state.location.toNotificationLocation(),
                 )
             }
             .toTypedArray()

@@ -26,7 +26,7 @@ import com.android.systemui.statusbar.notification.logging.notificationPanelLogg
 
 val Kosmos.notificationStatsLogger by Fixture {
     NotificationStatsLoggerImpl(
-        applicationScope = testScope,
+        applicationScope = testScope.backgroundScope,
         bgDispatcher = testDispatcher,
         statusBarService = statusBarService,
         notificationListenerService = notificationListenerService,
