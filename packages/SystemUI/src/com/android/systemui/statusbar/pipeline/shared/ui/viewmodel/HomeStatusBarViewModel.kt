@@ -34,6 +34,7 @@ import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.chips.mediaprojection.domain.model.MediaProjectionStopDialogModel
@@ -228,14 +229,19 @@ constructor(
     override val isHomeStatusBarAllowedByScene: StateFlow<Boolean> =
         combine(
                 sceneInteractor.currentScene,
+                sceneInteractor.currentOverlays,
                 sceneContainerOcclusionInteractor.invisibleDueToOcclusion,
-            ) { currentScene, isOccluded ->
+            ) { currentScene, currentOverlays, isOccluded ->
                 // All scenes have their own status bars, so we should only show the home status bar
-                // if we're not in a scene. The one exception: If the scene is occluded, then the
-                // occluding app needs to show the status bar. (Fullscreen apps actually won't show
-                // the status bar but that's handled with the rest of our fullscreen app logic,
-                // which lives elsewhere.)
-                currentScene == Scenes.Gone || isOccluded
+                // if we're not in a scene. There are two exceptions:
+                // 1) The shade (notifications or quick settings) is shown, because it has its own
+                // status-bar-like header.
+                // 2) If the scene is occluded, then the occluding app needs to show the status bar.
+                // (Fullscreen apps actually won't show the status bar but that's handled with the
+                // rest of our fullscreen app logic, which lives elsewhere.)
+                (currentScene == Scenes.Gone &&
+                    Overlays.NotificationsShade !in currentOverlays &&
+                    Overlays.QuickSettingsShade !in currentOverlays) || isOccluded
             }
             .distinctUntilChanged()
             .logDiffsForTable(
