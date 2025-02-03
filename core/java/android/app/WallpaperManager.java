@@ -297,6 +297,16 @@ public class WallpaperManager {
             "android.wallpaper.lockscreen_layout_changed";
 
     /**
+     * Command for {@link #sendWallpaperCommand}:  Include the tap position within the wallpaper
+     * focal area.The x and y arguments are the absolute tap coordinates, already scaled to match
+     * the wallpaper's dimensions.
+     *
+     * @hide
+     */
+    public static final String COMMAND_LOCKSCREEN_TAP =
+            "android.wallpaper.lockscreen_tap";
+
+    /**
      * Extra passed back from setWallpaper() giving the new wallpaper's assigned ID.
      * @hide
      */

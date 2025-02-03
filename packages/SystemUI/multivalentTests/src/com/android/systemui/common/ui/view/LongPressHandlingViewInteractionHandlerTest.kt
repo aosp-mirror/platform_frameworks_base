@@ -44,7 +44,7 @@ class LongPressHandlingViewInteractionHandlerTest : SysuiTestCase() {
 
     @Mock private lateinit var postDelayed: (Runnable, Long) -> DisposableHandle
     @Mock private lateinit var onLongPressDetected: (Int, Int) -> Unit
-    @Mock private lateinit var onSingleTapDetected: () -> Unit
+    @Mock private lateinit var onSingleTapDetected: (Int, Int) -> Unit
 
     private lateinit var underTest: LongPressHandlingViewInteractionHandler
 
@@ -76,74 +76,51 @@ class LongPressHandlingViewInteractionHandlerTest : SysuiTestCase() {
         val downX = 123
         val downY = 456
         dispatchTouchEvents(
-            Down(
-                x = downX,
-                y = downY,
-            ),
-            Move(
-                distanceMoved = ViewConfiguration.getTouchSlop() - 0.1f,
-            ),
+            Down(x = downX, y = downY),
+            Move(distanceMoved = ViewConfiguration.getTouchSlop() - 0.1f),
         )
         delayedRunnable?.run()
 
         verify(onLongPressDetected).invoke(downX, downY)
-        verify(onSingleTapDetected, never()).invoke()
+        verify(onSingleTapDetected, never()).invoke(any(), any())
     }
 
     @Test
     fun longPressButFeatureNotEnabled() = runTest {
         underTest.isLongPressHandlingEnabled = false
-        dispatchTouchEvents(
-            Down(
-                x = 123,
-                y = 456,
-            ),
-        )
+        dispatchTouchEvents(Down(x = 123, y = 456))
 
         assertThat(delayedRunnable).isNull()
         verify(onLongPressDetected, never()).invoke(any(), any())
-        verify(onSingleTapDetected, never()).invoke()
+        verify(onSingleTapDetected, never()).invoke(any(), any())
     }
 
     @Test
     fun longPressButViewNotAttached() = runTest {
         isAttachedToWindow = false
-        dispatchTouchEvents(
-            Down(
-                x = 123,
-                y = 456,
-            ),
-        )
+        dispatchTouchEvents(Down(x = 123, y = 456))
         delayedRunnable?.run()
 
         verify(onLongPressDetected, never()).invoke(any(), any())
-        verify(onSingleTapDetected, never()).invoke()
+        verify(onSingleTapDetected, never()).invoke(any(), any())
     }
 
     @Test
     fun draggedTooFarToBeConsideredAlongPress() = runTest {
         dispatchTouchEvents(
-            Down(
-                x = 123,
-                y = 456,
-            ),
-            Move(
-                distanceMoved = ViewConfiguration.getTouchSlop() + 0.1f,
-            ),
+            Down(x = 123, y = 456),
+            Move(distanceMoved = ViewConfiguration.getTouchSlop() + 0.1f),
         )
 
         assertThat(delayedRunnable).isNull()
         verify(onLongPressDetected, never()).invoke(any(), any())
-        verify(onSingleTapDetected, never()).invoke()
+        verify(onSingleTapDetected, never()).invoke(any(), any())
     }
 
     @Test
     fun heldDownTooBrieflyToBeConsideredAlongPress() = runTest {
         dispatchTouchEvents(
-            Down(
-                x = 123,
-                y = 456,
-            ),
+            Down(x = 123, y = 456),
             Up(
                 distanceMoved = ViewConfiguration.getTouchSlop().toFloat(),
                 gestureDuration = ViewConfiguration.getLongPressTimeout() - 1L,
@@ -152,12 +129,10 @@ class LongPressHandlingViewInteractionHandlerTest : SysuiTestCase() {
 
         assertThat(delayedRunnable).isNull()
         verify(onLongPressDetected, never()).invoke(any(), any())
-        verify(onSingleTapDetected).invoke()
+        verify(onSingleTapDetected).invoke(123, 456)
     }
 
-    private fun dispatchTouchEvents(
-        vararg models: MotionEventModel,
-    ) {
+    private fun dispatchTouchEvents(vararg models: MotionEventModel) {
         models.forEach { model -> underTest.onTouchEvent(model) }
     }
 }

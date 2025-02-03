@@ -37,6 +37,7 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.util.kotlin.combine
+import com.android.systemui.wallpapers.domain.interactor.WallpaperFocalAreaInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -62,6 +63,7 @@ constructor(
     headsUpNotificationInteractor: HeadsUpNotificationInteractor,
     @Application private val applicationScope: CoroutineScope,
     val keyguardClockRepository: KeyguardClockRepository,
+    private val wallpaperFocalAreaInteractor: WallpaperFocalAreaInteractor,
 ) {
     private val isOnAod: Flow<Boolean> =
         keyguardTransitionInteractor.currentKeyguardState.map { it == KeyguardState.AOD }
@@ -183,6 +185,6 @@ constructor(
     }
 
     fun setNotificationStackDefaultTop(top: Float) {
-        keyguardClockRepository.setNotificationDefaultTop(top)
+        wallpaperFocalAreaInteractor.setNotificationDefaultTop(top)
     }
 }

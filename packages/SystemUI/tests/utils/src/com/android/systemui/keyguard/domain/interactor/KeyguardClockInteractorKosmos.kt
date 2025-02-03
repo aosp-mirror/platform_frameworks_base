@@ -23,6 +23,7 @@ import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarou
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
+import com.android.systemui.wallpapers.domain.interactor.wallpaperFocalAreaInteractor
 
 val Kosmos.keyguardClockInteractor by
     Kosmos.Fixture {
@@ -35,5 +36,6 @@ val Kosmos.keyguardClockInteractor by
             headsUpNotificationInteractor = headsUpNotificationInteractor,
             applicationScope = applicationCoroutineScope,
             keyguardClockRepository = keyguardClockRepository,
+            wallpaperFocalAreaInteractor = wallpaperFocalAreaInteractor,
         )
     }

@@ -18,13 +18,27 @@ package com.android.systemui.wallpapers.data.repository
 
 import android.app.WallpaperInfo
 import android.view.View
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /** Fake implementation of the wallpaper repository. */
 class FakeWallpaperRepository : WallpaperRepository {
-    override val wallpaperInfo = MutableStateFlow<WallpaperInfo?>(null)
-    override val wallpaperSupportsAmbientMode = flowOf(false)
+    private val _wallpaperInfo: MutableStateFlow<WallpaperInfo?> = MutableStateFlow(null)
+    override val wallpaperInfo: StateFlow<WallpaperInfo?> = _wallpaperInfo.asStateFlow()
+    private val _wallpaperSupportsAmbientMode = MutableStateFlow(false)
+    override val wallpaperSupportsAmbientMode: Flow<Boolean> =
+        _wallpaperSupportsAmbientMode.asStateFlow()
     override var rootView: View? = null
-    override val shouldSendFocalArea = MutableStateFlow(false)
+    private val _shouldSendFocalArea = MutableStateFlow(false)
+    override val shouldSendFocalArea: StateFlow<Boolean> = _shouldSendFocalArea.asStateFlow()
+
+    fun setShouldSendFocalArea(shouldSendFocalArea: Boolean) {
+        _shouldSendFocalArea.value = shouldSendFocalArea
+    }
+
+    fun setWallpaperInfo(wallpaperInfo: WallpaperInfo?) {
+        _wallpaperInfo.value = wallpaperInfo
+    }
 }

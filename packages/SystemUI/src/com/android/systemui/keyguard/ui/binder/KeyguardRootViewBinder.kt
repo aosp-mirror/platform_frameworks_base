@@ -50,7 +50,6 @@ import com.android.systemui.common.ui.view.onTouchListener
 import com.android.systemui.customization.R as customR
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
-import com.android.systemui.keyguard.domain.interactor.WallpaperFocalAreaInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.view.layout.sections.AodPromotedNotificationSection
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
@@ -80,6 +79,7 @@ import com.android.systemui.util.ui.AnimatedValue
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
+import com.android.systemui.wallpapers.ui.viewmodel.WallpaperFocalAreaViewModel
 import com.google.android.msdl.data.model.MSDLToken
 import com.google.android.msdl.domain.MSDLPlayer
 import kotlin.math.min
@@ -104,7 +104,6 @@ object KeyguardRootViewBinder {
         screenOffAnimationController: ScreenOffAnimationController,
         shadeInteractor: ShadeInteractor,
         clockInteractor: KeyguardClockInteractor,
-        wallpaperFocalAreaInteractor: WallpaperFocalAreaInteractor,
         clockViewModel: KeyguardClockViewModel,
         deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor?,
         vibratorHelper: VibratorHelper?,
@@ -113,6 +112,7 @@ object KeyguardRootViewBinder {
         mainImmediateDispatcher: CoroutineDispatcher,
         msdlPlayer: MSDLPlayer?,
         @KeyguardBlueprintLog blueprintLog: LogBuffer,
+        wallpaperFocalAreaViewModel: WallpaperFocalAreaViewModel,
     ): DisposableHandle {
         val disposables = DisposableHandles()
         val childViews = mutableMapOf<Int, View>()
@@ -368,13 +368,11 @@ object KeyguardRootViewBinder {
         disposables +=
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    if (viewModel.shouldSendFocalArea.value) {
+                    if (wallpaperFocalAreaViewModel.hasFocalArea.value) {
                         launch {
-                            wallpaperFocalAreaInteractor.wallpaperFocalAreaBounds
+                            wallpaperFocalAreaViewModel.wallpaperFocalAreaBounds
                                 .filterNotNull()
-                                .collect {
-                                    wallpaperFocalAreaInteractor.setWallpaperFocalAreaBounds(it)
-                                }
+                                .collect { wallpaperFocalAreaViewModel.setFocalAreaBounds(it) }
                         }
                     }
                 }

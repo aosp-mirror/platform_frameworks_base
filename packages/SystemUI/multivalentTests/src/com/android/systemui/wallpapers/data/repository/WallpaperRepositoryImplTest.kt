@@ -27,8 +27,6 @@ import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyguard.data.repository.FakeKeyguardClockRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.res.R as SysUIR
 import com.android.systemui.shared.Flags as SharedFlags
 import com.android.systemui.user.data.model.SelectedUserModel
@@ -53,8 +51,7 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
     private val userRepository = FakeUserRepository()
-    private val keyguardClockRepository = FakeKeyguardClockRepository()
-    private val keyguardRepository = FakeKeyguardRepository()
+    private val wallpaperFocalAreaRepository = FakeWallpaperFocalAreaRepository()
     private val wallpaperManager: WallpaperManager = mock()
 
     private val underTest: WallpaperRepositoryImpl by lazy {
@@ -63,7 +60,7 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
             testDispatcher,
             fakeBroadcastDispatcher,
             userRepository,
-            keyguardRepository,
+            wallpaperFocalAreaRepository,
             wallpaperManager,
             context,
         )

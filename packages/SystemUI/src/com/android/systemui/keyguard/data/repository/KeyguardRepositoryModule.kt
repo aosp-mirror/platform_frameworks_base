@@ -22,6 +22,8 @@ import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepositoryImpl
 import com.android.systemui.keyguard.shared.transition.KeyguardTransitionAnimationCallback
 import com.android.systemui.keyguard.shared.transition.KeyguardTransitionAnimationCallbackDelegator
+import com.android.systemui.wallpapers.data.repository.WallpaperFocalAreaRepository
+import com.android.systemui.wallpapers.data.repository.WallpaperFocalAreaRepositoryImpl
 import dagger.Binds
 import dagger.Module
 
@@ -73,4 +75,9 @@ interface KeyguardRepositoryModule {
     fun keyguardSmartspaceRepository(
         impl: KeyguardSmartspaceRepositoryImpl
     ): KeyguardSmartspaceRepository
+
+    @Binds
+    fun bindWallpaperFocalAreaRepository(
+        impl: WallpaperFocalAreaRepositoryImpl
+    ): WallpaperFocalAreaRepository
 }

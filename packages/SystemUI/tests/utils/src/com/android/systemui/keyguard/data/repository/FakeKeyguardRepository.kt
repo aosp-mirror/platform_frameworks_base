@@ -18,7 +18,6 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
-import android.graphics.RectF
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
@@ -122,18 +121,6 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     private val _isEncryptedOrLockdown = MutableStateFlow(true)
     override val isEncryptedOrLockdown: Flow<Boolean> = _isEncryptedOrLockdown
-
-    private val _shortcutAbsoluteTop = MutableStateFlow(0F)
-    override val shortcutAbsoluteTop: StateFlow<Float>
-        get() = _shortcutAbsoluteTop.asStateFlow()
-
-    private val _notificationStackAbsoluteBottom = MutableStateFlow(0F)
-    override val notificationStackAbsoluteBottom: StateFlow<Float>
-        get() = _notificationStackAbsoluteBottom.asStateFlow()
-
-    private val _wallpaperFocalAreaBounds = MutableStateFlow(RectF(0f, 0f, 0f, 0f))
-    override val wallpaperFocalAreaBounds: StateFlow<RectF>
-        get() = _wallpaperFocalAreaBounds.asStateFlow()
 
     private val _isKeyguardEnabled = MutableStateFlow(true)
     override val isKeyguardEnabled: StateFlow<Boolean> = _isKeyguardEnabled.asStateFlow()
@@ -287,18 +274,6 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override fun isShowKeyguardWhenReenabled(): Boolean {
         return isShowKeyguardWhenReenabled
-    }
-
-    override fun setShortcutAbsoluteTop(top: Float) {
-        _shortcutAbsoluteTop.value = top
-    }
-
-    override fun setNotificationStackAbsoluteBottom(bottom: Float) {
-        _notificationStackAbsoluteBottom.value = bottom
-    }
-
-    override fun setWallpaperFocalAreaBounds(bounds: RectF) {
-        _wallpaperFocalAreaBounds.value = bounds
     }
 
     override fun setCanIgnoreAuthAndReturnToGone(canWake: Boolean) {

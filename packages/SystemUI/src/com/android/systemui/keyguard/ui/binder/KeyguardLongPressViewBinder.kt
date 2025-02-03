@@ -43,13 +43,13 @@ object KeyguardLongPressViewBinder {
     fun bind(
         view: LongPressHandlingView,
         viewModel: KeyguardTouchHandlingViewModel,
-        onSingleTap: () -> Unit,
+        onSingleTap: (x: Int, y: Int) -> Unit,
         falsingManager: FalsingManager,
     ) {
         view.accessibilityHintLongPressAction =
             AccessibilityNodeInfo.AccessibilityAction(
                 AccessibilityNodeInfoCompat.ACTION_LONG_CLICK,
-                view.resources.getString(R.string.lock_screen_settings)
+                view.resources.getString(R.string.lock_screen_settings),
             )
         view.listener =
             object : LongPressHandlingView.Listener {
@@ -57,7 +57,7 @@ object KeyguardLongPressViewBinder {
                     view: View,
                     x: Int,
                     y: Int,
-                    isA11yAction: Boolean
+                    isA11yAction: Boolean,
                 ) {
                     if (
                         !isA11yAction && falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)
@@ -68,12 +68,12 @@ object KeyguardLongPressViewBinder {
                     viewModel.onLongPress(isA11yAction)
                 }
 
-                override fun onSingleTapDetected(view: View) {
+                override fun onSingleTapDetected(view: View, x: Int, y: Int) {
                     if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                         return
                     }
 
-                    onSingleTap()
+                    onSingleTap(x, y)
                 }
             }
 
