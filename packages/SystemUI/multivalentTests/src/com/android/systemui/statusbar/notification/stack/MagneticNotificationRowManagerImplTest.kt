@@ -90,6 +90,20 @@ class MagneticNotificationRowManagerImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun setMagneticRowTranslation_whenIdle_doesNotSetMagneticTranslation() =
+        kosmos.testScope.runTest {
+            // GIVEN an IDLE state
+            // WHEN setting a translation for the swiped row
+            val row = children.attachedChildren[childrenNumber / 2]
+            underTest.setMagneticRowTranslation(row, translation = 100f)
+
+            // THEN no magnetic translations are set
+            val canSetMagneticTranslation =
+                underTest.setMagneticRowTranslation(row, translation = 100f)
+            assertThat(canSetMagneticTranslation).isFalse()
+        }
+
+    @Test
     fun setMagneticRowTranslation_whenRowIsNotSwiped_doesNotSetMagneticTranslation() =
         kosmos.testScope.runTest {
             // GIVEN that targets are set

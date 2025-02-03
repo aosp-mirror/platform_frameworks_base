@@ -112,6 +112,10 @@ constructor(
         if (!row.isSwipedTarget()) return false
 
         when (currentState) {
+            State.IDLE -> {
+                logger.logMagneticRowTranslationNotSet(currentState, row.entry)
+                return false
+            }
             State.TARGETS_SET -> {
                 pullTargets(translation)
                 currentState = State.PULLING
@@ -131,7 +135,6 @@ constructor(
                 val swiped = currentMagneticListeners.swipedListener()
                 swiped?.setMagneticTranslation(translation)
             }
-            else -> {}
         }
         return true
     }
