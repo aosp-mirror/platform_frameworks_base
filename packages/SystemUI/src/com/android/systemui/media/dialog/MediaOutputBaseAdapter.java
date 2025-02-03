@@ -455,7 +455,7 @@ public abstract class MediaOutputBaseAdapter extends
                     : R.drawable.media_output_icon_volume;
         }
 
-        void updateIconAreaClickListener(View.OnClickListener listener) {
+        void updateIconAreaClickListener(@Nullable View.OnClickListener listener) {
             mIconAreaLayout.setOnClickListener(listener);
         }
 

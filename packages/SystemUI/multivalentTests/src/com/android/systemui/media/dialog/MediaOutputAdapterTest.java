@@ -625,6 +625,25 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
+    public void onItemClick_selectionBehaviorGoToApp_sendsLaunchIntent() {
+        when(mMediaSwitchingController.isCurrentOutputDeviceHasSessionOngoing()).thenReturn(true);
+        when(mMediaDevice2.getState()).thenReturn(
+                LocalMediaManager.MediaDeviceState.STATE_DISCONNECTED);
+        when(mMediaDevice2.getSelectionBehavior()).thenReturn(SELECTION_BEHAVIOR_GO_TO_APP);
+        mMediaOutputAdapter = new MediaOutputAdapter(mMediaSwitchingController);
+        mMediaOutputAdapter.updateItems();
+        mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
+                .onCreateViewHolder(new LinearLayout(mContext), 0);
+        MediaOutputAdapter.MediaDeviceViewHolder spyMediaDeviceViewHolder = spy(mViewHolder);
+
+        mMediaOutputAdapter.onBindViewHolder(spyMediaDeviceViewHolder, 1);
+        spyMediaDeviceViewHolder.mContainerLayout.performClick();
+
+        verify(mMediaSwitchingController).tryToLaunchInAppRoutingIntent(TEST_DEVICE_ID_2,
+                mViewHolder.mContainerLayout);
+    }
+
+    @Test
     public void onItemClick_clicksWithMutingExpectedDeviceExist_cancelsMuteAwaitConnection() {
         when(mMediaSwitchingController.isAnyDeviceTransferring()).thenReturn(false);
         when(mMediaSwitchingController.hasMutingExpectedDevice()).thenReturn(true);
