@@ -1862,9 +1862,38 @@
        <enum name="sync" value="2" />
     </attr>
 
-    <!-- This attribute will be used to override app compatibility mode on 16 KB devices.
-         If set to enabled, Natives lib will be extracted from APK if they are not page aligned on
-         16 KB device. 4 KB natives libs will be loaded app-compat mode if they are eligible.
+    <!-- This attribute overrides the user-set or platform-set 16 KB page size
+         compatibility mode, so that page agnostic compatibility is always enabled
+         or always disabled, rather than according to the user's preference.
+
+         <p>On 4 KB systems, this attribute is ignored and apps are installed
+         normally.
+
+         <p>On 16 KB systems, if an app is built for 16 KB page sizes, this
+         attribute is ignored and apps are installed normally.
+
+         <p>This attribute only affects 16 KB systems for apps that are built
+         with 4 KB page size (old) options.
+
+         <p>When page agnostic compatibility is enabled (either through this
+         flag or via the user's preference), the system specializes the app
+         installation process in ways known to improve compatibility of 4 KB
+         built apps on 16 KB systems. That is, apps which do not have aligned
+         libraries in APK files are extracted, requiring more space on the
+         device. An additional specialization when this option is enabled is
+         that the linker loads the application in a special mode intended
+         to allow 4 KB aligned program segments to load on a 16 KB page system.
+
+         <p>Here are the situations where this attribute should be most useful:
+         <ul>
+            <li>If an app works on 16 KB mode, but is not built for it, enabling this
+            attribute forces the app to be installed in 16 KB mode without
+            the user having to set these options themself.
+            <li>If an app is fully working in 16 KB mode, you can set this
+            attribute to disabled, so that any regression causes a clear failure
+            and this compatibility mode is not used.
+         </ul>
+
          @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB) -->
     <attr name="pageSizeCompat">
         <!-- value for enabled must match with
