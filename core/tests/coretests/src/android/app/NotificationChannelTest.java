@@ -69,6 +69,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -77,9 +80,6 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
-
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
-import platform.test.runner.parameterized.Parameters;
 
 @RunWith(ParameterizedAndroidJunit4.class)
 @UsesFlags(android.app.Flags.class)
@@ -92,7 +92,8 @@ public class NotificationChannelTest {
     @Parameters(name = "{0}")
     public static List<FlagsParameterization> getParams() {
         return FlagsParameterization.allCombinationsOf(
-                Flags.FLAG_NOTIF_CHANNEL_CROP_VIBRATION_EFFECTS);
+                Flags.FLAG_NOTIF_CHANNEL_CROP_VIBRATION_EFFECTS,
+                Flags.FLAG_NOTIF_CHANNEL_ESTIMATE_EFFECT_SIZE);
     }
 
     @Rule
@@ -279,6 +280,59 @@ public class NotificationChannelTest {
         assertThat(result.getVibrationEffect()
                 .computeCreateWaveformOffOnTimingsOrNull())
                 .isEqualTo(result.getVibrationPattern());
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_NOTIFICATION_CHANNEL_VIBRATION_EFFECT_API,
+            Flags.FLAG_NOTIF_CHANNEL_CROP_VIBRATION_EFFECTS,
+            Flags.FLAG_NOTIF_CHANNEL_ESTIMATE_EFFECT_SIZE})
+    public void testVibrationEffect_droppedIfTooLargeAndNotTrimmable() {
+        NotificationChannel channel = new NotificationChannel("id", "name", 3);
+        // populate pattern with contents
+        long[] pattern = new long[65550 / 2];
+        for (int i = 0; i < pattern.length; i++) {
+            pattern[i] = 100;
+        }
+        // repeating effects cannot be trimmed
+        VibrationEffect effect = VibrationEffect.createWaveform(pattern, 1);
+        channel.setVibrationEffect(effect);
+
+        NotificationChannel result = writeToAndReadFromParcel(channel);
+        assertThat(result.getVibrationEffect()).isNull();
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_NOTIFICATION_CHANNEL_VIBRATION_EFFECT_API,
+            Flags.FLAG_NOTIF_CHANNEL_CROP_VIBRATION_EFFECTS,
+            Flags.FLAG_NOTIF_CHANNEL_ESTIMATE_EFFECT_SIZE})
+    public void testVibrationEffect_trimmedIfLargeAndTrimmable() {
+        NotificationChannel channel = new NotificationChannel("id", "name", 3);
+        // populate pattern with contents
+        long[] pattern = new long[65550 / 2];
+        for (int i = 0; i < pattern.length; i++) {
+            pattern[i] = 100;
+        }
+        // Effect is equivalent to the pattern
+        VibrationEffect effect = VibrationEffect.createWaveform(pattern, -1);
+        channel.setVibrationEffect(effect);
+
+        NotificationChannel result = writeToAndReadFromParcel(channel);
+        assertThat(result.getVibrationEffect()).isNotNull();
+        assertThat(result.getVibrationEffect().computeCreateWaveformOffOnTimingsOrNull()).hasLength(
+                NotificationChannel.MAX_VIBRATION_LENGTH);
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_NOTIFICATION_CHANNEL_VIBRATION_EFFECT_API,
+            Flags.FLAG_NOTIF_CHANNEL_CROP_VIBRATION_EFFECTS,
+            Flags.FLAG_NOTIF_CHANNEL_ESTIMATE_EFFECT_SIZE})
+    public void testVibrationEffect_keptIfSmall() {
+        NotificationChannel channel = new NotificationChannel("id", "name", 3);
+        VibrationEffect effect = VibrationEffect.createOneShot(1, 100);
+        channel.setVibrationEffect(effect);
+
+        NotificationChannel result = writeToAndReadFromParcel(channel);
+        assertThat(result.getVibrationEffect()).isEqualTo(effect);
     }
 
     @Test

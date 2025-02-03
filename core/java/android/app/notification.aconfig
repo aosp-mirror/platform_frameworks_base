@@ -154,6 +154,16 @@ flag {
 }
 
 flag {
+  name: "notif_channel_estimate_effect_size"
+  namespace: "systemui"
+  description: "When reading vibration effects from parcel, estimate size instead of unnecessarily serializing to XML"
+  bug: "391908451"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "evenly_divided_call_style_action_layout"
   namespace: "systemui"
   description: "Evenly divides horizontal space for action buttons in CallStyle notifications."
