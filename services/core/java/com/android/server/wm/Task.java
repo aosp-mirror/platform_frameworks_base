@@ -2390,18 +2390,17 @@ class Task extends TaskFragment {
         mTaskSupervisor.mLaunchParamsPersister.saveTask(this, display);
     }
 
-    Rect updateOverrideConfigurationFromLaunchBounds() {
+    void updateOverrideConfigurationFromLaunchBounds() {
         // If the task is controlled by another organized task, do not set override
         // configurations and let its parent (organized task) to control it;
         final Task rootTask = getRootTask();
-        final Rect bounds = rootTask != this && rootTask.isOrganized() ? null : getLaunchBounds();
-        setBounds(bounds);
-        if (bounds != null && !bounds.isEmpty()) {
-            // TODO: Review if we actually want to do this - we are setting the launch bounds
-            // directly here.
-            bounds.set(getRequestedOverrideBounds());
+        boolean shouldInheritBounds = rootTask != this && rootTask.isOrganized();
+        if (Flags.enableMultipleDesktopsBackend()) {
+            // Only inherit from organized parent when this task is not organized.
+            shouldInheritBounds &= !isOrganized();
         }
-        return bounds;
+        final Rect bounds = shouldInheritBounds ? null : getLaunchBounds();
+        setBounds(bounds);
     }
 
     /** Returns the bounds that should be used to launch this task. */
