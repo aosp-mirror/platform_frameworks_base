@@ -6786,4 +6786,10 @@ ul.</string>
 
     <!-- Fingerprint loe notification string -->
     <string name="fingerprint_loe_notification_msg">Your fingerprints can no longer be recognized. Set up Fingerprint Unlock again.</string>
+
+    <!--  AdvancedProtectionService USB notifications -->
+    <string name="usb_apm_usb_plugged_in_when_locked_notification_title">USB device plugged in when locked</string>
+    <string name="usb_apm_usb_plugged_in_when_locked_notification_text">USB device is plugged in when Android is locked. To use device, please unlock Android first and then reinsert USB device to use it.</string>
+    <string name="usb_apm_usb_suspicious_activity_notification_title">Suspicious USB activity</string>
+    <string name="usb_apm_usb_suspicious_activity_notification_text">USB data signal has been disabled.</string>
 </resources>

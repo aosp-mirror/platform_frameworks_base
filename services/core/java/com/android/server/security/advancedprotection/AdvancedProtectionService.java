@@ -49,6 +49,7 @@ import com.android.server.security.advancedprotection.features.AdvancedProtectio
 import com.android.server.security.advancedprotection.features.DisallowCellular2GAdvancedProtectionHook;
 import com.android.server.security.advancedprotection.features.DisallowInstallUnknownSourcesAdvancedProtectionHook;
 import com.android.server.security.advancedprotection.features.MemoryTaggingExtensionHook;
+import com.android.server.security.advancedprotection.features.UsbDataAdvancedProtectionHook;
 
 import java.io.FileDescriptor;
 import java.util.ArrayList;
@@ -100,6 +101,13 @@ public class AdvancedProtectionService extends IAdvancedProtectionService.Stub  
             Slog.e(TAG, "Failed to initialize DisallowCellular2g", e);
           }
         }
+        if (android.security.Flags.aapmFeatureUsbDataProtection()) {
+          try {
+            mHooks.add(new UsbDataAdvancedProtectionHook(mContext, enabled));
+          } catch (Exception e) {
+            Slog.e(TAG, "Failed to initialize UsbDataAdvancedProtection", e);
+          }
+      }
     }
 
     // Only for tests

@@ -5876,4 +5876,9 @@
 
   <java-symbol type="array" name="config_notificationDefaultUnsupportedAdjustments" />
 
+  <!-- Advanced Protection Service USB feature -->
+  <java-symbol type="string" name="usb_apm_usb_plugged_in_when_locked_notification_title" />
+  <java-symbol type="string" name="usb_apm_usb_plugged_in_when_locked_notification_text" />
+  <java-symbol type="string" name="usb_apm_usb_suspicious_activity_notification_title" />
+  <java-symbol type="string" name="usb_apm_usb_suspicious_activity_notification_text" />
 </resources>
