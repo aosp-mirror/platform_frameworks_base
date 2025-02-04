@@ -10981,7 +10981,10 @@ public final class Settings {
         /**
          * Indicates whether "seen" notifications should be suppressed from the lockscreen.
          * <p>
-         * Type: int (0 for unset, 1 for true, 2 for false)
+         * Type: int (0 for unset_off, 1 for true, 2 for false)
+         * 0 is the default value for phones, which is equivalent to off in effect, before
+         * the notification minimalism feature, this setting is default hidden to phones, we use
+         * 0 instead of 2 to mark that we need to hide this setting toggle in the Settings app.
          *
          * @hide
          */
