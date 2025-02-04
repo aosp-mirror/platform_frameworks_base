@@ -44,6 +44,7 @@ import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.collectLastValue
 import com.android.systemui.kosmos.collectValues
+import com.android.systemui.kosmos.runCurrent
 import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
@@ -52,6 +53,7 @@ import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.scene.data.repository.sceneContainerRepository
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
@@ -90,6 +92,7 @@ import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runCurrent
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -553,6 +556,30 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
             kosmos.sceneContainerRepository.snapToScene(Scenes.Gone)
 
             assertThat(latest).isTrue()
+        }
+
+    @Test
+    fun isHomeStatusBarAllowedByScene_sceneGoneWithNotificationsShadeOverlay_false() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.isHomeStatusBarAllowedByScene)
+
+            kosmos.sceneContainerRepository.snapToScene(Scenes.Gone)
+            kosmos.sceneContainerRepository.showOverlay(Overlays.NotificationsShade)
+            runCurrent()
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun isHomeStatusBarAllowedByScene_sceneGoneWithQuickSettingsShadeOverlay_false() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.isHomeStatusBarAllowedByScene)
+
+            kosmos.sceneContainerRepository.snapToScene(Scenes.Gone)
+            kosmos.sceneContainerRepository.showOverlay(Overlays.QuickSettingsShade)
+            runCurrent()
+
+            assertThat(latest).isFalse()
         }
 
     @Test

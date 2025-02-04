@@ -32,6 +32,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.domain.interactor.keyguardStatusBarInteractor
 import com.android.systemui.statusbar.headsup.shared.StatusBarNoHunBehavior
@@ -44,6 +45,7 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -54,6 +56,7 @@ import org.mockito.Mockito.verify
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 class KeyguardStatusBarViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
@@ -96,6 +99,15 @@ class KeyguardStatusBarViewModelTest(flags: FlagsParameterization) : SysuiTestCa
     }
 
     @Test
+    fun isVisible_lockscreen_true() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isVisible)
+            kosmos.sceneContainerRepository.snapToScene(Scenes.Lockscreen)
+
+            assertThat(latest).isTrue()
+        }
+
+    @Test
     fun isVisible_dozing_false() =
         testScope.runTest {
             val latest by collectLastValue(underTest.isVisible)
@@ -112,6 +124,30 @@ class KeyguardStatusBarViewModelTest(flags: FlagsParameterization) : SysuiTestCa
             val latest by collectLastValue(underTest.isVisible)
 
             kosmos.sceneContainerRepository.snapToScene(Scenes.Shade)
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun isVisible_notificationsShadeOverlay_false() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isVisible)
+
+            kosmos.sceneContainerRepository.snapToScene(Scenes.Lockscreen)
+            kosmos.sceneContainerRepository.showOverlay(Overlays.NotificationsShade)
+            runCurrent()
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun isVisible_quickSettingsShadeOverlay_false() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isVisible)
+
+            kosmos.sceneContainerRepository.snapToScene(Scenes.Lockscreen)
+            kosmos.sceneContainerRepository.showOverlay(Overlays.QuickSettingsShade)
+            runCurrent()
 
             assertThat(latest).isFalse()
         }

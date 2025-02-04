@@ -22,6 +22,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.domain.interactor.KeyguardStatusBarInteractor
 import com.android.systemui.statusbar.headsup.shared.StatusBarNoHunBehavior
@@ -70,10 +71,15 @@ constructor(
     val isVisible: StateFlow<Boolean> =
         combine(
                 sceneInteractor.currentScene,
+                sceneInteractor.currentOverlays,
                 keyguardInteractor.isDozing,
                 showingHeadsUpStatusBar,
-            ) { currentScene, isDozing, showHeadsUpStatusBar ->
-                currentScene == Scenes.Lockscreen && !isDozing && !showHeadsUpStatusBar
+            ) { currentScene, currentOverlays, isDozing, showHeadsUpStatusBar ->
+                currentScene == Scenes.Lockscreen &&
+                    Overlays.NotificationsShade !in currentOverlays &&
+                    Overlays.QuickSettingsShade !in currentOverlays &&
+                    !isDozing &&
+                    !showHeadsUpStatusBar
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
