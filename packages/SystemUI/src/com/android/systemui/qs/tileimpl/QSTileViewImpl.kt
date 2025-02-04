@@ -27,7 +27,6 @@ import android.content.res.Resources.ID_NULL
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.Rect
-import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
@@ -60,7 +59,6 @@ import com.android.app.tracing.traceSection
 import com.android.settingslib.Utils
 import com.android.systemui.Flags
 import com.android.systemui.FontSizeUtils
-import com.android.systemui.FontStyles
 import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.LaunchableView
 import com.android.systemui.animation.LaunchableViewDelegate
@@ -310,16 +308,6 @@ constructor(
         }
         setLabelColor(getLabelColorForState(QSTile.State.DEFAULT_STATE))
         setSecondaryLabelColor(getSecondaryLabelColorForState(QSTile.State.DEFAULT_STATE))
-
-        if (Flags.gsfQuickSettings()) {
-            label.apply {
-                typeface = Typeface.create(FontStyles.GSF_TITLE_SMALL_EMPHASIZED, Typeface.NORMAL)
-            }
-            secondaryLabel.apply {
-                typeface = Typeface.create(FontStyles.GSF_LABEL_MEDIUM, Typeface.NORMAL)
-            }
-        }
-
         addView(labelContainer)
     }
 

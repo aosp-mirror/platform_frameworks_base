@@ -14,15 +14,12 @@
 
 package com.android.systemui.qs.customize;
 
-import static com.android.systemui.Flags.gsfQuickSettings;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -47,7 +44,6 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.FontSizeUtils;
-import com.android.systemui.FontStyles;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.qs.QSEditEvent;
@@ -313,10 +309,6 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         if (viewType == TYPE_HEADER) {
             View v = inflater.inflate(R.layout.qs_customize_header, parent, false);
             v.setMinimumHeight(calculateHeaderMinHeight(context));
-            if (gsfQuickSettings()) {
-                ((TextView) v.findViewById(android.R.id.title)).setTypeface(
-                        Typeface.create(FontStyles.GSF_LABEL_LARGE, Typeface.NORMAL));
-            }
             return new Holder(v);
         }
         if (viewType == TYPE_DIVIDER) {

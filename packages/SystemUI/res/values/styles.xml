@@ -819,11 +819,6 @@
         <item name="android:textColor">?attr/onSurfaceVariant</item>
     </style>
 
-    <style name="TextAppearance.QSEditTitle" >
-        <item name="android:fontFamily">"gsf-title-medium-emphasized"</item>
-        <item name="android:textColor">?attr/onSurfaceVariant</item>
-    </style>
-
     <style name="QSCustomizeToolbar" parent="@*android:style/Widget.DeviceDefault.Toolbar">
         <item name="android:textColor">?attr/onSurface</item>
         <item name="android:elevation">10dp</item>
