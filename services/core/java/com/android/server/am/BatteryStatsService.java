@@ -526,6 +526,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     public void systemServicesReady() {
+        mStats.setBatteryHistoryCompressionEnabled(
+                Flags.extendedBatteryHistoryCompressionEnabled());
         mStats.saveBatteryUsageStatsOnReset(mBatteryUsageStatsProvider, mPowerStatsStore,
                 isBatteryUsageStatsAccumulationSupported());
         mStats.resetBatteryHistoryOnNewSession(

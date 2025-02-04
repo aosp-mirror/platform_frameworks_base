@@ -42,6 +42,7 @@ import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.PowerStats;
+import com.android.server.power.stats.BatteryHistoryDirectory;
 import com.android.server.power.stats.BatteryUsageStatsRule;
 import com.android.server.power.stats.MockClock;
 import com.android.server.power.stats.PowerStatsStore;
@@ -84,6 +85,7 @@ public class PowerStatsExporterTest {
     private PowerStatsStore mPowerStatsStore;
     private PowerStatsAggregator mPowerStatsAggregator;
     private MultiStatePowerAttributor mPowerAttributor;
+    private BatteryHistoryDirectory mDirectory;
     private BatteryStatsHistory mHistory;
     private CpuPowerStatsLayout mCpuStatsArrayLayout;
     private PowerStats.Descriptor mPowerStatsDescriptor;
@@ -117,7 +119,8 @@ public class PowerStatsExporterTest {
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE);
 
         mPowerStatsStore = new PowerStatsStore(storeDirectory, new TestHandler());
-        mHistory = new BatteryStatsHistory(Parcel.obtain(), storeDirectory, 0, 10000,
+        mDirectory = new BatteryHistoryDirectory(storeDirectory, 0);
+        mHistory = new BatteryStatsHistory(Parcel.obtain(), 10000, mDirectory,
                 mock(BatteryStatsHistory.HistoryStepDetailsCalculator.class), mClock,
                 mMonotonicClock, null, null);
         mPowerStatsAggregator = new PowerStatsAggregator(config);

@@ -877,9 +877,19 @@ public class BatteryUsageStatsProviderTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_EXTENDED_BATTERY_HISTORY_CONTINUOUS_COLLECTION_ENABLED)
+    @EnableFlags({
+            Flags.FLAG_EXTENDED_BATTERY_HISTORY_CONTINUOUS_COLLECTION_ENABLED,
+            Flags.FLAG_EXTENDED_BATTERY_HISTORY_COMPRESSION_ENABLED
+    })
     public void testIncludeSubsetOfHistory() throws IOException {
         MockBatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
+        BatteryHistoryDirectory store =
+                (BatteryHistoryDirectory) batteryStats.getHistory().getBatteryHistoryStore();
+        store.setFileCompressionEnabled(true);
+        // Make history fragment size predictable. Without this protection, holding the history
+        // directory lock in the background would prevent new fragments from being created.
+        store.makeDirectoryLockUnconditional();
+
         batteryStats.getHistory().setMaxHistoryBufferSize(100);
         synchronized (batteryStats) {
             batteryStats.setRecordAllHistoryLocked(true);

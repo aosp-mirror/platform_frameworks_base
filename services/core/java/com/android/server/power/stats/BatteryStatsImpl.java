@@ -195,6 +195,8 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final boolean DEBUG_BINDER_STATS = false;
     private static final boolean DEBUG_MEMORY = false;
 
+    private static final String HISTORY_DIR = "battery-history";
+
     // TODO: remove "tcp" from network methods, since we measure total stats.
 
     // Current on-disk Parcel version. Must be updated when the format of the parcelable changes
@@ -1143,6 +1145,8 @@ public class BatteryStatsImpl extends BatteryStats {
     private int mBatteryTemperature;
     private int mBatteryVoltageMv;
 
+    @Nullable
+    private final BatteryHistoryDirectory mBatteryHistoryDirectory;
     @NonNull
     private final BatteryStatsHistory mHistory;
 
@@ -11476,7 +11480,10 @@ public class BatteryStatsImpl extends BatteryStats {
             @NonNull UserInfoProvider userInfoProvider, @NonNull PowerProfile powerProfile,
             @NonNull CpuScalingPolicies cpuScalingPolicies,
             @NonNull PowerStatsUidResolver powerStatsUidResolver) {
-        this(config, clock, monotonicClock, systemDir, handler, platformIdleStateCallback,
+        this(config, clock, monotonicClock, systemDir,
+                systemDir != null ? new BatteryHistoryDirectory(new File(systemDir, HISTORY_DIR),
+                        config.getMaxHistorySizeBytes()) : null,
+                handler, platformIdleStateCallback,
                 energyStatsRetriever, userInfoProvider, powerProfile, cpuScalingPolicies,
                 powerStatsUidResolver, new FrameworkStatsLogger(),
                 new BatteryStatsHistory.TraceDelegate(), new BatteryStatsHistory.EventLogger());
@@ -11484,6 +11491,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public BatteryStatsImpl(@NonNull BatteryStatsConfig config, @NonNull Clock clock,
             @NonNull MonotonicClock monotonicClock, @Nullable File systemDir,
+            @Nullable BatteryHistoryDirectory batteryHistoryDirectory,
             @NonNull Handler handler, @Nullable PlatformIdleStateCallback platformIdleStateCallback,
             @Nullable EnergyStatsRetriever energyStatsRetriever,
             @NonNull UserInfoProvider userInfoProvider, @NonNull PowerProfile powerProfile,
@@ -11517,9 +11525,10 @@ public class BatteryStatsImpl extends BatteryStats {
             mDailyFile = null;
         }
 
-        mHistory = new BatteryStatsHistory(null /* historyBuffer */, systemDir,
-                mConstants.MAX_HISTORY_SIZE, mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator,
-                mClock, mMonotonicClock, traceDelegate, eventLogger);
+        mBatteryHistoryDirectory = batteryHistoryDirectory;
+        mHistory = new BatteryStatsHistory(null /* historyBuffer */, mConstants.MAX_HISTORY_BUFFER,
+                mBatteryHistoryDirectory, mStepDetailsCalculator, mClock, mMonotonicClock,
+                traceDelegate, eventLogger);
 
         mCpuPowerStatsCollector = new CpuPowerStatsCollector(mPowerStatsCollectorInjector);
         mCpuPowerStatsCollector.addConsumer(this::recordPowerStats);
@@ -12060,7 +12069,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public int getHistoryTotalSize() {
-        return mHistory.getMaxHistorySize();
+        return mBatteryHistoryDirectory.getMaxHistorySize();
     }
 
     public int getHistoryUsedSize() {
@@ -12158,6 +12167,13 @@ public class BatteryStatsImpl extends BatteryStats {
      */
     public void resetBatteryHistoryOnNewSession(boolean enabled) {
         mResetBatteryHistoryOnNewSession = enabled;
+    }
+
+    /**
+     * Enables or disables battery history file compression.
+     */
+    public void setBatteryHistoryCompressionEnabled(boolean enabled) {
+        mBatteryHistoryDirectory.setFileCompressionEnabled(enabled);
     }
 
     @GuardedBy("this")
@@ -16354,7 +16370,9 @@ public class BatteryStatsImpl extends BatteryStats {
          */
         @VisibleForTesting
         public void onChange() {
-            mHistory.setMaxHistorySize(MAX_HISTORY_SIZE);
+            if (mBatteryHistoryDirectory != null) {
+                mBatteryHistoryDirectory.setMaxHistorySize(MAX_HISTORY_SIZE);
+            }
             mHistory.setMaxHistoryBufferSize(MAX_HISTORY_BUFFER);
         }
 
