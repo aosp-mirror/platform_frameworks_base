@@ -2087,9 +2087,8 @@
     <!-- Text shown in notification guts for conversation notifications that don't implement the full feature -->
     <string name="no_shortcut"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> doesn\u2019t support conversation features</string>
 
-    <!-- TODO: b/381099727 - Mark translatable once feedback layout is finalized. -->
     <!-- [CHAR LIMIT=80] Text shown in feedback button in notification guts for a bundled notification -->
-    <string name="notification_guts_bundle_feedback" translatable="false">Provide Bundle Feedback</string>
+    <string name="notification_guts_bundle_feedback">Feedback</string>
 
     <!-- [CHAR LIMIT=30] Text shown in button used to dismiss this single notification. -->
     <string name="notification_inline_dismiss">Dismiss</string>
