@@ -5443,6 +5443,10 @@ public class AudioService extends IAudioService.Stub
     protected void sendVolumeUpdate(int streamType, int oldIndex, int index, int flags, int device)
     {
         streamType = sStreamVolumeAlias.get(streamType, /*valueIfKeyNotFound=*/-1);
+        if (streamType == -1) {
+            Slog.e(TAG, "Invalid stream type. No update to IVolumeController", new Exception());
+            return;
+        }
 
         if (streamType == AudioSystem.STREAM_MUSIC && isFullVolumeDevice(device)) {
             flags &= ~AudioManager.FLAG_SHOW_UI;
