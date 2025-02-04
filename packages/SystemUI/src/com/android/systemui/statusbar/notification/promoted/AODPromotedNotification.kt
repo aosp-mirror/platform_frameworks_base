@@ -160,6 +160,8 @@ private class AODPromotedNotificationViewUpdater(root: View) {
     private var chronometerStub: ViewStub? = root.findViewById(R.id.chronometer)
     private var chronometer: Chronometer? = null
     private val closeButton: View? = root.findViewById(R.id.close_button)
+    private val conversationIconContainer: View? =
+        root.findViewById(R.id.conversation_icon_container)
     private val conversationText: TextView? = root.findViewById(R.id.conversation_text)
     private val expandButton: NotificationExpandButton? = root.findViewById(R.id.expand_button)
     private val headerText: TextView? = root.findViewById(R.id.header_text)
@@ -191,6 +193,7 @@ private class AODPromotedNotificationViewUpdater(root: View) {
         alternateExpandTarget?.visibility = GONE
         bigPicture?.visibility = GONE
         closeButton?.visibility = GONE
+        conversationIconContainer?.visibility = GONE
         expandButton?.visibility = GONE
         leftIcon?.visibility = GONE
         notificationProgressEndIcon?.visibility = GONE
