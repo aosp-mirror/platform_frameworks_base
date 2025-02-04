@@ -37,6 +37,7 @@ import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
 import static android.os.BatteryManager.CHARGING_POLICY_DEFAULT;
 import static android.telephony.SubscriptionManager.PROFILE_CLASS_PROVISIONING;
+import static android.telephony.SubscriptionManager.SUBSCRIPTION_TYPE_REMOTE_SIM;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
@@ -689,13 +690,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * @return List of SubscriptionInfo records, maybe empty but never null.
      *
      * Note that this method will filter out any subscription which is PROFILE_CLASS_PROVISIONING
+     * and REMOTE SIMs. REMOTE SIMs use an invalid slot index (-1).
      */
     public List<SubscriptionInfo> getSubscriptionInfo(boolean forceReload) {
         List<SubscriptionInfo> sil = mSubscriptionInfo;
         if (sil == null || forceReload) {
             mSubscriptionInfo = mSubscriptionManager.getCompleteActiveSubscriptionInfoList()
                     .stream()
-                    .filter(subInfo -> subInfo.getProfileClass() != PROFILE_CLASS_PROVISIONING)
+                    .filter(subInfo ->
+                            subInfo.getProfileClass() != PROFILE_CLASS_PROVISIONING
+                                && subInfo.getSubscriptionType() != SUBSCRIPTION_TYPE_REMOTE_SIM)
                     .toList();
         }
 

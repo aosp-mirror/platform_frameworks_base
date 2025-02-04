@@ -218,6 +218,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             TEST_CARRIER, TEST_CARRIER, NAME_SOURCE_CARRIER_ID, 0xFFFFFF, "",
             DATA_ROAMING_DISABLE, null, null, null, null, false, null, "", false, TEST_GROUP_UUID,
             TEST_CARRIER_ID, PROFILE_CLASS_PROVISIONING);
+    private static final SubscriptionInfo TEST_REMOTE_SIM =
+            new SubscriptionInfo.Builder(TEST_SUBSCRIPTION)
+                    .setType(SubscriptionManager.SUBSCRIPTION_TYPE_REMOTE_SIM).build();
     private static final int FINGERPRINT_SENSOR_ID = 1;
     private KosmosJavaAdapter mKosmos;
     @Mock
@@ -1365,6 +1368,26 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         SubscriptionInfo.Builder b = new SubscriptionInfo.Builder(TEST_SUBSCRIPTION_PROVISIONING);
         b.setProfileClass(PROFILE_CLASS_DEFAULT);
+        SubscriptionInfo validInfo = b.build();
+
+        list.clear();
+        list.add(validInfo);
+        mKeyguardUpdateMonitor.mSubscriptionListener.onSubscriptionsChanged();
+
+        assertThat(mKeyguardUpdateMonitor.getSubscriptionInfo(true)).hasSize(1);
+    }
+
+    @Test
+    public void testActiveSubscriptionList_filtersRemoteSim() {
+        List<SubscriptionInfo> list = new ArrayList<>();
+        list.add(TEST_REMOTE_SIM);
+        when(mSubscriptionManager.getCompleteActiveSubscriptionInfoList()).thenReturn(list);
+        mKeyguardUpdateMonitor.mSubscriptionListener.onSubscriptionsChanged();
+
+        assertThat(mKeyguardUpdateMonitor.getSubscriptionInfo(true)).isEmpty();
+
+        SubscriptionInfo.Builder b = new SubscriptionInfo.Builder(TEST_REMOTE_SIM);
+        b.setType(SubscriptionManager.SUBSCRIPTION_TYPE_LOCAL_SIM);
         SubscriptionInfo validInfo = b.build();
 
         list.clear();
