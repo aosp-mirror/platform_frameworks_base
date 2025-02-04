@@ -23,7 +23,6 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.scene.domain.SceneFrameworkTableLog
 import com.android.systemui.shade.data.repository.ShadeRepository
-import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shared.settings.data.repository.SecureSettingsRepository
 import javax.inject.Inject
@@ -116,11 +115,7 @@ constructor(
         isShadeLayoutWide: Boolean,
     ): ShadeMode {
         return when {
-            isDualShadeEnabled ||
-                // TODO(b/388793191): This ensures that the dual_shade aconfig flag can also enable
-                //  Dual Shade, to avoid breaking unit tests. Remove this once all references to the
-                //  flag are removed.
-                DualShade.isEnabled -> ShadeMode.Dual
+            isDualShadeEnabled -> ShadeMode.Dual
             isShadeLayoutWide -> ShadeMode.Split
             else -> ShadeMode.Single
         }

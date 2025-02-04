@@ -282,13 +282,6 @@ flag {
 }
 
 flag {
-    name: "dual_shade"
-    namespace: "systemui"
-    description: "Enables Dual Shade (go/dual-shade-design-doc)."
-    bug: "337259436"
-}
-
-flag {
     name: "device_entry_udfps_refactor"
     namespace: "systemui"
     description: "Refactoring device entry UDFPS icon to use modern architecture and "
