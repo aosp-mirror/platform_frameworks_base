@@ -24,6 +24,7 @@ import com.android.systemui.coroutines.newTracingContext
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.qs.flags.QsDetailedView
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -41,6 +42,7 @@ constructor(
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val dialogFactory: InternetDialogDelegateLegacy.Factory,
     @Background private val bgDispatcher: CoroutineDispatcher,
+    private val shadeModeInteractor: ShadeModeInteractor,
 ) {
     private lateinit var coroutineScope: CoroutineScope
 
@@ -59,8 +61,10 @@ constructor(
         canConfigWifi: Boolean,
         expandable: Expandable?,
     ) {
-        // If `QsDetailedView` is enabled, it should show the details view.
-        QsDetailedView.assertInLegacyMode()
+        if (shadeModeInteractor.isDualShade) {
+            // If `QsDetailedView` is enabled, it should show the details view.
+            QsDetailedView.assertInLegacyMode()
+        }
         if (dialog != null) {
             if (DEBUG) {
                 Log.d(TAG, "InternetDialog is showing, do not create it twice.")
