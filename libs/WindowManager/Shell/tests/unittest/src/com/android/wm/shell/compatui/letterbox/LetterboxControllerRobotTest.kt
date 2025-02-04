@@ -33,10 +33,10 @@ abstract class LetterboxControllerRobotTest {
 
     companion object {
         @JvmStatic
-        private val DISPLAY_ID = 1
+        val DISPLAY_ID = 1
 
         @JvmStatic
-        private val TASK_ID = 20
+        val TASK_ID = 20
     }
 
     lateinit var letterboxController: LetterboxController

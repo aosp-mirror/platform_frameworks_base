@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.compatui.letterbox
 
+import android.view.MotionEvent.ACTION_DOWN
+import android.view.MotionEvent.obtain
 import android.view.SurfaceControl
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
@@ -37,6 +39,18 @@ fun getTransactionMock(): SurfaceControl.Transaction = mock<SurfaceControl.Trans
     doReturn(this).`when`(this).setWindowCrop(anyOrNull(), any(), any())
 }
 
+/**
+ * @return A [LetterboxInputSurfaceBuilder] mock to use in tests.
+ */
+fun getLetterboxInputSurfaceBuilderMock() = mock<LetterboxInputSurfaceBuilder>().apply {
+    doReturn(SurfaceControl()).`when`(this).createInputSurface(
+        any(),
+        any(),
+        any(),
+        any()
+    )
+}
+
 // Utility to make verification mode depending on a [Boolean].
 fun Boolean.asMode(): VerificationMode = if (this) times(1) else never()
 
@@ -45,6 +59,11 @@ object LetterboxMatchers {
     fun Int.asAnyMode() = asAnyMode { this < 0 }
     fun Float.asAnyMode() = asAnyMode { this < 0f }
     fun String.asAnyMode() = asAnyMode { this.isEmpty() }
+}
+
+object LetterboxEvents {
+    fun motionEventAt(x: Float, y: Float) =
+        obtain(0, 10, ACTION_DOWN, x, y, 0)
 }
 
 private inline fun <reified T : Any> T.asAnyMode(condition: () -> Boolean) =
