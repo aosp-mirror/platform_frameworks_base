@@ -34,6 +34,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 
+import static com.android.window.flags.Flags.enableNonDefaultDisplaySplit;
 import static com.android.wm.shell.Flags.enableFlexibleSplit;
 import static com.android.wm.shell.Flags.enableFlexibleTwoAppSplit;
 import static com.android.wm.shell.common.split.SplitLayout.PARALLAX_ALIGN_CENTER;
@@ -1696,6 +1697,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             toTopStage.doForAllChildTaskInfos(taskInfo -> {
                 wct.setWindowingMode(taskInfo.token, targetWindowingMode);
             });
+        }
+        // Reparent root task to default display if non default display split is enabled.
+        if (enableNonDefaultDisplaySplit() && mRootTaskInfo.displayId != DEFAULT_DISPLAY) {
+            DisplayAreaInfo displayAreaInfo = mRootTDAOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY);
+            if (displayAreaInfo != null) {
+                wct.reparent(mRootTaskInfo.token, displayAreaInfo.token, false /* onTop */);
+            }
         }
         deactivateSplit(wct, stageToTop);
         mSplitState.exit();
