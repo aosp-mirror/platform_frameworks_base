@@ -2089,6 +2089,12 @@
     <string name="unpin_target" msgid="3963318576590204447">"Otkači"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Otkači aplikaciju <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"Informacije o aplikaciji"</string>
+    <!-- no translation found for shortcut_group_a11y_title (2992150163811583865) -->
+    <skip />
+    <!-- no translation found for suggested_apps_group_a11y_title (2804876567839501831) -->
+    <skip />
+    <!-- no translation found for all_apps_group_a11y_title (7020352520224108745) -->
+    <skip />
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Pokrećemo demonstraciju..."</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Resetujemo uređaj..."</string>
@@ -2243,6 +2249,10 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"nalevo na D-pad-u"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"nadesno na D-pad-u"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"centar na D-pad-u"</string>
+    <string name="accessibility_autoclick_type_settings_panel_title" msgid="7354373370578758696">"Okno sa podešavanjima tipa automatskog klika"</string>
+    <string name="accessibility_autoclick_left_click" msgid="2301793352260551080">"Levi klik"</string>
+    <string name="accessibility_autoclick_pause" msgid="3272200156172573568">"Pauziraj"</string>
+    <string name="accessibility_autoclick_position" msgid="2933660969907663545">"Pozicija"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Paket <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> je dodat u segment OGRANIČENO"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"je poslao/la sliku"</string>
@@ -2517,4 +2527,12 @@
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Mape"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Aplikacije"</string>
     <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Otisci prstiju više ne mogu da se prepoznaju. Ponovo podesite otključavanje otiskom prsta."</string>
+    <!-- no translation found for usb_apm_usb_plugged_in_when_locked_notification_title (468577168569874967) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_plugged_in_when_locked_notification_text (6695268246267993166) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_suspicious_activity_notification_title (3461195995882871461) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_suspicious_activity_notification_text (6537085605929303187) -->
+    <skip />
 </resources>

@@ -1055,7 +1055,7 @@
     <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"Logi sisse"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="4369219936865697679">"Vale kasutajanimi või parool."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1683405808525090649">"Kas unustasite oma kasutajanime või parooli?\nKülastage aadressi "<b>"google.com/accounts/recovery"</b>"."</string>
-    <string name="lockscreen_glogin_checking_password" msgid="2607271802803381645">"Kontrollimine ..."</string>
+    <string name="lockscreen_glogin_checking_password" msgid="2607271802803381645">"Kontrollimine..."</string>
     <string name="lockscreen_unlock_label" msgid="4648257878373307582">"Ava"</string>
     <string name="lockscreen_sound_on_label" msgid="1660281470535492430">"Heli sisse"</string>
     <string name="lockscreen_sound_off_label" msgid="2331496559245450053">"Heli välja"</string>
@@ -1509,7 +1509,7 @@
     <string name="ext_media_move_failure_message" msgid="4197306718121869335">"Proovige sisu uuesti teisaldada"</string>
     <string name="ext_media_status_removed" msgid="241223931135751691">"Eemaldatud"</string>
     <string name="ext_media_status_unmounted" msgid="8145812017295835941">"Väljutatud"</string>
-    <string name="ext_media_status_checking" msgid="159013362442090347">"Kontrollimine ..."</string>
+    <string name="ext_media_status_checking" msgid="159013362442090347">"Kontrollimine..."</string>
     <string name="ext_media_status_mounted" msgid="3459448555811203459">"Valmis"</string>
     <string name="ext_media_status_mounted_ro" msgid="1974809199760086956">"Kirjutuskaitstud"</string>
     <string name="ext_media_status_bad_removal" msgid="508448566481406245">"Eemaldamine polnud turvaline"</string>
@@ -2088,6 +2088,12 @@
     <string name="unpin_target" msgid="3963318576590204447">"Vabasta"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Vabasta <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"Rakenduse teave"</string>
+    <!-- no translation found for shortcut_group_a11y_title (2992150163811583865) -->
+    <skip />
+    <!-- no translation found for suggested_apps_group_a11y_title (2804876567839501831) -->
+    <skip />
+    <!-- no translation found for all_apps_group_a11y_title (7020352520224108745) -->
+    <skip />
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Demo käivitamine …"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Seadme lähtestamine …"</string>
@@ -2242,6 +2248,10 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Suunaklahvistiku vasaknool"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Suunaklahvistiku paremnool"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Suunaklahvistiku keskmine nupp"</string>
+    <string name="accessibility_autoclick_type_settings_panel_title" msgid="7354373370578758696">"Automaatkliki tüübi seadete paneel"</string>
+    <string name="accessibility_autoclick_left_click" msgid="2301793352260551080">"Vasakklikk"</string>
+    <string name="accessibility_autoclick_pause" msgid="3272200156172573568">"Peata"</string>
+    <string name="accessibility_autoclick_position" msgid="2933660969907663545">"Asukoht"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> on lisatud salve PIIRANGUTEGA"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"saatis kujutise"</string>
@@ -2516,4 +2526,12 @@
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Rakendused"</string>
     <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Teie sõrmejälgi ei saa enam tuvastada. Seadistage sõrmejäljega avamine uuesti."</string>
+    <!-- no translation found for usb_apm_usb_plugged_in_when_locked_notification_title (468577168569874967) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_plugged_in_when_locked_notification_text (6695268246267993166) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_suspicious_activity_notification_title (3461195995882871461) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_suspicious_activity_notification_text (6537085605929303187) -->
+    <skip />
 </resources>
