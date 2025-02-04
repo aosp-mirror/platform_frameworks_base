@@ -77,7 +77,6 @@ import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransition
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scrim.ScrimView;
-import com.android.systemui.shade.domain.interactor.ShadeModeInteractor;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.shade.transition.LinearLargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.policy.FakeConfigurationController;
@@ -155,7 +154,6 @@ public class ScrimControllerTest extends SysuiTestCase {
     private final FakeKeyguardTransitionRepository mKeyguardTransitionRepository =
             mKosmos.getKeyguardTransitionRepository();
     @Mock private KeyguardInteractor mKeyguardInteractor;
-    @Mock private ShadeModeInteractor mShadeModeInteractor;
 
     // TODO(b/204991468): Use a real PanelExpansionStateManager object once this bug is fixed. (The
     //   event-dispatch-on-registration pattern caused some of these unit tests to fail.)
@@ -272,8 +270,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         when(mAlternateBouncerToGoneTransitionViewModel.getScrimAlpha())
                 .thenReturn(emptyFlow());
 
-        when(mShadeModeInteractor.isDualShade()).thenReturn(false);
-
         mScrimController = new ScrimController(
                 mLightBarController,
                 mDozeParameters,
@@ -292,7 +288,6 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mAlternateBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
                 mKeyguardInteractor,
-                mShadeModeInteractor,
                 mKosmos.getTestDispatcher(),
                 mLinearLargeScreenShadeInterpolator,
                 new BlurConfig(0.0f, 0.0f));
@@ -359,8 +354,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     @EnableSceneContainer
-    public void transitionToShadeLocked_sceneContainer_dualShadeOff() {
-        when(mShadeModeInteractor.isDualShade()).thenReturn(false);
+    public void transitionToShadeLocked_sceneContainer() {
         mScrimController.transitionTo(SHADE_LOCKED);
         mScrimController.setQsPosition(1f, 0);
         finishAnimationsImmediately();
@@ -374,27 +368,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertScrimTinted(Map.of(
                 mScrimInFront, false,
                 mScrimBehind, true
-        ));
-    }
-
-    @Test
-    @EnableSceneContainer
-    public void transitionToShadeLocked_sceneContainer_dualShadeOn() {
-        when(mShadeModeInteractor.isDualShade()).thenReturn(true);
-        mScrimController.transitionTo(SHADE_LOCKED);
-        mScrimController.setQsPosition(1f, 0);
-        finishAnimationsImmediately();
-
-        assertScrimAlpha(Map.of(
-                mNotificationsScrim, TRANSPARENT,
-                mScrimInFront, TRANSPARENT,
-                mScrimBehind, TRANSPARENT
-        ));
-
-        assertScrimTinted(Map.of(
-                mScrimInFront, false,
-                mNotificationsScrim, false,
-                mScrimBehind, false
         ));
     }
 
@@ -959,8 +932,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     @EnableSceneContainer
-    public void transitionToUnlocked_sceneContainer_dualShadeOff() {
-        when(mShadeModeInteractor.isDualShade()).thenReturn(false);
+    public void transitionToUnlocked_sceneContainer() {
         mScrimController.setRawPanelExpansionFraction(0f);
         mScrimController.transitionTo(ScrimState.UNLOCKED);
         finishAnimationsImmediately();
@@ -983,35 +955,6 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimInFront, TRANSPARENT,
                 mNotificationsScrim, OPAQUE,
                 mScrimBehind, OPAQUE
-        ));
-    }
-
-    @Test
-    @EnableSceneContainer
-    public void transitionToUnlocked_sceneContainer_dualShadeOn() {
-        when(mShadeModeInteractor.isDualShade()).thenReturn(true);
-        mScrimController.setRawPanelExpansionFraction(0f);
-        mScrimController.transitionTo(ScrimState.UNLOCKED);
-        finishAnimationsImmediately();
-
-        assertScrimAlpha(Map.of(
-                mScrimInFront, TRANSPARENT,
-                mNotificationsScrim, TRANSPARENT,
-                mScrimBehind, TRANSPARENT
-        ));
-
-        mScrimController.setRawPanelExpansionFraction(0.5f);
-        assertScrimAlpha(Map.of(
-                mScrimInFront, TRANSPARENT,
-                mNotificationsScrim, TRANSPARENT,
-                mScrimBehind, TRANSPARENT
-        ));
-
-        mScrimController.setRawPanelExpansionFraction(1f);
-        assertScrimAlpha(Map.of(
-                mScrimInFront, TRANSPARENT,
-                mNotificationsScrim, TRANSPARENT,
-                mScrimBehind, TRANSPARENT
         ));
     }
 
@@ -1259,7 +1202,6 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mAlternateBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
                 mKeyguardInteractor,
-                mShadeModeInteractor,
                 mKosmos.getTestDispatcher(),
                 mLinearLargeScreenShadeInterpolator,
                 new BlurConfig(0.0f, 0.0f));
