@@ -88,10 +88,6 @@ constructor(
     // Map of Runnable to label for debugging only
     private val debugRunnableLabelMap: MutableMap<Runnable, String> = HashMap()
 
-    // HeadsUpEntry we did not show at all because they are not the top priority hun in their batch
-    // For debugging only
-    @VisibleForTesting var debugDropSet: MutableSet<HeadsUpEntry> = HashSet()
-
     enum class ThrottleEvent(private val id: Int) : UiEventLogger.UiEventEnum {
         @UiEvent(doc = "HUN was shown.") AVALANCHE_THROTTLING_HUN_SHOWN(1821),
         @UiEvent(doc = "HUN was dropped to show higher priority HUNs.")
@@ -235,9 +231,6 @@ constructor(
             if (entry in nextList) nextList.remove(entry)
             uiEventLogger.log(ThrottleEvent.AVALANCHE_THROTTLING_HUN_REMOVED)
             outcome = "remove from next. ${getStateStr()}"
-        } else if (entry in debugDropSet) {
-            debugDropSet.remove(entry)
-            outcome = "remove from dropset. ${getStateStr()}"
         } else if (isShowing(entry)) {
             previousHunKey = getKey(headsUpEntryShowing)
             // Show the next HUN before removing this one, so that we don't tell listeners
@@ -249,7 +242,8 @@ constructor(
             outcome = "remove showing. ${getStateStr()}"
         } else {
             runnable.run()
-            outcome = "run runnable for untracked shown HUN. ${getStateStr()}"
+            outcome = "run runnable for untracked HUN " +
+                    "(was dropped or shown when AC was disabled). ${getStateStr()}"
         }
         headsUpManagerLogger.logAvalancheDelete(caller, isEnabled(), getKey(entry), outcome)
     }
@@ -401,9 +395,13 @@ constructor(
                     debugRunnableLabelMap.remove(r)
                 }
             }
-            debugDropSet.addAll(listToDrop)
+            val queue = ArrayList<String>()
+            for (entry in listToDrop) {
+                queue.add("[${getKey(entry)}]")
+            }
+            val dropList = java.lang.String.join("\n", queue)
+            headsUpManagerLogger.logDroppedHuns(dropList)
         }
-
         clearNext()
         showNow(headsUpEntryShowing!!, headsUpEntryShowingRunnableList)
     }
@@ -438,19 +436,9 @@ constructor(
             "\n\tprevious: [$previousHunKey]" +
             "\n\tnext list: $nextListStr" +
             "\n\tnext map: $nextMapStr" +
-            "\n\tdropped: $dropSetStr" +
             "\nBHUM.mHeadsUpEntryMap: " +
             baseEntryMapStr()
     }
-
-    private val dropSetStr: String
-        get() {
-            val queue = ArrayList<String>()
-            for (entry in debugDropSet) {
-                queue.add("[${getKey(entry)}]")
-            }
-            return java.lang.String.join("\n", queue)
-        }
 
     private val nextListStr: String
         get() {
