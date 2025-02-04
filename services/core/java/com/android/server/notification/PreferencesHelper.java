@@ -1764,8 +1764,8 @@ public class PreferencesHelper implements RankingConfig {
      * structure; do not modify the returned groups before copying or parceling.
      */
     @Override
-    public Collection<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
-            int uid) {
+    public Collection<NotificationChannelGroup> getNotificationChannelGroupsWithoutChannels(
+            String pkg, int uid) {
         List<NotificationChannelGroup> groups = new ArrayList<>();
         synchronized (mLock) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);

@@ -4998,8 +4998,8 @@ public class NotificationManagerService extends SystemService {
                 getNotificationChannelGroupsWithoutChannels(String pkg) {
             checkCallerIsSystemOrSameApp(pkg);
             List<NotificationChannelGroup> groups = new ArrayList<>();
-            groups.addAll(
-                    mPreferencesHelper.getNotificationChannelGroups(pkg, Binder.getCallingUid()));
+            groups.addAll(mPreferencesHelper.getNotificationChannelGroupsWithoutChannels(pkg,
+                    Binder.getCallingUid()));
             return new ParceledListSlice<>(groups);
         }
 
@@ -7146,7 +7146,7 @@ public class NotificationManagerService extends SystemService {
             verifyPrivilegedListener(token, user, true);
 
             List<NotificationChannelGroup> groups = new ArrayList<>();
-            groups.addAll(mPreferencesHelper.getNotificationChannelGroups(
+            groups.addAll(mPreferencesHelper.getNotificationChannelGroupsWithoutChannels(
                     pkg, getUidForPackageAndUser(pkg, user)));
             return new ParceledListSlice<>(groups);
         }

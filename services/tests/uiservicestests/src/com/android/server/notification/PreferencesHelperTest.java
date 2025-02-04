@@ -3314,7 +3314,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 PKG_N_MR1, UID_N_MR1, nonGroupedNonDeletedChannel.getId(), false));
 
         // notDeleted
-        assertEquals(1, mHelper.getNotificationChannelGroups(PKG_N_MR1, UID_N_MR1).size());
+        assertEquals(1, mHelper.getNotificationChannelGroups(PKG_N_MR1, UID_N_MR1,
+                NotificationChannelGroupsHelper.Params.forAllGroups()).getList().size());
 
         verify(mHandler, never()).requestSort();
 
@@ -3474,7 +3475,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
         assertEquals(0, mHelper.getAppLockedFields(PKG_O, UID_O));
         assertEquals(0, mHelper.getRemovedPkgNotificationChannels(PKG_O, UID_O).size());
-        assertEquals(0, mHelper.getNotificationChannelGroups(PKG_O, UID_O).size());
+        assertEquals(0, mHelper.getNotificationChannelGroupsWithoutChannels(PKG_O, UID_O).size());
 
         NotificationChannel channel = getChannel();
         mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, false,
@@ -3496,8 +3497,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         NotificationChannelGroup ncg = new NotificationChannelGroup("group1", "name1");
         mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, ncg, true,
                 UID_N_MR1, false);
-        assertEquals(ncg,
-                mHelper.getNotificationChannelGroups(PKG_N_MR1, UID_N_MR1).iterator().next());
+        assertEquals(ncg, mHelper.getNotificationChannelGroupsWithoutChannels(PKG_N_MR1,
+                UID_N_MR1).iterator().next());
         verify(mHandler, never()).requestSort();
         assertEquals(1, mLogger.getCalls().size());
         assertEquals(
