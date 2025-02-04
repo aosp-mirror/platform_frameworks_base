@@ -23,6 +23,7 @@
     android:orientation="vertical"
     android:padding="@dimen/magnification_setting_background_padding"
     android:focusable="true"
+    android:accessibilityPaneTitle="@string/accessibility_magnification_settings_panel_description"
     android:contentDescription="@string/accessibility_magnification_settings_panel_description">
     <LinearLayout
         android:layout_width="match_parent"
