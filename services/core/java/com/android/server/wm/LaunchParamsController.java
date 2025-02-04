@@ -124,31 +124,19 @@ class LaunchParamsController {
         }
     }
 
-    /**
-     * A convenience method for laying out a task.
-     * @return {@code true} if bounds were set on the task. {@code false} otherwise.
-     */
-    boolean layoutTask(Task task, WindowLayout layout) {
-        return layoutTask(task, layout, null /*activity*/, null /*source*/, null /*options*/);
-    }
-
+    /** @return {@code true} if bounds were set on the task. {@code false} otherwise. */
     boolean layoutTask(Task task, WindowLayout layout, ActivityRecord activity,
             ActivityRecord source, ActivityOptions options) {
         calculate(task, layout, activity, source, options, null /* request */, PHASE_BOUNDS,
                 mTmpParams);
 
         // No changes, return.
-        if (mTmpParams.isEmpty()) {
+        if (mTmpParams.isEmpty() || mTmpParams.mBounds.isEmpty()) {
             return false;
         }
 
         mService.deferWindowLayout();
-
         try {
-            if (mTmpParams.mBounds.isEmpty()) {
-                return false;
-            }
-
             if (task.getRootTask().inMultiWindowMode()) {
                 task.setBounds(mTmpParams.mBounds);
                 return true;

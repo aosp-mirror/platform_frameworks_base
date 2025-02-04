@@ -39,6 +39,7 @@ import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
+import android.annotation.NonNull;
 import android.app.ActivityOptions;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo.WindowLayout;
@@ -293,7 +294,7 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         final int beforeWindowMode = task.getWindowingMode();
         assertNotEquals(windowingMode, beforeWindowMode);
 
-        mController.layoutTask(task, null /* windowLayout */);
+        layoutTask(task);
 
         final int afterWindowMode = task.getWindowingMode();
         assertEquals(afterWindowMode, beforeWindowMode);
@@ -317,7 +318,7 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
 
         assertNotEquals(expected, task.getBounds());
 
-        mController.layoutTask(task, null /* windowLayout */);
+        layoutTask(task);
 
         // Task will make adjustments to requested bounds. We only need to guarantee that the
         // reuqested bounds are expected.
@@ -342,7 +343,7 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
 
         assertNotEquals(expected, task.getBounds());
 
-        mController.layoutTask(task, null /* windowLayout */);
+        layoutTask(task);
 
         assertEquals(expected, task.getRequestedOverrideBounds());
     }
@@ -365,7 +366,7 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
 
         assertNotEquals(expected, task.getBounds());
 
-        mController.layoutTask(task, null /* windowLayout */);
+        layoutTask(task);
 
         assertNotEquals(expected, task.getBounds());
         assertEquals(expected, task.mLastNonFullscreenBounds);
@@ -466,5 +467,10 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
 
     private TestDisplayContent createNewDisplayContent() {
         return addNewDisplayContentAt(DisplayContent.POSITION_TOP);
+    }
+
+    private void layoutTask(@NonNull Task task) {
+        mController.layoutTask(task, null /* layout */, null /* activity */, null /* source */,
+                null /* options */);
     }
 }

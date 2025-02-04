@@ -6033,7 +6033,7 @@ class Task extends TaskFragment {
             IVoiceInteractor voiceInteractor, boolean toTop, ActivityRecord activity,
             ActivityRecord source, ActivityOptions options) {
 
-        Task task;
+        final Task task;
         if (canReuseAsLeafTask()) {
             // This root task will only contain one task, so just return itself since all root
             // tasks ara now tasks and all tasks are now root tasks.
@@ -6043,7 +6043,6 @@ class Task extends TaskFragment {
             final int taskId = activity != null
                     ? mTaskSupervisor.getNextTaskIdForUser(activity.mUserId)
                     : mTaskSupervisor.getNextTaskIdForUser();
-            final int activityType = getActivityType();
             task = new Task.Builder(mAtmService)
                     .setTaskId(taskId)
                     .setActivityInfo(info)
@@ -6056,17 +6055,21 @@ class Task extends TaskFragment {
                     .build();
         }
 
-        int displayId = getDisplayId();
-        if (displayId == INVALID_DISPLAY) displayId = DEFAULT_DISPLAY;
-        final boolean isLockscreenShown = mAtmService.mTaskSupervisor.getKeyguardController()
-                .isKeyguardOrAodShowing(displayId);
-        if (!mTaskSupervisor.getLaunchParamsController()
-                .layoutTask(task, info.windowLayout, activity, source, options)
-                && !getRequestedOverrideBounds().isEmpty()
-                && task.isResizeable() && !isLockscreenShown) {
-            task.setBounds(getRequestedOverrideBounds());
+        if (com.android.window.flags.Flags.fixLayoutExistingTask()) {
+            mTaskSupervisor.getLaunchParamsController()
+                    .layoutTask(task, info.windowLayout, activity, source, options);
+        } else {
+            int displayId = getDisplayId();
+            if (displayId == INVALID_DISPLAY) displayId = DEFAULT_DISPLAY;
+            final boolean isLockscreenShown =
+                    mAtmService.mKeyguardController.isKeyguardOrAodShowing(displayId);
+            if (!mTaskSupervisor.getLaunchParamsController()
+                    .layoutTask(task, info.windowLayout, activity, source, options)
+                    && !getRequestedOverrideBounds().isEmpty()
+                    && task.isResizeable() && !isLockscreenShown) {
+                task.setBounds(getRequestedOverrideBounds());
+            }
         }
-
         return task;
     }
 
