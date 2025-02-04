@@ -91,6 +91,7 @@ import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.SceneTransitionLayoutState
 import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.gesture.NestedScrollableBound
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
 import com.android.systemui.res.R
@@ -579,6 +580,7 @@ fun ContentScope.NotificationScrollingStack(
                             Modifier.nestedScroll(scrimNestedScrollConnection)
                         }
                         .stackVerticalOverscroll(coroutineScope) { scrollState.canScrollForward }
+                        .disableSwipesWhenScrolling(NestedScrollableBound.BottomRight)
                         .verticalScroll(scrollState)
                         .padding(top = stackTopPadding, bottom = stackBottomPadding)
                         .fillMaxWidth()
