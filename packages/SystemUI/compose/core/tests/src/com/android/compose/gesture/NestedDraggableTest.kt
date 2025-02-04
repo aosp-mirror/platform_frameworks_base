@@ -173,6 +173,27 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
     }
 
     @Test
+    fun nestedScrollable_disabled() {
+        val draggable = TestDraggable()
+        val effect = TestOverscrollEffect(orientation) { 0f }
+        val touchSlop =
+            rule.setContentWithTouchSlop {
+                Box(
+                    Modifier.fillMaxSize()
+                        .nestedDraggable(draggable, orientation, effect, nestedDragsEnabled = false)
+                        .nestedScrollable(rememberScrollState())
+                )
+            }
+
+        rule.onRoot().performTouchInput {
+            down(center)
+            moveBy((-touchSlop - 10f).toOffset())
+        }
+
+        assertThat(draggable.onDragStartedCalled).isFalse()
+    }
+
+    @Test
     fun onDragStoppedIsCalledWhenDraggableIsUpdatedAndReset() {
         val draggable = TestDraggable()
         val effect = TestOverscrollEffect(orientation) { 0f }

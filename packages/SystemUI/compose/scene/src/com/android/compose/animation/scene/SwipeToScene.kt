@@ -27,16 +27,19 @@ import com.android.compose.gesture.nestedDraggable
  */
 @Stable
 internal fun Modifier.swipeToScene(draggableHandler: DraggableHandler): Modifier {
+    val contentForSwipes = draggableHandler.contentForSwipes()
+    val enabled = draggableHandler.enabled(contentForSwipes)
     return this.nestedDraggable(
         draggable = draggableHandler,
         orientation = draggableHandler.orientation,
         overscrollEffect = draggableHandler.overscrollEffect,
-        enabled = draggableHandler.enabled(),
+        enabled = enabled,
+        nestedDragsEnabled = enabled && contentForSwipes.areNestedSwipesAllowed(),
     )
 }
 
-internal fun DraggableHandler.enabled(): Boolean {
-    return isDrivingTransition || contentForSwipes().shouldEnableSwipes(orientation)
+internal fun DraggableHandler.enabled(contentForSwipes: Content = contentForSwipes()): Boolean {
+    return isDrivingTransition || contentForSwipes.shouldEnableSwipes(orientation)
 }
 
 private fun DraggableHandler.contentForSwipes(): Content {
@@ -45,7 +48,7 @@ private fun DraggableHandler.contentForSwipes(): Content {
 
 /** Whether swipe should be enabled in the given [orientation]. */
 private fun Content.shouldEnableSwipes(orientation: Orientation): Boolean {
-    if (userActions.isEmpty() || !areSwipesAllowed()) {
+    if (userActions.isEmpty()) {
         return false
     }
 

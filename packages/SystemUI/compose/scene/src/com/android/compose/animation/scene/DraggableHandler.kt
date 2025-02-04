@@ -458,10 +458,6 @@ internal class Swipes(val upOrLeft: Swipe.Resolved, val downOrRight: Swipe.Resol
      * @return The best matching [UserActionResult], or `null` if no match is found.
      */
     private fun Content.findActionResultBestMatch(swipe: Swipe.Resolved): UserActionResult? {
-        if (!areSwipesAllowed()) {
-            return null
-        }
-
         var bestPoints = Int.MIN_VALUE
         var bestMatch: UserActionResult? = null
         userActions.forEach { (actionSwipe, actionResult) ->

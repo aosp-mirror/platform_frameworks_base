@@ -23,11 +23,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
+import com.android.compose.animation.scene.TestScenes.SceneB
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -56,14 +59,51 @@ class ContentTest {
         }
 
         val content = layoutImpl.content(SceneA)
-        assertThat(content.areSwipesAllowed()).isTrue()
+        assertThat(content.areNestedSwipesAllowed()).isTrue()
         rule.onRoot().performTouchInput {
             down(topLeft)
             moveBy(bottomLeft)
         }
 
-        assertThat(content.areSwipesAllowed()).isFalse()
+        assertThat(content.areNestedSwipesAllowed()).isFalse()
         rule.onRoot().performTouchInput { up() }
-        assertThat(content.areSwipesAllowed()).isTrue()
+        assertThat(content.areNestedSwipesAllowed()).isTrue()
+    }
+
+    @Test
+    fun disableSwipesWhenScrolling_outerDragDisabled() {
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
+        var consumeScrolls = true
+        var touchSlop = 0f
+
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            SceneTransitionLayout(state) {
+                scene(SceneA, mapOf(Swipe.Down to SceneB)) {
+                    Box(
+                        Modifier.fillMaxSize()
+                            .disableSwipesWhenScrolling()
+                            .scrollable(
+                                rememberScrollableState { if (consumeScrolls) it else 0f },
+                                Orientation.Vertical,
+                            )
+                    )
+                }
+                scene(SceneB) { Box(Modifier.fillMaxSize()) }
+            }
+        }
+
+        // Draw down. The whole drag is consumed by the scrollable and the STL should still be idle.
+        rule.onRoot().performTouchInput {
+            down(center)
+            moveBy(Offset(0f, touchSlop + 10f))
+        }
+        assertThat(state.currentTransition).isNull()
+
+        // Continue dragging down but don't consume the scrolls. The STL should still be idle given
+        // that we use disableSwipesWhenScrolling().
+        consumeScrolls = false
+        rule.onRoot().performTouchInput { moveBy(Offset(0f, 10f)) }
+        assertThat(state.currentTransition).isNull()
     }
 }

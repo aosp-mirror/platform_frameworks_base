@@ -179,7 +179,7 @@ internal sealed class Content(
         }
     }
 
-    fun areSwipesAllowed(): Boolean = nestedScrollControlState.isOuterScrollAllowed
+    fun areNestedSwipesAllowed(): Boolean = nestedScrollControlState.isOuterScrollAllowed
 
     fun maybeUpdateEffects(effectFactory: OverscrollFactory) {
         if (effectFactory != lastFactory) {

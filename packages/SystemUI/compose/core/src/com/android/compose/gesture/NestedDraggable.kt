@@ -137,9 +137,18 @@ fun Modifier.nestedDraggable(
     orientation: Orientation,
     overscrollEffect: OverscrollEffect? = null,
     enabled: Boolean = true,
+    nestedDragsEnabled: Boolean = true,
 ): Modifier {
     return this.thenIf(overscrollEffect != null) { Modifier.overscroll(overscrollEffect) }
-        .then(NestedDraggableElement(draggable, orientation, overscrollEffect, enabled))
+        .then(
+            NestedDraggableElement(
+                draggable,
+                orientation,
+                overscrollEffect,
+                enabled,
+                nestedDragsEnabled,
+            )
+        )
 }
 
 private data class NestedDraggableElement(
@@ -147,13 +156,20 @@ private data class NestedDraggableElement(
     private val orientation: Orientation,
     private val overscrollEffect: OverscrollEffect?,
     private val enabled: Boolean,
+    private val nestedDragsEnabled: Boolean,
 ) : ModifierNodeElement<NestedDraggableRootNode>() {
     override fun create(): NestedDraggableRootNode {
-        return NestedDraggableRootNode(draggable, orientation, overscrollEffect, enabled)
+        return NestedDraggableRootNode(
+            draggable,
+            orientation,
+            overscrollEffect,
+            enabled,
+            nestedDragsEnabled,
+        )
     }
 
     override fun update(node: NestedDraggableRootNode) {
-        node.update(draggable, orientation, overscrollEffect, enabled)
+        node.update(draggable, orientation, overscrollEffect, enabled, nestedDragsEnabled)
     }
 }
 
@@ -166,15 +182,17 @@ private class NestedDraggableRootNode(
     orientation: Orientation,
     overscrollEffect: OverscrollEffect?,
     enabled: Boolean,
+    nestedDragsEnabled: Boolean,
 ) : DelegatingNode() {
     private var delegateNode =
-        if (enabled) create(draggable, orientation, overscrollEffect) else null
+        if (enabled) create(draggable, orientation, overscrollEffect, nestedDragsEnabled) else null
 
     fun update(
         draggable: NestedDraggable,
         orientation: Orientation,
         overscrollEffect: OverscrollEffect?,
         enabled: Boolean,
+        nestedDragsEnabled: Boolean,
     ) {
         // Disabled.
         if (!enabled) {
@@ -186,20 +204,23 @@ private class NestedDraggableRootNode(
         // Disabled => Enabled.
         val nullableDelegate = delegateNode
         if (nullableDelegate == null) {
-            delegateNode = create(draggable, orientation, overscrollEffect)
+            delegateNode = create(draggable, orientation, overscrollEffect, nestedDragsEnabled)
             return
         }
 
         // Enabled => Enabled (update).
-        nullableDelegate.update(draggable, orientation, overscrollEffect)
+        nullableDelegate.update(draggable, orientation, overscrollEffect, nestedDragsEnabled)
     }
 
     private fun create(
         draggable: NestedDraggable,
         orientation: Orientation,
         overscrollEffect: OverscrollEffect?,
+        nestedDragsEnabled: Boolean,
     ): NestedDraggableNode {
-        return delegate(NestedDraggableNode(draggable, orientation, overscrollEffect))
+        return delegate(
+            NestedDraggableNode(draggable, orientation, overscrollEffect, nestedDragsEnabled)
+        )
     }
 }
 
@@ -207,6 +228,7 @@ private class NestedDraggableNode(
     private var draggable: NestedDraggable,
     override var orientation: Orientation,
     private var overscrollEffect: OverscrollEffect?,
+    private var nestedDragsEnabled: Boolean,
 ) :
     DelegatingNode(),
     PointerInputModifierNode,
@@ -247,18 +269,12 @@ private class NestedDraggableNode(
         draggable: NestedDraggable,
         orientation: Orientation,
         overscrollEffect: OverscrollEffect?,
+        nestedDragsEnabled: Boolean,
     ) {
-        if (
-            draggable == this.draggable &&
-                orientation == this.orientation &&
-                overscrollEffect == this.overscrollEffect
-        ) {
-            return
-        }
-
         this.draggable = draggable
         this.orientation = orientation
         this.overscrollEffect = overscrollEffect
+        this.nestedDragsEnabled = nestedDragsEnabled
 
         trackWheelScroll.resetPointerInputHandler()
         trackDownPositionDelegate.resetPointerInputHandler()
@@ -545,7 +561,8 @@ private class NestedDraggableNode(
 
         val sign = offset.sign
         if (
-            nestedScrollController == null &&
+            nestedDragsEnabled &&
+                nestedScrollController == null &&
                 // TODO(b/388231324): Remove this.
                 !lastEventWasScrollWheel &&
                 draggable.shouldConsumeNestedScroll(sign) &&
