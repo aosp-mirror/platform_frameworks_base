@@ -65,7 +65,7 @@
     <string name="permission_nearby_devices" msgid="7530973297737123481">"नजिकैका डिभाइसहरू"</string>
     <string name="permission_media_routing_control" msgid="5498639511586715253">"मिडिया आउटपुट बदल्नुहोस्"</string>
     <string name="permission_storage" msgid="6831099350839392343">"फोटो र मिडिया"</string>
-    <string name="permission_notifications" msgid="4099418516590632909">"सूचनाहरू"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"नोटिफिकेसनहरू"</string>
     <string name="permission_phone_summary" msgid="8246321093970051702">"फोन कल गर्ने र व्यवस्थापन गर्ने"</string>
     <string name="permission_call_logs_summary" msgid="7545243592757693321">"फोन कलको लग रिड र राइट गर्ने"</string>
     <string name="permission_sms_summary" msgid="8499509535410068616">"SMS म्यासेज पठाउने र हेर्ने"</string>
