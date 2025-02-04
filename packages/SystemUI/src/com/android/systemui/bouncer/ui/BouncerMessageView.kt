@@ -45,7 +45,7 @@ class BouncerMessageView : LinearLayout {
         primaryMessageView = findViewById(R.id.bouncer_primary_message_area)
         secondaryMessageView = findViewById(R.id.bouncer_secondary_message_area)
 
-        if (Flags.gsfBouncer()) {
+        if (Flags.gsfBouncer() || Flags.bouncerUiRevamp2()) {
             primaryMessageView?.apply {
                 typeface = Typeface.create("gsf-title-large-emphasized", Typeface.NORMAL)
             }

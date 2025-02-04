@@ -41,4 +41,13 @@
         <item>@drawable/pin_dot_shape_5_avd</item>
         <item>@drawable/pin_dot_shape_6_avd</item>
     </integer-array>
+
+    <integer-array name="updated_bouncer_pin_shapes">
+        <item>@drawable/bouncer_shape_1</item>
+        <item>@drawable/bouncer_shape_2</item>
+        <item>@drawable/bouncer_shape_3</item>
+        <item>@drawable/bouncer_shape_4</item>
+        <item>@drawable/bouncer_shape_5</item>
+        <item>@drawable/bouncer_shape_6</item>
+    </integer-array>
 </resources>

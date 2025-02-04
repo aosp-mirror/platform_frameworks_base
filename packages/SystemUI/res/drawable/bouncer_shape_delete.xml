@@ -1,0 +1,126 @@
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <target android:name="_R_G_L_0_G_D_0_P_0">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator android:duration="150" android:propertyName="fillAlpha"
+                    android:startOffset="0" android:valueFrom="1" android:valueTo="1"
+                    android:valueType="floatType">
+                    <aapt:attr name="android:interpolator">
+                        <pathInterpolator
+                            android:pathData="M 0.0,0.0 c0.167,0.167 0.833,0.833 1.0,1.0" />
+                    </aapt:attr>
+                </objectAnimator>
+                <objectAnimator android:duration="200" android:propertyName="fillAlpha"
+                    android:startOffset="150" android:valueFrom="1" android:valueTo="0"
+                    android:valueType="floatType">
+                    <aapt:attr name="android:interpolator">
+                        <pathInterpolator
+                            android:pathData="M 0.0,0.0 c0.167,0.167 0.833,0.833 1.0,1.0" />
+                    </aapt:attr>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="_R_G_L_0_G_D_0_P_0">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator android:duration="150" android:propertyName="pathData"
+                    android:startOffset="0"
+                    android:valueFrom="M-13.54 -17.54 C-8.57,-17.54 -4.54,-13.51 -4.54,-8.54 C-4.54,-3.57 -8.57,0.46 -13.54,0.46 C-18.51,0.46 -22.54,-3.57 -22.54,-8.54 C-22.54,-13.51 -18.51,-17.54 -13.54,-17.54c "
+                    android:valueTo="M-13.54 -11.54 C-11.88,-11.54 -10.54,-10.2 -10.54,-8.54 C-10.54,-6.88 -11.88,-5.54 -13.54,-5.54 C-15.2,-5.54 -16.54,-6.88 -16.54,-8.54 C-16.54,-10.2 -15.2,-11.54 -13.54,-11.54c "
+                    android:valueType="pathType">
+                    <aapt:attr name="android:interpolator">
+                        <pathInterpolator
+                            android:pathData="M 0.0,0.0 c0.167,0.167 0.833,0.833 1.0,1.0" />
+                    </aapt:attr>
+                </objectAnimator>
+                <objectAnimator android:duration="200" android:propertyName="pathData"
+                    android:startOffset="150"
+                    android:valueFrom="M-13.54 -11.54 C-11.88,-11.54 -10.54,-10.2 -10.54,-8.54 C-10.54,-6.88 -11.88,-5.54 -13.54,-5.54 C-15.2,-5.54 -16.54,-6.88 -16.54,-8.54 C-16.54,-10.2 -15.2,-11.54 -13.54,-11.54c "
+                    android:valueTo="M-13.54 -13.54 C-10.78,-13.54 -8.54,-11.3 -8.54,-8.54 C-8.54,-5.78 -10.78,-3.54 -13.54,-3.54 C-16.3,-3.54 -18.54,-5.78 -18.54,-8.54 C-18.54,-11.3 -16.3,-13.54 -13.54,-13.54c "
+                    android:valueType="pathType">
+                    <aapt:attr name="android:interpolator">
+                        <pathInterpolator
+                            android:pathData="M 0.0,0.0 c0.167,0.167 0.833,0.833 1.0,1.0" />
+                    </aapt:attr>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="_R_G_L_0_G_D_1_P_0">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator android:duration="150" android:propertyName="strokeWidth"
+                    android:startOffset="0" android:valueFrom="0" android:valueTo="0"
+                    android:valueType="floatType">
+                    <aapt:attr name="android:interpolator">
+                        <pathInterpolator
+                            android:pathData="M 0.0,0.0 c0.167,0.167 0.833,0.833 1.0,1.0" />
+                    </aapt:attr>
+                </objectAnimator>
+                <objectAnimator android:duration="50" android:propertyName="strokeWidth"
+                    android:startOffset="150" android:valueFrom="0" android:valueTo="3"
+                    android:valueType="floatType">
+                    <aapt:attr name="android:interpolator">
+                        <pathInterpolator
+                            android:pathData="M 0.0,0.0 c0.167,0.167 0.833,0.833 1.0,1.0" />
+                    </aapt:attr>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="_R_G_L_0_G_D_1_P_0">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator android:duration="150" android:propertyName="pathData"
+                    android:startOffset="0"
+                    android:valueFrom="M-13.54 -17.54 C-8.57,-17.54 -4.54,-13.51 -4.54,-8.54 C-4.54,-3.57 -8.57,0.46 -13.54,0.46 C-18.51,0.46 -22.54,-3.57 -22.54,-8.54 C-22.54,-13.51 -18.51,-17.54 -13.54,-17.54c "
+                    android:valueTo="M-13.54 -11.54 C-11.88,-11.54 -10.54,-10.2 -10.54,-8.54 C-10.54,-6.88 -11.88,-5.54 -13.54,-5.54 C-15.2,-5.54 -16.54,-6.88 -16.54,-8.54 C-16.54,-10.2 -15.2,-11.54 -13.54,-11.54c "
+                    android:valueType="pathType">
+                    <aapt:attr name="android:interpolator">
+                        <pathInterpolator
+                            android:pathData="M 0.0,0.0 c0.167,0.167 0.833,0.833 1.0,1.0" />
+                    </aapt:attr>
+                </objectAnimator>
+                <objectAnimator android:duration="200" android:propertyName="pathData"
+                    android:startOffset="150"
+                    android:valueFrom="M-13.54 -11.54 C-11.88,-11.54 -10.54,-10.2 -10.54,-8.54 C-10.54,-6.88 -11.88,-5.54 -13.54,-5.54 C-15.2,-5.54 -16.54,-6.88 -16.54,-8.54 C-16.54,-10.2 -15.2,-11.54 -13.54,-11.54c "
+                    android:valueTo="M-13.54 -13.54 C-10.78,-13.54 -8.54,-11.3 -8.54,-8.54 C-8.54,-5.78 -10.78,-3.54 -13.54,-3.54 C-16.3,-3.54 -18.54,-5.78 -18.54,-8.54 C-18.54,-11.3 -16.3,-13.54 -13.54,-13.54c "
+                    android:valueType="pathType">
+                    <aapt:attr name="android:interpolator">
+                        <pathInterpolator
+                            android:pathData="M 0.0,0.0 c0.167,0.167 0.833,0.833 1.0,1.0" />
+                    </aapt:attr>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="time_group">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator android:duration="500" android:propertyName="translateX"
+                    android:startOffset="0" android:valueFrom="0" android:valueTo="1"
+                    android:valueType="floatType" />
+            </set>
+        </aapt:attr>
+    </target>
+    <aapt:attr name="android:drawable">
+        <vector android:width="36dp" android:height="36dp" android:viewportHeight="36"
+            android:viewportWidth="36">
+            <group android:name="_R_G">
+                <group android:name="_R_G_L_0_G" android:translateX="31.54"
+                    android:translateY="26.54">
+                    <path android:name="_R_G_L_0_G_D_0_P_0" android:fillAlpha="1"
+                        android:fillColor="#ffffff" android:fillType="nonZero"
+                        android:pathData=" M-13.54 -17.54 C-8.57,-17.54 -4.54,-13.51 -4.54,-8.54 C-4.54,-3.57 -8.57,0.46 -13.54,0.46 C-18.51,0.46 -22.54,-3.57 -22.54,-8.54 C-22.54,-13.51 -18.51,-17.54 -13.54,-17.54c " />
+                    <path android:name="_R_G_L_0_G_D_1_P_0" android:pathData=" M-13.54 -17.54 C-8.57,-17.54 -4.54,-13.51 -4.54,-8.54 C-4.54,-3.57 -8.57,0.46 -13.54,0.46 C-18.51,0.46 -22.54,-3.57 -22.54,-8.54 C-22.54,-13.51 -18.51,-17.54 -13.54,-17.54c "
+                        android:strokeAlpha="1" android:strokeColor="#ffffff"
+                        android:strokeLineCap="round" android:strokeLineJoin="round"
+                        android:strokeWidth="0" />
+                </group>
+            </group>
+            <group android:name="time_group" />
+        </vector>
+    </aapt:attr>
+</animated-vector>

@@ -20,6 +20,7 @@ import static com.android.systemui.Flags.gsfBouncer;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -28,6 +29,8 @@ import android.view.ViewConfiguration;
 import android.widget.Button;
 
 import com.android.internal.util.EmergencyAffordanceManager;
+import com.android.systemui.Flags;
+import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 
 /**
  * This class implements a smart emergency button that updates itself based
@@ -71,6 +74,19 @@ public class EmergencyButton extends Button {
                 }
                 return false;
             });
+        }
+        if (gsfBouncer() || Flags.bouncerUiRevamp2()) {
+            setTypeface(Typeface.create("gsf-title-medium", Typeface.NORMAL));
+        }
+        if (Flags.bouncerUiRevamp2()) {
+            Drawable background = getBackground();
+            int bgColor = mContext.getColor(KeyguardBouncerConstants.Color.actionButtonBg);
+            if (background != null) {
+                background.setTint(bgColor);
+            } else {
+                setBackgroundColor(bgColor);
+            }
+            setTextColor(mContext.getColor(KeyguardBouncerConstants.Color.actionButtonText));
         }
     }
 
@@ -125,9 +141,6 @@ public class EmergencyButton extends Button {
                 textId = com.android.internal.R.string.lockscreen_emergency_call;
             }
             setText(textId);
-            if (gsfBouncer()) {
-                setTypeface(Typeface.create("gsf-title-medium", Typeface.NORMAL));
-            }
         } else {
             setVisibility(View.GONE);
         }
