@@ -970,7 +970,9 @@ public class NotificationChildrenContainer extends ViewGroup
         if (mHeaderViewState != null) {
             mHeaderViewState.applyToView(mGroupHeader);
         }
-        if (notificationsRedesignTemplates()) {
+        // Only apply the special viewState for the header's children if we're not currently showing
+        // the minimized header.
+        if (notificationsRedesignTemplates() && !showingAsLowPriority()) {
             if (mTopLineViewState != null) {
                 mTopLineViewState.applyToView(mGroupHeader.getTopLineView());
             }
@@ -1236,14 +1238,12 @@ public class NotificationChildrenContainer extends ViewGroup
         }
     }
 
-    private ViewGroup calculateDesiredHeader() {
-        ViewGroup desiredHeader;
+    private NotificationHeaderView calculateDesiredHeader() {
         if (showingAsLowPriority()) {
-            desiredHeader = mMinimizedGroupHeader;
+            return mMinimizedGroupHeader;
         } else {
-            desiredHeader = mGroupHeader;
+            return mGroupHeader;
         }
-        return desiredHeader;
     }
 
     private void startChildAlphaAnimations(boolean toVisible) {
