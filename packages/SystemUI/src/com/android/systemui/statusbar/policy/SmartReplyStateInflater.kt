@@ -396,24 +396,28 @@ constructor(
         action: Notification.Action,
         delayOnClickListener: Boolean,
         packageContext: Context,
-    ): Button =
-        (LayoutInflater.from(parent.context).inflate(R.layout.smart_action_button, parent, false)
+    ): Button {
+        val isMagicAction = Flags.notificationMagicActionsTreatment() &&
+                smartActions.fromAssistant &&
+                action.extras.getBoolean(Notification.Action.EXTRA_IS_MAGIC, false)
+        val layoutRes = if (isMagicAction) {
+            R.layout.magic_action_button
+        } else {
+            R.layout.smart_action_button
+        }
+        return (LayoutInflater.from(parent.context).inflate(layoutRes, parent, false)
                 as Button)
             .apply {
                 text = action.title
-
-                if (Flags.notificationMagicActionsTreatment()) {
-                    if (
-                        smartActions.fromAssistant &&
-                            action.extras.getBoolean(Notification.Action.EXTRA_IS_MAGIC, false)
-                    ) {
-                        background = MagicActionBackgroundDrawable(parent.context)
-                        val textColor =
-                            parent.context.getColor(
-                                com.android.internal.R.color.materialColorOnPrimaryContainer
-                            )
-                        setTextColor(textColor)
-                    }
+                // TODO: Move the MagicActionBackgroundDrawable to MagicActionButton once
+                //  MagicActionButton is created.
+                if (isMagicAction) {
+                    background = MagicActionBackgroundDrawable(parent.context)
+                    val textColor =
+                        parent.context.getColor(
+                            com.android.internal.R.color.materialColorOnPrimaryContainer
+                        )
+                    setTextColor(textColor)
                 }
 
                 // We received the Icon from the application - so use the Context of the application
@@ -441,6 +445,8 @@ constructor(
                 // Mark this as an Action button
                 (layoutParams as SmartReplyView.LayoutParams).mButtonType = SmartButtonType.ACTION
             }
+
+    }
 
     private fun onSmartActionClick(
         entry: NotificationEntry,
