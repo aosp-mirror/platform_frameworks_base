@@ -2261,6 +2261,45 @@ public class UserManager {
     public @interface UserSwitchabilityResult {}
 
     /**
+     * Indicates that user can logout.
+     * @hide
+     */
+    public static final int LOGOUTABILITY_STATUS_OK = 0;
+
+    /**
+     * Indicates that user cannot logout because it is the system user.
+     * @hide
+     */
+    public static final int LOGOUTABILITY_STATUS_CANNOT_LOGOUT_SYSTEM_USER = 1;
+
+    /**
+     * Indicates that user cannot logout because there is no suitable user to logout to. This is
+     * generally applicable to Headless System User Mode devices that do not have an interactive
+     * system user.
+     * @hide
+     */
+    public static final int LOGOUTABILITY_STATUS_NO_SUITABLE_USER_TO_LOGOUT_TO = 2;
+
+    /**
+     * Indicates that user cannot logout because user switch cannot happen.
+     * @hide
+     */
+    public static final int LOGOUTABILITY_STATUS_CANNOT_SWITCH = 3;
+
+    /**
+     * Result returned in {@link #getUserLogoutability()} indicating user logoutability.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = false, prefix = { "LOGOUTABILITY_STATUS_" }, value = {
+            LOGOUTABILITY_STATUS_OK,
+            LOGOUTABILITY_STATUS_CANNOT_LOGOUT_SYSTEM_USER,
+            LOGOUTABILITY_STATUS_NO_SUITABLE_USER_TO_LOGOUT_TO,
+            LOGOUTABILITY_STATUS_CANNOT_SWITCH
+    })
+    public @interface UserLogoutability {}
+
+    /**
      * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
      * the specified user has been successfully removed.
      *
@@ -2731,6 +2770,35 @@ public class UserManager {
     public @UserSwitchabilityResult int getUserSwitchability(UserHandle userHandle) {
         try {
             return mService.getUserSwitchability(userHandle.getIdentifier());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether logging out is currently allowed for the context user.
+     *
+     * <p>Logging out is not allowed in the following cases:
+     * <ol>
+     * <li>the user is system user
+     * <li>there is no suitable user to logout to (if no interactive system user)
+     * <li>the user is in a phone call
+     * <li>{@link #DISALLOW_USER_SWITCH} is set
+     * <li>system user hasn't been unlocked yet
+     * </ol>
+     *
+     * @return A {@link UserLogoutability} flag indicating if the user can logout,
+     * one of {@link #LOGOUTABILITY_STATUS_OK},
+     * {@link #LOGOUTABILITY_STATUS_CANNOT_LOGOUT_SYSTEM_USER},
+     * {@link #LOGOUTABILITY_STATUS_NO_SUITABLE_USER_TO_LOGOUT_TO},
+     * {@link #LOGOUTABILITY_STATUS_CANNOT_SWITCH}.
+     * @hide
+     */
+    @UserHandleAware
+    @RequiresPermission(Manifest.permission.MANAGE_USERS)
+    public @UserLogoutability int getUserLogoutability() {
+        try {
+            return mService.getUserLogoutability(mUserId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

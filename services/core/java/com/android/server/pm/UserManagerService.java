@@ -129,6 +129,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManager.EnforcingUser;
 import android.os.UserManager.QuietModeFlag;
+import android.os.UserManager.UserLogoutability;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.provider.Settings;
@@ -1472,10 +1473,13 @@ public class UserManagerService extends IUserManager.Stub {
        return UserHandle.USER_NULL;
    }
 
-
     @Override
     public @CanBeNULL @UserIdInt int getPreviousFullUserToEnterForeground() {
         checkQueryOrCreateUsersPermission("get previous user");
+        return getPreviousFullUserToEnterForegroundUnchecked();
+    }
+
+    private int getPreviousFullUserToEnterForegroundUnchecked() {
         int previousUser = UserHandle.USER_NULL;
         long latestEnteredTime = 0;
         final int currentUser = getCurrentUserId();
@@ -2915,7 +2919,8 @@ public class UserManagerService extends IUserManager.Stub {
      * @return A {@link UserManager.UserSwitchabilityResult} flag indicating if the user is
      * switchable.
      */
-    public @UserManager.UserSwitchabilityResult int getUserSwitchability(int userId) {
+    @Override
+    public @UserManager.UserSwitchabilityResult int getUserSwitchability(@UserIdInt int userId) {
         if (Flags.getUserSwitchabilityPermission()) {
             if (!hasManageUsersOrPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)) {
                 throw new SecurityException(
@@ -2991,6 +2996,49 @@ public class UserManagerService extends IUserManager.Stub {
                 && !hasUserRestriction(DISALLOW_USER_SWITCH, userId)
                 && !UserManager.isDeviceInDemoMode(mContext)
                 && multiUserSettingOn;
+    }
+
+    @Override
+    public @UserLogoutability int getUserLogoutability(@UserIdInt int userId) {
+        if (!android.multiuser.Flags.logoutUserApi()) {
+            throw new UnsupportedOperationException(
+                    "aconfig flag android.multiuser.logout_user_api not enabled");
+        }
+
+        checkManageUsersPermission("getUserLogoutability");
+
+        if (userId == UserHandle.USER_SYSTEM) {
+            return UserManager.LOGOUTABILITY_STATUS_CANNOT_LOGOUT_SYSTEM_USER;
+        }
+
+        if (userId != getCurrentUserId()) {
+            // TODO(b/393656514): Decide what to do with non-current/background users.
+            // As of now, we are not going to logout a background user. A background user should
+            // simply be stopped instead.
+            return UserManager.LOGOUTABILITY_STATUS_CANNOT_SWITCH;
+        }
+
+        if (getUserSwitchability(userId) != UserManager.SWITCHABILITY_STATUS_OK) {
+            return UserManager.LOGOUTABILITY_STATUS_CANNOT_SWITCH;
+        }
+
+        if (getUserToLogoutCurrentUserTo() == UserHandle.USER_NULL) {
+            return UserManager.LOGOUTABILITY_STATUS_NO_SUITABLE_USER_TO_LOGOUT_TO;
+        }
+
+        return UserManager.LOGOUTABILITY_STATUS_OK;
+    }
+
+    /**
+     * Returns the user to switch to, when logging out current user. If in HSUM and has interactive
+     * system user, then logout would switch to the system user. Otherwise, logout would switch to
+     * the previous foreground user.
+     */
+    private @UserIdInt int getUserToLogoutCurrentUserTo() {
+        if (isHeadlessSystemUserMode() && canSwitchToHeadlessSystemUser()) {
+            return USER_SYSTEM;
+        }
+        return getPreviousFullUserToEnterForegroundUnchecked();
     }
 
     @Override

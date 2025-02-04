@@ -615,3 +615,10 @@ flag {
     bug: "346553745"
     is_exported: true
 }
+
+flag {
+     namespace: "multi_user"
+     name: "logout_user_api"
+     description: "Add API to logout user"
+     bug: "350045389"
+}
