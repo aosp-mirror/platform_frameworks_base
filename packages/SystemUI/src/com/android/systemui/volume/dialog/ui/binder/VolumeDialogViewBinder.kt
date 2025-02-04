@@ -18,12 +18,8 @@ package com.android.systemui.volume.dialog.ui.binder
 
 import android.app.Dialog
 import android.content.res.Resources
-import android.graphics.Rect
-import android.graphics.Region
 import android.view.View
-import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import android.view.ViewTreeObserver.InternalInsetsInfo
 import android.view.WindowInsets
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.view.updatePadding
@@ -31,7 +27,6 @@ import com.android.internal.view.RotationPolicy
 import com.android.systemui.common.ui.view.onApplyWindowInsets
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
-import com.android.systemui.util.children
 import com.android.systemui.util.kotlin.awaitCancellationThenDispose
 import com.android.systemui.volume.SystemUIInterpolators
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
@@ -45,6 +40,7 @@ import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogViewModel
 import com.android.systemui.volume.dialog.utils.VolumeTracer
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -55,6 +51,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 
 /** Binds the root view of the Volume Dialog. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @VolumeDialogScope
 class VolumeDialogViewBinder
 @Inject
@@ -90,7 +87,7 @@ constructor(
             }
             .launchIn(this)
 
-        launch { root.viewTreeObserver.computeInternalInsetsListener(root) }
+        launch { root.viewTreeObserver.listenToComputeInternalInsets() }
 
         launch {
             root
@@ -177,27 +174,15 @@ constructor(
         animator.suspendAnimate(jankListenerFactory.dismiss(this, duration))
     }
 
-    private suspend fun ViewTreeObserver.computeInternalInsetsListener(viewGroup: ViewGroup) =
+    private suspend fun ViewTreeObserver.listenToComputeInternalInsets() =
         suspendCancellableCoroutine<Unit> { continuation ->
             val listener =
                 ViewTreeObserver.OnComputeInternalInsetsListener { inoutInfo ->
-                    viewGroup.fillTouchableBounds(inoutInfo)
+                    viewModel.fillTouchableBounds(inoutInfo)
                 }
             addOnComputeInternalInsetsListener(listener)
             continuation.invokeOnCancellation { removeOnComputeInternalInsetsListener(listener) }
         }
-
-    private fun ViewGroup.fillTouchableBounds(internalInsetsInfo: InternalInsetsInfo) {
-        for (child in children) {
-            val boundsRect = Rect()
-            internalInsetsInfo.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_REGION)
-
-            child.getBoundsInWindow(boundsRect, false)
-            internalInsetsInfo.touchableRegion.op(boundsRect, Region.Op.UNION)
-        }
-        val boundsRect = Rect()
-        getBoundsInWindow(boundsRect, false)
-    }
 
     private fun MotionLayout.transitionToState(newState: Int, animate: Boolean) {
         if (animate) {

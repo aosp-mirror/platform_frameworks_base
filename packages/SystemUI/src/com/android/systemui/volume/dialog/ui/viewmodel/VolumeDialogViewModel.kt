@@ -18,6 +18,10 @@ package com.android.systemui.volume.dialog.ui.viewmodel
 
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Rect
+import android.graphics.Region
+import android.view.View
+import android.view.ViewTreeObserver.InternalInsetsInfo
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.DevicePostureController
@@ -37,6 +41,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 /** Provides a state for the Volume Dialog. */
 @VolumeDialogScope
@@ -77,10 +82,27 @@ constructor(
             }
             .filterNotNull()
 
+    private val touchableBoundsViews: MutableCollection<View> = mutableSetOf()
+
     /** @return true when the foldable device screen curve is in the way of the volume dialog */
     private fun shouldOffsetVolumeDialog(devicePosture: Int, config: Configuration): Boolean {
         val isLandscape = config.orientation == Configuration.ORIENTATION_LANDSCAPE
         val isHalfOpen = devicePosture == DevicePostureController.DEVICE_POSTURE_HALF_OPENED
         return isLandscape && isHalfOpen
+    }
+
+    fun fillTouchableBounds(internalInsetsInfo: InternalInsetsInfo) {
+        for (child in touchableBoundsViews) {
+            val boundsRect = Rect()
+            internalInsetsInfo.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_REGION)
+
+            child.getBoundsInWindow(boundsRect, false)
+            internalInsetsInfo.touchableRegion.op(boundsRect, Region.Op.UNION)
+        }
+    }
+
+    suspend fun addTouchableBounds(vararg views: View): Nothing = suspendCancellableCoroutine {
+        touchableBoundsViews.addAll(views)
+        it.invokeOnCancellation { touchableBoundsViews.removeAll(views.toSet()) }
     }
 }
