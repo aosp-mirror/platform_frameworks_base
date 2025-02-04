@@ -22,6 +22,8 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.hardware.biometrics.SensorLocationInternal
 import android.hardware.display.DisplayManagerGlobal
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.view.Display
 import android.view.DisplayInfo
 import android.view.WindowInsets
@@ -30,6 +32,7 @@ import android.view.windowManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.airbnb.lottie.model.KeyPath
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
@@ -74,15 +77,18 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
 
     private val contextDisplayInfo = DisplayInfo()
 
-    private val indicatorColor = context.getColor(
-            com.android.internal.R.color.materialColorPrimaryFixed,
-        )
-    private val outerRimColor = context.getColor(
-            com.android.internal.R.color.materialColorPrimaryFixedDim,
-        )
-    private val chevronFill = context.getColor(
-            com.android.internal.R.color.materialColorOnPrimaryFixed,
-        )
+    private val indicatorColor =
+        context.getColor(com.android.internal.R.color.materialColorPrimaryFixed)
+    private val outerRimColor =
+        context.getColor(com.android.internal.R.color.materialColorPrimaryFixedDim)
+    private val chevronFill =
+        context.getColor(com.android.internal.R.color.materialColorOnPrimaryFixed)
+    private val dynamicIndicatorColor =
+        context.getColor(com.android.internal.R.color.materialColorPrimary)
+    private val dynamicOuterRimColor =
+        context.getColor(com.android.internal.R.color.materialColorPrimary)
+    private val dynamicChevronFill =
+        context.getColor(com.android.internal.R.color.materialColorOnPrimary)
     private val color_blue400 =
         context.getColor(com.android.settingslib.color.R.color.settingslib_color_blue400)
 
@@ -267,6 +273,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_BP_COLORS)
     fun updatesLottieCallbacks_onShowIndicatorForDeviceEntry() {
         kosmos.testScope.runTest {
             val lottieCallbacks by collectLastValue(kosmos.sideFpsOverlayViewModel.lottieCallbacks)
@@ -284,6 +291,25 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_BP_COLORS)
+    fun updatesLottieCallbacks_dynamicSfps() {
+        kosmos.testScope.runTest {
+            val lottieCallbacks by collectLastValue(kosmos.sideFpsOverlayViewModel.lottieCallbacks)
+
+            updateSfpsIndicatorRequests(kosmos, mContext, primaryBouncerRequest = true)
+            runCurrent()
+
+            assertThat(lottieCallbacks)
+                .contains(LottieCallback(KeyPath(".blue600", "**"), dynamicIndicatorColor))
+            assertThat(lottieCallbacks)
+                .contains(LottieCallback(KeyPath(".blue400", "**"), dynamicOuterRimColor))
+            assertThat(lottieCallbacks)
+                .contains(LottieCallback(KeyPath(".black", "**"), dynamicChevronFill))
+        }
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_BP_COLORS)
     fun updatesLottieCallbacks_onShowIndicatorForSystemServer_inDarkMode() {
         kosmos.testScope.runTest {
             val lottieCallbacks by collectLastValue(kosmos.sideFpsOverlayViewModel.lottieCallbacks)
@@ -300,6 +326,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_BP_COLORS)
     fun updatesLottieCallbacks_onShowIndicatorForSystemServer_inLightMode() {
         kosmos.testScope.runTest {
             val lottieCallbacks by collectLastValue(kosmos.sideFpsOverlayViewModel.lottieCallbacks)
