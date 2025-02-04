@@ -572,32 +572,12 @@ class DesktopTasksController(
             )
 
         val taskIdToMinimize =
-            if (Flags.enableMultipleDesktopsBackend()) {
-                // Activate the desk first.
-                prepareForDeskActivation(displayId, wct)
-                desksOrganizer.activateDesk(wct, deskId)
-                if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_PERSISTENCE.isTrue()) {
-                    // TODO: 362720497 - do non-running tasks need to be restarted with
-                    // |wct#startTask|?
-                }
-                taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(
-                    doesAnyTaskRequireTaskbarRounding(displayId)
-                )
-                // TODO: 362720497 - activating a desk with the intention to move a new task to it
-                //  means we may need to minimize something in the activating desk. Do so here
-                // similar
-                //  to how it's done in #bringDesktopAppsToFrontBeforeShowingNewTask instead of
-                //  returning null.
-                null
-            } else {
-                // Bring other apps to front first.
-                bringDesktopAppsToFrontBeforeShowingNewTask(task.displayId, wct, task.taskId)
-            }
-        if (Flags.enableMultipleDesktopsBackend()) {
-            prepareMoveTaskToDesk(wct, task, deskId)
-        } else {
-            addMoveToDesktopChanges(wct, task)
-        }
+            prepareMoveTaskToDeskAndActivate(
+                wct = wct,
+                displayId = displayId,
+                deskId = deskId,
+                task = task,
+            )
 
         val transition: IBinder
         if (remoteTransition != null) {
@@ -628,6 +608,48 @@ class DesktopTasksController(
         } else {
             taskRepository.setActiveDesk(displayId = displayId, deskId = deskId)
         }
+    }
+
+    /**
+     * Applies the necessary changes and operations to [wct] to move a task into a desk and
+     * activating that desk. This includes showing pre-existing tasks of that desk behind the new
+     * task (but minimizing one of them if needed) and showing Home and the desktop wallpaper.
+     *
+     * @return the id of the task that is being minimized, if any.
+     */
+    private fun prepareMoveTaskToDeskAndActivate(
+        wct: WindowContainerTransaction,
+        displayId: Int,
+        deskId: Int,
+        task: RunningTaskInfo,
+    ): Int? {
+        val taskIdToMinimize =
+            if (Flags.enableMultipleDesktopsBackend()) {
+                // Activate the desk first.
+                prepareForDeskActivation(displayId, wct)
+                desksOrganizer.activateDesk(wct, deskId)
+                if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_PERSISTENCE.isTrue()) {
+                    // TODO: b/362720497 - do non-running tasks need to be restarted with
+                    // |wct#startTask|?
+                }
+                taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(
+                    doesAnyTaskRequireTaskbarRounding(displayId)
+                )
+                // TODO: b/362720497 - activating a desk with the intention to move a new task to
+                //  it means we may need to minimize something in the activating desk. Do so here
+                //  similar to how it's done in #bringDesktopAppsToFrontBeforeShowingNewTask
+                //  instead of returning null.
+                null
+            } else {
+                // Bring other apps to front first.
+                bringDesktopAppsToFrontBeforeShowingNewTask(displayId, wct, task.taskId)
+            }
+        if (Flags.enableMultipleDesktopsBackend()) {
+            prepareMoveTaskToDesk(wct, task, deskId)
+        } else {
+            addMoveToDesktopChanges(wct, task)
+        }
+        return taskIdToMinimize
     }
 
     private fun invokeCallbackToOverview(transition: IBinder, callback: IMoveToDesktopCallback?) {
@@ -669,21 +691,34 @@ class DesktopTasksController(
      * [startDragToDesktop].
      */
     private fun finalizeDragToDesktop(taskInfo: RunningTaskInfo) {
+        val deskId =
+            checkNotNull(taskRepository.getDefaultDeskId(taskInfo.displayId)) {
+                "Expected a default desk to exist"
+            }
         ProtoLog.v(
             WM_SHELL_DESKTOP_MODE,
-            "DesktopTasksController: finalizeDragToDesktop taskId=%d",
+            "DesktopTasksController: finalizeDragToDesktop taskId=%d deskId=%d",
             taskInfo.taskId,
+            deskId,
         )
         val wct = WindowContainerTransaction()
         exitSplitIfApplicable(wct, taskInfo)
-        if (Flags.enablePerDisplayDesktopWallpaperActivity()) {
-            moveHomeTask(taskInfo.displayId, wct)
-        } else {
-            moveHomeTask(context.displayId, wct)
+        if (!Flags.enableMultipleDesktopsBackend()) {
+            // |moveHomeTask| is also called in |bringDesktopAppsToFrontBeforeShowingNewTask|, so
+            // this shouldn't be necessary at all.
+            if (Flags.enablePerDisplayDesktopWallpaperActivity()) {
+                moveHomeTask(taskInfo.displayId, wct)
+            } else {
+                moveHomeTask(context.displayId, wct)
+            }
         }
         val taskIdToMinimize =
-            bringDesktopAppsToFrontBeforeShowingNewTask(taskInfo.displayId, wct, taskInfo.taskId)
-        addMoveToDesktopChanges(wct, taskInfo)
+            prepareMoveTaskToDeskAndActivate(
+                wct = wct,
+                displayId = taskInfo.displayId,
+                deskId = deskId,
+                task = taskInfo,
+            )
         val exitResult =
             desktopImmersiveController.exitImmersiveIfApplicable(
                 wct = wct,
@@ -700,6 +735,18 @@ class DesktopTasksController(
                 addPendingMinimizeTransition(it, taskId, MinimizeReason.TASK_LIMIT)
             }
             exitResult.asExit()?.runOnTransitionStart?.invoke(transition)
+            if (Flags.enableMultipleDesktopsBackend()) {
+                desksTransitionObserver.addPendingTransition(
+                    DeskTransition.ActiveDeskWithTask(
+                        token = transition,
+                        displayId = taskInfo.displayId,
+                        deskId = deskId,
+                        enterTaskId = taskInfo.taskId,
+                    )
+                )
+            } else {
+                taskRepository.setActiveDesk(displayId = taskInfo.displayId, deskId = deskId)
+            }
         }
     }
 
