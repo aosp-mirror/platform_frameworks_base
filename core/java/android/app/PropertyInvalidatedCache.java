@@ -307,11 +307,8 @@ public class PropertyInvalidatedCache<Query, Result> {
     @GuardedBy("mLock")
     private long mMisses = 0;
 
-    // This counter tracks the number of times {@link #recompute} returned a null value.  Null
-    // results are cached, or not, depending on instantiation arguments.  Caching nulls when they
-    // should not be cached is a functional error. Failing to cache nulls that can be cached is a
-    // performance error.  A non-zero value here means the cache should be examined to be sure
-    // that nulls are correctly cached, or not.
+    // This counter tracks the number of times {@link #recompute} returned a null value and the
+    // result was not cached.
     @GuardedBy("mLock")
     private long mNulls = 0;
 
@@ -1728,8 +1725,8 @@ public class PropertyInvalidatedCache<Query, Result> {
                 if (mLastSeenNonce == currentNonce) {
                     if (result != null || mCacheNullResults) {
                         mCache.put(query, result);
-                    }
-                    if (result == null) {
+                    } else if (result == null) {
+                        // The result was null and it was not cached.
                         mNulls++;
                     }
                 }
