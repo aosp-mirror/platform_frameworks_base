@@ -31,7 +31,6 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.LAYOUT_DIRECTION_RTL;
 import static android.view.View.VISIBLE;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_VOLUME_CONTROL;
 import static com.android.internal.jank.InteractionJankMonitor.Configuration.Builder;
 import static com.android.settingslib.flags.Flags.audioSharingDeveloperOption;
@@ -144,17 +143,16 @@ import com.android.systemui.volume.domain.interactor.VolumeDialogInteractor;
 import com.android.systemui.volume.domain.interactor.VolumePanelNavigationInteractor;
 import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
-
 import com.google.android.msdl.domain.MSDLPlayer;
-import com.google.common.collect.ImmutableList;
-
-import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+
+import dagger.Lazy;
 
 /**
  * Visual presentation of the volume dialog.
@@ -326,8 +324,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private final VolumePanelFlag mVolumePanelFlag;
     private final VolumeDialogInteractor mInteractor;
     // Optional actions for soundDose
-    private Optional<ImmutableList<CsdWarningAction>>
-            mCsdWarningNotificationActions = Optional.of(ImmutableList.of());
+    private Optional<List<CsdWarningAction>>
+            mCsdWarningNotificationActions = Optional.of(Collections.emptyList());
 
     public VolumeDialogImpl(
             Context context,
@@ -2237,7 +2235,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     }
 
     public void setCsdWarningNotificationActionIntents(
-            ImmutableList<CsdWarningAction> actionIntent) {
+            List<CsdWarningAction> actionIntent) {
         mCsdWarningNotificationActions = Optional.of(actionIntent);
     }
 

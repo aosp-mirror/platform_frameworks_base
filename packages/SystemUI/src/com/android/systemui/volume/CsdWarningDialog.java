@@ -46,13 +46,12 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.NotificationChannels;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
-import com.google.common.collect.ImmutableList;
+import java.util.List;
+import java.util.Optional;
 
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
-
-import java.util.Optional;
 
 /**
  * A class that implements the three Computed Sound Dose-related warnings defined in
@@ -108,7 +107,7 @@ public class CsdWarningDialog extends SystemUIDialog
     private long mShowTime;
 
     @VisibleForTesting public int mCachedMediaStreamVolume;
-    private Optional<ImmutableList<CsdWarningAction>> mActionIntents;
+    private Optional<List<CsdWarningAction>> mActionIntents;
     private final BroadcastDispatcher mBroadcastDispatcher;
 
     /**
@@ -120,7 +119,7 @@ public class CsdWarningDialog extends SystemUIDialog
         CsdWarningDialog create(
                 int csdWarning,
                 Runnable onCleanup,
-                Optional<ImmutableList<CsdWarningAction>> actionIntents);
+                Optional<List<CsdWarningAction>> actionIntents);
     }
 
     @AssistedInject
@@ -131,7 +130,7 @@ public class CsdWarningDialog extends SystemUIDialog
             NotificationManager notificationManager,
             @Background DelayableExecutor delayableExecutor,
             @Assisted Runnable onCleanup,
-            @Assisted Optional<ImmutableList<CsdWarningAction>> actionIntents,
+            @Assisted Optional<List<CsdWarningAction>> actionIntents,
             BroadcastDispatcher broadcastDispatcher) {
         super(context);
         mCsdWarning = csdWarning;
@@ -350,7 +349,7 @@ public class CsdWarningDialog extends SystemUIDialog
         if (Flags.sounddoseCustomization()
                 && mActionIntents.isPresent()
                 && !mActionIntents.get().isEmpty()) {
-            ImmutableList<CsdWarningAction> actionIntentsList = mActionIntents.get();
+            List<CsdWarningAction> actionIntentsList = mActionIntents.get();
             for (CsdWarningAction action : actionIntentsList) {
                 if (action.getLabel() == null || action.getIntent() == null) {
                     Log.w(TAG, "Null action intent received. Skipping addition to notification");

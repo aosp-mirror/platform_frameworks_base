@@ -20,9 +20,11 @@ import com.android.systemui.volume.Events
 import com.android.systemui.volume.dialog.VolumeDialog
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPlugin
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPluginScope
+import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogCsdWarningInteractor
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogSafetyWarningInteractor
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
 import com.android.systemui.volume.dialog.shared.VolumeDialogLogger
+import com.android.systemui.volume.dialog.shared.model.CsdWarningConfigModel
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel
 import javax.inject.Inject
 import javax.inject.Provider
@@ -38,8 +40,10 @@ constructor(
     @VolumeDialogPlugin private val coroutineScope: CoroutineScope,
     private val dialogVisibilityInteractor: VolumeDialogVisibilityInteractor,
     private val dialogSafetyWarningInteractor: VolumeDialogSafetyWarningInteractor,
+    private val dialogCsdWarningInteractor: VolumeDialogCsdWarningInteractor,
     private val volumeDialogProvider: Provider<VolumeDialog>,
     private val logger: VolumeDialogLogger,
+    val csdWarningConfigModel: CsdWarningConfigModel,
 ) {
 
     fun launchVolumeDialog() {
@@ -61,9 +65,14 @@ constructor(
     }
 
     val isShowingSafetyWarning: Flow<Boolean> = dialogSafetyWarningInteractor.isShowingSafetyWarning
+    val csdWarning: Flow<Int?> = dialogCsdWarningInteractor.csdWarning
 
     fun onSafetyWarningDismissed() {
         dialogSafetyWarningInteractor.onSafetyWarningDismissed()
+    }
+
+    fun onCsdWarningDismissed() {
+        dialogCsdWarningInteractor.onCsdWarningDismissed()
     }
 
     private fun showDialog() {

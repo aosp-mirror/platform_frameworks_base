@@ -43,13 +43,13 @@ import com.android.systemui.volume.VolumePanelDialogReceiver;
 import com.android.systemui.volume.VolumeUI;
 import com.android.systemui.volume.dialog.VolumeDialogPlugin;
 import com.android.systemui.volume.dialog.dagger.VolumeDialogPluginComponent;
+import com.android.systemui.volume.dialog.dagger.factory.VolumeDialogPluginComponentFactory;
 import com.android.systemui.volume.domain.interactor.VolumeDialogInteractor;
 import com.android.systemui.volume.domain.interactor.VolumePanelNavigationInteractor;
 import com.android.systemui.volume.panel.dagger.VolumePanelComponent;
 import com.android.systemui.volume.panel.dagger.factory.VolumePanelComponentFactory;
 import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
-
 import com.google.android.msdl.domain.MSDLPlayer;
 
 import dagger.Binds;
@@ -103,6 +103,10 @@ public interface VolumeModule {
     /**  */
     @Binds
     VolumePanelComponentFactory bindVolumePanelComponentFactory(VolumePanelComponent.Factory impl);
+
+    @Binds
+    VolumeDialogPluginComponentFactory bindVolumeDialogPluginComponentFactory(
+            VolumeDialogPluginComponent.Factory impl);
 
     /**  */
     @Provides
