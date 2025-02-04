@@ -16,6 +16,12 @@
 
 package com.android.systemui.communal.ui.compose.section
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -28,6 +34,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -52,6 +63,8 @@ import com.android.systemui.communal.ui.viewmodel.CommunalToDreamButtonViewModel
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.res.R
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
 
 class CommunalToDreamButtonSection
 @Inject
@@ -75,16 +88,54 @@ constructor(
         val buttonSize = dimensionResource(R.dimen.communal_to_dream_button_size)
 
         if (viewModel.shouldShowTooltip) {
+            val tooltipVisibleState = remember { MutableTransitionState(false) }
+
             Column(
                 modifier =
                     Modifier.widthIn(max = tooltipMaxWidth).pointerInput(Unit) {
-                        observeTaps { viewModel.setDreamButtonTooltipDismissed() }
+                        observeTaps {
+                            if (tooltipVisibleState.isCurrentlyVisible()) {
+                                tooltipVisibleState.targetState = false
+                            }
+                        }
                     }
             ) {
-                Tooltip(
-                    pointerOffsetDp = buttonSize.div(2),
-                    text = stringResource(R.string.glanceable_hub_to_dream_button_tooltip),
-                )
+                var waitingToShowTooltip by remember { mutableStateOf(true) }
+
+                LaunchedEffect(tooltipVisibleState.targetState) {
+                    delay(3.seconds)
+                    tooltipVisibleState.targetState = true
+                    waitingToShowTooltip = false
+                }
+
+                // This LaunchedEffect is used to wait for the tooltip dismiss animation to
+                // complete before setting the tooltip dismissed. Otherwise, the composable would
+                // be removed before the animation can start.
+                LaunchedEffect(
+                    tooltipVisibleState.currentState,
+                    tooltipVisibleState.isIdle,
+                    waitingToShowTooltip,
+                ) {
+                    if (
+                        !waitingToShowTooltip &&
+                            !tooltipVisibleState.currentState &&
+                            tooltipVisibleState.isIdle
+                    ) {
+                        viewModel.setDreamButtonTooltipDismissed()
+                    }
+                }
+
+                AnimatedVisibility(
+                    visibleState = tooltipVisibleState,
+                    enter = fadeIn() + expandVertically(expandFrom = Alignment.Bottom),
+                    exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Bottom),
+                ) {
+                    Tooltip(
+                        pointerOffsetDp = buttonSize.div(2),
+                        text = stringResource(R.string.glanceable_hub_to_dream_button_tooltip),
+                    )
+                }
+
                 GoToDreamButton(
                     modifier = Modifier.width(buttonSize).height(buttonSize).align(Alignment.End)
                 ) {
@@ -97,6 +148,8 @@ constructor(
             }
         }
     }
+
+    private fun MutableTransitionState<Boolean>.isCurrentlyVisible() = currentState && isIdle
 
     companion object {
         private val tooltipMaxWidth = 350.dp
