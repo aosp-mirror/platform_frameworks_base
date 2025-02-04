@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.view.layout.sections
 
+import android.content.Context
 import androidx.compose.ui.platform.ComposeView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -26,6 +27,7 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.promoted.AODPromotedNotification
 import com.android.systemui.statusbar.notification.promoted.PromotedNotificationLogger
@@ -36,6 +38,7 @@ import javax.inject.Inject
 class AodPromotedNotificationSection
 @Inject
 constructor(
+    @ShadeDisplayAware private val context: Context,
     private val viewModelFactory: AODPromotedNotificationViewModel.Factory,
     private val shadeInteractor: ShadeInteractor,
     private val logger: PromotedNotificationLogger,
@@ -83,13 +86,30 @@ constructor(
         // view may have been created by a different instance of the section (!), and we don't
         // actually *need* it to set constraints, so don't check for it here.
 
+        val topPadding =
+            context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start_icons)
+
         constraintSet.apply {
             val isShadeLayoutWide = shadeInteractor.isShadeLayoutWide.value
-            val endGuidelineId = if (isShadeLayoutWide) R.id.split_shade_guideline else PARENT_ID
 
-            connect(viewId, TOP, R.id.smart_space_barrier_bottom, BOTTOM, 0)
-            connect(viewId, START, PARENT_ID, START, 0)
-            connect(viewId, END, endGuidelineId, END, 0)
+            if (isShadeLayoutWide) {
+                // When in split shade, align with top of smart space:
+                connect(viewId, TOP, R.id.smart_space_barrier_top, TOP, 0)
+
+                // and occupy the right half of the screen:
+                connect(viewId, START, R.id.split_shade_guideline, START, 0)
+                connect(viewId, END, PARENT_ID, END, 0)
+
+                // TODO(b/369151941): Calculate proper right padding here (when in split shade, it's
+                // bigger than what the Composable applies!)
+            } else {
+                // When not in split shade, place below smart space:
+                connect(viewId, TOP, R.id.smart_space_barrier_bottom, BOTTOM, topPadding)
+
+                // and occupy the full width of the screen:
+                connect(viewId, START, PARENT_ID, START, 0)
+                connect(viewId, END, PARENT_ID, END, 0)
+            }
 
             constrainWidth(viewId, ConstraintSet.MATCH_CONSTRAINT)
             constrainHeight(viewId, ConstraintSet.WRAP_CONTENT)

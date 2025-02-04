@@ -113,7 +113,7 @@ constructor(
                                         AodPromotedNotificationArea(
                                             modifier =
                                                 Modifier.fillMaxWidth(0.5f)
-                                                    .align(alignment = Alignment.TopStart)
+                                                    .align(alignment = Alignment.TopEnd)
                                         )
                                         Notifications(
                                             areNotificationsVisible = areNotificationsVisible,
@@ -129,6 +129,10 @@ constructor(
                             }
                         }
 
+                        // Not a mistake; reusing below_clock_padding_start_icons as AOD RON top
+                        // padding for now.
+                        val aodPromotedNotifTopPadding: Dp =
+                            dimensionResource(R.dimen.below_clock_padding_start_icons)
                         val aodIconPadding: Dp =
                             dimensionResource(R.dimen.below_clock_padding_start_icons)
 
@@ -136,7 +140,10 @@ constructor(
                             if (!isShadeLayoutWide && !isBypassEnabled) {
                                 Box(modifier = Modifier.weight(weight = 1f)) {
                                     Column(Modifier.align(alignment = Alignment.TopStart)) {
-                                        AodPromotedNotificationArea()
+                                        AodPromotedNotificationArea(
+                                            modifier =
+                                                Modifier.padding(top = aodPromotedNotifTopPadding)
+                                        )
                                         AodNotificationIcons(
                                             modifier = Modifier.padding(start = aodIconPadding)
                                         )
@@ -150,7 +157,10 @@ constructor(
                             } else {
                                 Column {
                                     if (!isShadeLayoutWide) {
-                                        AodPromotedNotificationArea()
+                                        AodPromotedNotificationArea(
+                                            modifier =
+                                                Modifier.padding(top = aodPromotedNotifTopPadding)
+                                        )
                                     }
                                     AodNotificationIcons(
                                         modifier =

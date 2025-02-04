@@ -63,7 +63,10 @@ import com.android.systemui.statusbar.notification.promoted.shared.model.Promote
 import com.android.systemui.statusbar.notification.promoted.ui.viewmodel.AODPromotedNotificationViewModel
 
 @Composable
-fun AODPromotedNotification(viewModelFactory: AODPromotedNotificationViewModel.Factory) {
+fun AODPromotedNotification(
+    viewModelFactory: AODPromotedNotificationViewModel.Factory,
+    modifier: Modifier = Modifier,
+) {
     if (!PromotedNotificationUiAod.isEnabled) {
         return
     }
@@ -76,17 +79,15 @@ fun AODPromotedNotification(viewModelFactory: AODPromotedNotificationViewModel.F
     key(content.identity) {
         val layoutResource = content.layoutResource ?: return
 
-        val topPadding = dimensionResource(systemuiR.dimen.below_clock_padding_start_icons)
         val sidePaddings = dimensionResource(systemuiR.dimen.notification_side_paddings)
-        val paddingValues =
-            PaddingValues(top = topPadding, start = sidePaddings, end = sidePaddings, bottom = 0.dp)
+        val sidePaddingValues = PaddingValues(horizontal = sidePaddings, vertical = 0.dp)
 
         val borderStroke = BorderStroke(1.dp, SecondaryText.brush)
 
         val borderRadius = dimensionResource(systemuiR.dimen.notification_corner_radius)
         val borderShape = RoundedCornerShape(borderRadius)
 
-        Box(modifier = Modifier.padding(paddingValues)) {
+        Box(modifier = modifier.padding(sidePaddingValues)) {
             AODPromotedNotificationView(
                 layoutResource = layoutResource,
                 content = content,
