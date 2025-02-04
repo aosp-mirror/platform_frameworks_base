@@ -183,7 +183,7 @@ public class InputMethodServiceTest {
         setShowImeWithHardKeyboard(true /* enabled */);
 
         // Triggers to show IME via public API.
-        verifyInputViewStatus(
+        verifyInputViewStatusOnMainSync(
                 () -> assertThat(mActivity.showImeWithWindowInsetsController()).isTrue(),
                 true /* expected */,
                 true /* inputViewStarted */);
