@@ -29,4 +29,8 @@ class QSPreferencesInteractor @Inject constructor(private val repo: QSPreference
     fun setLargeTilesSpecs(specs: Set<TileSpec>) {
         repo.setLargeTilesSpecs(specs)
     }
+
+    fun setInitialLargeTilesSpecs(specs: Set<TileSpec>, user: Int) {
+        repo.setInitialLargeTilesSpecs(specs, user)
+    }
 }

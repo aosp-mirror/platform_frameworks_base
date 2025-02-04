@@ -44,6 +44,7 @@ constructor(
     @PanelsLog private val logBuffer: LogBuffer,
     @Application private val applicationScope: CoroutineScope,
 ) {
+
     val largeTilesSpecs =
         preferencesInteractor.largeTilesSpecs
             .onEach { logChange(it) }

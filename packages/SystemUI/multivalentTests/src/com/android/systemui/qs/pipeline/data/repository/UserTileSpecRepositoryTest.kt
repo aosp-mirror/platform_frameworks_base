@@ -7,11 +7,13 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.qs.pipeline.data.model.RestoreData
+import com.android.systemui.qs.pipeline.data.repository.UserTileSpecRepositoryTest.Companion.toTilesSet
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -312,11 +314,7 @@ class UserTileSpecRepositoryTest : SysuiTestCase() {
             runCurrent()
 
             val restoreData =
-                RestoreData(
-                    restoredSpecs.toTileSpecs(),
-                    restoredAutoAdded.toTilesSet(),
-                    USER,
-                )
+                RestoreData(restoredSpecs.toTileSpecs(), restoredAutoAdded.toTilesSet(), USER)
             underTest.reconcileRestore(restoreData, autoAddedBeforeRestore.toTilesSet())
             runCurrent()
 
@@ -351,6 +349,49 @@ class UserTileSpecRepositoryTest : SysuiTestCase() {
             assertThat(tiles).isEqualTo(currentTiles)
         }
 
+    @Test
+    fun noSettingsStored_noTilesReadFromSettings() =
+        testScope.runTest {
+            val tilesRead by collectLastValue(underTest.tilesReadFromSettings.consumeAsFlow())
+            val tiles by collectLastValue(underTest.tiles())
+
+            assertThat(tiles).isEqualTo(getDefaultTileSpecs())
+            assertThat(tilesRead).isEqualTo(null)
+        }
+
+    @Test
+    fun settingsStored_tilesReadFromSettings() =
+        testScope.runTest {
+            val storedTiles = "a,b"
+            storeTiles(storedTiles)
+            val tiles by collectLastValue(underTest.tiles())
+            val tilesRead by collectLastValue(underTest.tilesReadFromSettings.consumeAsFlow())
+
+            assertThat(tilesRead).isEqualTo(storedTiles.toTilesSet())
+        }
+
+    @Test
+    fun noSettingsStored_tilesChanged_tilesReadFromSettingsNotChanged() =
+        testScope.runTest {
+            val tilesRead by collectLastValue(underTest.tilesReadFromSettings.consumeAsFlow())
+            val tiles by collectLastValue(underTest.tiles())
+
+            underTest.addTile(TileSpec.create("a"))
+            assertThat(tilesRead).isEqualTo(null)
+        }
+
+    @Test
+    fun settingsStored_tilesChanged_tilesReadFromSettingsNotChanged() =
+        testScope.runTest {
+            val storedTiles = "a,b"
+            storeTiles(storedTiles)
+            val tiles by collectLastValue(underTest.tiles())
+            val tilesRead by collectLastValue(underTest.tilesReadFromSettings.consumeAsFlow())
+
+            underTest.addTile(TileSpec.create("c"))
+            assertThat(tilesRead).isEqualTo(storedTiles.toTilesSet())
+        }
+
     private fun getDefaultTileSpecs(): List<TileSpec> {
         return defaultTilesRepository.defaultTiles
     }
@@ -370,6 +411,7 @@ class UserTileSpecRepositoryTest : SysuiTestCase() {
         private const val SETTING = Settings.Secure.QS_TILES
 
         private fun String.toTileSpecs() = TilesSettingConverter.toTilesList(this)
+
         private fun String.toTilesSet() = TilesSettingConverter.toTilesSet(this)
     }
 }
