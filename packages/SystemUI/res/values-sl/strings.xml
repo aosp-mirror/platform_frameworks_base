@@ -59,7 +59,7 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Spremembo jezika sistema je zahtevala druga naprava."</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Spremeni jezik"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Obdrži trenutni jezik"</string>
-    <string name="share_wifi_button_text" msgid="1285273973812029240">"Delite omrežje Wi‑Fi"</string>
+    <string name="share_wifi_button_text" msgid="1285273973812029240">"Deli Wi‑Fi"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Ali dovolite brezžično odpravljanje napak v tem omrežju?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Ime omrežja (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nNaslov omrežja Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Vedno dovoli v tem omrežju"</string>
@@ -250,10 +250,8 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Neznan odstotek napolnjenosti baterije."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Povezava vzpostavljena z: <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Vzpostavljena povezava: <xliff:g id="CAST">%s</xliff:g>."</string>
-    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
-    <skip />
-    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
-    <skip />
+    <string name="accessibility_expand_group" msgid="521237935987978624">"Razširitev skupine."</string>
+    <string name="accessibility_open_application" msgid="1749126077501259712">"Odpiranje aplikacije."</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Ni povezan."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Gostovanje"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Izklopljeno"</string>
@@ -543,8 +541,7 @@
     <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"Raziščite način središča"</string>
     <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"Med polnjenjem dostopajte do priljubljenih pripomočkov in ohranjevalnikov zaslona."</string>
     <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Pa začnimo"</string>
-    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
-    <skip />
+    <string name="glanceable_hub_to_dream_button_tooltip" msgid="9018287673822335829">"Prikaz priljubljenih ohranjevalnikov zaslona med polnjenjem"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Preklop med uporabniki"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"spustni meni"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Vse aplikacije in podatki v tej seji bodo izbrisani."</string>
@@ -807,6 +804,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Prikaz v obliki oblačka na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu, preglasitev načina Ne moti."</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prednostno"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podpira pogovornih funkcij."</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
     <string name="notification_inline_dismiss" msgid="88423586921134258">"Opusti"</string>
     <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"Tega ne prikaži več"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Za ta obvestila ni mogoče spremeniti nastavitev."</string>
@@ -924,12 +923,9 @@
     <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"Preklopi zaklepanje tipk"</string>
     <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"Preklopi daljši pritisk tipk"</string>
     <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Preklopi Glasovni dostop"</string>
-    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
-    <skip />
-    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
-    <skip />
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"Preklop funkcije TalkBack"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"Preklop povečave"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"Aktiviranje storitve Izberite in poslušajte"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Ne moti"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Bližnjica z gumboma za glasnost"</string>
     <string name="battery" msgid="769686279459897127">"Baterija"</string>
@@ -1309,8 +1305,7 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Odprite s prstnim odtisom"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Zahtevano je preverjanje pristnosti. Za preverjanje pristnosti se dotaknite tipala prstnih odtisov."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"Aktivni klic"</string>
-    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
-    <skip />
+    <string name="ongoing_notification_extra_content_description" msgid="2098752668861351265">"V teku"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Prenos podatkov v mobilnem omrežju"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Povezano"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Začasno vzpostavljena povezava"</string>

@@ -250,10 +250,8 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Hindi alam ang porsyento ng baterya."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Nakakonekta sa <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Nakakonekta sa <xliff:g id="CAST">%s</xliff:g>."</string>
-    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
-    <skip />
-    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
-    <skip />
+    <string name="accessibility_expand_group" msgid="521237935987978624">"I-expand ang grupo."</string>
+    <string name="accessibility_open_application" msgid="1749126077501259712">"Buksan ang application."</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Hindi nakakonekta."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Naka-off"</string>
@@ -543,8 +541,7 @@
     <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"I-explore ang hub mode"</string>
     <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"I-access ang mga paborito mong widget at screen saver habang nagcha-charge."</string>
     <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Tara na"</string>
-    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
-    <skip />
+    <string name="glanceable_hub_to_dream_button_tooltip" msgid="9018287673822335829">"Ipakita ang mga paborito mong screensaver habang nagcha-charge"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Magpalit ng user"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"pulldown menu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Ide-delete ang lahat ng app at data sa session na ito."</string>
@@ -807,6 +804,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Makikita sa itaas ng mga notification ng pag-uusap at bilang larawan sa profile sa lock screen, lumalabas bilang bubble, naaabala ang Huwag Istorbohin"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priyoridad"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Hindi sinusuportahan ng <xliff:g id="APP_NAME">%1$s</xliff:g> ang mga feature ng pag-uusap"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
     <string name="notification_inline_dismiss" msgid="88423586921134258">"I-dismiss"</string>
     <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"Huwag nang ipakita ulit"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Hindi puwedeng baguhin ang mga notification na ito."</string>
@@ -1306,8 +1305,7 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Gamitin ang fingerprint para buksan"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Kailangan ng pag-authenticate. Pindutin ang sensor para sa fingerprint para mag-authenticate."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"Kasalukuyang tawag"</string>
-    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
-    <skip />
+    <string name="ongoing_notification_extra_content_description" msgid="2098752668861351265">"Kasalukuyan"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobile data"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Nakakonekta"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Pansamantalang nakakonekta"</string>

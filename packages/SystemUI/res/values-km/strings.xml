@@ -250,10 +250,8 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"មិនដឹងអំពី​ភាគរយថ្មទេ។"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"បាន​ភ្ជាប់​ទៅ <xliff:g id="BLUETOOTH">%s</xliff:g> ។"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"បានភ្ជាប់ទៅ <xliff:g id="CAST">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
-    <skip />
-    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
-    <skip />
+    <string name="accessibility_expand_group" msgid="521237935987978624">"ពង្រីកក្រុម។"</string>
+    <string name="accessibility_open_application" msgid="1749126077501259712">"បើកកម្មវិធី។"</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"មិន​បាន​តភ្ជាប់​។"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"រ៉ូ​មីង"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"បិទ"</string>
@@ -543,8 +541,7 @@
     <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"រុករកមុខងារមណ្ឌល"</string>
     <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"ចូលប្រើប្រាស់ធាតុ​ក្រាហ្វិក និងធាតុរក្សាអេក្រង់ដែលអ្នកពេញចិត្តពេលសាកថ្ម។"</string>
     <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"ចាប់ផ្ដើម"</string>
-    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
-    <skip />
+    <string name="glanceable_hub_to_dream_button_tooltip" msgid="9018287673822335829">"បង្ហាញធាតុ​រក្សា​អេក្រង់សំណព្វរបស់អ្នក ពេលកំពុងសាកថ្ម"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ប្ដូរ​អ្នក​ប្រើ"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ម៉ឺនុយ​ទាញចុះ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"កម្មវិធី និងទិន្នន័យ​ទាំងអស់​ក្នុង​វគ្គ​នេះ​នឹង​ត្រូវ​លុប។"</string>
@@ -807,6 +804,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"បង្ហាញនៅខាងលើ​ការជូនដំណឹងអំពីការសន្ទនា និងជារូបភាព​កម្រង​ព័ត៌មាននៅលើអេក្រង់ចាក់សោ បង្ហាញជាពពុះ បង្អាក់មុខងារកុំ​រំខាន"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"អាទិភាព"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> មិនអាចប្រើ​មុខងារ​សន្ទនា​បានទេ"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
     <string name="notification_inline_dismiss" msgid="88423586921134258">"ច្រានចោល"</string>
     <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"កុំបង្ហាញម្ដងទៀត"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"មិនអាច​កែប្រែ​ការជូនដំណឹង​ទាំងនេះ​បានទេ។"</string>
@@ -924,12 +923,9 @@
     <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"បិទ/បើកគ្រាប់ចុចស្អិត"</string>
     <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"បិទ/បើកគ្រាប់ចុចយឺត"</string>
     <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"បិទ/បើកការចូល​ប្រើប្រាស់តាមរយៈ​សំឡេង"</string>
-    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
-    <skip />
-    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
-    <skip />
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"បិទ/បើក TalkBack"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"បើក/បិទ​ការ​ពង្រីក"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"បើកដំណើរការ \"ជ្រើសរើសដើម្បីអាន\""</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"កុំ​រំខាន"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ផ្លូវកាត់ប៊ូតុងកម្រិតសំឡេង"</string>
     <string name="battery" msgid="769686279459897127">"ថ្ម"</string>
@@ -1309,8 +1305,7 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ប្រើស្នាមម្រាមដៃ ដើម្បីបើក"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"តម្រូវឱ្យ​មាន​ការផ្ទៀងផ្ទាត់។ សូមចុច​ឧបករណ៍​ចាប់ស្នាមម្រាមដៃ ដើម្បី​ផ្ទៀងផ្ទាត់​។"</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"ការ​ហៅដែលកំពុងដំណើរការ"</string>
-    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
-    <skip />
+    <string name="ongoing_notification_extra_content_description" msgid="2098752668861351265">"កំពុងដំណើរការ"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"ទិន្នន័យ​ទូរសព្ទចល័ត"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"បានភ្ជាប់"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"បានភ្ជាប់ជាបណ្ដោះអាសន្ន"</string>

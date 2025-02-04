@@ -250,10 +250,8 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ബാറ്ററി ശതമാനം അജ്ഞാതമാണ്."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> എന്നതിലേക്ക് കണക്‌റ്റുചെയ്‌തു."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> എന്നതിലേക്ക് കണക്റ്റുചെയ്തു."</string>
-    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
-    <skip />
-    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
-    <skip />
+    <string name="accessibility_expand_group" msgid="521237935987978624">"ഗ്രൂപ്പ് വികസിപ്പിക്കുക."</string>
+    <string name="accessibility_open_application" msgid="1749126077501259712">"ആപ്പ് തുറക്കുക."</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"കണക്റ്റുചെയ്‌തിട്ടില്ല."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"റോമിംഗ്"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"ഓഫ്"</string>
@@ -543,8 +541,7 @@
     <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"ഹബ് മോഡ് അടുത്തറിയുക"</string>
     <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"ചാർജ് ചെയ്യുമ്പോൾ നിങ്ങളുടെ പ്രിയപ്പെട്ട വിജറ്റുകളും സ്‌ക്രീൻ സേവറുകളും ആക്‌സസ് ചെയ്യുക."</string>
     <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"തുടങ്ങാം"</string>
-    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
-    <skip />
+    <string name="glanceable_hub_to_dream_button_tooltip" msgid="9018287673822335829">"ചാർജ് ചെയ്യുമ്പോൾ നിങ്ങളുടെ പ്രിയപ്പെട്ട സ്ക്രീൻ സേവറുകൾ കാണിക്കുക"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ഉപയോക്താവ് മാറുക"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"പുൾഡൗൺ മെനു"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ഈ സെഷനിലെ എല്ലാ ആപ്പുകളും ഡാറ്റയും ഇല്ലാതാക്കും."</string>
@@ -807,6 +804,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"സംഭാഷണ അറിയിപ്പുകളുടെ മുകളിലും സ്ക്രീൻ ലോക്കായിരിക്കുമ്പോൾ ഒരു പ്രൊഫൈൽ ചിത്രമായും ബബിൾ രൂപത്തിൽ ദൃശ്യമാകുന്നു, ശല്യപ്പെടുത്തരുത് മോഡ് തടസ്സപ്പെടുത്തുന്നു"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"മുൻഗണന"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"സംഭാഷണ ഫീച്ചറുകളെ <xliff:g id="APP_NAME">%1$s</xliff:g> പിന്തുണയ്‌ക്കുന്നില്ല"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
     <string name="notification_inline_dismiss" msgid="88423586921134258">"ഡിസ്‌മിസ് ചെയ്യുക"</string>
     <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"വീണ്ടും കാണിക്കരുത്"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ഈ അറിയിപ്പുകൾ പരിഷ്ക്കരിക്കാനാവില്ല."</string>
@@ -924,12 +923,9 @@
     <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"സ്‌റ്റിക്കി കീകൾ ടോഗിൾ ചെയ്യുക"</string>
     <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"സ്ലോ കീകൾ ടോഗിൾ ചെയ്യുക"</string>
     <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Voice Access ടോഗിൾ ചെയ്യുക"</string>
-    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
-    <skip />
-    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
-    <skip />
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"TalkBack ടോഗിൾ ചെയ്യുക"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"മാഗ്നിഫിക്കേഷൻ ടോഗിൾ ചെയ്യുക"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"\'വായിച്ചുകേൾക്കാൻ തിരഞ്ഞെടുക്കുക\' സജീവമാക്കുക"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ശല്യപ്പെടുത്തരുത്"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"വോളിയം ബട്ടൺ കുറുക്കുവഴി"</string>
     <string name="battery" msgid="769686279459897127">"ബാറ്ററി"</string>
@@ -1309,8 +1305,7 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"തുറക്കുന്നതിന് നിങ്ങളുടെ ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കുക"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"പരിശോധിച്ചുറപ്പിക്കേണ്ടതുണ്ട്. പരിശോധിച്ചുറപ്പിക്കാൻ, വിരലടയാള സെൻസറിൽ സ്‌പർശിക്കുക."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"കോളിലാണ്"</string>
-    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
-    <skip />
+    <string name="ongoing_notification_extra_content_description" msgid="2098752668861351265">"നടന്നുകൊണ്ടിരിക്കുന്നവ"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"മൊബൈൽ ഡാറ്റ"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"കണക്റ്റ് ചെയ്തു"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"താൽക്കാലികമായി കണക്റ്റ് ചെയ്തിരിക്കുന്നു"</string>

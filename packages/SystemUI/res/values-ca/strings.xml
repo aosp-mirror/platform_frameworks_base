@@ -807,6 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Es mostra a la part superior de les notificacions de les converses i com a foto de perfil a la pantalla de bloqueig, apareix com una bombolla, interromp el mode No molestis"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritat"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admet les funcions de converses"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
     <string name="notification_inline_dismiss" msgid="88423586921134258">"Ignora"</string>
     <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"No ho tornis a mostrar"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Aquestes notificacions no es poden modificar."</string>
