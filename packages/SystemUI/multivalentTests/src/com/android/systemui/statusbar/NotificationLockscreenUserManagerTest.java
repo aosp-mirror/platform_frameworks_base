@@ -92,6 +92,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.row.shared.LockscreenOtpRedaction;
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository;
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -113,14 +115,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
-
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
-import platform.test.runner.parameterized.Parameters;
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4.class)
@@ -169,8 +171,18 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     private KeyguardStateController mKeyguardStateController;
     @Mock
     private Lazy<DeviceUnlockedInteractor> mDeviceUnlockedInteractorLazy;
+
+    @Mock
+    private Lazy<WifiRepository> mWifiRepositoryLazy;
     @Mock
     private DeviceUnlockedInteractor mDeviceUnlockedInteractor;
+
+    @Mock
+    private WifiRepository mWifiRepository;
+
+    @Mock
+    private StateFlow<WifiNetworkModel> mWifiStateFlow;
+
     @Mock
     private Lazy<KeyguardInteractor> mKeyguardInteractorLazy;
     @Mock
@@ -266,6 +278,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         when(mKeyguardInteractorLazy.get()).thenReturn(mKeyguardInteractor);
         when(mKeyguardInteractor.isKeyguardDismissible())
                 .thenReturn(mock(StateFlow.class));
+        when(mWifiRepositoryLazy.get()).thenReturn(mWifiRepository);
+        when(mWifiRepository.getWifiNetwork()).thenReturn(mock(StateFlow.class));
         mLockscreenUserManager = new TestNotificationLockscreenUserManager(mContext);
         mLockscreenUserManager.setUpWithPresenter(mPresenter);
 
@@ -528,6 +542,9 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                 .set(mSensitiveNotifPostTime - TimeUnit.DAYS.toMillis(1));
         // Device is not currently locked
         mLockscreenUserManager.mLocked.set(false);
+        mLockscreenUserManager.mConnectedToWifi.set(false);
+        mLockscreenUserManager.mLastWifiConnectionTime.set(
+                mSensitiveNotifPostTime - TimeUnit.DAYS.toMillis(1));
 
         // Sensitive Content notifications are always redacted
         assertEquals(REDACTION_TYPE_NONE,
@@ -542,6 +559,9 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                 mCurrentUser.id);
         changeSetting(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
         mLockscreenUserManager.mLocked.set(true);
+        mLockscreenUserManager.mConnectedToWifi.set(false);
+        mLockscreenUserManager.mLastWifiConnectionTime.set(
+                mSensitiveNotifPostTime - TimeUnit.DAYS.toMillis(1));
         // Device was locked after this notification arrived
         mLockscreenUserManager.mLastLockTime
                 .set(mSensitiveNotifPostTime + TimeUnit.DAYS.toMillis(1));
@@ -562,6 +582,9 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         mLockscreenUserManager.mLastLockTime
                 .set(mSensitiveNotifPostTime - TimeUnit.SECONDS.toMillis(1));
         mLockscreenUserManager.mLocked.set(true);
+        mLockscreenUserManager.mConnectedToWifi.set(false);
+        mLockscreenUserManager.mLastWifiConnectionTime.set(
+                mSensitiveNotifPostTime - TimeUnit.DAYS.toMillis(1));
 
         // Sensitive Content notifications are always redacted
         assertEquals(REDACTION_TYPE_NONE,
@@ -569,8 +592,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(LockscreenOtpRedaction.FLAG_NAME)
-    public void testHasSensitiveContent_notRedactedFlagDisabled() {
+    @EnableFlags(LockscreenOtpRedaction.FLAG_NAME)
+    public void testHasSensitiveContent_notRedactedIfOnWifi() {
         // Allow private notifications for this user
         mSettings.putIntForUser(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 1,
                 mCurrentUser.id);
@@ -579,6 +602,49 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         mLockscreenUserManager.mLastLockTime
                 .set(mSensitiveNotifPostTime - TimeUnit.DAYS.toMillis(1));
         mLockscreenUserManager.mLocked.set(true);
+        // We are currently connected to wifi
+        mLockscreenUserManager.mConnectedToWifi.set(true);
+        mLockscreenUserManager.mLastWifiConnectionTime.set(
+                mSensitiveNotifPostTime - TimeUnit.DAYS.toMillis(1));
+
+        // Sensitive Content notifications are always redacted
+        assertEquals(REDACTION_TYPE_NONE,
+                mLockscreenUserManager.getRedactionType(mSensitiveContentNotif));
+    }
+
+    @Test
+    @EnableFlags(LockscreenOtpRedaction.FLAG_NAME)
+    public void testHasSensitiveContent_notRedactedIfConnectedToWifiSinceReceiving() {
+        // Allow private notifications for this user
+        mSettings.putIntForUser(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 1,
+                mCurrentUser.id);
+        changeSetting(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
+        // Claim the device was last locked 1 day ago
+        mLockscreenUserManager.mLastLockTime
+                .set(mSensitiveNotifPostTime - TimeUnit.DAYS.toMillis(1));
+        mLockscreenUserManager.mLocked.set(true);
+        mLockscreenUserManager.mConnectedToWifi.set(false);
+        // We are not currently connected to wifi, but did connect after the notification came in
+        mLockscreenUserManager.mLastWifiConnectionTime.set(
+                mSensitiveNotifPostTime + TimeUnit.SECONDS.toMillis(1));
+
+        // Sensitive Content notifications are always redacted
+        assertEquals(REDACTION_TYPE_NONE,
+                mLockscreenUserManager.getRedactionType(mSensitiveContentNotif));
+    }
+
+    @Test
+    @DisableFlags(LockscreenOtpRedaction.FLAG_NAME)
+    public void testHasSensitiveContent_notRedactedIfFlagDisabled() {
+        // Allow private notifications for this user
+        mSettings.putIntForUser(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 1,
+                mCurrentUser.id);
+        changeSetting(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
+        // Claim the device was last locked 1 day ago
+        mLockscreenUserManager.mLastLockTime
+                .set(mSensitiveNotifPostTime - TimeUnit.DAYS.toMillis(1));
+        mLockscreenUserManager.mLocked.set(true);
+        mLockscreenUserManager.mConnectedToWifi.set(false);
 
         // Sensitive Content notifications are always redacted
         assertEquals(REDACTION_TYPE_NONE,
@@ -592,10 +658,11 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         mSettings.putIntForUser(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 1,
                 mCurrentUser.id);
         changeSetting(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
-        when(mKeyguardManager.isDeviceLocked()).thenReturn(true);
+        mLockscreenUserManager.mLocked.set(true);
         // Claim the device was last unlocked 1 day ago
         mLockscreenUserManager.mLastLockTime
                 .set(mSensitiveNotifPostTime - TimeUnit.DAYS.toMillis(1));
+        mLockscreenUserManager.mConnectedToWifi.set(false);
 
         // Sensitive Content notifications are always redacted
         assertEquals(REDACTION_TYPE_SENSITIVE_CONTENT,
@@ -1155,6 +1222,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                     mFakeFeatureFlags,
                     mDeviceUnlockedInteractorLazy,
                     mKeyguardInteractorLazy,
+                    mWifiRepositoryLazy,
                     null //CoroutineScope
             );
         }

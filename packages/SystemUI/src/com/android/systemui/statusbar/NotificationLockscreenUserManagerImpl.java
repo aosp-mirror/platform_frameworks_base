@@ -61,7 +61,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.Flags;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor;
@@ -77,6 +76,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.row.shared.LockscreenOtpRedaction;
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ListenerSet;
@@ -84,6 +84,8 @@ import com.android.systemui.util.kotlin.JavaAdapterKt;
 import com.android.systemui.util.settings.SecureSettings;
 
 import dagger.Lazy;
+
+import kotlinx.coroutines.CoroutineScope;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -96,8 +98,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.CoroutineScope;
 
 /**
  * Handles keeping track of the current user, profiles, and various things related to hiding
@@ -300,6 +300,12 @@ public class NotificationLockscreenUserManagerImpl implements
     // Whether or not the device is locked
     @VisibleForTesting
     protected final AtomicBoolean mLocked = new AtomicBoolean(true);
+    // The last time the device connected to a wifi network
+    @VisibleForTesting
+    protected final AtomicLong mLastWifiConnectionTime = new AtomicLong(-1);
+    // Whether the device is connected to wifi
+    @VisibleForTesting
+    protected final AtomicBoolean mConnectedToWifi = new AtomicBoolean(false);
 
     protected int mCurrentUserId = 0;
 
@@ -331,7 +337,8 @@ public class NotificationLockscreenUserManagerImpl implements
             FeatureFlagsClassic featureFlags,
             Lazy<DeviceUnlockedInteractor> deviceUnlockedInteractorLazy,
             Lazy<KeyguardInteractor> keyguardInteractor,
-            @Application CoroutineScope coroutineScope
+            Lazy<WifiRepository> wifiRepository,
+            @Background CoroutineScope coroutineScope
     ) {
         mContext = context;
         mMainExecutor = mainExecutor;
@@ -366,14 +373,29 @@ public class NotificationLockscreenUserManagerImpl implements
         // To avoid dependency injection cycle, finish constructing this object before using the
         // KeyguardInteractor. The CoroutineScope will only be null in tests.
         if (LockscreenOtpRedaction.isEnabled() && coroutineScope != null) {
-            mMainExecutor.execute(() -> JavaAdapterKt.collectFlow(coroutineScope,
+            mMainExecutor.execute(() -> {
+                JavaAdapterKt.collectFlow(coroutineScope,
                     keyguardInteractor.get().isKeyguardDismissible(),
                     unlocked -> {
                         if (!unlocked) {
                             mLastLockTime.set(System.currentTimeMillis());
                         }
                         mLocked.set(!unlocked);
-                    }));
+                        notifyNotificationStateChanged();
+                    });
+                JavaAdapterKt.collectFlow(coroutineScope, wifiRepository.get().getWifiNetwork(),
+                        n -> {
+                        boolean wasConnectedToWifi = mConnectedToWifi.get();
+                        boolean isConnectedToWifi =
+                                wifiRepository.get().isWifiConnectedWithValidSsid();
+                        if (wasConnectedToWifi != isConnectedToWifi) {
+                            // We are either connecting, or disconnecting from wifi
+                            mLastWifiConnectionTime.set(System.currentTimeMillis());
+                            mConnectedToWifi.set(isConnectedToWifi);
+                            notifyNotificationStateChanged();
+                        }
+                    });
+            });
         }
     }
 
@@ -732,9 +754,11 @@ public class NotificationLockscreenUserManagerImpl implements
      * We show the sensitive content redaction view if
      * 1. The feature is enabled
      * 2. The device is locked
-     * 3. The notification has the `hasSensitiveContent` ranking variable set to true
-     * 4. The device has been locked for at least LOCK_TIME_FOR_SENSITIVE_REDACTION_MS
-     * 5. The notification arrived since the last lock time
+     * 3. The device is NOT connected to Wifi
+     * 4. The notification has the `hasSensitiveContent` ranking variable set to true
+     * 5. The device has not connected to Wifi since receiving the notification
+     * 6. The notification arrived at least LOCK_TIME_FOR_SENSITIVE_REDACTION_MS before the last
+     *    lock time.
      */
     private boolean shouldShowSensitiveContentRedactedView(NotificationEntry ent) {
         if (!LockscreenOtpRedaction.isEnabled()) {
@@ -745,18 +769,27 @@ public class NotificationLockscreenUserManagerImpl implements
             return false;
         }
 
+        if (mConnectedToWifi.get()) {
+            return false;
+        }
+
         if (ent.getRanking() == null || !ent.getRanking().hasSensitiveContent()) {
             return false;
         }
 
-        long lastLockedTime = mLastLockTime.get();
-        if (ent.getSbn().getNotification().getWhen() < lastLockedTime) {
+        long lastWifiConnectTime = mLastWifiConnectionTime.get();
+        // If the device has connected to wifi since receiving the notification, do not redact
+        if (ent.getSbn().getPostTime() < lastWifiConnectTime) {
             return false;
         }
 
-        if ((System.currentTimeMillis() - lastLockedTime) < LOCK_TIME_FOR_SENSITIVE_REDACTION_MS) {
+        // If the lock screen was not already locked for LOCK_TIME_FOR_SENSITIVE_REDACTION_MS when
+        // this notification arrived, do not redact
+        long latestTimeForRedaction = mLastLockTime.get() + LOCK_TIME_FOR_SENSITIVE_REDACTION_MS;
+        if (ent.getSbn().getPostTime() < latestTimeForRedaction) {
             return false;
         }
+
         return true;
     }
 
