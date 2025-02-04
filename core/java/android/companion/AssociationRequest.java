@@ -94,7 +94,21 @@ public final class AssociationRequest implements Parcelable {
     public static final String DEVICE_PROFILE_GLASSES = "android.app.role.COMPANION_DEVICE_GLASSES";
 
     /**
-     * Device profile: a virtual device capable of rendering Android applications, and sending back
+     * Device profile: a wearable device capable of sensing its surroundings.
+     * <p>
+     * This device profile is not tied to any android role, and is used to identify the device
+     * as a wearable sensing device.
+     * <p>
+     * This profile may only be used by the system.
+     *
+     * @see AssociationRequest.Builder#setDeviceProfile
+     * @hide
+     */
+    public static final String DEVICE_PROFILE_WEARABLE_SENSING =
+            "android.companion.COMPANION_DEVICE_WEARABLE_SENSING";
+
+    /**
+     * Device profile: a virtual display capable of rendering Android applications, and sending back
      * input events.
      * <p>
      * Only applications that have been granted
@@ -167,7 +181,8 @@ public final class AssociationRequest implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @StringDef(value = { DEVICE_PROFILE_WATCH, DEVICE_PROFILE_COMPUTER,
             DEVICE_PROFILE_AUTOMOTIVE_PROJECTION, DEVICE_PROFILE_APP_STREAMING,
-            DEVICE_PROFILE_GLASSES, DEVICE_PROFILE_NEARBY_DEVICE_STREAMING })
+            DEVICE_PROFILE_GLASSES, DEVICE_PROFILE_NEARBY_DEVICE_STREAMING,
+            DEVICE_PROFILE_WEARABLE_SENSING })
     public @interface DeviceProfile {}
 
     /**
