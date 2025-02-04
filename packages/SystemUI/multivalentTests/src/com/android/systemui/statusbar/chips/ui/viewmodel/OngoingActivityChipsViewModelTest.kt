@@ -40,6 +40,8 @@ import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.NORMAL_PACKAGE
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
+import com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel.ScreenRecordChipViewModel
+import com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.ShareToAppChipViewModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
@@ -385,32 +387,35 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
         fun assertIsScreenRecordChip(latest: OngoingActivityChipModel?) {
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+            assertThat((latest as OngoingActivityChipModel.Shown).key)
+                .isEqualTo(ScreenRecordChipViewModel.KEY)
             val icon =
-                (((latest as OngoingActivityChipModel.Shown).icon)
-                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
-                    .impl as Icon.Resource
+                ((latest.icon) as OngoingActivityChipModel.ChipIcon.SingleColorIcon).impl
+                    as Icon.Resource
             assertThat(icon.res).isEqualTo(R.drawable.ic_screenrecord)
         }
 
         fun assertIsShareToAppChip(latest: OngoingActivityChipModel?) {
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+            assertThat((latest as OngoingActivityChipModel.Shown).key)
+                .isEqualTo(ShareToAppChipViewModel.KEY)
             val icon =
-                (((latest as OngoingActivityChipModel.Shown).icon)
-                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
-                    .impl as Icon.Resource
+                ((latest.icon) as OngoingActivityChipModel.ChipIcon.SingleColorIcon).impl
+                    as Icon.Resource
             assertThat(icon.res).isEqualTo(R.drawable.ic_present_to_all)
         }
 
         fun assertIsCallChip(latest: OngoingActivityChipModel?, notificationKey: String) {
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+            assertThat((latest as OngoingActivityChipModel.Shown).key).isEqualTo(notificationKey)
+
             if (StatusBarConnectedDisplays.isEnabled) {
                 assertNotificationIcon(latest, notificationKey)
                 return
             }
             val icon =
-                (((latest as OngoingActivityChipModel.Shown).icon)
-                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
-                    .impl as Icon.Resource
+                ((latest.icon) as OngoingActivityChipModel.ChipIcon.SingleColorIcon).impl
+                    as Icon.Resource
             assertThat(icon.res).isEqualTo(com.android.internal.R.drawable.ic_phone)
         }
 

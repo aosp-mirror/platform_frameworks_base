@@ -114,6 +114,7 @@ constructor(
             // If the user tapped this chip to show the HUN, we want to just show the icon because
             // the HUN will show the rest of the information.
             return OngoingActivityChipModel.Shown.IconOnly(
+                this.key,
                 icon,
                 colors,
                 onClickListenerLegacy,
@@ -123,6 +124,7 @@ constructor(
 
         if (this.promotedContent.shortCriticalText != null) {
             return OngoingActivityChipModel.Shown.Text(
+                this.key,
                 icon,
                 colors,
                 this.promotedContent.shortCriticalText,
@@ -140,6 +142,7 @@ constructor(
             // to always show "now". We don't want early testers to get that experience since it's
             // not what will happen at launch, so just don't show any time.
             return OngoingActivityChipModel.Shown.IconOnly(
+                this.key,
                 icon,
                 colors,
                 onClickListenerLegacy,
@@ -149,6 +152,7 @@ constructor(
 
         if (this.promotedContent.time == null) {
             return OngoingActivityChipModel.Shown.IconOnly(
+                this.key,
                 icon,
                 colors,
                 onClickListenerLegacy,
@@ -158,6 +162,7 @@ constructor(
         when (this.promotedContent.time.mode) {
             PromotedNotificationContentModel.When.Mode.BasicTime -> {
                 return OngoingActivityChipModel.Shown.ShortTimeDelta(
+                    this.key,
                     icon,
                     colors,
                     time = this.promotedContent.time.time,
@@ -167,6 +172,7 @@ constructor(
             }
             PromotedNotificationContentModel.When.Mode.CountUp -> {
                 return OngoingActivityChipModel.Shown.Timer(
+                    this.key,
                     icon,
                     colors,
                     startTimeMs = this.promotedContent.time.time,
@@ -177,6 +183,7 @@ constructor(
             PromotedNotificationContentModel.When.Mode.CountDown -> {
                 // TODO(b/364653005): Support CountDown.
                 return OngoingActivityChipModel.Shown.Timer(
+                    this.key,
                     icon,
                     colors,
                     startTimeMs = this.promotedContent.time.time,

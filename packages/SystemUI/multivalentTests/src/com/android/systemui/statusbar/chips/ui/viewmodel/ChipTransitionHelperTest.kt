@@ -52,6 +52,7 @@ class ChipTransitionHelperTest : SysuiTestCase() {
 
             val newChip =
                 OngoingActivityChipModel.Shown.Timer(
+                    key = KEY,
                     icon = createIcon(R.drawable.ic_cake),
                     colors = ColorsModel.Themed,
                     startTimeMs = 100L,
@@ -65,6 +66,7 @@ class ChipTransitionHelperTest : SysuiTestCase() {
 
             val newerChip =
                 OngoingActivityChipModel.Shown.IconOnly(
+                    key = KEY,
                     icon = createIcon(R.drawable.ic_hotspot),
                     colors = ColorsModel.Themed,
                     onClickListenerLegacy = null,
@@ -86,6 +88,7 @@ class ChipTransitionHelperTest : SysuiTestCase() {
 
             val shownChip =
                 OngoingActivityChipModel.Shown.Timer(
+                    key = KEY,
                     icon = createIcon(R.drawable.ic_cake),
                     colors = ColorsModel.Themed,
                     startTimeMs = 100L,
@@ -127,6 +130,7 @@ class ChipTransitionHelperTest : SysuiTestCase() {
 
             val shownChip =
                 OngoingActivityChipModel.Shown.Timer(
+                    key = KEY,
                     icon = createIcon(R.drawable.ic_cake),
                     colors = ColorsModel.Themed,
                     startTimeMs = 100L,
@@ -162,4 +166,8 @@ class ChipTransitionHelperTest : SysuiTestCase() {
         OngoingActivityChipModel.ChipIcon.SingleColorIcon(
             Icon.Resource(drawable, contentDescription = null)
         )
+
+    companion object {
+        private const val KEY = "testKey"
+    }
 }
