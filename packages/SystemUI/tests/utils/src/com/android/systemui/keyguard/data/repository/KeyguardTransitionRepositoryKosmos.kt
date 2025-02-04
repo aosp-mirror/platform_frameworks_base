@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import com.android.systemui.keyguard.shared.transition.keyguardTransitionAnimationCallbackDelegator
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
@@ -28,4 +29,9 @@ var Kosmos.fakeKeyguardTransitionRepository by
 var Kosmos.fakeKeyguardTransitionRepositorySpy: FakeKeyguardTransitionRepository by
     Kosmos.Fixture { spy(fakeKeyguardTransitionRepository) }
 var Kosmos.realKeyguardTransitionRepository: KeyguardTransitionRepository by
-    Kosmos.Fixture { KeyguardTransitionRepositoryImpl(testDispatcher) }
+    Kosmos.Fixture {
+        KeyguardTransitionRepositoryImpl(
+            testDispatcher,
+            keyguardTransitionAnimationCallbackDelegator,
+        )
+    }

@@ -33,6 +33,7 @@ import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.keyguard.shared.transition.KeyguardTransitionAnimationCallback
 import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -131,7 +132,10 @@ interface KeyguardTransitionRepository {
 @SysUISingleton
 class KeyguardTransitionRepositoryImpl
 @Inject
-constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionRepository {
+constructor(
+    @Main private val mainDispatcher: CoroutineDispatcher,
+    private val transitionCallback: KeyguardTransitionAnimationCallback,
+) : KeyguardTransitionRepository {
     /**
      * Each transition between [KeyguardState]s will have an associated Flow. In order to collect
      * these events, clients should call [transition].
@@ -252,16 +256,19 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
                 animatorListener =
                     object : AnimatorListenerAdapter() {
                         override fun onAnimationStart(animation: Animator) {
+                            transitionCallback.onAnimationStarted(info.from, info.to)
                             emitTransition(
                                 TransitionStep(info, startingValue, TransitionState.STARTED)
                             )
                         }
 
                         override fun onAnimationCancel(animation: Animator) {
+                            transitionCallback.onAnimationCanceled(info.from, info.to)
                             endAnimation(lastStep.value, TransitionState.CANCELED)
                         }
 
                         override fun onAnimationEnd(animation: Animator) {
+                            transitionCallback.onAnimationEnded(info.from, info.to)
                             endAnimation(1f, TransitionState.FINISHED)
                         }
 

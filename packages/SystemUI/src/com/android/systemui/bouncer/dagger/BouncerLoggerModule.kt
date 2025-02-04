@@ -17,6 +17,7 @@
 package com.android.systemui.bouncer.dagger
 
 import com.android.systemui.CoreStartable
+import com.android.systemui.bouncer.domain.interactor.BouncerMessageAuditLogger
 import com.android.systemui.bouncer.log.BouncerLoggerStartable
 import dagger.Binds
 import dagger.Module
@@ -30,4 +31,9 @@ interface BouncerLoggerModule {
     @IntoMap
     @ClassKey(BouncerLoggerStartable::class)
     fun bindBouncerLoggerStartable(impl: BouncerLoggerStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(BouncerMessageAuditLogger::class)
+    fun bind(impl: BouncerMessageAuditLogger): CoreStartable
 }

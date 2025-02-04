@@ -17,13 +17,13 @@
 package com.android.systemui.bouncer.domain.interactor
 
 import android.util.Log
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.CoreStartable
 import com.android.systemui.bouncer.data.repository.BouncerMessageRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 private val TAG = BouncerMessageAuditLogger::class.simpleName!!
 

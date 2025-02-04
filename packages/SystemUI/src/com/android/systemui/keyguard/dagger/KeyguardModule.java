@@ -61,6 +61,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardRepositoryModule;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionBootInteractor;
 import com.android.systemui.keyguard.domain.interactor.StartKeyguardTransitionModule;
+import com.android.systemui.keyguard.ui.binder.SideFpsProgressBarViewBinder;
 import com.android.systemui.keyguard.ui.transitions.BlurConfig;
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransitionModule;
 import com.android.systemui.keyguard.ui.view.AlternateBouncerWindowViewBinder;
@@ -271,4 +272,10 @@ public interface KeyguardModule {
     @IntoMap
     @ClassKey(AlternateBouncerWindowViewBinder.class)
     CoreStartable bindsAlternateBouncerWindowViewBinder(AlternateBouncerWindowViewBinder binder);
+
+    /** A silly lint rule made me write this, this is a self-documenting function! */
+    @Binds
+    @IntoMap
+    @ClassKey(SideFpsProgressBarViewBinder.class)
+    CoreStartable bindSideFpsProgressBarViewBinder(SideFpsProgressBarViewBinder impl);
 }

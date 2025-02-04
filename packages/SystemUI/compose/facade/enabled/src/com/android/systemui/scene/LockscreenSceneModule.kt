@@ -17,6 +17,7 @@
 package com.android.systemui.scene
 
 import android.view.View
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardViewConfigurator
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
@@ -62,12 +63,14 @@ interface LockscreenSceneModule {
             notificationScrimViewModelFactory: NotificationLockscreenScrimViewModel.Factory,
             blueprints: Set<@JvmSuppressWildcards ComposableLockscreenSceneBlueprint>,
             clockInteractor: KeyguardClockInteractor,
+            interactionJankMonitor: InteractionJankMonitor,
         ): LockscreenContent {
             return LockscreenContent(
                 viewModelFactory,
                 notificationScrimViewModelFactory,
                 blueprints,
                 clockInteractor,
+                interactionJankMonitor,
             )
         }
     }
