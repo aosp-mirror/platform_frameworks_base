@@ -28,7 +28,7 @@ import static android.provider.settings.validators.SettingsValidators.COMMA_SEPA
 import static android.provider.settings.validators.SettingsValidators.COMPONENT_NAME_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.CREDENTIAL_SERVICE_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.JSON_OBJECT_VALIDATOR;
-import static android.provider.settings.validators.SettingsValidators.LOCALE_VALIDATOR;
+import static android.provider.settings.validators.SettingsValidators.LOCALE_LOOSE_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.NONE_NEGATIVE_LONG_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.NULLABLE_COMPONENT_NAME_VALIDATOR;
@@ -96,7 +96,7 @@ public class SecureSettingsValidators {
                 Secure.ACCESSIBILITY_CAPTIONING_PRESET,
                 new DiscreteValueValidator(new String[] {"-1", "0", "1", "2", "3", "4"}));
         VALIDATORS.put(Secure.ACCESSIBILITY_CAPTIONING_ENABLED, BOOLEAN_VALIDATOR);
-        VALIDATORS.put(Secure.ACCESSIBILITY_CAPTIONING_LOCALE, LOCALE_VALIDATOR);
+        VALIDATORS.put(Secure.ACCESSIBILITY_CAPTIONING_LOCALE, LOCALE_LOOSE_VALIDATOR);
         VALIDATORS.put(Secure.ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Secure.ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(
@@ -109,7 +109,7 @@ public class SecureSettingsValidators {
                         new String[] {"DEFAULT", "MONOSPACE", "SANS_SERIF", "SERIF"}));
         VALIDATORS.put(
                 Secure.ACCESSIBILITY_CAPTIONING_FONT_SCALE,
-                new InclusiveFloatRangeValidator(0.5f, 2.0f));
+                new InclusiveFloatRangeValidator(0.25f, 2.0f));
         VALIDATORS.put(Secure.ACCESSIBILITY_CAPTIONING_WINDOW_COLOR, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Secure.FONT_WEIGHT_ADJUSTMENT, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Secure.REDUCE_BRIGHT_COLORS_LEVEL, PERCENTAGE_INTEGER_VALIDATOR);

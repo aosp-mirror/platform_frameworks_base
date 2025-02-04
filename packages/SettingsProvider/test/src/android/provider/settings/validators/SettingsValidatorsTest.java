@@ -125,6 +125,19 @@ public class SettingsValidatorsTest {
     }
 
     @Test
+    public void testLocaleLooseValidator() {
+        assertTrue(SettingsValidators.LOCALE_LOOSE_VALIDATOR.validate(null));
+        assertTrue(SettingsValidators.LOCALE_LOOSE_VALIDATOR.validate("en_US"));
+        assertTrue(SettingsValidators.LOCALE_LOOSE_VALIDATOR.validate("en_us"));
+        assertTrue(SettingsValidators.LOCALE_LOOSE_VALIDATOR.validate("es"));
+        assertTrue(SettingsValidators.LOCALE_LOOSE_VALIDATOR.validate("zh_TW"));
+        assertTrue(SettingsValidators.LOCALE_LOOSE_VALIDATOR.validate("en_US_POSIX"));
+        assertFalse(SettingsValidators.LOCALE_LOOSE_VALIDATOR.validate("en_FAKE"));
+        assertFalse(SettingsValidators.LOCALE_LOOSE_VALIDATOR.validate("en_US_FAKE"));
+        assertFalse(SettingsValidators.LOCALE_LOOSE_VALIDATOR.validate("rectangle"));
+    }
+
+    @Test
     public void testPackageNameValidator() {
         assertTrue(SettingsValidators.PACKAGE_NAME_VALIDATOR.validate(
                 "com.google.android"));
