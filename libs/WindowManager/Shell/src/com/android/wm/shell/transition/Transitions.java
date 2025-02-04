@@ -193,6 +193,9 @@ public class Transitions implements RemoteCallable<Transitions>,
     /** Transition to end the recents transition */
     public static final int TRANSIT_END_RECENTS_TRANSITION = TRANSIT_FIRST_CUSTOM + 22;
 
+    /** Transition type for app compat reachability. */
+    public static final int TRANSIT_MOVE_LETTERBOX_REACHABILITY = TRANSIT_FIRST_CUSTOM + 23;
+
     /** Transition type for desktop mode transitions. */
     public static final int TRANSIT_DESKTOP_MODE_TYPES =
             WindowManager.TRANSIT_FIRST_CUSTOM + 100;
