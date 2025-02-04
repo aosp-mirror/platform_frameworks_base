@@ -16,38 +16,48 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import androidx.compose.runtime.getValue
+import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.qs.panels.domain.interactor.GridLayoutTypeInteractor
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import com.android.systemui.qs.panels.ui.compose.GridLayout
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
-import javax.inject.Inject
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import javax.inject.Named
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.stateIn
 
-@SysUISingleton
 class TileGridViewModel
-@Inject
+@AssistedInject
 constructor(
     gridLayoutTypeInteractor: GridLayoutTypeInteractor,
     gridLayoutMap: Map<GridLayoutType, @JvmSuppressWildcards GridLayout>,
     tilesInteractor: CurrentTilesInteractor,
     @Named("Default") defaultGridLayout: GridLayout,
-    @Application private val applicationScope: CoroutineScope
-) {
-    val gridLayout: StateFlow<GridLayout> =
-        gridLayoutTypeInteractor.layout
-            .map { gridLayoutMap[it] ?: defaultGridLayout }
-            .stateIn(applicationScope, SharingStarted.Eagerly, defaultGridLayout)
-    val tileViewModels: Flow<List<TileViewModel>> =
-        tilesInteractor.currentTiles.mapLatest { tiles ->
-            tiles.map { TileViewModel(it.tile, it.spec) }
-        }
+) : ExclusiveActivatable() {
+
+    private val hydrator = Hydrator("TileGridViewModel")
+
+    val gridLayout by
+        hydrator.hydratedStateOf(
+            traceName = "gridLayout",
+            source = gridLayoutTypeInteractor.layout.map { gridLayoutMap[it] ?: defaultGridLayout },
+            initialValue = defaultGridLayout,
+        )
+
+    private val tileModels by
+        hydrator.hydratedStateOf(traceName = "tileModels", source = tilesInteractor.currentTiles)
+
+    val tileViewModels: List<TileViewModel>
+        get() = tileModels.map { TileViewModel(it.tile, it.spec) }
+
+    override suspend fun onActivated(): Nothing {
+        hydrator.activate()
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): TileGridViewModel
+    }
 }

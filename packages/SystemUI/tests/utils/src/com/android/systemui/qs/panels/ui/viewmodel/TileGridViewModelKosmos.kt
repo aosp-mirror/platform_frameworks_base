@@ -17,7 +17,6 @@
 package com.android.systemui.qs.panels.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.qs.panels.domain.interactor.gridLayoutMap
 import com.android.systemui.qs.panels.domain.interactor.gridLayoutTypeInteractor
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.infiniteGridLayout
@@ -30,6 +29,14 @@ val Kosmos.tileGridViewModel by
             gridLayoutMap,
             currentTilesInteractor,
             infiniteGridLayout,
-            applicationCoroutineScope,
         )
+    }
+
+val Kosmos.tileGridViewModelFactory by
+    Kosmos.Fixture {
+        object : TileGridViewModel.Factory {
+            override fun create(): TileGridViewModel {
+                return tileGridViewModel
+            }
+        }
     }
