@@ -679,7 +679,7 @@ public final class MediaQualityUtils {
             pictureParams.add(PictureParameter.pictureQualityEventType(
                     (byte) params.getInt(PictureQuality.PARAMETER_PICTURE_QUALITY_EVENT_TYPE)));
         }
-        return  (PictureParameter[]) pictureParams.toArray();
+        return pictureParams.toArray(new PictureParameter[0]);
     }
 
     /**
@@ -865,7 +865,7 @@ public final class MediaQualityUtils {
         dts.height = params.getBoolean(SoundQuality.PARAMETER_DTS_VIRTUAL_X_HEIGHT);
         soundParams.add(SoundParameter.dtsVirtualX(dts));
 
-        return  (SoundParameter[]) soundParams.toArray();
+        return soundParams.toArray(new SoundParameter[0]);
     }
 
     private static String persistableBundleToJson(PersistableBundle bundle) {
