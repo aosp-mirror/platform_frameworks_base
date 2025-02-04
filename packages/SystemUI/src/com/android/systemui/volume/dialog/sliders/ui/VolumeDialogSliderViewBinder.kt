@@ -99,7 +99,6 @@ private fun VolumeDialogSlider(
     hapticsViewModelFactory: SliderHapticsViewModel.Factory?,
     modifier: Modifier = Modifier,
 ) {
-
     val colors =
         SliderDefaults.colors(
             thumbColor = MaterialTheme.colorScheme.primary,
@@ -205,7 +204,7 @@ private fun BoxScope.VolumeIcon(
 ) {
     AnimatedVisibility(
         visible = isVisible,
-        enter = fadeIn(animationSpec = tween(durationMillis = 50)),
+        enter = fadeIn(animationSpec = tween(delayMillis = 33, durationMillis = 100)),
         exit = fadeOut(animationSpec = tween(durationMillis = 50)),
         modifier = modifier.align(Alignment.Center).size(40.dp).padding(10.dp),
     ) {
