@@ -1993,7 +1993,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                     continue;
                 }
                 if (decor.mTaskInfo.displayId == displayId
-                        && Flags.enableDesktopWindowingImmersiveHandleHiding()) {
+                        && DesktopModeFlags
+                        .ENABLE_DESKTOP_WINDOWING_IMMERSIVE_HANDLE_HIDING.isTrue()) {
                     decor.onInsetsStateChanged(insetsState);
                 }
                 if (!DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) {

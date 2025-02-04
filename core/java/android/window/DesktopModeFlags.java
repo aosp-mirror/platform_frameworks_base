@@ -74,6 +74,8 @@ public enum DesktopModeFlags {
     ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS_BUGFIX(
             Flags::enableDesktopWindowingExitTransitionsBugfix, true),
     ENABLE_DESKTOP_WINDOWING_HSUM(Flags::enableDesktopWindowingHsum, true),
+    ENABLE_DESKTOP_WINDOWING_IMMERSIVE_HANDLE_HIDING(
+            Flags::enableDesktopWindowingImmersiveHandleHiding, true),
     ENABLE_DESKTOP_WINDOWING_MODALS_POLICY(Flags::enableDesktopWindowingModalsPolicy, true),
     ENABLE_DESKTOP_WINDOWING_MODE(Flags::enableDesktopWindowingMode, true),
     ENABLE_DESKTOP_WINDOWING_MULTI_INSTANCE_FEATURES(
