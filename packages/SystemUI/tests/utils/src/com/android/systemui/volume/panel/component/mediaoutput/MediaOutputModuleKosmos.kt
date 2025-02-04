@@ -16,16 +16,13 @@
 
 package com.android.systemui.volume.panel.component.mediaoutput
 
-import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testScope
-import com.android.systemui.volume.panel.component.mediaoutput.domain.MediaOutputAvailabilityCriteria
 import com.android.systemui.volume.panel.component.mediaoutput.ui.composable.MediaOutputComponent
 import com.android.systemui.volume.panel.component.mediaoutput.ui.viewmodel.mediaOutputViewModel
+import com.android.systemui.volume.panel.domain.ComponentAvailabilityCriteria
+import com.android.systemui.volume.panel.domain.availableCriteria
 
 var Kosmos.mediaOutputComponent: MediaOutputComponent by
     Kosmos.Fixture { MediaOutputComponent(mediaOutputViewModel) }
-var Kosmos.mediaOutputAvailabilityCriteria by
-    Kosmos.Fixture {
-        MediaOutputAvailabilityCriteria(applicationContext, testScope.backgroundScope)
-    }
+var Kosmos.mediaOutputAvailabilityCriteria: ComponentAvailabilityCriteria by
+    Kosmos.Fixture { availableCriteria }
