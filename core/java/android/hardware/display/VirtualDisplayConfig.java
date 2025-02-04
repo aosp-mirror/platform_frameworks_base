@@ -243,8 +243,10 @@ public final class VirtualDisplayConfig implements Parcelable {
     }
 
     /**
-     * Whether this virtual display ignores fixed orientation, aspect ratio and resizability
+     * Whether this virtual display ignores fixed orientation, aspect ratio, and resizability
      * of apps.
+     *
+     * @return Whether orientation, aspect ratio, and resizability restrictions are ignored.
      *
      * @see Builder#setIgnoreActivitySizeRestrictions(boolean)
      * @hide
