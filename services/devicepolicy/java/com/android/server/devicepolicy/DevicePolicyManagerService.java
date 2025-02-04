@@ -3285,8 +3285,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
                 .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
                 .toBundle();
-        mInjector.binderWithCleanCallingIdentity(() ->
-                mContext.sendBroadcastAsUser(intent, new UserHandle(userHandle), null, options));
+        mInjector.binderWithCleanCallingIdentity(() -> {
+            try {
+                mContext.sendBroadcastAsUser(intent, new UserHandle(userHandle), null, options);
+            } catch (SecurityException e) {
+                // TODO(b/387259698) remove debug logging.
+                Slog.d(LOG_TAG, "Exception broadcasting as UID " + Binder.getCallingUid(), e);
+                throw e;
+            }
+        });
     }
 
     private void loadSettingsLocked(DevicePolicyData policy, int userHandle) {
