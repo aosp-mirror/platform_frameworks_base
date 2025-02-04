@@ -148,21 +148,6 @@ class FlexClockFaceController(clockCtx: ClockContext, private val isLargeClock: 
          * keyguard_large_clock_top_margin from default clock
          */
         override fun onTargetRegionChanged(targetRegion: Rect?) {
-            // When a clock needs to be aligned with screen, like weather clock
-            // it needs to offset back the translation of keyguard_large_clock_top_margin
-            if (isLargeClock && (view as FlexClockView).isAlignedWithScreen()) {
-                val topMargin = keyguardLargeClockTopMargin
-                targetRegion?.let {
-                    val (_, yDiff) = computeLayoutDiff(view, it, isLargeClock)
-                    // In LS, we use yDiff to counter translate
-                    // the translation of KeyguardLargeClockTopMargin
-                    // With the targetRegion passed from picker,
-                    // we will have yDiff = 0, no translation is needed for weather clock
-                    if (yDiff.toInt() != 0) view.translationY = yDiff - topMargin / 2
-                }
-                return
-            }
-
             var maxWidth = 0f
             var maxHeight = 0f
 
@@ -231,7 +216,7 @@ class FlexClockFaceController(clockCtx: ClockContext, private val isLargeClock: 
             }
 
             override fun onPickerCarouselSwiping(swipingFraction: Float) {
-                if (isLargeClock && !(view as FlexClockView).isAlignedWithScreen()) {
+                if (isLargeClock) {
                     view.translationY = keyguardLargeClockTopMargin / 2F * swipingFraction
                 }
                 layerController.animations.onPickerCarouselSwiping(swipingFraction)
@@ -251,6 +236,7 @@ class FlexClockFaceController(clockCtx: ClockContext, private val isLargeClock: 
 
     companion object {
         val SMALL_CLOCK_MAX_WDTH = 120f
+
         val SMALL_LAYER_CONFIG =
             LayerConfig(
                 timespec = DigitalTimespec.TIME_FULL_FORMAT,

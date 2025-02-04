@@ -71,6 +71,7 @@ data class FontTextStyle(
 
 enum class DigitalTimespec {
     TIME_FULL_FORMAT,
+    DIGIT_PAIR,
     FIRST_DIGIT,
     SECOND_DIGIT,
 }
@@ -121,6 +122,28 @@ open class SimpleDigitalHandLayerController(
         }
     }
 
+    private fun applyLayout() {
+        // TODO: Remove NO-OP
+        if (view.layoutParams is RelativeLayout.LayoutParams) {
+            val lp = view.layoutParams as RelativeLayout.LayoutParams
+            lp.addRule(RelativeLayout.TEXT_ALIGNMENT_CENTER)
+            when (view.id) {
+                R.id.HOUR_DIGIT_PAIR -> {
+                    lp.addRule(RelativeLayout.CENTER_VERTICAL)
+                    lp.addRule(RelativeLayout.ALIGN_PARENT_START)
+                }
+                R.id.MINUTE_DIGIT_PAIR -> {
+                    lp.addRule(RelativeLayout.CENTER_VERTICAL)
+                    lp.addRule(RelativeLayout.END_OF, R.id.HOUR_DIGIT_PAIR)
+                }
+                else -> {
+                    throw Exception("cannot apply two pairs layout to view ${view.id}")
+                }
+            }
+            view.layoutParams = lp
+        }
+    }
+
     override val events =
         object : ClockEvents {
             override var isReactiveTouchInteractionEnabled = false
@@ -155,6 +178,7 @@ open class SimpleDigitalHandLayerController(
     override val animations =
         object : ClockAnimations {
             override fun enter() {
+                applyLayout()
                 refreshTime()
             }
 
@@ -170,6 +194,7 @@ open class SimpleDigitalHandLayerController(
             }
 
             override fun fold(fraction: Float) {
+                applyLayout()
                 refreshTime()
             }
 

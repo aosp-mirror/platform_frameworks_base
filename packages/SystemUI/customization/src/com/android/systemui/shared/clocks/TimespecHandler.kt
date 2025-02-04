@@ -106,19 +106,16 @@ class DigitalTimespecHandler(
         )
     }
 
-    private fun getSingleDigit(): String {
-        val isFirstDigit = timespec == DigitalTimespec.FIRST_DIGIT
+    private fun getSingleDigit(offset: Int): String {
         val text = dateFormat.format(cal.time).toString()
-        return text.substring(
-            if (isFirstDigit) 0 else text.length - 1,
-            if (isFirstDigit) text.length - 1 else text.length,
-        )
+        return text.substring(offset, offset + 1)
     }
 
     fun getDigitString(): String {
         return when (timespec) {
-            DigitalTimespec.FIRST_DIGIT,
-            DigitalTimespec.SECOND_DIGIT -> getSingleDigit()
+            DigitalTimespec.FIRST_DIGIT -> getSingleDigit(0)
+            DigitalTimespec.SECOND_DIGIT -> getSingleDigit(1)
+            DigitalTimespec.DIGIT_PAIR -> dateFormat.format(cal.time).toString()
             DigitalTimespec.TIME_FULL_FORMAT -> dateFormat.format(cal.time).toString()
         }
     }

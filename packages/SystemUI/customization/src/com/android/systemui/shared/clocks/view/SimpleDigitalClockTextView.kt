@@ -314,6 +314,7 @@ open class SimpleDigitalClockTextView(
                 targetTextBounds,
             )
         }
+
         if (layout == null) {
             requestLayout()
         } else {
