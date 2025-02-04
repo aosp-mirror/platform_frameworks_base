@@ -73,6 +73,7 @@ public class IllustrationPreference extends Preference implements GroupSectionDi
     private boolean mLottieDynamicColor;
     private CharSequence mContentDescription;
     private boolean mIsTablet;
+    private boolean mIsAnimationPaused;
 
     /**
      * Interface to listen in on when {@link #onBindViewHolder(PreferenceViewHolder)} occurs.
@@ -143,6 +144,16 @@ public class IllustrationPreference extends Preference implements GroupSectionDi
                 (FrameLayout) holder.findViewById(R.id.middleground_layout);
         final LottieAnimationView illustrationView =
                 (LottieAnimationView) holder.findViewById(R.id.lottie_view);
+        // Pause and resume animation
+        illustrationFrame.setOnClickListener(v -> {
+            mIsAnimationPaused = !mIsAnimationPaused;
+            if (mIsAnimationPaused) {
+                illustrationView.pauseAnimation();
+            } else {
+                illustrationView.resumeAnimation();
+            }
+        });
+
         if (illustrationView != null && !TextUtils.isEmpty(mContentDescription)) {
             illustrationView.setContentDescription(mContentDescription);
             illustrationView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
