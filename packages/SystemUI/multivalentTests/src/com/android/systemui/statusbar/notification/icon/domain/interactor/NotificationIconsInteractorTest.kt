@@ -15,6 +15,7 @@
 
 package com.android.systemui.statusbar.notification.icon.domain.interactor
 
+import android.platform.test.annotations.DisableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -24,6 +25,7 @@ import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.data.repository.notificationListenerSettingsRepository
+import com.android.systemui.statusbar.headsup.shared.StatusBarNoHunBehavior
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
@@ -62,7 +64,7 @@ class NotificationIconsInteractorTest : SysuiTestCase() {
             kosmos.activeNotificationsInteractor,
             kosmos.bubblesOptional,
             kosmos.headsUpNotificationIconInteractor,
-            kosmos.notificationsKeyguardViewStateRepository
+            kosmos.notificationsKeyguardViewStateRepository,
         )
 
     @Before
@@ -306,6 +308,7 @@ class StatusBarNotificationIconsInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(StatusBarNoHunBehavior.FLAG_NAME)
     fun filteredEntrySet_includesIsolatedIcon() =
         testScope.runTest {
             val filteredSet by collectLastValue(underTest.statusBarNotifs)
@@ -316,31 +319,11 @@ class StatusBarNotificationIconsInteractorTest : SysuiTestCase() {
 
 private val testIcons =
     listOf(
-        activeNotificationModel(
-            key = "notif1",
-        ),
-        activeNotificationModel(
-            key = "notif2",
-            isAmbient = true,
-        ),
-        activeNotificationModel(
-            key = "notif3",
-            isRowDismissed = true,
-        ),
-        activeNotificationModel(
-            key = "notif4",
-            isSilent = true,
-        ),
-        activeNotificationModel(
-            key = "notif5",
-            isLastMessageFromReply = true,
-        ),
-        activeNotificationModel(
-            key = "notif6",
-            isSuppressedFromStatusBar = true,
-        ),
-        activeNotificationModel(
-            key = "notif7",
-            isPulsing = true,
-        ),
+        activeNotificationModel(key = "notif1"),
+        activeNotificationModel(key = "notif2", isAmbient = true),
+        activeNotificationModel(key = "notif3", isRowDismissed = true),
+        activeNotificationModel(key = "notif4", isSilent = true),
+        activeNotificationModel(key = "notif5", isLastMessageFromReply = true),
+        activeNotificationModel(key = "notif6", isSuppressedFromStatusBar = true),
+        activeNotificationModel(key = "notif7", isPulsing = true),
     )
