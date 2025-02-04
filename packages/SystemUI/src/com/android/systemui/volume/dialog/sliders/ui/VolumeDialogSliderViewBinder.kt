@@ -19,6 +19,7 @@ package com.android.systemui.volume.dialog.sliders.ui
 import android.graphics.drawable.Drawable
 import android.view.View
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -39,8 +40,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -60,12 +61,11 @@ import com.android.systemui.volume.haptics.ui.VolumeHapticsConfigsProvider
 import javax.inject.Inject
 import kotlin.math.round
 import kotlin.math.roundToInt
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 @VolumeDialogSliderScope
 class VolumeDialogSliderViewBinder
@@ -102,6 +102,7 @@ private fun VolumeDialogSlider(
     hapticsViewModelFactory: SliderHapticsViewModel.Factory?,
     modifier: Modifier = Modifier,
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val colors =
         SliderDefaults.colors(
             thumbColor = MaterialTheme.colorScheme.primary,
@@ -110,8 +111,14 @@ private fun VolumeDialogSlider(
             activeTrackColor = MaterialTheme.colorScheme.primary,
             inactiveTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         )
-    val collectedSliderState by viewModel.state.collectAsStateWithLifecycle(null)
-    val sliderState = collectedSliderState ?: return
+    val collectedSliderStateModel by viewModel.state.collectAsStateWithLifecycle(null)
+    val sliderStateModel = collectedSliderStateModel ?: return
+
+    val steps = with(sliderStateModel.valueRange) { endInclusive - start - 1 }.toInt()
+
+    var animateJob: Job? = null
+    val animatedSliderValue =
+        remember(sliderStateModel.value) { Animatable(sliderStateModel.value) }
 
     val interactionSource = remember { MutableInteractionSource() }
     val hapticsViewModel: SliderHapticsViewModel? =
@@ -119,56 +126,63 @@ private fun VolumeDialogSlider(
             rememberViewModel(traceName = "SliderHapticsViewModel") {
                 it.create(
                     interactionSource,
-                    sliderState.valueRange,
+                    sliderStateModel.valueRange,
                     Orientation.Vertical,
-                    VolumeHapticsConfigsProvider.sliderHapticFeedbackConfig(sliderState.valueRange),
+                    VolumeHapticsConfigsProvider.sliderHapticFeedbackConfig(
+                        sliderStateModel.valueRange
+                    ),
                     VolumeHapticsConfigsProvider.seekableSliderTrackerConfig,
                 )
             }
         }
 
-    val state =
-        remember(sliderState.valueRange) {
+    val sliderState =
+        remember(steps, sliderStateModel.valueRange) {
             SliderState(
-                    value = sliderState.value,
-                    valueRange = sliderState.valueRange,
-                    steps =
-                        (sliderState.valueRange.endInclusive - sliderState.valueRange.start - 1)
-                            .toInt(),
+                    value = sliderStateModel.value,
+                    valueRange = sliderStateModel.valueRange,
+                    steps = steps,
                 )
-                .apply {
-                    onValueChangeFinished = {
-                        viewModel.onStreamChangeFinished(value.roundToInt())
+                .also { sliderState ->
+                    sliderState.onValueChangeFinished = {
+                        viewModel.onStreamChangeFinished(sliderState.value.roundToInt())
                         hapticsViewModel?.onValueChangeEnded()
                     }
-                    setOnValueChangeListener {
-                        value = it
-                        hapticsViewModel?.addVelocityDataPoint(it)
+                    sliderState.onValueChange = { newValue ->
+                        if (newValue != animatedSliderValue.targetValue) {
+                            animateJob?.cancel()
+                            animateJob =
+                                coroutineScope.launch {
+                                    animatedSliderValue.animateTo(newValue) {
+                                        sliderState.value = value
+                                    }
+                                }
+                        }
+
+                        hapticsViewModel?.addVelocityDataPoint(newValue)
                         overscrollViewModel.setSlider(
-                            value = value,
-                            min = valueRange.start,
-                            max = valueRange.endInclusive,
+                            value = sliderState.value,
+                            min = sliderState.valueRange.start,
+                            max = sliderState.valueRange.endInclusive,
                         )
-                        viewModel.setStreamVolume(it, true)
+                        viewModel.setStreamVolume(newValue, true)
                     }
                 }
         }
-    var lastDiscreteStep by remember { mutableFloatStateOf(round(sliderState.value)) }
-    LaunchedEffect(sliderState.value) {
-        state.value = sliderState.value
-        snapshotFlow { sliderState.value }
-            .map { round(it) }
-            .filter { it != lastDiscreteStep }
-            .distinctUntilChanged()
-            .collect { discreteStep ->
-                lastDiscreteStep = discreteStep
-                hapticsViewModel?.onValueChange(discreteStep)
-            }
+
+    var lastDiscreteStep by remember { mutableFloatStateOf(round(sliderStateModel.value)) }
+    LaunchedEffect(sliderStateModel.value) {
+        val value = sliderStateModel.value
+        launch { animatedSliderValue.animateTo(value) }
+        if (value != lastDiscreteStep) {
+            lastDiscreteStep = value
+            hapticsViewModel?.onValueChange(value)
+        }
     }
 
     VerticalSlider(
-        state = state,
-        enabled = !sliderState.isDisabled,
+        state = sliderState,
+        enabled = !sliderStateModel.isDisabled,
         reverseDirection = true,
         colors = colors,
         interactionSource = interactionSource,
@@ -185,14 +199,14 @@ private fun VolumeDialogSlider(
             },
         track = {
             VolumeDialogSliderTrack(
-                state,
+                sliderState,
                 colors = colors,
-                isEnabled = !sliderState.isDisabled,
+                isEnabled = !sliderStateModel.isDisabled,
                 activeTrackEndIcon = { iconsState ->
-                    VolumeIcon(sliderState.icon, iconsState.isActiveTrackEndIconVisible)
+                    VolumeIcon(sliderStateModel.icon, iconsState.isActiveTrackEndIconVisible)
                 },
                 inactiveTrackEndIcon = { iconsState ->
-                    VolumeIcon(sliderState.icon, !iconsState.isActiveTrackEndIconVisible)
+                    VolumeIcon(sliderStateModel.icon, !iconsState.isActiveTrackEndIconVisible)
                 },
             )
         },
@@ -212,17 +226,5 @@ private fun BoxScope.VolumeIcon(
         modifier = modifier.align(Alignment.Center).size(40.dp).padding(10.dp),
     ) {
         Icon(painter = DrawablePainter(drawable), contentDescription = null)
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-fun SliderState.setOnValueChangeListener(onValueChange: ((Float) -> Unit)?) {
-    with(javaClass.getDeclaredField("onValueChange")) {
-        val oldIsAccessible = isAccessible
-        AutoCloseable { isAccessible = oldIsAccessible }
-            .use {
-                isAccessible = true
-                set(this@setOnValueChangeListener, onValueChange)
-            }
     }
 }
