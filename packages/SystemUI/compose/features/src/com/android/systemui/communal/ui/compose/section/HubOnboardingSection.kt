@@ -34,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,6 +53,8 @@ import com.android.systemui.statusbar.phone.ComponentSystemUIDialog
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import com.android.systemui.statusbar.phone.createBottomSheet
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.delay
 
 class HubOnboardingSection
 @Inject
@@ -69,9 +72,22 @@ constructor(
             return
         }
 
-        HubOnboardingBottomSheet(shouldShowBottomSheet = true, dialogFactory = dialogFactory) {
-            viewModel.onDismissed()
+        var show by remember { mutableStateOf(false) }
+
+        LaunchedEffect(Unit) {
+            delay(SHOW_BOTTOMSHEET_DELAY_MS)
+            show = true
         }
+
+        if (show) {
+            HubOnboardingBottomSheet(shouldShowBottomSheet = true, dialogFactory = dialogFactory) {
+                viewModel.onDismissed()
+            }
+        }
+    }
+
+    companion object {
+        val SHOW_BOTTOMSHEET_DELAY_MS = 1000.milliseconds
     }
 }
 
