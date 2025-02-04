@@ -17,8 +17,8 @@
 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
        android:shape="rectangle">
-    <!-- background is material_grey_700 with .9 alpha -->
-    <solid android:color="#E65F6368" />
+    <!-- background is material_white with .9 alpha -->
+    <solid android:color="@color/tooltip_background_light" />
     <corners android:radius="24dp" />
 </shape>
 
