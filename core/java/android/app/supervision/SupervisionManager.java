@@ -33,7 +33,7 @@ import android.os.RemoteException;
 @SystemService(Context.SUPERVISION_SERVICE)
 public class SupervisionManager {
     private final Context mContext;
-    private final ISupervisionManager mService;
+    @Nullable private final ISupervisionManager mService;
 
     /**
      * Activity action: ask the human user to enable supervision for this user. Only the app that
@@ -66,7 +66,7 @@ public class SupervisionManager {
 
     /** @hide */
     @UnsupportedAppUsage
-    public SupervisionManager(Context context, ISupervisionManager service) {
+    public SupervisionManager(Context context, @Nullable ISupervisionManager service) {
         mContext = context;
         mService = service;
     }
@@ -93,11 +93,14 @@ public class SupervisionManager {
             value = android.Manifest.permission.INTERACT_ACROSS_USERS,
             conditional = true)
     public boolean isSupervisionEnabledForUser(@UserIdInt int userId) {
-        try {
-            return mService.isSupervisionEnabledForUser(userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (mService != null) {
+            try {
+                return mService.isSupervisionEnabledForUser(userId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
+        return false;
     }
 
     /**
@@ -122,10 +125,12 @@ public class SupervisionManager {
             value = android.Manifest.permission.INTERACT_ACROSS_USERS,
             conditional = true)
     public void setSupervisionEnabledForUser(@UserIdInt int userId, boolean enabled) {
-        try {
-            mService.setSupervisionEnabledForUser(userId, enabled);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (mService != null) {
+            try {
+                mService.setSupervisionEnabledForUser(userId, enabled);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 
@@ -138,10 +143,13 @@ public class SupervisionManager {
     @UserHandleAware
     @Nullable
     public String getActiveSupervisionAppPackage() {
-        try {
-            return mService.getActiveSupervisionAppPackage(mContext.getUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (mService != null) {
+            try {
+                return mService.getActiveSupervisionAppPackage(mContext.getUserId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
+        return null;
     }
 }
