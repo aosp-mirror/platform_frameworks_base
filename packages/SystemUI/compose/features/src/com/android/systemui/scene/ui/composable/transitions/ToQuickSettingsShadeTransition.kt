@@ -21,6 +21,7 @@ import com.android.compose.animation.scene.TransitionBuilder
 import com.android.compose.animation.scene.reveal.ContainerRevealHaptics
 import com.android.compose.animation.scene.reveal.verticalContainerReveal
 import com.android.systemui.qs.ui.composable.QuickSettingsShade
+import com.android.systemui.shade.ui.composable.OverlayShade
 import kotlin.time.Duration.Companion.milliseconds
 
 fun TransitionBuilder.toQuickSettingsShadeTransition(
@@ -31,7 +32,8 @@ fun TransitionBuilder.toQuickSettingsShadeTransition(
 
     verticalContainerReveal(QuickSettingsShade.Elements.Panel, revealHaptics)
 
-    fade(QuickSettingsShade.Elements.StatusBar)
+    fractionRange(end = .5f) { fade(OverlayShade.Elements.Scrim) }
+    fractionRange(start = .5f) { fade(QuickSettingsShade.Elements.StatusBar) }
 }
 
 private val DefaultDuration = 300.milliseconds
