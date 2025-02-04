@@ -221,7 +221,7 @@ private class AODPromotedNotificationViewUpdater(root: View) {
         textView: ImageFloatingTextView? = null,
         showOldProgress: Boolean = true,
     ) {
-        updateHeader(content)
+        updateHeader(content, hideTitle = true)
 
         updateTitle(title, content)
         updateText(textView ?: text, content)
@@ -282,19 +282,27 @@ private class AODPromotedNotificationViewUpdater(root: View) {
         }
     }
 
-    private fun updateHeader(content: PromotedNotificationContentModel) {
+    private fun updateHeader(
+        content: PromotedNotificationContentModel,
+        hideTitle: Boolean = false,
+    ) {
         updateAppName(content)
         updateTextView(headerTextSecondary, content.subText)
-        updateTitle(headerText, content)
+        if (!hideTitle) {
+            updateTitle(headerText, content)
+        }
         updateTimeAndChronometer(content)
 
-        updateHeaderDividers(content)
+        updateHeaderDividers(content, hideTitle = hideTitle)
     }
 
-    private fun updateHeaderDividers(content: PromotedNotificationContentModel) {
+    private fun updateHeaderDividers(
+        content: PromotedNotificationContentModel,
+        hideTitle: Boolean = false,
+    ) {
         val hasAppName = content.appName != null && content.appName.isNotEmpty()
         val hasSubText = content.subText != null && content.subText.isNotEmpty()
-        val hasHeader = content.title != null && content.title.isNotEmpty()
+        val hasHeader = content.title != null && content.title.isNotEmpty() && !hideTitle
         val hasTimeOrChronometer = content.time != null
 
         val hasTextBeforeSubText = hasAppName
@@ -314,14 +322,16 @@ private class AODPromotedNotificationViewUpdater(root: View) {
         updateTitle(conversationText, content)
         updateAppName(content)
         updateTimeAndChronometer(content)
-
-        updateConversationHeaderDividers(content)
+        updateConversationHeaderDividers(content, hideTitle = true)
 
         updateTextView(verificationText, content.verificationText)
     }
 
-    private fun updateConversationHeaderDividers(content: PromotedNotificationContentModel) {
-        val hasTitle = content.title != null
+    private fun updateConversationHeaderDividers(
+        content: PromotedNotificationContentModel,
+        hideTitle: Boolean = false,
+    ) {
+        val hasTitle = content.title != null && !hideTitle
         val hasAppName = content.appName != null
         val hasTimeOrChronometer = content.time != null
         val hasVerification = content.verificationIcon != null || content.verificationText != null
