@@ -18,6 +18,12 @@ package com.android.systemui.volume.dialog.settings.ui.binder
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.volume.dialog.settings.ui.viewmodel.volumeDialogSettingsButtonViewModel
+import com.android.systemui.volume.dialog.ui.viewmodel.volumeDialogViewModel
 
 val Kosmos.volumeDialogSettingsButtonViewBinder by
-    Kosmos.Fixture { VolumeDialogSettingsButtonViewBinder(volumeDialogSettingsButtonViewModel) }
+    Kosmos.Fixture {
+        VolumeDialogSettingsButtonViewBinder(
+            volumeDialogSettingsButtonViewModel,
+            volumeDialogViewModel,
+        )
+    }

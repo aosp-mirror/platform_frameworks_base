@@ -40,6 +40,7 @@ import com.android.systemui.volume.dialog.ringer.ui.viewmodel.RingerViewModel
 import com.android.systemui.volume.dialog.ringer.ui.viewmodel.RingerViewModelState
 import com.android.systemui.volume.dialog.ringer.ui.viewmodel.VolumeDialogRingerDrawerViewModel
 import com.android.systemui.volume.dialog.ui.utils.suspendAnimate
+import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogViewModel
 import javax.inject.Inject
 import kotlin.properties.Delegates
 import kotlinx.coroutines.CoroutineScope
@@ -56,7 +57,10 @@ private const val BUTTON_MIN_VISIBLE_CHANGE = 0.05F
 @VolumeDialogScope
 class VolumeDialogRingerViewBinder
 @Inject
-constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
+constructor(
+    private val viewModel: VolumeDialogRingerDrawerViewModel,
+    private val dialogViewModel: VolumeDialogViewModel,
+) {
     private val roundnessSpringForce =
         SpringForce(1F).apply {
             stiffness = 800F
@@ -116,6 +120,7 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
         drawerContainer.setTransitionListener(ringerDrawerTransitionListener)
         volumeDialogBackgroundView.background = volumeDialogBackgroundView.background.mutate()
         ringerBackgroundView.background = ringerBackgroundView.background.mutate()
+        launch { dialogViewModel.addTouchableBounds(drawerContainer) }
 
         viewModel.ringerViewModel
             .mapLatest { ringerState ->
