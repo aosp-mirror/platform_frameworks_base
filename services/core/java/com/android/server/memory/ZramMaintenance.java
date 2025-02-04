@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.memory;
 
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;

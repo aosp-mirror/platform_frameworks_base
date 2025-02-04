@@ -9,7 +9,6 @@ per-file DisplayThread.java = michaelwr@google.com, ogunwale@google.com
 
 # Zram writeback
 per-file ZramWriteback.java = minchan@google.com, rajekumar@google.com
-per-file ZramMaintenance.java = kawasin@google.com
 
 # ServiceWatcher
 per-file ServiceWatcher.java = sooniln@google.com

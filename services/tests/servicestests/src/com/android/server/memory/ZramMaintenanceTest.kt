@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.zram
+package com.android.server.memory
 
 import android.app.job.JobInfo
 import android.app.job.JobParameters
@@ -26,7 +26,6 @@ import android.testing.TestableContext
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 
-import com.android.server.ZramMaintenance
 import com.google.common.truth.Truth.assertThat
 
 import org.junit.Before
