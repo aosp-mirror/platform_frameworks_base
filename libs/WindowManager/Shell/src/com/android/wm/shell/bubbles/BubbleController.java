@@ -116,6 +116,7 @@ import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
 import com.android.wm.shell.shared.bubbles.BubbleBarUpdate;
+import com.android.wm.shell.shared.bubbles.BubbleDropTargetBoundsProvider;
 import com.android.wm.shell.shared.bubbles.DeviceConfig;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -922,6 +923,11 @@ public class BubbleController implements ConfigurationChangeListener,
     /** Contains information to help position things on the screen. */
     @VisibleForTesting
     public BubblePositioner getPositioner() {
+        return mBubblePositioner;
+    }
+
+    /** Provides bounds for drag zone drop targets */
+    public BubbleDropTargetBoundsProvider getBubbleDropTargetBoundsProvider() {
         return mBubblePositioner;
     }
 

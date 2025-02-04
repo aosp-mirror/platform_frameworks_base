@@ -16,11 +16,11 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.animation.AnimatorTestRule
 import android.app.ActivityManager.RunningTaskInfo
 import android.graphics.PointF
 import android.graphics.Rect
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.SurfaceControl
@@ -34,6 +34,7 @@ import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.shared.bubbles.BubbleDropTargetBoundsProvider
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -56,7 +57,7 @@ import org.mockito.kotlin.whenever
 @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
 class DesktopModeVisualIndicatorTest : ShellTestCase() {
 
-    @JvmField @Rule val setFlagsRule = SetFlagsRule()
+    @JvmField @Rule val animatorTestRule = AnimatorTestRule(this)
 
     @JvmField
     @Rule
@@ -69,6 +70,7 @@ class DesktopModeVisualIndicatorTest : ShellTestCase() {
     @Mock private lateinit var taskSurface: SurfaceControl
     @Mock private lateinit var taskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
     @Mock private lateinit var displayLayout: DisplayLayout
+    @Mock private lateinit var bubbleBoundsProvider: BubbleDropTargetBoundsProvider
 
     private lateinit var visualIndicator: DesktopModeVisualIndicator
 
@@ -80,6 +82,8 @@ class DesktopModeVisualIndicatorTest : ShellTestCase() {
         whenever(displayLayout.stableInsets()).thenReturn(STABLE_INSETS)
         whenever(displayController.getDisplayLayout(anyInt())).thenReturn(displayLayout)
         whenever(displayController.getDisplay(anyInt())).thenReturn(mContext.display)
+        whenever(bubbleBoundsProvider.getBubbleBarExpandedViewDropTargetBounds(any()))
+            .thenReturn(Rect())
         taskInfo = DesktopTestHelpers.createFullscreenTask()
     }
 
@@ -292,6 +296,40 @@ class DesktopModeVisualIndicatorTest : ShellTestCase() {
         assertThat(result).isEqualTo(DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR)
     }
 
+    @Test
+    @EnableFlags(
+        com.android.wm.shell.Flags.FLAG_ENABLE_BUBBLE_TO_FULLSCREEN,
+        com.android.wm.shell.Flags.FLAG_ENABLE_CREATE_ANY_BUBBLE,
+    )
+    fun testBubbleLeftVisualIndicatorSize() {
+        val dropTargetBounds = Rect(100, 100, 500, 1500)
+        whenever(bubbleBoundsProvider.getBubbleBarExpandedViewDropTargetBounds(/* onLeft= */ true))
+            .thenReturn(dropTargetBounds)
+        createVisualIndicator(DesktopModeVisualIndicator.DragStartState.FROM_FULLSCREEN)
+        visualIndicator.updateIndicatorType(PointF(100f, 1500f))
+
+        animatorTestRule.advanceTimeBy(200)
+
+        assertThat(visualIndicator.indicatorBounds).isEqualTo(dropTargetBounds)
+    }
+
+    @Test
+    @EnableFlags(
+        com.android.wm.shell.Flags.FLAG_ENABLE_BUBBLE_TO_FULLSCREEN,
+        com.android.wm.shell.Flags.FLAG_ENABLE_CREATE_ANY_BUBBLE,
+    )
+    fun testBubbleRightVisualIndicatorSize() {
+        val dropTargetBounds = Rect(1900, 100, 2300, 1500)
+        whenever(bubbleBoundsProvider.getBubbleBarExpandedViewDropTargetBounds(/* onLeft= */ false))
+            .thenReturn(dropTargetBounds)
+        createVisualIndicator(DesktopModeVisualIndicator.DragStartState.FROM_FULLSCREEN)
+        visualIndicator.updateIndicatorType(PointF(2300f, 1500f))
+
+        animatorTestRule.advanceTimeBy(200)
+
+        assertThat(visualIndicator.indicatorBounds).isEqualTo(dropTargetBounds)
+    }
+
     private fun createVisualIndicator(dragStartState: DesktopModeVisualIndicator.DragStartState) {
         visualIndicator =
             DesktopModeVisualIndicator(
@@ -302,6 +340,7 @@ class DesktopModeVisualIndicatorTest : ShellTestCase() {
                 taskSurface,
                 taskDisplayAreaOrganizer,
                 dragStartState,
+                bubbleBoundsProvider,
             )
     }
 

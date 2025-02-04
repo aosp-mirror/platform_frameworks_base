@@ -150,6 +150,7 @@ import java.util.Optional
 import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
+import kotlin.jvm.optionals.getOrNull
 
 /** Handles moving tasks in and out of desktop */
 class DesktopTasksController(
@@ -2706,6 +2707,7 @@ class DesktopTasksController(
                     taskSurface,
                     rootTaskDisplayAreaOrganizer,
                     dragStartState,
+                    bubbleController.getOrNull()?.bubbleDropTargetBoundsProvider,
                 )
         if (visualIndicator == null) visualIndicator = indicator
         return indicator.updateIndicatorType(PointF(inputX, taskTop))
