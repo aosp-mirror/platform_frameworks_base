@@ -74,7 +74,7 @@
                     <TextView
                         android:id="@+id/timeout_message"
                         android:layout_width="match_parent"
-                        android:layout_height="100dp"
+                        android:layout_height="match_parent"
                         android:visibility="gone"
                         style="@style/TimeoutMessage" />
 
@@ -98,6 +98,10 @@
 
                     <ProgressBar
                         android:id="@+id/progress_bar"
+                        android:importantForAccessibility="no"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
                         style="@style/HorizontalProgressBar" />
 
                     <View
