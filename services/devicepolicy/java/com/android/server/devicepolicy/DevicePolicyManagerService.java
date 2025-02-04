@@ -8872,7 +8872,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 return false;
             }
 
-            if (isAdb(caller)) {
+            boolean isAdb = isAdb(caller);
+            if (isAdb) {
                 // Log profile owner provisioning was started using adb.
                 MetricsLogger.action(mContext, PROVISIONING_ENTRY_POINT_ADB, LOG_TAG_PROFILE_OWNER);
                 DevicePolicyEventLogger
@@ -8895,6 +8896,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             UserRestrictionsUtils.getDefaultEnabledForManagedProfiles());
                     ensureUnknownSourcesRestrictionForProfileOwnerLocked(userHandle, admin,
                             true /* newOwner */);
+                    if (isAdb) {
+                        // DISALLOW_DEBUGGING_FEATURES is being added to newly-created
+                        // work profile by default due to b/382064697 . This would have
+                        //  impacted certain CTS test flows when they interact with the
+                        // work profile via ADB (for example installing an app into the
+                        // work profile). Remove DISALLOW_DEBUGGING_FEATURES here to
+                        // reduce the potential impact.
+                        admin.ensureUserRestrictions().putBoolean(
+                            UserManager.DISALLOW_DEBUGGING_FEATURES, false);
+                        saveUserRestrictionsLocked(userHandle);
+                    }
                 }
                 sendOwnerChangedBroadcast(DevicePolicyManager.ACTION_PROFILE_OWNER_CHANGED,
                         userHandle);
