@@ -29,6 +29,8 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 import com.android.internal.widget.remotecompose.core.operations.layout.AnimatableValue;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
@@ -345,4 +347,26 @@ public class GraphicsLayerModifierOperation extends DecoratorModifierOperation {
 
     @Override
     public void layout(RemoteContext context, Component component, float width, float height) {}
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER)
+                .add("type", "GraphicsLayerModifierOperation")
+                .add("scaleX", mScaleX)
+                .add("scaleX", mScaleX)
+                .add("rotationX", mRotationX)
+                .add("rotationY", mRotationY)
+                .add("rotationZ", mRotationZ)
+                .add("shadowElevation", mShadowElevation)
+                .add("transformOriginX", mTransformOriginX)
+                .add("transformOriginY", mTransformOriginY)
+                .add("alpha", mAlpha)
+                .add("cameraDistance", mCameraDistance)
+                .add("blendMode", mBlendMode)
+                .add("spotShadowColorId", mSpotShadowColorId)
+                .add("ambientShadowColorId", mAmbientShadowColorId)
+                .add("colorFilterId", mColorFilterId)
+                .add("renderEffectId", mRenderEffectId);
+    }
 }

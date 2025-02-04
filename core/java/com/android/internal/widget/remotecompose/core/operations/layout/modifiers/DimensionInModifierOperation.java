@@ -25,7 +25,7 @@ import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 /** Helper class to set the min / max dimension on a component */
-public class DimensionInModifierOperation extends Operation
+public abstract class DimensionInModifierOperation extends Operation
         implements ModifierOperation, VariableSupport {
     int mOpCode = -1;
 

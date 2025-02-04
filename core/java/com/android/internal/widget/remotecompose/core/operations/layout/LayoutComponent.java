@@ -46,6 +46,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.modifier
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.WidthModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ZIndexModifierOperation;
 import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.ArrayList;
 
@@ -491,10 +492,26 @@ public class LayoutComponent extends Component {
     @Override
     public void serialize(MapSerializer serializer) {
         super.serialize(serializer);
-        serializer.add("children", mChildrenComponents);
-        serializer.add("paddingLeft", mPaddingLeft);
-        serializer.add("paddingRight", mPaddingRight);
-        serializer.add("paddingTop", mPaddingTop);
-        serializer.add("paddingBottom", mPaddingBottom);
+        serializer
+                .addTags(SerializeTags.LAYOUT_COMPONENT)
+                .add("paddingLeft", mPaddingLeft)
+                .add("paddingRight", mPaddingRight)
+                .add("paddingTop", mPaddingTop)
+                .add("paddingBottom", mPaddingBottom);
+    }
+
+    @Override
+    public <T> @Nullable T selfOrModifier(Class<T> operationClass) {
+        if (operationClass.isInstance(this)) {
+            return operationClass.cast(this);
+        }
+
+        for (ModifierOperation op : mComponentModifiers.getList()) {
+            if (operationClass.isInstance(op)) {
+                return operationClass.cast(op);
+            }
+        }
+
+        return null;
     }
 }

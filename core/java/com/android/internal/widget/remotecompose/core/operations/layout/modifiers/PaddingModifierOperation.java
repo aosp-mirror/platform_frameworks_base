@@ -25,6 +25,8 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
@@ -176,5 +178,16 @@ public class PaddingModifierOperation extends Operation implements ModifierOpera
                 .field(FLOAT, "top", "")
                 .field(FLOAT, "right", "")
                 .field(FLOAT, "bottom", "");
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER)
+                .add("type", "PaddingModifierOperation")
+                .add("left", mLeft)
+                .add("top", mTop)
+                .add("right", mRight)
+                .add("bottom", mBottom);
     }
 }

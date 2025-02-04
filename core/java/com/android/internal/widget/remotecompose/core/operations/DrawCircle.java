@@ -23,6 +23,7 @@ import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
 
 import java.util.List;
 
@@ -107,5 +108,10 @@ public class DrawCircle extends DrawBase3 {
         buffer.writeFloat(x1);
         buffer.writeFloat(y1);
         buffer.writeFloat(x2);
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serialize(serializer, "cx", "cy", "radius").add("type", CLASS_NAME);
     }
 }

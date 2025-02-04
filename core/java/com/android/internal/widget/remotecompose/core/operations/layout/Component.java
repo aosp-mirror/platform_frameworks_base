@@ -39,6 +39,7 @@ import com.android.internal.widget.remotecompose.core.operations.paint.PaintBund
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
 import com.android.internal.widget.remotecompose.core.serialize.Serializable;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -1049,6 +1050,7 @@ public class Component extends PaintOperation
 
     @Override
     public void serialize(MapSerializer serializer) {
+        serializer.addTags(SerializeTags.COMPONENT);
         serializer.add("type", getSerializedName());
         serializer.add("id", mComponentId);
         serializer.add("x", mX);
@@ -1056,5 +1058,27 @@ public class Component extends PaintOperation
         serializer.add("width", mWidth);
         serializer.add("height", mHeight);
         serializer.add("visibility", mVisibility);
+        serializer.add("list", mList);
+    }
+
+    /**
+     * Return ourself or a matching modifier. Used by the semantics / accessibility layer.
+     *
+     * @param operationClass
+     * @return
+     * @param <T>
+     */
+    public <T> @Nullable T selfOrModifier(Class<T> operationClass) {
+        if (operationClass.isInstance(this)) {
+            return operationClass.cast(this);
+        }
+
+        for (Operation op : mList) {
+            if (operationClass.isInstance(op)) {
+                return operationClass.cast(op);
+            }
+        }
+
+        return null;
     }
 }

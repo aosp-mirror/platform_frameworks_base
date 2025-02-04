@@ -29,12 +29,15 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 import com.android.internal.widget.remotecompose.core.operations.layout.ActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.Serializable;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
 /** Capture a host action information. This can be triggered on eg. a click. */
 public class HostActionOperation extends Operation
-        implements ActionOperation, SerializableToString {
+        implements ActionOperation, SerializableToString, Serializable {
     private static final int OP_CODE = Operations.HOST_ACTION;
 
     int mActionId = -1;
@@ -121,5 +124,13 @@ public class HostActionOperation extends Operation
         doc.operation("Layout Operations", OP_CODE, "HostAction")
                 .description("Host action. This operation represents a host action")
                 .field(INT, "ACTION_ID", "Host Action ID");
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER)
+                .add("type", "HostActionOperation")
+                .add("id", mActionId);
     }
 }

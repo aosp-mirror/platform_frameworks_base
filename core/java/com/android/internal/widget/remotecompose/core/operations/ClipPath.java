@@ -24,6 +24,8 @@ import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.Serializable;
 
 import java.util.List;
 
@@ -31,7 +33,7 @@ import java.util.List;
  * Defines a path that clips a the subsequent drawing commands Use MatrixSave and MatrixRestore
  * commands to remove clip TODO allow id 0 to mean null?
  */
-public class ClipPath extends PaintOperation {
+public class ClipPath extends PaintOperation implements Serializable {
     private static final int OP_CODE = Operations.CLIP_PATH;
     private static final String CLASS_NAME = "ClipPath";
     int mId;
@@ -127,5 +129,27 @@ public class ClipPath extends PaintOperation {
     @Override
     public void paint(@NonNull PaintContext context) {
         context.clipPath(mId, mRegionOp);
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer.add("type", CLASS_NAME).add("id", mId).add("regionOp", regionOpToString());
+    }
+
+    String regionOpToString() {
+        switch (mRegionOp) {
+            case REPLACE:
+                return "REPLACE";
+            case DIFFERENCE:
+                return "DIFFERENCE";
+            case INTERSECT:
+                return "INTERSECT";
+            case XOR:
+                return "XOR";
+            case REVERSE_DIFFERENCE:
+                return "REVERSE_DIFFERENCE";
+            default:
+                return "UNDEFINED";
+        }
     }
 }

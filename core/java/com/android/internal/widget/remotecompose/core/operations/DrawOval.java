@@ -23,6 +23,7 @@ import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
 
 import java.util.List;
 
@@ -105,5 +106,10 @@ public class DrawOval extends DrawBase4 {
      */
     public static void apply(@NonNull WireBuffer buffer, float x1, float y1, float x2, float y2) {
         write(buffer, OP_CODE, x1, y1, x2, y2);
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serialize(serializer, "left", "top", "right", "bottom").add("type", CLASS_NAME);
     }
 }

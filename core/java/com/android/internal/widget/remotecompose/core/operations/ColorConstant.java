@@ -25,11 +25,13 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.Serializable;
 
 import java.util.List;
 
 /** Operation that defines a simple Color based on ID Mainly for colors in theming. */
-public class ColorConstant extends Operation {
+public class ColorConstant extends Operation implements Serializable {
     private static final int OP_CODE = Operations.COLOR_CONSTANT;
     private static final String CLASS_NAME = "ColorConstant";
 
@@ -126,5 +128,13 @@ public class ColorConstant extends Operation {
     @Override
     public String deepToString(@NonNull String indent) {
         return indent + toString();
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .add("type", CLASS_NAME)
+                .add("color", Utils.colorInt(mColor))
+                .add("colorId", mColorId);
     }
 }

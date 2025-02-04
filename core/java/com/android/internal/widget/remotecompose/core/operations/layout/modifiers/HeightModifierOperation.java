@@ -24,6 +24,8 @@ import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
@@ -135,5 +137,14 @@ public class HeightModifierOperation extends DimensionModifierOperation {
      */
     public HeightInModifierOperation getHeightIn() {
         return mHeightIn;
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER)
+                .add("type", "HeightModifierOperation")
+                .add("height", mValue, mOutValue)
+                .add("dimensionModifierType", mType);
     }
 }

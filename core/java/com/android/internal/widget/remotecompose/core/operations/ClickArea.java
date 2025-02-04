@@ -26,12 +26,14 @@ import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.Serializable;
 
 import java.util.List;
 
 /** Add a click area to the document */
 public class ClickArea extends Operation
-        implements RemoteComposeOperation, AccessibleComponent, VariableSupport {
+        implements RemoteComposeOperation, AccessibleComponent, VariableSupport, Serializable {
     private static final int OP_CODE = Operations.CLICK_AREA;
     private static final String CLASS_NAME = "ClickArea";
     int mId;
@@ -230,5 +232,18 @@ public class ClickArea extends Operation
                         DocumentedOperation.FLOAT,
                         "metadata",
                         "user defined string accessible in callback");
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .add("type", CLASS_NAME)
+                .add("id", mId)
+                .add("contentDescriptionId", mContentDescription)
+                .add("left", mLeft, mOutLeft)
+                .add("top", mTop, mOutTop)
+                .add("right", mRight, mOutRight)
+                .add("bottom", mBottom, mOutBottom)
+                .add("metadata", mMetadata);
     }
 }

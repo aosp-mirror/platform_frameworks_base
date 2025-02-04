@@ -224,7 +224,7 @@ public class ColorExpression extends Operation implements VariableSupport {
 
     @Override
     public void registerListening(@NonNull RemoteContext context) {
-        if (mMode == 4) {
+        if (mMode == HSV_MODE) {
             if (Float.isNaN(mHue)) {
                 context.listensTo(Utils.idFromNan(mHue), this);
             }
@@ -233,6 +233,21 @@ public class ColorExpression extends Operation implements VariableSupport {
             }
             if (Float.isNaN(mValue)) {
                 context.listensTo(Utils.idFromNan(mValue), this);
+            }
+            return;
+        }
+        if (mMode == ARGB_MODE) {
+            if (Float.isNaN(mArgbAlpha)) {
+                context.listensTo(Utils.idFromNan(mArgbAlpha), this);
+            }
+            if (Float.isNaN(mArgbRed)) {
+                context.listensTo(Utils.idFromNan(mArgbRed), this);
+            }
+            if (Float.isNaN(mArgbGreen)) {
+                context.listensTo(Utils.idFromNan(mArgbGreen), this);
+            }
+            if (Float.isNaN(mArgbBlue)) {
+                context.listensTo(Utils.idFromNan(mArgbBlue), this);
             }
             return;
         }

@@ -23,6 +23,8 @@ import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
@@ -99,5 +101,14 @@ public class WidthInModifierOperation extends DimensionInModifierOperation {
     @Override
     public void serializeToString(int indent, @NonNull StringSerializer serializer) {
         serializer.append(indent, "WIDTH_IN = [" + getMin() + ", " + getMax() + "]");
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER)
+                .add("type", "WidthInModifierOperation")
+                .add("min", mV1, mValue1)
+                .add("max", mV2, mValue2);
     }
 }

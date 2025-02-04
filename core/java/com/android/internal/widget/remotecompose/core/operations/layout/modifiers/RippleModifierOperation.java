@@ -33,6 +33,8 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Color
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 import com.android.internal.widget.remotecompose.core.operations.utilities.easing.Easing;
 import com.android.internal.widget.remotecompose.core.operations.utilities.easing.FloatAnimation;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
@@ -210,4 +212,17 @@ public class RippleModifierOperation extends DecoratorModifierOperation implemen
     @Override
     public void onTouchCancel(
             RemoteContext context, CoreDocument document, Component component, float x, float y) {}
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER)
+                .add("type", "RippleModifierOperation")
+                .add("animateRippleStart", mAnimateRippleStart)
+                .add("animateRippleX", mAnimateRippleX)
+                .add("animateRippleY", mAnimateRippleY)
+                .add("animateRippleDuration", mAnimateRippleDuration)
+                .add("width", mWidth)
+                .add("height", mHeight);
+    }
 }

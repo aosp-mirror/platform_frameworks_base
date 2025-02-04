@@ -16,20 +16,33 @@
 package com.android.internal.widget.remotecompose.accessibility;
 
 import android.graphics.Rect;
+import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
+
+import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
+import com.android.internal.widget.remotecompose.core.semantics.ScrollableComponent;
+
+import java.util.List;
 
 public class AndroidPlatformSemanticNodeApplier
         extends BaseSemanticNodeApplier<AccessibilityNodeInfo> {
 
     private static final String ROLE_DESCRIPTION_KEY = "AccessibilityNodeInfo.roleDescription";
 
+    private final View mPlayer;
+
+    public AndroidPlatformSemanticNodeApplier(View player) {
+        this.mPlayer = player;
+    }
+
     @Override
     protected void setClickable(AccessibilityNodeInfo nodeInfo, boolean clickable) {
         nodeInfo.setClickable(clickable);
         if (clickable) {
-            nodeInfo.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK);
+            nodeInfo.addAction(AccessibilityAction.ACTION_CLICK);
         } else {
-            nodeInfo.removeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK);
+            nodeInfo.removeAction(AccessibilityAction.ACTION_CLICK);
         }
     }
 
@@ -82,5 +95,69 @@ public class AndroidPlatformSemanticNodeApplier
     @Override
     protected void setUniqueId(AccessibilityNodeInfo nodeInfo, String id) {
         nodeInfo.setUniqueId(id);
+    }
+
+    @Override
+    protected void applyScrollable(
+            AccessibilityNodeInfo nodeInfo,
+            ScrollableComponent.ScrollAxisRange scrollAxis,
+            int scrollDirection) {
+        nodeInfo.setScrollable(true);
+        nodeInfo.addAction(AccessibilityAction.ACTION_SCROLL_TO_POSITION);
+        nodeInfo.addAction(AccessibilityAction.ACTION_SET_PROGRESS);
+
+        nodeInfo.setGranularScrollingSupported(true);
+
+        if (scrollAxis.canScrollForward()) {
+            nodeInfo.addAction(AccessibilityAction.ACTION_SCROLL_FORWARD);
+            if (scrollDirection == RootContentBehavior.SCROLL_VERTICAL) {
+                nodeInfo.addAction(AccessibilityAction.ACTION_SCROLL_DOWN);
+                nodeInfo.addAction(AccessibilityAction.ACTION_PAGE_DOWN);
+            } else if (scrollDirection == RootContentBehavior.SCROLL_HORIZONTAL) {
+                // TODO handle RTL
+                nodeInfo.addAction(AccessibilityAction.ACTION_SCROLL_RIGHT);
+                nodeInfo.addAction(AccessibilityAction.ACTION_PAGE_RIGHT);
+            }
+        }
+
+        if (scrollAxis.canScrollBackwards()) {
+            nodeInfo.addAction(AccessibilityAction.ACTION_SCROLL_BACKWARD);
+            if (scrollDirection == RootContentBehavior.SCROLL_VERTICAL) {
+                nodeInfo.addAction(AccessibilityAction.ACTION_SCROLL_UP);
+                nodeInfo.addAction(AccessibilityAction.ACTION_PAGE_UP);
+            } else if (scrollDirection == RootContentBehavior.SCROLL_HORIZONTAL) {
+                // TODO handle RTL
+                nodeInfo.addAction(AccessibilityAction.ACTION_SCROLL_LEFT);
+                nodeInfo.addAction(AccessibilityAction.ACTION_PAGE_LEFT);
+            }
+        }
+
+        // TODO correct values
+        nodeInfo.setCollectionInfo(AccessibilityNodeInfo.CollectionInfo.obtain(-1, 1, false));
+
+        if (scrollDirection == RootContentBehavior.SCROLL_HORIZONTAL) {
+            nodeInfo.setClassName("android.widget.HorizontalScrollView");
+        } else {
+            nodeInfo.setClassName("android.widget.ScrollView");
+        }
+    }
+
+    @Override
+    protected void applyListItem(AccessibilityNodeInfo nodeInfo, int parentId) {
+        nodeInfo.addAction(AccessibilityAction.ACTION_SHOW_ON_SCREEN);
+        nodeInfo.setScreenReaderFocusable(true);
+        nodeInfo.setFocusable(true);
+        nodeInfo.setParent(mPlayer, parentId);
+
+        // TODO correct values
+        nodeInfo.setCollectionItemInfo(
+                AccessibilityNodeInfo.CollectionItemInfo.obtain(1, 1, 0, 1, false));
+    }
+
+    @Override
+    public void addChildren(AccessibilityNodeInfo nodeInfo, List<Integer> childIds) {
+        for (int id : childIds) {
+            nodeInfo.addChild(mPlayer, id);
+        }
     }
 }

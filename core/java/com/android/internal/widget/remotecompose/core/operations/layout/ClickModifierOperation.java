@@ -36,6 +36,8 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.easin
 import com.android.internal.widget.remotecompose.core.operations.utilities.easing.FloatAnimation;
 import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent;
 import com.android.internal.widget.remotecompose.core.semantics.CoreSemantics;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -247,5 +249,10 @@ public class ClickModifierOperation extends PaintOperation
                 .description(
                         "Click modifier. This operation contains"
                                 + " a list of action executed on click");
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer.addTags(SerializeTags.MODIFIER).add("type", "ClickModifierOperation");
     }
 }

@@ -36,6 +36,8 @@ import com.android.internal.widget.remotecompose.core.operations.layout.RootLayo
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentModifiers;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.Serializable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,21 +50,21 @@ import java.util.Set;
  * Represents a platform independent RemoteCompose document, containing RemoteCompose operations +
  * state
  */
-public class CoreDocument {
+public class CoreDocument implements Serializable {
 
     private static final boolean DEBUG = false;
 
     // Semantic version
     public static final int MAJOR_VERSION = 0;
-    public static final int MINOR_VERSION = 3;
+    public static final int MINOR_VERSION = 4;
     public static final int PATCH_VERSION = 0;
 
     // Internal version level
-    public static final int DOCUMENT_API_LEVEL = 3;
+    public static final int DOCUMENT_API_LEVEL = 4;
 
     // We also keep a more fine-grained BUILD number, exposed as
     // ID_API_LEVEL = DOCUMENT_API_LEVEL + BUILD
-    static final float BUILD = 0.4f;
+    static final float BUILD = 0.0f;
 
     @NonNull ArrayList<Operation> mOperations = new ArrayList<>();
 
@@ -401,6 +403,14 @@ public class CoreDocument {
             float v = expression.evaluate(context);
             context.overrideFloat(targetId, v);
         }
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer.add("type", "CoreDocument");
+        serializer.add("width", mWidth);
+        serializer.add("height", mHeight);
+        serializer.add("operations", mOperations);
     }
 
     // ============== Haptic support ==================
@@ -1308,9 +1318,24 @@ public class CoreDocument {
      * @param ctl the call back to allow evaluation of shaders
      */
     public void checkShaders(RemoteContext context, ShaderControl ctl) {
-        for (Operation op : mOperations) {
+        checkShaders(context, ctl, mOperations);
+    }
+
+    /**
+     * Recursive private version that checks the shaders
+     *
+     * @param context the remote context
+     * @param ctl the call back to allow evaluation of shaders
+     * @param operations the operations to check
+     */
+    private void checkShaders(
+            RemoteContext context, ShaderControl ctl, List<Operation> operations) {
+        for (Operation op : operations) {
             if (op instanceof TextData) {
                 op.apply(context);
+            }
+            if (op instanceof Container) {
+                checkShaders(context, ctl, ((Container) op).getList());
             }
             if (op instanceof ShaderData) {
                 ShaderData sd = (ShaderData) op;

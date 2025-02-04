@@ -25,6 +25,7 @@ import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
 
 import java.util.List;
 
@@ -135,5 +136,10 @@ public class DrawLine extends DrawBase4 implements SerializableToString {
             y2 = "[" + Utils.idFromNan(mY2Value) + " = " + mY2 + "]";
         }
         serializer.append(indent, CLASS_NAME + "(" + x1 + ", " + y1 + ", " + x2 + ", " + y2 + ")");
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serialize(serializer, "startX", "startY", "endX", "endY").add("type", CLASS_NAME);
     }
 }

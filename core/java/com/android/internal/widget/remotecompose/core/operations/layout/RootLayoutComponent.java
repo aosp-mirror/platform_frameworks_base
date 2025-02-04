@@ -32,6 +32,8 @@ import com.android.internal.widget.remotecompose.core.operations.layout.measure.
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.MeasurePass;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentModifiers;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
@@ -274,5 +276,12 @@ public class RootLayoutComponent extends Component {
      */
     public boolean hasTouchListeners() {
         return mHasTouchListeners;
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        super.serialize(serializer);
+        serializer.addTags(SerializeTags.COMPONENT);
+        serializer.add("type", "RootLayoutComponent");
     }
 }

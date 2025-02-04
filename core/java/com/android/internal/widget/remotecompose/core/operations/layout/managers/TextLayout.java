@@ -24,10 +24,12 @@ import android.annotation.Nullable;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
+import com.android.internal.widget.remotecompose.core.Platform;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.MeasurePass;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.Size;
@@ -41,6 +43,19 @@ import java.util.List;
 /** Text component, referencing a text id */
 public class TextLayout extends LayoutManager implements VariableSupport, AccessibleComponent {
 
+    public static final int TEXT_ALIGN_LEFT = 1;
+    public static final int TEXT_ALIGN_RIGHT = 2;
+    public static final int TEXT_ALIGN_CENTER = 3;
+    public static final int TEXT_ALIGN_JUSTIFY = 4;
+    public static final int TEXT_ALIGN_START = 5;
+    public static final int TEXT_ALIGN_END = 6;
+
+    public static final int OVERFLOW_CLIP = 1;
+    public static final int OVERFLOW_VISIBLE = 2;
+    public static final int OVERFLOW_ELLIPSIS = 3;
+    public static final int OVERFLOW_START_ELLIPSIS = 4;
+    public static final int OVERFLOW_MIDDLE_ELLIPSIS = 5;
+
     private static final boolean DEBUG = false;
     private int mTextId = -1;
     private int mColor = 0;
@@ -49,6 +64,8 @@ public class TextLayout extends LayoutManager implements VariableSupport, Access
     private float mFontWeight = 400f;
     private int mFontFamilyId = -1;
     private int mTextAlign = -1;
+    private int mOverflow = 1;
+    private int mMaxLines = Integer.MAX_VALUE;
 
     private int mType = -1;
     private float mTextX;
@@ -57,6 +74,8 @@ public class TextLayout extends LayoutManager implements VariableSupport, Access
     private float mTextH = -1;
 
     @Nullable private String mCachedString = "";
+
+    Platform.ComputedTextLayout mComputedTextLayout;
 
     @Nullable
     @Override
@@ -123,7 +142,9 @@ public class TextLayout extends LayoutManager implements VariableSupport, Access
             int fontStyle,
             float fontWeight,
             int fontFamilyId,
-            int textAlign) {
+            int textAlign,
+            int overflow,
+            int maxLines) {
         super(parent, componentId, animationId, x, y, width, height);
         mTextId = textId;
         mColor = color;
@@ -132,6 +153,8 @@ public class TextLayout extends LayoutManager implements VariableSupport, Access
         mFontWeight = fontWeight;
         mFontFamilyId = fontFamilyId;
         mTextAlign = textAlign;
+        mOverflow = overflow;
+        mMaxLines = maxLines;
     }
 
     public TextLayout(
@@ -144,7 +167,9 @@ public class TextLayout extends LayoutManager implements VariableSupport, Access
             int fontStyle,
             float fontWeight,
             int fontFamilyId,
-            int textAlign) {
+            int textAlign,
+            int overflow,
+            int maxLines) {
         this(
                 parent,
                 componentId,
@@ -159,7 +184,9 @@ public class TextLayout extends LayoutManager implements VariableSupport, Access
                 fontStyle,
                 fontWeight,
                 fontFamilyId,
-                textAlign);
+                textAlign,
+                overflow,
+                maxLines);
     }
 
     @NonNull public PaintBundle mPaint = new PaintBundle();
@@ -187,18 +214,35 @@ public class TextLayout extends LayoutManager implements VariableSupport, Access
             return;
         }
         int length = mCachedString.length();
-        if (mTextW > mWidth) {
-            context.save();
-            context.clipRect(
-                    mPaddingLeft,
-                    mPaddingTop,
-                    mWidth - mPaddingLeft - mPaddingRight,
-                    mHeight - mPaddingTop - mPaddingBottom);
-            context.translate(getScrollX(), getScrollY());
-            context.drawTextRun(mTextId, 0, length, 0, 0, mTextX, mTextY, false);
-            context.restore();
+        if (mComputedTextLayout != null) {
+            context.drawComplexText(mComputedTextLayout);
         } else {
-            context.drawTextRun(mTextId, 0, length, 0, 0, mTextX, mTextY, false);
+            float px = mTextX;
+            switch (mTextAlign) {
+                case TEXT_ALIGN_CENTER:
+                    px = (mWidth - mPaddingLeft - mPaddingRight - mTextW) / 2f;
+                    break;
+                case TEXT_ALIGN_RIGHT:
+                case TEXT_ALIGN_END:
+                    px = (mWidth - mPaddingRight - mTextW);
+                    break;
+                case TEXT_ALIGN_LEFT:
+                case TEXT_ALIGN_START:
+                default:
+            }
+            if (mTextW > (mWidth - mPaddingLeft - mPaddingRight)) {
+                context.save();
+                context.clipRect(
+                        0f,
+                        0f,
+                        mWidth - mPaddingLeft - mPaddingRight,
+                        mHeight - mPaddingTop - mPaddingBottom);
+                context.translate(getScrollX(), getScrollY());
+                context.drawTextRun(mTextId, 0, length, 0, 0, px, mTextY, false);
+                context.restore();
+            } else {
+                context.drawTextRun(mTextId, 0, length, 0, 0, px, mTextY, false);
+            }
         }
         if (DEBUG) {
             mPaint.setStyle(PaintBundle.STYLE_FILL_AND_STROKE);
@@ -285,13 +329,40 @@ public class TextLayout extends LayoutManager implements VariableSupport, Access
         mPaint.reset();
         mPaint.setTextSize(mFontSize);
         mPaint.setTextStyle(mType, (int) mFontWeight, mFontStyle == 1);
+        mPaint.setColor(mColor);
         context.applyPaint(mPaint);
         float[] bounds = new float[4];
-        int flags = PaintContext.TEXT_MEASURE_FONT_HEIGHT;
         if (mCachedString == null) {
             return;
         }
+        int flags = PaintContext.TEXT_MEASURE_FONT_HEIGHT | PaintContext.TEXT_MEASURE_SPACES;
+        if (mMaxLines == 1
+                && (mOverflow == OVERFLOW_START_ELLIPSIS
+                        || mOverflow == OVERFLOW_MIDDLE_ELLIPSIS
+                        || mOverflow == OVERFLOW_ELLIPSIS)) {
+            flags |= PaintContext.TEXT_COMPLEX;
+        }
         context.getTextBounds(mTextId, 0, mCachedString.length(), flags, bounds);
+        if (bounds[2] - bounds[1] > maxWidth) {
+            mComputedTextLayout =
+                    context.layoutComplexText(
+                            mTextId,
+                            0,
+                            mCachedString.length(),
+                            mTextAlign,
+                            mOverflow,
+                            mMaxLines,
+                            maxWidth,
+                            flags);
+            if (mComputedTextLayout != null) {
+                bounds[0] = 0f;
+                bounds[1] = 0f;
+                bounds[2] = mComputedTextLayout.getWidth();
+                bounds[3] = mComputedTextLayout.getHeight();
+            }
+        } else {
+            mComputedTextLayout = null;
+        }
         context.restorePaint();
         float w = bounds[2] - bounds[0];
         float h = bounds[3] - bounds[1];
@@ -345,6 +416,8 @@ public class TextLayout extends LayoutManager implements VariableSupport, Access
      * @param fontWeight the font weight
      * @param fontFamilyId the font family id
      * @param textAlign the alignment rules
+     * @param overflow
+     * @param maxLines
      */
     public static void apply(
             @NonNull WireBuffer buffer,
@@ -356,7 +429,9 @@ public class TextLayout extends LayoutManager implements VariableSupport, Access
             int fontStyle,
             float fontWeight,
             int fontFamilyId,
-            int textAlign) {
+            int textAlign,
+            int overflow,
+            int maxLines) {
         buffer.start(id());
         buffer.writeInt(componentId);
         buffer.writeInt(animationId);
@@ -367,6 +442,8 @@ public class TextLayout extends LayoutManager implements VariableSupport, Access
         buffer.writeFloat(fontWeight);
         buffer.writeInt(fontFamilyId);
         buffer.writeInt(textAlign);
+        buffer.writeInt(overflow);
+        buffer.writeInt(maxLines);
     }
 
     /**
@@ -385,6 +462,8 @@ public class TextLayout extends LayoutManager implements VariableSupport, Access
         float fontWeight = buffer.readFloat();
         int fontFamilyId = buffer.readInt();
         int textAlign = buffer.readInt();
+        int overflow = buffer.readInt();
+        int maxLines = buffer.readInt();
         operations.add(
                 new TextLayout(
                         null,
@@ -396,7 +475,9 @@ public class TextLayout extends LayoutManager implements VariableSupport, Access
                         fontStyle,
                         fontWeight,
                         fontFamilyId,
-                        textAlign));
+                        textAlign,
+                        overflow,
+                        maxLines));
     }
 
     /**
@@ -431,14 +512,16 @@ public class TextLayout extends LayoutManager implements VariableSupport, Access
                 mFontStyle,
                 mFontWeight,
                 mFontFamilyId,
-                mTextAlign);
+                mTextAlign,
+                mOverflow,
+                mMaxLines);
     }
 
     @Override
     public void serialize(MapSerializer serializer) {
         super.serialize(serializer);
         serializer.add("textId", mTextId);
-        serializer.add("color", mColor);
+        serializer.add("color", Utils.colorInt(mColor));
         serializer.add("fontSize", mFontSize);
         serializer.add("fontStyle", mFontStyle);
         serializer.add("fontWeight", mFontWeight);

@@ -24,6 +24,7 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
+import com.android.internal.widget.remotecompose.core.semantics.ScrollableComponent;
 
 import java.util.List;
 
@@ -33,7 +34,8 @@ import java.util.List;
  * <p>It encodes the version of the document (following semantic versioning) as well as the
  * dimensions of the document in pixels.
  */
-public class RootContentBehavior extends Operation implements RemoteComposeOperation {
+public class RootContentBehavior extends Operation
+        implements RemoteComposeOperation, ScrollableComponent {
     private static final int OP_CODE = Operations.ROOT_CONTENT_BEHAVIOR;
     private static final String CLASS_NAME = "RootContentBehavior";
     int mScroll = NONE;
@@ -45,13 +47,13 @@ public class RootContentBehavior extends Operation implements RemoteComposeOpera
 
     protected static final String TAG = "RootContentBehavior";
 
-    public static final int NONE = 0;
+    public static final int NONE = ScrollableComponent.SCROLL_NONE;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Scrolling
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    public static final int SCROLL_HORIZONTAL = 1;
-    public static final int SCROLL_VERTICAL = 2;
+    public static final int SCROLL_HORIZONTAL = ScrollableComponent.SCROLL_HORIZONTAL;
+    public static final int SCROLL_VERTICAL = ScrollableComponent.SCROLL_VERTICAL;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Sizing
@@ -287,5 +289,26 @@ public class RootContentBehavior extends Operation implements RemoteComposeOpera
                 .possibleValues("LAYOUT_VERTICAL_FIXED", LAYOUT_VERTICAL_FIXED)
                 .possibleValues("LAYOUT_MATCH_PARENT", LAYOUT_MATCH_PARENT)
                 .possibleValues("LAYOUT_WRAP_CONTENT", LAYOUT_WRAP_CONTENT);
+    }
+
+    @Override
+    public boolean isInterestingForSemantics() {
+        return mScroll != SCROLL_NONE;
+    }
+
+    @Override
+    public boolean supportsScrollByOffset() {
+        return mScroll != SCROLL_NONE;
+    }
+
+    @Override
+    public int scrollByOffset(RemoteContext context, int offset) {
+        // TODO implement scroll handling
+        return offset;
+    }
+
+    @Override
+    public int scrollDirection() {
+        return mScroll;
     }
 }

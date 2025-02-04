@@ -32,12 +32,19 @@ import com.android.internal.widget.remotecompose.core.operations.layout.Componen
 import com.android.internal.widget.remotecompose.core.operations.layout.DecoratorComponent;
 import com.android.internal.widget.remotecompose.core.operations.layout.TouchHandler;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.Serializable;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.ArrayList;
 
 /** Maintain a list of modifiers */
 public class ComponentModifiers extends PaintOperation
-        implements DecoratorComponent, ClickHandler, TouchHandler, SerializableToString {
+        implements DecoratorComponent,
+                ClickHandler,
+                TouchHandler,
+                SerializableToString,
+                Serializable {
     @NonNull ArrayList<ModifierOperation> mList = new ArrayList<>();
 
     @NonNull
@@ -314,5 +321,13 @@ public class ComponentModifiers extends PaintOperation
             }
         }
         return 0f;
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER)
+                .add("type", "ComponentModifiers")
+                .add("modifiers", mList);
     }
 }
