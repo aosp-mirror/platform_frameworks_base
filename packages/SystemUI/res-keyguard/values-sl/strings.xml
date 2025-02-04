@@ -36,7 +36,7 @@
     <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Zaradi zaščite baterije je polnjenje na čakanju"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Preverite pripomoček za polnjenje"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Omrežje je zaklenjeno"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Ni kartice SIM."</string>
+    <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Ni kartice SIM"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Kartica SIM je neuporabna."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"Kartica SIM je zaklenjena."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"Kartica SIM je zaklenjena s kodo PUK."</string>
