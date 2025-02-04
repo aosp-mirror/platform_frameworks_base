@@ -413,6 +413,8 @@ public class DragLayout extends LinearLayout
     }
 
     private void updateDropZoneSizesForSingleTask() {
+        resetDropZoneTranslations();
+
         final LinearLayout.LayoutParams dropZoneView1 =
                 (LayoutParams) mDropZoneView1.getLayoutParams();
         final LinearLayout.LayoutParams dropZoneView2 =
@@ -427,6 +429,19 @@ public class DragLayout extends LinearLayout
         mDropZoneView2.setLayoutParams(dropZoneView2);
     }
 
+    /** Zeroes out translationX and translationY on all drop zone views. */
+    void resetDropZoneTranslations() {
+        setDropZoneTranslations(0, 0);
+    }
+
+    /** Sets translationX and translationY on all drop zone views. */
+    void setDropZoneTranslations(int x, int y) {
+        mDropZoneView1.setTranslationX(x);
+        mDropZoneView1.setTranslationY(y);
+        mDropZoneView2.setTranslationX(x);
+        mDropZoneView2.setTranslationY(y);
+    }
+
     /**
      * Sets the size of the two drop zones based on the provided bounds. The divider sits between
      * the views and its size is included in the calculations.
@@ -435,6 +450,15 @@ public class DragLayout extends LinearLayout
      * @param bounds2 bounds to apply to the second dropzone view, null if split in half.
      */
     private void updateDropZoneSizes(Rect bounds1, Rect bounds2) {
+        if (bounds1 == null || bounds2 == null) {
+            // We're entering 50:50 split screen from a single app, no need for any translations.
+            resetDropZoneTranslations();
+        } else {
+            // We're already in split, so align our drop zones to match the left/top app edge. This
+            // is necessary because the left/top app can be offscreen.
+            setDropZoneTranslations(bounds1.left, bounds1.top);
+        }
+
         final int halfDivider = mDividerSize / 2;
         final LinearLayout.LayoutParams dropZoneView1 =
                 (LayoutParams) mDropZoneView1.getLayoutParams();
