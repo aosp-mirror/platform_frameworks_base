@@ -298,8 +298,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     boolean showEndArea =
                             !Flags.enableOutputSwitcherSessionGrouping() || isDeselectable;
                     updateUnmutedVolumeIcon(device);
-                    updateGroupableCheckBox(true, isDeselectable, device);
-                    updateEndClickArea(device, isDeselectable);
+                    updateEndAreaForGroupCheckbox(device, true /* isSelected */, isDeselectable);
                     disableFocusPropertyForView(mContainerLayout);
                     setUpContentDescriptionForView(mSeekBar, device);
                     setSingleLineLayout(device.getName(), true /* showSeekBar */,
@@ -331,8 +330,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         //If device is connected and there's other selectable devices, layout as
                         // one of selected devices.
                         updateUnmutedVolumeIcon(device);
-                        updateGroupableCheckBox(true, isDeselectable, device);
-                        updateEndClickArea(device, isDeselectable);
+                        updateEndAreaForGroupCheckbox(device, true /* isSelected */,
+                                isDeselectable);
                         disableFocusPropertyForView(mContainerLayout);
                         setUpContentDescriptionForView(mSeekBar, device);
                         setSingleLineLayout(device.getName(), true /* showSeekBar */,
@@ -352,8 +351,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 } else if (isSelectable) {
                     //groupable device
                     setUpDeviceIcon(device);
-                    updateGroupableCheckBox(false, true, device);
-                    updateEndClickArea(device, true);
+                    updateEndAreaForGroupCheckbox(device, false /* isSelected */,
+                            true /* isDeselectable */);
                     if (!Flags.disableTransferWhenAppsDoNotSupport()
                             || isTransferable
                             || hasRouteListingPreferenceItem) {
@@ -406,7 +405,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         private void updateEndClickAreaWithIcon(View.OnClickListener clickListener,
                 @DrawableRes int iconDrawableId,
                 @StringRes int accessibilityStringId) {
-            updateEndClickAreaColor(mController.getColorSeekbarProgress());
+            updateEndAreaColor(mController.getColorSeekbarProgress());
             mEndClickIcon.setImageTintList(
                     ColorStateList.valueOf(mController.getColorItemContent()));
             mEndClickIcon.setOnClickListener(clickListener);
@@ -422,7 +421,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             }
         }
 
-        public void updateEndClickAreaColor(int color) {
+        public void updateEndAreaColor(int color) {
             mEndTouchArea.setBackgroundTintList(
                     ColorStateList.valueOf(color));
         }
@@ -455,25 +454,22 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     ColorStateList.valueOf(mController.getColorItemContent()));
         }
 
-        public void updateEndClickArea(MediaDevice device, boolean isDeviceDeselectable) {
+        public void updateEndAreaForGroupCheckbox(MediaDevice device, boolean isSelected,
+                boolean isDeselectable) {
             mEndTouchArea.setOnClickListener(null);
             mEndTouchArea.setOnClickListener(
-                    isDeviceDeselectable ? (v) -> mCheckBox.performClick() : null);
+                    isDeselectable ? (v) -> mCheckBox.performClick() : null);
             mEndTouchArea.setImportantForAccessibility(
                     View.IMPORTANT_FOR_ACCESSIBILITY_YES);
-            mEndTouchArea.setBackgroundTintList(
-                    ColorStateList.valueOf(mController.getColorItemBackground()));
+            updateEndAreaColor(isSelected ? mController.getColorSeekbarProgress()
+                    : mController.getColorItemBackground());
             setUpContentDescriptionForView(mEndTouchArea, device);
-        }
-
-        private void updateGroupableCheckBox(boolean isSelected, boolean isGroupable,
-                MediaDevice device) {
             mCheckBox.setOnCheckedChangeListener(null);
             mCheckBox.setChecked(isSelected);
             mCheckBox.setOnCheckedChangeListener(
-                    isGroupable ? (buttonView, isChecked) -> onGroupActionTriggered(!isSelected,
+                    isDeselectable ? (buttonView, isChecked) -> onGroupActionTriggered(!isSelected,
                             device) : null);
-            mCheckBox.setEnabled(isGroupable);
+            mCheckBox.setEnabled(isDeselectable);
             setCheckBoxColor(mCheckBox, mController.getColorItemContent());
         }
 
