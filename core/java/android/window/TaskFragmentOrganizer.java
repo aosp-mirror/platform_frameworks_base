@@ -279,10 +279,6 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      * @param state the state to save.
      */
     public void setSavedState(@NonNull Bundle state) {
-        if (!Flags.aeBackStackRestore()) {
-            return;
-        }
-
         if (state.getSize() > 200000) {
             throw new IllegalArgumentException("Saved state too large, " + state.getSize());
         }

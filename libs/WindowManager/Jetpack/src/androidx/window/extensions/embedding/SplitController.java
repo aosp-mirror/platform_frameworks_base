@@ -288,7 +288,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             mSplitRules.clear();
             mSplitRules.addAll(rules);
 
-            if (!Flags.aeBackStackRestore() || !mPresenter.isWaitingToRebuildTaskContainers()) {
+            if (!mPresenter.isWaitingToRebuildTaskContainers()) {
                 return;
             }
 
@@ -2893,10 +2893,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     @Override
     public void setAutoSaveEmbeddingState(boolean saveEmbeddingState) {
-        if (!Flags.aeBackStackRestore()) {
-            return;
-        }
-
         synchronized (mLock) {
             mPresenter.setAutoSaveEmbeddingState(saveEmbeddingState);
         }
