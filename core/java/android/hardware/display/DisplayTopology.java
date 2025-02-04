@@ -21,8 +21,10 @@ import static android.hardware.display.DisplayTopology.TreeNode.POSITION_LEFT;
 import static android.hardware.display.DisplayTopology.TreeNode.POSITION_RIGHT;
 import static android.hardware.display.DisplayTopology.TreeNode.POSITION_TOP;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Parcel;
@@ -39,6 +41,7 @@ import android.view.Display;
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.display.feature.flags.Flags;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -59,6 +62,8 @@ import java.util.Queue;
  *
  * @hide
  */
+@TestApi
+@FlaggedApi(Flags.FLAG_DISPLAY_TOPOLOGY)
 public final class DisplayTopology implements Parcelable {
     private static final String TAG = "DisplayTopology";
     private static final float EPSILON = 0.0001f;
@@ -82,6 +87,7 @@ public final class DisplayTopology implements Parcelable {
      * @param px The value in logical pixels
      * @param dpi The logical density of the display
      * @return The value in density-independent pixels
+     * @hide
      */
     public static float pxToDp(float px, int dpi) {
         return px * DisplayMetrics.DENSITY_DEFAULT / dpi;
@@ -91,6 +97,7 @@ public final class DisplayTopology implements Parcelable {
      * @param dp The value in density-independent pixels
      * @param dpi The logical density of the display
      * @return The value in logical pixels
+     * @hide
      */
     public static float dpToPx(float dp, int dpi) {
         return dp * dpi / DisplayMetrics.DENSITY_DEFAULT;
@@ -108,8 +115,14 @@ public final class DisplayTopology implements Parcelable {
      */
     private int mPrimaryDisplayId = Display.INVALID_DISPLAY;
 
+    /**
+     * @hide
+     */
     public DisplayTopology() {}
 
+    /**
+     * @hide
+     */
     public DisplayTopology(@Nullable TreeNode root, int primaryDisplayId) {
         mRoot = root;
         if (mRoot != null) {
@@ -124,15 +137,24 @@ public final class DisplayTopology implements Parcelable {
         mPrimaryDisplayId = primaryDisplayId;
     }
 
+    /**
+     * @hide
+     */
     public DisplayTopology(Parcel source) {
         this(source.readTypedObject(TreeNode.CREATOR), source.readInt());
     }
 
+    /**
+     * @hide
+     */
     @Nullable
     public TreeNode getRoot() {
         return mRoot;
     }
 
+    /**
+     * @hide
+     */
     public int getPrimaryDisplayId() {
         return mPrimaryDisplayId;
     }
@@ -144,6 +166,7 @@ public final class DisplayTopology implements Parcelable {
      * @param displayId The logical display ID
      * @param width The width of the display
      * @param height The height of the display
+     * @hide
      */
     public void addDisplay(int displayId, float width, float height) {
         addDisplay(displayId, width, height, /* shouldLog= */ true);
@@ -155,6 +178,7 @@ public final class DisplayTopology implements Parcelable {
      * @param width The new width
      * @param height The new height
      * @return True if the topology has changed.
+     * @hide
      */
     public boolean updateDisplay(int displayId, float width, float height) {
         TreeNode display = findDisplay(displayId, mRoot);
@@ -178,6 +202,7 @@ public final class DisplayTopology implements Parcelable {
      * one by one.
      * @param displayId The logical display ID
      * @return True if the display was present in the topology and removed.
+     * @hide
      */
     public boolean removeDisplay(int displayId) {
         if (findDisplay(displayId, mRoot) == null) {
@@ -221,6 +246,7 @@ public final class DisplayTopology implements Parcelable {
      *               are the display IDs.
      * @throws IllegalArgumentException if the keys in {@code positions} are not the exact display
      *                                  IDs in this topology, no more, no less
+     * @hide
      */
     public void rearrange(Map<Integer, PointF> newPos) {
         if (mRoot == null) {
@@ -346,6 +372,7 @@ public final class DisplayTopology implements Parcelable {
 
     /**
      * Clamp offsets and remove any overlaps between displays.
+     * @hide
      */
     public void normalize() {
         if (mRoot == null) {
@@ -494,6 +521,7 @@ public final class DisplayTopology implements Parcelable {
 
     /**
      * @return A deep copy of the topology that will not be modified by the system.
+     * @hide
      */
     public DisplayTopology copy() {
         TreeNode rootCopy = mRoot == null ? null : mRoot.copy();
@@ -505,6 +533,7 @@ public final class DisplayTopology implements Parcelable {
      * (0, 0).
      * @return Map from logical display ID to the display's absolute bounds
      */
+    @NonNull
     public SparseArray<RectF> getAbsoluteBounds() {
         Map<TreeNode, RectF> bounds = new HashMap<>();
         getInfo(bounds, /* depths= */ null, /* parents= */ null, mRoot, /* x= */ 0, /* y= */ 0,
@@ -529,6 +558,7 @@ public final class DisplayTopology implements Parcelable {
 
     /**
      * Print the object's state and debug information into the given stream.
+     * @hide
      * @param pw The stream to dump information to.
      */
     public void dump(PrintWriter pw) {
@@ -629,6 +659,9 @@ public final class DisplayTopology implements Parcelable {
         return result;
     }
 
+    /**
+     * @hide
+     */
     @Nullable
     public static TreeNode findDisplay(int displayId, @Nullable TreeNode startingNode) {
         if (startingNode == null) {
@@ -725,6 +758,7 @@ public final class DisplayTopology implements Parcelable {
      * @param densityPerDisplay The logical display densities, indexed by logical display ID
      * @return The graph representation of the topology. If there is a corner adjacency, the same
      * display will appear twice in the list of adjacent displays with both possible placements.
+     * @hide
      */
     @Nullable
     public DisplayTopologyGraph getGraph(SparseIntArray densityPerDisplay) {
@@ -839,6 +873,9 @@ public final class DisplayTopology implements Parcelable {
         }
     }
 
+    /**
+     * @hide
+     */
     public static final class TreeNode implements Parcelable {
         public static final int POSITION_LEFT = 0;
         public static final int POSITION_TOP = 1;
