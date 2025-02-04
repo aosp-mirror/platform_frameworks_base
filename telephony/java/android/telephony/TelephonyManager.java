@@ -19432,7 +19432,6 @@ public class TelephonyManager {
      * and integrity algorithms in use
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_MODEM_CIPHER_TRANSPARENCY)
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
     public void setNullCipherNotificationsEnabled(boolean enable) {
@@ -19459,7 +19458,6 @@ public class TelephonyManager {
      * and integrity algorithms in use
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_MODEM_CIPHER_TRANSPARENCY)
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @SystemApi
     public boolean isNullCipherNotificationsEnabled() {
