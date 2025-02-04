@@ -111,13 +111,13 @@ import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
 import kotlin.jvm.functions.Function1;
 
+import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.MainCoroutineDispatcher;
+
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import kotlinx.coroutines.CoroutineScope;
-import kotlinx.coroutines.MainCoroutineDispatcher;
 
 /**
  * Defines visuals and behaviors of a window decoration of a caption bar and shadows. It works with
@@ -731,11 +731,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         } else {
             // App header is visible since `mWindowDecorViewHolder` is of type
             // [AppHeaderViewHolder].
-            ((AppHeaderViewHolder) mWindowDecorViewHolder).runOnAppChipGlobalLayout(
-                    () -> {
-                        notifyAppHeaderStateChanged();
-                        return Unit.INSTANCE;
-                    });
+            final AppHeaderViewHolder appHeader = asAppHeader(mWindowDecorViewHolder);
+            if (appHeader != null) {
+                appHeader.runOnAppChipGlobalLayout(
+                        () -> {
+                            notifyAppHeaderStateChanged();
+                            return Unit.INSTANCE;
+                        });
+            }
         }
     }
 
@@ -766,11 +769,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     private void notifyAppHeaderStateChanged() {
-        if (isAppHandle(mWindowDecorViewHolder) || mWindowDecorViewHolder == null) {
+        final AppHeaderViewHolder appHeader = asAppHeader(mWindowDecorViewHolder);
+        if (appHeader == null) {
             return;
         }
-        final Rect appChipPositionInWindow =
-                ((AppHeaderViewHolder) mWindowDecorViewHolder).getAppChipLocationInWindow();
+        final Rect appChipPositionInWindow = appHeader.getAppChipLocationInWindow();
         final Rect taskBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
         final Rect appChipGlobalPosition = new Rect(
                 taskBounds.left + appChipPositionInWindow.left,
