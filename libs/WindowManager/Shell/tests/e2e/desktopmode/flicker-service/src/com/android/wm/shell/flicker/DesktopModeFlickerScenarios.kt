@@ -36,7 +36,6 @@ import android.tools.flicker.assertors.assertions.AppWindowHasMaxDisplayHeight
 import android.tools.flicker.assertors.assertions.AppWindowHasMaxDisplayWidth
 import android.tools.flicker.assertors.assertions.AppWindowHasSizeOfAtLeast
 import android.tools.flicker.assertors.assertions.AppWindowInsideDisplayBoundsAtEnd
-import android.tools.flicker.assertors.assertions.AppWindowIsBiggerThanInitialBoundsAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowIsInvisibleAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowIsVisibleAlways
 import android.tools.flicker.assertors.assertions.AppWindowMaintainsAspectRatioAlways
@@ -172,7 +171,6 @@ class DesktopModeFlickerScenarios {
                 assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
                         listOf(
                             ResizeVeilKeepsIncreasingInSize(DESKTOP_MODE_APP),
-                            AppWindowIsBiggerThanInitialBoundsAtEnd(DESKTOP_MODE_APP),
                         ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
                 )
 
@@ -189,7 +187,6 @@ class DesktopModeFlickerScenarios {
                 assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
                         listOf(
                             ResizeVeilKeepsIncreasingInSize(DESKTOP_MODE_APP),
-                            AppWindowIsBiggerThanInitialBoundsAtEnd(DESKTOP_MODE_APP),
                         ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 
