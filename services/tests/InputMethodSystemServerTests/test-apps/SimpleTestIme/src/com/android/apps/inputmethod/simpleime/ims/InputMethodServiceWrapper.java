@@ -25,21 +25,35 @@ import java.util.concurrent.CountDownLatch;
 
 /** Wrapper of {@link InputMethodService} to expose interfaces for testing purpose. */
 public class InputMethodServiceWrapper extends InputMethodService {
+
     private static final String TAG = "InputMethodServiceWrapper";
 
-    private static InputMethodServiceWrapper sInputMethodServiceWrapper;
-
-    public static InputMethodServiceWrapper getInputMethodServiceWrapperForTesting() {
-        return sInputMethodServiceWrapper;
-    }
+    /** Last created instance of this wrapper. */
+    private static InputMethodServiceWrapper sInstance;
 
     private boolean mInputViewStarted;
+
+    /**
+     * @see #setCountDownLatchForTesting
+     */
     private CountDownLatch mCountDownLatchForTesting;
+
+    /** Gets the last created instance of this wrapper, if available. */
+    public static InputMethodServiceWrapper getInstance() {
+        return sInstance;
+    }
 
     public boolean getCurrentInputViewStarted() {
         return mInputViewStarted;
     }
 
+    /**
+     * Sets the latch used to wait for the IME to start showing ({@link #onStartInputView},
+     * start hiding ({@link #onFinishInputView}) or receive a configuration change
+     * ({@link #onConfigurationChanged}).
+     *
+     * @param countDownLatchForTesting the latch to wait on.
+     */
     public void setCountDownLatchForTesting(CountDownLatch countDownLatchForTesting) {
         mCountDownLatchForTesting = countDownLatchForTesting;
     }
@@ -48,7 +62,7 @@ public class InputMethodServiceWrapper extends InputMethodService {
     public void onCreate() {
         Log.i(TAG, "onCreate()");
         super.onCreate();
-        sInputMethodServiceWrapper = this;
+        sInstance = this;
     }
 
     @Override
@@ -102,12 +116,13 @@ public class InputMethodServiceWrapper extends InputMethodService {
     }
 
     private String dumpEditorInfo(EditorInfo info) {
-        var sb = new StringBuilder();
-        sb.append("EditorInfo{packageName=").append(info.packageName);
-        sb.append(" fieldId=").append(info.fieldId);
-        sb.append(" hintText=").append(info.hintText);
-        sb.append(" privateImeOptions=").append(info.privateImeOptions);
-        sb.append("}");
-        return sb.toString();
+        if (info == null) {
+            return "null";
+        }
+        return "EditorInfo{packageName=" + info.packageName
+                + " fieldId=" + info.fieldId
+                + " hintText=" + info.hintText
+                + " privateImeOptions=" + info.privateImeOptions
+                + "}";
     }
 }

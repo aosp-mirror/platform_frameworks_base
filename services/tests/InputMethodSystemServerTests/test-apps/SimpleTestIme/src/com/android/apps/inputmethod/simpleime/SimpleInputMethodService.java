@@ -23,13 +23,15 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputConnection;
 import android.widget.FrameLayout;
+
+import androidx.annotation.NonNull;
 
 import com.android.apps.inputmethod.simpleime.ims.InputMethodServiceWrapper;
 
-/** The {@link InputMethodService} implementation for SimpeTestIme app. */
-public class SimpleInputMethodService extends InputMethodServiceWrapper {
+/** The {@link InputMethodService} implementation for SimpleTestIme app. */
+public final class SimpleInputMethodService extends InputMethodServiceWrapper {
+
     private static final String TAG = "SimpleIMS";
 
     private FrameLayout mInputView;
@@ -45,23 +47,18 @@ public class SimpleInputMethodService extends InputMethodServiceWrapper {
     public void onStartInputView(EditorInfo info, boolean restarting) {
         super.onStartInputView(info, restarting);
         mInputView.removeAllViews();
-        SimpleKeyboard keyboard = new SimpleKeyboard(this, R.layout.qwerty_10_9_9);
+        final var keyboard = new SimpleKeyboard(this, R.layout.qwerty_10_9_9);
         mInputView.addView(keyboard.inflateKeyboardView(LayoutInflater.from(this), mInputView));
     }
 
-    void handle(String data, int keyboardState) {
-        InputConnection inputConnection = getCurrentInputConnection();
-        Integer keyCode = KeyCodeConstants.KEY_NAME_TO_CODE_MAP.get(data);
+    void handleKeyPress(@NonNull String keyCodeName, int keyboardState) {
+        final Integer keyCode = KeyCodeConstants.KEY_NAME_TO_CODE_MAP.get(keyCodeName);
         Log.v(TAG, "keyCode: " + keyCode);
         if (keyCode != null) {
-            inputConnection.sendKeyEvent(
-                    new KeyEvent(
-                            SystemClock.uptimeMillis(),
-                            SystemClock.uptimeMillis(),
-                            KeyEvent.ACTION_DOWN,
-                            keyCode,
-                            0,
-                            KeyCodeConstants.isAlphaKeyCode(keyCode) ? keyboardState : 0));
+            final var downTime = SystemClock.uptimeMillis();
+            getCurrentInputConnection().sendKeyEvent(new KeyEvent(downTime, downTime,
+                    KeyEvent.ACTION_DOWN, keyCode, 0 /* repeat */,
+                    KeyCodeConstants.isAlphaKeyCode(keyCode) ? keyboardState : 0) /* metaState */);
         }
     }
 }
