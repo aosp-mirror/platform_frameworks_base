@@ -43,13 +43,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ContentScope
+import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.brightness.ui.compose.BrightnessSliderContainer
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.rememberViewModel
-import com.android.systemui.notifications.ui.composable.NotificationsShade
 import com.android.systemui.notifications.ui.composable.SnoozeableHeadsUpNotificationSpace
 import com.android.systemui.qs.composefragment.ui.GridAnchor
 import com.android.systemui.qs.flags.QsDetailedView
@@ -123,13 +123,14 @@ constructor(
                     },
             )
             OverlayShade(
+                panelElement = QuickSettingsShade.Elements.Panel,
                 panelAlignment = Alignment.TopEnd,
                 onScrimClicked = contentViewModel::onScrimClicked,
                 header = {
                     OverlayShadeHeader(
                         viewModel = quickSettingsContainerViewModel.shadeHeaderViewModel,
                         modifier =
-                            Modifier.element(NotificationsShade.Elements.StatusBar)
+                            Modifier.element(QuickSettingsShade.Elements.StatusBar)
                                 .layoutId(SingleShadeMeasurePolicy.LayoutId.ShadeHeader),
                     )
                 },
@@ -159,7 +160,8 @@ constructor(
                             QuickSettingsOverlayHeader(
                                 viewModel = quickSettingsContainerViewModel.shadeHeaderViewModel,
                                 modifier =
-                                    Modifier.padding(top = QuickSettingsShade.Dimensions.Padding),
+                                    Modifier.element(QuickSettingsShade.Elements.Header)
+                                        .padding(top = QuickSettingsShade.Dimensions.Padding),
                             )
                         }
                     },
@@ -267,6 +269,11 @@ fun ContentScope.QuickSettingsLayout(
 }
 
 object QuickSettingsShade {
+    object Elements {
+        val StatusBar = ElementKey("QuickSettingsShadeOverlayStatusBar")
+        val Panel = ElementKey("QuickSettingsShadeOverlayPanel")
+        val Header = ElementKey("QuickSettingsShadeOverlayHeader")
+    }
 
     object Dimensions {
         val Padding = 16.dp

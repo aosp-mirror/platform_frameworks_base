@@ -85,6 +85,7 @@ constructor(
             }
 
         OverlayShade(
+            panelElement = NotificationsShade.Elements.Panel,
             panelAlignment = Alignment.TopStart,
             modifier = modifier,
             onScrimClicked = viewModel::onScrimClicked,
@@ -144,6 +145,7 @@ constructor(
 
 object NotificationsShade {
     object Elements {
-        val StatusBar = ElementKey("NotificationsShadeStatusBar")
+        val Panel = ElementKey("NotificationsShadeOverlayPanel")
+        val StatusBar = ElementKey("NotificationsShadeOverlayStatusBar")
     }
 }

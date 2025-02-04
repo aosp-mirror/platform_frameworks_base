@@ -58,6 +58,7 @@ import com.android.systemui.res.R
 /** Renders a lightweight shade UI container, as an overlay. */
 @Composable
 fun ContentScope.OverlayShade(
+    panelElement: ElementKey,
     panelAlignment: Alignment,
     onScrimClicked: () -> Unit,
     modifier: Modifier = Modifier,
@@ -75,7 +76,7 @@ fun ContentScope.OverlayShade(
             Panel(
                 modifier =
                     Modifier.overscroll(verticalOverscrollEffect)
-                        .element(OverlayShade.Elements.Panel)
+                        .element(panelElement)
                         .panelWidth(isFullWidth),
                 header = header.takeIf { isFullWidth },
                 content = content,

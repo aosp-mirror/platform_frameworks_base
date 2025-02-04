@@ -21,8 +21,8 @@ import com.android.compose.animation.scene.TransitionBuilder
 import com.android.compose.animation.scene.reveal.ContainerRevealHaptics
 import com.android.compose.animation.scene.reveal.verticalContainerReveal
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockElementKeys
+import com.android.systemui.notifications.ui.composable.NotificationsShade
 import com.android.systemui.scene.shared.model.Overlays
-import com.android.systemui.shade.ui.composable.OverlayShade
 import kotlin.time.Duration.Companion.milliseconds
 
 fun TransitionBuilder.toNotificationsShadeTransition(
@@ -36,7 +36,10 @@ fun TransitionBuilder.toNotificationsShadeTransition(
         ClockElementKeys.smallClockElementKey,
         elevateInContent = Overlays.NotificationsShade,
     )
-    verticalContainerReveal(OverlayShade.Elements.Panel, revealHaptics)
+
+    verticalContainerReveal(NotificationsShade.Elements.Panel, revealHaptics)
+
+    fade(NotificationsShade.Elements.StatusBar)
 }
 
 private val DefaultDuration = 300.milliseconds

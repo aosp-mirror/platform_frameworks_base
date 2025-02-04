@@ -20,7 +20,7 @@ import androidx.compose.animation.core.tween
 import com.android.compose.animation.scene.TransitionBuilder
 import com.android.compose.animation.scene.reveal.ContainerRevealHaptics
 import com.android.compose.animation.scene.reveal.verticalContainerReveal
-import com.android.systemui.shade.ui.composable.OverlayShade
+import com.android.systemui.qs.ui.composable.QuickSettingsShade
 import kotlin.time.Duration.Companion.milliseconds
 
 fun TransitionBuilder.toQuickSettingsShadeTransition(
@@ -29,7 +29,9 @@ fun TransitionBuilder.toQuickSettingsShadeTransition(
 ) {
     spec = tween(durationMillis = (DefaultDuration * durationScale).inWholeMilliseconds.toInt())
 
-    verticalContainerReveal(OverlayShade.Elements.Panel, revealHaptics)
+    verticalContainerReveal(QuickSettingsShade.Elements.Panel, revealHaptics)
+
+    fade(QuickSettingsShade.Elements.StatusBar)
 }
 
 private val DefaultDuration = 300.milliseconds
