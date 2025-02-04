@@ -769,6 +769,11 @@ class ActivityMetricsLogger {
             // As abort for no process switch.
             launchObserverNotifyIntentFailed(newInfo.mLaunchingState.mStartUptimeNs);
         }
+        if (Intent.ACTION_PROCESS_TEXT.equals(newInfo.mLastLaunchedActivity.intent.getAction())) {
+            mLoggerHandler.post(PooledLambda.obtainRunnable(FrameworkStatsLog::write,
+                    FrameworkStatsLog.PROCESS_TEXT_ACTION_LAUNCHED_REPORTED,
+                    launchedActivity.launchedFromUid, launchedActivity.getUid()));
+        }
         scheduleCheckActivityToBeDrawnIfSleeping(launchedActivity);
 
         // If the previous transitions are no longer visible, abort them to avoid counting the
