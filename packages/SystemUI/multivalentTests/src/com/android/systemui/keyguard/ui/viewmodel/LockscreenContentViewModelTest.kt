@@ -25,8 +25,10 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
 import com.android.systemui.keyguard.shared.model.ClockSize
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
@@ -236,6 +238,10 @@ class LockscreenContentViewModelTest(flags: FlagsParameterization) : SysuiTestCa
                 val isContentVisible by collectLastValue(underTest.isContentVisible)
 
                 keyguardOcclusionRepository.setShowWhenLockedActivityInfo(true, null)
+                fakeKeyguardTransitionRepository.transitionTo(
+                    KeyguardState.LOCKSCREEN,
+                    KeyguardState.OCCLUDED,
+                )
                 runCurrent()
                 assertThat(isContentVisible).isFalse()
             }
@@ -246,12 +252,46 @@ class LockscreenContentViewModelTest(flags: FlagsParameterization) : SysuiTestCa
         with(kosmos) {
             testScope.runTest {
                 val isContentVisible by collectLastValue(underTest.isContentVisible)
+
                 keyguardOcclusionRepository.setShowWhenLockedActivityInfo(true, null)
+                fakeKeyguardTransitionRepository.transitionTo(
+                    KeyguardState.LOCKSCREEN,
+                    KeyguardState.OCCLUDED,
+                )
                 runCurrent()
 
                 sceneInteractor.snapToScene(Scenes.Shade, "")
                 runCurrent()
                 assertThat(isContentVisible).isFalse()
+            }
+        }
+
+    @Test
+    fun isContentVisible_whenOccluded_notVisibleInOccluded_visibleInAod() =
+        with(kosmos) {
+            testScope.runTest {
+                val isContentVisible by collectLastValue(underTest.isContentVisible)
+                keyguardOcclusionRepository.setShowWhenLockedActivityInfo(true, null)
+                fakeKeyguardTransitionRepository.transitionTo(
+                    KeyguardState.LOCKSCREEN,
+                    KeyguardState.OCCLUDED,
+                )
+                runCurrent()
+
+                sceneInteractor.snapToScene(Scenes.Shade, "")
+                runCurrent()
+                assertThat(isContentVisible).isFalse()
+
+                fakeKeyguardTransitionRepository.transitionTo(
+                    KeyguardState.OCCLUDED,
+                    KeyguardState.AOD,
+                )
+                runCurrent()
+
+                sceneInteractor.snapToScene(Scenes.Lockscreen, "")
+                runCurrent()
+
+                assertThat(isContentVisible).isTrue()
             }
         }
 

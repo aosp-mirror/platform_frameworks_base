@@ -24,10 +24,11 @@ import com.android.systemui.customization.R as customR
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.ClockSize
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.res.R
-import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
 import dagger.assisted.AssistedFactory
@@ -54,8 +55,8 @@ constructor(
     val touchHandling: KeyguardTouchHandlingViewModel,
     private val shadeInteractor: ShadeInteractor,
     private val unfoldTransitionInteractor: UnfoldTransitionInteractor,
-    private val occlusionInteractor: SceneContainerOcclusionInteractor,
     private val deviceEntryInteractor: DeviceEntryInteractor,
+    private val transitionInteractor: KeyguardTransitionInteractor,
 ) : ExclusiveActivatable() {
     @VisibleForTesting val clockSize = clockInteractor.clockSize
 
@@ -89,9 +90,15 @@ constructor(
             }
 
             launch {
-                occlusionInteractor.isOccludingActivityShown
-                    .map { !it }
-                    .collect { _isContentVisible.value = it }
+                transitionInteractor
+                    .transitionValue(KeyguardState.OCCLUDED)
+                    .map { it > 0f }
+                    .collect { fullyOrPartiallyOccluded ->
+                        // Content is visible unless we're OCCLUDED. Currently, we don't have nice
+                        // animations into and out of OCCLUDED, so the lockscreen/AOD content is
+                        // hidden immediately upon entering/exiting OCCLUDED.
+                        _isContentVisible.value = !fullyOrPartiallyOccluded
+                    }
             }
 
             awaitCancellation()
