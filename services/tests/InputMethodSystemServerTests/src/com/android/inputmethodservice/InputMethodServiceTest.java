@@ -211,7 +211,6 @@ public class InputMethodServiceTest {
      * lose flags like HIDE_IMPLICIT_ONLY.
      */
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testShowHideSelf() throws Exception {
         setShowImeWithHardKeyboard(true /* enabled */);
 
@@ -223,13 +222,16 @@ public class InputMethodServiceTest {
                 true /* inputViewStarted */);
         assertThat(mInputMethodService.isInputViewShown()).isTrue();
 
-        // IME request to hide itself with flag HIDE_IMPLICIT_ONLY, expect not hide (shown).
-        Log.i(TAG, "Call IMS#requestHideSelf(InputMethodManager.HIDE_IMPLICIT_ONLY)");
-        verifyInputViewStatusOnMainSync(
-                () -> mInputMethodService.requestHideSelf(InputMethodManager.HIDE_IMPLICIT_ONLY),
-                false /* expected */,
-                true /* inputViewStarted */);
-        assertThat(mInputMethodService.isInputViewShown()).isTrue();
+        if (!mFlagsValueProvider.getBoolean(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)) {
+            // IME request to hide itself with flag HIDE_IMPLICIT_ONLY, expect not hide (shown).
+            Log.i(TAG, "Call IMS#requestHideSelf(InputMethodManager.HIDE_IMPLICIT_ONLY)");
+            verifyInputViewStatusOnMainSync(
+                    () -> mInputMethodService.requestHideSelf(
+                            InputMethodManager.HIDE_IMPLICIT_ONLY),
+                    false /* expected */,
+                    true /* inputViewStarted */);
+            assertThat(mInputMethodService.isInputViewShown()).isTrue();
+        }
 
         // IME request to hide itself without any flags, expect hidden.
         Log.i(TAG, "Call IMS#requestHideSelf(0)");
@@ -237,23 +239,32 @@ public class InputMethodServiceTest {
                 () -> mInputMethodService.requestHideSelf(0 /* flags */),
                 true /* expected */,
                 false /* inputViewStarted */);
-        assertThat(mInputMethodService.isInputViewShown()).isFalse();
+        if (mFlagsValueProvider.getBoolean(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)) {
+            // The IME visibility is only sent at the end of the animation. Therefore, we have to
+            // wait until the visibility was sent to the server and the IME window hidden.
+            eventually(() -> assertThat(mInputMethodService.isInputViewShown()).isFalse());
+        } else {
+            assertThat(mInputMethodService.isInputViewShown()).isFalse();
+        }
 
-        // IME request to show itself with flag SHOW_IMPLICIT, expect shown.
-        Log.i(TAG, "Call IMS#requestShowSelf(InputMethodManager.SHOW_IMPLICIT)");
-        verifyInputViewStatusOnMainSync(
-                () -> mInputMethodService.requestShowSelf(InputMethodManager.SHOW_IMPLICIT),
-                true /* expected */,
-                true /* inputViewStarted */);
-        assertThat(mInputMethodService.isInputViewShown()).isTrue();
+        if (!mFlagsValueProvider.getBoolean(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)) {
+            // IME request to show itself with flag SHOW_IMPLICIT, expect shown.
+            Log.i(TAG, "Call IMS#requestShowSelf(InputMethodManager.SHOW_IMPLICIT)");
+            verifyInputViewStatusOnMainSync(
+                    () -> mInputMethodService.requestShowSelf(InputMethodManager.SHOW_IMPLICIT),
+                    true /* expected */,
+                    true /* inputViewStarted */);
+            assertThat(mInputMethodService.isInputViewShown()).isTrue();
 
-        // IME request to hide itself with flag HIDE_IMPLICIT_ONLY, expect hidden.
-        Log.i(TAG, "Call IMS#requestHideSelf(InputMethodManager.HIDE_IMPLICIT_ONLY)");
-        verifyInputViewStatusOnMainSync(
-                () -> mInputMethodService.requestHideSelf(InputMethodManager.HIDE_IMPLICIT_ONLY),
-                true /* expected */,
-                false /* inputViewStarted */);
-        assertThat(mInputMethodService.isInputViewShown()).isFalse();
+            // IME request to hide itself with flag HIDE_IMPLICIT_ONLY, expect hidden.
+            Log.i(TAG, "Call IMS#requestHideSelf(InputMethodManager.HIDE_IMPLICIT_ONLY)");
+            verifyInputViewStatusOnMainSync(
+                    () -> mInputMethodService.requestHideSelf(
+                            InputMethodManager.HIDE_IMPLICIT_ONLY),
+                    true /* expected */,
+                    false /* inputViewStarted */);
+            assertThat(mInputMethodService.isInputViewShown()).isFalse();
+        }
     }
 
     /**
