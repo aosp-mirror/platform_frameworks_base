@@ -7967,7 +7967,7 @@ public abstract class PackageManager {
      * @param flags Additional option flags to modify the data returned.
      * @return Returns a List of ResolveInfo objects containing one entry for
      *         each matching receiver, ordered from best to worst. If there are
-     *         no matching receivers, an empty list or null is returned.
+     *         no matching receivers, returns an empty list.
      */
     @NonNull
     public abstract List<ResolveInfo> queryBroadcastReceivers(@NonNull Intent intent, int flags);
@@ -7994,7 +7994,7 @@ public abstract class PackageManager {
      * @param userHandle UserHandle of the user being queried.
      * @return Returns a List of ResolveInfo objects containing one entry for
      *         each matching receiver, ordered from best to worst. If there are
-     *         no matching receivers, an empty list or null is returned.
+     *         no matching receivers, returns an empty list.
      * @hide
      */
     @SuppressWarnings("HiddenAbstractMethod")
@@ -8111,8 +8111,8 @@ public abstract class PackageManager {
      * @return Returns a List of ResolveInfo objects containing one entry for
      *         each matching service, ordered from best to worst. In other
      *         words, the first item is what would be returned by
-     *         {@link #resolveService}. If there are no matching services, an
-     *         empty list or null is returned.
+     *         {@link #resolveService}. If there are no matching services,
+     *         returns an empty list.
      */
     @NonNull
     public abstract List<ResolveInfo> queryIntentServices(@NonNull Intent intent,
@@ -8140,8 +8140,8 @@ public abstract class PackageManager {
      * @return Returns a List of ResolveInfo objects containing one entry for
      *         each matching service, ordered from best to worst. In other
      *         words, the first item is what would be returned by
-     *         {@link #resolveService}. If there are no matching services, an
-     *         empty list or null is returned.
+     *         {@link #resolveService}. If there are no matching services,
+     *         returns an empty list.
      * @hide
      */
     @SuppressWarnings("HiddenAbstractMethod")
@@ -8173,8 +8173,8 @@ public abstract class PackageManager {
      * @return Returns a List of ResolveInfo objects containing one entry for
      *         each matching service, ordered from best to worst. In other
      *         words, the first item is what would be returned by
-     *         {@link #resolveService}. If there are no matching services, an
-     *         empty list or null is returned.
+     *         {@link #resolveService}. If there are no matching services,
+     *         returns an empty list.
      * @hide
      */
     @NonNull
@@ -8208,7 +8208,7 @@ public abstract class PackageManager {
      * @param userId The user id.
      * @return Returns a List of ResolveInfo objects containing one entry for
      *         each matching provider, ordered from best to worst. If there are
-     *         no matching services, an empty list or null is returned.
+     *         no matching services, returns an empty list.
      * @hide
      */
     @SuppressWarnings("HiddenAbstractMethod")
@@ -8240,7 +8240,7 @@ public abstract class PackageManager {
      * @param user The user being queried.
      * @return Returns a List of ResolveInfo objects containing one entry for
      *         each matching provider, ordered from best to worst. If there are
-     *         no matching services, an empty list or null is returned.
+     *         no matching services, returns an empty list.
      * @hide
      */
     @NonNull
@@ -8274,7 +8274,7 @@ public abstract class PackageManager {
      * @param flags Additional option flags to modify the data returned.
      * @return Returns a List of ResolveInfo objects containing one entry for
      *         each matching provider, ordered from best to worst. If there are
-     *         no matching services, an empty list or null is returned.
+     *         no matching services, returns an empty list.
      */
     @NonNull
     public abstract List<ResolveInfo> queryIntentContentProviders(@NonNull Intent intent,
