@@ -987,6 +987,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
                     } else {
                         animateToUnexpandedState(getUserResizeBounds());
                     }
+                    mPipBoundsState.setHasUserResizedPip(true);
                 } else {
                     // Expand to fullscreen if this is a double tap
                     // the PiP should be frozen until the transition ends
