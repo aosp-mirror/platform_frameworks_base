@@ -25,6 +25,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -42,6 +43,7 @@ import kotlin.Unit;
 import java.util.Objects;
 
 public class EmptyShadeView extends StackScrollerDecorView implements LaunchableView {
+    private static final String TAG = "EmptyShadeView";
 
     private TextView mEmptyText;
     private TextView mEmptyFooterText;
@@ -55,7 +57,7 @@ public class EmptyShadeView extends StackScrollerDecorView implements Launchable
     private @Visibility int mFooterVisibility = View.GONE;
     private int mSize;
 
-    private LaunchableViewDelegate mLaunchableViewDelegate = new LaunchableViewDelegate(this,
+    private final LaunchableViewDelegate mLaunchableViewDelegate = new LaunchableViewDelegate(this,
             visibility -> {
                 super.setVisibility(visibility);
                 return Unit.INSTANCE;
@@ -179,8 +181,12 @@ public class EmptyShadeView extends StackScrollerDecorView implements Launchable
         if (icon == 0) {
             drawable = null;
         } else {
-            drawable = getResources().getDrawable(icon);
-            drawable.setBounds(0, 0, mSize, mSize);
+            drawable = getContext().getDrawable(icon);
+            if (drawable != null) {
+                drawable.setBounds(0, 0, mSize, mSize);
+            } else {
+                Log.w(TAG, "Invalid footer icon resource ID");
+            }
         }
         mEmptyFooterText.setCompoundDrawablesRelative(drawable, null, null, null);
     }
@@ -224,8 +230,7 @@ public class EmptyShadeView extends StackScrollerDecorView implements Launchable
         @Override
         public void applyToView(View view) {
             super.applyToView(view);
-            if (view instanceof EmptyShadeView) {
-                EmptyShadeView emptyShadeView = (EmptyShadeView) view;
+            if (view instanceof EmptyShadeView emptyShadeView) {
                 boolean visible = this.clipTopAmount <= mEmptyText.getPaddingTop() * 0.6f;
                 emptyShadeView.setContentVisibleAnimated(visible && emptyShadeView.isVisible());
             }
