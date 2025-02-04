@@ -648,3 +648,13 @@ flag {
        purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "enable_desktop_trampoline_close_animation_bugfix"
+    namespace: "lse_desktop_experience"
+    description: "Enables a close animation when the app trampolines (a second window is opened, and the first is closed)."
+    bug: "391548553"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
