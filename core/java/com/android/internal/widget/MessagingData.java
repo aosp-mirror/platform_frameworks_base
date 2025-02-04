@@ -39,10 +39,10 @@ final class MessagingData {
     MessagingData(Person user, boolean showSpinner,
             List<MessagingMessage> historicMessagingMessages,
             List<MessagingMessage> newMessagingMessages, List<List<MessagingMessage>> groups,
-            List<Person> senders) {
+            List<Person> senders, CharSequence summarization) {
         this(user, showSpinner, /* unreadCount= */0,
                 historicMessagingMessages, newMessagingMessages,
-                groups, senders, null, null);
+                groups, senders, null, summarization);
     }
 
     MessagingData(Person user, boolean showSpinner,
