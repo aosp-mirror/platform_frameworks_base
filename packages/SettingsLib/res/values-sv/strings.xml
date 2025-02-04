@@ -424,8 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Skala – övergångsanimering"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Längdskala för Animator"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simulera sekundär skärm"</string>
-    <!-- no translation found for shade_display_awareness_title (8000009404669495876) -->
-    <skip />
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Panelens placering på skärmen"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Appar"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Behåll inte aktiviteter"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Förstör aktiviteter så fort användaren lämnar dem"</string>
