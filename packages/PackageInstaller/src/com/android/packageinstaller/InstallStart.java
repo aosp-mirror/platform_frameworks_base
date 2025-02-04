@@ -56,7 +56,7 @@ public class InstallStart extends Activity {
         mPackageManager = getPackageManager();
         mUserManager = getSystemService(UserManager.class);
         Intent intent = getIntent();
-        String callingPackage = getCallingPackage();
+        String callingPackage = getLaunchedFromPackage();
         String callingAttributionTag = null;
 
         final boolean isSessionInstall =

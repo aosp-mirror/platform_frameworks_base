@@ -239,6 +239,11 @@ public class LockTaskControllerTest {
         verifyLockTaskStarted(STATUS_BAR_MASK_PINNED, DISABLE2_NONE);
         // THEN screen pinning toast should be shown
         verify(mStatusBarService).showPinningEnterExitToast(eq(true /* entering */));
+
+        // WHEN the app calls startLockTaskMode while the Task is already locked
+        mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
+        // THEN a pinning request should NOT be shown
+        verify(mStatusBarManagerInternal, never()).showScreenPinningRequest(anyInt());
     }
 
     @Test
