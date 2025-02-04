@@ -219,6 +219,7 @@ class ExpandableNotificationRowBuilder(
             }
         val conversationProcessor =
             ConversationNotificationProcessor(
+                context,
                 Mockito.mock(LauncherApps::class.java, STUB_ONLY),
                 Mockito.mock(ConversationNotificationManager::class.java, STUB_ONLY),
             )

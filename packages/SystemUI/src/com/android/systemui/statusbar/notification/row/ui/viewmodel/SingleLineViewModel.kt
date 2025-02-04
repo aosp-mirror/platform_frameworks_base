@@ -46,7 +46,7 @@ data class SingleLineViewModel(
 data class ConversationData(
     val conversationSenderName: CharSequence?,
     val avatar: ConversationAvatar,
-    val summarization: String?
+    val summarization: CharSequence?
 )
 
 /**

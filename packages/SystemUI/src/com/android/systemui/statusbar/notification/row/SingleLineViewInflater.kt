@@ -61,7 +61,7 @@ internal object SingleLineViewInflater {
         builder: Notification.Builder,
         systemUiContext: Context,
         redactText: Boolean,
-        summarization: String?
+        summarization: CharSequence?
     ): SingleLineViewModel {
         if (AsyncHybridViewInflation.isUnexpectedlyInLegacyMode()) {
             return SingleLineViewModel(null, null, null)
