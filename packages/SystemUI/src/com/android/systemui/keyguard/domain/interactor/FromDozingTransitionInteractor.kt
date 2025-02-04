@@ -77,6 +77,7 @@ constructor(
 
     override fun start() {
         listenForDozingToAny()
+        listenForDozingToDreaming()
         listenForDozingToGoneViaBiometrics()
         listenForWakeFromDozing()
         listenForTransitionToCamera(scope, keyguardInteractor)
@@ -127,6 +128,18 @@ constructor(
         } else {
             isCommunalAvailable && dreamManager.canStartDreaming(false)
         }
+
+    @OptIn(FlowPreview::class)
+    @SuppressLint("MissingPermission")
+    private fun listenForDozingToDreaming() {
+        scope.launch {
+            keyguardInteractor.isAbleToDream
+                .filterRelevantKeyguardStateAnd { isAbleToDream -> isAbleToDream }
+                .collect {
+                    startTransitionTo(KeyguardState.DREAMING, ownerReason = "isAbleToDream")
+                }
+        }
+    }
 
     @OptIn(FlowPreview::class)
     @SuppressLint("MissingPermission")
@@ -284,6 +297,7 @@ constructor(
             interpolator = Interpolators.LINEAR
             duration =
                 when (toState) {
+                    KeyguardState.DREAMING -> TO_DREAMING_DURATION
                     KeyguardState.GONE -> TO_GONE_DURATION
                     KeyguardState.GLANCEABLE_HUB -> TO_GLANCEABLE_HUB_DURATION
                     KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
@@ -297,6 +311,7 @@ constructor(
     companion object {
         const val TAG = "FromDozingTransitionInteractor"
         private val DEFAULT_DURATION = 500.milliseconds
+        val TO_DREAMING_DURATION = 300.milliseconds
         val TO_GLANCEABLE_HUB_DURATION = DEFAULT_DURATION
         val TO_GONE_DURATION = DEFAULT_DURATION
         val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
