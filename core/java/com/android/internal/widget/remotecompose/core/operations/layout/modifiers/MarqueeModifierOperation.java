@@ -29,6 +29,8 @@ import com.android.internal.widget.remotecompose.core.operations.layout.Componen
 import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponent;
 import com.android.internal.widget.remotecompose.core.operations.layout.ScrollDelegate;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
@@ -248,5 +250,18 @@ public class MarqueeModifierOperation extends DecoratorModifierOperation impleme
             setContentWidth(layoutComponent.intrinsicWidth(context));
             setContentHeight(layoutComponent.intrinsicHeight(context));
         }
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER)
+                .add("type", "MarqueeModifierOperation")
+                .add("iterations", mIterations)
+                .add("animationMode", mAnimationMode)
+                .add("repeatDelayMillis", mRepeatDelayMillis)
+                .add("initialDelayMillis", mInitialDelayMillis)
+                .add("spacing", mSpacing)
+                .add("velocity", mVelocity);
     }
 }

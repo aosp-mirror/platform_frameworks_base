@@ -50,6 +50,7 @@ import com.android.internal.widget.remotecompose.core.operations.FloatExpression
 import com.android.internal.widget.remotecompose.core.operations.FloatFunctionCall;
 import com.android.internal.widget.remotecompose.core.operations.FloatFunctionDefine;
 import com.android.internal.widget.remotecompose.core.operations.Header;
+import com.android.internal.widget.remotecompose.core.operations.ImageAttribute;
 import com.android.internal.widget.remotecompose.core.operations.IntegerExpression;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRestore;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRotate;
@@ -68,6 +69,7 @@ import com.android.internal.widget.remotecompose.core.operations.PathTween;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
 import com.android.internal.widget.remotecompose.core.operations.RootContentDescription;
 import com.android.internal.widget.remotecompose.core.operations.ShaderData;
+import com.android.internal.widget.remotecompose.core.operations.TextAttribute;
 import com.android.internal.widget.remotecompose.core.operations.TextData;
 import com.android.internal.widget.remotecompose.core.operations.TextFromFloat;
 import com.android.internal.widget.remotecompose.core.operations.TextLength;
@@ -76,6 +78,7 @@ import com.android.internal.widget.remotecompose.core.operations.TextLookupInt;
 import com.android.internal.widget.remotecompose.core.operations.TextMeasure;
 import com.android.internal.widget.remotecompose.core.operations.TextMerge;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
+import com.android.internal.widget.remotecompose.core.operations.TimeAttribute;
 import com.android.internal.widget.remotecompose.core.operations.TouchExpression;
 import com.android.internal.widget.remotecompose.core.operations.layout.CanvasContent;
 import com.android.internal.widget.remotecompose.core.operations.layout.ClickModifierOperation;
@@ -209,6 +212,9 @@ public class Operations {
     public static final int IMPULSE_PROCESS = 165;
     public static final int FUNCTION_CALL = 166;
     public static final int FUNCTION_DEFINE = 168;
+    public static final int ATTRIBUTE_TEXT = 170;
+    public static final int ATTRIBUTE_IMAGE = 171;
+    public static final int ATTRIBUTE_TIME = 172;
 
     ///////////////////////////////////////// ======================
 
@@ -405,6 +411,10 @@ public class Operations {
         map.put(FUNCTION_DEFINE, FloatFunctionDefine::read);
 
         map.put(ACCESSIBILITY_SEMANTICS, CoreSemantics::read);
+        map.put(ATTRIBUTE_IMAGE, ImageAttribute::read);
+        map.put(ATTRIBUTE_TEXT, TextAttribute::read);
+        map.put(ATTRIBUTE_TIME, TimeAttribute::read);
+
         //        map.put(ACCESSIBILITY_CUSTOM_ACTION, CoreSemantics::read);
     }
 }

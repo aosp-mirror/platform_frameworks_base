@@ -25,11 +25,13 @@ import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.Serializable;
 
 import java.util.List;
 
 /** Base class for commands that take 3 float */
-public abstract class DrawBase2 extends PaintOperation implements VariableSupport {
+public abstract class DrawBase2 extends PaintOperation implements VariableSupport, Serializable {
     @NonNull protected String mName = "DrawRectBase";
     float mV1;
     float mV2;
@@ -116,5 +118,9 @@ public abstract class DrawBase2 extends PaintOperation implements VariableSuppor
         buffer.start(opCode);
         buffer.writeFloat(x1);
         buffer.writeFloat(y1);
+    }
+
+    protected MapSerializer serialize(MapSerializer serializer, String v1Name, String v2Name) {
+        return serializer.add(v1Name, mV1, mValue1).add(v2Name, mV2, mValue2);
     }
 }

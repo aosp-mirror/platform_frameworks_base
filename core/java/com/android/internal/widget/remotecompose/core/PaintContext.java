@@ -24,6 +24,8 @@ import com.android.internal.widget.remotecompose.core.operations.paint.PaintBund
 public abstract class PaintContext {
     public static final int TEXT_MEASURE_MONOSPACE_WIDTH = 0x01;
     public static final int TEXT_MEASURE_FONT_HEIGHT = 0x02;
+    public static final int TEXT_MEASURE_SPACES = 0x04;
+    public static final int TEXT_COMPLEX = 0x08;
 
     protected @NonNull RemoteContext mContext;
     private boolean mNeedsRepaint = false;
@@ -233,13 +235,51 @@ public abstract class PaintContext {
      * @param textId
      * @param start
      * @param end if end is -1 it means the whole string
-     * @param flags how to measure: TEXT_MEASURE_MONOSPACE_WIDTH - measure as a monospace font
-     *     TEXT_MEASURE_FULL_HEIGHT - measure bounds of the given string using the max ascend and
-     *     descent of the font (not just of the measured text)
+     * @param flags how to measure:
+     *     <ul>
+     *       <li>TEXT_MEASURE_MONOSPACE_WIDTH - measure as a monospace font
+     *       <li>TEXT_MEASURE_FULL_HEIGHT - measure bounds of the given string using the max ascend
+     *           and descent of the font (not just of the measured text).
+     *       <li>TEXT_MEASURE_SPACES - make sure to include leading/trailing spaces in the measure
+     *       <li>TEXT_MEASURE_COMPLEX - complex text
+     *     </ul>
+     *
      * @param bounds the bounds (left, top, right, bottom)
      */
     public abstract void getTextBounds(
             int textId, int start, int end, int flags, @NonNull float[] bounds);
+
+    /**
+     * Compute complex text layout
+     *
+     * @param textId
+     * @param start
+     * @param end if end is -1 it means the whole string
+     * @param alignment draw the text aligned start/center/end in the available space if > text
+     *     length
+     * @param overflow overflow behavior when text length > max width
+     * @param maxLines maximum number of lines to display
+     * @param maxWidth maximum width to layout the text
+     * @param flags how to measure:
+     *     <ul>
+     *       <li>TEXT_MEASURE_MONOSPACE_WIDTH - measure as a monospace font
+     *       <li>TEXT_MEASURE_FULL_HEIGHT - measure bounds of the given string using the max ascend
+     *           and descent of the font (not just of the measured text).
+     *       <li>TEXT_MEASURE_SPACES - make sure to include leading/trailing spaces in the measure
+     *       <li>TEXT_MEASURE_COMPLEX - complex text
+     *     </ul>
+     *
+     * @return an instance of a ComputedTextLayout (typically if complex text drawing is used)
+     */
+    public abstract Platform.ComputedTextLayout layoutComplexText(
+            int textId,
+            int start,
+            int end,
+            int alignment,
+            int overflow,
+            int maxLines,
+            float maxWidth,
+            int flags);
 
     /**
      * Draw a text starting ast x,y
@@ -262,6 +302,13 @@ public abstract class PaintContext {
             float x,
             float y,
             boolean rtl);
+
+    /**
+     * Draw a complex text (multilines, etc.)
+     *
+     * @param computedTextLayout pre-computed text layout
+     */
+    public abstract void drawComplexText(Platform.ComputedTextLayout computedTextLayout);
 
     /**
      * Draw an interpolation between two paths

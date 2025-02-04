@@ -25,11 +25,13 @@ import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.Serializable;
 
 import java.util.List;
 
 /** Base class for draw commands that take 4 floats */
-public abstract class DrawBase4 extends PaintOperation implements VariableSupport {
+public abstract class DrawBase4 extends PaintOperation implements VariableSupport, Serializable {
     @NonNull protected String mName = "DrawRectBase";
     protected float mX1;
     protected float mY1;
@@ -151,5 +153,14 @@ public abstract class DrawBase4 extends PaintOperation implements VariableSuppor
         buffer.writeFloat(y1);
         buffer.writeFloat(x2);
         buffer.writeFloat(y2);
+    }
+
+    protected MapSerializer serialize(
+            MapSerializer serializer, String x1Name, String y1Name, String x2Name, String y2Name) {
+        return serializer
+                .add(x1Name, mX1, mX1Value)
+                .add(y1Name, mY1, mY1Value)
+                .add(x2Name, mX2, mX2Value)
+                .add(y2Name, mY2, mY2Value);
     }
 }

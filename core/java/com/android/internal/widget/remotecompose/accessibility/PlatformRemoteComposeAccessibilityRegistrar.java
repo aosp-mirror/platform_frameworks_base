@@ -34,7 +34,7 @@ public class PlatformRemoteComposeAccessibilityRegistrar
                 player,
                 new CoreDocumentAccessibility(
                         coreDocument, ((RemoteContextAware) player).getRemoteContext()),
-                new AndroidPlatformSemanticNodeApplier());
+                new AndroidPlatformSemanticNodeApplier(player));
     }
 
     public void setAccessibilityDelegate(View remoteComposePlayer, CoreDocument document) {

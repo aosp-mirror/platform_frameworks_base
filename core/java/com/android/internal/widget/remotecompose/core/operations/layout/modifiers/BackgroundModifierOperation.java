@@ -28,6 +28,8 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
@@ -220,5 +222,18 @@ public class BackgroundModifierOperation extends DecoratorModifierOperation {
                 .field(FLOAT, "b", "")
                 .field(FLOAT, "a", "")
                 .field(FLOAT, "shapeType", "0 for RECTANGLE, 1 for CIRCLE");
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER)
+                .add("type", "BackgroundModifierOperation")
+                .add("x", mX)
+                .add("y", mY)
+                .add("width", mWidth)
+                .add("height", mHeight)
+                .add("color", mA, mR, mG, mB)
+                .add("shapeType", ShapeType.getString(mShapeType));
     }
 }

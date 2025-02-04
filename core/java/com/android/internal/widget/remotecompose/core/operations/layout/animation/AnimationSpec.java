@@ -26,7 +26,9 @@ import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.operations.utilities.easing.Easing;
 import com.android.internal.widget.remotecompose.core.operations.utilities.easing.GeneralEasing;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
 
 import java.util.List;
 
@@ -122,6 +124,18 @@ public class AnimationSpec extends Operation implements ModifierOperation {
                         + ", "
                         + getExitAnimation()
                         + "]");
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .add("type", "AnimationSpec")
+                .add("motionDuration", getMotionDuration())
+                .add("motionEasingType", Easing.getString(getMotionEasingType()))
+                .add("visibilityDuration", getVisibilityDuration())
+                .add("visibilityEasingType", Easing.getString(getVisibilityEasingType()))
+                .add("enterAnimation", getEnterAnimation())
+                .add("exitAnimation", getExitAnimation());
     }
 
     public enum ANIMATION {

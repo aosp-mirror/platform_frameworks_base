@@ -19,9 +19,11 @@ import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.utilities.easing.FloatAnimation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.easing.GeneralEasing;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.Serializable;
 
 /** Value animation for layouts */
-public class AnimatableValue {
+public class AnimatableValue implements Serializable {
     boolean mIsVariable = false;
     int mId = 0;
     float mValue = 0f;
@@ -123,5 +125,10 @@ public class AnimatableValue {
     @Override
     public String toString() {
         return "AnimatableValue{mId=" + mId + "}";
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer.add("type", "AnimatableValue").add("id", mId);
     }
 }

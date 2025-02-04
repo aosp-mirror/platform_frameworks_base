@@ -16,11 +16,15 @@
 package com.android.internal.widget.remotecompose.accessibility;
 
 import android.graphics.Rect;
+import android.util.Log;
 
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
+import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponent;
 import com.android.internal.widget.remotecompose.core.semantics.AccessibilitySemantics;
 import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent;
 import com.android.internal.widget.remotecompose.core.semantics.CoreSemantics;
+import com.android.internal.widget.remotecompose.core.semantics.ScrollableComponent;
+import com.android.internal.widget.remotecompose.core.semantics.ScrollableComponent.ScrollAxisRange;
 
 import java.util.List;
 
@@ -37,6 +41,8 @@ import java.util.List;
  * @param <N> The type of node this applier works with.
  */
 public abstract class BaseSemanticNodeApplier<N> implements SemanticNodeApplier<N> {
+    private static final String LOG_TAG = "RemoteCompose";
+
     @Override
     public void applyComponent(
             RemoteComposeDocumentAccessibility remoteComposeAccessibility,
@@ -74,6 +80,15 @@ public abstract class BaseSemanticNodeApplier<N> implements SemanticNodeApplier<
         if (getText(nodeInfo) == null && getContentDescription(nodeInfo) == null) {
             setContentDescription(nodeInfo, "");
         }
+
+        if (component.getParent() instanceof LayoutComponent) {
+            LayoutComponent parent = (LayoutComponent) component.getParent();
+            ScrollableComponent scrollable = parent.selfOrModifier(ScrollableComponent.class);
+
+            if (scrollable != null) {
+                applyListItem(nodeInfo, parent.getComponentId());
+            }
+        }
     }
 
     protected void applySemantics(
@@ -106,6 +121,15 @@ public abstract class BaseSemanticNodeApplier<N> implements SemanticNodeApplier<
                     }
 
                     applyRole(accessibleComponent.getRole(), nodeInfo);
+                } else if (semantic instanceof ScrollableComponent) {
+                    ScrollableComponent scrollableSemantic = (ScrollableComponent) semantic;
+
+                    if (scrollableSemantic.supportsScrollByOffset()) {
+                        ScrollAxisRange scrollAxis = scrollableSemantic.getScrollAxisRange();
+                        applyScrollable(nodeInfo, scrollAxis, scrollableSemantic.scrollDirection());
+                    }
+                } else {
+                    Log.w(LOG_TAG, "Unknown semantic: " + semantic);
                 }
             }
         }
@@ -154,10 +178,8 @@ public abstract class BaseSemanticNodeApplier<N> implements SemanticNodeApplier<
             N nodeInfo,
             RemoteComposeDocumentAccessibility remoteComposeAccessibility) {
         if (textId != null) {
-            setText(
-                    nodeInfo,
-                    appendNullable(
-                            getText(nodeInfo), remoteComposeAccessibility.stringValue(textId)));
+            String value = remoteComposeAccessibility.stringValue(textId);
+            setText(nodeInfo, appendNullable(getText(nodeInfo), value));
         }
     }
 
@@ -205,4 +227,9 @@ public abstract class BaseSemanticNodeApplier<N> implements SemanticNodeApplier<
     protected abstract void setBoundsInScreen(N nodeInfo, Rect bounds);
 
     protected abstract void setUniqueId(N nodeInfo, String s);
+
+    protected abstract void applyScrollable(
+            N nodeInfo, ScrollAxisRange scrollAxis, int scrollDirection);
+
+    protected abstract void applyListItem(N nodeInfo, int parentId);
 }

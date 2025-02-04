@@ -18,6 +18,7 @@ package com.android.internal.widget.remotecompose.accessibility;
 import android.annotation.Nullable;
 import android.graphics.PointF;
 import android.os.Bundle;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
@@ -31,6 +32,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.modifier
 import com.android.internal.widget.remotecompose.core.semantics.AccessibilitySemantics;
 import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent;
 import com.android.internal.widget.remotecompose.core.semantics.CoreSemantics;
+import com.android.internal.widget.remotecompose.core.semantics.ScrollableComponent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -95,14 +97,90 @@ public class CoreDocumentAccessibility implements RemoteComposeDocumentAccessibi
         return result;
     }
 
-    @Override
     public boolean performAction(Component component, int action, Bundle arguments) {
-        if (action == ACTION_CLICK) {
-            mDocument.performClick(mRemoteContext, component.getComponentId());
-            return true;
-        } else {
-            return false;
+        boolean needsRepaint = true;
+
+        try {
+            if (isClickAction(action)) {
+                return performClick(component);
+            } else if (isScrollForwardAction(action)) {
+                return scrollByOffset(mRemoteContext, component, -500) != 0;
+            } else if (isScrollBackwardAction(action)) {
+                return scrollByOffset(mRemoteContext, component, 500) != 0;
+            } else if (isShowOnScreenAction(action)) {
+                return showOnScreen(mRemoteContext, component);
+            } else {
+                needsRepaint = false;
+                return false;
+            }
+        } finally {
+            if (needsRepaint) {
+                mDocument.needsRepaint();
+            }
         }
+    }
+
+    private static boolean isShowOnScreenAction(int action) {
+        return action == android.R.id.accessibilityActionShowOnScreen;
+    }
+
+    private static boolean isScrollBackwardAction(int action) {
+        return action == AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD
+                || action == android.R.id.accessibilityActionScrollUp
+                || action == android.R.id.accessibilityActionScrollLeft;
+    }
+
+    private static boolean isScrollForwardAction(int action) {
+        return action == AccessibilityNodeInfo.ACTION_SCROLL_FORWARD
+                || action == android.R.id.accessibilityActionScrollDown
+                || action == android.R.id.accessibilityActionScrollRight;
+    }
+
+    private static boolean isClickAction(int action) {
+        return action == AccessibilityNodeInfo.ACTION_CLICK;
+    }
+
+    private boolean showOnScreen(RemoteContext context, Component component) {
+        if (component.getParent() instanceof LayoutComponent) {
+            LayoutComponent parent = (LayoutComponent) component.getParent();
+            ScrollableComponent scrollable = parent.selfOrModifier(ScrollableComponent.class);
+
+            if (scrollable != null) {
+                scrollable.showOnScreen(context, component.getComponentId());
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * scroll content by the given offset
+     *
+     * @param context
+     * @param component
+     * @param pixels
+     * @return
+     */
+    public int scrollByOffset(RemoteContext context, Component component, int pixels) {
+        ScrollableComponent scrollable = component.selfOrModifier(ScrollableComponent.class);
+
+        if (scrollable != null) {
+            return scrollable.scrollByOffset(context, pixels);
+        }
+
+        return 0;
+    }
+
+    /**
+     * Perform a click on the given component
+     *
+     * @param component
+     * @return
+     */
+    public boolean performClick(Component component) {
+        mDocument.performClick(mRemoteContext, component.getComponentId());
+        return true;
     }
 
     @Nullable

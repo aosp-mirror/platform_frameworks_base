@@ -73,4 +73,37 @@ public abstract class Easing {
 
     /** a elastic Easing function */
     public static final int EASE_OUT_ELASTIC = 14;
+
+    /**
+     * Returns a string representation for the given value. Used during serialization.
+     *
+     * @param value
+     * @return
+     */
+    public static String getString(int value) {
+        switch (value) {
+            case CUBIC_STANDARD:
+                return "CUBIC_STANDARD";
+            case CUBIC_ACCELERATE:
+                return "CUBIC_ACCELERATE";
+            case CUBIC_DECELERATE:
+                return "CUBIC_DECELERATE";
+            case CUBIC_LINEAR:
+                return "CUBIC_LINEAR";
+            case CUBIC_ANTICIPATE:
+                return "CUBIC_ANTICIPATE";
+            case CUBIC_OVERSHOOT:
+                return "CUBIC_OVERSHOOT";
+            case CUBIC_CUSTOM:
+                return "CUBIC_CUSTOM";
+            case SPLINE_CUSTOM:
+                return "SPLINE_CUSTOM";
+            case EASE_OUT_BOUNCE:
+                return "EASE_OUT_BOUNCE";
+            case EASE_OUT_ELASTIC:
+                return "EASE_OUT_ELASTIC";
+            default:
+                return "INVALID_CURVE_TYPE[" + value + "]";
+        }
+    }
 }

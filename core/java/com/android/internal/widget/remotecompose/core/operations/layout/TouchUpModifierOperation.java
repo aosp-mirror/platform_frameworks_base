@@ -23,6 +23,7 @@ import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
 
 import java.util.List;
 
@@ -123,5 +124,11 @@ public class TouchUpModifierOperation extends ListActionsOperation implements To
                 .description(
                         "Touch up modifier. This operation contains"
                                 + " a list of action executed on Touch up");
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        super.serialize(serializer);
+        serializer.add("type", "TouchUpModifierOperation");
     }
 }

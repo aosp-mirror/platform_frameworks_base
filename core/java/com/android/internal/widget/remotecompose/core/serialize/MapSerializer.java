@@ -24,13 +24,20 @@ import java.util.Map;
 public interface MapSerializer {
 
     /**
+     * Add metadata to this map for filtering by the data format generator.
+     *
+     * @param value A set of tags to add
+     */
+    MapSerializer addTags(SerializeTags... value);
+
+    /**
      * Add a list entry to this map. The List values can be any primitive, List, Map, or
      * Serializable
      *
      * @param key The key
      * @param value The list
      */
-    <T> void add(String key, @Nullable List<T> value);
+    <T> MapSerializer add(String key, @Nullable List<T> value);
 
     /**
      * Add a map entry to this map. The map values can be any primitive, List, Map, or Serializable
@@ -38,7 +45,7 @@ public interface MapSerializer {
      * @param key The key
      * @param value The list
      */
-    <T> void add(String key, @Nullable Map<String, T> value);
+    <T> MapSerializer add(String key, @Nullable Map<String, T> value);
 
     /**
      * Adds any Serializable type to this map
@@ -46,7 +53,7 @@ public interface MapSerializer {
      * @param key The key
      * @param value The Serializable
      */
-    void add(String key, @Nullable Serializable value);
+    MapSerializer add(String key, @Nullable Serializable value);
 
     /**
      * Adds a String entry
@@ -54,7 +61,27 @@ public interface MapSerializer {
      * @param key The key
      * @param value The String
      */
-    void add(String key, @Nullable String value);
+    MapSerializer add(String key, @Nullable String value);
+
+    /**
+     * Adds a color entry
+     *
+     * @param key The key
+     * @param a Alpha value [0, 1]
+     * @param r Red value [0, 1]
+     * @param g Green value [0, 1]
+     * @param b Blue value [0, 1]
+     */
+    MapSerializer add(String key, float a, float r, float g, float b);
+
+    /**
+     * Adds an ID and Value pair. This can be either a value or variable.
+     *
+     * @param key The key
+     * @param id Maybe float NaN ID
+     * @param value Maybe value
+     */
+    MapSerializer add(String key, float id, float value);
 
     /**
      * Adds a Byte entry
@@ -62,7 +89,7 @@ public interface MapSerializer {
      * @param key The key
      * @param value The Byte
      */
-    void add(String key, @Nullable Byte value);
+    MapSerializer add(String key, @Nullable Byte value);
 
     /**
      * Adds a Short entry
@@ -70,7 +97,7 @@ public interface MapSerializer {
      * @param key The key
      * @param value The Short
      */
-    void add(String key, @Nullable Short value);
+    MapSerializer add(String key, @Nullable Short value);
 
     /**
      * Adds an Integer entry
@@ -78,7 +105,7 @@ public interface MapSerializer {
      * @param key The key
      * @param value The Integer
      */
-    void add(String key, @Nullable Integer value);
+    MapSerializer add(String key, @Nullable Integer value);
 
     /**
      * Adds a Long entry
@@ -86,7 +113,7 @@ public interface MapSerializer {
      * @param key The key
      * @param value The Long
      */
-    void add(String key, @Nullable Long value);
+    MapSerializer add(String key, @Nullable Long value);
 
     /**
      * Adds a Float entry
@@ -94,7 +121,7 @@ public interface MapSerializer {
      * @param key The key
      * @param value The Float
      */
-    void add(String key, @Nullable Float value);
+    MapSerializer add(String key, @Nullable Float value);
 
     /**
      * Adds a Double entry
@@ -102,7 +129,7 @@ public interface MapSerializer {
      * @param key The key
      * @param value The Double
      */
-    void add(String key, @Nullable Double value);
+    MapSerializer add(String key, @Nullable Double value);
 
     /**
      * Adds a Boolean entry
@@ -110,7 +137,7 @@ public interface MapSerializer {
      * @param key The key
      * @param value The Boolean
      */
-    void add(String key, @Nullable Boolean value);
+    MapSerializer add(String key, @Nullable Boolean value);
 
     /**
      * Adds a Enum entry
@@ -118,5 +145,5 @@ public interface MapSerializer {
      * @param key The key
      * @param value The Enum
      */
-    <T extends Enum<T>> void add(String key, @Nullable Enum<T> value);
+    <T extends Enum<T>> MapSerializer add(String key, @Nullable Enum<T> value);
 }

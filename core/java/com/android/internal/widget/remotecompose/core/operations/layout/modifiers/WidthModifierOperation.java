@@ -24,6 +24,8 @@ import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
@@ -135,5 +137,14 @@ public class WidthModifierOperation extends DimensionModifierOperation {
      */
     public WidthInModifierOperation getWidthIn() {
         return mWidthIn;
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER)
+                .add("type", "WidthModifierOperation")
+                .add("width", mValue, mOutValue)
+                .add("dimensionModifierType", mType);
     }
 }

@@ -23,6 +23,8 @@ import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
@@ -153,5 +155,19 @@ public class CoreSemantics extends Operation implements AccessibilityModifier {
 
     public @Nullable Integer getTextId() {
         return mTextId != 0 ? mTextId : null;
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER, SerializeTags.A11Y)
+                .add("type", "CoreSemantics")
+                .add("contentDescriptionId", mContentDescriptionId)
+                .add("role", mRole)
+                .add("textId", mTextId)
+                .add("stateDescriptionId", mStateDescriptionId)
+                .add("enabled", mEnabled)
+                .add("mode", mMode)
+                .add("clickable", mClickable);
     }
 }

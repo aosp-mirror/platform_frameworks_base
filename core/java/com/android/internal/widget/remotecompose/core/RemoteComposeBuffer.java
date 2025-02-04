@@ -53,6 +53,7 @@ import com.android.internal.widget.remotecompose.core.operations.FloatExpression
 import com.android.internal.widget.remotecompose.core.operations.FloatFunctionCall;
 import com.android.internal.widget.remotecompose.core.operations.FloatFunctionDefine;
 import com.android.internal.widget.remotecompose.core.operations.Header;
+import com.android.internal.widget.remotecompose.core.operations.ImageAttribute;
 import com.android.internal.widget.remotecompose.core.operations.IntegerExpression;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRestore;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRotate;
@@ -70,6 +71,7 @@ import com.android.internal.widget.remotecompose.core.operations.PathData;
 import com.android.internal.widget.remotecompose.core.operations.PathTween;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
 import com.android.internal.widget.remotecompose.core.operations.RootContentDescription;
+import com.android.internal.widget.remotecompose.core.operations.TextAttribute;
 import com.android.internal.widget.remotecompose.core.operations.TextData;
 import com.android.internal.widget.remotecompose.core.operations.TextFromFloat;
 import com.android.internal.widget.remotecompose.core.operations.TextLength;
@@ -78,6 +80,7 @@ import com.android.internal.widget.remotecompose.core.operations.TextLookupInt;
 import com.android.internal.widget.remotecompose.core.operations.TextMeasure;
 import com.android.internal.widget.remotecompose.core.operations.TextMerge;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
+import com.android.internal.widget.remotecompose.core.operations.TimeAttribute;
 import com.android.internal.widget.remotecompose.core.operations.TouchExpression;
 import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.layout.CanvasContent;
@@ -2230,6 +2233,8 @@ public class RemoteComposeBuffer {
      * @param fontStyle font style (0 : Normal, 1 : Italic)
      * @param fontWeight font weight (1 to 1000, normal is 400)
      * @param fontFamily font family or null
+     * @param overflow
+     * @param maxLines
      */
     public void addTextComponentStart(
             int componentId,
@@ -2240,7 +2245,9 @@ public class RemoteComposeBuffer {
             int fontStyle,
             float fontWeight,
             @Nullable String fontFamily,
-            int textAlign) {
+            int textAlign,
+            int overflow,
+            int maxLines) {
         mLastComponentId = getComponentId(componentId);
         int fontFamilyId = -1;
         if (fontFamily != null) {
@@ -2256,7 +2263,9 @@ public class RemoteComposeBuffer {
                 fontStyle,
                 fontWeight,
                 fontFamilyId,
-                textAlign);
+                textAlign,
+                overflow,
+                maxLines);
     }
 
     /**
@@ -2356,5 +2365,39 @@ public class RemoteComposeBuffer {
      */
     public void callFloatFunction(int id, float[] args) {
         FloatFunctionCall.apply(mBuffer, id, args);
+    }
+
+    /**
+     * @param bitmapId the id of the bitmap
+     * @param attribute the attribute to get
+     * @return the nan id of the attribute
+     */
+    public float bitmapAttribute(int bitmapId, short attribute) {
+        int id = mRemoteComposeState.nextId();
+        ImageAttribute.apply(mBuffer, id, bitmapId, attribute, null);
+        return Utils.asNan(id);
+    }
+
+    /**
+     * @param textId the id of the bitmap
+     * @param attribute the attribute to get
+     * @return the nan id of the attribute
+     */
+    public float textAttribute(int textId, short attribute) {
+        int id = mRemoteComposeState.nextId();
+        TextAttribute.apply(mBuffer, id, textId, attribute);
+        return Utils.asNan(id);
+    }
+
+    /**
+     * @param timeId the id of the long
+     * @param attribute the attribute to get
+     * @param args the arguments of the function
+     * @return the nan id of the attribute
+     */
+    public float timeAttribute(int timeId, short attribute, int... args) {
+        int id = mRemoteComposeState.nextId();
+        TimeAttribute.apply(mBuffer, id, timeId, attribute, args);
+        return Utils.asNan(id);
     }
 }

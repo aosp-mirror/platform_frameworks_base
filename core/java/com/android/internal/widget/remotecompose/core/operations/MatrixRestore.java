@@ -23,11 +23,13 @@ import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.Serializable;
 
 import java.util.List;
 
 /** The restore previous matrix command */
-public class MatrixRestore extends PaintOperation {
+public class MatrixRestore extends PaintOperation implements Serializable {
     private static final int OP_CODE = Operations.MATRIX_RESTORE;
     private static final String CLASS_NAME = "MatrixRestore";
 
@@ -96,5 +98,10 @@ public class MatrixRestore extends PaintOperation {
     @Override
     public void paint(@NonNull PaintContext context) {
         context.matrixRestore();
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer.add("type", CLASS_NAME);
     }
 }

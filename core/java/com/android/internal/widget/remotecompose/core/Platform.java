@@ -71,6 +71,27 @@ public interface Platform {
      */
     void log(LogCategory category, String message);
 
+    /**
+     * Represents a precomputed text layout, for complex text painting / measuring / layout. Allows
+     * the implementation to return a cached / engine after a text measure to be used int the paint
+     * pass.
+     */
+    interface ComputedTextLayout {
+        /**
+         * Horizontal dimension of this text layout
+         *
+         * @return
+         */
+        float getWidth();
+
+        /**
+         * Vertical dimension of this text layout
+         *
+         * @return
+         */
+        float getHeight();
+    }
+
     Platform None =
             new Platform() {
                 @Override

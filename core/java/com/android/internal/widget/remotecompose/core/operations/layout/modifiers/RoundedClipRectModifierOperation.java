@@ -29,6 +29,8 @@ import com.android.internal.widget.remotecompose.core.operations.DrawBase4;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.DecoratorComponent;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
@@ -159,5 +161,14 @@ public class RoundedClipRectModifierOperation extends DrawBase4
             float bottomStart,
             float bottomEnd) {
         write(buffer, OP_CODE, topStart, topEnd, bottomStart, bottomEnd);
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serialize(serializer, "topStart", "topEnd", "bottomStart", "bottomEnd")
+                .addTags(SerializeTags.MODIFIER)
+                .add("type", CLASS_NAME)
+                .add("width", mWidth)
+                .add("height", mHeight);
     }
 }
