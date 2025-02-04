@@ -246,7 +246,6 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-import android.util.SystemPropertySetter;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -254,7 +253,6 @@ import android.widget.Toast;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
