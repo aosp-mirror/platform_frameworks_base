@@ -106,6 +106,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.Hyphens
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -387,24 +389,26 @@ private fun ShortcutHelperTwoPane(
     var isCustomizing by remember { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxSize().padding(horizontal = 24.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
             // Keep title centered whether customize button is visible or not.
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    TitleBar(isCustomizing)
-                }
-                if (isShortcutCustomizerFlagEnabled) {
-                    CustomizationButtonsContainer(
-                        isCustomizing = isCustomizing,
-                        onToggleCustomizationMode = { isCustomizing = !isCustomizing },
-                        onReset = {
-                            onCustomizationRequested(ShortcutCustomizationRequestInfo.Reset)
-                        },
-                        shouldShowResetButton = shouldShowResetButton,
-                    )
-                } else {
-                    Spacer(modifier = Modifier.width(if (isCustomizing) 69.dp else 133.dp))
-                }
+            Spacer(modifier = Modifier.weight(1f))
+            Box(modifier = Modifier.width(412.dp), contentAlignment = Alignment.Center) {
+                TitleBar(isCustomizing)
+            }
+            if (isShortcutCustomizerFlagEnabled) {
+                CustomizationButtonsContainer(
+                    modifier = Modifier.weight(1f),
+                    isCustomizing = isCustomizing,
+                    onToggleCustomizationMode = { isCustomizing = !isCustomizing },
+                    onReset = { onCustomizationRequested(ShortcutCustomizationRequestInfo.Reset) },
+                    shouldShowResetButton = shouldShowResetButton,
+                )
+            } else {
+                Spacer(modifier = Modifier.weight(1f))
             }
         }
         Spacer(modifier = Modifier.height(12.dp))
@@ -435,11 +439,13 @@ private fun CustomizationButtonsContainer(
     shouldShowResetButton: Boolean,
     onToggleCustomizationMode: () -> Unit,
     onReset: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.End) {
         if (isCustomizing) {
             if (shouldShowResetButton) {
                 ResetButton(onClick = onReset)
+                Spacer(Modifier.width(8.dp))
             }
             DoneButton(onClick = onToggleCustomizationMode)
         } else {
@@ -986,6 +992,9 @@ private fun TitleBar(isCustomizing: Boolean = false) {
                 text = text,
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.headlineSmall,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
             )
         },
         windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp, left = 0.dp, right = 0.dp),
@@ -1063,8 +1072,9 @@ private fun KeyboardSettings(horizontalPadding: Dp, verticalPadding: Dp, onClick
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 16.sp,
                 style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.weight(1f),
             )
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.width(8.dp))
             Icon(
                 imageVector = Icons.AutoMirrored.Default.OpenInNew,
                 contentDescription = null,
