@@ -34,6 +34,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeExpansionChangeEvent
+import com.android.systemui.shared.Flags as SharedFlags
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScrimController
@@ -311,10 +312,19 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(SharedFlags.FLAG_AMBIENT_AOD)
     fun onDozeAmountChanged_appliesBlur() {
         statusBarStateListener.onDozeAmountChanged(1f, 1f)
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(blurUtils).applyBlur(any(), eq(maxBlur), eq(false))
+    }
+
+    @Test
+    @EnableFlags(SharedFlags.FLAG_AMBIENT_AOD)
+    fun onDozeAmountChanged_doesNotApplyBlurWithAmbientAod() {
+        statusBarStateListener.onDozeAmountChanged(1f, 1f)
+        notificationShadeDepthController.updateBlurCallback.doFrame(0)
+        verify(blurUtils).applyBlur(any(), eq(0), eq(false))
     }
 
     @Test
