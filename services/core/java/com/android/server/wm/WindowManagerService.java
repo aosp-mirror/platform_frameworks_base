@@ -326,7 +326,6 @@ import android.window.WindowContainerToken;
 import android.window.WindowContextInfo;
 
 import com.android.internal.R;
-import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
@@ -343,6 +342,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.LatencyTracker;
+import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.view.WindowManagerPolicyThread;
 import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
@@ -388,7 +388,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -671,6 +670,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** List of window currently causing non-system overlay windows to be hidden. */
     private ArrayList<WindowState> mHidingNonSystemOverlayWindows = new ArrayList<>();
+
+    /**
+     * A map that tracks uid/count of windows that cause non-system overlay windows to be hidden.
+     * The key is the window's uid and the value is the number of windows with that uid that are
+     * requesting hiding non-system overlay
+     */
+    private final ArrayMap<Integer, Integer> mHidingNonSystemOverlayWindowsCountPerUid =
+            new ArrayMap<>();
 
     /**
      * In some cases (e.g. when {@link R.bool.config_reverseDefaultRotation} has value
@@ -1808,7 +1815,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     UserHandle.getUserId(win.getOwningUid()));
             win.setHiddenWhileSuspended(suspended);
 
-            final boolean hideSystemAlertWindows = !mHidingNonSystemOverlayWindows.isEmpty();
+            final boolean hideSystemAlertWindows = shouldHideNonSystemOverlayWindow(win);
             win.setForceHideNonSystemOverlayWindowIfNeeded(hideSystemAlertWindows);
 
             boolean imMayMove = true;
@@ -2030,6 +2037,22 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             return appInfo.targetSdkVersion >= Build.VERSION_CODES.O;
         }
+    }
+
+    private boolean shouldHideNonSystemOverlayWindow(WindowState win) {
+        if (!Flags.fixHideOverlayApi()) {
+            return !mHidingNonSystemOverlayWindows.isEmpty();
+        }
+
+        if (mHidingNonSystemOverlayWindows.isEmpty()) {
+            return false;
+        }
+
+        if (mHidingNonSystemOverlayWindowsCountPerUid.size() == 1
+                && mHidingNonSystemOverlayWindowsCountPerUid.containsKey(win.getOwningUid())) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -8733,22 +8756,42 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
         final boolean systemAlertWindowsHidden = !mHidingNonSystemOverlayWindows.isEmpty();
+        final int numUIDsRequestHidingPreUpdate = mHidingNonSystemOverlayWindowsCountPerUid.size();
         if (surfaceShown && win.hideNonSystemOverlayWindowsWhenVisible()) {
             if (!mHidingNonSystemOverlayWindows.contains(win)) {
                 mHidingNonSystemOverlayWindows.add(win);
+                int uid = win.getOwningUid();
+                int count = mHidingNonSystemOverlayWindowsCountPerUid.getOrDefault(uid, 0);
+                mHidingNonSystemOverlayWindowsCountPerUid.put(uid, count + 1);
             }
         } else {
             mHidingNonSystemOverlayWindows.remove(win);
+            int uid = win.getOwningUid();
+            int count = mHidingNonSystemOverlayWindowsCountPerUid.getOrDefault(uid, 0);
+            if (count <= 1) {
+                mHidingNonSystemOverlayWindowsCountPerUid.remove(win.getOwningUid());
+            } else {
+                mHidingNonSystemOverlayWindowsCountPerUid.put(uid, count - 1);
+            }
         }
-
         final boolean hideSystemAlertWindows = !mHidingNonSystemOverlayWindows.isEmpty();
-
-        if (systemAlertWindowsHidden == hideSystemAlertWindows) {
-            return;
+        final int numUIDSRequestHidingPostUpdate = mHidingNonSystemOverlayWindowsCountPerUid.size();
+        if (Flags.fixHideOverlayApi()) {
+            if (numUIDSRequestHidingPostUpdate == numUIDsRequestHidingPreUpdate) {
+                return;
+            }
+            // The visibility of SAWs needs to be refreshed only when the number of uids that
+            // request hiding SAWs changes 0->1, 1->0, 1->2 or 2->1.
+            if (numUIDSRequestHidingPostUpdate != 1 && numUIDsRequestHidingPreUpdate != 1) {
+                return;
+            }
+        } else {
+            if (systemAlertWindowsHidden == hideSystemAlertWindows) {
+                return;
+            }
         }
-
         mRoot.forAllWindows((w) -> {
-            w.setForceHideNonSystemOverlayWindowIfNeeded(hideSystemAlertWindows);
+            w.setForceHideNonSystemOverlayWindowIfNeeded(shouldHideNonSystemOverlayWindow(w));
         }, false /* traverseTopToBottom */);
     }
 
