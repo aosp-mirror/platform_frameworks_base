@@ -225,9 +225,9 @@ public final class Adjustment implements Parcelable {
     public static final int TYPE_CONTENT_RECOMMENDATION = 4;
 
     /**
-     * Data type: String, the classification type of this notification. The OS may display
-     * notifications differently depending on the type, and may change the alerting level of the
-     * notification.
+     * Data type: String, a summarization of the text of the notification, or, if provided for
+     * a group summary, a summarization of the text of all of the notificatrions in the group.
+     * Send this key with a null value to remove an existing summarization.
      */
     @FlaggedApi(android.app.Flags.FLAG_NM_SUMMARIZATION)
     public static final String KEY_SUMMARIZATION = "key_summarization";
