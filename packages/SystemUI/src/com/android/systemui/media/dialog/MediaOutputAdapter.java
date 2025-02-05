@@ -188,7 +188,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             GroupStatus groupStatus = null;
             OngoingSessionStatus ongoingSessionStatus = null;
             ConnectionState connectionState = ConnectionState.DISCONNECTED;
-            boolean restrictVolumeAdjustment = false;
+            boolean restrictVolumeAdjustment = mController.hasAdjustVolumeUserRestriction();
             String subtitle = null;
             Drawable deviceStatusIcon = null;
             boolean deviceDisabled = false;
@@ -200,8 +200,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             mItemLayout.setVisibility(View.VISIBLE);
 
             if (mController.isAnyDeviceTransferring()) {
-                if (device.getState() == MediaDeviceState.STATE_CONNECTING
-                        && !mController.hasAdjustVolumeUserRestriction()) {
+                if (device.getState() == MediaDeviceState.STATE_CONNECTING) {
                     connectionState = ConnectionState.CONNECTING;
                 }
             } else {
@@ -251,8 +250,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             true /* selected */,
                             isDeselectable /* deselectable */);
                     connectionState = ConnectionState.CONNECTED;
-                } else if (!mController.hasAdjustVolumeUserRestriction()
-                        && currentlyConnected) {
+                } else if (currentlyConnected) {
                     // single selected device
                     if (isMutingExpectedDeviceExist
                             && !mController.isCurrentConnectedDeviceRemote()) {

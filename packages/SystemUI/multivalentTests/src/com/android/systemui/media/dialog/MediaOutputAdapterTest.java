@@ -820,25 +820,20 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
     @DisableFlags(Flags.FLAG_ENABLE_OUTPUT_SWITCHER_SESSION_GROUPING)
     @Test
-    public void onItemClick_onGroupActionTriggered_verifySeekbarDisabled() {
-        when(mMediaSwitchingController.getSelectedMediaDevice())
-                .thenReturn(
-                        mMediaItems.stream()
-                                .map((item) -> item.getMediaDevice().get())
-                                .collect(Collectors.toList()));
-        mMediaOutputAdapter = new MediaOutputAdapter(mMediaSwitchingController);
-        mMediaOutputAdapter.updateItems();
-        mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
-                .onCreateViewHolder(new LinearLayout(mContext), 0);
-        List<MediaDevice> selectableDevices = new ArrayList<>();
-        selectableDevices.add(mMediaDevice1);
-        when(mMediaSwitchingController.getSelectableMediaDevice()).thenReturn(selectableDevices);
+    public void onBindViewHolder_hasVolumeAdjustmentRestriction_verifySeekbarDisabled() {
+        when(mMediaSwitchingController.getSelectedMediaDevice()).thenReturn(
+                List.of(mMediaDevice1, mMediaDevice2));
+        when(mMediaSwitchingController.isCurrentConnectedDeviceRemote()).thenReturn(true);
         when(mMediaSwitchingController.hasAdjustVolumeUserRestriction()).thenReturn(true);
+        mMediaOutputAdapter.updateItems();
+
+        // Connected and selected device
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
+        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.GONE);
 
-        mViewHolder.mContainerLayout.performClick();
-
-        assertThat(mViewHolder.mSeekBar.isEnabled()).isFalse();
+        // Selected device
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 1);
+        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
