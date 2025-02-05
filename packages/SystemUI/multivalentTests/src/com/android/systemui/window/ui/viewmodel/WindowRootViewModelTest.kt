@@ -46,12 +46,14 @@ class WindowRootViewModelTest : SysuiTestCase() {
     @Test
     fun bouncerTransitionChangesWindowBlurRadius() =
         testScope.runTest {
-            val blurState by collectLastValue(underTest.blurState)
+            val blurRadius by collectLastValue(underTest.blurRadius)
+            val isBlurOpaque by collectLastValue(underTest.isBlurOpaque)
             runCurrent()
 
             kosmos.fakeBouncerTransitions.first().windowBlurRadius.value = 30.0f
             runCurrent()
 
-            assertThat(blurState).isEqualTo(BlurState(radius = 30, isOpaque = false))
+            assertThat(blurRadius).isEqualTo(30)
+            assertThat(isBlurOpaque).isEqualTo(false)
         }
 }

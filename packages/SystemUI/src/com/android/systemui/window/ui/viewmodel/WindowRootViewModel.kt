@@ -19,7 +19,7 @@ package com.android.systemui.window.ui.viewmodel
 import android.os.Build
 import android.util.Log
 import com.android.app.tracing.coroutines.launchTraced
-import com.android.systemui.Flags.glanceableHubBlurredBackground
+import com.android.systemui.Flags
 import com.android.systemui.keyguard.ui.transitions.GlanceableHubTransition
 import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
 import com.android.systemui.lifecycle.ExclusiveActivatable
@@ -29,9 +29,9 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 
@@ -41,14 +41,33 @@ typealias BlurAppliedUiEvent = Int
 class WindowRootViewModel
 @AssistedInject
 constructor(
-    private val primaryBouncerTransitions: Set<@JvmSuppressWildcards PrimaryBouncerTransition>,
-    private val glanceableHubTransitions: Set<@JvmSuppressWildcards GlanceableHubTransition>,
+    primaryBouncerTransitions: Set<@JvmSuppressWildcards PrimaryBouncerTransition>,
+    glanceableHubTransitions: Set<@JvmSuppressWildcards GlanceableHubTransition>,
     private val blurInteractor: WindowRootViewBlurInteractor,
 ) : ExclusiveActivatable() {
 
     private val blurEvents = Channel<BlurAppliedUiEvent>(Channel.BUFFERED)
-    private val _blurState = MutableStateFlow(BlurState(0, false))
-    val blurState = _blurState.asStateFlow()
+
+    private val bouncerBlurRadiusFlows =
+        if (Flags.bouncerUiRevamp())
+            primaryBouncerTransitions.map { it.windowBlurRadius.logIfPossible(it.javaClass.name) }
+        else emptyList()
+
+    private val glanceableHubBlurRadiusFlows =
+        if (Flags.glanceableHubBlurredBackground())
+            glanceableHubTransitions.map { it.windowBlurRadius.logIfPossible(it.javaClass.name) }
+        else emptyList()
+
+    val blurRadius: Flow<Float> =
+        listOf(
+                *bouncerBlurRadiusFlows.toTypedArray(),
+                *glanceableHubBlurRadiusFlows.toTypedArray(),
+                blurInteractor.blurRadius.map { it.toFloat() }.logIfPossible("ShadeBlur"),
+            )
+            .merge()
+
+    val isBlurOpaque =
+        blurInteractor.isBlurOpaque.distinctUntilChanged().logIfPossible("isBlurOpaque")
 
     override suspend fun onActivated(): Nothing {
         coroutineScope {
@@ -58,49 +77,6 @@ constructor(
                         Log.d(TAG, "blur applied for $event")
                     }
                     blurInteractor.onBlurApplied(event)
-                }
-            }
-
-            launchTraced("WindowRootViewModel#blurState") {
-                combine(blurInteractor.blurRadius, blurInteractor.isBlurOpaque, ::BlurState)
-                    .collect { _blurState.value = it }
-            }
-
-            launchTraced("WindowRootViewModel#bouncerTransitions") {
-                primaryBouncerTransitions
-                    .map { transition ->
-                        transition.windowBlurRadius.onEach { blurRadius ->
-                            if (isLoggable) {
-                                Log.d(
-                                    TAG,
-                                    "${transition.javaClass.simpleName} windowBlurRadius $blurRadius",
-                                )
-                            }
-                        }
-                    }
-                    .merge()
-                    .collect { blurRadius ->
-                        blurInteractor.requestBlurForBouncer(blurRadius.toInt())
-                    }
-            }
-
-            if (glanceableHubBlurredBackground()) {
-                launchTraced("WindowRootViewModel#glanceableHubTransitions") {
-                    glanceableHubTransitions
-                        .map { transition ->
-                            transition.windowBlurRadius.onEach { blurRadius ->
-                                if (isLoggable) {
-                                    Log.d(
-                                        TAG,
-                                        "${transition.javaClass.simpleName} windowBlurRadius $blurRadius",
-                                    )
-                                }
-                            }
-                        }
-                        .merge()
-                        .collect { blurRadius ->
-                            blurInteractor.requestBlurForGlanceableHub(blurRadius.toInt())
-                        }
                 }
             }
         }
@@ -118,7 +94,11 @@ constructor(
 
     private companion object {
         const val TAG = "WindowRootViewModel"
-        val isLoggable = Log.isLoggable(TAG, Log.DEBUG) || Build.isDebuggable()
+        val isLoggable = Log.isLoggable(TAG, Log.VERBOSE) || Build.isDebuggable()
+
+        fun <T> Flow<T>.logIfPossible(loggingInfo: String): Flow<T> {
+            return onEach { if (isLoggable) Log.v(TAG, "$loggingInfo $it") }
+        }
     }
 }
 
