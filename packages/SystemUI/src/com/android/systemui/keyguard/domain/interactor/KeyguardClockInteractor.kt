@@ -177,6 +177,14 @@ constructor(
                 }
         }
 
+    fun handleFidgetTap(x: Float, y: Float) {
+        if (selectedClockSize.value == ClockSizeSetting.DYNAMIC) {
+            clockEventController.handleFidgetTap(x, y)
+        } else {
+            wallpaperFocalAreaInteractor.setTapPosition(x, y)
+        }
+    }
+
     fun animateFoldToAod(foldFraction: Float) {
         clock?.let { clock ->
             clock.smallClock.animations.fold(foldFraction)

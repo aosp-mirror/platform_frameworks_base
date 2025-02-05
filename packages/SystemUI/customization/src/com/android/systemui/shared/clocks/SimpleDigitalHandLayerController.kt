@@ -207,6 +207,10 @@ open class SimpleDigitalHandLayerController(
             override fun onPositionUpdated(fromLeft: Int, direction: Int, fraction: Float) {}
 
             override fun onPositionUpdated(distance: Float, fraction: Float) {}
+
+            override fun onFidgetTap(x: Float, y: Float) {
+                view.animateFidget(x, y)
+            }
         }
 
     override val faceEvents =

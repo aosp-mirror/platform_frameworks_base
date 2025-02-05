@@ -230,7 +230,10 @@ class FlexClockFaceController(clockCtx: ClockContext, private val isLargeClock: 
 
             override fun onPositionUpdated(distance: Float, fraction: Float) {
                 layerController.animations.onPositionUpdated(distance, fraction)
-                // TODO(b/378128811) port stepping animation
+            }
+
+            override fun onFidgetTap(x: Float, y: Float) {
+                layerController.animations.onFidgetTap(x, y)
             }
         }
 

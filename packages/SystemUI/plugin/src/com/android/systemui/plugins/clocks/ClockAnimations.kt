@@ -58,4 +58,7 @@ interface ClockAnimations {
      * 0.0 -> clock is scaled down in the shade; previewRatio is previewSize / screenSize
      */
     fun onPickerCarouselSwiping(swipingFraction: Float)
+
+    /** Runs when an animation when the view is tapped on the lockscreen */
+    fun onFidgetTap(x: Float, y: Float)
 }
