@@ -71,7 +71,7 @@ public class ZramMaintenance extends JobService {
     private static final boolean DEFAULT_REQUIRE_DEVICE_IDLE =
             true;
     private static final String REQUIRE_BATTERY_NOT_LOW_PROP =
-            "zram.maintenance.require_battry_not_low";
+            "zram.maintenance.require_battery_not_low";
     private static final boolean DEFAULT_REQUIRE_BATTERY_NOT_LOW =
             true;
 
