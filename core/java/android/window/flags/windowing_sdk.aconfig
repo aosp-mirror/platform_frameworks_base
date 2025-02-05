@@ -91,14 +91,6 @@ flag {
 
 flag {
     namespace: "windowing_sdk"
-    name: "ae_back_stack_restore"
-    description: "Allow the ActivityEmbedding back stack to be restored after process restarted"
-    bug: "289875940"
-    is_fixed_read_only: true
-}
-
-flag {
-    namespace: "windowing_sdk"
     name: "touch_pass_through_opt_in"
     description: "Requires apps to opt-in to overlay pass through touches and provide APIs to opt-in"
     bug: "358129114"
