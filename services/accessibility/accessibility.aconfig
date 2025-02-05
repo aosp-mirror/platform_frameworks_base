@@ -209,6 +209,16 @@ flag {
 }
 
 flag {
+    name: "motion_event_injector_cancel_fix"
+    namespace: "accessibility"
+    description: "Fix the ACTION_CANCEL logic used in MotionEventInjector to avoid InputDispatcher inconsistency"
+    bug: "384451671"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "package_monitor_dedicated_thread"
     namespace: "accessibility"
     description: "Runs the A11yManagerService PackageMonitor on a dedicated thread"

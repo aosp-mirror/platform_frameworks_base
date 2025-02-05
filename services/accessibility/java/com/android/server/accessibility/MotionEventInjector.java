@@ -115,6 +115,8 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
         mHandler.sendMessage(mHandler.obtainMessage(MESSAGE_INJECT_EVENTS, args));
     }
 
+    // Note: MotionEventInjector is the first transformation in the AccessibilityInputFilter stream
+    // so any event that arrives here is a real event from a real user interaction.
     @Override
     public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         if (mTrace.isA11yTracingEnabledForTypes(
@@ -123,22 +125,30 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
                     AccessibilityTrace.FLAGS_INPUT_FILTER | AccessibilityTrace.FLAGS_GESTURE,
                     "event=" + event + ";rawEvent=" + rawEvent + ";policyFlags=" + policyFlags);
         }
-        // MotionEventInjector would cancel any injected gesture when any MotionEvent arrives.
-        // For user using an external device to control the pointer movement, it's almost
-        // impossible to perform the gestures. Any slightly unintended movement results in the
-        // cancellation of the gesture.
+        // InputDispatcher cancels an injected touch gesture if another MotionEvent arrives on this
+        // display from another device or source, like a real touch or a real mouse pointer.
+        // For user using an external device to control the pointer movement, it becomes difficult
+        // to perform injected gestures because slight unintended movement results in cancellation
+        // of the injected gesture; to fix this we swallow real mouse MotionEvents while an injected
+        // touch gesture is in progress, preventing the mouse events from reaching InputDispatcher.
         if ((event.isFromSource(InputDevice.SOURCE_MOUSE)
                 && event.getActionMasked() == MotionEvent.ACTION_HOVER_MOVE)
                 && mOpenTouchGestureInProgress) {
             return;
         }
-        cancelAnyPendingInjectedEvents();
-        if (!android.view.accessibility.Flags.preventA11yNontoolFromInjectingIntoSensitiveViews()) {
-            // Indicate that the input event is injected from accessibility, to let applications
-            // distinguish it from events injected by other means.
-            policyFlags |= WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY;
+        if (Flags.motionEventInjectorCancelFix()) {
+            // Pass this real event down the stream unmodified.
+            super.onMotionEvent(event, rawEvent, policyFlags);
+        } else {
+            cancelAnyPendingInjectedEvents();
+            if (!android.view.accessibility.Flags
+                    .preventA11yNontoolFromInjectingIntoSensitiveViews()) {
+                // Indicate that the input event is injected from accessibility, to let applications
+                // distinguish it from events injected by other means.
+                policyFlags |= WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY;
+            }
+            sendMotionEventToNext(event, rawEvent, policyFlags);
         }
-        sendMotionEventToNext(event, rawEvent, policyFlags);
     }
 
     @Override
@@ -223,8 +233,10 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
         }
         if (!continuingGesture) {
             cancelAnyPendingInjectedEvents();
-            // Injected gestures have been canceled, but real gestures still need cancelling
-            cancelAnyGestureInProgress();
+            if (!Flags.motionEventInjectorCancelFix()) {
+                // Injected gestures have been canceled, but real gestures still need cancelling
+                cancelInjectedGestureInProgress();
+            }
         }
         mServiceInterfaceForCurrentGesture = serviceInterface;
 
@@ -334,7 +346,7 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
         }
     }
 
-    private void cancelAnyGestureInProgress() {
+    private void cancelInjectedGestureInProgress() {
         if ((getNext() != null) && mOpenTouchGestureInProgress) {
             long now = SystemClock.uptimeMillis();
             MotionEvent cancelEvent =
@@ -356,7 +368,7 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
     private void cancelAnyPendingInjectedEvents() {
         if (mHandler.hasMessages(MESSAGE_SEND_MOTION_EVENT)) {
             mHandler.removeMessages(MESSAGE_SEND_MOTION_EVENT);
-            cancelAnyGestureInProgress();
+            cancelInjectedGestureInProgress();
             for (int i = mSequencesInProgress.size() - 1; i >= 0; i--) {
                 notifyService(mServiceInterfaceForCurrentGesture,
                         mSequencesInProgress.get(i), false);
@@ -364,7 +376,7 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
             }
         } else if (mNumLastTouchPoints != 0) {
             // An injected gesture is in progress and waiting for a continuation. Cancel it.
-            cancelAnyGestureInProgress();
+            cancelInjectedGestureInProgress();
         }
         mNumLastTouchPoints = 0;
         mStrokeIdToPointerId.clear();
