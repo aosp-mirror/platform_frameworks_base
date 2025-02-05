@@ -17,6 +17,8 @@
 package com.android.internal.util;
 
 import android.os.SystemClock;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A speed/rate limiting cache that's used to cache a value to be returned as long as period hasn't
@@ -30,6 +32,12 @@ import android.os.SystemClock;
  * and then the cached value is returned for the remainder of the period. It uses a simple fixed
  * window method to track rate. Use a window and count appropriate for bursts of calls and for
  * high latency/cost of the AIDL call.
+ * <p>
+ * This class is thread-safe. When multiple threads call get(), they will all fetch a new value
+ * if the cached value is stale. This is to prevent a slow getting thread from blocking other
+ * threads from getting a fresh value. In such circumsntaces it's possible to exceed
+ * <code>count</code> calls in a given period by up to the number of threads that are concurrently
+ * attempting to get a fresh value minus one.
  *
  * @param <Value> The type of the return value
  * @hide
@@ -37,12 +45,11 @@ import android.os.SystemClock;
 @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class RateLimitingCache<Value> {
 
-    private volatile Value mCurrentValue;
-    private volatile long mLastTimestamp; // Can be last fetch time or window start of fetch time
     private final long mPeriodMillis; // window size
     private final int mLimit; // max per window
-    private int mCount = 0; // current count within window
-    private long mRandomOffset; // random offset to avoid batching of AIDL calls at window boundary
+    // random offset to avoid batching of AIDL calls at window boundary
+    private final long mRandomOffset;
+    private final AtomicReference<CachedValue> mCachedValue = new AtomicReference();
 
     /**
      * The interface to fetch the actual value, if the cache is null or expired.
@@ -54,6 +61,12 @@ public class RateLimitingCache<Value> {
          * @return the latest value fetched from the source
          */
         V fetchValue();
+    }
+
+    class CachedValue {
+        Value value;
+        long timestamp;
+        AtomicInteger count; // current count within window
     }
 
     /**
@@ -83,6 +96,8 @@ public class RateLimitingCache<Value> {
         mLimit = count;
         if (mLimit > 1 && periodMillis > 1) {
             mRandomOffset = (long) (Math.random() * (periodMillis / 2));
+        } else {
+            mRandomOffset = 0;
         }
     }
 
@@ -102,34 +117,39 @@ public class RateLimitingCache<Value> {
      * @return the cached or latest value
      */
     public Value get(ValueFetcher<Value> query) {
-        // If the value never changes
-        if (mPeriodMillis < 0 && mLastTimestamp != 0) {
-            return mCurrentValue;
+        CachedValue cached = mCachedValue.get();
+
+        // If the value never changes and there is a previous cached value, return it
+        if (mPeriodMillis < 0 && cached != null && cached.timestamp != 0) {
+            return cached.value;
         }
 
-        synchronized (this) {
-            // Get the current time and add a random offset to avoid colliding with other
-            // caches with similar harmonic window boundaries
-            final long now = getTime() + mRandomOffset;
-            final boolean newWindow = now - mLastTimestamp >= mPeriodMillis;
-            if (newWindow || mCount < mLimit) {
-                // Fetch a new value
-                mCurrentValue = query.fetchValue();
-
-                // If rate limiting, set timestamp to start of this window
-                if (mLimit > 1) {
-                    mLastTimestamp = now - (now % mPeriodMillis);
-                } else {
-                    mLastTimestamp = now;
-                }
-
-                if (newWindow) {
-                    mCount = 1;
-                } else {
-                    mCount++;
-                }
+        // Get the current time and add a random offset to avoid colliding with other
+        // caches with similar harmonic window boundaries
+        final long now = getTime() + mRandomOffset;
+        final boolean newWindow = cached == null || now - cached.timestamp >= mPeriodMillis;
+        if (newWindow || cached.count.getAndIncrement() < mLimit) {
+            // Fetch a new value
+            Value freshValue = query.fetchValue();
+            long freshTimestamp = now;
+            // If rate limiting, set timestamp to start of this window
+            if (mLimit > 1) {
+                freshTimestamp = now - (now % mPeriodMillis);
             }
-            return mCurrentValue;
+
+            CachedValue freshCached = new CachedValue();
+            freshCached.value = freshValue;
+            freshCached.timestamp = freshTimestamp;
+            if (newWindow) {
+                freshCached.count = new AtomicInteger(1);
+            } else {
+                freshCached.count = cached.count;
+            }
+
+            // If we fail to CAS then it means that another thread beat us to it.
+            // In this case we don't override their work.
+            mCachedValue.compareAndSet(cached, freshCached);
         }
+        return mCachedValue.get().value;
     }
 }
