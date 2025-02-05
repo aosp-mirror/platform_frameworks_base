@@ -76,6 +76,41 @@ static void simplifyPaint(int color, Paint* paint) {
     paint->setBlendMode(SkBlendMode::kSrcOver);
 }
 
+namespace {
+
+static bool shouldDarkenTextForHighContrast(const uirenderer::Lab& lab) {
+    // LINT.IfChange(hct_darken)
+    return lab.L <= 50;
+    // LINT.ThenChange(/core/java/android/text/Layout.java:hct_darken)
+}
+
+}  // namespace
+
+static void adjustHighContrastInnerTextColor(uirenderer::Lab* lab) {
+    bool darken = shouldDarkenTextForHighContrast(*lab);
+    bool isGrayscale = abs(lab->a) < 10 && abs(lab->b) < 10;
+    if (isGrayscale) {
+        // For near-grayscale text we first remove all color.
+        lab->a = lab->b = 0;
+        if (lab->L > 40 && lab->L < 60) {
+            // Text near "middle gray" is pushed to a more contrasty gray.
+            lab->L = darken ? 20 : 80;
+        } else {
+            // Other grayscale text is pushed completely white or black.
+            lab->L = darken ? 0 : 100;
+        }
+    } else {
+        // For color text we ensure the text is bright enough (for light text)
+        // or dark enough (for dark text) to stand out against the background,
+        // without touching the A and B components so we retain color.
+        if (darken && lab->L > 20.f) {
+            lab->L = 20.0f;
+        } else if (!darken && lab->L < 90.f) {
+            lab->L = 90.0f;
+        }
+    }
+}
+
 class DrawTextFunctor {
 public:
     /**
@@ -114,10 +149,8 @@ public:
         if (CC_UNLIKELY(canvas->isHighContrastText() && paint.getAlpha() != 0)) {
             // high contrast draw path
             int color = paint.getColor();
-            // LINT.IfChange(hct_darken)
             uirenderer::Lab lab = uirenderer::sRGBToLab(color);
-            bool darken = lab.L <= 50;
-            // LINT.ThenChange(/core/java/android/text/Layout.java:hct_darken)
+            bool darken = shouldDarkenTextForHighContrast(lab);
 
             // outline
             gDrawTextBlobMode = DrawTextBlobMode::HctOutline;
@@ -130,20 +163,7 @@ public:
             gDrawTextBlobMode = DrawTextBlobMode::HctInner;
             Paint innerPaint(paint);
             if (flags::high_contrast_text_inner_text_color()) {
-                // Preserve some color information while still ensuring sufficient contrast.
-                // Thus we increase the lightness to make the color stand out against a black
-                // background, and vice-versa. For grayscale, we retain some gray to indicate
-                // states like disabled or to distinguish links.
-                bool isGrayscale = abs(lab.a) < 1 && abs(lab.b) < 1;
-                if (isGrayscale) {
-                    if (darken) {
-                        lab.L = lab.L < 40 ? 0 : 20;
-                    } else {
-                        lab.L = lab.L > 60 ? 100 : 80;
-                    }
-                } else {
-                    lab.L = darken ? 20 : 90;
-                }
+                adjustHighContrastInnerTextColor(&lab);
                 simplifyPaint(uirenderer::LabToSRGB(lab, SK_AlphaOPAQUE), &innerPaint);
             } else {
                 simplifyPaint(darken ? SK_ColorBLACK : SK_ColorWHITE, &innerPaint);

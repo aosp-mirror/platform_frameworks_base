@@ -779,6 +779,7 @@ cc_test {
         "tests/unit/CommonPoolTests.cpp",
         "tests/unit/DamageAccumulatorTests.cpp",
         "tests/unit/DeferredLayerUpdaterTests.cpp",
+        "tests/unit/DrawTextFunctorTest.cpp",
         "tests/unit/EglManagerTests.cpp",
         "tests/unit/FatVectorTests.cpp",
         "tests/unit/GraphicsStatsServiceTests.cpp",
