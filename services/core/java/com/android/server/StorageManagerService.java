@@ -127,6 +127,7 @@ import android.provider.Downloads;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.service.storage.ExternalStorageService;
+import android.sysprop.MmdProperties;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
@@ -935,21 +936,21 @@ class StorageManagerService extends IStorageManager.Stub
         // Start scheduling nominally-daily fstrim operations
         MountServiceIdler.scheduleIdlePass(mContext);
 
-        // Toggle zram-enable system property in response to settings
-        mContext.getContentResolver().registerContentObserver(
-            Settings.Global.getUriFor(Settings.Global.ZRAM_ENABLED),
-            false /*notifyForDescendants*/,
-            new ContentObserver(null /* current thread */) {
-                @Override
-                public void onChange(boolean selfChange) {
-                    refreshZramSettings();
-                }
-            });
-        refreshZramSettings();
-
-        if (mmdEnabled()) {
+        if (mmdEnabled() && MmdProperties.mmd_zram_enabled().orElse(false)) {
             ZramMaintenance.startZramMaintenance(mContext);
         } else {
+            // Toggle zram-enable system property in response to settings
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.ZRAM_ENABLED),
+                    false /*notifyForDescendants*/,
+                    new ContentObserver(null /* current thread */) {
+                        @Override
+                        public void onChange(boolean selfChange) {
+                            refreshZramSettings();
+                        }
+                    });
+            refreshZramSettings();
+
             // Schedule zram writeback unless zram is disabled by persist.sys.zram_enabled
             String zramPropValue = SystemProperties.get(ZRAM_ENABLED_PROPERTY);
             if (!zramPropValue.equals("0")
@@ -983,7 +984,7 @@ class StorageManagerService extends IStorageManager.Stub
             // sole writer.
             SystemProperties.set(ZRAM_ENABLED_PROPERTY, desiredPropertyValue);
             // Schedule writeback only if zram is being enabled.
-            if (!mmdEnabled() && desiredPropertyValue.equals("1")
+            if (desiredPropertyValue.equals("1")
                     && mContext.getResources().getBoolean(
                         com.android.internal.R.bool.config_zramWriteback)) {
                 ZramWriteback.scheduleZramWriteback(mContext);
