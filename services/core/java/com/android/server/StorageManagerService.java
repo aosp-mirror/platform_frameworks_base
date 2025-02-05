@@ -155,6 +155,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.memory.ZramMaintenance;
 import com.android.server.pm.Installer;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.storage.AppFuseBridge;
@@ -946,7 +947,6 @@ class StorageManagerService extends IStorageManager.Stub
         refreshZramSettings();
 
         if (mmdEnabled()) {
-            // TODO: b/375432472 - Start zram maintenance only when zram is enabled.
             ZramMaintenance.startZramMaintenance(mContext);
         } else {
             // Schedule zram writeback unless zram is disabled by persist.sys.zram_enabled
