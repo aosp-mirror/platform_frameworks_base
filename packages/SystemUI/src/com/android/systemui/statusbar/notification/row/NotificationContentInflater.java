@@ -61,6 +61,7 @@ import com.android.systemui.statusbar.notification.promoted.PromotedNotification
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel;
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation;
+import com.android.systemui.statusbar.notification.row.shared.ImageModelProvider;
 import com.android.systemui.statusbar.notification.row.shared.LockscreenOtpRedaction;
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor;
 import com.android.systemui.statusbar.notification.row.ui.viewbinder.SingleLineViewBinder;
@@ -436,6 +437,9 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         return TraceUtils.trace("NotificationContentInflater.createRemoteViews", () -> {
             InflationProgress result = new InflationProgress();
             final NotificationEntry entryForLogging = row.getEntry();
+
+            // create an image inflater
+            result.mRowImageInflater = RowImageInflater.newInstance(row.mImageModelIndex);
 
             if ((reInflateFlags & FLAG_CONTENT_VIEW_CONTRACTED) != 0) {
                 logger.logAsyncTaskProgress(entryForLogging, "creating contracted remote view");
@@ -978,6 +982,9 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         NotificationContentView publicLayout = row.getPublicLayout();
         logger.logAsyncTaskProgress(entry, "finishing");
 
+        // Put the new image index on the row
+        row.mImageModelIndex = result.mRowImageInflater.getNewImageIndex();
+
         if (PromotedNotificationContentModel.featureFlagEnabled()) {
             entry.setPromotedNotificationContentModel(result.mPromotedContent);
         }
@@ -1363,14 +1370,19 @@ public class NotificationContentInflater implements NotificationRowContentBinder
 
             if (PromotedNotificationContentModel.featureFlagEnabled()) {
                 mLogger.logAsyncTaskProgress(mEntry, "extracting promoted notification content");
+                final ImageModelProvider imageModelProvider =
+                        result.mRowImageInflater.useForContentModel();
                 final PromotedNotificationContentModel promotedContent =
                         mPromotedNotificationContentExtractor.extractContent(mEntry,
-                                recoveredBuilder);
+                                recoveredBuilder, imageModelProvider);
                 mLogger.logAsyncTaskProgress(mEntry, "extracted promoted notification content: "
                         + promotedContent);
 
                 result.mPromotedContent = promotedContent;
             }
+
+            mLogger.logAsyncTaskProgress(mEntry, "loading RON images");
+            inflationProgress.mRowImageInflater.loadImagesSynchronously(packageContext);
 
             mLogger.logAsyncTaskProgress(mEntry,
                     "getting row image resolver (on wrong thread!)");
@@ -1473,6 +1485,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
 
     @VisibleForTesting
     static class InflationProgress {
+        RowImageInflater mRowImageInflater;
+
         PromotedNotificationContentModel mPromotedContent;
 
         private RemoteViews newContentView;

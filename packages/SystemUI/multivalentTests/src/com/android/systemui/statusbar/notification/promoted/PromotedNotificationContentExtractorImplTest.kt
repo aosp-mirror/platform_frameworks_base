@@ -27,6 +27,7 @@ import android.app.Notification.ProgressStyle.Segment
 import android.app.PendingIntent
 import android.app.Person
 import android.content.Intent
+import android.graphics.drawable.Icon
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -38,6 +39,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.promoted.AutomaticPromotionCoordinator.Companion.EXTRA_WAS_AUTOMATICALLY_PROMOTED
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.Style
+import com.android.systemui.statusbar.notification.row.RowImageInflater
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -49,6 +51,8 @@ class PromotedNotificationContentExtractorImplTest : SysuiTestCase() {
     private val kosmos = testKosmos()
 
     private val underTest = kosmos.promotedNotificationContentExtractor
+    private val rowImageInflater = RowImageInflater.newInstance(previousIndex = null)
+    private val imageModelProvider by lazy { rowImageInflater.useForContentModel() }
 
     @Test
     @DisableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
@@ -294,14 +298,18 @@ class PromotedNotificationContentExtractorImplTest : SysuiTestCase() {
 
     private fun extractContent(entry: NotificationEntry): PromotedNotificationContentModel? {
         val recoveredBuilder = Notification.Builder(context, entry.sbn.notification)
-        return underTest.extractContent(entry, recoveredBuilder)
+        return underTest.extractContent(entry, recoveredBuilder, imageModelProvider)
     }
 
     private fun createEntry(
         promoted: Boolean = true,
         builderBlock: Notification.Builder.() -> Unit = {},
     ): NotificationEntry {
-        val notif = Notification.Builder(context, "channel").also(builderBlock).build()
+        val notif =
+            Notification.Builder(context, "channel")
+                .setSmallIcon(Icon.createWithContentUri("content://foo/bar"))
+                .also(builderBlock)
+                .build()
         if (promoted) {
             notif.flags = FLAG_PROMOTED_ONGOING
         }

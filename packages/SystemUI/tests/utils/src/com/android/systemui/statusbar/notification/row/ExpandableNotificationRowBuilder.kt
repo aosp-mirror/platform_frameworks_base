@@ -78,6 +78,7 @@ import com.android.systemui.statusbar.notification.row.icon.AppIconProviderImpl
 import com.android.systemui.statusbar.notification.row.icon.NotificationIconStyleProviderImpl
 import com.android.systemui.statusbar.notification.row.icon.NotificationRowIconViewInflaterFactory
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor
+import com.android.systemui.statusbar.notification.row.shared.SkeletonImageTransform
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
@@ -224,6 +225,7 @@ class ExpandableNotificationRowBuilder(
         val promotedNotificationContentExtractor =
             PromotedNotificationContentExtractorImpl(
                 context,
+                SkeletonImageTransform(context),
                 PromotedNotificationLogger(logcatLogBuffer("PromotedNotifLog")),
             )
 

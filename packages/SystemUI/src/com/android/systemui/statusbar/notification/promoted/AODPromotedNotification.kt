@@ -55,12 +55,15 @@ import com.android.internal.widget.NotificationProgressModel
 import com.android.internal.widget.NotificationRowIconView
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.res.R as systemuiR
+import com.android.systemui.statusbar.notification.promoted.AodPromotedNotificationColor.Background
 import com.android.systemui.statusbar.notification.promoted.AodPromotedNotificationColor.PrimaryText
 import com.android.systemui.statusbar.notification.promoted.AodPromotedNotificationColor.SecondaryText
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.Style
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.When
 import com.android.systemui.statusbar.notification.promoted.ui.viewmodel.AODPromotedNotificationViewModel
+import com.android.systemui.statusbar.notification.row.shared.ImageModel
+import com.android.systemui.statusbar.notification.row.shared.isNullOrEmpty
 
 @Composable
 fun AODPromotedNotification(viewModelFactory: AODPromotedNotificationViewModel.Factory) {
@@ -171,6 +174,7 @@ private class AODPromotedNotificationViewUpdater(root: View) {
         root.findViewById(R.id.header_text_secondary_divider)
     private val icon: NotificationRowIconView? = root.findViewById(R.id.icon)
     private val leftIcon: ImageView? = root.findViewById(R.id.left_icon)
+    private val rightIcon: ImageView? = root.findViewById(R.id.right_icon)
     private val notificationProgressEndIcon: CachingIconView? =
         root.findViewById(R.id.notification_progress_end_icon)
     private val notificationProgressStartIcon: CachingIconView? =
@@ -224,10 +228,16 @@ private class AODPromotedNotificationViewUpdater(root: View) {
         textView: ImageFloatingTextView? = null,
         showOldProgress: Boolean = true,
     ) {
+        // Icon binding must be called in this order
+        updateImageView(icon, content.smallIcon)
+        icon?.setBackgroundColor(Background.colorInt)
+        icon?.originalIconColor = PrimaryText.colorInt
+
         updateHeader(content, hideTitle = true)
 
         updateTitle(title, content)
         updateText(textView ?: text, content)
+        updateImageView(rightIcon, content.skeletonLargeIcon)
 
         if (showOldProgress) {
             updateOldProgressBar(content)
@@ -327,6 +337,7 @@ private class AODPromotedNotificationViewUpdater(root: View) {
         updateTimeAndChronometer(content)
         updateConversationHeaderDividers(content, hideTitle = true)
 
+        updateImageView(verificationIcon, content.verificationIcon)
         updateTextView(verificationText, content.verificationText)
     }
 
@@ -337,7 +348,8 @@ private class AODPromotedNotificationViewUpdater(root: View) {
         val hasTitle = content.title != null && !hideTitle
         val hasAppName = content.appName != null
         val hasTimeOrChronometer = content.time != null
-        val hasVerification = content.verificationIcon != null || content.verificationText != null
+        val hasVerification =
+            !content.verificationIcon.isNullOrEmpty() || !content.verificationText.isNullOrEmpty()
 
         val hasTextBeforeAppName = hasTitle
         val hasTextBeforeTime = hasTitle || hasAppName
@@ -415,15 +427,18 @@ private class AODPromotedNotificationViewUpdater(root: View) {
         text: CharSequence?,
         color: AodPromotedNotificationColor = SecondaryText,
     ) {
+        if (view == null) return
         setTextViewColor(view, color)
 
-        if (text != null && text.isNotEmpty()) {
-            view?.text = text.toSkeleton()
-            view?.visibility = VISIBLE
-        } else {
-            view?.text = ""
-            view?.visibility = GONE
-        }
+        view.text = text?.toSkeleton() ?: ""
+        view.isVisible = !text.isNullOrEmpty()
+    }
+
+    private fun updateImageView(view: ImageView?, model: ImageModel?) {
+        if (view == null) return
+        val drawable = model?.drawable
+        view.setImageDrawable(drawable)
+        view.isVisible = drawable != null
     }
 
     private fun setTextViewColor(view: TextView?, color: AodPromotedNotificationColor) {
@@ -464,7 +479,7 @@ private fun Notification.ProgressStyle.Point.toSkeleton(): Notification.Progress
 }
 
 private enum class AodPromotedNotificationColor(colorUInt: UInt) {
-    Background(0x00000000u),
+    Background(0xFF000000u),
     PrimaryText(0xFFFFFFFFu),
     SecondaryText(0xFFCCCCCCu);
 

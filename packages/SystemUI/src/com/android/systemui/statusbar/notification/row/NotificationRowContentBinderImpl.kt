@@ -490,6 +490,9 @@ constructor(
                     }
             }
 
+            logger.logAsyncTaskProgress(entry, "loading RON images")
+            inflationProgress.rowImageInflater.loadImagesSynchronously(packageContext)
+
             logger.logAsyncTaskProgress(entry, "getting row image resolver (on wrong thread!)")
             val imageResolver = row.imageResolver
             // wait for image resolver to finish preloading
@@ -582,6 +585,7 @@ constructor(
     @VisibleForTesting
     class InflationProgress(
         @VisibleForTesting val packageContext: Context,
+        val rowImageInflater: RowImageInflater,
         val remoteViews: NewRemoteViews,
         val contentModel: NotificationContentModel,
         val promotedContent: PromotedNotificationContentModel?,
@@ -674,15 +678,21 @@ constructor(
             promotedNotificationContentExtractor: PromotedNotificationContentExtractor,
             logger: NotificationRowContentBinderLogger,
         ): InflationProgress {
+            val rowImageInflater =
+                RowImageInflater.newInstance(previousIndex = row.mImageModelIndex)
+
             val promotedContent =
                 if (PromotedNotificationContentModel.featureFlagEnabled()) {
                     logger.logAsyncTaskProgress(entry, "extracting promoted notification content")
-                    promotedNotificationContentExtractor.extractContent(entry, builder).also {
-                        logger.logAsyncTaskProgress(
-                            entry,
-                            "extracted promoted notification content: $it",
-                        )
-                    }
+                    val imageModelProvider = rowImageInflater.useForContentModel()
+                    promotedNotificationContentExtractor
+                        .extractContent(entry, builder, imageModelProvider)
+                        .also {
+                            logger.logAsyncTaskProgress(
+                                entry,
+                                "extracted promoted notification content: $it",
+                            )
+                        }
                 } else {
                     null
                 }
@@ -719,7 +729,7 @@ constructor(
                         builder = builder,
                         systemUiContext = systemUiContext,
                         redactText = false,
-                        summarization = entry.ranking.summarization
+                        summarization = entry.ranking.summarization,
                     )
                 } else null
 
@@ -736,7 +746,7 @@ constructor(
                             builder = builder,
                             systemUiContext = systemUiContext,
                             redactText = true,
-                            summarization = null
+                            summarization = null,
                         )
                     } else {
                         SingleLineViewInflater.inflateRedactedSingleLineViewModel(
@@ -761,6 +771,7 @@ constructor(
 
             return InflationProgress(
                 packageContext = packageContext,
+                rowImageInflater = rowImageInflater,
                 remoteViews = remoteViews,
                 contentModel = contentModel,
                 promotedContent = promotedContent,
@@ -1473,6 +1484,9 @@ constructor(
                 return false
             }
             logger.logAsyncTaskProgress(entry, "finishing")
+
+            // Put the new image index on the row
+            row.mImageModelIndex = result.rowImageInflater.getNewImageIndex()
 
             entry.setContentModel(result.contentModel)
             if (PromotedNotificationContentModel.featureFlagEnabled()) {

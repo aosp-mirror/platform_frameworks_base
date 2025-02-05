@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.promoted
 import android.app.Notification
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
+import com.android.systemui.statusbar.notification.row.shared.ImageModelProvider
 import org.junit.Assert
 
 class FakePromotedNotificationContentExtractor : PromotedNotificationContentExtractor {
@@ -29,6 +30,7 @@ class FakePromotedNotificationContentExtractor : PromotedNotificationContentExtr
     override fun extractContent(
         entry: NotificationEntry,
         recoveredBuilder: Notification.Builder,
+        imageModelProvider: ImageModelProvider,
     ): PromotedNotificationContentModel? {
         extractCalls.add(entry to recoveredBuilder)
 
@@ -38,13 +40,13 @@ class FakePromotedNotificationContentExtractor : PromotedNotificationContentExtr
         } else {
             // If entries *are* set, fail on unexpected ones.
             Assert.assertTrue(contentForEntry.containsKey(entry))
-            return contentForEntry.get(entry)
+            return contentForEntry[entry]
         }
     }
 
     fun resetForEntry(entry: NotificationEntry, content: PromotedNotificationContentModel?) {
         contentForEntry.clear()
-        contentForEntry.put(entry, content)
+        contentForEntry[entry] = content
         extractCalls.clear()
     }
 
