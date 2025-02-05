@@ -3044,20 +3044,11 @@ final class InstallPackageHelper {
 
             // Set the OP_ACCESS_RESTRICTED_SETTINGS op, which is used by ECM (see {@link
             // EnhancedConfirmationManager}) as a persistent state denoting whether an app is
-            // currently guarded by ECM, not guarded by ECM, or (in Android V+) that this should
-            // be decided later.
-            if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
-                    && android.security.Flags.extendEcmToAllSettings()) {
-                final int appId = request.getAppId();
-                // TODO: b/388960315 - Implement a long-term solution to race condition
-                mPm.mHandler.postDelayed(() -> {
-                    for (int userId : firstUserIds) {
-                        // MODE_DEFAULT means that the app's guardedness will be decided lazily
-                        setAccessRestrictedSettingsMode(packageName, appId, userId,
-                                AppOpsManager.MODE_DEFAULT);
-                    }
-                }, 1000L);
-            } else {
+            // currently guarded by ECM, not guarded by ECM or (in Android V+) that this should
+            // be decided later. In Android B, the op's default mode was updated to the
+            // "should be decided later" case, and so this step is now unnecessary.
+            if (!android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
+                    || !android.security.Flags.extendEcmToAllSettings()) {
                 // Apply restricted settings on potentially dangerous packages. Needs to happen
                 // after appOpsManager is notified of the new package
                 if (request.getPackageSource() == PackageInstaller.PACKAGE_SOURCE_LOCAL_FILE

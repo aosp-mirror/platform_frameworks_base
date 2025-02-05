@@ -61,5 +61,21 @@ class AppIdAppOpUpgrade(private val policy: AppIdAppOpPolicy) {
                 }
             }
         }
+        if (version <= 15) {
+            with(policy) {
+                val appOpModes = getAppOpModes(packageState.appId, userId)
+                if (
+                    appOpModes != null &&
+                        AppOpsManager.OPSTR_ACCESS_RESTRICTED_SETTINGS !in appOpModes
+                ) {
+                    setAppOpMode(
+                        packageState.appId,
+                        userId,
+                        AppOpsManager.OPSTR_ACCESS_RESTRICTED_SETTINGS,
+                        AppOpsManager.MODE_ALLOWED,
+                    )
+                }
+            }
+        }
     }
 }
