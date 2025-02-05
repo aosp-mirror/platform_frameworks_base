@@ -126,7 +126,10 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
                 return state.getIdentifier();
             }
         }
-        return INVALID_DEVICE_STATE_IDENTIFIER;
+
+        // If RDMV2 flag is enabled but not properly configured, let's fall back to RDMV1 if
+        // possible.
+        return getRdmV1Identifier(currentSupportedDeviceStates);
     }
 
     public WindowAreaComponentImpl(@NonNull Context context) {

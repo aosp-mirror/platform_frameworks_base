@@ -143,13 +143,20 @@ public class WindowAreaComponentImplTests {
     }
 
     @Test
+    public void testFallsBackToRdmV1() {
+        // Test that if we try to get RDMV2 but it's not available, that we get RDMV1 if it is
+        // available.
+        final List<DeviceState> supportedStates = new ArrayList<>();
+        supportedStates.add(REAR_DISPLAY_STATE_V1);
+        assertEquals(REAR_DISPLAY_STATE_V1.getIdentifier(),
+                WindowAreaComponentImpl.getRdmV2Identifier(supportedStates));
+    }
+
+    @Test
     public void testRdmV2Identifier_whenStateIsProperlyConfigured() {
         final List<DeviceState> supportedStates = new ArrayList<>();
 
         supportedStates.add(REAR_DISPLAY_STATE_V1);
-        assertEquals(INVALID_DEVICE_STATE_IDENTIFIER,
-                WindowAreaComponentImpl.getRdmV2Identifier(supportedStates));
-
         supportedStates.add(REAR_DISPLAY_STATE_V2);
         assertEquals(REAR_DISPLAY_STATE_V2.getIdentifier(),
                 WindowAreaComponentImpl.getRdmV2Identifier(supportedStates));
