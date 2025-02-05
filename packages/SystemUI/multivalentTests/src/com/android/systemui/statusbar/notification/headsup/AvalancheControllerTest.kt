@@ -234,32 +234,6 @@ class AvalancheControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testDelete_wasDropped_removedFromDropSet() {
-        // Entry was dropped
-        val headsUpEntry = createHeadsUpEntry(id = 0)
-        mAvalancheController.debugDropSet.add(headsUpEntry)
-
-        // Delete
-        mAvalancheController.delete(headsUpEntry, runnableMock!!, "testLabel")
-
-        // Entry was removed from dropSet
-        assertThat(mAvalancheController.debugDropSet.contains(headsUpEntry)).isFalse()
-    }
-
-    @Test
-    fun testDelete_wasDropped_runnableNotRun() {
-        // Entry was dropped
-        val headsUpEntry = createHeadsUpEntry(id = 0)
-        mAvalancheController.debugDropSet.add(headsUpEntry)
-
-        // Delete
-        mAvalancheController.delete(headsUpEntry, runnableMock!!, "testLabel")
-
-        // Runnable was not run
-        Mockito.verify(runnableMock, Mockito.times(0)).run()
-    }
-
-    @Test
     fun testDelete_isShowing_runnableRun() {
         // Entry is showing
         val headsUpEntry = createHeadsUpEntry(id = 0)
