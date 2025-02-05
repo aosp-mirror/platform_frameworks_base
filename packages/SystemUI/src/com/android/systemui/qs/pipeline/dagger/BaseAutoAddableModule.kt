@@ -17,7 +17,6 @@
 package com.android.systemui.qs.pipeline.dagger
 
 import android.content.res.Resources
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.pipeline.domain.autoaddable.A11yShortcutAutoAddable
 import com.android.systemui.qs.pipeline.domain.autoaddable.A11yShortcutAutoAddableList
 import com.android.systemui.qs.pipeline.domain.autoaddable.AutoAddableSetting
@@ -30,6 +29,7 @@ import com.android.systemui.qs.pipeline.domain.autoaddable.NightDisplayAutoAddab
 import com.android.systemui.qs.pipeline.domain.autoaddable.WalletAutoAddable
 import com.android.systemui.qs.pipeline.domain.autoaddable.WorkTileAutoAddable
 import com.android.systemui.qs.pipeline.domain.model.AutoAddable
+import com.android.systemui.shade.ShadeDisplayAware
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -43,7 +43,7 @@ interface BaseAutoAddableModule {
         @Provides
         @ElementsIntoSet
         fun providesAutoAddableSetting(
-            @Main resources: Resources,
+            @ShadeDisplayAware resources: Resources,
             autoAddableSettingFactory: AutoAddableSetting.Factory,
         ): Set<AutoAddable> {
             return AutoAddableSettingList.parseSettingsResource(

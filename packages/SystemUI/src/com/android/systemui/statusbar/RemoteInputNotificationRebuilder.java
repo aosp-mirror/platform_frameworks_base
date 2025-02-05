@@ -29,6 +29,7 @@ import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ public class RemoteInputNotificationRebuilder {
     private final Context mContext;
 
     @Inject
-    RemoteInputNotificationRebuilder(Context context) {
+    RemoteInputNotificationRebuilder(@ShadeDisplayAware Context context) {
         mContext = context;
     }
 

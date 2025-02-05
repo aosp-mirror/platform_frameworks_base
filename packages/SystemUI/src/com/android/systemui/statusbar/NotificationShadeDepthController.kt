@@ -42,6 +42,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.shade.ShadeExpansionListener
 import com.android.systemui.shared.Flags.ambientAod
@@ -80,7 +81,7 @@ constructor(
     private val wallpaperController: WallpaperController,
     private val notificationShadeWindowController: NotificationShadeWindowController,
     private val dozeParameters: DozeParameters,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val splitShadeStateController: SplitShadeStateController,
     private val windowRootViewBlurInteractor: WindowRootViewBlurInteractor,
     @Application private val applicationScope: CoroutineScope,

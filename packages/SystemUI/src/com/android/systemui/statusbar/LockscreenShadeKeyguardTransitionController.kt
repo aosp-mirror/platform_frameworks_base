@@ -6,6 +6,7 @@ import android.util.MathUtils
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
@@ -19,7 +20,7 @@ class LockscreenShadeKeyguardTransitionController
 constructor(
     private val mediaHierarchyManager: MediaHierarchyManager,
     @Assisted private val shadeLockscreenInteractor: ShadeLockscreenInteractor,
-    context: Context,
+    @ShadeDisplayAware context: Context,
     configurationController: ConfigurationController,
     dumpManager: DumpManager,
     splitShadeStateController: SplitShadeStateController,

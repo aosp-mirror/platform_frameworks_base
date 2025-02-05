@@ -19,6 +19,7 @@ import android.app.StatusBarManager
 import android.content.Context
 import android.content.res.Configuration
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.CommandQueue
 import javax.inject.Inject
 
@@ -29,7 +30,7 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class RemoteInputQuickSettingsDisabler @Inject constructor(
-        private val context: Context,
+        @ShadeDisplayAware private val context: Context,
         private val commandQueue: CommandQueue,
         private val splitShadeStateController: SplitShadeStateController,
         configController: ConfigurationController
