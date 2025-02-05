@@ -288,12 +288,16 @@
     <item msgid="3753634915787796632">"2"</item>
     <item msgid="4779928470672877922">"3"</item>
   </string-array>
-    <!-- no translation found for shade_display_awareness_entries:0 (816770658383209617) -->
-    <!-- no translation found for shade_display_awareness_entries:1 (9161645858025071955) -->
-    <!-- no translation found for shade_display_awareness_entries:2 (114384731934682483) -->
-    <!-- no translation found for shade_display_awareness_summaries:0 (2964753205732912921) -->
-    <!-- no translation found for shade_display_awareness_summaries:1 (7795034287069726554) -->
-    <!-- no translation found for shade_display_awareness_summaries:2 (5280431949814340475) -->
+  <string-array name="shade_display_awareness_entries">
+    <item msgid="816770658383209617">"Endast enhetens skärm (standard)"</item>
+    <item msgid="9161645858025071955">"Extern skärm"</item>
+    <item msgid="114384731934682483">"Fokusbaserad"</item>
+  </string-array>
+  <string-array name="shade_display_awareness_summaries">
+    <item msgid="2964753205732912921">"Visa endast skugga på enhetens skärm"</item>
+    <item msgid="7795034287069726554">"Visa skugga på en enda extern skärm"</item>
+    <item msgid="5280431949814340475">"Visa enheten på skärmen som sist var i fokus"</item>
+  </string-array>
   <string-array name="shade_display_awareness_values">
     <item msgid="3055776101992426514">"default_display"</item>
     <item msgid="774789415968826925">"any_external_display"</item>
