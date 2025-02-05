@@ -100,6 +100,7 @@ public class BubbleTaskViewHelper {
 
             // TODO: I notice inconsistencies in lifecycle
             // Post to keep the lifecycle normal
+            // TODO - currently based on type, really it's what the "launch item" is.
             mParentView.post(() -> {
                 ProtoLog.d(WM_SHELL_BUBBLES, "onInitialized: calling startActivity, bubble=%s",
                         getBubbleKey());
@@ -108,11 +109,11 @@ public class BubbleTaskViewHelper {
                     options.setPendingIntentBackgroundActivityStartMode(
                             MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
                     final boolean isShortcutBubble = (mBubble.hasMetadataShortcutId()
-                            || (mBubble.getShortcutInfo() != null
+                            || (mBubble.isShortcut()
                             && BubbleAnythingFlagHelper.enableCreateAnyBubble()));
                     if (mBubble.getPreparingTransition() != null) {
                         mBubble.getPreparingTransition().surfaceCreated();
-                    } else if (mBubble.isAppBubble()) {
+                    } else if (mBubble.isApp() || mBubble.isNote()) {
                         Context context =
                                 mContext.createContextAsUser(
                                         mBubble.getUser(), Context.CONTEXT_RESTRICTED);
@@ -167,7 +168,7 @@ public class BubbleTaskViewHelper {
             // The taskId is saved to use for removeTask, preventing appearance in recent tasks.
             mTaskId = taskId;
 
-            if (mBubble != null && mBubble.isNoteBubble()) {
+            if (mBubble != null && mBubble.isNote()) {
                 // Let the controller know sooner what the taskId is.
                 mExpandedViewManager.setNoteBubbleTaskId(mBubble.getKey(), mTaskId);
             }

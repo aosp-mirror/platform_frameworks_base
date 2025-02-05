@@ -1385,16 +1385,16 @@ public class BubbleStackView extends FrameLayout
     /**
      * Whether the selected bubble is conversation bubble
      */
-    private boolean isConversationBubble() {
+    private boolean isChat() {
         BubbleViewProvider bubble = mBubbleData.getSelectedBubble();
-        return bubble instanceof Bubble && ((Bubble) bubble).isConversation();
+        return bubble instanceof Bubble && ((Bubble) bubble).isChat();
     }
 
     /**
      * Whether the educational view should show for the expanded view "manage" menu.
      */
     private boolean shouldShowManageEdu() {
-        if (!isConversationBubble()) {
+        if (!isChat()) {
             // We only show user education for conversation bubbles right now
             return false;
         }
@@ -1441,7 +1441,7 @@ public class BubbleStackView extends FrameLayout
      * Whether education view should show for the collapsed stack.
      */
     private boolean shouldShowStackEdu() {
-        if (!isConversationBubble()) {
+        if (!isChat()) {
             // We only show user education for conversation bubbles right now
             return false;
         }
@@ -1976,7 +1976,7 @@ public class BubbleStackView extends FrameLayout
             return;
         }
 
-        if (firstBubble && bubble.isNoteBubble() && !mPositioner.hasUserModifiedDefaultPosition()) {
+        if (firstBubble && bubble.isNote() && !mPositioner.hasUserModifiedDefaultPosition()) {
             // If it's an note bubble and we don't have a previous resting position, update the
             // controllers to use the default position for the note bubble (it'd be different from
             // the position initialized with the controllers originally).
@@ -3322,20 +3322,16 @@ public class BubbleStackView extends FrameLayout
         // name and icon.
         if (show) {
             final Bubble bubble = mBubbleData.getBubbleInStackWithKey(mExpandedBubble.getKey());
-            if (bubble != null && !bubble.isAppBubble()) {
-                // Setup options for non app bubbles
+            if (bubble != null && bubble.isChat()) {
+                // Setup options for chat bubbles
                 mManageDontBubbleView.setVisibility(VISIBLE);
                 mManageSettingsIcon.setImageBitmap(bubble.getRawAppBadge());
                 mManageSettingsText.setText(getResources().getString(
                         R.string.bubbles_app_settings, bubble.getAppName()));
                 mManageSettingsView.setVisibility(VISIBLE);
             } else {
-                // Setup options for app bubbles
-                // App bubbles have no conversations
-                // so we don't show the option to not bubble conversation
+                // Not a chat bubble, so don't show conversation / notification settings
                 mManageDontBubbleView.setVisibility(GONE);
-                // App bubbles are not notification based
-                // so we don't show the option to go to notification settings
                 mManageSettingsView.setVisibility(GONE);
             }
         }

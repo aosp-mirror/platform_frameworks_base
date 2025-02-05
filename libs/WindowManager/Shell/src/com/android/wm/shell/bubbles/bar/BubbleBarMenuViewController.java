@@ -222,7 +222,7 @@ class BubbleBarMenuViewController {
         Resources resources = mContext.getResources();
         int tintColor = mContext.getColor(com.android.internal.R.color.materialColorOnSurface);
 
-        if (bubble.isConversation()) {
+        if (bubble.isChat()) {
             // Don't bubble conversation action
             menuActions.add(new BubbleBarMenuView.MenuAction(
                     Icon.createWithResource(mContext, R.drawable.bubble_ic_stop_bubble),

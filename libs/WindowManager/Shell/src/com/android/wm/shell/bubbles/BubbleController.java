@@ -2890,7 +2890,7 @@ public class BubbleController implements ConfigurationChangeListener,
                     mShortcutIdToBubble.put(b.getShortcutId(), b);
                     updateBubbleSuppressedState(b);
 
-                    if (b.isNoteBubble()) {
+                    if (b.isNote()) {
                         mNoteBubbleTaskIds.put(b.getKey(), b.getTaskId());
                     }
                 }

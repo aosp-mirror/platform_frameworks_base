@@ -227,10 +227,11 @@ public class BubbleExpandedView extends LinearLayout {
                             MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
 
                     final boolean isShortcutBubble = (mBubble.hasMetadataShortcutId()
-                            || (mBubble.getShortcutInfo() != null
+                            || (mBubble.isShortcut()
                             && BubbleAnythingFlagHelper.enableCreateAnyBubble()));
 
-                    if (mBubble.isAppBubble()) {
+                    // TODO - currently based on type, really it's what the "launch item" is.
+                    if (mBubble.isApp() || mBubble.isNote()) {
                         Context context =
                                 mContext.createContextAsUser(
                                         mBubble.getUser(), Context.CONTEXT_RESTRICTED);
@@ -284,7 +285,7 @@ public class BubbleExpandedView extends LinearLayout {
             // The taskId is saved to use for removeTask, preventing appearance in recent tasks.
             mTaskId = taskId;
 
-            if (mBubble != null && mBubble.isNoteBubble()) {
+            if (mBubble != null && mBubble.isNote()) {
                 // Let the controller know sooner what the taskId is.
                 mManager.setNoteBubbleTaskId(mBubble.getKey(), mTaskId);
             }
