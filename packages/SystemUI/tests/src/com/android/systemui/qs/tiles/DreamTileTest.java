@@ -20,6 +20,8 @@ import static android.platform.test.flag.junit.FlagsParameterization.allCombinat
 
 import static com.android.systemui.Flags.FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
@@ -59,7 +61,6 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.FakeSettings;
-import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
 import org.junit.Before;
@@ -69,10 +70,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.List;
-
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
 import platform.test.runner.parameterized.Parameters;
+
+import java.util.List;
 
 @RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -107,7 +108,7 @@ public class DreamTileTest extends SysuiTestCase {
 
     private DreamTile mTile;
 
-    private SecureSettings mSecureSettings;
+    private FakeSettings mSecureSettings;
 
     private static final ComponentName COLORS_DREAM_COMPONENT_NAME = new ComponentName(
             "com.android.dreams", ".Colors");
@@ -275,6 +276,23 @@ public class DreamTileTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         assertEquals(createExpectedIcon(R.drawable.ic_qs_screen_saver_undocked),
                 dockedTile.getState().icon);
+
+        destroyTile(dockedTile);
+    }
+
+    @Test
+    public void testHandleUserSwitch() {
+        final DreamTile dockedTile = constructTileForTest(true, false);
+        dockedTile.handleSetListening(true);
+
+        final int oldUserId = mUserTracker.getUserId();
+        assertThat(dockedTile.mDreamSettingObserver.getCurrentUser()).isEqualTo(oldUserId);
+        assertThat(dockedTile.mEnabledSettingObserver.getCurrentUser()).isEqualTo(oldUserId);
+
+        final int newUserId = 1337;
+        dockedTile.handleUserSwitch(newUserId);
+        assertThat(dockedTile.mDreamSettingObserver.getCurrentUser()).isEqualTo(newUserId);
+        assertThat(dockedTile.mEnabledSettingObserver.getCurrentUser()).isEqualTo(newUserId);
 
         destroyTile(dockedTile);
     }
