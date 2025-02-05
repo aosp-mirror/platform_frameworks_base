@@ -34,24 +34,24 @@ android_test {
 
     static_libs: [
         "androidx.test.core",
-        "androidx.test.runner",
-        "androidx.test.espresso.core",
         "androidx.test.espresso.contrib",
+        "androidx.test.espresso.core",
         "androidx.test.ext.truth",
+        "androidx.test.runner",
         "frameworks-base-testutils",
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
         "ravenwood-junit",
-        "services.core",
         "service-permission.stubs.system_server",
+        "services.core",
         "servicestests-core-utils",
         "servicestests-utils-mockito-extended",
         "truth",
     ],
 
     libs: [
-        "android.test.mock.stubs.system",
         "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
         "android.test.runner.stubs.system",
     ],
 
@@ -103,27 +103,28 @@ android_test {
     test_config: "src/com/android/inputmethodservice/AndroidTest.xml",
 
     static_libs: [
+        "SimpleImeImsLib",
+        "SimpleImeTestingLib",
         "androidx.test.core",
-        "androidx.test.runner",
-        "androidx.test.espresso.core",
         "androidx.test.espresso.contrib",
+        "androidx.test.espresso.core",
         "androidx.test.ext.truth",
+        "androidx.test.runner",
+        "cts-wm-util",
         "frameworks-base-testutils",
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
         "ravenwood-junit",
-        "services.core",
         "service-permission.stubs.system_server",
+        "services.core",
         "servicestests-core-utils",
         "servicestests-utils-mockito-extended",
         "truth",
-        "SimpleImeTestingLib",
-        "SimpleImeImsLib",
     ],
 
     libs: [
-        "android.test.mock.stubs.system",
         "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
         "android.test.runner.stubs.system",
     ],
 
