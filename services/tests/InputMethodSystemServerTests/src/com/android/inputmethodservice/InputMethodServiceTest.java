@@ -19,6 +19,7 @@ package com.android.inputmethodservice;
 import static android.view.WindowInsets.Type.captionBar;
 
 import static com.android.compatibility.common.util.SystemUtil.eventually;
+import static com.android.cts.input.injectinputinprocess.InjectInputInProcessKt.clickOnViewCenter;
 import static com.android.internal.inputmethod.InputMethodNavButtonFlags.IME_DRAWS_IME_NAV_BAR;
 import static com.android.internal.inputmethod.InputMethodNavButtonFlags.SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN;
 
@@ -77,7 +78,6 @@ public class InputMethodServiceTest {
 
     private static final String TAG = "SimpleIMSTest";
     private static final String INPUT_METHOD_SERVICE_NAME = ".SimpleInputMethodService";
-    private static final String EDIT_TEXT_DESC = "Input box";
     private static final String INPUT_METHOD_NAV_BACK_ID =
             "android:id/input_method_nav_back";
     private static final String INPUT_METHOD_NAV_IME_SWITCHER_ID =
@@ -168,7 +168,7 @@ public class InputMethodServiceTest {
         // Performs click on EditText to bring up the IME.
         Log.i(TAG, "Click on EditText");
         verifyInputViewStatus(
-                this::clickOnEditText,
+                () -> clickOnViewCenter(mActivity.getEditText()),
                 true /* expected */,
                 true /* inputViewStarted */);
         assertWithMessage("IME is shown").that(mInputMethodService.isInputViewShown()).isTrue();
@@ -1259,11 +1259,5 @@ public class InputMethodServiceTest {
         } else {
             controller.hide(captionBar());
         }
-    }
-
-    private void clickOnEditText() {
-        // Find the editText and click it.
-        getUiObject(By.desc(EDIT_TEXT_DESC)).click();
-        mInstrumentation.waitForIdleSync();
     }
 }

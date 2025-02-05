@@ -110,6 +110,7 @@ android_test {
         "androidx.test.espresso.core",
         "androidx.test.ext.truth",
         "androidx.test.runner",
+        "cts-input-lib",
         "cts-wm-util",
         "frameworks-base-testutils",
         "mockito-target-extended-minus-junit4",
