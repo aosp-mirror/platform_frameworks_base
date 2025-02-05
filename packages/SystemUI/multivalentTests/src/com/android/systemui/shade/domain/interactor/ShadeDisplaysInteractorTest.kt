@@ -184,4 +184,11 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
 
             verify(notificationStackRebindingHider).setVisible(eq(true), eq(true))
         }
+
+    @Test
+    fun start_registersConfigChangeListener() {
+        underTest.start()
+
+        verify(shadeContext).registerComponentCallbacks(any())
+    }
 }
