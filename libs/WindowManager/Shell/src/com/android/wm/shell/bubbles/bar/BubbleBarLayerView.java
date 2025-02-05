@@ -128,6 +128,16 @@ public class BubbleBarLayerView extends FrameLayout
         setOnClickListener(view -> hideModalOrCollapse());
     }
 
+    /** Hides the expanded view drop target. */
+    public void hideBubbleBarExpandedViewDropTarget() {
+        mBubbleExpandedViewPinController.hideDropTarget();
+    }
+
+    /** Shows the expanded view drop target at the requested {@link BubbleBarLocation location} */
+    public void showBubbleBarExtendedViewDropTarget(@NonNull BubbleBarLocation bubbleBarLocation) {
+        mBubbleExpandedViewPinController.showDropTarget(bubbleBarLocation);
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();

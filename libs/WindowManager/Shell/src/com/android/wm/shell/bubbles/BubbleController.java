@@ -832,6 +832,10 @@ public class BubbleController implements ConfigurationChangeListener,
             case BubbleBarLocation.UpdateSource.A11Y_ACTION_EXP_VIEW:
                 // TODO(b/349845968): move logging from BubbleBarLayerView to here
                 break;
+            case BubbleBarLocation.UpdateSource.APP_ICON_DRAG:
+                mLogger.log(onLeft ? BubbleLogger.Event.BUBBLE_BAR_MOVED_LEFT_APP_ICON_DROP
+                        : BubbleLogger.Event.BUBBLE_BAR_MOVED_RIGHT_APP_ICON_DROP);
+                break;
         }
     }
 
@@ -851,24 +855,28 @@ public class BubbleController implements ConfigurationChangeListener,
     public void onDragItemOverBubbleBarDragZone(@Nullable BubbleBarLocation bubbleBarLocation) {
         if (bubbleBarLocation == null) return;
         if (isShowingAsBubbleBar() && BubbleAnythingFlagHelper.enableCreateAnyBubble()) {
-            //TODO(b/388894910) show expanded view drop
             mBubbleStateListener.onDragItemOverBubbleBarDragZone(bubbleBarLocation);
+            ensureBubbleViewsAndWindowCreated();
+            if (mLayerView != null) {
+                mLayerView.showBubbleBarExtendedViewDropTarget(bubbleBarLocation);
+            }
         }
     }
 
     @Override
     public void onItemDraggedOutsideBubbleBarDropZone() {
         if (isShowingAsBubbleBar() && BubbleAnythingFlagHelper.enableCreateAnyBubble()) {
-            //TODO(b/388894910) hide expanded view drop
             mBubbleStateListener.onItemDraggedOutsideBubbleBarDropZone();
+            hideBubbleBarExpandedViewDropTarget();
         }
     }
 
     @Override
-    public void onItemDroppedOverBubbleBarDragZone(@Nullable BubbleBarLocation bubbleBarLocation) {
-        if (bubbleBarLocation == null) return;
+    public void onItemDroppedOverBubbleBarDragZone(BubbleBarLocation location, Intent appIntent,
+            UserHandle userHandle) {
         if (isShowingAsBubbleBar() && BubbleAnythingFlagHelper.enableCreateAnyBubble()) {
-            //TODO(b/388894910) handle item drop with expandStackAndSelectBubble()
+            hideBubbleBarExpandedViewDropTarget();
+            expandStackAndSelectBubble(appIntent, userHandle, location);
         }
     }
 
@@ -886,6 +894,12 @@ public class BubbleController implements ConfigurationChangeListener,
                     new Rect(r - bubbleBarDropZoneSideSize, top, r, b));
         }
         return result;
+    }
+
+    private void hideBubbleBarExpandedViewDropTarget() {
+        if (mLayerView != null) {
+            mLayerView.hideBubbleBarExpandedViewDropTarget();
+        }
     }
 
     /** Whether this userId belongs to the current user. */
@@ -1512,8 +1526,14 @@ public class BubbleController implements ConfigurationChangeListener,
      *
      * @param intent the intent for the bubble.
      */
-    public void expandStackAndSelectBubble(Intent intent, UserHandle user) {
+    public void expandStackAndSelectBubble(Intent intent, UserHandle user,
+            @Nullable BubbleBarLocation bubbleBarLocation) {
         if (!BubbleAnythingFlagHelper.enableCreateAnyBubble()) return;
+        if (bubbleBarLocation != null) {
+            //TODO (b/388894910) combine location update with the setSelectedBubbleAndExpandStack &
+            // fix bubble bar flicking
+            setBubbleBarLocation(bubbleBarLocation, BubbleBarLocation.UpdateSource.APP_ICON_DRAG);
+        }
         Bubble b = mBubbleData.getOrCreateBubble(intent, user); // Removes from overflow
         ProtoLog.v(WM_SHELL_BUBBLES, "expandStackAndSelectBubble - intent=%s", intent);
         if (b.isInflated()) {
@@ -2746,7 +2766,8 @@ public class BubbleController implements ConfigurationChangeListener,
 
         @Override
         public void showAppBubble(Intent intent, UserHandle user) {
-            mMainExecutor.execute(() -> mController.expandStackAndSelectBubble(intent, user));
+            mMainExecutor.execute(() -> mController.expandStackAndSelectBubble(intent,
+                    user, /* bubbleBarLocation = */ null));
         }
 
         @Override

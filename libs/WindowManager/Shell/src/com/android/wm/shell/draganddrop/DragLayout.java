@@ -38,6 +38,7 @@ import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.StatusBarManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -46,6 +47,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
+import android.os.UserHandle;
 import android.view.DragEvent;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -600,6 +602,12 @@ public class DragLayout extends LinearLayout
 
     @Nullable
     private BubbleBarLocation getBubbleBarLocation(int x, int y) {
+        Intent appData = mSession.appData;
+        if (appData == null || appData.getExtra(Intent.EXTRA_INTENT) == null
+                || appData.getExtra(Intent.EXTRA_USER) == null) {
+            // there is no app data, so drop event over the bubble bar can not be handled
+            return null;
+        }
         for (BubbleBarLocation location : mBubbleBarLocations.keySet()) {
             if (mBubbleBarLocations.get(location).contains(x, y)) {
                 return location;
@@ -649,11 +657,17 @@ public class DragLayout extends LinearLayout
             @Nullable WindowContainerToken hideTaskToken, Runnable dropCompleteCallback) {
         final boolean handledDrop = mCurrentTarget != null || mCurrentBubbleBarTarget != null;
         mHasDropped = true;
+        Intent appData = mSession.appData;
 
-        // Process the drop
-        mPolicy.onDropped(mCurrentTarget, hideTaskToken);
-        //TODO(b/388894910) add info about the application
-        mBubbleBarDragListener.onItemDroppedOverBubbleBarDragZone(mCurrentBubbleBarTarget);
+        // Process the drop exclusive by DropTarget OR by the BubbleBar
+        if (mCurrentTarget != null) {
+            mPolicy.onDropped(mCurrentTarget, hideTaskToken);
+        } else if (appData != null && mCurrentBubbleBarTarget != null) {
+            Intent appIntent = (Intent) appData.getExtra(Intent.EXTRA_INTENT);
+            UserHandle user = (UserHandle) appData.getExtra(Intent.EXTRA_USER);
+            mBubbleBarDragListener.onItemDroppedOverBubbleBarDragZone(mCurrentBubbleBarTarget,
+                    appIntent, user);
+        }
 
         // Start animating the drop UI out with the drag surface
         hide(event, dropCompleteCallback);
