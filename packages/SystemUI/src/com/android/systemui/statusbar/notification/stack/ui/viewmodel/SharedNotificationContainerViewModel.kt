@@ -81,7 +81,6 @@ import com.android.systemui.shade.shared.model.ShadeMode.Dual
 import com.android.systemui.shade.shared.model.ShadeMode.Single
 import com.android.systemui.shade.shared.model.ShadeMode.Split
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
@@ -268,7 +267,8 @@ constructor(
                             horizontalPosition = horizontalPosition,
                             marginStart = if (shadeMode is Split) 0 else marginHorizontal,
                             marginEnd = marginHorizontal,
-                            marginBottom = NotificationStackScrollLayout.getBottomMargin(context),
+                            marginBottom =
+                                getDimensionPixelSize(R.dimen.notification_panel_margin_bottom),
                             // y position of the NSSL in the window needs to be 0 under scene
                             // container
                             marginTop = 0,

@@ -16,7 +16,6 @@
 -->
 
 <!-- This XML is served to be overridden by other OEMs/device types. -->
-<!-- Note: The margins may be overridden in code, see NotificationStackScrollLayout#getBottomMargin -->
 <com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"

@@ -6,7 +6,6 @@ import android.platform.test.flag.junit.FlagsParameterization
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation.getContentAlpha
 import com.android.systemui.dump.DumpManager
@@ -479,11 +478,7 @@ class StackScrollAlgorithmTest(flags: FlagsParameterization) : SysuiTestCase() {
         stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
 
         val marginBottom =
-            context.resources.getDimensionPixelSize(
-                if (Flags.notificationsRedesignFooterView())
-                    R.dimen.notification_2025_panel_margin_bottom
-                else R.dimen.notification_panel_margin_bottom
-            )
+            context.resources.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom)
         val fullHeight = ambientState.layoutMaxHeight + marginBottom - ambientState.stackY
         val centeredY = ambientState.stackY + fullHeight / 2f - emptyShadeView.height / 2f
         assertThat(emptyShadeView.viewState.yTranslation).isEqualTo(centeredY)

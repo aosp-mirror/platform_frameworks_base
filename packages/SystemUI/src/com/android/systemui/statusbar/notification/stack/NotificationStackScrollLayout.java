@@ -26,7 +26,6 @@ import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SHADE_CLEAR_ALL;
 import static com.android.systemui.Flags.magneticNotificationSwipes;
 import static com.android.systemui.Flags.notificationOverExpansionClippingFix;
-import static com.android.systemui.Flags.notificationsRedesignFooterView;
 import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
 import static com.android.systemui.statusbar.notification.stack.shared.model.AccessibilityScrollEvent.SCROLL_DOWN;
@@ -695,25 +694,8 @@ public class NotificationStackScrollLayout
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        if (notificationsRedesignFooterView()) {
-            int bottomMargin = getBottomMargin(getContext());
-            MarginLayoutParams lp = (MarginLayoutParams) getLayoutParams();
-            lp.setMargins(lp.leftMargin, lp.topMargin, lp.rightMargin, bottomMargin);
-            setLayoutParams(lp);
-        }
-
         if (!ModesEmptyShadeFix.isEnabled()) {
             inflateEmptyShadeView();
-        }
-    }
-
-    /** Get the pixel value of the bottom margin, taking flags into account. */
-    public static int getBottomMargin(Context context) {
-        Resources res = context.getResources();
-        if (notificationsRedesignFooterView()) {
-            return res.getDimensionPixelSize(R.dimen.notification_2025_panel_margin_bottom);
-        } else {
-            return res.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom);
         }
     }
 
