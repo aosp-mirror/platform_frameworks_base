@@ -380,17 +380,6 @@ public final class NotificationChannel implements Parcelable {
             mSound = null;
         }
         mLights = in.readByte() != 0;
-        mVibrationPattern = in.createLongArray();
-        if (mVibrationPattern != null && mVibrationPattern.length > MAX_VIBRATION_LENGTH) {
-            mVibrationPattern = Arrays.copyOf(mVibrationPattern, MAX_VIBRATION_LENGTH);
-        }
-        if (Flags.notificationChannelVibrationEffectApi()) {
-            mVibrationEffect =
-                    in.readInt() != 0 ? VibrationEffect.CREATOR.createFromParcel(in) : null;
-            if (Flags.notifChannelCropVibrationEffects() && mVibrationEffect != null) {
-                mVibrationEffect = getTrimmedVibrationEffect(mVibrationEffect);
-            }
-        }
         mUserLockedFields = in.readInt();
         mUserVisibleTaskShown = in.readByte() != 0;
         mVibrationEnabled = in.readByte() != 0;
@@ -412,6 +401,38 @@ public final class NotificationChannel implements Parcelable {
         mImportantConvo = in.readBoolean();
         mDeletedTime = in.readLong();
         mImportanceLockedDefaultApp = in.readBoolean();
+
+        // Add new fields above this line and not after vibration effect! When
+        // notif_channel_estimate_effect_size is true, we use parcel size to detect whether the
+        // vibration effect might be too large to handle, so this must remain at the end lest any
+        // following fields cause the data to get incorrectly dropped.
+        mVibrationPattern = in.createLongArray();
+        if (mVibrationPattern != null && mVibrationPattern.length > MAX_VIBRATION_LENGTH) {
+            mVibrationPattern = Arrays.copyOf(mVibrationPattern, MAX_VIBRATION_LENGTH);
+        }
+        boolean largeEffect = false;
+        if (Flags.notifChannelEstimateEffectSize()) {
+            // Note that we must check the length of remaining data in the parcel before reading in
+            // the data.
+            largeEffect = (in.dataAvail() > MAX_SERIALIZED_VIBRATION_LENGTH);
+        }
+        if (Flags.notificationChannelVibrationEffectApi()) {
+            mVibrationEffect =
+                    in.readInt() != 0 ? VibrationEffect.CREATOR.createFromParcel(in) : null;
+            if (Flags.notifChannelCropVibrationEffects() && mVibrationEffect != null) {
+                if (Flags.notifChannelEstimateEffectSize()) {
+                    // Try trimming the effect if the remaining parcel size is large. If trimming is
+                    // not applicable for the effect, rather than serializing to XML (expensive) to
+                    // check the exact serialized length, we just reject the effect.
+                    if (largeEffect) {
+                        mVibrationEffect = mVibrationEffect.cropToLengthOrNull(
+                                MAX_VIBRATION_LENGTH);
+                    }
+                } else {
+                    mVibrationEffect = getTrimmedVibrationEffect(mVibrationEffect);
+                }
+            }
+        }
     }
 
     @Override
@@ -444,15 +465,6 @@ public final class NotificationChannel implements Parcelable {
             dest.writeByte((byte) 0);
         }
         dest.writeByte(mLights ? (byte) 1 : (byte) 0);
-        dest.writeLongArray(mVibrationPattern);
-        if (Flags.notificationChannelVibrationEffectApi()) {
-            if (mVibrationEffect != null) {
-                dest.writeInt(1);
-                mVibrationEffect.writeToParcel(dest, /* flags= */ 0);
-            } else {
-                dest.writeInt(0);
-            }
-        }
         dest.writeInt(mUserLockedFields);
         dest.writeByte(mUserVisibleTaskShown ? (byte) 1 : (byte) 0);
         dest.writeByte(mVibrationEnabled ? (byte) 1 : (byte) 0);
@@ -480,6 +492,17 @@ public final class NotificationChannel implements Parcelable {
         dest.writeBoolean(mImportantConvo);
         dest.writeLong(mDeletedTime);
         dest.writeBoolean(mImportanceLockedDefaultApp);
+
+        // Add new fields above this line; vibration effect must remain the last entry.
+        dest.writeLongArray(mVibrationPattern);
+        if (Flags.notificationChannelVibrationEffectApi()) {
+            if (mVibrationEffect != null) {
+                dest.writeInt(1);
+                mVibrationEffect.writeToParcel(dest, /* flags= */ 0);
+            } else {
+                dest.writeInt(0);
+            }
+        }
     }
 
     /** @hide */
@@ -605,7 +628,9 @@ public final class NotificationChannel implements Parcelable {
         return input;
     }
 
-    // Returns trimmed vibration effect or null if not trimmable.
+    // Returns trimmed vibration effect or null if not trimmable and the serialized string is too
+    // long. Note that this method involves serializing the full VibrationEffect, which may be
+    // expensive.
     private VibrationEffect getTrimmedVibrationEffect(VibrationEffect effect) {
         if (effect == null) {
             return null;
