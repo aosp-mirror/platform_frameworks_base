@@ -77,7 +77,6 @@ import android.util.Pair;
 import android.window.IDumpCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.IOException;
@@ -92,7 +91,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
 /**
@@ -793,18 +791,8 @@ public class LauncherApps {
     public List<LauncherActivityInfo> getActivityList(String packageName, UserHandle user) {
         logErrorForInvalidProfileAccess(user);
         try {
-            final List<LauncherActivityInfo> activityList = convertToActivityList(
-                    mService.getLauncherActivities(
-                            mContext.getPackageName(),
-                            packageName,
-                            user
-                    ), user);
-            if (activityList.isEmpty()) {
-                // b/350144057
-                Log.d(TAG, "getActivityList: No launchable activities found for"
-                        + "packageName=" + packageName + ", user=" + user);
-            }
-            return activityList;
+            return convertToActivityList(mService.getLauncherActivities(mContext.getPackageName(),
+                    packageName, user), user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
