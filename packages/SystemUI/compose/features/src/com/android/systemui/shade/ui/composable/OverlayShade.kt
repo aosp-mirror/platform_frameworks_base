@@ -107,7 +107,10 @@ private fun ContentScope.Panel(
     header: (@Composable () -> Unit)?,
     content: @Composable () -> Unit,
 ) {
-    Box(modifier = modifier.clip(OverlayShade.Shapes.RoundedCornerPanel)) {
+    Box(
+        modifier =
+            modifier.clip(OverlayShade.Shapes.RoundedCornerPanel).disableSwipesWhenScrolling()
+    ) {
         Spacer(
             modifier =
                 Modifier.element(OverlayShade.Elements.PanelBackground)
