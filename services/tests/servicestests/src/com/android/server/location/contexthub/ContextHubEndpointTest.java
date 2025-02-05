@@ -19,14 +19,19 @@ package com.android.server.location.contexthub;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.hardware.contexthub.ErrorCode;
 import android.hardware.contexthub.HubEndpointInfo;
 import android.hardware.contexthub.HubEndpointInfo.HubEndpointIdentifier;
+import android.hardware.contexthub.HubMessage;
 import android.hardware.contexthub.IContextHubEndpoint;
 import android.hardware.contexthub.IContextHubEndpointCallback;
 import android.hardware.contexthub.IEndpointCommunication;
+import android.hardware.contexthub.MessageDeliveryStatus;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Postsubmit;
@@ -38,6 +43,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -120,5 +126,25 @@ public class ContextHubEndpointTest {
 
         mEndpointManager.returnSessionId(sessionId);
         assertThat(mEndpointManager.getNumAvailableSessions()).isEqualTo(SESSION_ID_RANGE);
+    }
+
+    @Test
+    public void testInvalidMessageReceivedCallback() throws RemoteException {
+        // Send an invalid call to onMessageReceived (no sessions created)
+        final int messageType = 1234;
+        final int sessionId = 4321;
+        final int sequenceNumber = 5678;
+        HubMessage message =
+                new HubMessage.Builder(messageType, new byte[0]).setResponseRequired(true).build();
+        message.setMessageSequenceNumber(sequenceNumber);
+        mEndpointManager.onMessageReceived(sessionId, message);
+
+        // Confirm that we can get a delivery status with DESTINATION_NOT_FOUND error
+        ArgumentCaptor<MessageDeliveryStatus> statusCaptor =
+                ArgumentCaptor.forClass(MessageDeliveryStatus.class);
+        verify(mMockEndpointCommunications)
+                .sendMessageDeliveryStatusToEndpoint(eq(sessionId), statusCaptor.capture());
+        assertThat(statusCaptor.getValue().messageSequenceNumber).isEqualTo(sequenceNumber);
+        assertThat(statusCaptor.getValue().errorCode).isEqualTo(ErrorCode.DESTINATION_NOT_FOUND);
     }
 }
