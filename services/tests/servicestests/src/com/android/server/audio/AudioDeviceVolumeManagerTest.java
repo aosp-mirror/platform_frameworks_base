@@ -34,6 +34,7 @@ import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.VolumeInfo;
+import android.os.IpcDataCache;
 import android.os.PermissionEnforcer;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.RequiresFlagsDisabled;
@@ -71,6 +72,8 @@ public class AudioDeviceVolumeManagerTest {
 
     @Before
     public void setUp() throws Exception {
+        IpcDataCache.disableForTestMode();
+
         mTestLooper = new TestLooper();
         mContext = InstrumentationRegistry.getTargetContext();
         mPackageName = mContext.getOpPackageName();
