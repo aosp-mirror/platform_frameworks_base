@@ -150,27 +150,13 @@ class AudioSharingRepositoryImpl(
                 BluetoothCsipSetCoordinator.GROUP_ID_INVALID
             )
 
-    override val secondaryGroupId: StateFlow<Int> =
-        secondaryDevice
-            .map { BluetoothUtils.getGroupId(it) }
-            .onEach { logger.onSecondaryGroupIdChanged(it) }
-            .flowOn(backgroundCoroutineContext)
-            .stateIn(
-                coroutineScope,
-                SharingStarted.WhileSubscribed(),
-                BluetoothCsipSetCoordinator.GROUP_ID_INVALID
-            )
+    override val primaryDevice: StateFlow<CachedBluetoothDevice?> =
+        primaryGroupId
+            .map { getCachedDeviceFromGroupId(it) }
+            .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), null)
 
-    override val primaryDevice: StateFlow<CachedBluetoothDevice?>
-        get() = primaryGroupId.map { getCachedDeviceFromGroupId(it) }
-            .stateIn(
-                coroutineScope,
-                SharingStarted.WhileSubscribed(),
-                null
-            )
-
-    override val secondaryDevice: StateFlow<CachedBluetoothDevice?>
-        get() = merge(
+    override val secondaryDevice: StateFlow<CachedBluetoothDevice?> =
+        merge(
             isAudioSharingProfilesReady.flatMapLatest { ready ->
                 if (ready) {
                     btManager.profileManager.leAudioBroadcastAssistantProfile
@@ -194,6 +180,17 @@ class AudioSharingRepositoryImpl(
                 coroutineScope,
                 SharingStarted.WhileSubscribed(),
                 null
+            )
+
+    override val secondaryGroupId: StateFlow<Int> =
+        secondaryDevice
+            .map { BluetoothUtils.getGroupId(it) }
+            .onEach { logger.onSecondaryGroupIdChanged(it) }
+            .flowOn(backgroundCoroutineContext)
+            .stateIn(
+                coroutineScope,
+                SharingStarted.WhileSubscribed(),
+                BluetoothCsipSetCoordinator.GROUP_ID_INVALID
             )
 
     override val volumeMap: StateFlow<GroupIdToVolumes> =
