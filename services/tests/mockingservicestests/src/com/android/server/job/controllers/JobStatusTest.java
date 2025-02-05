@@ -86,6 +86,8 @@ public class JobStatusTest {
     private static final double DELTA = 0.00001;
     private static final String TEST_PACKAGE = "job.test.package";
     private static final ComponentName TEST_JOB_COMPONENT = new ComponentName(TEST_PACKAGE, "test");
+    private static final String SOURCE_PACKAGE = "com.android.frameworks.mockingservicestests";
+    private static final int SOURCE_USER_ID = 0;
 
     private static final Uri IMAGES_MEDIA_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
     private static final Uri VIDEO_MEDIA_URI = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
@@ -1342,6 +1344,35 @@ public class JobStatusTest {
         assertFalse(job.readinessStatusWithConstraint(CONSTRAINT_FLEXIBLE, false));
     }
 
+    @Test
+    public void testJobName_NoTagNoNamespace() {
+        final JobInfo jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar")).build();
+        JobStatus jobStatus = createJobStatus(jobInfo, null, -1, null, null);
+        assertEquals("foo/bar", jobStatus.getBatteryName());
+    }
+
+    @Test
+    public void testJobName_NoTagWithNamespace() {
+        final JobInfo jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar")).build();
+        JobStatus jobStatus = createJobStatus(jobInfo, null, -1, "TestNamespace", null);
+        assertEquals("@TestNamespace@foo/bar", jobStatus.getBatteryName());
+    }
+
+    @Test
+    public void testJobName_WithTagNoNamespace() {
+        final JobInfo jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar")).build();
+        JobStatus jobStatus = createJobStatus(jobInfo, SOURCE_PACKAGE, 0, null, "TestTag");
+        assertEquals("TestTag:foo", jobStatus.getBatteryName());
+    }
+
+    @Test
+    public void testJobName_WithTagAndNamespace() {
+        final JobInfo jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar")).build();
+        JobStatus jobStatus = createJobStatus(jobInfo, SOURCE_PACKAGE, 0,
+                "TestNamespace", "TestTag");
+        assertEquals("@TestNamespace@TestTag:foo", jobStatus.getBatteryName());
+    }
+
     private void markExpeditedQuotaApproved(JobStatus job, boolean isApproved) {
         if (job.isRequestedExpeditedJob()) {
             job.setExpeditedJobQuotaApproved(sElapsedRealtimeClock.millis(), isApproved);
@@ -1366,6 +1397,14 @@ public class JobStatusTest {
 
     private static JobStatus createJobStatus(JobInfo job) {
         JobStatus jobStatus = JobStatus.createFromJobInfo(job, 0, null, -1, "JobStatusTest", null);
+        jobStatus.serviceProcessName = "testProcess";
+        return jobStatus;
+    }
+
+    private static JobStatus createJobStatus(
+            JobInfo job, String packageName, int callingUid, String namespace, String tag) {
+        JobStatus jobStatus = JobStatus.createFromJobInfo(
+                        job, callingUid, packageName, SOURCE_USER_ID, namespace, tag);
         jobStatus.serviceProcessName = "testProcess";
         return jobStatus;
     }
