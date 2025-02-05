@@ -302,7 +302,11 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         Trace.endSection();
 
         Trace.beginSection("WindowDecoration#relayout-updateViewHost");
-        outResult.mRootView.setPadding(0, params.mCaptionTopPadding, 0, 0);
+        outResult.mRootView.setPadding(
+                outResult.mRootView.getPaddingLeft(),
+                params.mCaptionTopPadding,
+                outResult.mRootView.getPaddingRight(),
+                outResult.mRootView.getPaddingBottom());
         final Rect localCaptionBounds = new Rect(
                 outResult.mCaptionX,
                 outResult.mCaptionY,
