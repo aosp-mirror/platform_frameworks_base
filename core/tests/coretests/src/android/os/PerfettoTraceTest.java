@@ -249,7 +249,7 @@ public class PerfettoTraceTest {
 
 
         PerfettoTrace.end(FOO_CATEGORY)
-                .usingThreadNamedTrack(Process.myTid(), "%s-%s", "bar", "stool")
+                .usingThreadNamedTrack(Process.myTid(), "bar")
                 .emit();
 
         Trace trace = Trace.parseFrom(session.close());
@@ -281,7 +281,7 @@ public class PerfettoTraceTest {
         assertThat(hasTrackUuid).isTrue();
         assertThat(mCategoryNames).contains(FOO);
         assertThat(mTrackNames).contains(FOO);
-        assertThat(mTrackNames).contains("bar-stool");
+        assertThat(mTrackNames).contains("bar");
     }
 
     @Test
@@ -339,7 +339,7 @@ public class PerfettoTraceTest {
 
         PerfettoTrace.counter(FOO_CATEGORY, 3.14)
                 .usingCounterTrack(PerfettoTrace.getThreadTrackUuid(Process.myTid()),
-                                   "%s-%s", "bar", "stool").emit();
+                                   "bar").emit();
 
         Trace trace = Trace.parseFrom(session.close());
 
@@ -370,7 +370,7 @@ public class PerfettoTraceTest {
         assertThat(hasCounterValue).isTrue();
         assertThat(hasDoubleCounterValue).isTrue();
         assertThat(mTrackNames).contains(FOO);
-        assertThat(mTrackNames).contains("bar-stool");
+        assertThat(mTrackNames).contains("bar");
     }
 
     @Test
@@ -383,7 +383,7 @@ public class PerfettoTraceTest {
         PerfettoTrace.counter(FOO_CATEGORY, 16).usingProcessCounterTrack(FOO).emit();
 
         PerfettoTrace.counter(FOO_CATEGORY, 3.14)
-                .usingThreadCounterTrack(Process.myTid(), "%s-%s", "bar", "stool").emit();
+                .usingThreadCounterTrack(Process.myTid(), "bar").emit();
 
         Trace trace = Trace.parseFrom(session.close());
 
@@ -414,7 +414,7 @@ public class PerfettoTraceTest {
         assertThat(hasCounterValue).isTrue();
         assertThat(hasDoubleCounterValue).isTrue();
         assertThat(mTrackNames).contains(FOO);
-        assertThat(mTrackNames).contains("bar-stool");
+        assertThat(mTrackNames).contains("bar");
     }
 
     @Test
