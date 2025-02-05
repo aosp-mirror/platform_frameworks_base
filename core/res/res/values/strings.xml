@@ -6164,6 +6164,14 @@
     <string name="accessibility_autoclick_type_settings_panel_title">Autoclick type settings panel</string>
     <!-- Label for autoclick left click button [CHAR LIMIT=NONE] -->
     <string name="accessibility_autoclick_left_click">Left click</string>
+    <!-- Label for autoclick right click button [CHAR LIMIT=NONE] -->
+    <string name="accessibility_autoclick_right_click">Right click</string>
+    <!-- Label for autoclick double click button [CHAR LIMIT=NONE] -->
+    <string name="accessibility_autoclick_double_click">Double click</string>
+    <!-- Label for autoclick drag button [CHAR LIMIT=NONE] -->
+    <string name="accessibility_autoclick_drag">Drag</string>
+    <!-- Label for autoclick scroll button [CHAR LIMIT=NONE] -->
+    <string name="accessibility_autoclick_scroll">Scroll</string>
     <!-- Label for autoclick pause button [CHAR LIMIT=NONE] -->
     <string name="accessibility_autoclick_pause">Pause</string>
     <!-- Label for autoclick position button [CHAR LIMIT=NONE] -->

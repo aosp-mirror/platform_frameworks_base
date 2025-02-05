@@ -5617,6 +5617,10 @@
   <java-symbol type="layout" name="accessibility_autoclick_type_panel" />
   <java-symbol type="string" name="accessibility_autoclick_type_settings_panel_title" />
   <java-symbol type="string" name="accessibility_autoclick_left_click" />
+  <java-symbol type="string" name="accessibility_autoclick_right_click" />
+  <java-symbol type="string" name="accessibility_autoclick_double_click" />
+  <java-symbol type="string" name="accessibility_autoclick_drag" />
+  <java-symbol type="string" name="accessibility_autoclick_scroll" />
   <java-symbol type="string" name="accessibility_autoclick_pause" />
   <java-symbol type="string" name="accessibility_autoclick_position" />
   <java-symbol type="dimen" name="accessibility_autoclick_type_panel_button_spacing" />
@@ -5624,8 +5628,17 @@
   <java-symbol type="dimen" name="accessibility_autoclick_type_panel_divider_height" />
   <java-symbol type="dimen" name="accessibility_autoclick_type_panel_divider_width" />
   <java-symbol type="id" name="accessibility_autoclick_type_panel" />
+  <java-symbol type="id" name="accessibility_autoclick_button_group_container" />
   <java-symbol type="id" name="accessibility_autoclick_left_click_layout" />
   <java-symbol type="id" name="accessibility_autoclick_left_click_button" />
+  <java-symbol type="id" name="accessibility_autoclick_right_click_layout" />
+  <java-symbol type="id" name="accessibility_autoclick_right_click_button" />
+  <java-symbol type="id" name="accessibility_autoclick_double_click_layout" />
+  <java-symbol type="id" name="accessibility_autoclick_double_click_button" />
+  <java-symbol type="id" name="accessibility_autoclick_drag_layout" />
+  <java-symbol type="id" name="accessibility_autoclick_drag_button" />
+  <java-symbol type="id" name="accessibility_autoclick_scroll_layout" />
+  <java-symbol type="id" name="accessibility_autoclick_scroll_button" />
   <java-symbol type="id" name="accessibility_autoclick_pause_layout" />
   <java-symbol type="id" name="accessibility_autoclick_pause_button" />
   <java-symbol type="id" name="accessibility_autoclick_position_layout" />
