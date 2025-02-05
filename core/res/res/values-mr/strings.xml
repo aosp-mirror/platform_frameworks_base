@@ -2042,7 +2042,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"अ‍ॅप उपलब्ध नाही"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> आत्ता उपलब्ध नाही. हे <xliff:g id="APP_NAME_1">%2$s</xliff:g> कडून व्यवस्थापित केले जाते."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"अधिक जाणून घ्या"</string>
-    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"अ‍ॅप उघडा"</string>
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"अ‍ॅप पुन्हा सुरू करा"</string>
     <string name="work_mode_off_title" msgid="6367463960165135829">"वर्क ॲप्स पुन्हा सुरू करायची?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"पुन्हा सुरू करा"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"आणीबाणी"</string>
@@ -2088,6 +2088,12 @@
     <string name="unpin_target" msgid="3963318576590204447">"अनपिन करा"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"<xliff:g id="LABEL">%1$s</xliff:g> ला अनपिन करा"</string>
     <string name="app_info" msgid="6113278084877079851">"अ‍ॅप माहिती"</string>
+    <!-- no translation found for shortcut_group_a11y_title (2992150163811583865) -->
+    <skip />
+    <!-- no translation found for suggested_apps_group_a11y_title (2804876567839501831) -->
+    <skip />
+    <!-- no translation found for all_apps_group_a11y_title (7020352520224108745) -->
+    <skip />
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"डेमो सुरू करत आहे..."</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"डिव्हाइस रीसेट करत आहे..."</string>
@@ -2242,6 +2248,14 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad डावीकडील"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad चे उजवीकडील"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad चे मधले"</string>
+    <!-- no translation found for accessibility_autoclick_type_settings_panel_title (7354373370578758696) -->
+    <skip />
+    <!-- no translation found for accessibility_autoclick_left_click (2301793352260551080) -->
+    <skip />
+    <!-- no translation found for accessibility_autoclick_pause (3272200156172573568) -->
+    <skip />
+    <!-- no translation found for accessibility_autoclick_position (2933660969907663545) -->
+    <skip />
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> हे प्रतिबंधित बादलीमध्ये ठेवण्यात आले आहे"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"इमेज पाठवली आहे"</string>
@@ -2516,4 +2530,12 @@
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"अ‍ॅप्लिकेशन"</string>
     <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"तुमची फिंगरप्रिंट यापुढे ओळखता येणार नाहीत. फिंगरप्रिंट अनलॉक पुन्हा सेट करा."</string>
+    <!-- no translation found for usb_apm_usb_plugged_in_when_locked_notification_title (468577168569874967) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_plugged_in_when_locked_notification_text (6695268246267993166) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_suspicious_activity_notification_title (3461195995882871461) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_suspicious_activity_notification_text (6537085605929303187) -->
+    <skip />
 </resources>
