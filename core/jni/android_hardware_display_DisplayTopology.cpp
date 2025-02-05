@@ -81,7 +81,7 @@ status_t android_hardware_display_DisplayTopologyGraphNode_toNative(
         for (jsize i = 0; i < length; i++) {
             ScopedLocalRef<jobject>
                     adjacentDisplayObj(env, env->GetObjectArrayElement(adjacentDisplaysArray, i));
-            if (NULL != adjacentDisplayObj.get()) {
+            if (NULL == adjacentDisplayObj.get()) {
                 break; // found null element indicating end of used portion of the array
             }
 
@@ -109,7 +109,7 @@ DisplayTopologyGraph android_hardware_display_DisplayTopologyGraph_toNative(JNIE
         jsize length = env->GetArrayLength(nodesArray);
         for (jsize i = 0; i < length; i++) {
             ScopedLocalRef<jobject> nodeObj(env, env->GetObjectArrayElement(nodesArray, i));
-            if (NULL != nodeObj.get()) {
+            if (NULL == nodeObj.get()) {
                 break; // found null element indicating end of used portion of the array
             }
 

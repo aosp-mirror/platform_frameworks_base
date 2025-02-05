@@ -571,9 +571,6 @@ private:
     PointerIcon loadPointerIcon(JNIEnv* env, ui::LogicalDisplayId displayId, PointerIconStyle type);
     bool isDisplayInteractive(ui::LogicalDisplayId displayId);
 
-    // TODO(b/362719483) remove when the real topology is available
-    void populateFakeDisplayTopology(const std::vector<DisplayViewport>& viewports);
-
     static inline JNIEnv* jniEnv() { return AndroidRuntime::getJNIEnv(); }
 };
 
@@ -663,54 +660,16 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
     mInputManager->getChoreographer().setDisplayViewports(viewports);
     mInputManager->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::Change::DISPLAY_INFO);
-
-    // TODO(b/362719483) remove when the real topology is available
-    populateFakeDisplayTopology(viewports);
 }
 
-void NativeInputManager::populateFakeDisplayTopology(
-        const std::vector<DisplayViewport>& viewports) {
+void NativeInputManager::setDisplayTopology(JNIEnv* env, jobject topologyGraph) {
     if (!com::android::input::flags::connected_displays_cursor()) {
         return;
     }
 
-    // create a fake topology assuming following order
-    // default-display (top-edge) -> next-display (right-edge) -> next-display (right-edge) ...
-    // This also adds a 100px offset on corresponding edge for better manual testing
-    //   ┌────────┐
-    //   │ next   ├─────────┐
-    // ┌─└───────┐┤ next 2  │ ...
-    // │ default │└─────────┘
-    // └─────────┘
-    DisplayTopologyGraph displaytopology;
-    displaytopology.primaryDisplayId = ui::LogicalDisplayId::DEFAULT;
-
-    // treat default display as base, in real topology it should be the primary-display
-    ui::LogicalDisplayId previousDisplay = ui::LogicalDisplayId::DEFAULT;
-    for (const auto& viewport : viewports) {
-        if (viewport.displayId == ui::LogicalDisplayId::DEFAULT) {
-            continue;
-        }
-        if (previousDisplay == ui::LogicalDisplayId::DEFAULT) {
-            displaytopology.graph[previousDisplay].push_back(
-                    {viewport.displayId, DisplayTopologyPosition::TOP, 100});
-            displaytopology.graph[viewport.displayId].push_back(
-                    {previousDisplay, DisplayTopologyPosition::BOTTOM, -100});
-        } else {
-            displaytopology.graph[previousDisplay].push_back(
-                    {viewport.displayId, DisplayTopologyPosition::RIGHT, 100});
-            displaytopology.graph[viewport.displayId].push_back(
-                    {previousDisplay, DisplayTopologyPosition::LEFT, -100});
-        }
-        previousDisplay = viewport.displayId;
-    }
-
-    mInputManager->getChoreographer().setDisplayTopology(displaytopology);
-}
-
-void NativeInputManager::setDisplayTopology(JNIEnv* env, jobject topologyGraph) {
-    android_hardware_display_DisplayTopologyGraph_toNative(env, topologyGraph);
-    // TODO(b/367661489): Use the topology
+    // TODO(b/383092013): Add topology validation
+    mInputManager->getChoreographer().setDisplayTopology(
+            android_hardware_display_DisplayTopologyGraph_toNative(env, topologyGraph));
 }
 
 base::Result<std::unique_ptr<InputChannel>> NativeInputManager::createInputChannel(
