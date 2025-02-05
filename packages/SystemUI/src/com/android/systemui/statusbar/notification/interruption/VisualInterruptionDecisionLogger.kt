@@ -94,15 +94,6 @@ constructor(@NotificationInterruptLog val buffer: LogBuffer) {
         )
     }
 
-    fun logAvalancheAllow(info: String) {
-        buffer.log(
-            TAG,
-            INFO,
-            { str1 = info },
-            { "AvalancheSuppressor: $str1" }
-        )
-    }
-
     fun logCooldownSetting(isEnabled: Boolean) {
         buffer.log(
             TAG,
