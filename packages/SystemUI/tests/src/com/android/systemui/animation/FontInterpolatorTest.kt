@@ -58,9 +58,12 @@ class FontInterpolatorTest : SysuiTestCase() {
             Font.Builder(sFont).setFontVariationSettings("'wght' 900, 'ital' 1, 'GRAD' 700").build()
 
         val interp = FontInterpolator()
-        assertSameAxes(startFont, interp.lerp(startFont, endFont, 0f))
-        assertSameAxes(endFont, interp.lerp(startFont, endFont, 1f))
-        assertSameAxes("'wght' 500, 'ital' 0.5, 'GRAD' 450", interp.lerp(startFont, endFont, 0.5f))
+        assertSameAxes(startFont, interp.lerp(startFont, endFont, 0f, 0f))
+        assertSameAxes(endFont, interp.lerp(startFont, endFont, 1f, 1f))
+        assertSameAxes(
+            "'wght' 500, 'ital' 0.5, 'GRAD' 450",
+            interp.lerp(startFont, endFont, 0.5f, 0.5f),
+        )
     }
 
     @Test
@@ -69,7 +72,7 @@ class FontInterpolatorTest : SysuiTestCase() {
         val endFont = Font.Builder(sFont).setFontVariationSettings("'ital' 1").build()
 
         val interp = FontInterpolator()
-        assertSameAxes("'wght' 250, 'ital' 0.5", interp.lerp(startFont, endFont, 0.5f))
+        assertSameAxes("'wght' 250, 'ital' 0.5", interp.lerp(startFont, endFont, 0.5f, 0.5f))
     }
 
     @Test
@@ -78,8 +81,8 @@ class FontInterpolatorTest : SysuiTestCase() {
         val endFont = Font.Builder(sFont).setFontVariationSettings("'ital' 1").build()
 
         val interp = FontInterpolator()
-        val resultFont = interp.lerp(startFont, endFont, 0.5f)
-        val cachedFont = interp.lerp(startFont, endFont, 0.5f)
+        val resultFont = interp.lerp(startFont, endFont, 0.5f, 0.5f)
+        val cachedFont = interp.lerp(startFont, endFont, 0.5f, 0.5f)
         assertThat(resultFont).isSameInstanceAs(cachedFont)
     }
 
@@ -89,8 +92,8 @@ class FontInterpolatorTest : SysuiTestCase() {
         val endFont = Font.Builder(sFont).setFontVariationSettings("'ital' 1").build()
 
         val interp = FontInterpolator()
-        val resultFont = interp.lerp(startFont, endFont, 0.5f)
-        val reversedFont = interp.lerp(endFont, startFont, 0.5f)
+        val resultFont = interp.lerp(startFont, endFont, 0.5f, 0.5f)
+        val reversedFont = interp.lerp(endFont, startFont, 0.5f, 0.5f)
         assertThat(resultFont).isSameInstanceAs(reversedFont)
     }
 
@@ -100,14 +103,14 @@ class FontInterpolatorTest : SysuiTestCase() {
 
         val startFont = Font.Builder(sFont).setFontVariationSettings("'wght' 100").build()
         val endFont = Font.Builder(sFont).setFontVariationSettings("'wght' 1").build()
-        val resultFont = interp.lerp(startFont, endFont, 0.5f)
+        val resultFont = interp.lerp(startFont, endFont, 0.5f, 0.5f)
         for (i in 0..(interp.fontCache as FontCacheImpl).cacheMaxEntries + 1) {
             val f1 = Font.Builder(sFont).setFontVariationSettings("'wght' ${i * 100}").build()
             val f2 = Font.Builder(sFont).setFontVariationSettings("'wght' $i").build()
-            interp.lerp(f1, f2, 0.5f)
+            interp.lerp(f1, f2, 0.5f, 0.5f)
         }
 
-        val cachedFont = interp.lerp(startFont, endFont, 0.5f)
+        val cachedFont = interp.lerp(startFont, endFont, 0.5f, 0.5f)
         assertThat(resultFont).isNotSameInstanceAs(cachedFont)
     }
 }
