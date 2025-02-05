@@ -616,6 +616,16 @@ flag {
 }
 
 flag {
+  name: "exclude_caption_from_app_bounds"
+  namespace: "lse_desktop_experience"
+  description: "Whether caption insets are excluded from app bounds in freeform"
+  bug: "388014743"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "enable_desktop_mode_through_dev_option"
     namespace: "lse_desktop_experience"
     description: "Enables support for desktop mode through developer options for devices eligible for desktop mode."
