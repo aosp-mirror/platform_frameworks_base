@@ -22,6 +22,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.settings.brightness.BrightnessController
 import com.android.systemui.settings.brightness.BrightnessSliderController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.tuner.TunerService
 import com.google.common.truth.Truth.assertThat
@@ -66,6 +67,7 @@ class QSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var pagedTileLayout: PagedTileLayout
     @Mock private lateinit var longPressEffectProvider: Provider<QSLongPressEffect>
     @Mock private lateinit var mediaCarouselInteractor: MediaCarouselInteractor
+    @Mock private lateinit var configurationController: ConfigurationController
 
     private val usingMediaPlayer: Boolean by lazy { !SceneContainerFlag.isEnabled }
 
@@ -108,6 +110,7 @@ class QSPanelControllerTest : SysuiTestCase() {
                 ResourcesSplitShadeStateController(),
                 longPressEffectProvider,
                 mediaCarouselInteractor,
+                configurationController,
             )
     }
 

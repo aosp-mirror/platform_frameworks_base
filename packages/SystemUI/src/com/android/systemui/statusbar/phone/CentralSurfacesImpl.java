@@ -21,14 +21,13 @@ import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
+import static android.service.quickaccesswallet.Flags.launchWalletOptionOnPowerDoubleTap;
+import static android.service.quickaccesswallet.Flags.launchWalletViaSysuiCallbacks;
 import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_AUTO;
 import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO;
 import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS;
 
 import static androidx.lifecycle.Lifecycle.State.RESUMED;
-
-import static android.service.quickaccesswallet.Flags.launchWalletOptionOnPowerDoubleTap;
-import static android.service.quickaccesswallet.Flags.launchWalletViaSysuiCallbacks;
 
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 import static com.android.systemui.Flags.keyboardShortcutHelperRewrite;
@@ -38,6 +37,7 @@ import static com.android.systemui.Flags.statusBarSignalPolicyRefactor;
 import static com.android.systemui.charging.WirelessChargingAnimation.UNKNOWN_BATTERY_LEVEL;
 import static com.android.systemui.flags.Flags.SHORTCUT_LIST_SEARCH_LAYOUT;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
+
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.IWallpaperManager;
@@ -176,6 +176,7 @@ import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeLogger;
 import com.android.systemui.shade.ShadeSurface;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.AutoHideUiElement;
@@ -1974,17 +1975,15 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
      * meantime, just update the things that we know change.
      */
     void updateResources() {
-        // TODO: b/374267505 - we shouldn't propagate this from here. Each class should be
-        //  listening at the correct configuration change. For example, shade window classes should
-        //  be listening at @ShadeDisplayAware configurations (as it can be on a different display.
+        if (!ShadeWindowGoesAround.isEnabled()) {
+            // Each class now subscribes to configuration changes by themselves.
+            if (mQSPanelController != null) {
+                mQSPanelController.updateResources();
+            }
 
-        // Update the quick setting tiles
-        if (mQSPanelController != null) {
-            mQSPanelController.updateResources();
-        }
-
-        if (mShadeSurface != null) {
-            mShadeSurface.updateResources();
+            if (mShadeSurface != null) {
+                mShadeSurface.updateResources();
+            }
         }
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.updateResources();

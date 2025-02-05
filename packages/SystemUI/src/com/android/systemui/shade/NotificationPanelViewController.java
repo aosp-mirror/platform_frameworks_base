@@ -49,6 +49,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Insets;
@@ -3370,6 +3371,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private final class ConfigurationListener implements
             ConfigurationController.ConfigurationListener {
+        @Override
+        public void onConfigChanged(Configuration newConfig) {
+            if (ShadeWindowGoesAround.isEnabled()) {
+                updateResources();
+            }
+        }
+
         @Override
         public void onThemeChanged() {
             debugLog("onThemeChanged");

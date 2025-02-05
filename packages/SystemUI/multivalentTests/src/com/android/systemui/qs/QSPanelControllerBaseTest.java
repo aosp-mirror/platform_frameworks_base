@@ -40,6 +40,7 @@ import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
 
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.FlagsParameterization;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.ContextThemeWrapper;
@@ -51,6 +52,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.UiEventLoggerFake;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.DisableSceneContainer;
@@ -64,6 +66,7 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.util.animation.DisappearParameters;
 
@@ -134,6 +137,8 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     Runnable mHorizontalLayoutListener;
     @Mock
     private ViewTreeObserver mViewTreeObserver;
+    @Mock
+    ConfigurationController mConfigurationController;
 
     private boolean mPagedTileLayoutListening = false;
 
@@ -151,7 +156,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
             super(view, host, qsCustomizerController, usingMediaPlayer(),
                     mediaHost, metricsLogger, uiEventLogger,
                     qsLogger, dumpManager, new ResourcesSplitShadeStateController(),
-                    mLongPressEffectProvider);
+                    mLongPressEffectProvider, mConfigurationController);
         }
 
         private MutableStateFlow<Boolean> mMediaVisible = MutableStateFlow(false);
@@ -631,6 +636,19 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
                 anyInt(),
                 anyString()
         );
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_SHADE_WINDOW_GOES_AROUND)
+    public void onViewAttached_registersConfigListener() {
+        reset(mConfigurationController);
+        mController.onViewAttached();
+
+        verify(mConfigurationController).addCallback(any());
+
+        mController.onViewDetached();
+
+        verify(mConfigurationController).removeCallback(any());
     }
 
 
