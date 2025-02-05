@@ -25,7 +25,7 @@
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Introduce tu patrón"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Dibuja el patrón"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Introduce tu contraseña"</string>
-    <string name="keyguard_enter_password" msgid="6483623792371009758">"Escribe la contraseña"</string>
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"Introduce la contraseña"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Tarjeta no válida."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Cargado"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando sin cables"</string>
