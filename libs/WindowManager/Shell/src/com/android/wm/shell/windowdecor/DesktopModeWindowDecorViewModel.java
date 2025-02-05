@@ -911,7 +911,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         private boolean mIsCustomHeaderGesture;
         private boolean mIsResizeGesture;
         private boolean mIsDragging;
-        private boolean mTouchscreenInUse;
+        private boolean mLongClickDisabled;
         private int mDragPointerId = -1;
         private MotionEvent mMotionEvent;
 
@@ -997,10 +997,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             mMotionEvent = e;
             final int id = v.getId();
             final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
-            if ((e.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN) {
-                mTouchscreenInUse = e.getActionMasked() != ACTION_UP
-                        && e.getActionMasked() != ACTION_CANCEL;
-            }
+            final boolean touchscreenSource =
+                    (e.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN;
+            // Disable long click during events from a non-touchscreen source
+            mLongClickDisabled = !touchscreenSource && e.getActionMasked() != ACTION_UP
+                    && e.getActionMasked() != ACTION_CANCEL;
+
             if (id != R.id.caption_handle && id != R.id.desktop_mode_caption
                     && id != R.id.open_menu_button && id != R.id.close_window
                     && id != R.id.maximize_window && id != R.id.minimize_window) {
@@ -1070,7 +1072,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         @Override
         public boolean onLongClick(View v) {
             final int id = v.getId();
-            if (id == R.id.maximize_window && mTouchscreenInUse) {
+            if (id == R.id.maximize_window && !mLongClickDisabled) {
                 final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
                 moveTaskToFront(decoration.mTaskInfo);
                 if (decoration.isMaximizeMenuActive()) {
