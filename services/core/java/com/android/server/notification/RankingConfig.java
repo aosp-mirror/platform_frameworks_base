@@ -36,7 +36,7 @@ public interface RankingConfig {
     boolean canShowNotificationsOnLockscreen(int userId);
     boolean canShowPrivateNotificationsOnLockScreen(int userId);
 
-    Collection<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
+    Collection<NotificationChannelGroup> getNotificationChannelGroupsWithoutChannels(String pkg,
             int uid);
     void createNotificationChannelGroup(String pkg, int uid, NotificationChannelGroup group,
             boolean fromTargetApp, int callingUid, boolean isSystemOrSystemUi);

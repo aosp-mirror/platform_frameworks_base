@@ -5339,7 +5339,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.getNotificationChannelGroupsFromPrivilegedListener(
                 null, mPkg, Process.myUserHandle());
 
-        verify(mPreferencesHelper, times(1)).getNotificationChannelGroups(anyString(), anyInt());
+        verify(mPreferencesHelper, times(1)).getNotificationChannelGroupsWithoutChannels(
+                anyString(), anyInt());
     }
 
     @Test
@@ -5356,7 +5357,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             // pass
         }
 
-        verify(mPreferencesHelper, never()).getNotificationChannelGroups(anyString(), anyInt());
+        verify(mPreferencesHelper, never()).getNotificationChannelGroupsWithoutChannels(anyString(),
+                anyInt());
     }
 
     @Test
@@ -5376,7 +5378,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             // pass
         }
 
-        verify(mPreferencesHelper, never()).getNotificationChannelGroups(anyString(), anyInt());
+        verify(mPreferencesHelper, never()).getNotificationChannelGroupsWithoutChannels(anyString(),
+                anyInt());
     }
 
     @Test
