@@ -1472,6 +1472,7 @@ constructor(
                 }
 
                 // This is a hosting view, let's remeasure our players
+                val prevLocation = this.desiredLocation
                 this.desiredLocation = desiredLocation
                 this.desiredHostState = it
                 currentlyExpanded = it.expansion > 0
@@ -1504,7 +1505,11 @@ constructor(
                             mediaPlayer.closeGuts(!animate)
                         }
 
-                        mediaPlayer.mediaViewController.onLocationPreChange(desiredLocation)
+                        mediaPlayer.mediaViewController.onLocationPreChange(
+                            mediaPlayer.mediaViewHolder,
+                            desiredLocation,
+                            prevLocation,
+                        )
                     }
                 } else {
                     controllerById.values.forEach { controller ->
@@ -1515,7 +1520,11 @@ constructor(
                             controller.closeGuts(!animate)
                         }
 
-                        controller.onLocationPreChange(desiredLocation)
+                        controller.onLocationPreChange(
+                            controller.mediaViewHolder,
+                            desiredLocation,
+                            prevLocation,
+                        )
                     }
                 }
                 mediaCarouselScrollHandler.showsSettingsButton = !it.showsOnlyActiveMedia

@@ -23,6 +23,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.provider.Settings
 import android.view.View
@@ -43,6 +44,10 @@ import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.view.GutsViewHolder
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.controls.ui.view.MediaViewHolder
+import com.android.systemui.media.controls.ui.view.MediaViewHolder.Companion.headlineSmallTF
+import com.android.systemui.media.controls.ui.view.MediaViewHolder.Companion.labelLargeTF
+import com.android.systemui.media.controls.ui.view.MediaViewHolder.Companion.labelMediumTF
+import com.android.systemui.media.controls.ui.view.MediaViewHolder.Companion.titleMediumTF
 import com.android.systemui.media.controls.ui.view.RecommendationViewHolder
 import com.android.systemui.media.controls.ui.viewmodel.MediaControlViewModel
 import com.android.systemui.media.controls.ui.viewmodel.SeekBarViewModel
@@ -185,6 +190,9 @@ constructor(
     var isScrubbing: Boolean = false
 
     var isSeekBarEnabled: Boolean = false
+
+    /** Whether font family should be updated. */
+    private var isFontUpdateAllowed: Boolean = true
 
     /** Not visible value for previous button when scrubbing */
     private var prevNotVisibleValue = ConstraintSet.GONE
@@ -1108,11 +1116,43 @@ constructor(
         return viewState
     }
 
+    private fun updateFontPerLocation(viewHolder: MediaViewHolder?, location: Int) {
+        when (location) {
+            MediaHierarchyManager.LOCATION_COMMUNAL_HUB ->
+                viewHolder?.updateFontFamily(headlineSmallTF, titleMediumTF, labelMediumTF)
+            else -> viewHolder?.updateFontFamily(titleMediumTF, labelLargeTF, labelMediumTF)
+        }
+    }
+
+    private fun MediaViewHolder.updateFontFamily(
+        titleTF: Typeface,
+        artistTF: Typeface,
+        menuTF: Typeface,
+    ) {
+        gutsViewHolder.gutsText.setTypeface(menuTF)
+        gutsViewHolder.dismissText.setTypeface(menuTF)
+        titleText.setTypeface(titleTF)
+        artistText.setTypeface(artistTF)
+        seamlessText.setTypeface(menuTF)
+    }
+
     /**
      * Notify that the location is changing right now and a [setCurrentState] change is imminent.
      * This updates the width the view will me measured with.
      */
-    fun onLocationPreChange(@MediaLocation newLocation: Int) {
+    fun onLocationPreChange(
+        viewHolder: MediaViewHolder?,
+        @MediaLocation newLocation: Int,
+        @MediaLocation prevLocation: Int,
+    ) {
+        isFontUpdateAllowed =
+            isFontUpdateAllowed ||
+                MediaHierarchyManager.LOCATION_COMMUNAL_HUB == newLocation ||
+                MediaHierarchyManager.LOCATION_COMMUNAL_HUB == prevLocation
+        if (Flags.mediaControlsUiUpdate() && isFontUpdateAllowed) {
+            updateFontPerLocation(viewHolder, newLocation)
+            isFontUpdateAllowed = false
+        }
         obtainViewStateForLocation(newLocation)?.let { layoutController.setMeasureState(it) }
     }
 
