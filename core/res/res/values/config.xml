@@ -6596,4 +6596,8 @@
     <!-- Enables or disables the "Share" action item shown in the context menu that appears upon
         long-pressing on selected text. Enabled by default. -->
     <bool name="config_textShareSupported">true</bool>
+
+    <!-- List of protected packages that require biometric authentication for modification
+         (Disable, force-stop or uninstalling updates). -->
+    <string-array name="config_biometric_protected_package_names" translatable="false" />
 </resources>
