@@ -107,7 +107,7 @@ public class StackScrollAlgorithm {
         mGapHeightOnLockscreen = res.getDimensionPixelSize(
                 R.dimen.notification_section_divider_height_lockscreen);
         mNotificationScrimPadding = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
-        mMarginBottom = NotificationStackScrollLayout.getBottomMargin(context);
+        mMarginBottom = res.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom);
         mQuickQsOffsetHeight = SystemBarUtils.getQuickQsOffsetHeight(context);
         mSmallCornerRadius = res.getDimension(R.dimen.notification_corner_radius_small);
         mLargeCornerRadius = res.getDimension(R.dimen.notification_corner_radius);

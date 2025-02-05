@@ -16,8 +16,6 @@
 
 package com.android.systemui.shade
 
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
@@ -28,7 +26,6 @@ import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.fragments.FragmentHostManager
 import com.android.systemui.fragments.FragmentService
@@ -125,7 +122,6 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
 
         overrideResource(R.dimen.split_shade_notifications_scrim_margin_bottom, SCRIM_MARGIN)
         overrideResource(R.dimen.notification_panel_margin_bottom, NOTIFICATIONS_MARGIN)
-        overrideResource(R.dimen.notification_2025_panel_margin_bottom, NOTIFICATIONS_MARGIN)
         overrideResource(R.bool.config_use_split_notification_shade, false)
         overrideResource(R.dimen.qs_footer_actions_bottom_padding, FOOTER_ACTIONS_PADDING)
         overrideResource(R.dimen.qs_footer_action_inset, FOOTER_ACTIONS_INSET)
@@ -362,25 +358,12 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_NOTIFICATIONS_REDESIGN_FOOTER_VIEW)
     fun testNotificationsMarginBottomIsUpdated() {
         Mockito.clearInvocations(view)
         enableSplitShade()
         verify(view).setNotificationsMarginBottom(NOTIFICATIONS_MARGIN)
 
         overrideResource(R.dimen.notification_panel_margin_bottom, 100)
-        disableSplitShade()
-        verify(view).setNotificationsMarginBottom(100)
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_NOTIFICATIONS_REDESIGN_FOOTER_VIEW)
-    fun testNotificationsMarginBottomIsUpdated_footerRedesign() {
-        Mockito.clearInvocations(view)
-        enableSplitShade()
-        verify(view).setNotificationsMarginBottom(NOTIFICATIONS_MARGIN)
-
-        overrideResource(R.dimen.notification_2025_panel_margin_bottom, 100)
         disableSplitShade()
         verify(view).setNotificationsMarginBottom(100)
     }
