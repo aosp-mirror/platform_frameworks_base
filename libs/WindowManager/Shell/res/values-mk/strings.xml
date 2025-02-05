@@ -135,7 +135,7 @@
     <string name="collapse_menu_text" msgid="7515008122450342029">"Затворете го менито"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"Отвори го менито"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Максимизирај го екранот"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"Промени ја големината"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"Промени ја гол."</string>
     <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"Апликацијата не може да се премести овде"</string>
     <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"Реалистично"</string>
     <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"Врати"</string>
