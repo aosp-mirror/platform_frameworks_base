@@ -35,7 +35,6 @@ import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.Application;
-import android.app.LoadedApk;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.appwidget.AppWidgetHostView;
@@ -6284,9 +6283,18 @@ public class RemoteViews implements Parcelable, Filter {
                 return context;
             }
             try {
-                LoadedApk.checkAndUpdateApkPaths(mApplication);
-                return context.createApplicationContext(mApplication,
+                // Use PackageManager as the source of truth for application information, rather
+                // than the parceled ApplicationInfo provided by the app.
+                ApplicationInfo sanitizedApplication =
+                        context.getPackageManager().getApplicationInfoAsUser(
+                                mApplication.packageName, 0,
+                                UserHandle.getUserId(mApplication.uid));
+                Context applicationContext = context.createApplicationContext(
+                        sanitizedApplication,
                         Context.CONTEXT_RESTRICTED);
+                // Get the correct apk paths while maintaining the current context's configuration.
+                return applicationContext.createConfigurationContext(
+                        context.getResources().getConfiguration());
             } catch (NameNotFoundException e) {
                 Log.e(LOG_TAG, "Package name " + mApplication.packageName + " not found");
             }
