@@ -81,9 +81,9 @@ import com.android.wm.shell.dagger.pip.PipModule;
 import com.android.wm.shell.desktopmode.CloseDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.DefaultDragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler;
-import com.android.wm.shell.desktopmode.DesktopBackNavigationTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopDisplayEventHandler;
 import com.android.wm.shell.desktopmode.DesktopImmersiveController;
+import com.android.wm.shell.desktopmode.DesktopMinimizationTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopMixedTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeDragAndDropTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
@@ -1073,11 +1073,11 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
-    static DesktopBackNavigationTransitionHandler provideDesktopBackNavigationTransitionHandler(
+    static DesktopMinimizationTransitionHandler provideDesktopMinimizationTransitionHandler(
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellAnimationThread ShellExecutor animExecutor,
             DisplayController displayController) {
-        return new DesktopBackNavigationTransitionHandler(mainExecutor, animExecutor,
+        return new DesktopMinimizationTransitionHandler(mainExecutor, animExecutor,
                 displayController);
     }
 
@@ -1173,7 +1173,7 @@ public abstract class WMShellModule {
             FreeformTaskTransitionHandler freeformTaskTransitionHandler,
             CloseDesktopTaskTransitionHandler closeDesktopTaskTransitionHandler,
             Optional<DesktopImmersiveController> desktopImmersiveController,
-            DesktopBackNavigationTransitionHandler desktopBackNavigationTransitionHandler,
+            DesktopMinimizationTransitionHandler desktopMinimizationTransitionHandler,
             InteractionJankMonitor interactionJankMonitor,
             @ShellMainThread Handler handler,
             ShellInit shellInit,
@@ -1191,7 +1191,7 @@ public abstract class WMShellModule {
                         freeformTaskTransitionHandler,
                         closeDesktopTaskTransitionHandler,
                         desktopImmersiveController.get(),
-                        desktopBackNavigationTransitionHandler,
+                        desktopMinimizationTransitionHandler,
                         interactionJankMonitor,
                         handler,
                         shellInit,

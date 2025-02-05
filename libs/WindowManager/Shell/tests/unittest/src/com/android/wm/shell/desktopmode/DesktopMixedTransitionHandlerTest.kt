@@ -84,8 +84,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     @Mock lateinit var userRepositories: DesktopUserRepositories
     @Mock lateinit var freeformTaskTransitionHandler: FreeformTaskTransitionHandler
     @Mock lateinit var closeDesktopTaskTransitionHandler: CloseDesktopTaskTransitionHandler
-    @Mock
-    lateinit var desktopBackNavigationTransitionHandler: DesktopBackNavigationTransitionHandler
+    @Mock lateinit var desktopMinimizationTransitionHandler: DesktopMinimizationTransitionHandler
     @Mock lateinit var desktopImmersiveController: DesktopImmersiveController
     @Mock lateinit var interactionJankMonitor: InteractionJankMonitor
     @Mock lateinit var mockHandler: Handler
@@ -108,7 +107,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
                 freeformTaskTransitionHandler,
                 closeDesktopTaskTransitionHandler,
                 desktopImmersiveController,
-                desktopBackNavigationTransitionHandler,
+                desktopMinimizationTransitionHandler,
                 interactionJankMonitor,
                 mockHandler,
                 shellInit,
@@ -642,12 +641,12 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
-    fun startAnimation_withMinimizingDesktopTask_callsBackNavigationHandler() {
+    fun startAnimation_withMinimizingDesktopTask_callsMinimizationHandler() {
         val minimizingTask = createTask(WINDOWING_MODE_FREEFORM)
         val transition = Binder()
         whenever(desktopRepository.getExpandedTaskCount(any())).thenReturn(2)
         whenever(
-                desktopBackNavigationTransitionHandler.startAnimation(
+                desktopMinimizationTransitionHandler.startAnimation(
                     any(),
                     any(),
                     any(),
@@ -675,7 +674,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
             )
 
         assertTrue("Should delegate animation to back navigation transition handler", started)
-        verify(desktopBackNavigationTransitionHandler)
+        verify(desktopMinimizationTransitionHandler)
             .startAnimation(
                 eq(transition),
                 argThat { info -> info.changes.contains(minimizingTaskChange) },
@@ -692,7 +691,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
         val transition = Binder()
         whenever(desktopRepository.getExpandedTaskCount(any())).thenReturn(2)
         whenever(
-                desktopBackNavigationTransitionHandler.startAnimation(
+                desktopMinimizationTransitionHandler.startAnimation(
                     any(),
                     any(),
                     any(),

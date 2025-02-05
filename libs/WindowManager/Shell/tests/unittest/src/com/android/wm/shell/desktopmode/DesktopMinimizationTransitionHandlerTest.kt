@@ -45,18 +45,18 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWithLooper
 @RunWith(AndroidTestingRunner::class)
-class DesktopBackNavigationTransitionHandlerTest : ShellTestCase() {
+class DesktopMinimizationTransitionHandlerTest : ShellTestCase() {
 
     private val testExecutor = mock<ShellExecutor>()
     private val closingTaskLeash = mock<SurfaceControl>()
     private val displayController = mock<DisplayController>()
 
-    private lateinit var handler: DesktopBackNavigationTransitionHandler
+    private lateinit var handler: DesktopMinimizationTransitionHandler
 
     @Before
     fun setUp() {
         handler =
-            DesktopBackNavigationTransitionHandler(testExecutor, testExecutor, displayController)
+            DesktopMinimizationTransitionHandler(testExecutor, testExecutor, displayController)
         whenever(displayController.getDisplayContext(any())).thenReturn(mContext)
     }
 
