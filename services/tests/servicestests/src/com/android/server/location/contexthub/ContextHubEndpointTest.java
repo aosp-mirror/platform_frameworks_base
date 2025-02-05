@@ -29,7 +29,7 @@ import android.hardware.contexthub.IContextHubEndpointCallback;
 import android.hardware.contexthub.IEndpointCommunication;
 import android.os.Binder;
 import android.os.RemoteException;
-import android.platform.test.annotations.Postsubmit;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -45,8 +45,7 @@ import org.mockito.junit.MockitoRule;
 import java.util.Collections;
 
 @RunWith(AndroidJUnit4.class)
-@Postsubmit
-// TODO(b/378944402): Enable test in presubmit
+@Presubmit
 public class ContextHubEndpointTest {
     private static final int SESSION_ID_RANGE = ContextHubEndpointManager.SERVICE_SESSION_RANGE;
     private static final int MIN_SESSION_ID = 0;
