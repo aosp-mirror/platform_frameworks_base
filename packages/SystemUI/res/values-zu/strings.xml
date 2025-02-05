@@ -809,6 +809,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Ivela phezu kwezaziso zengxoxo futhi njengesithombe sephrofayela esikrinini sokukhiya, ivela njengebhamuza, ukuphazamisa okuthi Ungaphazamisi"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Okubalulekile"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> ayisekeli izici zengxoxo"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
     <string name="notification_inline_dismiss" msgid="88423586921134258">"Chitha"</string>
     <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"Ungabonisi futhi"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Lezi zaziso azikwazi ukushintshwa."</string>
@@ -926,12 +928,9 @@
     <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"Guqula okhiye abanamathelayo"</string>
     <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"Guqula okhiye abanensayo"</string>
     <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Guqula Ukufinyelela Kwezwi"</string>
-    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
-    <skip />
-    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
-    <skip />
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"Guqula ITalkback"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"Guqula Ukukhuliswa"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"Sebenzisa okuthi Khetha ukuze Ukhulume"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Ungaphazamisi"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Izinqamuleli zezinkinobho zevolomu"</string>
     <string name="battery" msgid="769686279459897127">"Ibhethri"</string>

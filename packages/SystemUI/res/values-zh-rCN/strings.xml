@@ -807,6 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"以气泡形式显示在对话通知顶部（屏幕锁定时显示为个人资料照片），并且会中断勿扰模式"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"优先"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>不支持对话功能"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
     <string name="notification_inline_dismiss" msgid="88423586921134258">"关闭"</string>
     <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"不再显示"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"无法修改这些通知。"</string>
@@ -924,12 +926,9 @@
     <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"开启/关闭粘滞键"</string>
     <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"开启/关闭慢速键"</string>
     <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"开启/关闭语音操控"</string>
-    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
-    <skip />
-    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
-    <skip />
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"开启/关闭 TalkBack"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"开启/关闭放大功能"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"启用“随选朗读”"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"勿扰"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"音量按钮快捷键"</string>
     <string name="battery" msgid="769686279459897127">"电池"</string>

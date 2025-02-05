@@ -142,7 +142,7 @@
     <string name="share_to_app_stop_dialog_title_generic" msgid="9079161538135843648">"هل تريد إيقاف المشاركة؟"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"تتم حاليًا مشاركة محتوى الشاشة بأكمله مع \"<xliff:g id="HOST_APP_NAME">%1$s</xliff:g>\""</string>
     <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"تتم حاليًا مشاركة محتوى الشاشة بأكمله مع تطبيق"</string>
-    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"تتم حاليًا مشاركة محتوى \"<xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>\""</string>
+    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"تتم حاليًا مشاركة شاشة تطبيق \"<xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>\""</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"تتم حاليًا مشاركة محتوى تطبيق"</string>
     <string name="share_to_app_stop_dialog_message_generic" msgid="7622174291691249392">"تتم حاليًا مشاركة المحتوى مع تطبيق"</string>
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"إيقاف المشاركة"</string>
@@ -566,17 +566,17 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"ستتمكن الخدمة التي تقدّم هذه الوظيفة من الوصول إلى كل المحتوى المعروض على شاشتك أو الذي يتم تشغيله على جهازك أثناء التسجيل أو البثّ. ويشمل ذلك معلومات، مثل كلمات المرور وتفاصيل الدفع والصور والرسائل والمقاطع الصوتية التي تشغِّلها."</string>
     <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"مشاركة محتوى تطبيق أو تسجيله"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"هل تريد مشاركة الشاشة مع تطبيق \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\"؟"</string>
-    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"مشاركة تطبيق واحد"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"مشاركة شاشة تطبيق واحد"</string>
     <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
     <skip />
     <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"مشاركة الشاشة بأكملها"</string>
     <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
     <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"أثناء مشاركة محتوى الشاشة بالكامل، سيكون كل المحتوى المعروض على شاشتك مرئيًا لتطبيق \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\". لذا يُرجى توخي الحذر بشأن المعلومات، مثل كلمات المرور وتفاصيل الدفع والرسائل والصور وملفات الصوت والفيديو."</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"أثناء مشاركة محتوى تطبيق، سيكون كل المحتوى المعروض أو الذي يتم تشغيله في ذلك التطبيق مرئيًا لتطبيق \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\". لذا يُرجى توخي الحذر بشأن المعلومات، مثل كلمات المرور وتفاصيل الدفع والرسائل والصور وملفات الصوت والفيديو."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"ستتم مشاركة كل المحتوى المعروض أو المشغَّل على شاشة هذا التطبيق مع تطبيق \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\"، لذا يُرجى توخي الحذر بشأن المعلومات الظاهرة على الشاشة، مثل كلمات المرور وتفاصيل الدفع والرسائل والصور والمقاطع الصوتية والفيديوهات."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"مشاركة الشاشة"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"تم إيقاف هذا الخيار من خلال تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
-    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"اختيار تطبيق لمشاركة محتواه"</string>
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"يُرجى اختيار تطبيق لمشاركة محتواه"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"هل تريد بث محتوى الشاشة؟"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"بث محتوى تطبيق واحد"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"بث محتوى الشاشة بالكامل"</string>
@@ -807,6 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"تظهر في أعلى إشعارات المحادثات وكصورة ملف شخصي على شاشة القفل وتظهر على شكل فقاعة لمقاطعة ميزة \"عدم الإزعاج\"."</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"الأولوية"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"لا يدعم تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> ميزات المحادثات."</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
     <string name="notification_inline_dismiss" msgid="88423586921134258">"إغلاق"</string>
     <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"عدم الإظهار مرة أخرى"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"يتعذّر تعديل هذه الإشعارات."</string>
@@ -1420,7 +1422,7 @@
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"تم رصد تواجد المستخدم."</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"يمكنك ضبط تطبيق تدوين الملاحظات التلقائي في \"الإعدادات\"."</string>
     <string name="install_app" msgid="5066668100199613936">"تثبيت التطبيق"</string>
-    <string name="dismissible_keyguard_swipe" msgid="8377597870094949432">"التمرير سريعًا للأعلى للمتابعة"</string>
+    <string name="dismissible_keyguard_swipe" msgid="8377597870094949432">"مرِّر سريعًا للأعلى للمتابعة"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"هل تريد بث محتوى جهازك على الشاشة الخارجية؟"</string>
     <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"سيتم النسخ المطابق لمحتوى الشاشة الداخلية، وإيقاف الشاشة الأمامية."</string>
     <string name="mirror_display" msgid="2515262008898122928">"بث المحتوى على الشاشة"</string>

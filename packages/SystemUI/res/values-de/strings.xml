@@ -807,6 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Wird oben im Bereich „Unterhaltungen“ sowie als Profilbild auf dem Sperrbildschirm angezeigt, erscheint als Bubble, unterbricht „Bitte nicht stören“"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorität"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> unterstützt keine Funktionen für Unterhaltungen"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
     <string name="notification_inline_dismiss" msgid="88423586921134258">"Schließen"</string>
     <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"Nicht mehr anzeigen"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Diese Benachrichtigungen können nicht geändert werden."</string>
@@ -879,7 +881,7 @@
     <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"Tastenkombinationen für die Eingabe werden angezeigt"</string>
     <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"Tastenkombinationen zum Öffnen von Apps werden angezeigt"</string>
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Tastenkombinationen für die aktuelle App werden angezeigt"</string>
-    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Benachrichti­gun­gen ansehen"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Benach­richti­­gun­gen ansehen"</string>
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"Screenshot erstellen"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Tasten­kürzel anzeigen"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Zurück"</string>
@@ -1391,7 +1393,7 @@
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Abbrechen"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Jetzt umdrehen"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Smartphone auffalten"</string>
-    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Bildschirm wechseln?"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Display wechseln?"</string>
     <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"Mit der Rückkamera lassen sich Fotos mit höherer Auflösung aufnehmen"</string>
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Für höhere Auflösung Smartphone umdrehen"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Faltbares Gerät wird geöffnet"</string>

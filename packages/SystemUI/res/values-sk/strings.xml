@@ -250,10 +250,8 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Percento batérie nie je známe."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Pripojené k zariadeniu <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Pripojené k zariadeniu <xliff:g id="CAST">%s</xliff:g>."</string>
-    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
-    <skip />
-    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
-    <skip />
+    <string name="accessibility_expand_group" msgid="521237935987978624">"Rozbaliť skupinu"</string>
+    <string name="accessibility_open_application" msgid="1749126077501259712">"Otvoriť aplikáciu"</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Nepripojené."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Vypnuté"</string>
@@ -543,8 +541,7 @@
     <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"Preskúmajte režim centra"</string>
     <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"Počas nabíjania máte prístup k svojim obľúbeným miniaplikáciám a šetričom obrazovky."</string>
     <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Poďme na to"</string>
-    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
-    <skip />
+    <string name="glanceable_hub_to_dream_button_tooltip" msgid="9018287673822335829">"Zobrazovať počas nabíjania obľúbené šetriče obrazovky"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Prepnutie používateľa"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"rozbaľovacia ponuka"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Všetky aplikácie a údaje v tejto relácii budú odstránené."</string>
@@ -576,7 +573,7 @@
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Pri zdieľaní aplikácie vidí aplikácia <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> všetko, čo sa v zdieľanej aplikácii zobrazuje alebo prehráva. Preto zvýšte pozornosť v prípade položiek, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Zdieľať obrazovku"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> túto možnosť zakázala"</string>
-    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Výber aplikácie na zdieľanie"</string>
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Vyberte aplikáciu, do ktorej chcete zdieľať"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Chcete prenášať obrazovku?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Prenášať jednu aplikáciu"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Prenášať celú obrazovku"</string>
@@ -807,6 +804,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Zobrazuje sa ako bublina v hornej časti upozornení konverzácie a profilová fotka na uzamknutej obrazovke, preruší režim bez vyrušení"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritné"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> nepodporuje funkcie konverzácie"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
     <string name="notification_inline_dismiss" msgid="88423586921134258">"Zavrieť"</string>
     <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"Nabudúce nezobrazovať"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Tieto upozornenia sa nedajú upraviť."</string>
@@ -924,12 +923,9 @@
     <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"Prepnúť na režim uzamknutia klávesa"</string>
     <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"Prepnúť na pomalé klávesy"</string>
     <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Prepnúť na Voice Access"</string>
-    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
-    <skip />
-    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
-    <skip />
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"Prepnúť TalkBack"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"Prepnúť zväčšenie"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"Aktivovať počúvanie vybraného textu"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Režim bez vyrušení"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Skratka tlačidiel hlasitosti"</string>
     <string name="battery" msgid="769686279459897127">"Batéria"</string>
@@ -1309,8 +1305,7 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Otvorte odtlačkom prsta"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Vyžaduje sa overenie. Dotknite sa senzora odtlačkov prstov."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"Prebiehajúci hovor"</string>
-    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
-    <skip />
+    <string name="ongoing_notification_extra_content_description" msgid="2098752668861351265">"Prebieha"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobilné dáta"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Pripojené"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Dočasne pripojené"</string>

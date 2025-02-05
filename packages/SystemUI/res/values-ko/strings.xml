@@ -540,12 +540,9 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"위젯을 사용하여 앱을 열려면 본인 인증을 해야 합니다. 또한 태블릿이 잠겨 있더라도 누구나 볼 수 있다는 점을 유의해야 합니다. 일부 위젯은 잠금 화면에 적합하지 않고 여기에 추가하기에 안전하지 않을 수 있습니다."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"확인"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"화면 보호기 버튼 표시"</string>
-    <!-- no translation found for hub_onboarding_bottom_sheet_title (162092881395529947) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_text (8589816797970240544) -->
-    <skip />
-    <!-- no translation found for hub_onboarding_bottom_sheet_action_button (6161983690157872829) -->
-    <skip />
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"허브 모드 살펴보기"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"충전하는 동안 즐겨 찾는 위젯과 화면 보호기에 액세스하세요."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"시작"</string>
     <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"사용자 전환"</string>
@@ -810,6 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"대화 알림 상단에 표시, 잠금 화면에 프로필 사진으로 표시, 대화창으로 표시, 방해 금지 모드를 무시함"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"우선순위"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱은 대화 기능을 지원하지 않습니다."</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
     <string name="notification_inline_dismiss" msgid="88423586921134258">"닫기"</string>
     <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"다시 표시하지 않음"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"이 알림은 수정할 수 없습니다."</string>
@@ -927,12 +926,9 @@
     <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"고정키 전환"</string>
     <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"느린 키 전환"</string>
     <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"음성 액세스 전환"</string>
-    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
-    <skip />
-    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
-    <skip />
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"TalkBack 전환"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"확대 전환"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"텍스트 읽어주기 활성화"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"방해 금지 모드"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"볼륨 버튼 단축키"</string>
     <string name="battery" msgid="769686279459897127">"배터리"</string>
@@ -1519,12 +1515,10 @@
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"최근 앱 보기 동작을 완료했습니다."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"최근 앱을 보려면 터치패드에서 세 손가락을 사용해 위로 스와이프한 채로 유지하세요."</string>
     <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"앱 전환"</string>
-    <!-- no translation found for touchpad_switch_apps_gesture_guidance (2554844933805502538) -->
-    <skip />
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"네 손가락을 사용해 터치패드에서 오른쪽으로 스와이프하세요."</string>
     <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"잘하셨습니다"</string>
     <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"앱 전환 동작을 완료했습니다."</string>
-    <!-- no translation found for touchpad_switch_gesture_error_body (5895231916964677918) -->
-    <skip />
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"앱을 전환하려면 네 손가락을 사용해 터치패드에서 오른쪽으로 스와이프하세요"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"모든 앱 보기"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"키보드의 작업 키를 누르세요."</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"잘하셨습니다"</string>

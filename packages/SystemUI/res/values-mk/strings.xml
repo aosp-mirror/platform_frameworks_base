@@ -110,7 +110,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Се обработува снимка од екран"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Тековно известување за сесија за снимање на екранот"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Да се снима екранот?"</string>
-    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Снимање на една апликација"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Снимање една апликација"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"Снимај го екранов"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"Снимај го екранот %s"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Додека го снимате целиот екран, сѐ што е прикажано на екранот се снима. Затоа, бидете внимателни со лозинките, деталите за плаќање, пораките, фотографиите и аудиото и видеото."</string>
@@ -126,7 +126,7 @@
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Се снима екранот"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Се снима екранот и аудиото"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Прикажувај допири на екранот"</string>
-    <string name="screenrecord_stop_label" msgid="72699670052087989">"Сопри"</string>
+    <string name="screenrecord_stop_label" msgid="72699670052087989">"Сопрете"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Сподели"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Снимката од екранот е зачувана"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Допрете за прегледување"</string>
@@ -145,7 +145,7 @@
     <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Во моментов ја споделувате <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>"</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Во моментов споделувате апликација"</string>
     <string name="share_to_app_stop_dialog_message_generic" msgid="7622174291691249392">"Во моментов споделувате со апликација"</string>
-    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Сопри го споделувањето"</string>
+    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Сопрете го споделувањето"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Се емитува екранот"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Да се сопре емитувањето?"</string>
     <string name="cast_to_other_device_stop_dialog_message_entire_screen_with_device" msgid="1474703115926205251">"Во моментов го емитувате целиот екран на <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
@@ -807,6 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Се прикажува најгоре во известувањата за разговор и како профилна слика на заклучен екран, се појавува како балонче, го прекинува „Не вознемирувај“"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритетно"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не поддржува функции за разговор"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
     <string name="notification_inline_dismiss" msgid="88423586921134258">"Отфрли"</string>
     <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"Не прикажувај повторно"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Овие известувања не може да се изменат"</string>
@@ -924,12 +926,9 @@
     <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"Вклучи/исклучи „Лепливи копчиња“"</string>
     <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"Вклучи/исклучи „Бавни копчиња“"</string>
     <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Вклучи/исклучи „Пристап со глас“"</string>
-    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
-    <skip />
-    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
-    <skip />
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"Вклучете/исклучете TalkBack"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"Вклучете/исклучете зголемување"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"Активирајте ја „Изберете за говор“"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Не вознемирувај"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Кратенка за копчињата за јачина на звук"</string>
     <string name="battery" msgid="769686279459897127">"Батерија"</string>

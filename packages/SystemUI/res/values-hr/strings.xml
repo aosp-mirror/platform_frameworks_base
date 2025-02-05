@@ -250,10 +250,8 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Postotak baterije nije poznat."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Spojen na <xliff:g id="BLUETOOTH">%s</xliff:g> ."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Povezani ste sa sljedećim uređajem: <xliff:g id="CAST">%s</xliff:g>."</string>
-    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
-    <skip />
-    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
-    <skip />
+    <string name="accessibility_expand_group" msgid="521237935987978624">"Proširite grupu."</string>
+    <string name="accessibility_open_application" msgid="1749126077501259712">"Otvorite aplikaciju."</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Nije povezano."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Isključeno"</string>
@@ -543,8 +541,7 @@
     <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"Istraži način Huba"</string>
     <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"Pristupite omiljenim widgetima i čuvarima zaslona tijekom punjenja."</string>
     <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Započnimo"</string>
-    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
-    <skip />
+    <string name="glanceable_hub_to_dream_button_tooltip" msgid="9018287673822335829">"Prikaz vaših omiljenih čuvara zaslona tijekom punjenja"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Promjena korisnika"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"padajući izbornik"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Izbrisat će se sve aplikacije i podaci u ovoj sesiji."</string>
@@ -807,6 +804,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Prikazuje se pri vrhu obavijesti razgovora i kao profilna slika na zaključanom zaslonu, izgleda kao oblačić, prekida Ne uznemiravaj"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritetno"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podržava značajke razgovora"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
     <string name="notification_inline_dismiss" msgid="88423586921134258">"Odbaci"</string>
     <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"Ne prikazuj ponovo"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Te se obavijesti ne mogu izmijeniti."</string>
@@ -1306,8 +1305,7 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Otvorite pomoću otiska prsta"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Potrebna je autentifikacija. Dodirnite senzor otiska prsta da biste se autentificirali."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"Poziv u tijeku"</string>
-    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
-    <skip />
+    <string name="ongoing_notification_extra_content_description" msgid="2098752668861351265">"U tijeku"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobilni podaci"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Povezano"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Privremeno povezano"</string>

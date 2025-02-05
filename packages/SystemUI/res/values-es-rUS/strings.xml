@@ -250,10 +250,8 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Se desconoce el porcentaje de la batería."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Conectado a <xliff:g id="BLUETOOTH">%s</xliff:g>"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Conectado a <xliff:g id="CAST">%s</xliff:g>."</string>
-    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
-    <skip />
-    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
-    <skip />
+    <string name="accessibility_expand_group" msgid="521237935987978624">"Expandir grupo."</string>
+    <string name="accessibility_open_application" msgid="1749126077501259712">"Abrir aplicación."</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"No conectado"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Desactivados"</string>
@@ -543,8 +541,7 @@
     <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"Explora el modo Hub"</string>
     <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"Accede a tus widgets y protectores de pantalla favoritos mientras se carga el dispositivo."</string>
     <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Comenzar"</string>
-    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
-    <skip />
+    <string name="glanceable_hub_to_dream_button_tooltip" msgid="9018287673822335829">"Muestra tus protectores de pantalla favoritos mientras se carga el dispositivo"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Cambiar usuario"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menú expandible"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Se eliminarán las aplicaciones y los datos de esta sesión."</string>
@@ -807,6 +804,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Aparece en forma de burbuja y como foto de perfil en la parte superior de las notificaciones de conversación, en la pantalla de bloqueo, y detiene el modo No interrumpir"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritaria"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admite funciones de conversación"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
     <string name="notification_inline_dismiss" msgid="88423586921134258">"Descartar"</string>
     <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"No volver a mostrar"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"No se pueden modificar estas notificaciones."</string>
@@ -924,12 +923,9 @@
     <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"Activar o desactivar las teclas especiales"</string>
     <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"Activar o desactivar las teclas lentas"</string>
     <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Activar o desactivar el Acceso por voz"</string>
-    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
-    <skip />
-    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
-    <skip />
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"Activar o desactivar TalkBack"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"Activar o desactivar la ampliación"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"Activar Seleccionar para pronunciar"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"No interrumpir"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Combinación de teclas de botones de volumen"</string>
     <string name="battery" msgid="769686279459897127">"Batería"</string>
@@ -1309,8 +1305,7 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Usa la huella dactilar para abrir"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Se requiere de una autenticación. Toca el sensor de huellas dactilares para autenticarte."</string>
     <string name="ongoing_call_content_description" msgid="6394763878322348560">"Llamada en curso"</string>
-    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
-    <skip />
+    <string name="ongoing_notification_extra_content_description" msgid="2098752668861351265">"En curso"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Datos móviles"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Conexión establecida"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Conectado temporalmente"</string>

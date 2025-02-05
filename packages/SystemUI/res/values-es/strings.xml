@@ -116,7 +116,7 @@
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Cuando grabas toda la pantalla, se graba todo lo que se muestre en ella. Debes tener cuidado con elementos como contraseñas, detalles de pagos, mensajes, fotos, audio y vídeo."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Cuando grabas una aplicación, se graba todo lo que se muestre o reproduzca en ella. Debes tener cuidado con elementos como contraseñas, detalles de pagos, mensajes, fotos, audio y vídeo."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Grabar pantalla"</string>
-    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Elegir una aplicación para grabar"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Elige la aplicación que quieres grabar"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Grabar audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio del dispositivo"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Sonido de tu dispositivo, como música, llamadas y tonos de llamada"</string>
@@ -576,7 +576,7 @@
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Cuando compartes una aplicación, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> puede ver todo lo que se muestra o reproduce en ella. Debes tener cuidado con elementos como contraseñas, detalles de pagos, mensajes, fotos, audio y vídeo."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Compartir pantalla"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> ha inhabilitado esta opción"</string>
-    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Elegir una aplicación para compartir"</string>
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Elige la aplicación que quieres compartir"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"¿Enviar tu pantalla?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Enviar una aplicación"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Enviar toda la pantalla"</string>
@@ -807,6 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Se muestra encima de las notificaciones de conversaciones y como imagen de perfil en la pantalla de bloqueo, aparece como burbuja e interrumpe el modo No molestar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridad"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admite funciones de conversación"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
     <string name="notification_inline_dismiss" msgid="88423586921134258">"Cerrar"</string>
     <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"No volver a mostrar"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Estas notificaciones no se pueden modificar."</string>
@@ -924,12 +926,9 @@
     <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"Activar/Desactivar teclas persistentes"</string>
     <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"Activar/Desactivar teclas lentas"</string>
     <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Activar/Desactivar Voice Access"</string>
-    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
-    <skip />
-    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
-    <skip />
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"Activar/Desactivar TalkBack"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"Activar/Desactivar ampliación"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"Activar Enunciar selección"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"No molestar"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Acceso directo de los botones de volumen"</string>
     <string name="battery" msgid="769686279459897127">"Batería"</string>
@@ -1464,7 +1463,7 @@
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="7636040209946696120">"Para crear esta combinación de teclas, pulsa la tecla de acción y una o varias teclas a la vez"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Se eliminará tu combinación de teclas personalizada de forma permanente."</string>
     <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Se eliminarán todos tus accesos directos personalizados de forma permanente."</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Buscar accesos directos"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Buscar combinaciones de teclas"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"No hay resultados de búsqueda"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Icono de contraer"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Icono de la tecla de acción o de la tecla Meta"</string>
@@ -1478,7 +1477,7 @@
     <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"barra inclinada"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Controlador de arrastre"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Ajustes del teclado"</string>
-    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Establecer combinación de teclas"</string>
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Establecer combinación"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Eliminar"</string>
     <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Sí, restablecer"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Cancelar"</string>

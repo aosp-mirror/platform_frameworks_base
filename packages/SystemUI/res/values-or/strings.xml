@@ -807,6 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"ବାର୍ତ୍ତାଳାପ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ଶୀର୍ଷରେ ଏବଂ ଲକ୍ ସ୍କ୍ରିନରେ ଏକ ପ୍ରୋଫାଇଲ୍ ଛବି ଭାବେ ଦେଖାଏ, ଏକ ବବଲ୍ ଭାବେ ଦେଖାଯାଏ, \'ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\'କୁ ବାଧା ଦିଏ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ପ୍ରାଥମିକତା"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବାର୍ତ୍ତାଳାପ ଫିଚରଗୁଡ଼ିକୁ ସମର୍ଥନ କରେ ନାହିଁ"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
     <string name="notification_inline_dismiss" msgid="88423586921134258">"ଖାରଜ କରନ୍ତୁ"</string>
     <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"ପୁଣି ଶୋ କରନ୍ତୁ ନାହିଁ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ପରିବର୍ତ୍ତନ କରିହେବ ନାହିଁ।"</string>
@@ -924,12 +926,9 @@
     <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"ଷ୍ଟିକି କୀ ଟୋଗଲ କରନ୍ତୁ"</string>
     <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"ଧିର କୀ ଟୋଗଲ କରନ୍ତୁ"</string>
     <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Voice Access ଟୋଗଲ କରନ୍ତୁ"</string>
-    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
-    <skip />
-    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
-    <skip />
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"TalkBack ଟୋଗଲ କରନ୍ତୁ"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"ମେଗ୍ନିଫିକେସନ ଟୋଗଲ କରନ୍ତୁ"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"ସିଲେକ୍ଟ ଟୁ ସ୍ପିକକୁ ସକ୍ରିୟ କରନ୍ତୁ"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ଭଲ୍ୟୁମ ବଟନ୍‍ ଶର୍ଟକଟ୍‍"</string>
     <string name="battery" msgid="769686279459897127">"ବେଟେରୀ"</string>

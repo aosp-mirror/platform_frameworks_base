@@ -721,7 +721,7 @@
     <string name="volume_ringer_change" msgid="3574969197796055532">"Ketuk untuk mengubah mode pendering"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"mode pendering"</string>
     <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>, ketuk untuk mengubah mode pendering"</string>
-    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"Tanpa suara"</string>
+    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"bisukan"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"aktifkan"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"getar"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s kontrol volume"</string>
@@ -807,6 +807,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Muncul teratas di notifikasi percakapan dan sebagai foto profil di layar kunci, ditampilkan sebagai balon, menimpa mode Jangan Ganggu"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritas"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak mendukung fitur percakapan"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
     <string name="notification_inline_dismiss" msgid="88423586921134258">"Tutup"</string>
     <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"Jangan tampilkan lagi"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Notifikasi ini tidak dapat diubah."</string>
@@ -924,12 +926,9 @@
     <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"Aktifkan/nonaktifkan tombol lekat"</string>
     <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"Aktifkan/nonaktifkan tombol lambat"</string>
     <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Aktifkan/nonaktifkan Voice Access"</string>
-    <!-- no translation found for group_accessibility_toggle_talkback (5017967056006325713) -->
-    <skip />
-    <!-- no translation found for group_accessibility_toggle_magnification (3892267763383743128) -->
-    <skip />
-    <!-- no translation found for group_accessibility_activate_select_to_speak (9157775915495428592) -->
-    <skip />
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"Aktifkan/nonaktifkan TalkBack"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"Aktifkan/nonaktifkan Pembesaran"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"Aktifkan fitur Klik untuk Diucapkan"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Jangan Ganggu"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Pintasan tombol volume"</string>
     <string name="battery" msgid="769686279459897127">"Baterai"</string>
