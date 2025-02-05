@@ -18,10 +18,12 @@ package com.android.systemui.complication;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.graphics.Rect;
 import android.view.View;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -56,12 +58,14 @@ public class ComplicationLayoutEngineTest extends SysuiTestCase {
     @Mock
     TouchInsetManager.TouchInsetSession mTouchSession;
 
+    Margins mMargins = new Margins(0, 0, 0, 0);
+
     ComplicationLayoutEngine createComplicationLayoutEngine() {
         return createComplicationLayoutEngine(0);
     }
 
     ComplicationLayoutEngine createComplicationLayoutEngine(int spacing) {
-        return new ComplicationLayoutEngine(mLayout, spacing, 0, 0, 0, 0, mTouchSession, 0, 0);
+        return new ComplicationLayoutEngine(mLayout, spacing, () -> mMargins, mTouchSession, 0, 0);
     }
 
     @Before
@@ -84,7 +88,7 @@ public class ComplicationLayoutEngineTest extends SysuiTestCase {
                 ConstraintLayout layout) {
             this.lp = params;
             this.category = category;
-            this.view = Mockito.mock(View.class);
+            this.view = mock(View.class);
             this.id = sFactory.getNextId();
             when(view.getId()).thenReturn(sNextId++);
             when(view.getParent()).thenReturn(layout);
@@ -131,15 +135,10 @@ public class ComplicationLayoutEngineTest extends SysuiTestCase {
     @Test
     public void testComplicationMarginPosition() {
         final Random rand = new Random();
-        final int startMargin = rand.nextInt();
-        final int topMargin = rand.nextInt();
-        final int endMargin = rand.nextInt();
-        final int bottomMargin = rand.nextInt();
         final int spacing = rand.nextInt();
-
-        final ComplicationLayoutEngine engine = new ComplicationLayoutEngine(mLayout, spacing,
-                startMargin, topMargin, endMargin, bottomMargin, mTouchSession, 0, 0);
-
+        mMargins = new Margins(rand.nextInt(), rand.nextInt(), rand.nextInt(),
+                rand.nextInt());
+        final ComplicationLayoutEngine engine = createComplicationLayoutEngine(spacing);
         final ViewInfo firstViewInfo = new ViewInfo(
                 new ComplicationLayoutParams(
                         100,
@@ -167,17 +166,67 @@ public class ComplicationLayoutEngineTest extends SysuiTestCase {
 
         addComplication(engine, secondViewInfo);
 
-
         // The first added view should have margins from both directions from the corner position.
         verifyChange(firstViewInfo, false, lp -> {
-            assertThat(lp.topMargin).isEqualTo(topMargin);
-            assertThat(lp.getMarginEnd()).isEqualTo(endMargin);
+            assertThat(lp.topMargin).isEqualTo(mMargins.top);
+            assertThat(lp.getMarginEnd()).isEqualTo(mMargins.end);
         });
 
         // The second view should be spaced below the first view and have the side end margin.
         verifyChange(secondViewInfo, false, lp -> {
             assertThat(lp.topMargin).isEqualTo(spacing);
-            assertThat(lp.getMarginEnd()).isEqualTo(endMargin);
+            assertThat(lp.getMarginEnd()).isEqualTo(mMargins.end);
+        });
+    }
+
+    @Test
+    public void testComplicationMarginsOnScreenSizeChange() {
+        final Random rand = new Random();
+        final int spacing = rand.nextInt();
+        final ComplicationLayoutEngine engine = createComplicationLayoutEngine(spacing);
+        final ViewInfo firstViewInfo = new ViewInfo(
+                new ComplicationLayoutParams(
+                        100,
+                        100,
+                        ComplicationLayoutParams.POSITION_TOP
+                                | ComplicationLayoutParams.POSITION_END,
+                        ComplicationLayoutParams.DIRECTION_DOWN,
+                        0),
+                Complication.CATEGORY_SYSTEM,
+                mLayout);
+
+        addComplication(engine, firstViewInfo);
+
+        final ViewInfo secondViewInfo = new ViewInfo(
+                new ComplicationLayoutParams(
+                        100,
+                        100,
+                        ComplicationLayoutParams.POSITION_TOP
+                                | ComplicationLayoutParams.POSITION_END,
+                        ComplicationLayoutParams.DIRECTION_DOWN,
+                        0),
+                Complication.CATEGORY_STANDARD,
+                mLayout);
+
+        addComplication(engine, secondViewInfo);
+
+        firstViewInfo.clearInvocations();
+        secondViewInfo.clearInvocations();
+
+        // Triggers an update to the layout engine with new margins.
+        final int newTopMargin = rand.nextInt();
+        final int newEndMargin = rand.nextInt();
+        mMargins = new Margins(0, newTopMargin, newEndMargin, 0);
+        engine.updateLayoutEngine(new Rect(0, 0, 800, 1000));
+
+        // Ensure complication view have new margins
+        verifyChange(firstViewInfo, false, lp -> {
+            assertThat(lp.topMargin).isEqualTo(newTopMargin);
+            assertThat(lp.getMarginEnd()).isEqualTo(newEndMargin);
+        });
+        verifyChange(secondViewInfo, false, lp -> {
+            assertThat(lp.topMargin).isEqualTo(spacing);
+            assertThat(lp.getMarginEnd()).isEqualTo(newEndMargin);
         });
     }
 
@@ -241,7 +290,6 @@ public class ComplicationLayoutEngineTest extends SysuiTestCase {
     @Test
     public void testDirectionLayout() {
         final ComplicationLayoutEngine engine = createComplicationLayoutEngine();
-
         final ViewInfo firstViewInfo = new ViewInfo(
                 new ComplicationLayoutParams(
                         100,
@@ -289,7 +337,6 @@ public class ComplicationLayoutEngineTest extends SysuiTestCase {
     @Test
     public void testPositionLayout() {
         final ComplicationLayoutEngine engine = createComplicationLayoutEngine();
-
         final ViewInfo firstViewInfo = new ViewInfo(
                 new ComplicationLayoutParams(
                         100,
@@ -376,7 +423,6 @@ public class ComplicationLayoutEngineTest extends SysuiTestCase {
     public void testDefaultMargin() {
         final int margin = 5;
         final ComplicationLayoutEngine engine = createComplicationLayoutEngine(margin);
-
         final ViewInfo firstViewInfo = new ViewInfo(
                 new ComplicationLayoutParams(
                         100,
@@ -452,7 +498,6 @@ public class ComplicationLayoutEngineTest extends SysuiTestCase {
         final int defaultMargin = 5;
         final int complicationMargin = 10;
         final ComplicationLayoutEngine engine = createComplicationLayoutEngine(defaultMargin);
-
         final ViewInfo firstViewInfo = new ViewInfo(
                 new ComplicationLayoutParams(
                         100,
@@ -518,7 +563,6 @@ public class ComplicationLayoutEngineTest extends SysuiTestCase {
     public void testWidthConstraint() {
         final int maxWidth = 20;
         final ComplicationLayoutEngine engine = createComplicationLayoutEngine();
-
         final ViewInfo viewStartDirection = new ViewInfo(
                 new ComplicationLayoutParams(
                         100,
@@ -566,7 +610,6 @@ public class ComplicationLayoutEngineTest extends SysuiTestCase {
     public void testHeightConstraint() {
         final int maxHeight = 20;
         final ComplicationLayoutEngine engine = createComplicationLayoutEngine();
-
         final ViewInfo viewUpDirection = new ViewInfo(
                 new ComplicationLayoutParams(
                         100,
@@ -613,7 +656,6 @@ public class ComplicationLayoutEngineTest extends SysuiTestCase {
     @Test
     public void testConstraintNotSetWhenNotSpecified() {
         final ComplicationLayoutEngine engine = createComplicationLayoutEngine();
-
         final ViewInfo view = new ViewInfo(
                 new ComplicationLayoutParams(
                         100,
@@ -641,7 +683,6 @@ public class ComplicationLayoutEngineTest extends SysuiTestCase {
     @Test
     public void testRemoval() {
         final ComplicationLayoutEngine engine = createComplicationLayoutEngine();
-
         final ViewInfo firstViewInfo = new ViewInfo(
                 new ComplicationLayoutParams(
                         100,
@@ -687,7 +728,6 @@ public class ComplicationLayoutEngineTest extends SysuiTestCase {
     @Test
     public void testDoubleRemoval() {
         final ComplicationLayoutEngine engine = createComplicationLayoutEngine();
-
         final ViewInfo firstViewInfo = new ViewInfo(
                 new ComplicationLayoutParams(
                         100,
@@ -716,7 +756,6 @@ public class ComplicationLayoutEngineTest extends SysuiTestCase {
     @Test
     public void testGetViews() {
         final ComplicationLayoutEngine engine = createComplicationLayoutEngine();
-
         final ViewInfo topEndView = new ViewInfo(
                 new ComplicationLayoutParams(
                         100,
