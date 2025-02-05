@@ -20,16 +20,20 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.hardware.tv.mediaquality.DolbyAudioProcessing;
 import android.hardware.tv.mediaquality.DtsVirtualX;
+import android.hardware.tv.mediaquality.ParameterDefaultValue;
 import android.hardware.tv.mediaquality.ParameterName;
+import android.hardware.tv.mediaquality.ParameterRange;
 import android.hardware.tv.mediaquality.PictureParameter;
 import android.hardware.tv.mediaquality.SoundParameter;
 import android.media.quality.MediaQualityContract.BaseParameters;
 import android.media.quality.MediaQualityContract.PictureQuality;
 import android.media.quality.MediaQualityContract.SoundQuality;
+import android.media.quality.ParameterCapability;
 import android.media.quality.PictureProfile;
 import android.media.quality.PictureProfileHandle;
 import android.media.quality.SoundProfile;
 import android.media.quality.SoundProfileHandle;
+import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.util.Log;
 
@@ -1509,6 +1513,30 @@ public final class MediaQualityUtils {
         parameterNameMap.put(ParameterName.SOUND_STYLE, SoundQuality.PARAMETER_SOUND_STYLE);
 
         return parameterNameMap.get(pn);
+    }
+
+    /**
+     * Convert ParameterRange to a Bundle.
+     */
+    public static Bundle convertToCaps(int type, ParameterRange range) {
+        Bundle bundle = new Bundle();
+        if (range == null || range.numRange == null) {
+            return bundle;
+        }
+        type -= 1;
+        if (type == ParameterDefaultValue.intDefault) {
+            bundle.putObject(ParameterCapability.CAPABILITY_MIN, range.numRange.getIntMinMax()[0]);
+            bundle.putObject(ParameterCapability.CAPABILITY_MAX, range.numRange.getIntMinMax()[1]);
+        } else if (type == ParameterDefaultValue.doubleDefault) {
+            bundle.putObject(ParameterCapability.CAPABILITY_MIN,
+                    range.numRange.getDoubleMinMax()[0]);
+            bundle.putObject(ParameterCapability.CAPABILITY_MAX,
+                    range.numRange.getDoubleMinMax()[1]);
+        } else if (type == ParameterDefaultValue.longDefault) {
+            bundle.putObject(ParameterCapability.CAPABILITY_MIN, range.numRange.getLongMinMax()[0]);
+            bundle.putObject(ParameterCapability.CAPABILITY_MAX, range.numRange.getLongMinMax()[1]);
+        }
+        return bundle;
     }
 
     private static String getTempId(BiMap<Long, String> map, Cursor cursor) {
