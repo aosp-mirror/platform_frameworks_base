@@ -211,6 +211,7 @@ public class KeyguardIndicationController {
     protected boolean mPowerPluggedInDock;
     protected int mChargingSpeed;
     protected boolean mPowerCharged;
+    protected int mChargingStatus;
 
     /** Whether the battery defender is triggered. */
     private boolean mBatteryDefender;
@@ -1260,6 +1261,7 @@ public class KeyguardIndicationController {
         pw.println("  mPowerCharged: " + mPowerCharged);
         pw.println("  mChargingSpeed: " + mChargingSpeed);
         pw.println("  mChargingWattage: " + mChargingWattage);
+        pw.println("  mChargingStatus: " + mChargingStatus);
         pw.println("  mMessageToShowOnScreenOn: " + mBiometricErrorMessageToShowOnScreenOn);
         pw.println("  mDozing: " + mDozing);
         pw.println("  mTransientIndication: " + mTransientIndication);
@@ -1317,6 +1319,7 @@ public class KeyguardIndicationController {
             mPowerCharged = status.isCharged();
             mChargingWattage = status.maxChargingWattage;
             mChargingSpeed = status.getChargingSpeed(mContext);
+            mChargingStatus = status.chargingStatus;
             mBatteryLevel = status.level;
             mBatteryPresent = status.present;
             mBatteryDefender = isBatteryDefender(status);
