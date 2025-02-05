@@ -1232,63 +1232,73 @@ static void AMessageToCryptoInfo(JNIEnv * env, const jobject & obj,
     sp<ABuffer> ivBuffer;
     CryptoPlugin::Mode mode;
     CryptoPlugin::Pattern pattern;
-    CHECK(msg->findInt32("mode", (int*)&mode));
-    CHECK(msg->findSize("numSubSamples", &numSubSamples));
-    CHECK(msg->findBuffer("subSamples", &subSamplesBuffer));
-    CHECK(msg->findInt32("encryptBlocks", (int32_t *)&pattern.mEncryptBlocks));
-    CHECK(msg->findInt32("skipBlocks", (int32_t *)&pattern.mSkipBlocks));
-    CHECK(msg->findBuffer("iv", &ivBuffer));
-    CHECK(msg->findBuffer("key", &keyBuffer));
-
-    // subsamples
+    CryptoPlugin::SubSample *samplesArray = nullptr;
+    ScopedLocalRef<jbyteArray> keyArray(env, env->NewByteArray(16));
+    ScopedLocalRef<jbyteArray> ivArray(env, env->NewByteArray(16));
+    jboolean isCopy;
+    sp<RefBase> cryptoInfosObj;
+    if (msg->findObject("cryptoInfos", &cryptoInfosObj)) {
+        sp<CryptoInfosWrapper> cryptoInfos((CryptoInfosWrapper*)cryptoInfosObj.get());
+        CHECK(!cryptoInfos->value.empty() && (cryptoInfos->value[0] != nullptr));
+        std::unique_ptr<CodecCryptoInfo> &info = cryptoInfos->value[0];
+        mode = info->mMode;
+        numSubSamples = info->mNumSubSamples;
+        samplesArray = info->mSubSamples;
+        pattern = info->mPattern;
+        if (info->mKey != nullptr) {
+            jbyte * dstKey = env->GetByteArrayElements(keyArray.get(), &isCopy);
+            memcpy(dstKey, info->mKey, 16);
+            env->ReleaseByteArrayElements(keyArray.get(), dstKey, 0);
+        }
+        if (info->mIv != nullptr) {
+            jbyte * dstIv = env->GetByteArrayElements(ivArray.get(), &isCopy);
+            memcpy(dstIv, info->mIv, 16);
+            env->ReleaseByteArrayElements(ivArray.get(), dstIv, 0);
+        }
+    } else {
+        CHECK(msg->findInt32("mode", (int*)&mode));
+        CHECK(msg->findSize("numSubSamples", &numSubSamples));
+        CHECK(msg->findBuffer("subSamples", &subSamplesBuffer));
+        CHECK(msg->findInt32("encryptBlocks", (int32_t *)&pattern.mEncryptBlocks));
+        CHECK(msg->findInt32("skipBlocks", (int32_t *)&pattern.mSkipBlocks));
+        CHECK(msg->findBuffer("iv", &ivBuffer));
+        CHECK(msg->findBuffer("key", &keyBuffer));
+        samplesArray =
+                (CryptoPlugin::SubSample*)(subSamplesBuffer.get()->data());
+        if (keyBuffer.get() != nullptr && keyBuffer->size() > 0) {
+            jbyte * dstKey = env->GetByteArrayElements(keyArray.get(), &isCopy);
+            memcpy(dstKey, keyBuffer->data(), keyBuffer->size());
+            env->ReleaseByteArrayElements(keyArray.get(), dstKey, 0);
+        }
+        if (ivBuffer.get() != nullptr && ivBuffer->size() > 0) {
+            jbyte * dstIv = env->GetByteArrayElements(ivArray.get(), &isCopy);
+            memcpy(dstIv, ivBuffer->data(), ivBuffer->size());
+            env->ReleaseByteArrayElements(ivArray.get(), dstIv, 0);
+        }
+    }
     ScopedLocalRef<jintArray> samplesOfEncryptedDataArr(env, env->NewIntArray(numSubSamples));
     ScopedLocalRef<jintArray> samplesOfClearDataArr(env, env->NewIntArray(numSubSamples));
-    jboolean isCopy;
-    jint *dstEncryptedSamples =
-        env->GetIntArrayElements(samplesOfEncryptedDataArr.get(), &isCopy);
-    jint * dstClearSamples =
-        env->GetIntArrayElements(samplesOfClearDataArr.get(), &isCopy);
-
-    CryptoPlugin::SubSample * samplesArray =
-        (CryptoPlugin::SubSample*)(subSamplesBuffer.get()->data());
-
-    for(int i = 0 ; i < numSubSamples ; i++) {
-        dstEncryptedSamples[i] = samplesArray[i].mNumBytesOfEncryptedData;
-        dstClearSamples[i] = samplesArray[i].mNumBytesOfClearData;
+    if (numSubSamples > 0) {
+        jint *dstEncryptedSamples =
+            env->GetIntArrayElements(samplesOfEncryptedDataArr.get(), &isCopy);
+        jint * dstClearSamples =
+            env->GetIntArrayElements(samplesOfClearDataArr.get(), &isCopy);
+        for(int i = 0 ; i < numSubSamples ; i++) {
+            dstEncryptedSamples[i] = samplesArray[i].mNumBytesOfEncryptedData;
+            dstClearSamples[i] = samplesArray[i].mNumBytesOfClearData;
+        }
+        env->ReleaseIntArrayElements(samplesOfEncryptedDataArr.get(), dstEncryptedSamples, 0);
+        env->ReleaseIntArrayElements(samplesOfClearDataArr.get(), dstClearSamples, 0);
     }
-    env->ReleaseIntArrayElements(samplesOfEncryptedDataArr.get(), dstEncryptedSamples, 0);
-    env->ReleaseIntArrayElements(samplesOfClearDataArr.get(), dstClearSamples, 0);
-    // key and iv
-    jbyteArray keyArray = NULL;
-    jbyteArray ivArray = NULL;
-    if (keyBuffer.get() != nullptr && keyBuffer->size() > 0) {
-        keyArray = env->NewByteArray(keyBuffer->size());
-        jbyte * dstKey = env->GetByteArrayElements(keyArray, &isCopy);
-        memcpy(dstKey, keyBuffer->data(), keyBuffer->size());
-        env->ReleaseByteArrayElements(keyArray,dstKey,0);
-    }
-    if (ivBuffer.get() != nullptr && ivBuffer->size() > 0) {
-        ivArray = env->NewByteArray(ivBuffer->size());
-        jbyte *dstIv = env->GetByteArrayElements(ivArray, &isCopy);
-        memcpy(dstIv, ivBuffer->data(), ivBuffer->size());
-        env->ReleaseByteArrayElements(ivArray, dstIv,0);
-    }
-    // set samples, key and iv
     env->CallVoidMethod(
         obj,
         gFields.cryptoInfoSetID,
         (jint)numSubSamples,
         samplesOfClearDataArr.get(),
         samplesOfEncryptedDataArr.get(),
-        keyArray,
-        ivArray,
+        keyArray.get(),
+        ivArray.get(),
         mode);
-    if (keyArray != NULL) {
-        env->DeleteLocalRef(keyArray);
-    }
-    if (ivArray != NULL) {
-        env->DeleteLocalRef(ivArray);
-    }
     // set pattern
     env->CallVoidMethod(
         obj,
