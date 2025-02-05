@@ -125,6 +125,7 @@ import com.android.systemui.haptics.slider.HapticSliderPlugin;
 import com.android.systemui.haptics.slider.HapticSliderViewBinder;
 import com.android.systemui.haptics.slider.SeekableSliderTrackerConfig;
 import com.android.systemui.haptics.slider.SliderHapticFeedbackConfig;
+import com.android.systemui.haptics.slider.SliderHapticFeedbackFilter;
 import com.android.systemui.media.dialog.MediaOutputDialogManager;
 import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.plugins.VolumeDialogController;
@@ -2698,7 +2699,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 /* upperBookendScale= */ 1f,
                 /* lowerBookendScale= */ 0.05f,
                 /* exponent= */ 1f / 0.89f,
-                /* sliderStepSize = */ 0f);
+                /* sliderStepSize = */ 0f,
+                /* filter =*/new SliderHapticFeedbackFilter());
         private static final SeekableSliderTrackerConfig sSliderTrackerConfig =
                 new SeekableSliderTrackerConfig(
                         /* waitTimeMillis= */100,

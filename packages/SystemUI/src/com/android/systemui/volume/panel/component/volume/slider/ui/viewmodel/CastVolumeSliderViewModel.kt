@@ -21,6 +21,7 @@ import android.media.session.MediaController.PlaybackInfo
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Flags
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.haptics.slider.SliderHapticFeedbackFilter
 import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
 import com.android.systemui.res.R
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaDeviceSessionInteractor
@@ -90,6 +91,9 @@ constructor(
         override val isEnabled: Boolean,
         override val a11yStep: Int,
     ) : SliderState {
+        override val hapticFilter: SliderHapticFeedbackFilter
+            get() = SliderHapticFeedbackFilter()
+
         override val disabledMessage: String?
             get() = null
 

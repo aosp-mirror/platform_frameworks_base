@@ -67,6 +67,7 @@ import com.android.systemui.Flags
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.compose.modifiers.sysuiResTag
+import com.android.systemui.haptics.slider.SliderHapticFeedbackFilter
 import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.res.R
@@ -104,7 +105,13 @@ fun VolumeSlider(
     val value by valueState(state)
     val interactionSource = remember { MutableInteractionSource() }
     val hapticsViewModel: SliderHapticsViewModel? =
-        setUpHapticsViewModel(value, state.valueRange, interactionSource, hapticsViewModelFactory)
+        setUpHapticsViewModel(
+            value,
+            state.valueRange,
+            state.hapticFilter,
+            interactionSource,
+            hapticsViewModelFactory,
+        )
 
     Column(modifier = modifier.animateContentSize(), verticalArrangement = Arrangement.Top) {
         Row(
@@ -220,7 +227,13 @@ private fun LegacyVolumeSlider(
     val value by valueState(state)
     val interactionSource = remember { MutableInteractionSource() }
     val hapticsViewModel: SliderHapticsViewModel? =
-        setUpHapticsViewModel(value, state.valueRange, interactionSource, hapticsViewModelFactory)
+        setUpHapticsViewModel(
+            value,
+            state.valueRange,
+            state.hapticFilter,
+            interactionSource,
+            hapticsViewModelFactory,
+        )
 
     PlatformSlider(
         modifier =
@@ -338,6 +351,7 @@ private fun SliderIcon(
 fun setUpHapticsViewModel(
     value: Float,
     valueRange: ClosedFloatingPointRange<Float>,
+    hapticFilter: SliderHapticFeedbackFilter,
     interactionSource: MutableInteractionSource,
     hapticsViewModelFactory: SliderHapticsViewModel.Factory?,
 ): SliderHapticsViewModel? {
@@ -347,7 +361,10 @@ fun setUpHapticsViewModel(
                     interactionSource,
                     valueRange,
                     Orientation.Horizontal,
-                    VolumeHapticsConfigsProvider.sliderHapticFeedbackConfig(valueRange),
+                    VolumeHapticsConfigsProvider.sliderHapticFeedbackConfig(
+                        valueRange,
+                        hapticFilter,
+                    ),
                     VolumeHapticsConfigsProvider.seekableSliderTrackerConfig,
                 )
             }

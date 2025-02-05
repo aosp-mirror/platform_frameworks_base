@@ -20,6 +20,7 @@ import android.content.Context
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.Flags
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.haptics.slider.SliderHapticFeedbackFilter
 import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
 import com.android.systemui.res.R
 import com.android.systemui.volume.domain.interactor.AudioSharingInteractor
@@ -102,6 +103,9 @@ constructor(
         override val icon: Icon,
         override val label: String,
     ) : SliderState {
+        override val hapticFilter: SliderHapticFeedbackFilter
+            get() = SliderHapticFeedbackFilter()
+
         override val isEnabled: Boolean
             get() = true
 
