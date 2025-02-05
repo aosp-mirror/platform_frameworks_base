@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,5 @@ package com.android.systemui.wallpapers.data.repository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 
-var Kosmos.fakeWallpaperRepository by Kosmos.Fixture { FakeWallpaperRepository() }
-
-var Kosmos.wallpaperRepository: WallpaperRepository by Kosmos.Fixture { fakeWallpaperRepository }
+val Kosmos.wallpaperFocalAreaRepository by Fixture { fakeWallpaperFocalAreaRepository }
+val Kosmos.fakeWallpaperFocalAreaRepository by Fixture { FakeWallpaperFocalAreaRepository() }

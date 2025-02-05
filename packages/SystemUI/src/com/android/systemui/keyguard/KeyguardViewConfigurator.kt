@@ -27,7 +27,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
-import com.android.systemui.keyguard.domain.interactor.WallpaperFocalAreaInteractor
 import com.android.systemui.keyguard.ui.binder.KeyguardBlueprintViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardJankBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardRootViewBinder
@@ -53,6 +52,8 @@ import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
+import com.android.systemui.wallpapers.domain.interactor.WallpaperFocalAreaInteractor
+import com.android.systemui.wallpapers.ui.viewmodel.WallpaperFocalAreaViewModel
 import com.android.systemui.wallpapers.ui.viewmodel.WallpaperViewModel
 import com.google.android.msdl.domain.MSDLPlayer
 import java.util.Optional
@@ -93,6 +94,7 @@ constructor(
     @Main private val mainDispatcher: CoroutineDispatcher,
     private val msdlPlayer: MSDLPlayer,
     @KeyguardBlueprintLog private val blueprintLog: LogBuffer,
+    private val wallpaperFocalAreaViewModel: WallpaperFocalAreaViewModel,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -148,7 +150,6 @@ constructor(
                 screenOffAnimationController,
                 shadeInteractor,
                 clockInteractor,
-                wallpaperFocalAreaInteractor,
                 keyguardClockViewModel,
                 deviceEntryHapticsInteractor,
                 vibratorHelper,
@@ -157,6 +158,7 @@ constructor(
                 mainDispatcher,
                 msdlPlayer,
                 blueprintLog,
+                wallpaperFocalAreaViewModel,
             )
     }
 

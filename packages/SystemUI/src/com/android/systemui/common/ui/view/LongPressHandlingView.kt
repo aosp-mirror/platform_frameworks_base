@@ -45,11 +45,7 @@ class LongPressHandlingView(
     longPressDuration: () -> Long,
     allowedTouchSlop: Int = ViewConfiguration.getTouchSlop(),
     logger: LongPressHandlingViewLogger? = null,
-) :
-    View(
-        context,
-        attrs,
-    ) {
+) : View(context, attrs) {
 
     init {
         setupAccessibilityDelegate()
@@ -62,15 +58,10 @@ class LongPressHandlingView(
 
     interface Listener {
         /** Notifies that a long-press has been detected by the given view. */
-        fun onLongPressDetected(
-            view: View,
-            x: Int,
-            y: Int,
-            isA11yAction: Boolean = false,
-        )
+        fun onLongPressDetected(view: View, x: Int, y: Int, isA11yAction: Boolean = false)
 
         /** Notifies that the gesture was too short for a long press, it is actually a click. */
-        fun onSingleTapDetected(view: View) = Unit
+        fun onSingleTapDetected(view: View, x: Int, y: Int) = Unit
     }
 
     var listener: Listener? = null
@@ -82,23 +73,17 @@ class LongPressHandlingView(
             postDelayed = { block, timeoutMs ->
                 val dispatchToken = Any()
 
-                handler.postDelayed(
-                    block,
-                    dispatchToken,
-                    timeoutMs,
-                )
+                handler.postDelayed(block, dispatchToken, timeoutMs)
 
                 DisposableHandle { handler.removeCallbacksAndMessages(dispatchToken) }
             },
             isAttachedToWindow = ::isAttachedToWindow,
             onLongPressDetected = { x, y ->
-                listener?.onLongPressDetected(
-                    view = this,
-                    x = x,
-                    y = y,
-                )
+                listener?.onLongPressDetected(view = this, x = x, y = y)
             },
-            onSingleTapDetected = { listener?.onSingleTapDetected(this@LongPressHandlingView) },
+            onSingleTapDetected = { x, y ->
+                listener?.onSingleTapDetected(this@LongPressHandlingView, x = x, y = y)
+            },
             longPressDuration = longPressDuration,
             allowedTouchSlop = allowedTouchSlop,
             logger = logger,
@@ -129,7 +114,7 @@ class LongPressHandlingView(
             object : AccessibilityDelegate() {
                 override fun onInitializeAccessibilityNodeInfo(
                     v: View,
-                    info: AccessibilityNodeInfo
+                    info: AccessibilityNodeInfo,
                 ) {
                     super.onInitializeAccessibilityNodeInfo(v, info)
                     if (
@@ -143,7 +128,7 @@ class LongPressHandlingView(
                 override fun performAccessibilityAction(
                     host: View,
                     action: Int,
-                    args: Bundle?
+                    args: Bundle?,
                 ): Boolean {
                     return if (
                         interactionHandler.isLongPressHandlingEnabled &&
@@ -179,7 +164,7 @@ private fun MotionEvent.toModel(): LongPressHandlingViewInteractionHandler.Motio
             )
         MotionEvent.ACTION_MOVE ->
             LongPressHandlingViewInteractionHandler.MotionEventModel.Move(
-                distanceMoved = distanceMoved(),
+                distanceMoved = distanceMoved()
             )
         MotionEvent.ACTION_UP ->
             LongPressHandlingViewInteractionHandler.MotionEventModel.Up(

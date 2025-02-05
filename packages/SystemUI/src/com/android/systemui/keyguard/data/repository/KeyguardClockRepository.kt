@@ -69,16 +69,11 @@ interface KeyguardClockRepository {
 
     val previewClock: Flow<ClockController>
 
-    /** top of notifications without bcsmartspace in small clock settings */
-    val notificationDefaultTop: StateFlow<Float>
-
     val clockEventController: ClockEventController
 
     val shouldForceSmallClock: Boolean
 
     fun setClockSize(size: ClockSize)
-
-    fun setNotificationDefaultTop(top: Float)
 }
 
 @SysUISingleton
@@ -154,14 +149,6 @@ constructor(
             // at the same time
             clockRegistry.createCurrentClock()
         }
-
-    private val _notificationDefaultTop: MutableStateFlow<Float> = MutableStateFlow(0F)
-
-    override val notificationDefaultTop: StateFlow<Float> = _notificationDefaultTop.asStateFlow()
-
-    override fun setNotificationDefaultTop(top: Float) {
-        _notificationDefaultTop.value = top
-    }
 
     override val shouldForceSmallClock: Boolean
         get() =

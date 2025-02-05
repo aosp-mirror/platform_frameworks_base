@@ -86,7 +86,7 @@ class WallpaperControllerTest : SysuiTestCase() {
 
     @Test
     fun setUnfoldTransitionZoom_defaultUnfoldTransitionIsDisabled_doesNotUpdateWallpaperZoom() {
-        wallpaperRepository.wallpaperInfo.value = createWallpaperInfo(useDefaultTransition = false)
+        wallpaperRepository.setWallpaperInfo(createWallpaperInfo(useDefaultTransition = false))
 
         wallaperController.setUnfoldTransitionZoom(0.5f)
 

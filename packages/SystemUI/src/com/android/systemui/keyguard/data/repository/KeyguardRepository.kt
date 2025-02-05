@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
-import android.graphics.RectF
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -255,13 +254,6 @@ interface KeyguardRepository {
      */
     val isEncryptedOrLockdown: Flow<Boolean>
 
-    /** The top of shortcut in screen, used by wallpaper to find remaining space in lockscreen */
-    val shortcutAbsoluteTop: StateFlow<Float>
-
-    val notificationStackAbsoluteBottom: StateFlow<Float>
-
-    val wallpaperFocalAreaBounds: StateFlow<RectF>
-
     /**
      * Returns `true` if the keyguard is showing; `false` otherwise.
      *
@@ -328,13 +320,6 @@ interface KeyguardRepository {
      * otherwise.
      */
     fun isShowKeyguardWhenReenabled(): Boolean
-
-    fun setShortcutAbsoluteTop(top: Float)
-
-    /** Set bottom of notifications from notification stack */
-    fun setNotificationStackAbsoluteBottom(bottom: Float)
-
-    fun setWallpaperFocalAreaBounds(bounds: RectF)
 }
 
 /** Encapsulates application state for the keyguard. */
@@ -621,16 +606,6 @@ constructor(
     private val _isQuickSettingsVisible = MutableStateFlow(false)
     override val isQuickSettingsVisible: Flow<Boolean> = _isQuickSettingsVisible.asStateFlow()
 
-    private val _shortcutAbsoluteTop = MutableStateFlow(0F)
-    override val shortcutAbsoluteTop = _shortcutAbsoluteTop.asStateFlow()
-
-    private val _notificationStackAbsoluteBottom = MutableStateFlow(0F)
-    override val notificationStackAbsoluteBottom = _notificationStackAbsoluteBottom.asStateFlow()
-
-    private val _wallpaperFocalAreaBounds = MutableStateFlow(RectF(0F, 0F, 0F, 0F))
-    override val wallpaperFocalAreaBounds: StateFlow<RectF> =
-        _wallpaperFocalAreaBounds.asStateFlow()
-
     init {
         val callback =
             object : KeyguardStateController.Callback {
@@ -703,18 +678,6 @@ constructor(
             2 -> StatusBarState.SHADE_LOCKED
             else -> throw IllegalArgumentException("Invalid StatusBarState value: $value")
         }
-    }
-
-    override fun setShortcutAbsoluteTop(top: Float) {
-        _shortcutAbsoluteTop.value = top
-    }
-
-    override fun setNotificationStackAbsoluteBottom(bottom: Float) {
-        _notificationStackAbsoluteBottom.value = bottom
-    }
-
-    override fun setWallpaperFocalAreaBounds(bounds: RectF) {
-        _wallpaperFocalAreaBounds.value = bounds
     }
 
     private fun dozeMachineStateToModel(state: DozeMachine.State): DozeStateModel {

@@ -30,7 +30,6 @@ import com.android.internal.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.res.R as SysUIR
 import com.android.systemui.shared.Flags.ambientAod
 import com.android.systemui.shared.Flags.extendedWallpaperEffects
@@ -79,7 +78,7 @@ constructor(
     @Background private val bgDispatcher: CoroutineDispatcher,
     broadcastDispatcher: BroadcastDispatcher,
     userRepository: UserRepository,
-    keyguardRepository: KeyguardRepository,
+    wallpaperFocalAreaRepository: WallpaperFocalAreaRepository,
     private val wallpaperManager: WallpaperManager,
     private val context: Context,
 ) : WallpaperRepository {
@@ -101,6 +100,7 @@ constructor(
             .filter { it.selectionStatus == SelectionStatus.SELECTION_COMPLETE }
 
     @VisibleForTesting var sendLockscreenLayoutJob: Job? = null
+    @VisibleForTesting var sendTapInShapeEffectsJob: Job? = null
 
     override val wallpaperInfo: StateFlow<WallpaperInfo?> =
         if (!wallpaperManager.isWallpaperSupported) {
@@ -131,7 +131,7 @@ constructor(
                 if (shouldSendNotificationLayout) {
                     sendLockscreenLayoutJob =
                         scope.launch {
-                            keyguardRepository.wallpaperFocalAreaBounds.collect {
+                            wallpaperFocalAreaRepository.wallpaperFocalAreaBounds.collect {
                                 wallpaperFocalAreaBounds ->
                                 wallpaperManager.sendWallpaperCommand(
                                     /* windowToken = */ rootView?.windowToken,
@@ -161,8 +161,24 @@ constructor(
                                 )
                             }
                         }
+
+                    sendTapInShapeEffectsJob =
+                        scope.launch {
+                            wallpaperFocalAreaRepository.wallpaperFocalAreaTapPosition.collect {
+                                wallpaperFocalAreaTapPosition ->
+                                wallpaperManager.sendWallpaperCommand(
+                                    /* windowToken = */ rootView?.windowToken,
+                                    /* action = */ WallpaperManager.COMMAND_LOCKSCREEN_TAP,
+                                    /* x = */ wallpaperFocalAreaTapPosition.x.toInt(),
+                                    /* y = */ wallpaperFocalAreaTapPosition.y.toInt(),
+                                    /* z = */ 0,
+                                    /* extras = */ null,
+                                )
+                            }
+                        }
                 } else {
                     sendLockscreenLayoutJob?.cancel()
+                    sendTapInShapeEffectsJob?.cancel()
                 }
                 shouldSendNotificationLayout
             }

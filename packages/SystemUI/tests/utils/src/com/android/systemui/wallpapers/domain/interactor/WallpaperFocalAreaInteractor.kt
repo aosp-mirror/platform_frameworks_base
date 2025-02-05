@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.domain.interactor
+package com.android.systemui.wallpapers.domain.interactor
 
 import android.content.applicationContext
-import com.android.systemui.keyguard.data.repository.keyguardClockRepository
-import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
+import com.android.systemui.wallpapers.data.repository.wallpaperFocalAreaRepository
 import com.android.systemui.wallpapers.data.repository.wallpaperRepository
 
 val Kosmos.wallpaperFocalAreaInteractor by
@@ -30,10 +29,9 @@ val Kosmos.wallpaperFocalAreaInteractor by
         WallpaperFocalAreaInteractor(
             applicationScope = applicationCoroutineScope,
             context = applicationContext,
-            keyguardRepository = keyguardRepository,
+            wallpaperFocalAreaRepository = wallpaperFocalAreaRepository,
             shadeRepository = shadeRepository,
             activeNotificationsInteractor = activeNotificationsInteractor,
-            keyguardClockRepository = keyguardClockRepository,
             wallpaperRepository = wallpaperRepository,
         )
     }

@@ -28,6 +28,8 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.wallpapers.data.repository.FakeWallpaperFocalAreaRepository
+import com.android.systemui.wallpapers.data.repository.WallpaperFocalAreaRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,6 +50,8 @@ object KeyguardInteractorFactory {
         bouncerRepository: FakeKeyguardBouncerRepository = FakeKeyguardBouncerRepository(),
         configurationRepository: FakeConfigurationRepository = FakeConfigurationRepository(),
         shadeRepository: FakeShadeRepository = FakeShadeRepository(),
+        wallpaperFocalAreaRepository: WallpaperFocalAreaRepository =
+            FakeWallpaperFocalAreaRepository(),
         sceneInteractor: SceneInteractor = mock(),
         fromGoneTransitionInteractor: FromGoneTransitionInteractor = mock(),
         fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor = mock(),
@@ -84,6 +88,7 @@ object KeyguardInteractorFactory {
                     fromAlternateBouncerTransitionInteractor
                 },
                 applicationScope = testScope,
+                wallpaperFocalAreaRepository = wallpaperFocalAreaRepository,
             ),
         )
     }

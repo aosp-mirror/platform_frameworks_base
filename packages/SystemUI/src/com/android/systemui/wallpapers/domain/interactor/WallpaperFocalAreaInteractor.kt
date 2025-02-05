@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,44 +14,43 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.domain.interactor
+package com.android.systemui.wallpapers.domain.interactor
 
 import android.content.Context
 import android.content.res.Resources
+import android.graphics.PointF
 import android.graphics.RectF
 import android.util.TypedValue
-import com.android.app.animation.MathUtils.max
+import androidx.annotation.VisibleForTesting
+import com.android.app.animation.MathUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.data.repository.KeyguardClockRepository
-import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.res.R
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.wallpapers.data.repository.WallpaperFocalAreaRepository
 import com.android.systemui.wallpapers.data.repository.WallpaperRepository
 import javax.inject.Inject
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @SysUISingleton
 class WallpaperFocalAreaInteractor
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    context: Context,
-    private val keyguardRepository: KeyguardRepository,
+    private val context: Context,
+    private val wallpaperFocalAreaRepository: WallpaperFocalAreaRepository,
     shadeRepository: ShadeRepository,
     activeNotificationsInteractor: ActiveNotificationsInteractor,
-    keyguardClockRepository: KeyguardClockRepository,
-    wallpaperRepository: WallpaperRepository,
+    val wallpaperRepository: WallpaperRepository,
 ) {
-    // When there's notifications in splitshade, the focal area shape effect should be left aligned
-    private val notificationInShadeWideLayout: Flow<Boolean> =
+    // When there's notifications in splitshade, the focal area should be left aligned
+    @VisibleForTesting
+    val notificationInShadeWideLayout: Flow<Boolean> =
         combine(
             shadeRepository.isShadeLayoutWide,
             activeNotificationsInteractor.areAnyNotificationsPresent,
@@ -63,14 +62,15 @@ constructor(
             }
         }
 
-    val shouldSendFocalArea = wallpaperRepository.shouldSendFocalArea
-    val wallpaperFocalAreaBounds: StateFlow<RectF?> =
+    val hasFocalArea = wallpaperRepository.shouldSendFocalArea
+
+    val wallpaperFocalAreaBounds: Flow<RectF> =
         combine(
                 shadeRepository.isShadeLayoutWide,
                 notificationInShadeWideLayout,
-                keyguardRepository.notificationStackAbsoluteBottom,
-                keyguardRepository.shortcutAbsoluteTop,
-                keyguardClockRepository.notificationDefaultTop,
+                wallpaperFocalAreaRepository.notificationStackAbsoluteBottom,
+                wallpaperFocalAreaRepository.shortcutAbsoluteTop,
+                wallpaperFocalAreaRepository.notificationDefaultTop,
             ) {
                 isShadeLayoutWide,
                 notificationInShadeWideLayout,
@@ -80,6 +80,7 @@ constructor(
                 // Wallpaper will be zoomed in with config_wallpaperMaxScale in lockscreen
                 // so we need to give a bounds taking this scale in consideration
                 val wallpaperZoomedInScale = getSystemWallpaperMaximumScale(context)
+
                 val screenBounds =
                     RectF(
                         0F,
@@ -95,12 +96,14 @@ constructor(
                         screenBounds.centerX() + screenBounds.width() / 2F / wallpaperZoomedInScale,
                         screenBounds.centerY() + screenBounds.height() / 2F / wallpaperZoomedInScale,
                     )
+
                 val maxFocalAreaWidth =
                     TypedValue.applyDimension(
                         TypedValue.COMPLEX_UNIT_DIP,
                         FOCAL_AREA_MAX_WIDTH_DP.toFloat(),
                         context.resources.displayMetrics,
                     )
+
                 val (left, right) =
                 // tablet landscape
                 if (context.resources.getBoolean(R.bool.center_align_focal_area_shape)) {
@@ -140,32 +143,48 @@ constructor(
                         // handheld / portrait
                     } else {
                         scaledBounds.top +
-                            max(notificationDefaultTop, notificationStackAbsoluteBottom) /
+                            MathUtils.max(notificationDefaultTop, notificationStackAbsoluteBottom) /
                                 wallpaperZoomedInScale
                     }
                 val bottom = scaledBounds.bottom - scaledBottomMargin
                 RectF(left, top, right, bottom)
             }
-            .stateIn(
-                applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = null,
-            )
+            .distinctUntilChanged()
 
-    fun setWallpaperFocalAreaBounds(bounds: RectF) {
-        keyguardRepository.setWallpaperFocalAreaBounds(bounds)
+    fun setFocalAreaBounds(bounds: RectF) {
+        wallpaperFocalAreaRepository.setWallpaperFocalAreaBounds(bounds)
+    }
+
+    fun setNotificationDefaultTop(top: Float) {
+        wallpaperFocalAreaRepository.setNotificationDefaultTop(top)
+    }
+
+    fun setTapPosition(x: Float, y: Float) {
+        // Focal area should only react to touch event within its bounds
+        val wallpaperZoomedInScale = getSystemWallpaperMaximumScale(context)
+        // Because there's a scale applied on wallpaper in lockscreen
+        // we should map it to the unscaled position on wallpaper
+        val screenCenterX = context.resources.displayMetrics.widthPixels / 2F
+        val newX = (x - screenCenterX) / wallpaperZoomedInScale + screenCenterX
+        val screenCenterY = context.resources.displayMetrics.heightPixels / 2F
+        val newY = (y - screenCenterY) / wallpaperZoomedInScale + screenCenterY
+        if (wallpaperFocalAreaRepository.wallpaperFocalAreaBounds.value.contains(newX, newY)) {
+            wallpaperFocalAreaRepository.setTapPosition(PointF(newX, newY))
+        }
     }
 
     companion object {
         fun getSystemWallpaperMaximumScale(context: Context): Float {
-            return context.resources.getFloat(
-                Resources.getSystem()
-                    .getIdentifier(
-                        /* name= */ "config_wallpaperMaxScale",
-                        /* defType= */ "dimen",
-                        /* defPackage= */ "android",
-                    )
-            )
+            val scale =
+                context.resources.getFloat(
+                    Resources.getSystem()
+                        .getIdentifier(
+                            /* name= */ "config_wallpaperMaxScale",
+                            /* defType= */ "dimen",
+                            /* defPackage= */ "android",
+                        )
+                )
+            return if (scale == 0f) 1f else scale
         }
 
         // A max width for focal area shape effects bounds, to avoid

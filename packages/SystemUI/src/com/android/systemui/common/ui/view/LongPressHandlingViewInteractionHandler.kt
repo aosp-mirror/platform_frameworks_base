@@ -17,6 +17,7 @@
 
 package com.android.systemui.common.ui.view
 
+import android.graphics.Point
 import com.android.systemui.log.LongPressHandlingViewLogger
 import kotlinx.coroutines.DisposableHandle
 
@@ -32,7 +33,7 @@ class LongPressHandlingViewInteractionHandler(
     /** Callback reporting the a long-press gesture was detected at the given coordinates. */
     private val onLongPressDetected: (x: Int, y: Int) -> Unit,
     /** Callback reporting the a single tap gesture was detected at the given coordinates. */
-    private val onSingleTapDetected: () -> Unit,
+    private val onSingleTapDetected: (x: Int, y: Int) -> Unit,
     /** Time for the touch to be considered a long-press in ms */
     var longPressDuration: () -> Long,
     /**
@@ -47,19 +48,11 @@ class LongPressHandlingViewInteractionHandler(
     sealed class MotionEventModel {
         object Other : MotionEventModel()
 
-        data class Down(
-            val x: Int,
-            val y: Int,
-        ) : MotionEventModel()
+        data class Down(val x: Int, val y: Int) : MotionEventModel()
 
-        data class Move(
-            val distanceMoved: Float,
-        ) : MotionEventModel()
+        data class Move(val distanceMoved: Float) : MotionEventModel()
 
-        data class Up(
-            val distanceMoved: Float,
-            val gestureDuration: Long,
-        ) : MotionEventModel()
+        data class Up(val distanceMoved: Float, val gestureDuration: Long) : MotionEventModel()
 
         object Cancel : MotionEventModel()
     }
@@ -67,14 +60,18 @@ class LongPressHandlingViewInteractionHandler(
     var isLongPressHandlingEnabled: Boolean = false
     var scheduledLongPressHandle: DisposableHandle? = null
 
+    /** Record coordinate for last DOWN event for single tap */
+    val lastEventDownCoordinate = Point(-1, -1)
+
     fun onTouchEvent(event: MotionEventModel?): Boolean {
         if (!isLongPressHandlingEnabled) {
             return false
         }
-
         return when (event) {
             is MotionEventModel.Down -> {
                 scheduleLongPress(event.x, event.y)
+                lastEventDownCoordinate.x = event.x
+                lastEventDownCoordinate.y = event.y
                 true
             }
             is MotionEventModel.Move -> {
@@ -92,7 +89,7 @@ class LongPressHandlingViewInteractionHandler(
                         event.gestureDuration < longPressDuration()
                 ) {
                     logger?.dispatchingSingleTap()
-                    dispatchSingleTap()
+                    dispatchSingleTap(lastEventDownCoordinate.x, lastEventDownCoordinate.y)
                 }
                 false
             }
@@ -105,29 +102,20 @@ class LongPressHandlingViewInteractionHandler(
         }
     }
 
-    private fun scheduleLongPress(
-        x: Int,
-        y: Int,
-    ) {
+    private fun scheduleLongPress(x: Int, y: Int) {
         val duration = longPressDuration()
         logger?.schedulingLongPress(duration)
         scheduledLongPressHandle =
             postDelayed(
                 {
                     logger?.longPressTriggered()
-                    dispatchLongPress(
-                        x = x,
-                        y = y,
-                    )
+                    dispatchLongPress(x = x, y = y)
                 },
                 duration,
             )
     }
 
-    private fun dispatchLongPress(
-        x: Int,
-        y: Int,
-    ) {
+    private fun dispatchLongPress(x: Int, y: Int) {
         if (!isAttachedToWindow()) {
             return
         }
@@ -139,11 +127,11 @@ class LongPressHandlingViewInteractionHandler(
         scheduledLongPressHandle?.dispose()
     }
 
-    private fun dispatchSingleTap() {
+    private fun dispatchSingleTap(x: Int, y: Int) {
         if (!isAttachedToWindow()) {
             return
         }
 
-        onSingleTapDetected()
+        onSingleTapDetected(x, y)
     }
 }

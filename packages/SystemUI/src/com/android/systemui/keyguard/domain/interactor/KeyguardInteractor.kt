@@ -52,6 +52,7 @@ import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import com.android.systemui.util.kotlin.sample
+import com.android.systemui.wallpapers.data.repository.WallpaperFocalAreaRepository
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
@@ -85,6 +86,7 @@ class KeyguardInteractor
 constructor(
     private val repository: KeyguardRepository,
     bouncerRepository: KeyguardBouncerRepository,
+    private val wallpaperFocalAreaRepository: WallpaperFocalAreaRepository,
     @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     shadeRepository: ShadeRepository,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
@@ -532,7 +534,7 @@ constructor(
     }
 
     fun setShortcutAbsoluteTop(top: Float) {
-        repository.setShortcutAbsoluteTop(top)
+        wallpaperFocalAreaRepository.setShortcutAbsoluteTop(top)
     }
 
     fun setIsKeyguardGoingAway(isGoingAway: Boolean) {
@@ -540,7 +542,7 @@ constructor(
     }
 
     fun setNotificationStackAbsoluteBottom(bottom: Float) {
-        repository.setNotificationStackAbsoluteBottom(bottom)
+        wallpaperFocalAreaRepository.setNotificationStackAbsoluteBottom(bottom)
     }
 
     suspend fun hydrateTableLogBuffer(tableLogBuffer: TableLogBuffer) {
