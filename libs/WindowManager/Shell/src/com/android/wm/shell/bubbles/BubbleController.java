@@ -1008,7 +1008,7 @@ public class BubbleController implements ConfigurationChangeListener,
             registerBroadcastReceiver();
             if (isShowingAsBubbleBar()) {
                 mBubbleData.getOverflow().initializeForBubbleBar(
-                        mExpandedViewManager, mBubblePositioner, mLogger);
+                        mExpandedViewManager, mBubblePositioner);
             } else {
                 mBubbleData.getOverflow().initialize(
                         mExpandedViewManager, mStackView, mBubblePositioner);
@@ -1216,7 +1216,6 @@ public class BubbleController implements ConfigurationChangeListener,
                     mExpandedViewManager,
                     mBubbleTaskViewFactory,
                     mBubblePositioner,
-                    mLogger,
                     mStackView,
                     mLayerView,
                     mBubbleIconFactory,
@@ -1228,7 +1227,6 @@ public class BubbleController implements ConfigurationChangeListener,
                     mExpandedViewManager,
                     mBubbleTaskViewFactory,
                     mBubblePositioner,
-                    mLogger,
                     mStackView,
                     mLayerView,
                     mBubbleIconFactory,
@@ -1534,7 +1532,7 @@ public class BubbleController implements ConfigurationChangeListener,
             // Lazy init stack view when a bubble is created
             ensureBubbleViewsAndWindowCreated();
             mBubbleTransitions.startConvertToBubble(b, taskInfo, mExpandedViewManager,
-                    mBubbleTaskViewFactory, mBubblePositioner, mLogger, mStackView, mLayerView,
+                    mBubbleTaskViewFactory, mBubblePositioner, mStackView, mLayerView,
                     mBubbleIconFactory, mInflateSynchronously);
         }
     }
@@ -1745,7 +1743,6 @@ public class BubbleController implements ConfigurationChangeListener,
                         mExpandedViewManager,
                         mBubbleTaskViewFactory,
                         mBubblePositioner,
-                        mLogger,
                         mStackView,
                         mLayerView,
                         mBubbleIconFactory,
@@ -1809,7 +1806,6 @@ public class BubbleController implements ConfigurationChangeListener,
                     mExpandedViewManager,
                     mBubbleTaskViewFactory,
                     mBubblePositioner,
-                    mLogger,
                     mStackView,
                     mLayerView,
                     mBubbleIconFactory,
@@ -1891,7 +1887,6 @@ public class BubbleController implements ConfigurationChangeListener,
                 mExpandedViewManager,
                 mBubbleTaskViewFactory,
                 mBubblePositioner,
-                mLogger,
                 mStackView,
                 mLayerView,
                 mBubbleIconFactory,

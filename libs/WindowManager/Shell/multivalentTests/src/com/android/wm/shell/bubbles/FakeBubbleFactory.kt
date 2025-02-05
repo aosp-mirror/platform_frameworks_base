@@ -45,10 +45,10 @@ class FakeBubbleFactory {
                         .inflate(R.layout.bubble_bar_expanded_view, null, false /* attachToRoot */)
                         as BubbleBarExpandedView)
                     .apply {
+                        this.bubbleLogger = bubbleLogger
                         initialize(
                             expandedViewManager,
                             bubblePositioner,
-                            bubbleLogger,
                             false, /* isOverflow */
                             bubbleTaskView,
                             mainExecutor,

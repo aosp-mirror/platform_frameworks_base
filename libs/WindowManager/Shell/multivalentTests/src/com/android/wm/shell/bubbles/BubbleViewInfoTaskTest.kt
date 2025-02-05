@@ -327,7 +327,6 @@ class BubbleViewInfoTaskTest {
             expandedViewManager,
             bubbleTaskViewFactory,
             bubblePositioner,
-            bubbleLogger,
             bubbleStackView,
             null /* layerView */,
             iconFactory,
