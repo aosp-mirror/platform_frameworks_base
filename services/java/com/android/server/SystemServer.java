@@ -875,6 +875,17 @@ public final class SystemServer implements Dumpable {
 
             SystemServiceRegistry.sEnableServiceNotFoundWtf = true;
 
+            // Prepare the thread pool for init tasks that can be parallelized
+            SystemServerInitThreadPool tp = SystemServerInitThreadPool.start();
+            mDumper.addDumpable(tp);
+
+            if (android.server.Flags.earlySystemConfigInit()) {
+                // SystemConfig init is expensive, so enqueue the work as early as possible to allow
+                // concurrent execution before it's needed (typically by ActivityManagerService).
+                // As native library loading is also expensive, this is a good place to start.
+                startSystemConfigInit(t);
+            }
+
             // Initialize native services.
             System.loadLibrary("android_servers");
 
@@ -907,9 +918,6 @@ public final class SystemServer implements Dumpable {
             mDumper.addDumpable(mSystemServiceManager);
 
             LocalServices.addService(SystemServiceManager.class, mSystemServiceManager);
-            // Prepare the thread pool for init tasks that can be parallelized
-            SystemServerInitThreadPool tp = SystemServerInitThreadPool.start();
-            mDumper.addDumpable(tp);
 
             // Lazily load the pre-installed system font map in SystemServer only if we're not doing
             // the optimized font loading in the FontManagerService.
@@ -1057,6 +1065,14 @@ public final class SystemServer implements Dumpable {
         }
     }
 
+    private void startSystemConfigInit(TimingsTraceAndSlog t) {
+        Slog.i(TAG, "Reading configuration...");
+        final String tagSystemConfig = "ReadingSystemConfig";
+        t.traceBegin(tagSystemConfig);
+        SystemServerInitThreadPool.submit(SystemConfig::getInstance, tagSystemConfig);
+        t.traceEnd();
+    }
+
     private void createSystemContext() {
         ActivityThread activityThread = ActivityThread.systemMain();
         mSystemContext = activityThread.getSystemContext();
@@ -1095,11 +1111,11 @@ public final class SystemServer implements Dumpable {
         mDumper.addDumpable(watchdog);
         t.traceEnd();
 
-        Slog.i(TAG, "Reading configuration...");
-        final String TAG_SYSTEM_CONFIG = "ReadingSystemConfig";
-        t.traceBegin(TAG_SYSTEM_CONFIG);
-        SystemServerInitThreadPool.submit(SystemConfig::getInstance, TAG_SYSTEM_CONFIG);
-        t.traceEnd();
+        // Legacy entry point for starting SystemConfig init, only needed if the early init flag is
+        // disabled and we haven't already triggered init before bootstrap services.
+        if (!android.server.Flags.earlySystemConfigInit()) {
+            startSystemConfigInit(t);
+        }
 
         // Orchestrates some ProtoLogging functionality.
         if (android.tracing.Flags.clientSideProtoLogging()) {
