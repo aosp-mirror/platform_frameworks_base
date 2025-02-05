@@ -234,6 +234,7 @@
     <item type="id" name="nssl_placeholder" />
     <item type="id" name="nssl_placeholder_barrier_bottom" />
     <item type="id" name="small_clock_guideline_top" />
+    <item type="id" name="smart_space_barrier_top" />
     <item type="id" name="smart_space_barrier_bottom" />
     <item type="id" name="split_shade_guideline" />
     <item type="id" name="start_button" />

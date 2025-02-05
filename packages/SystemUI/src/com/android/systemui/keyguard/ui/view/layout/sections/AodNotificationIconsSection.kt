@@ -34,6 +34,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeDisplayAware
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDisplayNotificationIconViewStore
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarIconViewBindingFailureTracker
@@ -55,6 +56,7 @@ constructor(
     private val nicAodIconViewStore: AlwaysOnDisplayNotificationIconViewStore,
     private val systemBarUtilsState: SystemBarUtilsState,
     private val rootViewModel: KeyguardRootViewModel,
+    private val shadeInteractor: ShadeInteractor,
 ) : KeyguardSection() {
 
     private var nicBindingDisposable: DisposableHandle? = null
@@ -93,34 +95,30 @@ constructor(
     override fun applyConstraints(constraintSet: ConstraintSet) {
         val bottomMargin =
             context.resources.getDimensionPixelSize(R.dimen.keyguard_status_view_bottom_margin)
+        val horizontalMargin =
+            context.resources.getDimensionPixelSize(customR.dimen.status_view_margin_horizontal)
+        val height = context.resources.getDimensionPixelSize(R.dimen.notification_shelf_height)
         val isVisible = rootViewModel.isNotifIconContainerVisible.value
+        val isShadeLayoutWide = shadeInteractor.isShadeLayoutWide.value
+
         constraintSet.apply {
             if (PromotedNotificationUiAod.isEnabled) {
                 connect(nicId, TOP, AodPromotedNotificationSection.viewId, BOTTOM, bottomMargin)
             } else {
                 connect(nicId, TOP, R.id.smart_space_barrier_bottom, BOTTOM, bottomMargin)
             }
+
             setGoneMargin(nicId, BOTTOM, bottomMargin)
             setVisibility(nicId, if (isVisible.value) VISIBLE else GONE)
 
-            connect(
-                nicId,
-                START,
-                PARENT_ID,
-                START,
-                context.resources.getDimensionPixelSize(customR.dimen.status_view_margin_horizontal),
-            )
-            connect(
-                nicId,
-                END,
-                PARENT_ID,
-                END,
-                context.resources.getDimensionPixelSize(customR.dimen.status_view_margin_horizontal),
-            )
-            constrainHeight(
-                nicId,
-                context.resources.getDimensionPixelSize(R.dimen.notification_shelf_height),
-            )
+            if (PromotedNotificationUiAod.isEnabled && isShadeLayoutWide) {
+                // Don't create a start constraint, so the icons can hopefully right-align.
+            } else {
+                connect(nicId, START, PARENT_ID, START, horizontalMargin)
+            }
+            connect(nicId, END, PARENT_ID, END, horizontalMargin)
+
+            constrainHeight(nicId, height)
         }
     }
 
