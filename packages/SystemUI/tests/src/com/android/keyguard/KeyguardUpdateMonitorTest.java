@@ -149,6 +149,7 @@ import com.android.systemui.deviceentry.shared.model.FaceDetectionStatus;
 import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationStatus;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.SceneContainerFlagParameterizationKt;
+import com.android.systemui.keyguard.domain.interactor.KeyguardServiceShowLockscreenInteractor;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -310,6 +311,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private SceneInteractor mSceneInteractor;
     @Mock
     private CommunalSceneInteractor mCommunalSceneInteractor;
+    @Mock
+    private KeyguardServiceShowLockscreenInteractor mKeyguardServiceShowLockscreenInteractor;
     @Captor
     private ArgumentCaptor<FaceAuthenticationListener> mFaceAuthenticationListener;
 
@@ -2739,7 +2742,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     () -> mAlternateBouncerInteractor,
                     () -> mJavaAdapter,
                     () -> mSceneInteractor,
-                    () -> mCommunalSceneInteractor);
+                    () -> mCommunalSceneInteractor,
+                    mKeyguardServiceShowLockscreenInteractor);
             setAlternateBouncerVisibility(false);
             setPrimaryBouncerVisibility(false);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);

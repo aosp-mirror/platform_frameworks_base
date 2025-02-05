@@ -82,7 +82,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
-import com.android.systemui.keyguard.domain.interactor.KeyguardServiceLockNowInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardServiceShowLockscreenInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardStateCallbackInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardWakeDirectlyToGoneInteractor;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindParamsApplier;
@@ -331,7 +331,7 @@ public class KeyguardService extends Service {
             return new FoldGracePeriodProvider();
         }
     };
-    private final KeyguardServiceLockNowInteractor mKeyguardServiceLockNowInteractor;
+    private final KeyguardServiceShowLockscreenInteractor mKeyguardServiceShowLockscreenInteractor;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     @Inject
@@ -358,7 +358,7 @@ public class KeyguardService extends Service {
             KeyguardDismissInteractor keyguardDismissInteractor,
             Lazy<DeviceEntryInteractor> deviceEntryInteractorLazy,
             KeyguardStateCallbackInteractor keyguardStateCallbackInteractor,
-            KeyguardServiceLockNowInteractor keyguardServiceLockNowInteractor,
+            KeyguardServiceShowLockscreenInteractor keyguardServiceShowLockscreenInteractor,
             KeyguardUpdateMonitor keyguardUpdateMonitor) {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
@@ -391,7 +391,7 @@ public class KeyguardService extends Service {
         mKeyguardEnabledInteractor = keyguardEnabledInteractor;
         mKeyguardWakeDirectlyToGoneInteractor = keyguardWakeDirectlyToGoneInteractor;
         mKeyguardDismissInteractor = keyguardDismissInteractor;
-        mKeyguardServiceLockNowInteractor = keyguardServiceLockNowInteractor;
+        mKeyguardServiceShowLockscreenInteractor = keyguardServiceShowLockscreenInteractor;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
     }
 
@@ -673,7 +673,7 @@ public class KeyguardService extends Service {
             if (SceneContainerFlag.isEnabled()) {
                 mDeviceEntryInteractorLazy.get().lockNow("doKeyguardTimeout");
             } else if (KeyguardWmStateRefactor.isEnabled()) {
-                mKeyguardServiceLockNowInteractor.onKeyguardServiceDoKeyguardTimeout(options);
+                mKeyguardServiceShowLockscreenInteractor.onKeyguardServiceDoKeyguardTimeout();
             }
 
             mKeyguardViewMediator.doKeyguardTimeout(options);
@@ -686,7 +686,12 @@ public class KeyguardService extends Service {
             if (mFoldGracePeriodProvider.get().isEnabled()) {
                 mKeyguardInteractor.showDismissibleKeyguard();
             }
-            mKeyguardViewMediator.showDismissibleKeyguard();
+
+            if (KeyguardWmStateRefactor.isEnabled()) {
+                mKeyguardServiceShowLockscreenInteractor.onKeyguardServiceShowDismissibleKeyguard();
+            } else {
+                mKeyguardViewMediator.showDismissibleKeyguard();
+            }
 
             if (SceneContainerFlag.isEnabled() && mFoldGracePeriodProvider.get().isEnabled()) {
                 mMainExecutor.execute(() -> mSceneInteractorLazy.get().changeScene(

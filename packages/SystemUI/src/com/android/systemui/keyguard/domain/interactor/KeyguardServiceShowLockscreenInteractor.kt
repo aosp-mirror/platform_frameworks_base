@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.annotation.SuppressLint
-import android.os.Bundle
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import javax.inject.Inject
@@ -26,48 +25,53 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
 /**
- * Emitted when we receive a [KeyguardServiceLockNowInteractor.onKeyguardServiceDoKeyguardTimeout]
- * call.
- */
-data class KeyguardLockNowEvent(val options: Bundle?)
-
-/**
- * Logic around requests by [KeyguardService] to lock the device right now, even though the device
- * is awake and not going to sleep.
+ * Logic around requests by [KeyguardService] to show keyguard right now, even though the device is
+ * awake and not going to sleep.
  *
- * This can happen if WM#lockNow() is called, or if the screen is forced to stay awake but the lock
- * timeout elapses.
+ * This can happen if WM#lockNow() is called, if KeyguardService#showDismissibleKeyguard is called
+ * because we're folding with "continue using apps on fold" set to "swipe up to continue", or if the
+ * screen is forced to stay awake but the lock timeout elapses.
  *
  * This is not the only way for the device to lock while the screen is on. The other cases, which do
- * not directly involve [KeyguardService], are handled in [KeyguardLockWhileAwakeInteractor].
+ * not directly involve [KeyguardService], are handled in [KeyguardShowWhileAwakeInteractor].
  */
 @SysUISingleton
-class KeyguardServiceLockNowInteractor
+class KeyguardServiceShowLockscreenInteractor
 @Inject
 constructor(@Background val backgroundScope: CoroutineScope) {
 
     /**
-     * Emits whenever [KeyguardService] receives a call that indicates we should lock the device
+     * Emits whenever [KeyguardService] receives a call that indicates we should show the lockscreen
      * right now, even though the device is awake and not going to sleep.
      *
-     * WARNING: This is only one of multiple reasons the device might need to lock while not going
+     * WARNING: This is only one of multiple reasons the keyguard might need to show while not going
      * to sleep. Unless you're dealing with keyguard internals that specifically need to know that
-     * we're locking due to a call to doKeyguardTimeout, use
-     * [KeyguardLockWhileAwakeInteractor.lockWhileAwakeEvents].
+     * we're locking due to a call to doKeyguardTimeout or showDismissibleKeyguard, use
+     * [KeyguardShowWhileAwakeInteractor.showWhileAwakeEvents].
      *
      * This is fundamentally an event flow, hence the SharedFlow.
      */
     @SuppressLint("SharedFlowCreation")
-    val lockNowEvents: MutableSharedFlow<KeyguardLockNowEvent> = MutableSharedFlow()
+    val showNowEvents: MutableSharedFlow<ShowWhileAwakeReason> = MutableSharedFlow()
 
     /**
      * Called by [KeyguardService] when it receives a doKeyguardTimeout() call. This indicates that
      * the device locked while the screen was on.
-     *
-     * [options] appears to be no longer used, but we'll keep it in this interactor in case that
-     * turns out not to be true.
      */
-    fun onKeyguardServiceDoKeyguardTimeout(options: Bundle?) {
-        backgroundScope.launch { lockNowEvents.emit(KeyguardLockNowEvent(options = options)) }
+    fun onKeyguardServiceDoKeyguardTimeout() {
+        backgroundScope.launch {
+            showNowEvents.emit(ShowWhileAwakeReason.KEYGUARD_TIMEOUT_WHILE_SCREEN_ON)
+        }
+    }
+
+    /**
+     * Called by [KeyguardService] when it receives a showDismissibleKeyguard() call. This indicates
+     * that the device was folded with settings configured to show a dismissible keyguard on the
+     * outer display.
+     */
+    fun onKeyguardServiceShowDismissibleKeyguard() {
+        backgroundScope.launch {
+            showNowEvents.emit(ShowWhileAwakeReason.FOLDED_WITH_SWIPE_UP_TO_CONTINUE)
+        }
     }
 }

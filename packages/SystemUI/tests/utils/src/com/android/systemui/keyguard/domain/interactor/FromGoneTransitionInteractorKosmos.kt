@@ -37,6 +37,6 @@ val Kosmos.fromGoneTransitionInteractor by
             powerInteractor = powerInteractor,
             communalSceneInteractor = communalSceneInteractor,
             keyguardOcclusionInteractor = keyguardOcclusionInteractor,
-            keyguardLockWhileAwakeInteractor = keyguardLockWhileAwakeInteractor,
+            keyguardShowWhileAwakeInteractor = keyguardShowWhileAwakeInteractor,
         )
     }
