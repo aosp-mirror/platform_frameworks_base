@@ -32,7 +32,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -72,38 +74,28 @@ constructor(
     /** Radius of blur to be applied on the window root view. */
     val blurRadius: StateFlow<Int> = repository.blurRadius.asStateFlow()
 
-    /** Whether the blur applied is opaque or transparent. */
-    val isBlurOpaque: StateFlow<Boolean> = repository.isBlurOpaque.asStateFlow()
-
     /**
      * Emits the applied blur radius whenever blur is successfully applied to the window root view.
      */
     val onBlurAppliedEvent: Flow<Int> = repository.onBlurApplied
 
-    /**
-     * Request to apply blur while on bouncer, this takes precedence over other blurs (from shade).
-     */
-    fun requestBlurForBouncer(blurRadius: Int) {
-        repository.isBlurOpaque.value = false
-        repository.blurRadius.value = blurRadius
-    }
-
-    /**
-     * Request to apply blur while on glanceable hub, this takes precedence over other blurs (from
-     * shade) except for bouncer.
-     */
-    fun requestBlurForGlanceableHub(blurRadius: Int): Boolean {
-        if (keyguardInteractor.primaryBouncerShowing.value) {
-            return false
+    /** Whether the blur applied is opaque or transparent. */
+    val isBlurOpaque: Flow<Boolean> =
+        combine(
+            if (Flags.bouncerUiRevamp()) {
+                keyguardInteractor.primaryBouncerShowing.or(isBouncerTransitionInProgress)
+            } else {
+                flowOf(false)
+            },
+            if (Flags.glanceableHubBlurredBackground()) {
+                communalInteractor.isCommunalBlurring
+            } else {
+                flowOf(false)
+            },
+            repository.isBlurOpaque,
+        ) { bouncerActive, ghActive, shadeBlurOpaque ->
+            if (bouncerActive || ghActive) false else shadeBlurOpaque
         }
-
-        Log.d(TAG, "requestBlurForGlanceableHub for $blurRadius")
-
-        repository.isBlurOpaque.value = false
-        repository.blurRadius.value = blurRadius
-
-        return true
-    }
 
     /**
      * Method that requests blur to be applied on window root view. It is applied only when other
@@ -119,10 +111,10 @@ constructor(
         // We need to check either of these because they are two different sources of truth,
         // primaryBouncerShowing changes early to true/false, but blur is
         // coordinated by transition value.
-        if (keyguardInteractor.primaryBouncerShowing.value || isBouncerTransitionInProgress.value) {
+        if (isBouncerTransitionInProgress()) {
             return false
         }
-        if (communalInteractor.isCommunalBlurring.value) {
+        if (isGlanceableHubActive()) {
             return false
         }
         Log.d(TAG, "requestingBlurForShade for $blurRadius $opaque")
@@ -130,6 +122,14 @@ constructor(
         repository.isBlurOpaque.value = opaque
         return true
     }
+
+    private fun isGlanceableHubActive() = communalInteractor.isCommunalBlurring.value
+
+    private fun isBouncerTransitionInProgress() =
+        keyguardInteractor.primaryBouncerShowing.value || isBouncerTransitionInProgress.value
+
+    private fun Flow<Boolean>.or(anotherFlow: Flow<Boolean>): Flow<Boolean> =
+        this.combine(anotherFlow) { a, b -> a || b }
 
     companion object {
         const val TAG = "WindowRootViewBlurInteractor"

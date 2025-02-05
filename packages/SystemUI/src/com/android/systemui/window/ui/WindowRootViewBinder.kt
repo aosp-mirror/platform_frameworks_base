@@ -20,6 +20,7 @@ import android.util.Log
 import android.view.Choreographer
 import android.view.Choreographer.FrameCallback
 import com.android.app.tracing.coroutines.TrackTracer
+import com.android.app.tracing.coroutines.launchTraced
 import com.android.systemui.Flags
 import com.android.systemui.lifecycle.WindowLifecycleState
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -29,8 +30,8 @@ import com.android.systemui.statusbar.BlurUtils
 import com.android.systemui.window.ui.viewmodel.WindowRootViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.launch
 
 /**
  * View binder that wires up window level UI transformations like blur to the [WindowRootView]
@@ -51,7 +52,6 @@ object WindowRootViewBinder {
 
         view.repeatWhenAttached(mainDispatcher) {
             Log.d(TAG, "Binding root view")
-            var frameCallbackPendingExecution: FrameCallback? = null
             view.viewModel(
                 minWindowLifecycleState = WindowLifecycleState.ATTACHED,
                 factory = { viewModelFactory.create() },
@@ -59,34 +59,48 @@ object WindowRootViewBinder {
             ) { viewModel ->
                 try {
                     Log.d(TAG, "Launching coroutines that update window root view state")
-                    launch {
-                        viewModel.blurState
-                            .filter { it.radius >= 0 }
-                            .collect { blurState ->
-                                val newFrameCallback = FrameCallback {
-                                    frameCallbackPendingExecution = null
-                                    blurUtils.applyBlur(
-                                        view.rootView?.viewRootImpl,
-                                        blurState.radius,
-                                        blurState.isOpaque,
-                                    )
-                                    TrackTracer.instantForGroup(
-                                        "windowBlur",
-                                        "appliedBlurRadius",
-                                        blurState.radius,
-                                    )
-                                    viewModel.onBlurApplied(blurState.radius)
+                    launchTraced("WindowBlur") {
+                        var wasUpdateScheduledForThisFrame = false
+                        var lastScheduledBlurRadius = 0
+                        var lastScheduleBlurOpaqueness = false
+
+                        // Creating the callback once and not for every coroutine invocation
+                        val newFrameCallback = FrameCallback {
+                            wasUpdateScheduledForThisFrame = false
+                            val blurRadiusToApply = lastScheduledBlurRadius
+                            blurUtils.applyBlur(
+                                view.rootView?.viewRootImpl,
+                                blurRadiusToApply,
+                                lastScheduleBlurOpaqueness,
+                            )
+                            TrackTracer.instantForGroup(
+                                "windowBlur",
+                                "appliedBlurRadius",
+                                blurRadiusToApply,
+                            )
+                            viewModel.onBlurApplied(blurRadiusToApply)
+                        }
+
+                        combine(viewModel.blurRadius, viewModel.isBlurOpaque, ::Pair)
+                            .filter { it.first >= 0 }
+                            .collect { (blurRadius, isOpaque) ->
+                                // Expectation is that we schedule only one blur radius value
+                                // per frame
+                                if (wasUpdateScheduledForThisFrame) {
+                                    return@collect
                                 }
                                 TrackTracer.instantForGroup(
                                     "windowBlur",
                                     "preparedBlurRadius",
-                                    blurState.radius,
+                                    blurRadius,
                                 )
-                                blurUtils.prepareBlur(view.rootView?.viewRootImpl, blurState.radius)
-                                if (frameCallbackPendingExecution != null) {
-                                    choreographer.removeFrameCallback(frameCallbackPendingExecution)
-                                }
-                                frameCallbackPendingExecution = newFrameCallback
+                                lastScheduledBlurRadius = blurRadius.toInt()
+                                lastScheduleBlurOpaqueness = isOpaque
+                                wasUpdateScheduledForThisFrame = true
+                                blurUtils.prepareBlur(
+                                    view.rootView?.viewRootImpl,
+                                    lastScheduledBlurRadius,
+                                )
                                 choreographer.postFrameCallback(newFrameCallback)
                             }
                     }
