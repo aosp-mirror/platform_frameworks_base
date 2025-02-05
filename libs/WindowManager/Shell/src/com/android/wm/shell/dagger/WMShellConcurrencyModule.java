@@ -37,6 +37,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.shared.annotations.ExternalMainThread;
 import com.android.wm.shell.shared.annotations.ShellAnimationThread;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
+import com.android.wm.shell.shared.annotations.ShellDesktopThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.annotations.ShellSplashscreenThread;
 
@@ -193,13 +194,26 @@ public abstract class WMShellConcurrencyModule {
     }
 
     /**
+     * Provides a Shell desktop thread Executor
+     */
+    @WMSingleton
+    @Provides
+    @ShellDesktopThread
+    public static ShellExecutor provideDesktopModeMiscExecutor() {
+        HandlerThread shellDesktopThread = new HandlerThread("wmshell.desktop",
+                THREAD_PRIORITY_TOP_APP_BOOST);
+        shellDesktopThread.start();
+        return new HandlerExecutor(shellDesktopThread.getThreadHandler());
+    }
+
+    /**
      * Provides a Shell background thread Handler for low priority background tasks.
      */
     @WMSingleton
     @Provides
     @ShellBackgroundThread
     public static Handler provideSharedBackgroundHandler() {
-        HandlerThread shellBackgroundThread = new HandlerThread("wmshell.background",
+        final HandlerThread shellBackgroundThread = new HandlerThread("wmshell.background",
                 THREAD_PRIORITY_BACKGROUND);
         shellBackgroundThread.start();
         return shellBackgroundThread.getThreadHandler();
