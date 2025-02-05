@@ -24,6 +24,7 @@ import com.android.keyguard.BouncerKeyguardMessageArea
 import com.android.keyguard.KeyguardMessageArea
 import com.android.keyguard.KeyguardMessageAreaController
 import com.android.systemui.Flags
+import com.android.systemui.FontStyles
 import com.android.systemui.res.R
 
 class BouncerMessageView : LinearLayout {
@@ -45,12 +46,12 @@ class BouncerMessageView : LinearLayout {
         primaryMessageView = findViewById(R.id.bouncer_primary_message_area)
         secondaryMessageView = findViewById(R.id.bouncer_secondary_message_area)
 
-        if (Flags.gsfBouncer() || Flags.bouncerUiRevamp2()) {
+        if (Flags.bouncerUiRevamp2()) {
             primaryMessageView?.apply {
-                typeface = Typeface.create("gsf-title-large-emphasized", Typeface.NORMAL)
+                typeface = Typeface.create(FontStyles.GSF_TITLE_LARGE_EMPHASIZED, Typeface.NORMAL)
             }
             secondaryMessageView?.apply {
-                typeface = Typeface.create("gsf-title-medium-emphasized", Typeface.NORMAL)
+                typeface = Typeface.create(FontStyles.GSF_TITLE_MEDIUM_EMPHASIZED, Typeface.NORMAL)
             }
         }
     }

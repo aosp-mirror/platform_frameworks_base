@@ -32,7 +32,7 @@ import static androidx.constraintlayout.widget.ConstraintSet.START;
 import static androidx.constraintlayout.widget.ConstraintSet.TOP;
 import static androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT;
 
-import static com.android.systemui.Flags.gsfBouncer;
+import static com.android.systemui.Flags.bouncerUiRevamp2;
 import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
 
 import static java.lang.Integer.max;
@@ -99,6 +99,7 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.settingslib.Utils;
 import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.systemui.Flags;
+import com.android.systemui.FontStyles;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.plugins.FalsingManager;
@@ -1348,8 +1349,9 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                     true);
             mUserSwitcherViewGroup = mView.findViewById(R.id.keyguard_bouncer_user_switcher);
             mUserSwitcher = mView.findViewById(R.id.user_switcher_header);
-            if (gsfBouncer()) {
-                mUserSwitcher.setTypeface(Typeface.create("gsf-label-medium", Typeface.NORMAL));
+            if (bouncerUiRevamp2()) {
+                mUserSwitcher.setTypeface(
+                        Typeface.create(FontStyles.GSF_LABEL_MEDIUM, Typeface.NORMAL));
             }
         }
 
