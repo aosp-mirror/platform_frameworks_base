@@ -24,7 +24,6 @@ import static android.app.ActivityManagerInternal.ServiceNotificationPolicy.NOT_
 import static android.app.ActivityManagerInternal.ServiceNotificationPolicy.SHOW_IMMEDIATELY;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.Flags.FLAG_KEYGUARD_PRIVATE_NOTIFICATIONS;
-import static android.app.Flags.FLAG_NM_BINDER_PERF_CACHE_CHANNELS;
 import static android.app.Flags.FLAG_SORT_SECTION_BY_TIME;
 import static android.app.Notification.EXTRA_ALLOW_DURING_SETUP;
 import static android.app.Notification.EXTRA_PICTURE;
@@ -816,6 +815,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // make sure PreferencesHelper doesn't try to interact with any real caches
         PreferencesHelper prefHelper = spy(mService.mPreferencesHelper);
         doNothing().when(prefHelper).invalidateNotificationChannelCache();
+        doNothing().when(prefHelper).invalidateNotificationChannelGroupCache();
         mService.setPreferencesHelper(prefHelper);
 
         // Return first true for RoleObserver main-thread check

@@ -69,12 +69,14 @@ import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenPolicy;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.LruCache;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.notification.NotificationChannelGroupsHelper;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1396,11 +1398,23 @@ public class NotificationManager {
      * The channel group must belong to your package, or null will be returned.
      */
     public NotificationChannelGroup getNotificationChannelGroup(String channelGroupId) {
-        INotificationManager service = service();
-        try {
-            return service.getNotificationChannelGroup(mContext.getPackageName(), channelGroupId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (Flags.nmBinderPerfCacheChannels()) {
+            String pkgName = mContext.getPackageName();
+            // getNotificationChannelGroup may only be called by the same package.
+            List<NotificationChannel> channelList = mNotificationChannelListCache.query(
+                    new NotificationChannelQuery(pkgName, pkgName, mContext.getUserId()));
+            Map<String, NotificationChannelGroup> groupHeaders =
+                    mNotificationChannelGroupsCache.query(pkgName);
+            return NotificationChannelGroupsHelper.getGroupWithChannels(channelGroupId, channelList,
+                    groupHeaders, /* includeDeleted= */ false);
+        } else {
+            INotificationManager service = service();
+            try {
+                return service.getNotificationChannelGroup(mContext.getPackageName(),
+                        channelGroupId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 
@@ -1408,17 +1422,27 @@ public class NotificationManager {
      * Returns all notification channel groups belonging to the calling app.
      */
     public List<NotificationChannelGroup> getNotificationChannelGroups() {
-        INotificationManager service = service();
-        try {
-            final ParceledListSlice<NotificationChannelGroup> parceledList =
-                    service.getNotificationChannelGroups(mContext.getPackageName());
-            if (parceledList != null) {
-                return parceledList.getList();
+        if (Flags.nmBinderPerfCacheChannels()) {
+            String pkgName = mContext.getPackageName();
+            List<NotificationChannel> channelList = mNotificationChannelListCache.query(
+                    new NotificationChannelQuery(pkgName, pkgName, mContext.getUserId()));
+            Map<String, NotificationChannelGroup> groupHeaders =
+                    mNotificationChannelGroupsCache.query(pkgName);
+            return NotificationChannelGroupsHelper.getGroupsWithChannels(channelList, groupHeaders,
+                    NotificationChannelGroupsHelper.Params.forAllGroups());
+        } else {
+            INotificationManager service = service();
+            try {
+                final ParceledListSlice<NotificationChannelGroup> parceledList =
+                        service.getNotificationChannelGroups(mContext.getPackageName());
+                if (parceledList != null) {
+                    return parceledList.getList();
+                }
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            return new ArrayList<>();
         }
-        return new ArrayList<>();
     }
 
     /**
@@ -1448,9 +1472,11 @@ public class NotificationManager {
         }
     }
 
-    private static final String NOTIFICATION_CHANNEL_CACHE_API = "getNotificationChannel";
-    private static final String NOTIFICATION_CHANNEL_LIST_CACHE_NAME = "getNotificationChannels";
-    private static final int NOTIFICATION_CHANNEL_CACHE_SIZE = 10;
+    private static final String NOTIFICATION_CHANNELS_CACHE_API = "getNotificationChannels";
+    private static final int NOTIFICATION_CHANNELS_CACHE_SIZE = 10;
+    private static final String NOTIFICATION_CHANNEL_GROUPS_CACHE_API =
+            "getNotificationChannelGroups";
+    private static final int NOTIFICATION_CHANNEL_GROUPS_CACHE_SIZE = 10;
 
     private final IpcDataCache.QueryHandler<NotificationChannelQuery, List<NotificationChannel>>
             mNotificationChannelListQueryHandler = new IpcDataCache.QueryHandler<>() {
@@ -1480,8 +1506,8 @@ public class NotificationManager {
 
     private final IpcDataCache<NotificationChannelQuery, List<NotificationChannel>>
             mNotificationChannelListCache =
-            new IpcDataCache<>(NOTIFICATION_CHANNEL_CACHE_SIZE, IpcDataCache.MODULE_SYSTEM,
-                    NOTIFICATION_CHANNEL_CACHE_API, NOTIFICATION_CHANNEL_LIST_CACHE_NAME,
+            new IpcDataCache<>(NOTIFICATION_CHANNELS_CACHE_SIZE, IpcDataCache.MODULE_SYSTEM,
+                    NOTIFICATION_CHANNELS_CACHE_API, NOTIFICATION_CHANNELS_CACHE_API,
                     mNotificationChannelListQueryHandler);
 
     private record NotificationChannelQuery(
@@ -1489,16 +1515,68 @@ public class NotificationManager {
             String targetPkg,
             int userId) {}
 
+    private final IpcDataCache.QueryHandler<String, Map<String, NotificationChannelGroup>>
+            mNotificationChannelGroupsQueryHandler = new IpcDataCache.QueryHandler<>() {
+                @Override
+                public Map<String, NotificationChannelGroup> apply(String pkg) {
+                    INotificationManager service = service();
+                    Map<String, NotificationChannelGroup> groups = new ArrayMap<>();
+                    try {
+                        final ParceledListSlice<NotificationChannelGroup> parceledList =
+                                service.getNotificationChannelGroupsWithoutChannels(pkg);
+                        if (parceledList != null) {
+                            for (NotificationChannelGroup group : parceledList.getList()) {
+                                groups.put(group.getId(), group);
+                            }
+                        }
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                    return groups;
+                }
+
+                @Override
+                public boolean shouldBypassCache(@NonNull String query) {
+                    // Other locations should also not be querying the cache in the first place if
+                    // the flag is not enabled, but this is an extra precaution.
+                    if (!Flags.nmBinderPerfCacheChannels()) {
+                        Log.wtf(TAG,
+                                "shouldBypassCache called when nm_binder_perf_cache_channels off");
+                        return true;
+                    }
+                    return false;
+                }
+            };
+
+    private final IpcDataCache<String, Map<String, NotificationChannelGroup>>
+            mNotificationChannelGroupsCache = new IpcDataCache<>(
+            NOTIFICATION_CHANNEL_GROUPS_CACHE_SIZE, IpcDataCache.MODULE_SYSTEM,
+            NOTIFICATION_CHANNEL_GROUPS_CACHE_API, NOTIFICATION_CHANNEL_GROUPS_CACHE_API,
+            mNotificationChannelGroupsQueryHandler);
+
     /**
      * @hide
      */
     public static void invalidateNotificationChannelCache() {
         if (Flags.nmBinderPerfCacheChannels()) {
             IpcDataCache.invalidateCache(IpcDataCache.MODULE_SYSTEM,
-                    NOTIFICATION_CHANNEL_CACHE_API);
+                    NOTIFICATION_CHANNELS_CACHE_API);
         } else {
             // if we are here, we have failed to flag something
             Log.wtf(TAG, "invalidateNotificationChannelCache called without flag");
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static void invalidateNotificationChannelGroupCache() {
+        if (Flags.nmBinderPerfCacheChannels()) {
+            IpcDataCache.invalidateCache(IpcDataCache.MODULE_SYSTEM,
+                    NOTIFICATION_CHANNEL_GROUPS_CACHE_API);
+        } else {
+            // if we are here, we have failed to flag something
+            Log.wtf(TAG, "invalidateNotificationChannelGroupCache called without flag");
         }
     }
 
@@ -1509,8 +1587,9 @@ public class NotificationManager {
      * @hide
      */
     @VisibleForTesting
-    public void setChannelCacheToTestMode() {
+    public void setChannelCachesToTestMode() {
         mNotificationChannelListCache.testPropertyName();
+        mNotificationChannelGroupsCache.testPropertyName();
     }
 
     /**
