@@ -19,6 +19,7 @@ package com.android.systemui.window.ui
 import android.util.Log
 import android.view.Choreographer
 import android.view.Choreographer.FrameCallback
+import com.android.app.tracing.coroutines.TrackTracer
 import com.android.systemui.Flags
 import com.android.systemui.lifecycle.WindowLifecycleState
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -69,8 +70,18 @@ object WindowRootViewBinder {
                                         blurState.radius,
                                         blurState.isOpaque,
                                     )
+                                    TrackTracer.instantForGroup(
+                                        "windowBlur",
+                                        "appliedBlurRadius",
+                                        blurState.radius,
+                                    )
                                     viewModel.onBlurApplied(blurState.radius)
                                 }
+                                TrackTracer.instantForGroup(
+                                    "windowBlur",
+                                    "preparedBlurRadius",
+                                    blurState.radius,
+                                )
                                 blurUtils.prepareBlur(view.rootView?.viewRootImpl, blurState.radius)
                                 if (frameCallbackPendingExecution != null) {
                                     choreographer.removeFrameCallback(frameCallbackPendingExecution)
