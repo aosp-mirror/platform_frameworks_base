@@ -110,13 +110,17 @@ constructor(
     @Background private val bgContext: CoroutineContext,
 ) : ShadeElement() {
     override suspend fun expand(reason: String) {
-        shadeInteractor.expandNotificationsShade(reason)
-        shadeInteractor.shadeExpansion.waitUntil(1f, bgContext)
+        if (SceneContainerFlag.isEnabled) {
+            shadeInteractor.expandNotificationsShade(reason)
+            shadeInteractor.shadeExpansion.waitUntil(1f, bgContext)
+        }
     }
 
     override suspend fun collapse(reason: String) {
-        shadeInteractor.collapseNotificationsShade(reason)
-        shadeInteractor.shadeExpansion.waitUntil(0f, bgContext)
+        if (SceneContainerFlag.isEnabled) {
+            shadeInteractor.collapseNotificationsShade(reason)
+            shadeInteractor.shadeExpansion.waitUntil(0f, bgContext)
+        }
     }
 }
 
@@ -128,12 +132,16 @@ constructor(
     @Background private val bgContext: CoroutineContext,
 ) : ShadeElement() {
     override suspend fun expand(reason: String) {
-        shadeInteractor.expandQuickSettingsShade(reason)
-        shadeInteractor.qsExpansion.waitUntil(1f, bgContext)
+        if (SceneContainerFlag.isEnabled) {
+            shadeInteractor.expandQuickSettingsShade(reason)
+            shadeInteractor.qsExpansion.waitUntil(1f, bgContext)
+        }
     }
 
     override suspend fun collapse(reason: String) {
-        shadeInteractor.collapseQuickSettingsShade(reason)
-        shadeInteractor.qsExpansion.waitUntil(0f, bgContext)
+        if (SceneContainerFlag.isEnabled) {
+            shadeInteractor.collapseQuickSettingsShade(reason)
+            shadeInteractor.qsExpansion.waitUntil(0f, bgContext)
+        }
     }
 }
