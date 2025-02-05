@@ -189,6 +189,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.art.ArtManagedInstallFileHelper;
 import com.android.server.pm.Installer.InstallerException;
@@ -235,6 +236,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final int MSG_ON_PACKAGE_INSTALLED = 4;
     private static final int MSG_SESSION_VALIDATION_FAILURE = 5;
     private static final int MSG_PRE_APPROVAL_REQUEST = 6;
+
+    private static final int MSG_ON_NATIVE_LIBS_EXTRACTED = 7;
 
     /** XML constants used for persisting a session */
     static final String TAG_SESSION = "session";
@@ -943,6 +946,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 case MSG_PRE_APPROVAL_REQUEST:
                     handlePreapprovalRequest();
                     break;
+                case MSG_ON_NATIVE_LIBS_EXTRACTED:
+                    handleOnNativeLibsExtracted();
             }
 
             return true;
@@ -2908,15 +2913,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void verify() {
+        // Extract native libraries on the IO thread before proceeding to the verification
+        runExtractNativeLibraries();
+    }
+
+    @WorkerThread
+    private void handleOnNativeLibsExtracted() {
         try {
-            List<PackageInstallerSession> children = getChildSessions();
-            if (isMultiPackage()) {
-                for (PackageInstallerSession child : children) {
-                    child.extractNativeLibraries();
-                }
-            } else {
-                extractNativeLibraries();
-            }
             verifyNonStaged();
         } catch (PackageManagerException e) {
             final String completeMsg = ExceptionUtils.getCompleteMessage(e);
@@ -2924,6 +2927,27 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             setSessionFailed(e.error, errorMsg);
             onSessionVerificationFailure(e.error, errorMsg);
         }
+    }
+
+    private void runExtractNativeLibraries() {
+        IoThread.getHandler().post(() -> {
+            try {
+                List<PackageInstallerSession> children = getChildSessions();
+                if (isMultiPackage()) {
+                    for (PackageInstallerSession child : children) {
+                        child.extractNativeLibraries();
+                    }
+                } else {
+                    extractNativeLibraries();
+                }
+                mHandler.obtainMessage(MSG_ON_NATIVE_LIBS_EXTRACTED).sendToTarget();
+            } catch (PackageManagerException e) {
+                final String completeMsg = ExceptionUtils.getCompleteMessage(e);
+                final String errorMsg = PackageManager.installStatusToString(e.error, completeMsg);
+                setSessionFailed(e.error, errorMsg);
+                onSessionVerificationFailure(e.error, errorMsg);
+            }
+        });
     }
 
     private IntentSender getRemoteStatusReceiver() {
@@ -3072,6 +3096,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    @WorkerThread
     private void extractNativeLibraries() throws PackageManagerException {
         synchronized (mLock) {
             if (mPackageLite != null) {
