@@ -119,6 +119,8 @@ fun ContentScope.MediaCarousel(
                 },
                 update = {
                     MediaCarouselStateLoader.loadCarouselState(carouselController, carouselState())
+                    carouselController.mediaCarouselScrollHandler.showsSettingsButton =
+                        !mediaHost.showsOnlyActiveMedia
                     it.setView(carouselController.mediaFrame)
                 },
                 onRelease = { it.removeAllViews() },

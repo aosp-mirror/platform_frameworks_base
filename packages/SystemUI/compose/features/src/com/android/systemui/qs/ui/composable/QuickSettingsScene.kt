@@ -84,7 +84,9 @@ import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.media.controls.ui.composable.isLandscape
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.view.MediaHost
+import com.android.systemui.media.controls.ui.view.MediaHostState.Companion.EXPANDED
 import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.notifications.ui.composable.HeadsUpNotificationSpace
 import com.android.systemui.notifications.ui.composable.NotificationScrollingStack
@@ -164,6 +166,12 @@ constructor(
             modifier = modifier,
             shadeSession = shadeSession,
         )
+    }
+
+    init {
+        mediaHost.expansion = EXPANDED
+        mediaHost.showsOnlyActiveMedia = false
+        mediaHost.init(MediaHierarchyManager.LOCATION_QS)
     }
 }
 
