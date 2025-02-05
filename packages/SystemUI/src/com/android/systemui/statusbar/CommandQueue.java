@@ -184,7 +184,6 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_SET_SPLITSCREEN_FOCUS = 81 << MSG_SHIFT;
     private static final int MSG_TOGGLE_QUICK_SETTINGS_PANEL = 82 << MSG_SHIFT;
     private static final int MSG_WALLET_ACTION_LAUNCH_GESTURE = 83 << MSG_SHIFT;
-    private static final int MSG_SET_HAS_NAVIGATION_BAR = 84 << MSG_SHIFT;
     private static final int MSG_DISPLAY_REMOVE_SYSTEM_DECORATIONS = 85 << MSG_SHIFT;
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -588,12 +587,6 @@ public class CommandQueue extends IStatusBar.Stub implements
          * @see IStatusBar#moveFocusedTaskToDesktop(int)
          */
         default void moveFocusedTaskToDesktop(int displayId) {}
-
-        /**
-         * @see IStatusBar#setHasNavigationBar(int, boolean)
-         */
-        default void setHasNavigationBar(int displayId, boolean hasNavigationBar) {
-        }
     }
 
     @VisibleForTesting
@@ -1532,14 +1525,6 @@ public class CommandQueue extends IStatusBar.Stub implements
         mHandler.obtainMessage(MSG_ENTER_DESKTOP, args).sendToTarget();
     }
 
-    @Override
-    public void setHasNavigationBar(int displayId, boolean hasNavigationBar) {
-        synchronized (mLock) {
-            mHandler.obtainMessage(MSG_SET_HAS_NAVIGATION_BAR, displayId,
-                    hasNavigationBar ? 1 : 0).sendToTarget();
-        }
-    }
-
 
     private final class H extends Handler {
         private H(Looper l) {
@@ -2072,11 +2057,6 @@ public class CommandQueue extends IStatusBar.Stub implements
                     }
                     break;
                 }
-                case MSG_SET_HAS_NAVIGATION_BAR:
-                    for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).setHasNavigationBar(msg.arg1, msg.arg2 != 0);
-                    }
-                    break;
             }
         }
     }

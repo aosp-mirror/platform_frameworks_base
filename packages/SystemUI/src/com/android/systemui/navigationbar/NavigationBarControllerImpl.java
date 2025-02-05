@@ -318,13 +318,6 @@ public class NavigationBarControllerImpl implements
                 navBarView.showPinningEscapeToast();
             }
         }
-
-        @Override
-        public void setHasNavigationBar(int displayId, boolean hasNavigationBar) {
-            if (enableDisplayContentModeManagement()) {
-                mHasNavBar.put(displayId, hasNavigationBar);
-            }
-        }
     };
 
     /**

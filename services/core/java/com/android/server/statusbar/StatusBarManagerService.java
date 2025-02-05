@@ -1011,23 +1011,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         public void passThroughShellCommand(String[] args, FileDescriptor fd) {
             StatusBarManagerService.this.passThroughShellCommand(args, fd);
         }
-
-        @Override
-        public void setHasNavigationBar(int displayId, boolean hasNavigationBar) {
-            if (isVisibleBackgroundUserOnDisplay(displayId)) {
-                if (SPEW) {
-                    Slog.d(TAG, "Skipping setHasNavigationBar for visible background user "
-                            + mUserManagerInternal.getUserAssignedToDisplay(displayId));
-                }
-                return;
-            }
-            IStatusBar bar = mBar;
-            if (bar != null) {
-                try {
-                    bar.setHasNavigationBar(displayId, hasNavigationBar);
-                } catch (RemoteException ex) {}
-            }
-        }
     };
 
     private final GlobalActionsProvider mGlobalActionsProvider = new GlobalActionsProvider() {

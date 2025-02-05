@@ -408,7 +408,4 @@ oneway interface IStatusBar
     * @param displayId the id of the current display.
     */
     void moveFocusedTaskToDesktop(int displayId);
-
-    /** Set whether the display should have a navigation bar. */
-    void setHasNavigationBar(int displayId, boolean hasNavigationBar);
 }

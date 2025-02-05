@@ -756,20 +756,7 @@ public class DisplayPolicy {
             return;
         }
 
-        final boolean hasNavigationBar = mDisplayContent.isSystemDecorationsSupported();
-        if (mHasNavigationBar == hasNavigationBar) {
-            return;
-        }
-
-        mHasNavigationBar = hasNavigationBar;
-        mHandler.post(
-                () -> {
-                    final int displayId = getDisplayId();
-                    StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
-                    if (statusBar != null) {
-                        statusBar.setHasNavigationBar(displayId, mHasNavigationBar);
-                    }
-                });
+        mHasNavigationBar = mDisplayContent.isSystemDecorationsSupported();
     }
 
     public boolean hasStatusBar() {
