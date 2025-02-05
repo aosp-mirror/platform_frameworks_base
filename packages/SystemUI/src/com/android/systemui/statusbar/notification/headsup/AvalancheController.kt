@@ -34,6 +34,9 @@ import javax.inject.Inject
  * Control when heads up notifications show during an avalanche where notifications arrive in fast
  * succession, by delaying visual listener side effects and removal handling from
  * [HeadsUpManagerImpl].
+ *
+ * Dev note: disable suppression so avoid 2min period of no HUNs after every build
+ * Settings > Notifications > General > Notification cooldown
  */
 @SysUISingleton
 class AvalancheController
