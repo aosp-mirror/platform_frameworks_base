@@ -221,13 +221,15 @@ public class HearingDevicePhoneCallNotificationController {
         }
 
         private Notification createSwitchInputNotification(boolean useRemoteMicrophone) {
+            final CharSequence message = getSwitchInputMessage(useRemoteMicrophone);
             return new Notification.Builder(mContext,
                     SystemNotificationChannels.ACCESSIBILITY_HEARING_DEVICE)
                     .setContentTitle(getSwitchInputTitle(useRemoteMicrophone))
-                    .setContentText(getSwitchInputMessage(useRemoteMicrophone))
+                    .setContentText(message)
                     .setSmallIcon(R.drawable.ic_settings_24dp)
                     .setColor(mContext.getResources().getColor(
                             com.android.internal.R.color.system_notification_accent_color))
+                    .setStyle(new Notification.BigTextStyle().bigText(message))
                     .setLocalOnly(true)
                     .setCategory(Notification.CATEGORY_SYSTEM)
                     .setContentIntent(createPendingIntent(ACTION_BLUETOOTH_DEVICE_DETAILS))
