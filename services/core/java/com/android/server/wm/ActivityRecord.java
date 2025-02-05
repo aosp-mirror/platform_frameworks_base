@@ -248,6 +248,7 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.sEnableShellTransitions;
 import static com.android.server.wm.WindowState.LEGACY_POLICY_VISIBILITY;
+import static com.android.window.flags.Flags.enablePresentationForConnectedDisplays;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
@@ -6220,6 +6221,16 @@ final class ActivityRecord extends WindowToken {
 
         // Untrusted embedded activity can be visible only if there is no other overlay window.
         if (hasOverlayOverUntrustedModeEmbedded()) {
+            return false;
+        }
+
+        // Hide all activities on the presenting display so that malicious apps can't do tap
+        // jacking (b/391466268).
+        // For now, this should only be applied to external displays because presentations can only
+        // be shown on them.
+        // TODO(b/390481621): Disallow a presentation from covering its controlling activity so that
+        // the presentation won't stop its controlling activity.
+        if (enablePresentationForConnectedDisplays() && mDisplayContent.mIsPresenting) {
             return false;
         }
 
