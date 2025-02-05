@@ -37,17 +37,18 @@ fun VolumePanelComposeScope.VerticalVolumePanelContent(
     layout: ComponentsLayout,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    Column(
+        modifier = modifier.verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+    ) {
         for (component in layout.headerComponents) {
             AnimatedVisibility(component.isVisible) {
                 with(component.component as ComposeVolumePanelUiComponent) { Content(Modifier) }
             }
         }
-        Column(Modifier.verticalScroll(rememberScrollState())) {
-            for (component in layout.contentComponents) {
-                AnimatedVisibility(component.isVisible) {
-                    with(component.component as ComposeVolumePanelUiComponent) { Content(Modifier) }
-                }
+        for (component in layout.contentComponents) {
+            AnimatedVisibility(component.isVisible) {
+                with(component.component as ComposeVolumePanelUiComponent) { Content(Modifier) }
             }
         }
 
