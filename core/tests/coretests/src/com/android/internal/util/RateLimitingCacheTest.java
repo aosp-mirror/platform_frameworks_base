@@ -19,8 +19,6 @@ package com.android.internal.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import android.os.SystemClock;
-
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
@@ -50,13 +48,13 @@ public class RateLimitingCacheTest {
      */
     @Test
     public void testTtl_Zero() {
-        RateLimitingCache<Integer> s = new RateLimitingCache<>(0);
+        TestRateLimitingCache<Integer> s = new TestRateLimitingCache<>(0);
 
         int first = s.get(mFetcher);
         assertEquals(first, 0);
         int second = s.get(mFetcher);
         assertEquals(second, 1);
-        SystemClock.sleep(20);
+        s.advanceTime(20);
         int third = s.get(mFetcher);
         assertEquals(third, 2);
     }
@@ -67,14 +65,14 @@ public class RateLimitingCacheTest {
      */
     @Test
     public void testTtl_100() {
-        RateLimitingCache<Integer> s = new RateLimitingCache<>(100);
+        TestRateLimitingCache<Integer> s = new TestRateLimitingCache<>(100);
 
         int first = s.get(mFetcher);
         assertEquals(first, 0);
         int second = s.get(mFetcher);
         // Too early to change
         assertEquals(second, 0);
-        SystemClock.sleep(150);
+        s.advanceTime(150);
         int third = s.get(mFetcher);
         // Changed by now
         assertEquals(third, 1);
@@ -89,11 +87,11 @@ public class RateLimitingCacheTest {
      */
     @Test
     public void testTtl_Negative() {
-        RateLimitingCache<Integer> s = new RateLimitingCache<>(-1);
+        TestRateLimitingCache<Integer> s = new TestRateLimitingCache<>(-1);
 
         int first = s.get(mFetcher);
         assertEquals(first, 0);
-        SystemClock.sleep(200);
+        s.advanceTime(200);
         // Should return the original value every time
         int second = s.get(mFetcher);
         assertEquals(second, 0);
@@ -105,7 +103,7 @@ public class RateLimitingCacheTest {
      */
     @Test
     public void testTtl_Spam() {
-        RateLimitingCache<Integer> s = new RateLimitingCache<>(100);
+        TestRateLimitingCache<Integer> s = new TestRateLimitingCache<>(100);
         assertCount(s, 1000, 7, 15);
     }
 
@@ -115,25 +113,10 @@ public class RateLimitingCacheTest {
      */
     @Test
     public void testRate_10hz() {
-        RateLimitingCache<Integer> s = new RateLimitingCache<>(1000, 10);
+        TestRateLimitingCache<Integer> s = new TestRateLimitingCache<>(1000, 10);
         // At 10 per second, 2 seconds should not exceed about 30, assuming overlap into left and
         // right windows that allow 10 each
         assertCount(s, 2000, 20, 33);
-    }
-
-    /**
-     * Test that using a different timebase works correctly.
-     */
-    @Test
-    public void testTimebase() {
-        RateLimitingCache<Integer> s = new RateLimitingCache<>(1000, 10) {
-            @Override
-            protected long getTime() {
-                return SystemClock.elapsedRealtime() / 2;
-            }
-        };
-        // Timebase is moving at half the speed, so only allows for 1 second worth in 2 seconds.
-        assertCount(s, 2000, 10, 22);
     }
 
     /**
@@ -144,15 +127,36 @@ public class RateLimitingCacheTest {
      * @param minCount the lower end of the expected number of fetches, with a margin for error
      * @param maxCount the higher end of the expected number of fetches, with a margin for error
      */
-    private void assertCount(RateLimitingCache<Integer> cache, long period,
+    private void assertCount(TestRateLimitingCache<Integer> cache, long period,
             int minCount, int maxCount) {
-        long startTime = SystemClock.elapsedRealtime();
-        while (SystemClock.elapsedRealtime() < startTime + period) {
+        long startTime = cache.getTime();
+        while (cache.getTime() < startTime + period) {
             int value = cache.get(mFetcher);
-            SystemClock.sleep(5);
+            cache.advanceTime(5);
         }
         int latest = cache.get(mFetcher);
         assertTrue("Latest should be between " + minCount + " and " + maxCount
                         + " but is " + latest, latest <= maxCount && latest >= minCount);
+    }
+
+    private static class TestRateLimitingCache<Value> extends RateLimitingCache<Value> {
+        private long mTime;
+
+        public TestRateLimitingCache(long periodMillis) {
+            super(periodMillis);
+        }
+
+        public TestRateLimitingCache(long periodMillis, int count) {
+            super(periodMillis, count);
+        }
+
+        public void advanceTime(long time) {
+            mTime += time;
+        }
+
+        @Override
+        public long getTime() {
+            return mTime;
+        }
     }
 }
