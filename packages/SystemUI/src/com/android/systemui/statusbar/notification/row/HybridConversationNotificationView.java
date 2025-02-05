@@ -289,7 +289,7 @@ public class HybridConversationNotificationView extends HybridNotificationView {
             CharSequence titleText,
             CharSequence contentText,
             CharSequence conversationSenderName,
-            @Nullable String summarization
+            @Nullable CharSequence summarization
     ) {
         if (AsyncHybridViewInflation.isUnexpectedlyInLegacyMode()) return;
         if (summarization != null) {
@@ -304,9 +304,8 @@ public class HybridConversationNotificationView extends HybridNotificationView {
                 mConversationSenderName.setText(conversationSenderName);
             }
         }
-        // TODO (b/217799515): super.bind() doesn't use contentView, remove the contentView
-        //  argument when the flag is removed
-        super.bind(/* title = */ titleText, /* text = */ contentText, /* contentView = */ null);
+        super.bind(/* title = */ titleText, /* text = */ contentText,
+                /* stripSpans = */ TextUtils.isEmpty(summarization));
     }
 
     private static void setSize(View view, int size) {

@@ -20,10 +20,17 @@ import android.app.Notification
 import android.app.Notification.EXTRA_SUMMARIZED_CONTENT
 import android.content.Context
 import android.content.pm.LauncherApps
+import android.graphics.Typeface
 import android.graphics.drawable.AnimatedImageDrawable
 import android.os.Handler
 import android.service.notification.NotificationListenerService.Ranking
 import android.service.notification.NotificationListenerService.RankingMap
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.TextUtils
+import android.text.style.ImageSpan
+import android.text.style.StyleSpan
+import com.android.internal.R
 import com.android.internal.widget.ConversationLayout
 import com.android.internal.widget.MessagingImageMessage
 import com.android.internal.widget.MessagingLayout
@@ -49,6 +56,7 @@ import javax.inject.Inject
 class ConversationNotificationProcessor
 @Inject
 constructor(
+    @ShadeDisplayAware private val context: Context,
     private val launcherApps: LauncherApps,
     private val conversationNotificationManager: ConversationNotificationManager,
 ) {
@@ -67,9 +75,38 @@ constructor(
             messagingStyle.shortcutIcon = launcherApps.getShortcutIcon(shortcutInfo)
             shortcutInfo.label?.let { label -> messagingStyle.conversationTitle = label }
         }
-        if (NmSummarizationUiFlag.isEnabled) {
+        if (NmSummarizationUiFlag.isEnabled && !TextUtils.isEmpty(entry.ranking.summarization)) {
+            val icon = context.getDrawable(R.drawable.ic_notification_summarization)?.mutate()
+            val imageSpan =
+                icon?.let {
+                    it.setBounds(
+                        /* left= */ 0,
+                        /* top= */ 0,
+                        icon.getIntrinsicWidth(),
+                        icon.getIntrinsicHeight(),
+                    )
+                    ImageSpan(it, ImageSpan.ALIGN_CENTER)
+                }
+            val decoratedSummary =
+                SpannableString("x" + entry.ranking.summarization).apply {
+                    setSpan(
+                        /* what = */ imageSpan,
+                        /* start = */ 0,
+                        /* end = */ 1,
+                        /* flags = */ Spanned.SPAN_INCLUSIVE_EXCLUSIVE,
+                    )
+                    entry.ranking.summarization?.let {
+                        setSpan(
+                            /* what = */ StyleSpan(Typeface.BOLD),
+                            /* start = */ 1,
+                            /* end = */ it.length,
+                            /* flags = */ Spanned.SPAN_EXCLUSIVE_INCLUSIVE,
+                        )
+                    }
+                }
             entry.sbn.notification.extras.putCharSequence(
-                EXTRA_SUMMARIZED_CONTENT, entry.ranking.summarization
+                EXTRA_SUMMARIZED_CONTENT,
+                decoratedSummary,
             )
         }
 

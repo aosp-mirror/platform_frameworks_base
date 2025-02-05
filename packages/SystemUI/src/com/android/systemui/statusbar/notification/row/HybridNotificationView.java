@@ -121,6 +121,11 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
 
     public void bind(@Nullable CharSequence title, @Nullable CharSequence text,
             @Nullable View contentView) {
+        bind(/* title = */ title, /* text = */ text, /* stripSpans */ true);
+    }
+
+    public void bind(@Nullable CharSequence title, @Nullable CharSequence text,
+            boolean stripSpans) {
         mTitleView.setText(title != null ? title.toString() : title);
         mTitleView.setVisibility(TextUtils.isEmpty(title) ? GONE : VISIBLE);
         if (TextUtils.isEmpty(text)) {
@@ -128,7 +133,11 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
             mTextView.setText(null);
         } else {
             mTextView.setVisibility(VISIBLE);
-            mTextView.setText(text.toString());
+            if (stripSpans) {
+                mTextView.setText(text.toString());
+            } else {
+                mTextView.setText(text);
+            }
         }
         requestLayout();
     }

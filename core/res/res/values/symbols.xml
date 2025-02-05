@@ -5888,6 +5888,7 @@
   <java-symbol type="bool" name="config_deviceSupportsWifiUsd" />
 
   <java-symbol type="array" name="config_notificationDefaultUnsupportedAdjustments" />
+  <java-symbol type="drawable" name="ic_notification_summarization" />
 
   <!-- Advanced Protection Service USB feature -->
   <java-symbol type="string" name="usb_apm_usb_plugged_in_when_locked_notification_title" />

@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.notification.row
 
 import android.annotation.SuppressLint
 import android.app.Notification
+import android.app.Notification.EXTRA_SUMMARIZED_CONTENT
 import android.app.Notification.MessagingStyle
 import android.content.Context
 import android.content.ContextWrapper
@@ -729,7 +730,9 @@ constructor(
                         builder = builder,
                         systemUiContext = systemUiContext,
                         redactText = false,
-                        summarization = entry.ranking.summarization,
+                        summarization = entry.sbn.notification.extras.getCharSequence(
+                            EXTRA_SUMMARIZED_CONTENT,
+                        )
                     )
                 } else null
 
