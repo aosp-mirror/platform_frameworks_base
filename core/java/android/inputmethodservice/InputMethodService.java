@@ -1725,8 +1725,20 @@ public class InputMethodService extends AbstractInputMethodService {
             return "SettingsObserver{mShowImeWithHardKeyboard=" + mShowImeWithHardKeyboard  + "}";
         }
     }
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private SettingsObserver mSettingsObserver;
+
+    /**
+     * Checks whether the IME should be shown when a hardware keyboard is connected, as configured
+     * through {@link Settings.Secure#SHOW_IME_WITH_HARD_KEYBOARD}, for testing purposes only.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public final boolean getShouldShowImeWithHardKeyboardForTesting() {
+        return mSettingsObserver.shouldShowImeWithHardKeyboard();
+    }
 
     /**
      * You can call this to customize the theme used by your IME's window.
@@ -4454,7 +4466,7 @@ public class InputMethodService extends AbstractInputMethodService {
      *
      * @hide
      */
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    @VisibleForTesting
     public final boolean isImeNavigationBarShownForTesting() {
         return mNavigationBarController.isShown();
     }
