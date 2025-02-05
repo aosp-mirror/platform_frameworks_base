@@ -133,7 +133,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                 callback.accept(new BluetoothDetailsViewModel(() -> {
                     longClick(null);
                     return null;
-                }))
+                }, mDialogViewModel))
         );
         return true;
     }

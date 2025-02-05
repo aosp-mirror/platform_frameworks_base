@@ -61,7 +61,7 @@ data class DeviceItemClick(val deviceItem: DeviceItem, val clickedView: View, va
 /** View content manager for showing active, connected and saved bluetooth devices. */
 class BluetoothDetailsContentManager
 @AssistedInject
-internal constructor(
+constructor(
     @Assisted private val initialUiProperties: BluetoothTileDialogViewModel.UiProperties,
     @Assisted private val cachedContentHeight: Int,
     @Assisted private val bluetoothTileDialogCallback: BluetoothTileDialogCallback,
@@ -112,7 +112,7 @@ internal constructor(
     private lateinit var scrollViewContent: View
 
     @AssistedFactory
-    internal interface Factory {
+    interface Factory {
         fun create(
             initialUiProperties: BluetoothTileDialogViewModel.UiProperties,
             cachedContentHeight: Int,

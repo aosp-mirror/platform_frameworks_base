@@ -18,11 +18,12 @@ package com.android.systemui.bluetooth.qsdialog
 
 import com.android.systemui.plugins.qs.TileDetailsViewModel
 
-class BluetoothDetailsViewModel(onLongClick: () -> Unit) : TileDetailsViewModel() {
-    private val _onLongClick = onLongClick
-
+class BluetoothDetailsViewModel(
+    private val onSettingsClick: () -> Unit,
+    val detailsContentViewModel: BluetoothTileDialogViewModel,
+) : TileDetailsViewModel() {
     override fun clickOnSettingsButton() {
-        _onLongClick()
+        onSettingsClick()
     }
 
     override fun getTitle(): String {
