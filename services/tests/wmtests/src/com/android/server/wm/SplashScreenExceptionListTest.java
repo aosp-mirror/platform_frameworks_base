@@ -71,7 +71,8 @@ public class SplashScreenExceptionListTest {
     @Before
     public void setUp() throws Exception {
         mInitialWindowManagerProperties = DeviceConfig.getProperties(
-                DeviceConfig.NAMESPACE_WINDOW_MANAGER);
+                DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                KEY_SPLASH_SCREEN_EXCEPTION_LIST);
         clearConstrainDisplayApisFlags();
     }
 
