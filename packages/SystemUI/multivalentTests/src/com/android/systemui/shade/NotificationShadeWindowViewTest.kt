@@ -249,15 +249,6 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(AConfigFlags.FLAG_SHADE_WINDOW_GOES_AROUND)
-    fun onConfigurationChanged_configForwarderSet_propagatesConfig() {
-        val config = Configuration()
-        underTest.onConfigurationChanged(config)
-
-        verify(configurationForwarder).onConfigurationChanged(eq(config))
-    }
-
-    @Test
-    @EnableFlags(AConfigFlags.FLAG_SHADE_WINDOW_GOES_AROUND)
     fun onMovedToDisplay_configForwarderSet_propagatesConfig() {
         val config = Configuration()
 

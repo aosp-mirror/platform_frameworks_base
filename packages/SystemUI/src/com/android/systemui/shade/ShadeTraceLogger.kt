@@ -36,7 +36,10 @@ object ShadeTraceLogger {
 
     @JvmStatic
     fun logOnConfigChanged(config: Configuration) {
-        t.instant { "onConfigurationChanged(dpi=${config.densityDpi})" }
+        t.instant {
+            "NotificationShadeWindowView#onConfigurationChanged(dpi=${config.densityDpi}, " +
+                    "smallestWidthDp=${config.smallestScreenWidthDp})"
+        }
     }
 
     @JvmStatic

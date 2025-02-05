@@ -28,6 +28,7 @@ import com.android.systemui.shade.data.repository.shadeExpansionIntent
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.notification.row.notificationRebindingTracker
 import com.android.systemui.statusbar.notification.stack.notificationStackRebindingHider
+import com.android.systemui.statusbar.policy.configurationController
 import java.util.Optional
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -59,5 +60,6 @@ val Kosmos.shadeDisplaysInteractor by
             activeNotificationsInteractor,
             notificationRebindingTracker,
             Optional.of(notificationStackRebindingHider),
+            configurationController,
         )
     }

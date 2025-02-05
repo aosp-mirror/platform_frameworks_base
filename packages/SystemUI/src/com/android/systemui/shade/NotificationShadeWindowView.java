@@ -187,10 +187,6 @@ public class NotificationShadeWindowView extends WindowRootView {
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         ShadeTraceLogger.logOnConfigChanged(newConfig);
-        if (mConfigurationForwarder != null) {
-            ShadeWindowGoesAround.isUnexpectedlyInLegacyMode();
-            mConfigurationForwarder.onConfigurationChanged(newConfig);
-        }
     }
 
     @Override

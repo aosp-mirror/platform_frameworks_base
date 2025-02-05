@@ -32,6 +32,7 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.leak.RotationUtils
 import javax.inject.Provider
@@ -64,6 +65,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     @Captor private lateinit var captor: ArgumentCaptor<QSPanel.OnConfigurationChangedListener>
     @Mock private lateinit var longPressEffectProvider: Provider<QSLongPressEffect>
     @Mock private lateinit var mediaCarouselInteractor: MediaCarouselInteractor
+    @Mock private lateinit var configurationController: ConfigurationController
 
     private val usingMediaPlayer: Boolean
         get() = false
@@ -100,6 +102,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
                 dumpManager,
                 longPressEffectProvider,
                 mediaCarouselInteractor,
+                configurationController,
             )
 
         controller.init()
@@ -171,6 +174,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         dumpManager: DumpManager,
         longPressEffectProvider: Provider<QSLongPressEffect>,
         mediaCarouselInteractor: MediaCarouselInteractor,
+        configurationController: ConfigurationController,
     ) :
         QuickQSPanelController(
             view,
@@ -186,6 +190,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
             ResourcesSplitShadeStateController(),
             longPressEffectProvider,
             mediaCarouselInteractor,
+            configurationController,
         ) {
 
         private var rotation = RotationUtils.ROTATION_NONE

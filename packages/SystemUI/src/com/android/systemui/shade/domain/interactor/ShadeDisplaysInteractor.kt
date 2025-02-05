@@ -16,6 +16,8 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import android.content.ComponentCallbacks
+import android.content.res.Configuration
 import android.util.Log
 import android.window.WindowContext
 import androidx.annotation.UiThread
@@ -36,6 +38,7 @@ import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.row.NotificationRebindingTracker
 import com.android.systemui.statusbar.notification.stack.NotificationStackRebindingHider
+import com.android.systemui.statusbar.phone.ConfigurationForwarder
 import com.android.systemui.util.kotlin.getOrNull
 import com.android.window.flags.Flags
 import java.util.Optional
@@ -65,6 +68,7 @@ constructor(
     private val activeNotificationsInteractor: ActiveNotificationsInteractor,
     private val notificationRebindingTracker: NotificationRebindingTracker,
     notificationStackRebindingHider: Optional<NotificationStackRebindingHider>,
+    @ShadeDisplayAware private val configForwarder: ConfigurationForwarder,
 ) : CoreStartable {
 
     private val shadeExpandedInteractor = requireOptional(shadeExpandedInteractor)
@@ -75,11 +79,24 @@ constructor(
 
     override fun start() {
         ShadeWindowGoesAround.isUnexpectedlyInLegacyMode()
+        listenForWindowContextConfigChanges()
         bgScope.launchTraced(TAG) {
             shadePositionRepository.displayId.collectLatest { displayId ->
                 moveShadeWindowTo(displayId)
             }
         }
+    }
+
+    private fun listenForWindowContextConfigChanges() {
+        shadeContext.registerComponentCallbacks(
+            object : ComponentCallbacks {
+                override fun onConfigurationChanged(newConfig: Configuration) {
+                    configForwarder.onConfigurationChanged(newConfig)
+                }
+
+                override fun onLowMemory() {}
+            }
+        )
     }
 
     /** Tries to move the shade. If anything wrong happens, fails gracefully without crashing. */
