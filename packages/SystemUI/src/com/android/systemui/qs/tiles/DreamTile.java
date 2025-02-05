@@ -67,8 +67,10 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
     private static final String LOG_TAG = "QSDream";
     private final IDreamManager mDreamManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
-    private final UserSettingObserver mEnabledSettingObserver;
-    private final UserSettingObserver mDreamSettingObserver;
+    @VisibleForTesting
+    final UserSettingObserver mEnabledSettingObserver;
+    @VisibleForTesting
+    final UserSettingObserver mDreamSettingObserver;
     private final UserTracker mUserTracker;
     private final boolean mDreamSupported;
     private final boolean mDreamOnlyEnabledForDockUser;
@@ -178,6 +180,13 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
             state.state = isDreaming() ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         }
         state.expandedAccessibilityClassName = Switch.class.getName();
+    }
+
+    @Override
+    protected void handleUserSwitch(int newUserId) {
+        super.handleUserSwitch(newUserId);
+        mDreamSettingObserver.setUserId(newUserId);
+        mEnabledSettingObserver.setUserId(newUserId);
     }
 
     @Nullable
