@@ -4342,6 +4342,23 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Nullable
+    Boolean resetIgnoreOrientationRequest(int displayId) {
+        synchronized (mGlobalLock) {
+            final DisplayContent display = mRoot.getDisplayContent(displayId);
+            if (display == null) {
+                return null;
+            }
+            display.mHasSetIgnoreOrientationRequest = false;
+            // Clear existing override settings.
+            mDisplayWindowSettings.setIgnoreOrientationRequest(display,
+                    null /* ignoreOrientationRequest */);
+            // Reload from settings in case there is built-in config.
+            mDisplayWindowSettings.applyRotationSettingsToDisplayLocked(display);
+            return display.getIgnoreOrientationRequest();
+        }
+    }
+
     /**
      * Controls whether ignore orientation request logic in {@link DisplayArea} is disabled
      * at runtime and how to optionally map some requested orientations to others.

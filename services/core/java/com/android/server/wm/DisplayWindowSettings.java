@@ -122,7 +122,7 @@ class DisplayWindowSettings {
     }
 
     void setIgnoreOrientationRequest(@NonNull DisplayContent displayContent,
-            boolean ignoreOrientationRequest) {
+            @Nullable Boolean ignoreOrientationRequest) {
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         final SettingsProvider.SettingsEntry overrideSettings =
                 mSettingsProvider.getOverrideSettings(displayInfo);

@@ -578,6 +578,18 @@ public class WindowManagerShellCommand extends ShellCommand {
             displayId = Integer.parseInt(getNextArgRequired());
             arg = getNextArgRequired();
         }
+        if ("reset".equals(arg)) {
+            final Boolean result = mInternal.resetIgnoreOrientationRequest(displayId);
+            if (result != null) {
+                pw.println("Reset ignoreOrientationRequest to " + result + " for displayId="
+                        + displayId);
+                return 0;
+            } else {
+                getErrPrintWriter().println(
+                        "Unable to reset ignoreOrientationRequest for displayId=" + displayId);
+                return -1;
+            }
+        }
 
         final boolean ignoreOrientationRequest;
         switch (arg) {
@@ -590,7 +602,7 @@ public class WindowManagerShellCommand extends ShellCommand {
                 ignoreOrientationRequest = false;
                 break;
             default:
-                getErrPrintWriter().println("Error: expecting true, 1, false, 0, but we "
+                getErrPrintWriter().println("Error: expecting true, 1, false, 0, reset, but we "
                         + "get " + arg);
                 return -1;
         }
@@ -1525,7 +1537,7 @@ public class WindowManagerShellCommand extends ShellCommand {
         mInterface.setFixedToUserRotation(displayId, IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT);
 
         // set-ignore-orientation-request
-        mInterface.setIgnoreOrientationRequest(displayId, false /* ignoreOrientationRequest */);
+        mInternal.resetIgnoreOrientationRequest(displayId);
 
         // set-letterbox-style
         resetLetterboxStyle();
@@ -1568,7 +1580,7 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("  fixed-to-user-rotation [-d DISPLAY_ID] [enabled|disabled|default");
         pw.println("      |enabled_if_no_auto_rotation]");
         pw.println("    Print or set rotating display for app requested orientation.");
-        pw.println("  set-ignore-orientation-request [-d DISPLAY_ID] [true|1|false|0]");
+        pw.println("  set-ignore-orientation-request [-d DISPLAY_ID] [reset|true|1|false|0]");
         pw.println("  get-ignore-orientation-request [-d DISPLAY_ID] ");
         pw.println("    If app requested orientation should be ignored.");
         pw.println("  set-sandbox-display-apis [true|1|false|0]");
