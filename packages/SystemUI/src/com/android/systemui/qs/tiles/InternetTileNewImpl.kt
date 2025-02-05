@@ -32,7 +32,6 @@ import com.android.systemui.plugins.qs.TileDetailsViewModel
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
-import com.android.systemui.qs.flags.QsDetailedView
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.dialog.InternetDetailsViewModel
@@ -94,9 +93,6 @@ constructor(
     }
 
     override fun handleClick(expandable: Expandable?) {
-        if (QsDetailedView.isEnabled) {
-            return
-        }
         mainHandler.post {
             internetDialogManager.create(
                 aboveStatusBar = true,

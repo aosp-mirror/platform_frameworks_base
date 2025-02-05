@@ -74,6 +74,7 @@ import com.android.systemui.qs.flags.QsDetailedView;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.shade.domain.interactor.ShadeDialogContextInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.wifitrackerlib.WifiEntry;
@@ -207,9 +208,13 @@ public class InternetDialogDelegateLegacy implements
             @Background Executor executor,
             KeyguardStateController keyguardStateController,
             SystemUIDialog.Factory systemUIDialogFactory,
-            ShadeDialogContextInteractor shadeDialogContextInteractor) {
-        // If `QsDetailedView` is enabled, it should show the details view.
-        QsDetailedView.assertInLegacyMode();
+            ShadeDialogContextInteractor shadeDialogContextInteractor,
+            ShadeModeInteractor shadeModeInteractor) {
+        // TODO (b/393628355): remove this after the details view is supported for single shade.
+        if (shadeModeInteractor.isDualShade()){
+            // If `QsDetailedView` is enabled, it should show the details view.
+            QsDetailedView.assertInLegacyMode();
+        }
 
         mAboveStatusBar = aboveStatusBar;
         mSystemUIDialogFactory = systemUIDialogFactory;

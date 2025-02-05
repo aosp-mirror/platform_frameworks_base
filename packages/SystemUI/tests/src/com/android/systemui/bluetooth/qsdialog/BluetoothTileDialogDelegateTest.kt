@@ -16,17 +16,20 @@
 
 package com.android.systemui.bluetooth.qsdialog
 
+import android.platform.test.annotations.DisableFlags
 import android.testing.TestableLooper
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.SysUiState
 import com.android.systemui.shade.data.repository.shadeDialogContextInteractor
+import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.testKosmos
@@ -50,6 +53,7 @@ import org.mockito.junit.MockitoRule
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
+@DisableFlags(Flags.FLAG_QS_TILE_DETAILED_VIEW)
 class BluetoothTileDialogDelegateTest : SysuiTestCase() {
     companion object {
         const val DEVICE_NAME = "device"
@@ -105,6 +109,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                 sysuiDialogFactory,
                 kosmos.shadeDialogContextInteractor,
                 bluetoothDetailsContentManagerFactory,
+                kosmos.shadeModeInteractor,
             )
 
         whenever(sysuiDialogFactory.create(any(SystemUIDialog.Delegate::class.java), any()))
