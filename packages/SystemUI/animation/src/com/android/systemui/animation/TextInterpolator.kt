@@ -98,6 +98,9 @@ class TextInterpolator(layout: Layout, var typefaceCache: TypefaceVariantCache) 
      */
     var progress: Float = 0f
 
+    /** Linear progress value (not interpolated) */
+    var linearProgress: Float = 0f
+
     /**
      * The layout used for drawing text.
      *
@@ -217,7 +220,12 @@ class TextInterpolator(layout: Layout, var typefaceCache: TypefaceVariantCache) 
                 }
                 run.fontRuns.forEach { fontRun ->
                     fontRun.baseFont =
-                        fontInterpolator.lerp(fontRun.baseFont, fontRun.targetFont, progress)
+                        fontInterpolator.lerp(
+                            fontRun.baseFont,
+                            fontRun.targetFont,
+                            progress,
+                            linearProgress,
+                        )
                     val fvar = FontVariationAxis.toFontVariationSettings(fontRun.baseFont.axes)
                     basePaint.typeface = typefaceCache.getTypefaceForVariant(fvar)
                 }
@@ -358,7 +366,7 @@ class TextInterpolator(layout: Layout, var typefaceCache: TypefaceVariantCache) 
     // Draws single font run.
     private fun drawFontRun(c: Canvas, line: Run, run: FontRun, lineNo: Int, paint: Paint) {
         var arrayIndex = 0
-        val font = fontInterpolator.lerp(run.baseFont, run.targetFont, progress)
+        val font = fontInterpolator.lerp(run.baseFont, run.targetFont, progress, linearProgress)
 
         val glyphFilter = glyphFilter
         if (glyphFilter == null) {

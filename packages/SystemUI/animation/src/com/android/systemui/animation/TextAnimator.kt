@@ -25,9 +25,8 @@ import android.graphics.Typeface
 import android.graphics.fonts.Font
 import android.graphics.fonts.FontVariationAxis
 import android.text.Layout
-import android.util.LruCache
-import kotlin.math.roundToInt
 import android.util.Log
+import android.util.LruCache
 
 private const val DEFAULT_ANIMATION_DURATION: Long = 300
 private const val TYPEFACE_CACHE_MAX_ENTRIES = 5
@@ -37,6 +36,7 @@ typealias GlyphCallback = (TextAnimator.PositionedGlyph, Float) -> Unit
 interface TypefaceVariantCache {
     val fontCache: FontCache
     val animationFrameCount: Int
+
     fun getTypefaceForVariant(fvar: String?): Typeface?
 
     companion object {
@@ -45,24 +45,25 @@ interface TypefaceVariantCache {
                 return baseTypeface
             }
 
-            val axes = FontVariationAxis.fromFontVariationSettings(fVar)
-                ?.toMutableList()
-                ?: mutableListOf()
+            val axes =
+                FontVariationAxis.fromFontVariationSettings(fVar)?.toMutableList()
+                    ?: mutableListOf()
             axes.removeIf { !baseTypeface.isSupportedAxes(it.getOpenTypeTagValue()) }
+
             if (axes.isEmpty()) {
                 return baseTypeface
+            } else {
+                return Typeface.createFromTypefaceWithVariation(baseTypeface, axes)
             }
-            return Typeface.createFromTypefaceWithVariation(baseTypeface, axes)
         }
     }
 }
 
-class TypefaceVariantCacheImpl(
-    var baseTypeface: Typeface,
-    override val animationFrameCount: Int,
-) : TypefaceVariantCache {
+class TypefaceVariantCacheImpl(var baseTypeface: Typeface, override val animationFrameCount: Int) :
+    TypefaceVariantCache {
     private val cache = LruCache<String, Typeface>(TYPEFACE_CACHE_MAX_ENTRIES)
     override val fontCache = FontCacheImpl(animationFrameCount)
+
     override fun getTypefaceForVariant(fvar: String?): Typeface? {
         if (fvar == null) {
             return baseTypeface
@@ -113,28 +114,19 @@ class TextAnimator(
         ValueAnimator.ofFloat(1f).apply {
             duration = DEFAULT_ANIMATION_DURATION
             addUpdateListener {
-                textInterpolator.progress =
-                    calculateProgress(it.animatedValue as Float, typefaceCache.animationFrameCount)
+                textInterpolator.progress = it.animatedValue as Float
+                textInterpolator.linearProgress =
+                    it.currentPlayTime.toFloat() / it.duration.toFloat()
                 invalidateCallback()
             }
             addListener(
                 object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator) = textInterpolator.rebase()
+
                     override fun onAnimationCancel(animation: Animator) = textInterpolator.rebase()
                 }
             )
         }
-
-    private fun calculateProgress(animProgress: Float, numberOfAnimationSteps: Int?): Float {
-        if (numberOfAnimationSteps != null) {
-            // This clamps the progress to the nearest value of "numberOfAnimationSteps"
-            // discrete values between 0 and 1f.
-            return (animProgress * numberOfAnimationSteps).roundToInt() /
-                numberOfAnimationSteps.toFloat()
-        }
-
-        return animProgress
-    }
 
     sealed class PositionedGlyph {
         /** Mutable X coordinate of the glyph position relative from drawing offset. */
@@ -209,12 +201,14 @@ class TextAnimator(
      *
      * Here is an example of font runs: "fin. 終わり"
      *
+     * ```
      * Characters :    f      i      n      .      _      終     わ     り
      * Code Points: \u0066 \u0069 \u006E \u002E \u0020 \u7D42 \u308F \u308A
      * Font Runs  : <-- Roboto-Regular.ttf          --><-- NotoSans-CJK.otf -->
      *                  runStart = 0, runLength = 5        runStart = 5, runLength = 3
      * Glyph IDs  :      194        48     7      8     4367   1039   1002
      * Glyph Index:       0          1     2      3       0      1      2
+     * ```
      *
      * In this example, the "fi" is converted into ligature form, thus the single glyph ID is
      * assigned for two characters, f and i.
@@ -246,22 +240,24 @@ class TextAnimator(
     /**
      * Set text style with animation.
      *
+     * ```
      * By passing -1 to weight, the view preserve the current weight.
      * By passing -1 to textSize, the view preserve the current text size.
-     * Bu passing -1 to duration, the default text animation, 1000ms, is used.
+     * By passing -1 to duration, the default text animation, 1000ms, is used.
      * By passing false to animate, the text will be updated without animation.
+     * ```
      *
      * @param fvar an optional text fontVariationSettings.
      * @param textSize an optional font size.
-     * @param colors an optional colors array that must be the same size as numLines passed to
-     *               the TextInterpolator
+     * @param colors an optional colors array that must be the same size as numLines passed to the
+     *   TextInterpolator
      * @param strokeWidth an optional paint stroke width
      * @param animate an optional boolean indicating true for showing style transition as animation,
-     *                false for immediate style transition. True by default.
+     *   false for immediate style transition. True by default.
      * @param duration an optional animation duration in milliseconds. This is ignored if animate is
-     *                 false.
+     *   false.
      * @param interpolator an optional time interpolator. If null is passed, last set interpolator
-     *                     will be used. This is ignored if animate is false.
+     *   will be used. This is ignored if animate is false.
      */
     fun setTextStyle(
         fvar: String? = "",
@@ -273,8 +269,20 @@ class TextAnimator(
         interpolator: TimeInterpolator? = null,
         delay: Long = 0,
         onAnimationEnd: Runnable? = null,
-    ) = setTextStyleInternal(fvar, textSize, color, strokeWidth, animate, duration,
-        interpolator, delay, onAnimationEnd, updateLayoutOnFailure = true)
+    ) {
+        setTextStyleInternal(
+            fvar,
+            textSize,
+            color,
+            strokeWidth,
+            animate,
+            duration,
+            interpolator,
+            delay,
+            onAnimationEnd,
+            updateLayoutOnFailure = true,
+        )
+    }
 
     private fun setTextStyleInternal(
         fvar: String?,
@@ -310,24 +318,21 @@ class TextAnimator(
 
             if (animate) {
                 animator.startDelay = delay
-                animator.duration =
-                    if (duration == -1L) {
-                        DEFAULT_ANIMATION_DURATION
-                    } else {
-                        duration
-                    }
+                animator.duration = if (duration == -1L) DEFAULT_ANIMATION_DURATION else duration
                 interpolator?.let { animator.interpolator = it }
                 if (onAnimationEnd != null) {
-                    val listener = object : AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator) {
-                            onAnimationEnd.run()
-                            animator.removeListener(this)
+                    animator.addListener(
+                        object : AnimatorListenerAdapter() {
+                            override fun onAnimationEnd(animation: Animator) {
+                                onAnimationEnd.run()
+                                animator.removeListener(this)
+                            }
+
+                            override fun onAnimationCancel(animation: Animator) {
+                                animator.removeListener(this)
+                            }
                         }
-                        override fun onAnimationCancel(animation: Animator) {
-                            animator.removeListener(this)
-                        }
-                    }
-                    animator.addListener(listener)
+                    )
                 }
                 animator.start()
             } else {
@@ -338,11 +343,26 @@ class TextAnimator(
             }
         } catch (ex: IllegalArgumentException) {
             if (updateLayoutOnFailure) {
-                Log.e(TAG, "setTextStyleInternal: Exception caught but retrying. This is usually" +
-                    " due to the layout having changed unexpectedly without being notified.", ex)
+                Log.e(
+                    TAG,
+                    "setTextStyleInternal: Exception caught but retrying. This is usually" +
+                        " due to the layout having changed unexpectedly without being notified.",
+                    ex,
+                )
+
                 updateLayout(textInterpolator.layout)
-                setTextStyleInternal(fvar, textSize, color, strokeWidth, animate, duration,
-                    interpolator, delay, onAnimationEnd, updateLayoutOnFailure = false)
+                setTextStyleInternal(
+                    fvar,
+                    textSize,
+                    color,
+                    strokeWidth,
+                    animate,
+                    duration,
+                    interpolator,
+                    delay,
+                    onAnimationEnd,
+                    updateLayoutOnFailure = false,
+                )
             } else {
                 throw ex
             }
@@ -351,6 +371,8 @@ class TextAnimator(
 
     /**
      * Set text style with animation. Similar as
+     *
+     * ```
      * fun setTextStyle(
      *      fvar: String? = "",
      *      textSize: Float = -1f,
@@ -362,6 +384,7 @@ class TextAnimator(
      *      delay: Long = 0,
      *      onAnimationEnd: Runnable? = null
      * )
+     * ```
      *
      * @param weight an optional style value for `wght` in fontVariationSettings.
      * @param width an optional style value for `wdth` in fontVariationSettings.
@@ -380,14 +403,16 @@ class TextAnimator(
         duration: Long = -1L,
         interpolator: TimeInterpolator? = null,
         delay: Long = 0,
-        onAnimationEnd: Runnable? = null
-    ) = setTextStyleInternal(
-            fvar = fontVariationUtils.updateFontVariation(
-                weight = weight,
-                width = width,
-                opticalSize = opticalSize,
-                roundness = roundness,
-            ),
+        onAnimationEnd: Runnable? = null,
+    ) {
+        setTextStyleInternal(
+            fvar =
+                fontVariationUtils.updateFontVariation(
+                    weight = weight,
+                    width = width,
+                    opticalSize = opticalSize,
+                    roundness = roundness,
+                ),
             textSize = textSize,
             color = color,
             strokeWidth = strokeWidth,
@@ -398,6 +423,7 @@ class TextAnimator(
             onAnimationEnd = onAnimationEnd,
             updateLayoutOnFailure = true,
         )
+    }
 
     companion object {
         private val TAG = TextAnimator::class.simpleName!!

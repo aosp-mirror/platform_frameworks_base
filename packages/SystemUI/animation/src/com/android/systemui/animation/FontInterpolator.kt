@@ -24,6 +24,7 @@ import android.util.MathUtils
 import androidx.annotation.VisibleForTesting
 import java.lang.Float.max
 import java.lang.Float.min
+import kotlin.math.roundToInt
 
 private const val TAG_WGHT = "wght"
 private const val TAG_ITAL = "ital"
@@ -89,7 +90,7 @@ class FontCacheImpl(override val animationFrameCount: Int = DEFAULT_FONT_CACHE_M
 /** Provide interpolation of two fonts by adjusting font variation settings. */
 class FontInterpolator(val fontCache: FontCache = FontCacheImpl()) {
     /** Linear interpolate the font variation settings. */
-    fun lerp(start: Font, end: Font, progress: Float): Font {
+    fun lerp(start: Font, end: Font, progress: Float, linearProgress: Float): Font {
         if (progress == 0f) {
             return start
         } else if (progress == 1f) {
@@ -105,7 +106,8 @@ class FontInterpolator(val fontCache: FontCache = FontCacheImpl()) {
 
         // Check we already know the result. This is commonly happens since we draws the different
         // text chunks with the same font.
-        val iKey = InterpKey(start, end, (progress * fontCache.animationFrameCount).toInt())
+        val iKey =
+            InterpKey(start, end, (linearProgress * fontCache.animationFrameCount).roundToInt())
         fontCache.get(iKey)?.let {
             if (DEBUG) {
                 Log.d(LOG_TAG, "[$progress] Interp. cache hit for $iKey")
