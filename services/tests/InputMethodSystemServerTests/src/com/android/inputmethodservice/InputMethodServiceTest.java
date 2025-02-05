@@ -38,6 +38,7 @@ import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
+import android.server.wm.WindowManagerStateHelper;
 import android.util.Log;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants;
@@ -63,6 +64,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 
 import java.util.Objects;
@@ -86,10 +88,15 @@ public class InputMethodServiceTest {
     private static final String DISABLE_SHOW_IME_WITH_HARD_KEYBOARD_CMD =
             "settings put secure " + Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD + " 0";
 
+    private final WindowManagerStateHelper mWmState =  new WindowManagerStateHelper();
+
     private final DeviceFlagsValueProvider mFlagsValueProvider = new DeviceFlagsValueProvider();
 
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = new CheckFlagsRule(mFlagsValueProvider);
+
+    @Rule
+    public final TestName mName = new TestName();
 
     private Instrumentation mInstrumentation;
     private UiDevice mUiDevice;
@@ -154,6 +161,8 @@ public class InputMethodServiceTest {
      */
     @Test
     public void testShowHideKeyboard_byUserAction() {
+        waitUntilActivityReadyForInputInjection(mActivity);
+
         setShowImeWithHardKeyboard(true /* enabled */);
 
         // Performs click on EditText to bring up the IME.
@@ -867,6 +876,8 @@ public class InputMethodServiceTest {
         assumeTrue("Must have a navigation bar", hasNavigationBar());
         assumeTrue("Must be in gesture navigation mode", isGestureNavEnabled());
 
+        waitUntilActivityReadyForInputInjection(mActivity);
+
         setShowImeWithHardKeyboard(true /* enabled */);
 
         verifyInputViewStatusOnMainSync(
@@ -900,6 +911,8 @@ public class InputMethodServiceTest {
     public void testBackButtonLongClick() {
         assumeTrue("Must have a navigation bar", hasNavigationBar());
         assumeTrue("Must be in gesture navigation mode", isGestureNavEnabled());
+
+        waitUntilActivityReadyForInputInjection(mActivity);
 
         setShowImeWithHardKeyboard(true /* enabled */);
 
@@ -935,6 +948,8 @@ public class InputMethodServiceTest {
     public void testImeSwitchButtonClick() {
         assumeTrue("Must have a navigation bar", hasNavigationBar());
         assumeTrue("Must be in gesture navigation mode", isGestureNavEnabled());
+
+        waitUntilActivityReadyForInputInjection(mActivity);
 
         setShowImeWithHardKeyboard(true /* enabled */);
 
@@ -973,6 +988,8 @@ public class InputMethodServiceTest {
     public void testImeSwitchButtonLongClick() {
         assumeTrue("Must have a navigation bar", hasNavigationBar());
         assumeTrue("Must be in gesture navigation mode", isGestureNavEnabled());
+
+        waitUntilActivityReadyForInputInjection(mActivity);
 
         setShowImeWithHardKeyboard(true /* enabled */);
 
@@ -1141,6 +1158,15 @@ public class InputMethodServiceTest {
     private void prepareActivity() {
         mActivity = TestActivity.startSync(mInstrumentation);
         Log.i(TAG, "Finish preparing activity with editor.");
+    }
+
+    private void waitUntilActivityReadyForInputInjection(@NonNull TestActivity activity) {
+        try {
+            mWmState.waitUntilActivityReadyForInputInjection(activity, mInstrumentation, TAG,
+                    "test: " + mName.getMethodName());
+        } catch (InterruptedException e) {
+            fail("Interrupted while waiting for activity to be ready: " + e.getMessage());
+        }
     }
 
     @NonNull
