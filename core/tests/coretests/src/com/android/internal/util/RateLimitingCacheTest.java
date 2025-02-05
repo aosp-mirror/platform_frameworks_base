@@ -18,9 +18,15 @@ package com.android.internal.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import android.os.SystemClock;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.CountDownLatch;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,7 +44,7 @@ public class RateLimitingCacheTest {
         mCounter = -1;
     }
 
-    RateLimitingCache.ValueFetcher<Integer> mFetcher = () -> {
+    private final RateLimitingCache.ValueFetcher<Integer> mFetcher = () -> {
         return ++mCounter;
     };
 
@@ -117,6 +123,143 @@ public class RateLimitingCacheTest {
         // At 10 per second, 2 seconds should not exceed about 30, assuming overlap into left and
         // right windows that allow 10 each
         assertCount(s, 2000, 20, 33);
+    }
+
+    /**
+     * Exercises concurrent access to the cache.
+     */
+    @Test
+    public void testMultipleThreads() throws InterruptedException {
+        final long periodMillis = 1000;
+        final int maxCountPerPeriod = 10;
+        final RateLimitingCache<Integer> s =
+                new RateLimitingCache<>(periodMillis, maxCountPerPeriod);
+
+        Thread t1 = new Thread(() -> {
+            for (int i = 0; i < 100; i++) {
+                s.get(mFetcher);
+            }
+        });
+        Thread t2 = new Thread(() -> {
+            for (int i = 0; i < 100; i++) {
+                s.get(mFetcher);
+            }
+        });
+
+        final long startTimeMillis = SystemClock.elapsedRealtime();
+        t1.start();
+        t2.start();
+        t1.join();
+        t2.join();
+        final long endTimeMillis = SystemClock.elapsedRealtime();
+
+        final long periodsElapsed = 1 + ((endTimeMillis - startTimeMillis) / periodMillis);
+        final long expected = Math.min(100 + 100, periodsElapsed * maxCountPerPeriod) - 1;
+        assertEquals(mCounter, expected);
+    }
+
+    /**
+     * Multiple threads calling get() on the cache while the cached value is stale are allowed
+     * to fetch, regardless of the rate limiting.
+     * This is to prevent a slow getting thread from blocking other threads from getting a fresh
+     * value.
+     */
+    @Test
+    public void testMultipleThreads_oneThreadIsSlow() throws InterruptedException {
+        final long periodMillis = 1000;
+        final int maxCountPerPeriod = 1;
+        final RateLimitingCache<Integer> s =
+                new RateLimitingCache<>(periodMillis, maxCountPerPeriod);
+
+        final CountDownLatch latch1 = new CountDownLatch(2);
+        final CountDownLatch latch2 = new CountDownLatch(1);
+        final AtomicInteger counter = new AtomicInteger();
+        final RateLimitingCache.ValueFetcher<Integer> fetcher = () -> {
+            latch1.countDown();
+            try {
+                latch2.await();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            return counter.incrementAndGet();
+        };
+
+        Thread t1 = new Thread(() -> {
+            for (int i = 0; i < 100; i++) {
+                s.get(fetcher);
+            }
+        });
+        Thread t2 = new Thread(() -> {
+            for (int i = 0; i < 100; i++) {
+                s.get(fetcher);
+            }
+        });
+
+        t1.start();
+        t2.start();
+        // Both threads should be admitted to fetch because there is no fresh cached value,
+        // even though this exceeds the rate limit of at most 1 call per period.
+        // Wait for both threads to be fetching.
+        latch1.await();
+        // Allow the fetcher to return.
+        latch2.countDown();
+        // Wait for both threads to finish their fetches.
+        t1.join();
+        t2.join();
+
+        assertEquals(counter.get(), 2);
+    }
+
+    /**
+     * Even if multiple threads race to refresh the cache, only one thread gets to set a new value.
+     * This ensures, among other things, that the cache never returns values that were fetched out
+     * of order.
+     */
+    @Test
+    public void testMultipleThreads_cachedValueNeverGoesBackInTime() throws InterruptedException {
+        final long periodMillis = 10;
+        final int maxCountPerPeriod = 3;
+        final RateLimitingCache<Integer> s =
+                new RateLimitingCache<>(periodMillis, maxCountPerPeriod);
+        final AtomicInteger counter = new AtomicInteger();
+        final RateLimitingCache.ValueFetcher<Integer> fetcher = () -> {
+            // Note that this fetcher has a side effect, which is strictly not allowed for
+            // RateLimitingCache users, but we make an exception for the purpose of this test.
+            return counter.incrementAndGet();
+        };
+
+        // Make three threads that spin on getting from the cache
+        final AtomicBoolean shouldRun = new AtomicBoolean(true);
+        Runnable worker = new Runnable() {
+            @Override
+            public void run() {
+                while (shouldRun.get()) {
+                    s.get(fetcher);
+                }
+            }
+        };
+        Thread t1 = new Thread(worker);
+        Thread t2 = new Thread(worker);
+        Thread t3 = new Thread(worker);
+        t1.start();
+        t2.start();
+        t3.start();
+
+        // Get values until a sufficiently convincing high value while ensuring that values are
+        // monotonically non-decreasing.
+        int lastSeen = 0;
+        while (lastSeen < 10000) {
+            int value = s.get(fetcher);
+            if (value < lastSeen) {
+                fail("Unexpectedly saw decreasing value " + value + " after " + lastSeen);
+            }
+            lastSeen = value;
+        }
+
+        shouldRun.set(false);
+        t1.join();
+        t2.join();
+        t3.join();
     }
 
     /**
