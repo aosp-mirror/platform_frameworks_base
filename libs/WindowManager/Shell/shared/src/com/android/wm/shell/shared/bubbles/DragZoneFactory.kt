@@ -44,8 +44,8 @@ class DragZoneFactory(
     private val hSplitFromExpandedViewDragZoneWidth = 60
     private val vSplitFromExpandedViewDragZoneWidth = 200
     private val vSplitFromExpandedViewDragZoneHeightTablet = 285
-    private val vSplitFromExpandedViewDragZoneHeightFold = 150
-    private val vUnevenSplitFromExpandedViewDragZoneHeight = 96
+    private val vSplitFromExpandedViewDragZoneHeightFoldTall = 150
+    private val vSplitFromExpandedViewDragZoneHeightFoldShort = 100
 
     /**
      * Creates the list of drag zones for the dragged object.
@@ -360,7 +360,7 @@ class DragZoneFactory(
                                     fullScreenDragZoneHeight,
                                     splitZoneLeft + fullScreenDragZoneWidth,
                                     fullScreenDragZoneHeight +
-                                        vSplitFromExpandedViewDragZoneHeightFold
+                                        vSplitFromExpandedViewDragZoneHeightFoldTall
                                 ),
                         ),
                         DragZone.Split.Bottom(
@@ -370,12 +370,32 @@ class DragZoneFactory(
                                     windowBounds.bottom / 2,
                                     splitZoneLeft + fullScreenDragZoneWidth,
                                     windowBounds.bottom / 2 +
-                                        vSplitFromExpandedViewDragZoneHeightFold
+                                        vSplitFromExpandedViewDragZoneHeightFoldTall
                                 ),
                         )
                     )
-                // TODO b/393172431: add this zone when it's defined
-                SplitScreenMode.SPLIT_10_90 -> listOf()
+                SplitScreenMode.SPLIT_10_90 ->
+                    listOf(
+                        DragZone.Split.Top(
+                            bounds =
+                                Rect(
+                                    0,
+                                    0,
+                                    windowBounds.right,
+                                    vSplitFromExpandedViewDragZoneHeightFoldShort
+                                ),
+                        ),
+                        DragZone.Split.Bottom(
+                            bounds =
+                                Rect(
+                                    splitZoneLeft,
+                                    vSplitFromExpandedViewDragZoneHeightFoldShort,
+                                    splitZoneLeft + fullScreenDragZoneWidth,
+                                    vSplitFromExpandedViewDragZoneHeightFoldShort +
+                                        vSplitFromExpandedViewDragZoneHeightFoldTall
+                                ),
+                        )
+                    )
                 SplitScreenMode.SPLIT_90_10 ->
                     listOf(
                         DragZone.Split.Top(
@@ -385,7 +405,7 @@ class DragZoneFactory(
                                     fullScreenDragZoneHeight,
                                     splitZoneLeft + fullScreenDragZoneWidth,
                                     fullScreenDragZoneHeight +
-                                        vUnevenSplitFromExpandedViewDragZoneHeight
+                                        vSplitFromExpandedViewDragZoneHeightFoldTall
                                 ),
                         ),
                         DragZone.Split.Bottom(
@@ -393,7 +413,7 @@ class DragZoneFactory(
                                 Rect(
                                     0,
                                     windowBounds.bottom -
-                                        vUnevenSplitFromExpandedViewDragZoneHeight,
+                                        vSplitFromExpandedViewDragZoneHeightFoldShort,
                                     windowBounds.right,
                                     windowBounds.bottom
                                 ),
