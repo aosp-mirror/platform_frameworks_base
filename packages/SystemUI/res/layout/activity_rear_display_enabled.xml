@@ -52,27 +52,25 @@
         android:text="@string/rear_display_unfolded_front_screen_on"
         android:textAppearance="@style/TextAppearance.Dialog.Title"
         android:lineSpacingExtra="2sp"
-        android:translationY="-1.24sp"
+        android:paddingBottom="@dimen/rear_display_title_bottom_padding"
         android:gravity="center_horizontal" />
 
-    <!-- Buttons -->
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="36dp">
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
-        <TextView
-            android:id="@+id/button_cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:layout_gravity="start"
-            android:text="@string/cancel"
-            style="@style/Widget.Dialog.Button.BorderButton" />
-    </LinearLayout>
+        android:text="@string/rear_display_unfolded_front_screen_on_slide_to_cancel"
+        android:textAppearance="@style/TextAppearance.Dialog.Body"
+        android:lineSpacingExtra="2sp"
+        android:paddingBottom="@dimen/rear_display_title_bottom_padding"
+        android:gravity="center_horizontal" />
+
+    <SeekBar
+        android:id="@+id/seekbar"
+        android:layout_width="@dimen/rear_display_animation_width_opened"
+        android:layout_height="wrap_content"
+        android:progressDrawable="@drawable/rear_display_dialog_seekbar"
+        android:thumb="@null"
+        android:background="@null"
+        android:gravity="center_horizontal" />
 
 </LinearLayout>

@@ -3656,6 +3656,8 @@
     <string name="rear_display_accessibility_unfolded_animation">Foldable device being flipped around</string>
     <!-- Text for a dialog telling the user that the front screen is turned on. [CHAR_LIMIT=NONE] -->
     <string name="rear_display_unfolded_front_screen_on">Front screen turned on</string>
+    <!-- Text for a dialog telling the user that sliding the progress bar cancels rear display mode, bringing the system contents back to the inner display. [CHAR_LIMIT=NONE] -->
+    <string name="rear_display_unfolded_front_screen_on_slide_to_cancel">Slide to use inner screen</string>
 
     <!-- QuickSettings: Additional label for the auto-rotation quicksettings tile indicating that the setting corresponds to the folded posture for a foldable device [CHAR LIMIT=32] -->
     <string name="quick_settings_rotation_posture_folded">folded</string>

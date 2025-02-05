@@ -2159,4 +2159,14 @@
     <!-- Gradient color wallpaper start -->
     <dimen name="gradient_color_wallpaper_center_offset">128dp</dimen>
     <!-- Gradient color wallpaper end -->
+
+    <!-- Rear display mode -->
+    <dimen name="rear_display_dialog_slider_height">42dp</dimen>
+    <dimen name="rear_display_dialog_slider_corner_radius">21dp</dimen>
+    <!-- (rear_display_dialog_slider_height - rounded_slider_icon_size) / 2 -->
+    <dimen name="rear_display_dialog_slider_icon_inset">11dp</dimen>
+    <!-- rear_display_animation_width_opened - 2 * rear_display_dialog_slider_corner_radius -->
+    <dimen name="rear_display_progress_width">231dp</dimen>
+    <!-- Rear display mode end -->
+
 </resources>
