@@ -27,26 +27,81 @@
     android:padding="16dp">
 
     <LinearLayout
+        android:id="@+id/accessibility_autoclick_button_group_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal">
 
         <LinearLayout
-            android:id="@+id/accessibility_autoclick_left_click_layout"
-            style="@style/AccessibilityAutoclickPanelButtonLayoutStyle"
-            android:layout_marginEnd="@dimen/accessibility_autoclick_type_panel_button_spacing">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/accessibility_autoclick_button_group_rounded_background"
+            android:orientation="horizontal"
+            android:padding="3dp">
 
-            <ImageButton
-                android:id="@+id/accessibility_autoclick_left_click_button"
-                style="@style/AccessibilityAutoclickPanelImageButtonStyle"
-                android:contentDescription="@string/accessibility_autoclick_left_click"
-                android:src="@drawable/accessibility_autoclick_left_click" />
+            <LinearLayout
+                android:id="@+id/accessibility_autoclick_drag_layout"
+                style="@style/AccessibilityAutoclickPanelButtonLayoutStyle">
+
+                <ImageButton
+                    android:id="@+id/accessibility_autoclick_drag_button"
+                    style="@style/AccessibilityAutoclickPanelImageButtonStyle"
+                    android:contentDescription="@string/accessibility_autoclick_drag"
+                    android:src="@drawable/accessibility_autoclick_drag" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/accessibility_autoclick_double_click_layout"
+                style="@style/AccessibilityAutoclickPanelButtonLayoutStyle">
+
+                <ImageButton
+                    android:id="@+id/accessibility_autoclick_double_click_button"
+                    style="@style/AccessibilityAutoclickPanelImageButtonStyle"
+                    android:contentDescription="@string/accessibility_autoclick_double_click"
+                    android:src="@drawable/accessibility_autoclick_double_click" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/accessibility_autoclick_right_click_layout"
+                style="@style/AccessibilityAutoclickPanelButtonLayoutStyle">
+
+                <ImageButton
+                    android:id="@+id/accessibility_autoclick_right_click_button"
+                    style="@style/AccessibilityAutoclickPanelImageButtonStyle"
+                    android:contentDescription="@string/accessibility_autoclick_right_click"
+                    android:src="@drawable/accessibility_autoclick_right_click" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/accessibility_autoclick_scroll_layout"
+                style="@style/AccessibilityAutoclickPanelButtonLayoutStyle">
+
+                <ImageButton
+                    android:id="@+id/accessibility_autoclick_scroll_button"
+                    style="@style/AccessibilityAutoclickPanelImageButtonStyle"
+                    android:contentDescription="@string/accessibility_autoclick_scroll"
+                    android:src="@drawable/accessibility_autoclick_scroll" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/accessibility_autoclick_left_click_layout"
+                style="@style/AccessibilityAutoclickPanelButtonLayoutStyle">
+
+                <ImageButton
+                    android:id="@+id/accessibility_autoclick_left_click_button"
+                    style="@style/AccessibilityAutoclickPanelImageButtonStyle"
+                    android:contentDescription="@string/accessibility_autoclick_left_click"
+                    android:src="@drawable/accessibility_autoclick_left_click" />
+            </LinearLayout>
+
         </LinearLayout>
 
         <View
             android:layout_width="@dimen/accessibility_autoclick_type_panel_divider_width"
             android:layout_height="@dimen/accessibility_autoclick_type_panel_divider_height"
+            android:layout_marginStart="@dimen/accessibility_autoclick_type_panel_button_spacing"
             android:layout_marginEnd="@dimen/accessibility_autoclick_type_panel_button_spacing"
             android:background="@color/materialColorSurfaceContainer" />
 
