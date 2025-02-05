@@ -280,7 +280,6 @@ class AvalancheSuppressor(
     private val uiEventLogger: UiEventLogger,
     private val context: Context,
     private val notificationManager: NotificationManager,
-    private val logger: VisualInterruptionDecisionLogger,
     private val systemSettings: SystemSettings,
 ) : VisualInterruptionFilter(types = setOf(PEEK, PULSE), reason = "avalanche") {
     val TAG = "AvalancheSuppressor"
@@ -358,18 +357,15 @@ class AvalancheSuppressor(
 
     override fun shouldSuppress(entry: NotificationEntry): Boolean {
         if (!isCooldownEnabled()) {
-            logger.logAvalancheAllow("cooldown OFF")
             return false
         }
         val timeSinceAvalancheMs = systemClock.currentTimeMillis() - avalancheProvider.startTime
         val timedOut = timeSinceAvalancheMs >= avalancheProvider.timeoutMs
         if (timedOut) {
-            logger.logAvalancheAllow("timedOut! timeSinceAvalancheMs=$timeSinceAvalancheMs")
             return false
         }
         val state = calculateState(entry)
         if (state != State.SUPPRESS) {
-            logger.logAvalancheAllow("state=$state")
             return false
         }
         if (shouldShowEdu()) {

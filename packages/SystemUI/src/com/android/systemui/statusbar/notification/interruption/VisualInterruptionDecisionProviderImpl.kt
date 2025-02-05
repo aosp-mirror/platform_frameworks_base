@@ -196,7 +196,6 @@ constructor(
                     uiEventLogger,
                     context,
                     notificationManager,
-                    logger,
                     systemSettings,
                 )
             )
