@@ -1003,4 +1003,21 @@ public class InfoMediaManagerTest {
         assertThat(routeOrder.get(2).getId()).isEqualTo(TEST_ID_4);
         assertThat(routeOrder.get(3).getId()).isEqualTo(TEST_ID_1);
     }
+
+    @Test
+    public void selectedRouteAppearsFirst() {
+        RouteListingPreference routeListingPreference =
+                setUpPreferenceList(TEST_PACKAGE_NAME, true);
+        List<MediaRoute2Info> routes = setAvailableRoutesList(TEST_PACKAGE_NAME);
+        List<MediaRoute2Info> selectedRoutes = List.of(routes.get(2));
+
+        List<MediaRoute2Info> routeOrder =
+                Api34Impl.arrangeRouteListByPreference(
+                        selectedRoutes, routes, routeListingPreference);
+
+        assertThat(routeOrder.stream().map(MediaRoute2Info::getId).toArray())
+                .asList()
+                .containsExactly(TEST_ID_4, TEST_ID_1, TEST_ID_3)
+                .inOrder();
+    }
 }
