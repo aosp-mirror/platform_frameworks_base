@@ -24,12 +24,10 @@ import androidx.annotation.AnyThread
 import androidx.annotation.WorkerThread
 import com.android.app.tracing.TraceUtils.trace
 import com.android.app.tracing.coroutines.launchTraced as launch
-import com.android.app.tracing.coroutines.nameCoroutine
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
+import com.android.app.tracing.coroutines.withContextTraced as withContext
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.withContext
 
 /**
  * Used to interact with mainly with Settings.Global, but can also be used for Settings.System and
@@ -53,9 +51,16 @@ interface SettingsProxy {
     val settingsScope: CoroutineScope
 
     @OptIn(ExperimentalStdlibApi::class)
-    fun settingsDispatcherContext(name: String): CoroutineContext {
-        return (settingsScope.coroutineContext[CoroutineDispatcher] ?: EmptyCoroutineContext) +
-            nameCoroutine(name)
+    suspend fun executeOnSettingsScopeDispatcher(name: String, block: () -> Unit) {
+        val settingsDispatcher = settingsScope.coroutineContext[CoroutineDispatcher]
+        if (
+            settingsDispatcher != null &&
+                settingsDispatcher != coroutineContext[CoroutineDispatcher]
+        ) {
+            withContext(name, settingsDispatcher) { block() }
+        } else {
+            trace(name) { block() }
+        }
     }
 
     /**
@@ -87,7 +92,7 @@ interface SettingsProxy {
      * wish to synchronize execution.
      */
     suspend fun registerContentObserver(name: String, settingsObserver: ContentObserver) {
-        withContext(settingsDispatcherContext("registerContentObserver-A")) {
+        executeOnSettingsScopeDispatcher("registerContentObserver-A") {
             registerContentObserverSync(getUriFor(name), settingsObserver)
         }
     }
@@ -139,7 +144,7 @@ interface SettingsProxy {
      * wish to synchronize execution.
      */
     suspend fun registerContentObserver(uri: Uri, settingsObserver: ContentObserver) {
-        withContext(settingsDispatcherContext("registerContentObserver-B")) {
+        executeOnSettingsScopeDispatcher("registerContentObserver-B") {
             registerContentObserverSync(uri, settingsObserver)
         }
     }
@@ -197,7 +202,7 @@ interface SettingsProxy {
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver,
     ) {
-        withContext(settingsDispatcherContext("registerContentObserver-C")) {
+        executeOnSettingsScopeDispatcher("registerContentObserver-C") {
             registerContentObserverSync(getUriFor(name), notifyForDescendants, settingsObserver)
         }
     }
@@ -266,7 +271,7 @@ interface SettingsProxy {
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver,
     ) {
-        withContext(settingsDispatcherContext("registerContentObserver-D")) {
+        executeOnSettingsScopeDispatcher("registerContentObserver-D") {
             registerContentObserverSync(uri, notifyForDescendants, settingsObserver)
         }
     }
@@ -326,7 +331,7 @@ interface SettingsProxy {
      * async block if they wish to synchronize execution.
      */
     suspend fun unregisterContentObserver(settingsObserver: ContentObserver) {
-        withContext(settingsDispatcherContext("unregisterContentObserver")) {
+        executeOnSettingsScopeDispatcher("unregisterContentObserver") {
             unregisterContentObserverSync(settingsObserver)
         }
     }

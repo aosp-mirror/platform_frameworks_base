@@ -28,7 +28,6 @@ import com.android.systemui.util.settings.SettingsProxy.Companion.parseFloat
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseFloatOrThrow
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseLongOrThrow
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseLongOrUseDefault
-import kotlinx.coroutines.withContext
 
 /**
  * Used to interact with per-user Settings.Secure and Settings.System settings (but not
@@ -71,7 +70,7 @@ interface UserSettingsProxy : SettingsProxy {
     }
 
     override suspend fun registerContentObserver(uri: Uri, settingsObserver: ContentObserver) {
-        withContext(settingsDispatcherContext("registerContentObserver-A")) {
+        executeOnSettingsScopeDispatcher("registerContentObserver-A") {
             registerContentObserverForUserSync(uri, settingsObserver, userId)
         }
     }
@@ -96,7 +95,7 @@ interface UserSettingsProxy : SettingsProxy {
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver,
     ) {
-        withContext(settingsDispatcherContext("registerContentObserver-B")) {
+        executeOnSettingsScopeDispatcher("registerContentObserver-B") {
             registerContentObserverForUserSync(uri, notifyForDescendants, settingsObserver, userId)
         }
     }
@@ -141,7 +140,7 @@ interface UserSettingsProxy : SettingsProxy {
         settingsObserver: ContentObserver,
         userHandle: Int,
     ) {
-        withContext(settingsDispatcherContext("registerContentObserverForUser-A")) {
+        executeOnSettingsScopeDispatcher("registerContentObserverForUser-A") {
             registerContentObserverForUserSync(name, settingsObserver, userHandle)
         }
     }
@@ -186,7 +185,7 @@ interface UserSettingsProxy : SettingsProxy {
         settingsObserver: ContentObserver,
         userHandle: Int,
     ) {
-        withContext(settingsDispatcherContext("registerContentObserverForUser-B")) {
+        executeOnSettingsScopeDispatcher("registerContentObserverForUser-B") {
             registerContentObserverForUserSync(uri, settingsObserver, userHandle)
         }
     }
@@ -264,7 +263,7 @@ interface UserSettingsProxy : SettingsProxy {
         settingsObserver: ContentObserver,
         userHandle: Int,
     ) {
-        withContext(settingsDispatcherContext("registerContentObserverForUser-C")) {
+        executeOnSettingsScopeDispatcher("registerContentObserverForUser-C") {
             registerContentObserverForUserSync(
                 name,
                 notifyForDescendants,
@@ -332,7 +331,7 @@ interface UserSettingsProxy : SettingsProxy {
         settingsObserver: ContentObserver,
         userHandle: Int,
     ) {
-        withContext(settingsDispatcherContext("registerContentObserverForUser-D")) {
+        executeOnSettingsScopeDispatcher("registerContentObserverForUser-D") {
             registerContentObserverForUserSync(
                 uri,
                 notifyForDescendants,
