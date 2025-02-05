@@ -121,7 +121,15 @@ constructor(
                     var flags = StatusBarManager.DISABLE_NONE
 
                     if (hideHomeAndRecentsForBouncer || (isKeyguardShowing && !isOccluded)) {
-                        if (!isShowHomeOverLockscreen || !isGesturalMode) {
+                        // Hide the home button/nav handle if we're on keyguard and either:
+                        // - Going to AOD, in which case the handle should animate away.
+                        // - Nav handle is configured not to show on lockscreen.
+                        // - There is no nav handle.
+                        if (
+                            startedState == KeyguardState.AOD ||
+                                !isShowHomeOverLockscreen ||
+                                !isGesturalMode
+                        ) {
                             flags = flags or StatusBarManager.DISABLE_HOME
                         }
                         flags = flags or StatusBarManager.DISABLE_RECENT
