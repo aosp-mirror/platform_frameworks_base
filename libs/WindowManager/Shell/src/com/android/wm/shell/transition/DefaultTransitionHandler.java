@@ -451,6 +451,17 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             final int type = getTransitionTypeFromInfo(info);
             Animation a = loadAnimation(type, info, change, wallpaperTransit, isDreamTransition);
             if (a != null) {
+                final int displayId = isTask ? change.getTaskInfo().displayId
+                        : info.getRoot(TransitionUtil.rootIndexFor(change, info))
+                                .getDisplayId();
+                final Context displayContext =
+                        mDisplayController.getDisplayContext(displayId);
+                if (displayContext != null
+                        && displayContext.getResources().getConfiguration().isScreenRound()) {
+                    // ensure that any animation on a round display is using rounded corners
+                    a.setHasRoundedCorners(true);
+                }
+
                 if (isTask) {
                     final boolean isTranslucent = (change.getFlags() & FLAG_TRANSLUCENT) != 0;
                     if (!isTranslucent && TransitionUtil.isOpenOrCloseMode(mode)
@@ -504,11 +515,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
                 final float cornerRadius;
                 if (a.hasRoundedCorners()) {
-                    final int displayId = isTask ? change.getTaskInfo().displayId
-                            : info.getRoot(TransitionUtil.rootIndexFor(change, info))
-                                    .getDisplayId();
-                    final Context displayContext =
-                            mDisplayController.getDisplayContext(displayId);
                     cornerRadius = displayContext == null ? 0
                             : ScreenDecorationsUtils.getWindowCornerRadius(displayContext);
                 } else {
