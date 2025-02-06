@@ -20,26 +20,19 @@ import android.os.PowerManager
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
-import android.provider.Settings
 import android.service.dream.dreamManager
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.Flags.FLAG_COMMUNAL_SCENE_KTF_REFACTOR
-import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_V2
 import com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
 import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
-import com.android.systemui.Flags.glanceableHubV2
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.data.repository.batteryRepository
-import com.android.systemui.common.data.repository.fake
 import com.android.systemui.communal.data.repository.FakeCommunalSceneRepository
 import com.android.systemui.communal.data.repository.communalSceneRepository
 import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
-import com.android.systemui.communal.domain.interactor.setCommunalV2ConfigEnabled
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepositorySpy
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
@@ -63,14 +56,11 @@ import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.se
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
-import com.android.systemui.user.data.repository.fakeUserRepository
-import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -103,10 +93,7 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
         @JvmStatic
         @Parameters(name = "{0}")
         fun getParams(): List<FlagsParameterization> {
-            return FlagsParameterization.allCombinationsOf(
-                FLAG_COMMUNAL_SCENE_KTF_REFACTOR,
-                FLAG_GLANCEABLE_HUB_V2,
-            )
+            return FlagsParameterization.allCombinationsOf(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
         }
     }
 
@@ -120,7 +107,6 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
 
         // Transition to DOZING and set the power interactor asleep.
         kosmos.powerInteractor.setAsleepForTest()
-        kosmos.setCommunalV2ConfigEnabled(true)
         runBlocking {
             kosmos.transitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
@@ -174,7 +160,7 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
 
     @Test
     @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
-    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR, FLAG_GLANCEABLE_HUB_V2)
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun testTransitionToLockscreen_onWake_canDream_glanceableHubAvailable() =
         kosmos.runTest {
             whenever(dreamManager.canStartDreaming(anyBoolean())).thenReturn(true)
@@ -193,17 +179,7 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
     fun testTransitionToLockscreen_onWake_canDream_ktfRefactor() =
         kosmos.runTest {
             setCommunalAvailable(true)
-            if (glanceableHubV2()) {
-                val user = fakeUserRepository.asMainUser()
-                fakeSettings.putIntForUser(
-                    Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
-                    1,
-                    user.id,
-                )
-                batteryRepository.fake.setDevicePluggedIn(true)
-            } else {
-                whenever(dreamManager.canStartDreaming(anyBoolean())).thenReturn(true)
-            }
+            whenever(dreamManager.canStartDreaming(anyBoolean())).thenReturn(true)
 
             clearInvocations(fakeCommunalSceneRepository)
             powerInteractor.setAwakeForTest()
@@ -264,17 +240,7 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
     fun testTransitionToGlanceableHub_onWakeup_ifAvailable() =
         kosmos.runTest {
             setCommunalAvailable(true)
-            if (glanceableHubV2()) {
-                val user = fakeUserRepository.asMainUser()
-                fakeSettings.putIntForUser(
-                    Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
-                    1,
-                    user.id,
-                )
-                batteryRepository.fake.setDevicePluggedIn(true)
-            } else {
-                whenever(dreamManager.canStartDreaming(anyBoolean())).thenReturn(true)
-            }
+            whenever(dreamManager.canStartDreaming(anyBoolean())).thenReturn(true)
 
             // Device turns on.
             powerInteractor.setAwakeForTest()

@@ -129,37 +129,20 @@ constructor(
         if (!communalSettingsInteractor.isCommunalFlagEnabled()) return
         if (SceneContainerFlag.isEnabled) return
         scope.launch {
-            if (communalSettingsInteractor.isV2FlagEnabled()) {
-                powerInteractor.isAwake
-                    .debounce(50L)
-                    .filterRelevantKeyguardStateAnd { isAwake -> isAwake }
-                    .sample(communalInteractor.shouldShowCommunal)
-                    .collect { shouldShowCommunal ->
-                        if (shouldShowCommunal) {
-                            // This case handles tapping the power button to transition through
-                            // dream -> off -> hub.
-                            communalSceneInteractor.snapToScene(
-                                newScene = CommunalScenes.Communal,
-                                loggingReason = "from dreaming to hub",
-                            )
-                        }
+            powerInteractor.isAwake
+                .debounce(50L)
+                .filterRelevantKeyguardStateAnd { isAwake -> isAwake }
+                .sample(communalInteractor.isCommunalAvailable)
+                .collect { isCommunalAvailable ->
+                    if (isCommunalAvailable && dreamManager.canStartDreaming(false)) {
+                        // This case handles tapping the power button to transition through
+                        // dream -> off -> hub.
+                        communalSceneInteractor.snapToScene(
+                            newScene = CommunalScenes.Communal,
+                            loggingReason = "from dreaming to hub",
+                        )
                     }
-            } else {
-                powerInteractor.isAwake
-                    .debounce(50L)
-                    .filterRelevantKeyguardStateAnd { isAwake -> isAwake }
-                    .sample(communalInteractor.isCommunalAvailable)
-                    .collect { isCommunalAvailable ->
-                        if (isCommunalAvailable && dreamManager.canStartDreaming(false)) {
-                            // This case handles tapping the power button to transition through
-                            // dream -> off -> hub.
-                            communalSceneInteractor.snapToScene(
-                                newScene = CommunalScenes.Communal,
-                                loggingReason = "from dreaming to hub",
-                            )
-                        }
-                    }
-            }
+                }
         }
     }
 
