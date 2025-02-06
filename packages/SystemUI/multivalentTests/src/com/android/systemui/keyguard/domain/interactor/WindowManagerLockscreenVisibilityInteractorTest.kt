@@ -60,7 +60,6 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
     private val lockscreenSurfaceVisibilityFlow = MutableStateFlow<Boolean?>(false)
     private val primaryBouncerSurfaceVisibilityFlow = MutableStateFlow<Boolean?>(false)
@@ -794,6 +793,122 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
                 TransitionStep(
                     transitionState = TransitionState.STARTED,
                     from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                )
+            )
+            runCurrent()
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.RUNNING,
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                )
+            )
+            runCurrent()
+
+            assertEquals(
+                listOf(
+                    true,
+                    // Still not visible during GONE -> LOCKSCREEN.
+                    false,
+                ),
+                values,
+            )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.FINISHED,
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                )
+            )
+            runCurrent()
+
+            assertEquals(
+                listOf(
+                    true,
+                    false,
+                    // Visible now that we're FINISHED in LOCKSCREEN.
+                    true,
+                ),
+                values,
+            )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.STARTED,
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                )
+            )
+            runCurrent()
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.RUNNING,
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                )
+            )
+            runCurrent()
+
+            assertEquals(
+                listOf(
+                    true,
+                    false,
+                    // Remains true until the transition ends.
+                    true,
+                ),
+                values,
+            )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.FINISHED,
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                )
+            )
+
+            runCurrent()
+            assertEquals(
+                listOf(
+                    true,
+                    false,
+                    true,
+                    // Until we're finished in GONE again.
+                    false,
+                ),
+                values,
+            )
+        }
+
+    @Test
+    @DisableSceneContainer
+    fun testLockscreenVisibility_falseDuringWakeAndUnlockToGone_fromNotCanceledGone() =
+        testScope.runTest {
+            val values by collectValues(underTest.value.lockscreenVisibility)
+
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope,
+            )
+
+            runCurrent()
+            assertEquals(
+                listOf(
+                    true,
+                    // Not visible when finished in GONE.
+                    false,
+                ),
+                values,
+            )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.STARTED,
+                    from = KeyguardState.GONE,
                     to = KeyguardState.AOD,
                 )
             )
@@ -857,8 +972,9 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
                 listOf(
                     true,
                     false,
-                    // Remains visible from AOD during transition.
                     true,
+                    // Becomes false immediately since we're wake and unlocking.
+                    false,
                 ),
                 values,
             )
@@ -1043,6 +1159,41 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
 
             surfaceBehindIsAnimatingFlow.emit(false)
             assertThat(usingKeyguardGoingAwayAnimation).isFalse()
+        }
+
+    @Test
+    fun aodVisibility_visibleFullyInAod_falseOtherwise() =
+        testScope.runTest {
+            val aodVisibility by collectValues(underTest.value.aodVisibility)
+
+            transitionRepository.sendTransitionStepsThroughRunning(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.AOD,
+                testScope,
+                throughValue = 0.5f,
+            )
+
+            assertEquals(listOf(false), aodVisibility)
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.FINISHED,
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.AOD,
+                )
+            )
+            runCurrent()
+
+            assertEquals(listOf(false, true), aodVisibility)
+
+            transitionRepository.sendTransitionStepsThroughRunning(
+                from = KeyguardState.AOD,
+                to = KeyguardState.GONE,
+                testScope,
+            )
+            runCurrent()
+
+            assertEquals(listOf(false, true, false), aodVisibility)
         }
 
     companion object {

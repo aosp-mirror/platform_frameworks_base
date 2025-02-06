@@ -23,13 +23,11 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.kosmos.Kosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @android.platform.test.annotations.EnabledOnRavenwood

@@ -70,6 +70,8 @@ public class RecordingController
     private final ScreenCaptureDisabledDialogDelegate mScreenCaptureDisabledDialogDelegate;
     private final ScreenRecordPermissionDialogDelegate.Factory
             mScreenRecordPermissionDialogDelegateFactory;
+    private final ScreenRecordPermissionViewBinder.Factory
+            mScreenRecordPermissionViewBinderFactory;
 
     protected static final String INTENT_UPDATE_STATE =
             "com.android.systemui.screenrecord.UPDATE_STATE";
@@ -118,7 +120,8 @@ public class RecordingController
             MediaProjectionMetricsLogger mediaProjectionMetricsLogger,
             ScreenCaptureDisabledDialogDelegate screenCaptureDisabledDialogDelegate,
             ScreenRecordPermissionDialogDelegate.Factory
-                    screenRecordPermissionDialogDelegateFactory) {
+                    screenRecordPermissionDialogDelegateFactory,
+            ScreenRecordPermissionViewBinder.Factory screenRecordPermissionViewBinderFactory) {
         mMainExecutor = mainExecutor;
         mDevicePolicyResolver = devicePolicyResolver;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -127,6 +130,7 @@ public class RecordingController
         mMediaProjectionMetricsLogger = mediaProjectionMetricsLogger;
         mScreenCaptureDisabledDialogDelegate = screenCaptureDisabledDialogDelegate;
         mScreenRecordPermissionDialogDelegateFactory = screenRecordPermissionDialogDelegateFactory;
+        mScreenRecordPermissionViewBinderFactory = screenRecordPermissionViewBinderFactory;
 
         BroadcastOptions options = BroadcastOptions.makeBasic();
         options.setInteractive(true);
@@ -151,8 +155,7 @@ public class RecordingController
      *  If screen capturing is currently not allowed it will return a dialog
      *  that warns users about it. */
     public Dialog createScreenRecordDialog(@Nullable Runnable onStartRecordingClicked) {
-        if (mDevicePolicyResolver.get()
-                        .isScreenCaptureCompletelyDisabled(getHostUserHandle())) {
+        if (isScreenCaptureDisabled()) {
             return mScreenCaptureDisabledDialogDelegate.createSysUIDialog();
         }
 
@@ -162,6 +165,27 @@ public class RecordingController
         return mScreenRecordPermissionDialogDelegateFactory
                 .create(this, getHostUserHandle(), getHostUid(), onStartRecordingClicked)
                 .createDialog();
+    }
+
+    /**
+     * Create a view binder that controls the logic of views inside the screen record permission
+     * view.
+     * @param onStartRecordingClicked the callback that is run when the start button is clicked.
+     */
+    public ScreenRecordPermissionViewBinder createScreenRecordPermissionViewBinder(
+            @Nullable Runnable onStartRecordingClicked
+    ) {
+        return mScreenRecordPermissionViewBinderFactory
+                .create(getHostUserHandle(), getHostUid(), this,
+                        onStartRecordingClicked);
+    }
+
+    /**
+     * Check if screen capture is currently disabled for this device and user.
+     */
+    public boolean isScreenCaptureDisabled() {
+        return mDevicePolicyResolver.get()
+                .isScreenCaptureCompletelyDisabled(getHostUserHandle());
     }
 
     /**

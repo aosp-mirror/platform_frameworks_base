@@ -218,14 +218,14 @@ class SliderHapticFeedbackProvider(
     }
 
     override fun onLowerBookend() {
-        if (!hasVibratedAtLowerBookend) {
+        if (!hasVibratedAtLowerBookend && config.filter.vibrateOnLowerBookend) {
             vibrateOnEdgeCollision(abs(velocityProvider.getTrackedVelocity()))
             hasVibratedAtLowerBookend = true
         }
     }
 
     override fun onUpperBookend() {
-        if (!hasVibratedAtUpperBookend) {
+        if (!hasVibratedAtUpperBookend && config.filter.vibrateOnUpperBookend) {
             vibrateOnEdgeCollision(abs(velocityProvider.getTrackedVelocity()))
             hasVibratedAtUpperBookend = true
         }

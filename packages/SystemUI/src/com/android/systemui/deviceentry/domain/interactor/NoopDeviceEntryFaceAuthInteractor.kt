@@ -19,6 +19,7 @@ package com.android.systemui.deviceentry.domain.interactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.shared.model.FaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.FaceDetectionStatus
+import com.android.systemui.log.table.TableLogBuffer
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -73,4 +74,6 @@ class NoopDeviceEntryFaceAuthInteractor @Inject constructor() : DeviceEntryFaceA
     override fun onWalletLaunched() = Unit
 
     override fun onDeviceUnfolded() {}
+
+    override suspend fun hydrateTableLogBuffer(tableLogBuffer: TableLogBuffer) {}
 }

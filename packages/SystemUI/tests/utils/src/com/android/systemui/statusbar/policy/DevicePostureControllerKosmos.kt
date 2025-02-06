@@ -19,4 +19,5 @@ package com.android.systemui.statusbar.policy
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.util.mockito.mock
 
-val Kosmos.devicePostureController by Kosmos.Fixture { mock<DevicePostureController>() }
+val Kosmos.fakeDevicePostureController by Kosmos.Fixture { FakeDevicePostureController() }
+var Kosmos.devicePostureController by Kosmos.Fixture { mock<DevicePostureController>() }

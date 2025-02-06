@@ -21,6 +21,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
+import com.android.systemui.animation.GSFAxes
 import com.android.systemui.customization.R
 import com.android.systemui.plugins.clocks.AlarmData
 import com.android.systemui.plugins.clocks.ClockAnimations
@@ -35,17 +36,15 @@ import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.shared.clocks.view.FlexClockView
-import com.android.systemui.shared.clocks.view.SimpleDigitalClockTextView
+import com.android.systemui.shared.clocks.view.HorizontalAlignment
+import com.android.systemui.shared.clocks.view.VerticalAlignment
 import java.util.Locale
 import java.util.TimeZone
 import kotlin.math.max
 
 // TODO(b/364680879): Merge w/ ComposedDigitalLayerController
-class FlexClockFaceController(
-    clockCtx: ClockContext,
-    face: ClockFace,
-    private val isLargeClock: Boolean,
-) : ClockFaceController {
+class FlexClockFaceController(clockCtx: ClockContext, private val isLargeClock: Boolean) :
+    ClockFaceController {
     override val view: View
         get() = layerController.view
 
@@ -59,19 +58,12 @@ class FlexClockFaceController(
     val timespecHandler = DigitalTimespecHandler(DigitalTimespec.TIME_FULL_FORMAT, "hh:mm")
 
     init {
-        val lp = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
-        lp.gravity = Gravity.CENTER
-
-        val layer = face.layers[0]
-
         layerController =
-            if (isLargeClock) {
-                ComposedDigitalLayerController(clockCtx, layer as ComposedDigitalHandLayer)
-            } else {
-                val childView = SimpleDigitalClockTextView(clockCtx)
-                SimpleDigitalHandLayerController(clockCtx, layer as DigitalHandLayer, childView)
-            }
-        layerController.view.layoutParams = lp
+            if (isLargeClock) ComposedDigitalLayerController(clockCtx)
+            else SimpleDigitalHandLayerController(clockCtx, SMALL_LAYER_CONFIG, isLargeClock)
+
+        layerController.view.layoutParams =
+            FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT).apply { gravity = Gravity.CENTER }
     }
 
     /** See documentation at [FlexClockView.offsetGlyphsForStepClockAnimation]. */
@@ -135,7 +127,19 @@ class FlexClockFaceController(
             layerController.faceEvents.onThemeChanged(theme)
         }
 
-        override fun onFontAxesChanged(axes: List<ClockFontAxisSetting>) {
+        override fun onFontAxesChanged(settings: List<ClockFontAxisSetting>) {
+            var axes = settings
+            if (!isLargeClock) {
+                axes =
+                    axes.map { axis ->
+                        if (axis.key == GSFAxes.WIDTH && axis.value > SMALL_CLOCK_MAX_WDTH) {
+                            axis.copy(value = SMALL_CLOCK_MAX_WDTH)
+                        } else {
+                            axis
+                        }
+                    }
+            }
+
             layerController.events.onFontAxesChanged(axes)
         }
 
@@ -144,21 +148,6 @@ class FlexClockFaceController(
          * keyguard_large_clock_top_margin from default clock
          */
         override fun onTargetRegionChanged(targetRegion: Rect?) {
-            // When a clock needs to be aligned with screen, like weather clock
-            // it needs to offset back the translation of keyguard_large_clock_top_margin
-            if (isLargeClock && (view as FlexClockView).isAlignedWithScreen()) {
-                val topMargin = keyguardLargeClockTopMargin
-                targetRegion?.let {
-                    val (_, yDiff) = computeLayoutDiff(view, it, isLargeClock)
-                    // In LS, we use yDiff to counter translate
-                    // the translation of KeyguardLargeClockTopMargin
-                    // With the targetRegion passed from picker,
-                    // we will have yDiff = 0, no translation is needed for weather clock
-                    if (yDiff.toInt() != 0) view.translationY = yDiff - topMargin / 2
-                }
-                return
-            }
-
             var maxWidth = 0f
             var maxHeight = 0f
 
@@ -227,11 +216,7 @@ class FlexClockFaceController(
             }
 
             override fun onPickerCarouselSwiping(swipingFraction: Float) {
-                face.pickerScale?.let {
-                    view.scaleX = swipingFraction * (1 - it.scaleX) + it.scaleX
-                    view.scaleY = swipingFraction * (1 - it.scaleY) + it.scaleY
-                }
-                if (isLargeClock && !(view as FlexClockView).isAlignedWithScreen()) {
+                if (isLargeClock) {
                     view.translationY = keyguardLargeClockTopMargin / 2F * swipingFraction
                 }
                 layerController.animations.onPickerCarouselSwiping(swipingFraction)
@@ -245,7 +230,23 @@ class FlexClockFaceController(
 
             override fun onPositionUpdated(distance: Float, fraction: Float) {
                 layerController.animations.onPositionUpdated(distance, fraction)
-                // TODO(b/378128811) port stepping animation
+            }
+
+            override fun onFidgetTap(x: Float, y: Float) {
+                layerController.animations.onFidgetTap(x, y)
             }
         }
+
+    companion object {
+        val SMALL_CLOCK_MAX_WDTH = 120f
+
+        val SMALL_LAYER_CONFIG =
+            LayerConfig(
+                timespec = DigitalTimespec.TIME_FULL_FORMAT,
+                style = FontTextStyle(fontSizeScale = 0.98f),
+                aodStyle = FontTextStyle(),
+                alignment = DigitalAlignment(HorizontalAlignment.LEFT, VerticalAlignment.CENTER),
+                dateTimeFormat = "h:mm",
+            )
+    }
 }

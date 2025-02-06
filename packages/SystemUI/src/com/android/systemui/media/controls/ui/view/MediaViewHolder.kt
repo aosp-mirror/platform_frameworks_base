@@ -16,6 +16,7 @@
 
 package com.android.systemui.media.controls.ui.view
 
+import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -139,7 +140,7 @@ class MediaViewHolder constructor(itemView: View) {
                 R.id.action4,
                 R.id.icon,
                 R.id.media_scrubbing_elapsed_time,
-                R.id.media_scrubbing_total_time
+                R.id.media_scrubbing_total_time,
             )
 
         // Buttons used for notification-based actions
@@ -175,5 +176,10 @@ class MediaViewHolder constructor(itemView: View) {
                 R.id.loading_effect_view,
                 R.id.touch_ripple_view,
             )
+
+        val headlineSmallTF: Typeface = Typeface.create("gsf-headline-small", Typeface.NORMAL)
+        val titleMediumTF: Typeface = Typeface.create("gsf-title-medium", Typeface.NORMAL)
+        val labelMediumTF: Typeface = Typeface.create("gsf-label-medium", Typeface.NORMAL)
+        val labelLargeTF: Typeface = Typeface.create("gsf-label-large", Typeface.NORMAL)
     }
 }

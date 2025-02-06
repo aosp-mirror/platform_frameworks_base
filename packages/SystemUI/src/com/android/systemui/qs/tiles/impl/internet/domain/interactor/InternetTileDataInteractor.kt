@@ -41,7 +41,6 @@ import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import com.android.systemui.utils.coroutines.flow.mapLatestConflated
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -50,7 +49,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
-@OptIn(ExperimentalCoroutinesApi::class)
 /** Observes internet state changes providing the [InternetTileModel]. */
 class InternetTileDataInteractor
 @Inject

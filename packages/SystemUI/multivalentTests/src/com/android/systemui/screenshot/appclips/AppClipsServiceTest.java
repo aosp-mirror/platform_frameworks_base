@@ -183,14 +183,14 @@ public final class AppClipsServiceTest extends SysuiTestCase {
         when(mFeatureFlags.isEnabled(SCREENSHOT_APP_CLIPS)).thenReturn(true);
         when(mOptionalBubbles.isEmpty()).thenReturn(false);
         when(mOptionalBubbles.get()).thenReturn(mBubbles);
-        when(mBubbles.isAppBubbleTaskId(eq((FAKE_TASK_ID)))).thenReturn(false);
+        when(mBubbles.isNoteBubbleTaskId(eq((FAKE_TASK_ID)))).thenReturn(false);
     }
 
     private void mockForScreenshotBlocked() {
         when(mFeatureFlags.isEnabled(SCREENSHOT_APP_CLIPS)).thenReturn(true);
         when(mOptionalBubbles.isEmpty()).thenReturn(false);
         when(mOptionalBubbles.get()).thenReturn(mBubbles);
-        when(mBubbles.isAppBubbleTaskId(eq((FAKE_TASK_ID)))).thenReturn(true);
+        when(mBubbles.isNoteBubbleTaskId(eq((FAKE_TASK_ID)))).thenReturn(true);
         when(mDevicePolicyManager.getScreenCaptureDisabled(eq(null))).thenReturn(true);
     }
 
@@ -199,7 +199,7 @@ public final class AppClipsServiceTest extends SysuiTestCase {
         when(mFeatureFlags.isEnabled(SCREENSHOT_APP_CLIPS)).thenReturn(true);
         when(mOptionalBubbles.isEmpty()).thenReturn(false);
         when(mOptionalBubbles.get()).thenReturn(mBubbles);
-        when(mBubbles.isAppBubbleTaskId(eq((FAKE_TASK_ID)))).thenReturn(true);
+        when(mBubbles.isNoteBubbleTaskId(eq((FAKE_TASK_ID)))).thenReturn(true);
         when(mDevicePolicyManager.getScreenCaptureDisabled(eq(null))).thenReturn(false);
     }
 
@@ -208,7 +208,7 @@ public final class AppClipsServiceTest extends SysuiTestCase {
         when(mFeatureFlags.isEnabled(SCREENSHOT_APP_CLIPS)).thenReturn(true);
         when(mOptionalBubbles.isEmpty()).thenReturn(false);
         when(mOptionalBubbles.get()).thenReturn(mBubbles);
-        when(mBubbles.isAppBubbleTaskId(eq((FAKE_TASK_ID)))).thenReturn(true);
+        when(mBubbles.isNoteBubbleTaskId(eq((FAKE_TASK_ID)))).thenReturn(true);
         when(mDevicePolicyManager.getScreenCaptureDisabled(eq(null))).thenReturn(false);
     }
 

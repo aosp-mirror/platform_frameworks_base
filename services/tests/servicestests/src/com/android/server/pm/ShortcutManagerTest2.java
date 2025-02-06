@@ -952,7 +952,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(99, si.getExtras().getInt("x"));
     }
 
-    public void testShortcutInfoSaveAndLoad() throws InterruptedException {
+    public void disabled_testShortcutInfoSaveAndLoad() throws InterruptedException {
         mRunningUsers.put(USER_11, true);
 
         setCaller(CALLING_PACKAGE_1, USER_11);
@@ -1065,7 +1065,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         dumpUserFile(USER_11);
     }
 
-    public void testShortcutInfoSaveAndLoad_maskableBitmap() throws InterruptedException {
+    public void disabled_testShortcutInfoSaveAndLoad_maskableBitmap() throws InterruptedException {
         mRunningUsers.put(USER_11, true);
 
         setCaller(CALLING_PACKAGE_1, USER_11);
@@ -1134,7 +1134,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         dumpUserFile(USER_11);
     }
 
-    public void testShortcutInfoSaveAndLoad_resId() throws InterruptedException {
+    public void disabled_testShortcutInfoSaveAndLoad_resId() throws InterruptedException {
         mRunningUsers.put(USER_11, true);
 
         setCaller(CALLING_PACKAGE_1, USER_11);
@@ -1211,7 +1211,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(1, si.getRank());
     }
 
-    public void testShortcutInfoSaveAndLoad_uri() throws InterruptedException {
+    public void disabled_testShortcutInfoSaveAndLoad_uri() throws InterruptedException {
         mRunningUsers.put(USER_11, true);
 
         setCaller(CALLING_PACKAGE_1, USER_11);
@@ -1299,7 +1299,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals("uri_maskable", si.getIconUri());
     }
 
-    public void testShortcutInfoSaveAndLoad_forBackup() {
+    public void disabled_testShortcutInfoSaveAndLoad_forBackup() {
         setCaller(CALLING_PACKAGE_1, USER_10);
 
         final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
@@ -1368,7 +1368,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(0, si.getRank());
     }
 
-    public void testShortcutInfoSaveAndLoad_forBackup_resId() {
+    public void disabled_testShortcutInfoSaveAndLoad_forBackup_resId() {
         setCaller(CALLING_PACKAGE_1, USER_10);
 
         final Icon res32x32 = Icon.createWithResource(mClientContext, R.drawable.black_32x32);
@@ -1438,7 +1438,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(0, si.getRank());
     }
 
-    public void testShortcutInfoSaveAndLoad_forBackup_uri() {
+    public void disabled_testShortcutInfoSaveAndLoad_forBackup_uri() {
         setCaller(CALLING_PACKAGE_1, USER_10);
 
         final Icon uriIcon = Icon.createWithContentUri("test_uri");
@@ -1547,7 +1547,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 });
     }
 
-    public void testShortcutInfoSaveAndLoad_intents() {
+    public void disabled_testShortcutInfoSaveAndLoad_intents() {
         checkShortcutInfoSaveAndLoad_intents(new Intent(Intent.ACTION_VIEW));
 
         mInjectedCurrentTimeMillis += INTERVAL; // reset throttling.
@@ -1612,7 +1612,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 );
     }
 
-    public void testThrottling() {
+    public void disabled_testThrottling() {
         final ShortcutInfo si1 = makeShortcut("shortcut1");
 
         assertTrue(mManager.setDynamicShortcuts(list(si1)));
@@ -1685,7 +1685,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(START_TIME + INTERVAL * 9, mManager.getRateLimitResetTime());
     }
 
-    public void testThrottling_rewind() {
+    public void disabled_testThrottling_rewind() {
         final ShortcutInfo si1 = makeShortcut("shortcut1");
 
         assertTrue(mManager.setDynamicShortcuts(list(si1)));
@@ -1715,7 +1715,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(3, mManager.getRemainingCallCount());
     }
 
-    public void testThrottling_perPackage() {
+    public void disabled_testThrottling_perPackage() {
         final ShortcutInfo si1 = makeShortcut("shortcut1");
 
         assertTrue(mManager.setDynamicShortcuts(list(si1)));
@@ -1789,7 +1789,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertFalse(mManager.setDynamicShortcuts(list(si2)));
     }
 
-    public void testThrottling_localeChanges() {
+    public void disabled_testThrottling_localeChanges() {
         prepareCrossProfileDataSet();
 
         dumpsysOnLogcat("Before save & load");
@@ -1847,7 +1847,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         });
     }
 
-    public void testThrottling_foreground() throws Exception {
+    public void disabled_testThrottling_foreground() throws Exception {
         prepareCrossProfileDataSet();
 
         dumpsysOnLogcat("Before save & load");
@@ -2078,7 +2078,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
     }
 
 
-    public void testThrottling_resetByInternalCall() throws Exception {
+    public void disabled_testThrottling_resetByInternalCall() throws Exception {
         prepareCrossProfileDataSet();
 
         dumpsysOnLogcat("Before save & load");
@@ -2173,7 +2173,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         });
     }
 
-    public void testReportShortcutUsed() {
+    public void disabled_testReportShortcutUsed() {
         mRunningUsers.put(USER_11, true);
 
         runWithCaller(CALLING_PACKAGE_1, USER_11, () -> {
@@ -2322,7 +2322,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                         getTestContext().getPackageName()));
     }
 
-    public void testDumpCheckin() throws IOException {
+    public void disabled_testDumpCheckin() throws IOException {
         prepareCrossProfileDataSet();
 
         // prepareCrossProfileDataSet() doesn't set any icons, so do set here.

@@ -1,5 +1,4 @@
 android.content.AsyncTaskLoader$LoadTask
-android.media.MediaCodecInfo$CodecCapabilities$FeatureList
 android.net.ConnectivityThread$Singleton
 android.os.FileObserver
 android.os.NullVibrator

@@ -18,7 +18,6 @@ package com.android.systemui.shade.domain.interactor
 
 import androidx.annotation.FloatRange
 import com.android.compose.animation.scene.TransitionKey
-import com.android.systemui.shade.shared.model.ShadeMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -58,13 +57,6 @@ interface ShadeInteractor : BaseShadeInteractor {
 
     /** Whether the shade can be expanded from QQS to QS. */
     val isExpandToQsEnabled: Flow<Boolean>
-
-    /**
-     * The version of the shade layout to use.
-     *
-     * Note: Most likely, you want to read [isShadeLayoutWide] instead of this.
-     */
-    val shadeMode: StateFlow<ShadeMode>
 
     /**
      * Whether the shade layout should be wide (true) or narrow (false).

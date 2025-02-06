@@ -354,7 +354,7 @@ public class TransparentPolicyTest extends WindowTestsBase {
                     ta.launchTransparentActivityInTask();
                     a.assertNotNullOnTopActivity(ActivityRecord::getAppCompatDisplayInsets);
                     a.applyToTopActivity((top) -> {
-                        top.mAppCompatController.getAppCompatSizeCompatModePolicy()
+                        top.mAppCompatController.getSizeCompatModePolicy()
                                 .clearSizeCompatMode();
                     });
                     a.assertNullOnTopActivity(ActivityRecord::getAppCompatDisplayInsets);

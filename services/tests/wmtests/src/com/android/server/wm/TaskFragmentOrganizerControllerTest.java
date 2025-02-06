@@ -36,6 +36,7 @@ import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_TOP_OF_TAS
 import static android.window.TaskFragmentOperation.OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ANIMATION_PARAMS;
+import static android.window.TaskFragmentOperation.OP_TYPE_SET_CAN_AFFECT_SYSTEM_UI_FLAGS;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_DIM_ON_TASK;
 import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_OP_TYPE;
@@ -1909,6 +1910,53 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     public void testApplyTransaction_reorderToTopOfTask_failsIfNotSystemOrganizer() {
         testApplyTransaction_reorder_failsIfNotSystemOrganizer_common(
                 OP_TYPE_REORDER_TO_TOP_OF_TASK);
+    }
+
+    @Test
+    public void testApplyTransaction_setCanAffectSystemUiFlags() {
+        mController.unregisterOrganizer(mIOrganizer);
+        registerTaskFragmentOrganizer(mIOrganizer, true /* isSystemOrganizer */);
+
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment tf = createTaskFragment(task);
+
+        // Setting the flag to false.
+        TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
+                OP_TYPE_SET_CAN_AFFECT_SYSTEM_UI_FLAGS).setBooleanValue(false).build();
+        mTransaction.addTaskFragmentOperation(tf.getFragmentToken(), operation);
+
+        assertApplyTransactionAllowed(mTransaction);
+
+        verify(tf).setCanAffectSystemUiFlags(false);
+
+        // Setting the flag back to true.
+        operation = new TaskFragmentOperation.Builder(
+                OP_TYPE_SET_CAN_AFFECT_SYSTEM_UI_FLAGS).setBooleanValue(true).build();
+        mTransaction.addTaskFragmentOperation(tf.getFragmentToken(), operation);
+
+        assertApplyTransactionAllowed(mTransaction);
+
+        verify(tf).setCanAffectSystemUiFlags(true);
+    }
+
+    @Test
+    public void testApplyTransaction_setCanAffectSystemUiFlags_failsIfNotSystemOrganizer() {
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment tf = createTaskFragment(task);
+
+        TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
+                OP_TYPE_SET_CAN_AFFECT_SYSTEM_UI_FLAGS).setBooleanValue(false).build();
+        mTransaction
+                .addTaskFragmentOperation(tf.getFragmentToken(), operation)
+                .setErrorCallbackToken(mErrorToken);
+
+        assertApplyTransactionAllowed(mTransaction);
+
+        // The pending event will be dispatched on the handler (from requestTraversal).
+        waitHandlerIdle(mWm.mAnimationHandler);
+
+        assertTaskFragmentErrorTransaction(OP_TYPE_SET_CAN_AFFECT_SYSTEM_UI_FLAGS,
+                SecurityException.class);
     }
 
     @NonNull

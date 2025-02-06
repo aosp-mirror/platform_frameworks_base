@@ -1,2 +1,3 @@
 rule android.net.vcn.persistablebundleutils.** android.net.connectivity.android.net.vcn.persistablebundleutils.@1
 rule android.net.vcn.util.** android.net.connectivity.android.net.vcn.util.@1
+rule android.util.IndentingPrintWriter android.net.connectivity.android.util.IndentingPrintWriter

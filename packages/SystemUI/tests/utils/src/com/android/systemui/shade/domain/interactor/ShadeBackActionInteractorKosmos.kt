@@ -24,6 +24,7 @@ val Kosmos.shadeBackActionInteractor by
     Kosmos.Fixture {
         ShadeBackActionInteractorImpl(
             shadeInteractor = shadeInteractor,
+            shadeModeInteractor = shadeModeInteractor,
             sceneInteractor = sceneInteractor,
             deviceEntryInteractor = deviceEntryInteractor,
         )

@@ -76,6 +76,7 @@ constructor(
     private val _listeners: MutableSet<MediaDataManager.Listener> = mutableSetOf()
     val listeners: Set<MediaDataManager.Listener>
         get() = _listeners.toSet()
+
     lateinit var mediaDataManager: MediaDataManager
 
     private val allEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
@@ -107,7 +108,7 @@ constructor(
         data: MediaData,
         immediately: Boolean,
         receivedSmartspaceCardLatency: Int,
-        isSsReactivated: Boolean
+        isSsReactivated: Boolean,
     ) {
         if (oldKey != null && oldKey != key) {
             allEntries.remove(oldKey)
@@ -133,11 +134,9 @@ constructor(
     override fun onSmartspaceMediaDataLoaded(
         key: String,
         data: SmartspaceMediaData,
-        shouldPrioritize: Boolean
+        shouldPrioritize: Boolean,
     ) {
-        // With persistent recommendation card, we could get a background update while inactive
-        // Otherwise, consider it an invalid update
-        if (!data.isActive && !mediaFlags.isPersistentSsCardEnabled()) {
+        if (!data.isActive) {
             Log.d(TAG, "Inactive recommendation data. Skip triggering.")
             return
         }
@@ -176,7 +175,7 @@ constructor(
                 logger.logRecommendationActivated(
                     mediaData.appUid,
                     mediaData.packageName,
-                    mediaData.instanceId
+                    mediaData.instanceId,
                 )
                 listeners.forEach {
                     it.onMediaDataLoaded(
@@ -186,7 +185,7 @@ constructor(
                         receivedSmartspaceCardLatency =
                             (systemClock.currentTimeMillis() - data.headphoneConnectionTimeMillis)
                                 .toInt(),
-                        isSsReactivated = true
+                        isSsReactivated = true,
                     )
                 }
             }
@@ -201,7 +200,7 @@ constructor(
         }
         logger.logRecommendationAdded(
             smartspaceMediaData.packageName,
-            smartspaceMediaData.instanceId
+            smartspaceMediaData.instanceId,
         )
         listeners.forEach { it.onSmartspaceMediaDataLoaded(key, data, shouldPrioritizeMutable) }
     }
@@ -232,7 +231,7 @@ constructor(
             smartspaceMediaData =
                 EMPTY_SMARTSPACE_MEDIA_DATA.copy(
                     targetId = smartspaceMediaData.targetId,
-                    instanceId = smartspaceMediaData.instanceId
+                    instanceId = smartspaceMediaData.instanceId,
                 )
         }
         listeners.forEach { it.onSmartspaceMediaDataRemoved(key, immediately) }
@@ -286,7 +285,7 @@ constructor(
             if (dismissIntent == null) {
                 Log.w(
                     TAG,
-                    "Cannot create dismiss action click action: extras missing dismiss_intent."
+                    "Cannot create dismiss action click action: extras missing dismiss_intent.",
                 )
             } else if (
                 dismissIntent.component?.className == EXPORTED_SMARTSPACE_TRAMPOLINE_ACTIVITY_NAME
@@ -297,20 +296,15 @@ constructor(
                 broadcastSender.sendBroadcast(dismissIntent)
             }
 
-            if (mediaFlags.isPersistentSsCardEnabled()) {
-                smartspaceMediaData = smartspaceMediaData.copy(isActive = false)
-                mediaDataManager.setRecommendationInactive(smartspaceMediaData.targetId)
-            } else {
-                smartspaceMediaData =
-                    EMPTY_SMARTSPACE_MEDIA_DATA.copy(
-                        targetId = smartspaceMediaData.targetId,
-                        instanceId = smartspaceMediaData.instanceId,
-                    )
-                mediaDataManager.dismissSmartspaceRecommendation(
-                    smartspaceMediaData.targetId,
-                    delay = 0L,
+            smartspaceMediaData =
+                EMPTY_SMARTSPACE_MEDIA_DATA.copy(
+                    targetId = smartspaceMediaData.targetId,
+                    instanceId = smartspaceMediaData.instanceId,
                 )
-            }
+            mediaDataManager.dismissSmartspaceRecommendation(
+                smartspaceMediaData.targetId,
+                delay = 0L,
+            )
         }
     }
 
@@ -322,12 +316,7 @@ constructor(
 
     /** Are there any media entries we should display? */
     fun hasAnyMediaOrRecommendation(): Boolean {
-        val hasSmartspace =
-            if (mediaFlags.isPersistentSsCardEnabled()) {
-                smartspaceMediaData.isValid()
-            } else {
-                smartspaceMediaData.isActive && smartspaceMediaData.isValid()
-            }
+        val hasSmartspace = smartspaceMediaData.isActive && smartspaceMediaData.isValid()
         return userEntries.isNotEmpty() || hasSmartspace
     }
 

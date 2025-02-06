@@ -20,7 +20,7 @@ import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper.RunWithLooper
 import android.view.Choreographer
-import android.view.MotionEvent
+import android.view.accessibility.AccessibilityEvent
 import android.widget.FrameLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -45,7 +45,10 @@ import com.android.systemui.res.R
 import com.android.systemui.settings.brightness.data.repository.BrightnessMirrorShowingRepository
 import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
+import com.android.systemui.shade.data.repository.ShadeAnimationRepository
+import com.android.systemui.shade.data.repository.ShadeRepositoryImpl
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
+import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorLegacyImpl
 import com.android.systemui.statusbar.BlurUtils
 import com.android.systemui.statusbar.DragDownHelper
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -72,9 +75,9 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.window.ui.viewmodel.WindowRootViewModel
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -89,7 +92,6 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.eq
 
-@ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
@@ -185,6 +187,10 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 notificationShadeDepthController,
                 underTest,
                 shadeViewController,
+                ShadeAnimationInteractorLegacyImpl(
+                    ShadeAnimationRepository(),
+                    ShadeRepositoryImpl(testScope),
+                ),
                 panelExpansionInteractor,
                 ShadeExpansionStateManager(),
                 notificationStackScrollLayoutController,
@@ -213,6 +219,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 mock(),
                 { configurationForwarder },
                 brightnessMirrorShowingInteractor,
+                UnconfinedTestDispatcher(),
             )
 
         controller.setupExpandedStatusBar()
@@ -242,21 +249,26 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(AConfigFlags.FLAG_SHADE_WINDOW_GOES_AROUND)
-    fun onConfigurationChanged_configForwarderSet_propagatesConfig() {
-        val config = Configuration()
-        underTest.onConfigurationChanged(config)
-
-        verify(configurationForwarder).onConfigurationChanged(eq(config))
-    }
-
-    @Test
-    @EnableFlags(AConfigFlags.FLAG_SHADE_WINDOW_GOES_AROUND)
     fun onMovedToDisplay_configForwarderSet_propagatesConfig() {
         val config = Configuration()
 
         underTest.onMovedToDisplay(1, config)
 
         verify(configurationForwarder).dispatchOnMovedToDisplay(eq(1), eq(config))
+    }
+
+    @Test
+    @EnableFlags(AConfigFlags.FLAG_SHADE_LAUNCH_ACCESSIBILITY)
+    fun requestSendAccessibilityEvent_duringLaunchAnimation_blocksFocusEvent() {
+        underTest.setAnimatingContentLaunch(true)
+
+        assertThat(
+                underTest.requestSendAccessibilityEvent(
+                    underTest.getChildAt(0),
+                    AccessibilityEvent(AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED),
+                )
+            )
+            .isFalse()
     }
 
     private fun captureInteractionEventHandler() {

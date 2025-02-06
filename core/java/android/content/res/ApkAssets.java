@@ -353,7 +353,7 @@ public final class ApkAssets {
     /** @hide */
     public @NonNull String getDebugName() {
         synchronized (this) {
-            return nativeGetDebugName(mNativePtr);
+            return mNativePtr == 0 ? "<destroyed>" : nativeGetDebugName(mNativePtr);
         }
     }
 

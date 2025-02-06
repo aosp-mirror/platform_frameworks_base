@@ -21,6 +21,7 @@ import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.privacy.privacyDialogController
 import com.android.systemui.privacy.privacyDialogControllerV2
 import com.android.systemui.shade.data.repository.fakePrivacyChipRepository
+import com.android.systemui.shade.data.repository.shadeDialogContextInteractor
 import com.android.systemui.statusbar.policy.deviceProvisionedController
 
 var Kosmos.privacyChipInteractor: PrivacyChipInteractor by
@@ -31,5 +32,6 @@ var Kosmos.privacyChipInteractor: PrivacyChipInteractor by
             privacyDialogController = privacyDialogController,
             privacyDialogControllerV2 = privacyDialogControllerV2,
             deviceProvisionedController = deviceProvisionedController,
+            shadeDialogContextInteractor = shadeDialogContextInteractor,
         )
     }

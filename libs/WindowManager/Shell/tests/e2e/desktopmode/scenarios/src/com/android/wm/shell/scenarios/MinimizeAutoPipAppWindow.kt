@@ -54,6 +54,7 @@ abstract class MinimizeAutoPipAppWindow {
     fun setup() {
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() && tapl.isTablet)
         Assume.assumeTrue(Flags.enableMinimizeButton())
+        Assume.assumeTrue(com.android.wm.shell.Flags.enablePip2())
         testApp.enterDesktopMode(wmHelper, device)
         pipApp.launchViaIntent(wmHelper)
         pipApp.enableAutoEnterForPipActivity()

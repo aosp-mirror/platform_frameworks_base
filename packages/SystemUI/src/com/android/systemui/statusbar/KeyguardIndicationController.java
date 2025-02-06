@@ -88,6 +88,7 @@ import com.android.keyguard.TrustGrantFlags;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatteryStatus;
+import com.android.systemui.Flags;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FaceHelpMessageDeferral;
 import com.android.systemui.biometrics.FaceHelpMessageDeferralFactory;
@@ -199,7 +200,7 @@ public class KeyguardIndicationController {
     private CharSequence mBiometricMessage;
     private CharSequence mBiometricMessageFollowUp;
     private BiometricSourceType mBiometricMessageSource;
-    protected ColorStateList mInitialTextColorState;
+    private ColorStateList mInitialTextColorState;
     private boolean mVisible;
     private boolean mOrganizationOwnedDevice;
 
@@ -210,6 +211,7 @@ public class KeyguardIndicationController {
     protected boolean mPowerPluggedInDock;
     protected int mChargingSpeed;
     protected boolean mPowerCharged;
+    protected int mChargingStatus;
 
     /** Whether the battery defender is triggered. */
     private boolean mBatteryDefender;
@@ -393,13 +395,27 @@ public class KeyguardIndicationController {
         return mIndicationArea;
     }
 
+    /**
+     * Notify controller about configuration changes.
+     */
+    public void onConfigurationChanged() {
+        // Get new text color in case theme has changed
+        if (Flags.indicationTextA11yFix()) {
+            setIndicationColorToThemeColor();
+        }
+    }
+
     public void setIndicationArea(ViewGroup indicationArea) {
         mIndicationArea = indicationArea;
         mTopIndicationView = indicationArea.findViewById(R.id.keyguard_indication_text);
         mLockScreenIndicationView = indicationArea.findViewById(
                 R.id.keyguard_indication_text_bottom);
-        mInitialTextColorState = mTopIndicationView != null
-                ? mTopIndicationView.getTextColors() : ColorStateList.valueOf(Color.WHITE);
+        if (Flags.indicationTextA11yFix()) {
+            setIndicationColorToThemeColor();
+        } else {
+            setIndicationTextColor(mTopIndicationView != null
+                    ? mTopIndicationView.getTextColors() : ColorStateList.valueOf(Color.WHITE));
+        }
         if (mRotateTextViewController != null) {
             mRotateTextViewController.destroy();
         }
@@ -434,6 +450,12 @@ public class KeyguardIndicationController {
         collectFlow(mIndicationArea,
                 mUserLogoutInteractor.isLogoutEnabled(),
                 mIsLogoutEnabledCallback);
+    }
+
+    @NonNull
+    private ColorStateList wallpaperTextColor() {
+        return ColorStateList.valueOf(
+                Utils.getColorAttrDefaultColor(mContext, R.attr.wallpaperTextColor));
     }
 
     /**
@@ -513,7 +535,7 @@ public class KeyguardIndicationController {
                             .setMessage(mContext.getResources().getString(
                                     com.android.systemui.res.R.string.dismissible_keyguard_swipe)
                             )
-                            .setTextColor(mInitialTextColorState)
+                            .setTextColor(getInitialTextColorState())
                             .build(),
                     /* updateImmediately */ true);
         } else {
@@ -533,7 +555,7 @@ public class KeyguardIndicationController {
                               INDICATION_TYPE_DISCLOSURE,
                               new KeyguardIndication.Builder()
                                       .setMessage(disclosure)
-                                      .setTextColor(mInitialTextColorState)
+                                      .setTextColor(getInitialTextColorState())
                                       .build(),
                               /* updateImmediately */ false);
                     }
@@ -602,7 +624,7 @@ public class KeyguardIndicationController {
                             INDICATION_TYPE_OWNER_INFO,
                             new KeyguardIndication.Builder()
                                     .setMessage(finalInfo)
-                                    .setTextColor(mInitialTextColorState)
+                                    .setTextColor(getInitialTextColorState())
                                     .build(),
                             false);
                 } else {
@@ -624,7 +646,7 @@ public class KeyguardIndicationController {
                     INDICATION_TYPE_BATTERY,
                     new KeyguardIndication.Builder()
                             .setMessage(powerIndication)
-                            .setTextColor(mInitialTextColorState)
+                            .setTextColor(getInitialTextColorState())
                             .build(),
                     animate);
         } else {
@@ -645,7 +667,7 @@ public class KeyguardIndicationController {
                     new KeyguardIndication.Builder()
                             .setMessage(mContext.getResources().getText(
                                     com.android.internal.R.string.lockscreen_storage_locked))
-                            .setTextColor(mInitialTextColorState)
+                            .setTextColor(getInitialTextColorState())
                             .build(),
                     false);
         } else {
@@ -666,7 +688,7 @@ public class KeyguardIndicationController {
                             .setMessage(mBiometricMessage)
                             .setForceAccessibilityLiveRegionAssertive()
                             .setMinVisibilityMillis(IMPORTANT_MSG_MIN_DURATION)
-                            .setTextColor(mInitialTextColorState)
+                            .setTextColor(getInitialTextColorState())
                             .build(),
                     true
             );
@@ -680,7 +702,7 @@ public class KeyguardIndicationController {
                     new KeyguardIndication.Builder()
                             .setMessage(mBiometricMessageFollowUp)
                             .setMinVisibilityMillis(IMPORTANT_MSG_MIN_DURATION)
-                            .setTextColor(mInitialTextColorState)
+                            .setTextColor(getInitialTextColorState())
                             .build(),
                     true
             );
@@ -711,7 +733,7 @@ public class KeyguardIndicationController {
                     INDICATION_TYPE_TRUST,
                     new KeyguardIndication.Builder()
                             .setMessage(trustGrantedIndication)
-                            .setTextColor(mInitialTextColorState)
+                            .setTextColor(getInitialTextColorState())
                             .build(),
                     true);
             hideBiometricMessage();
@@ -722,7 +744,7 @@ public class KeyguardIndicationController {
                     INDICATION_TYPE_TRUST,
                     new KeyguardIndication.Builder()
                             .setMessage(trustManagedIndication)
-                            .setTextColor(mInitialTextColorState)
+                            .setTextColor(getInitialTextColorState())
                             .build(),
                     false);
         } else {
@@ -751,7 +773,7 @@ public class KeyguardIndicationController {
                     INDICATION_TYPE_PERSISTENT_UNLOCK_MESSAGE,
                     new KeyguardIndication.Builder()
                             .setMessage(mPersistentUnlockMessage)
-                            .setTextColor(mInitialTextColorState)
+                            .setTextColor(getInitialTextColorState())
                             .build(),
                     true);
         } else {
@@ -792,7 +814,7 @@ public class KeyguardIndicationController {
                     new KeyguardIndication.Builder()
                             .setMessage(mContext.getString(
                                     R.string.keyguard_indication_after_adaptive_auth_lock))
-                            .setTextColor(mInitialTextColorState)
+                            .setTextColor(getInitialTextColorState())
                             .build(),
                     true);
         } else {
@@ -1179,7 +1201,8 @@ public class KeyguardIndicationController {
                 } else {
                     message = mContext.getString(R.string.keyguard_retry);
                 }
-                mStatusBarKeyguardViewManager.setKeyguardMessage(message, mInitialTextColorState,
+                mStatusBarKeyguardViewManager.setKeyguardMessage(message,
+                        getInitialTextColorState(),
                         null);
             }
         } else {
@@ -1232,12 +1255,13 @@ public class KeyguardIndicationController {
 
     public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardIndicationController:");
-        pw.println("  mInitialTextColorState: " + mInitialTextColorState);
+        pw.println("  mInitialTextColorState: " + getInitialTextColorState());
         pw.println("  mPowerPluggedInWired: " + mPowerPluggedInWired);
         pw.println("  mPowerPluggedIn: " + mPowerPluggedIn);
         pw.println("  mPowerCharged: " + mPowerCharged);
         pw.println("  mChargingSpeed: " + mChargingSpeed);
         pw.println("  mChargingWattage: " + mChargingWattage);
+        pw.println("  mChargingStatus: " + mChargingStatus);
         pw.println("  mMessageToShowOnScreenOn: " + mBiometricErrorMessageToShowOnScreenOn);
         pw.println("  mDozing: " + mDozing);
         pw.println("  mTransientIndication: " + mTransientIndication);
@@ -1251,6 +1275,22 @@ public class KeyguardIndicationController {
         pw.println("  trustGrantedIndication: " + getTrustGrantedIndication());
         pw.println("    mCoExFaceHelpMsgIdsToShow=" + mCoExFaceAcquisitionMsgIdsToShow);
         mRotateTextViewController.dump(pw, args);
+    }
+
+    protected ColorStateList getInitialTextColorState() {
+        return mInitialTextColorState;
+    }
+
+    private void setIndicationColorToThemeColor() {
+        mInitialTextColorState = wallpaperTextColor();
+    }
+
+    /**
+     * @deprecated Use {@link #setIndicationColorToThemeColor}
+     */
+    @Deprecated
+    private void setIndicationTextColor(ColorStateList color) {
+        mInitialTextColorState = color;
     }
 
     protected class BaseKeyguardCallback extends KeyguardUpdateMonitorCallback {
@@ -1279,6 +1319,7 @@ public class KeyguardIndicationController {
             mPowerCharged = status.isCharged();
             mChargingWattage = status.maxChargingWattage;
             mChargingSpeed = status.getChargingSpeed(mContext);
+            mChargingStatus = status.chargingStatus;
             mBatteryLevel = status.level;
             mBatteryPresent = status.present;
             mBatteryDefender = isBatteryDefender(status);
@@ -1358,7 +1399,7 @@ public class KeyguardIndicationController {
                     mBouncerMessageInteractor.setFaceAcquisitionMessage(helpString);
                 }
                 mStatusBarKeyguardViewManager.setKeyguardMessage(helpString,
-                        mInitialTextColorState, biometricSourceType);
+                        getInitialTextColorState(), biometricSourceType);
             } else if (mScreenLifecycle.getScreenState() == SCREEN_ON) {
                 if (isCoExFaceAcquisitionMessage && msgId == FACE_ACQUIRED_TOO_DARK) {
                     showBiometricMessage(
@@ -1655,7 +1696,7 @@ public class KeyguardIndicationController {
     private void showErrorMessageNowOrLater(String errString, @Nullable String followUpMsg,
             BiometricSourceType biometricSourceType) {
         if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
-            mStatusBarKeyguardViewManager.setKeyguardMessage(errString, mInitialTextColorState,
+            mStatusBarKeyguardViewManager.setKeyguardMessage(errString, getInitialTextColorState(),
                     biometricSourceType);
         } else if (mScreenLifecycle.getScreenState() == SCREEN_ON) {
             showBiometricMessage(errString, followUpMsg, biometricSourceType);

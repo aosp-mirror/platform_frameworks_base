@@ -33,6 +33,7 @@ android_test {
         "WMShellFlickerTestsBase",
         "WMShellScenariosDesktopMode",
         "WMShellTestUtils",
+        "ui-trace-collector",
     ],
     data: ["trace_config/*"],
 }

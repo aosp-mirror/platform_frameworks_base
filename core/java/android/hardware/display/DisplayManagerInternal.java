@@ -475,6 +475,12 @@ public abstract class DisplayManagerInternal {
      */
     public abstract boolean isDisplayReadyForMirroring(int displayId);
 
+    /**
+     * Called by {@link  com.android.server.display.DisplayBackupHelper} when backup files were
+     * restored and are ready to be reloaded.
+     */
+    public abstract void reloadTopologies(int userId);
+
 
     /**
      * Used by the window manager to override the per-display screen brightness based on the

@@ -32,7 +32,6 @@ import com.android.systemui.util.kotlin.SharedPreferencesExt.observe
 import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
@@ -51,9 +50,20 @@ interface CommunalPrefsRepository {
 
     /** Save the CTA tile dismissed state for the current user. */
     suspend fun setCtaDismissed(user: UserInfo)
+
+    /** Whether hub onboarding has been dismissed. */
+    fun isHubOnboardingDismissed(user: UserInfo): Flow<Boolean>
+
+    /** Save the hub onboarding dismissed state for the current user. */
+    suspend fun setHubOnboardingDismissed(user: UserInfo)
+
+    /** Whether dream button tooltip has been dismissed. */
+    fun isDreamButtonTooltipDismissed(user: UserInfo): Flow<Boolean>
+
+    /** Save the dream button tooltip dismissed state for the current user. */
+    suspend fun setDreamButtonTooltipDismissed(user: UserInfo)
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class CommunalPrefsRepositoryImpl
 @Inject
@@ -64,9 +74,6 @@ constructor(
     @CommunalLog logBuffer: LogBuffer,
 ) : CommunalPrefsRepository {
     private val logger by lazy { Logger(logBuffer, TAG) }
-
-    override fun isCtaDismissed(user: UserInfo): Flow<Boolean> =
-        readKeyForUser(user, CTA_DISMISSED_STATE)
 
     /**
      * Emits an event each time a Backup & Restore restoration job is completed, and once at the
@@ -82,19 +89,37 @@ constructor(
             .onEach { logger.i("Restored state for communal preferences.") }
             .emitOnStart()
 
+    override fun isCtaDismissed(user: UserInfo): Flow<Boolean> =
+        readKeyForUser(user, CTA_DISMISSED_STATE)
+
     override suspend fun setCtaDismissed(user: UserInfo) =
-        withContext(bgDispatcher) {
-            getSharedPrefsForUser(user).edit().putBoolean(CTA_DISMISSED_STATE, true).apply()
-            logger.i("Dismissed CTA tile")
-        }
+        setBooleanKeyValueForUser(user, CTA_DISMISSED_STATE, "Dismissed CTA tile")
+
+    override fun isHubOnboardingDismissed(user: UserInfo): Flow<Boolean> =
+        readKeyForUser(user, HUB_ONBOARDING_DISMISSED_STATE)
+
+    override suspend fun setHubOnboardingDismissed(user: UserInfo) =
+        setBooleanKeyValueForUser(user, HUB_ONBOARDING_DISMISSED_STATE, "Dismissed hub onboarding")
+
+    override fun isDreamButtonTooltipDismissed(user: UserInfo): Flow<Boolean> =
+        readKeyForUser(user, DREAM_BUTTON_TOOLTIP_DISMISSED_STATE)
+
+    override suspend fun setDreamButtonTooltipDismissed(user: UserInfo) =
+        setBooleanKeyValueForUser(
+            user,
+            DREAM_BUTTON_TOOLTIP_DISMISSED_STATE,
+            "Dismissed dream button tooltip",
+        )
 
     private fun getSharedPrefsForUser(user: UserInfo): SharedPreferences {
-        return userFileManager.getSharedPreferences(
-            FILE_NAME,
-            Context.MODE_PRIVATE,
-            user.id,
-        )
+        return userFileManager.getSharedPreferences(FILE_NAME, Context.MODE_PRIVATE, user.id)
     }
+
+    private suspend fun setBooleanKeyValueForUser(user: UserInfo, key: String, logMsg: String) =
+        withContext(bgDispatcher) {
+            getSharedPrefsForUser(user).edit().putBoolean(key, true).apply()
+            logger.i(logMsg)
+        }
 
     private fun readKeyForUser(user: UserInfo, key: String): Flow<Boolean> {
         return backupRestorationEvents
@@ -109,5 +134,7 @@ constructor(
         const val TAG = "CommunalPrefsRepository"
         const val FILE_NAME = "communal_hub_prefs"
         const val CTA_DISMISSED_STATE = "cta_dismissed"
+        const val HUB_ONBOARDING_DISMISSED_STATE = "hub_onboarding_dismissed"
+        const val DREAM_BUTTON_TOOLTIP_DISMISSED_STATE = "dream_button_tooltip_dismissed_state"
     }
 }

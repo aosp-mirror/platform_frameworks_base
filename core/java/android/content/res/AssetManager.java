@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Provides access to an application's raw asset files; see {@link Resources}
@@ -133,7 +134,7 @@ public final class AssetManager implements AutoCloseable {
 
     // Debug/reference counting implementation.
     @GuardedBy("this") private boolean mOpen = true;
-    @GuardedBy("this") private int mNumRefs = 1;
+    private AtomicInteger mNumRefs = new AtomicInteger(1);
     @GuardedBy("this") private HashMap<Long, RuntimeException> mRefStacks;
 
     private ResourcesLoader[] mLoaders;
@@ -244,7 +245,7 @@ public final class AssetManager implements AutoCloseable {
 
         mObject = nativeCreate();
         if (DEBUG_REFS) {
-            mNumRefs = 0;
+            mNumRefs.set(0);
             incRefsLocked(hashCode());
         }
 
@@ -260,7 +261,7 @@ public final class AssetManager implements AutoCloseable {
     private AssetManager(boolean sentinel) {
         mObject = nativeCreate();
         if (DEBUG_REFS) {
-            mNumRefs = 0;
+            mNumRefs.set(0);
             incRefsLocked(hashCode());
         }
     }
@@ -324,7 +325,7 @@ public final class AssetManager implements AutoCloseable {
             }
 
             mOpen = false;
-            decRefsLocked(hashCode());
+            decRefs(hashCode());
         }
     }
 
@@ -1235,9 +1236,7 @@ public final class AssetManager implements AutoCloseable {
     }
 
     void xmlBlockGone(int id) {
-        synchronized (this) {
-            decRefsLocked(id);
-        }
+        decRefs(id);
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -1308,9 +1307,7 @@ public final class AssetManager implements AutoCloseable {
     }
 
     void releaseTheme(long themePtr) {
-        synchronized (this) {
-            decRefsLocked(themePtr);
-        }
+        decRefs(themePtr);
     }
 
     static long getThemeFreeFunction() {
@@ -1332,7 +1329,7 @@ public final class AssetManager implements AutoCloseable {
         if (this != newAssetManager) {
             synchronized (this) {
                 ensureValidLocked();
-                decRefsLocked(themePtr);
+                decRefs(themePtr);
             }
             synchronized (newAssetManager) {
                 newAssetManager.ensureValidLocked();
@@ -1364,8 +1361,8 @@ public final class AssetManager implements AutoCloseable {
 
     @Override
     protected void finalize() throws Throwable {
-        if (DEBUG_REFS && mNumRefs != 0) {
-            Log.w(TAG, "AssetManager " + this + " finalized with non-zero refs: " + mNumRefs);
+        if (DEBUG_REFS && mNumRefs.get() != 0) {
+            Log.w(TAG, "AssetManager " + this + " finalized with non-zero refs: " + mNumRefs.get());
             if (mRefStacks != null) {
                 for (RuntimeException e : mRefStacks.values()) {
                     Log.w(TAG, "Reference from here", e);
@@ -1473,9 +1470,7 @@ public final class AssetManager implements AutoCloseable {
                 nativeAssetDestroy(mAssetNativePtr);
                 mAssetNativePtr = 0;
 
-                synchronized (AssetManager.this) {
-                    decRefsLocked(hashCode());
-                }
+                decRefs(hashCode());
             }
         }
 
@@ -1680,19 +1675,25 @@ public final class AssetManager implements AutoCloseable {
             RuntimeException ex = new RuntimeException();
             mRefStacks.put(id, ex);
         }
-        mNumRefs++;
+        mNumRefs.incrementAndGet();
     }
 
-    @GuardedBy("this")
-    private void decRefsLocked(long id) {
-        if (DEBUG_REFS && mRefStacks != null) {
-            mRefStacks.remove(id);
+    private void decRefs(long id) {
+        if (DEBUG_REFS) {
+            synchronized (this) {
+                if (mRefStacks != null) {
+                    mRefStacks.remove(id);
+                }
+            }
         }
-        mNumRefs--;
-        if (mNumRefs == 0 && mObject != 0) {
-            nativeDestroy(mObject);
-            mObject = 0;
-            mApkAssets = sEmptyApkAssets;
+        if (mNumRefs.decrementAndGet() == 0) {
+            synchronized (this) {
+                if (mNumRefs.get() == 0 && mObject != 0) {
+                    nativeDestroy(mObject);
+                    mObject = 0;
+                    mApkAssets = sEmptyApkAssets;
+                }
+            }
         }
     }
 

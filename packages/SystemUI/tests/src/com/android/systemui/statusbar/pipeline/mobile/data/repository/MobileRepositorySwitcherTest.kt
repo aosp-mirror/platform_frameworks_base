@@ -50,7 +50,6 @@ import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -70,7 +69,6 @@ import org.mockito.MockitoAnnotations
  * switches over when the value of `demoMode` changes
  */
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class MobileRepositorySwitcherTest : SysuiTestCase() {

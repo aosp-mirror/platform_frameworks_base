@@ -48,6 +48,13 @@ public abstract class UsbACTerminal extends UsbACInterface {
         return mAssocTerminal;
     }
 
+    public boolean isInputTerminal() {
+        return mTerminalType == UsbTerminalTypes.TERMINAL_IN_MIC
+                || mTerminalType == UsbTerminalTypes.TERMINAL_BIDIR_HEADSET
+                || mTerminalType == UsbTerminalTypes.TERMINAL_BIDIR_UNDEFINED
+                || mTerminalType == UsbTerminalTypes.TERMINAL_EXTERN_LINE;
+    }
+
     @Override
     public int parseRawDescriptors(ByteStream stream) {
         mTerminalID = stream.getByte();

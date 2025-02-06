@@ -31,7 +31,7 @@ class ScreenshotCrossProfileService : Service() {
 
     private val mBinder: IBinder =
         object : ICrossProfileService.Stub() {
-            override fun launchIntent(intent: Intent, bundle: Bundle) {
+            override fun launchIntent(intent: Intent, bundle: Bundle?) {
                 startActivity(intent, bundle)
             }
         }

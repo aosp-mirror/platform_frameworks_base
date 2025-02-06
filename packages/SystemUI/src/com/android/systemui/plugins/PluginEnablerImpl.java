@@ -18,6 +18,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.shared.plugins.PluginEnabler;
@@ -28,6 +29,7 @@ import javax.inject.Singleton;
 /** */
 @Singleton
 public class PluginEnablerImpl implements PluginEnabler {
+    private static final String TAG = "PluginEnablerImpl";
     private static final String CRASH_DISABLED_PLUGINS_PREF_FILE = "auto_disabled_plugins_prefs";
 
     private final PackageManager mPm;
@@ -64,8 +66,13 @@ public class PluginEnablerImpl implements PluginEnabler {
 
     @Override
     public boolean isEnabled(ComponentName component) {
-        return mPm.getComponentEnabledSetting(component)
-                != PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+        try {
+            return mPm.getComponentEnabledSetting(component)
+                    != PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+        } catch (IllegalArgumentException ex) {
+            Log.e(TAG, "Package Manager Exception", ex);
+            return false;
+        }
     }
 
     @Override
@@ -73,6 +80,6 @@ public class PluginEnablerImpl implements PluginEnabler {
         if (isEnabled(componentName)) {
             return ENABLED;
         }
-        return mAutoDisabledPrefs.getInt(componentName.flattenToString(), DISABLED_MANUALLY);
+        return mAutoDisabledPrefs.getInt(componentName.flattenToString(), DISABLED_UNKNOWN);
     }
 }

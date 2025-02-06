@@ -50,10 +50,7 @@ import org.mockito.junit.MockitoJUnitRunner
  */
 @Presubmit
 @RunWith(MockitoJUnitRunner::class)
-@EnableFlags(
-    com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG,
-    com.android.input.flags.Flags.FLAG_ENABLE_INPUT_FILTER_RUST_IMPL,
-)
+@EnableFlags(com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG)
 class StickyModifierStateListenerTest {
 
     @get:Rule

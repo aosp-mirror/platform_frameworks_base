@@ -32,7 +32,6 @@ import com.android.systemui.plugins.qs.TileDetailsViewModel
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
-import com.android.systemui.qs.flags.QsDetailedView
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.dialog.InternetDetailsViewModel
@@ -61,6 +60,7 @@ constructor(
     private val internetDialogManager: InternetDialogManager,
     private val wifiStateWorker: WifiStateWorker,
     private val accessPointController: AccessPointController,
+    private val internetDetailsViewModelFactory: InternetDetailsViewModel.Factory,
 ) :
     QSTileImpl<QSTile.BooleanState>(
         host,
@@ -93,9 +93,6 @@ constructor(
     }
 
     override fun handleClick(expandable: Expandable?) {
-        if (QsDetailedView.isEnabled) {
-            return
-        }
         mainHandler.post {
             internetDialogManager.create(
                 aboveStatusBar = true,
@@ -107,7 +104,7 @@ constructor(
     }
 
     override fun getDetailsViewModel(): TileDetailsViewModel {
-        return InternetDetailsViewModel { longClick(null) }
+        return internetDetailsViewModelFactory.create { longClick(null) }
     }
 
     override fun handleSecondaryClick(expandable: Expandable?) {

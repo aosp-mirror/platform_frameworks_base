@@ -32,13 +32,11 @@ import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.user.utils.UserScopedService
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class BuildNumberInteractor
 @Inject

@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"બૅટરીની ટકાવારી અજાણ છે."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> થી કનેક્ટ થયાં."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> થી કનેક્ટ કરેલ."</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"કનેક્ટ થયેલું નથી."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"રોમિંગ"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"બંધ કરો"</string>
@@ -535,10 +539,12 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"લૉક સ્ક્રીન વિજેટ"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"વિજેટનો ઉપયોગ કરીને ઍપ ખોલવા માટે, તમારે એ ચકાસણી કરવાની જરૂર રહેશે કે આ તમે જ છો. તે ઉપરાંત, ધ્યાનમાં રાખો કે તમારું ટૅબ્લેટ લૉક કરેલું હોય તો પણ કોઈપણ વ્યક્તિ તેમને જોઈ શકે છે. અમુક વિજેટ કદાચ તમારી લૉક સ્ક્રીન માટે બનાવવામાં આવ્યા ન હોઈ શકે છે અને તેમને અહીં ઉમેરવાનું અસલામત હોઈ શકે છે."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"સમજાઈ ગયું"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"વિજેટ"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\"વિજેટ\"નો શૉર્ટકટ ઉમેરવા માટે, ખાતરી કરો કે સેટિંગમાં \"લૉક સ્ક્રીન પર વિજેટ બતાવો\" સુવિધા ચાલુ કરેલી છે."</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"સેટિંગ"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"સ્ક્રીનસેવર બટન બતાવો"</string>
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"હબ મોડ શોધખોળ કરો"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"ચાર્જ કરતી વખતે તમારા મનપસંદ વિજેટ અને સ્ક્રીન સેવર ઍક્સેસ કરો."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"ચાલો પ્રારંભ કરીએ"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"વપરાશકર્તા સ્વિચ કરો"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"પુલડાઉન મેનૂ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"આ સત્રમાંની તમામ ઍપ અને ડેટા કાઢી નાખવામાં આવશે."</string>
@@ -750,6 +756,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"અપડેટ કરી રહ્યાં છીએ"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"ઑફિસની પ્રોફાઇલ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"એરપ્લેન મોડ"</string>
+    <string name="status_bar_supervision" msgid="6735015942701134125">"માતાપિતાના યોગ્ય નિયંત્રણો"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"તમે <xliff:g id="WHEN">%1$s</xliff:g> એ તમારો આગલો એલાર્મ સાંભળશો નહીં"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> વાગ્યે"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g> એ"</string>
@@ -759,7 +766,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"સૅટલાઇટ, સારું કનેક્શન"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"સૅટલાઇટ, કનેક્શન ઉપલબ્ધ છે"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"ઇમર્જન્સી સૅટલાઇટ સહાય"</string>
-    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"ઇમર્જન્સી કૉલ અથવા SOS"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="9103913890116841786">"માત્ર ઇમર્જન્સી કૉલ કે ઇમર્જન્સી સૅટલાઇટ સહાય"</string>
     <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
     <string name="accessibility_no_signal" msgid="7052827511409250167">"કોઈ સિગ્નલ નથી"</string>
     <string name="accessibility_one_bar" msgid="5342012847647834506">"એક બાર"</string>
@@ -800,6 +807,10 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"વાતચીતના નોટિફિકેશન વિભાગની ટોચ પર અને લૉક કરેલી સ્ક્રીન પર પ્રોફાઇલ ફોટો તરીકે બતાવે છે, બબલ તરીકે દેખાય છે, ખલેલ પાડશો નહીં મોડમાં વિક્ષેપ ઊભો કરે છે"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"પ્રાધાન્યતા"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> વાતચીતની સુવિધાઓને સપોર્ટ આપતી નથી"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"છોડી દો"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"ફરી બતાવશો નહીં"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"આ નોટિફિકેશનમાં કોઈ ફેરફાર થઈ શકશે નહીં."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"કૉલના નોટિફિકેશનમાં કોઈ ફેરફાર કરી શકાતો નથી."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"નોટિફિકેશનના આ ગ્રૂપની ગોઠવણી અહીં કરી શકાશે નહીં"</string>
@@ -843,7 +854,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Delete"</string>
-    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc કી"</string>
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Home"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"End"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
@@ -856,7 +867,6 @@
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"પાછળ"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"નોટિફિકેશન"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"કીબોર્ડ શૉર્ટકટ"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"કીબોર્ડ લેઆઉટ સ્વિચ કરો"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"અથવા"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"શોધ ક્વેરી સાફ કરો"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"કીબોર્ડ શૉર્ટકટ"</string>
@@ -881,7 +891,7 @@
     <string name="group_system_cycle_back" msgid="8194102916946802902">"તાજેતરની ઍપ પર પાછળ જાઓ"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ઍપની સૂચિ ખોલો"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"સેટિંગ ખોલો"</string>
-    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistant ખોલો"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"આસિસ્ટંટ ખોલો"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"લૉક સ્ક્રીન"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"નોંધ લો"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"એકસાથે એકથી વધુ કાર્યો કરવા"</string>
@@ -911,6 +921,14 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"કેલ્ક્યુલેટર"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"બાઉન્સ કીને ટૉગલ કરો"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"માઉસ કીને ટૉગલ કરો"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"સ્ટીકી કીને ટૉગલ કરો"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"ધીમી કીને ટૉગલ કરો"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Voice Accessને ટૉગલ કરો"</string>
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"Talkbackની સુવિધાને ટૉગલ કરો"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"મોટું કરવાની સુવિધાને ટૉગલ કરો"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"\'સાંભળવા માટે પસંદ કરો\' સુવિધાને સક્રિય કરો"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ખલેલ પાડશો નહીં"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"વૉલ્યૂમ બટન્સ શૉર્ટકટ"</string>
     <string name="battery" msgid="769686279459897127">"બૅટરી"</string>
@@ -956,12 +974,12 @@
     <string name="tuner_time" msgid="2450785840990529997">"સમય"</string>
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"કલાક, મિનિટ અને સેકન્ડ બતાવો"</item>
-    <item msgid="1271006222031257266">"કલાક અને મિનિટ બતાવો (ડિફોલ્ટ)"</item>
+    <item msgid="1271006222031257266">"કલાક અને મિનિટ બતાવો (ડિફૉલ્ટ)"</item>
     <item msgid="6135970080453877218">"આ આઇકન બતાવશો નહીં"</item>
   </string-array>
   <string-array name="battery_options">
     <item msgid="7714004721411852551">"હંમેશાં ટકાવારી બતાવો"</item>
-    <item msgid="3805744470661798712">"ચાર્જ થાય ત્યારે ટકાવારી બતાવો (ડિફોલ્ટ)"</item>
+    <item msgid="3805744470661798712">"ચાર્જ થાય ત્યારે ટકાવારી બતાવો (ડિફૉલ્ટ)"</item>
     <item msgid="8619482474544321778">"આ આઇકન બતાવશો નહીં"</item>
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"ઓછી પ્રાધાન્યતાનું નોટિફિકેશન આઇકન બતાવો"</string>
@@ -1069,7 +1087,7 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"સ્ક્રીન રેકોર્ડિંગ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"કોઈ શીર્ષક નથી"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"સ્ટૅન્ડબાય"</string>
-    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"ફૉન્ટનું કદ"</string>
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"ફૉન્ટ સાઇઝ"</string>
     <string name="font_scaling_smaller" msgid="1012032217622008232">"વધુ નાનું બનાવો"</string>
     <string name="font_scaling_larger" msgid="5476242157436806760">"વધુ મોટું બનાવો"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"વિસ્તૃતીકરણ વિંડો"</string>
@@ -1289,7 +1307,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ડિવાઇસ અનલૉક કરો"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ખોલવા માટે ફિંગરપ્રિન્ટનો ઉપયોગ કરો"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"પ્રમાણીકરણ આવશ્યક છે. પ્રમાણિત કરવા માટે ફિંગરપ્રિન્ટ સેન્સરને ટચ કરો."</string>
-    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <string name="ongoing_call_content_description" msgid="6394763878322348560">"ચાલુ કૉલ"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
     <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"મોબાઇલ ડેટા"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"કનેક્ટ કરેલું"</string>
@@ -1432,15 +1451,16 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"સિસ્ટમ ઍપ"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"એકથી વધુ કાર્યો કરવા"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"સ્ક્રીનને વિભાજિત કરો"</string>
+    <string name="shortcutHelper_category_accessibility" msgid="8068337792277570938">"ઍક્સેસિબિલિટી"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ઇનપુટ"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"ઍપ શૉર્ટકટ"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"હાલની ઍપ"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ઍક્સેસિબિલિટી"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"કીબોર્ડ શૉર્ટકટ"</string>
-    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"કીબોર્ડ શૉર્ટકટને કસ્ટમાઇઝ કરો"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"શૉર્ટકટ કસ્ટમાઇઝ કરો"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"શું શૉર્ટકટ કાઢી નાખીએ?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"પાછા ડિફૉલ્ટ પર રીસેટ કરીએ?"</string>
-    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"શૉર્ટકટ સોંપવા માટે કી દબાવો"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="7636040209946696120">"આ શૉર્ટકટ બનાવવા માટે, ઍક્શન કી અને એક કે તેથી વધુ કી એકસાથે દબાવો"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"આ તમારા કસ્ટમ શૉર્ટકટને કાયમી રીતે ડિલીટ કરશે."</string>
     <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"આ તમારા બધા કસ્ટમ શૉર્ટકટને કાયમ માટે ડિલીટ કરશે."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"શૉર્ટકટ શોધો"</string>
@@ -1462,9 +1482,11 @@
     <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"હા, રીસેટ કરો"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"રદ કરો"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"કી દબાવો"</string>
-    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"કી સંયોજન પહેલેલેથી ઉપયોગમાં છે. અન્ય કી અજમાવી જુઓ."</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="3325858369539848162">"કી સંયોજન પહેલેથી ઉપયોગમાં છે. અન્ય સંયોજન અજમાવી જુઓ."</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"શૉર્ટકટ સેટ કરી શકાતો નથી."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
+    <string name="shortcut_helper_add_shortcut_button_label" msgid="7655779534665954910">"શૉર્ટકટ ઉમેરો"</string>
+    <string name="shortcut_helper_delete_shortcut_button_label" msgid="3148773472696137052">"શૉર્ટકટ ડિલીટ કરો"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"તમારા કીબોર્ડ વડે નૅવિગેટ કરો"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"કીબોર્ડ શૉર્ટકર્ટ જાણો"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"તમારા ટચપૅડ વડે નૅવિગેટ કરો"</string>
@@ -1474,6 +1496,7 @@
     <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"પાછા જાઓ"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"હોમ પર જાઓ"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"તાજેતરની ઍપ જુઓ"</string>
+    <string name="touchpad_tutorial_switch_apps_gesture_button" msgid="7768255095423767779">"ઍપ સ્વિચ કરો"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"થઈ ગયું"</string>
     <string name="gesture_error_title" msgid="469064941635578511">"ફરી પ્રયાસ કરો!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"પાછા જાઓ"</string>
@@ -1491,6 +1514,11 @@
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"ખૂબ સરસ કામ!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"તમે \'તાજેતરની ઍપ જુઓ\' સંકેત પૂર્ણ કર્યો."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"તાજેતરની ઍપ જોવા માટે, તમારા ટચપૅડ પર ત્રણ આંગળી વડે ઉપરની તરફ સ્વાઇપ કરો અને દબાવી રાખો"</string>
+    <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"ઍપ સ્વિચ કરો"</string>
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"તમારા ટચપૅડ પર ચાર આંગળીઓનો ઉપયોગ કરીને જમણે સ્વાઇપ કરો"</string>
+    <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"ખૂબ સરસ કામ!"</string>
+    <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"તમે ઍપ સ્વિચ કરવાનો સંકેત પૂર્ણ કર્યો છે."</string>
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"ઍપ સ્વિચ કરવા માટે, તમારા ટચપૅડ પર ચાર આંગળીઓનો ઉપયોગ કરીને જમણે સ્વાઇપ કરો"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"બધી ઍપ જુઓ"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"તમારા કીબોર્ડ પરની ઍક્શન કી દબાવો"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"વાહ!"</string>

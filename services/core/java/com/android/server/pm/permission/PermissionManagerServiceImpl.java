@@ -1014,7 +1014,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public int getPermissionRequestState(String packageName, String permName, String deviceId) {
+    public int getPermissionRequestState(String packageName, String permName, int deviceId,
+            String persistentDeviceId) {
         throw new IllegalStateException("getPermissionRequestState is not supported.");
     }
 

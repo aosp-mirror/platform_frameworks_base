@@ -472,6 +472,19 @@ public final class AidlConversionUnitTests {
     }
 
     @Test
+    public void testAudioDeviceAttributesConversion_MultichannelGroup() {
+        AudioDeviceAttributes attributes =
+                new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_MULTICHANNEL_GROUP, "myAddress");
+        AudioPort port = AidlConversion.api2aidl_AudioDeviceAttributes_AudioPort(attributes);
+        assertEquals("", port.name);
+        assertEquals(0, port.extraAudioDescriptors.length);
+        assertEquals("myAddress", port.ext.getDevice().device.address.getId());
+        assertEquals(AudioDeviceDescription.CONNECTION_VIRTUAL,
+                port.ext.getDevice().device.type.connection);
+        assertEquals(AudioDeviceType.OUT_MULTICHANNEL_GROUP, port.ext.getDevice().device.type.type);
+    }
+
+    @Test
     public void testAudioDeviceAttributesConversion() {
         AudioDescriptor audioDescriptor1 =
                 AidlConversion.aidl2api_ExtraAudioDescriptor_AudioDescriptor(

@@ -3,7 +3,6 @@ package com.android.systemui.statusbar
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
@@ -30,7 +29,6 @@ class SplitShadeLockScreenOverScrollerTest : SysuiTestCase() {
 
     private val configurationController = FakeConfigurationController()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Mock private lateinit var scrimController: ScrimController
     @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
     private var qS: QS? = null

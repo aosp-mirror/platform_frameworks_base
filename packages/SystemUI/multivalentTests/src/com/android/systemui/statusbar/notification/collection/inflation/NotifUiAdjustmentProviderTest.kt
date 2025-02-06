@@ -29,6 +29,7 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_NONE
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_PUBLIC
+import com.android.systemui.statusbar.RankingBuilder
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
@@ -241,5 +242,43 @@ class NotifUiAdjustmentProviderTest : SysuiTestCase() {
 
         // Then: need no re-inflation
         assertFalse(NotifUiAdjustment.needReinflate(oldAdjustment, newAdjustment))
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_NM_SUMMARIZATION_UI)
+    fun changeIsSummarization_needReInflation_newlySummarized() {
+        // Given: an Entry with no summarization
+        val oldAdjustment = adjustmentProvider.calculateAdjustment(entry)
+        assertThat(oldAdjustment.summarization).isNull()
+
+        // When: the Entry now has a summarization
+        val rb = RankingBuilder(entry.ranking)
+        rb.setSummarization("summary!")
+        entry.ranking = rb.build()
+        val newAdjustment = adjustmentProvider.calculateAdjustment(entry)
+        assertThat(newAdjustment).isNotEqualTo(oldAdjustment)
+
+        // Then: Need re-inflation
+        assertTrue(NotifUiAdjustment.needReinflate(oldAdjustment, newAdjustment))
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_NM_SUMMARIZATION_UI)
+    fun changeIsSummarization_needReInflation_summarizationChanged() {
+        // Given: an Entry with no summarization
+        val rb = RankingBuilder(entry.ranking)
+        rb.setSummarization("summary!")
+        entry.ranking = rb.build()
+        val oldAdjustment = adjustmentProvider.calculateAdjustment(entry)
+
+        // When: the Entry now has a new summarization
+        val rb2 = RankingBuilder(entry.ranking)
+        rb2.setSummarization("summary new!")
+        entry.ranking = rb2.build()
+        val newAdjustment = adjustmentProvider.calculateAdjustment(entry)
+        assertThat(newAdjustment).isNotEqualTo(oldAdjustment)
+
+        // Then: Need re-inflation
+        assertTrue(NotifUiAdjustment.needReinflate(oldAdjustment, newAdjustment))
     }
 }

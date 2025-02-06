@@ -23,6 +23,7 @@ import static android.companion.AssociationRequest.DEVICE_PROFILE_GLASSES;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_NEARBY_DEVICE_STREAMING;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_SENSOR_DEVICE_STREAMING;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_WEARABLE_SENSING;
 import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
 
 import static java.util.Collections.unmodifiableMap;
@@ -210,6 +211,7 @@ final class CompanionDeviceResources {
         set.add(DEVICE_PROFILE_AUTOMOTIVE_PROJECTION);
         set.add(DEVICE_PROFILE_NEARBY_DEVICE_STREAMING);
         set.add(DEVICE_PROFILE_SENSOR_DEVICE_STREAMING);
+        set.add(DEVICE_PROFILE_WEARABLE_SENSING);
         set.add(null);
 
         SUPPORTED_SELF_MANAGED_PROFILES = unmodifiableSet(set);

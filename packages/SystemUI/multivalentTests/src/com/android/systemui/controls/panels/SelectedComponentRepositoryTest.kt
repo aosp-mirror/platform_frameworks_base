@@ -33,7 +33,6 @@ import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import java.io.File
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -42,7 +41,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class SelectedComponentRepositoryTest : SysuiTestCase() {

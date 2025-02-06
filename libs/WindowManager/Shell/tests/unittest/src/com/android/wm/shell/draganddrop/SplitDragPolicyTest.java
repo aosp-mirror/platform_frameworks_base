@@ -220,7 +220,7 @@ public class SplitDragPolicyTest extends ShellTestCase {
         setRunningTask(mHomeTask);
         DragSession dragSession = new DragSession(mActivityTaskManager,
                 mLandscapeDisplayLayout, data, 0 /* dragFlags */);
-        dragSession.initialize();
+        dragSession.initialize(false /* skipUpdateRunningTask */);
         mPolicy.start(dragSession, mLoggerSessionId);
         ArrayList<Target> targets = assertExactTargetTypes(
                 mPolicy.getTargets(mInsets), TYPE_FULLSCREEN);
@@ -235,7 +235,7 @@ public class SplitDragPolicyTest extends ShellTestCase {
         setRunningTask(mFullscreenAppTask);
         DragSession dragSession = new DragSession(mActivityTaskManager,
                 mLandscapeDisplayLayout, data, 0 /* dragFlags */);
-        dragSession.initialize();
+        dragSession.initialize(false /* skipUpdateRunningTask */);
         mPolicy.start(dragSession, mLoggerSessionId);
         ArrayList<Target> targets = assertExactTargetTypes(
                 mPolicy.getTargets(mInsets), TYPE_SPLIT_LEFT, TYPE_SPLIT_RIGHT);
@@ -255,7 +255,7 @@ public class SplitDragPolicyTest extends ShellTestCase {
         setRunningTask(mFullscreenAppTask);
         DragSession dragSession = new DragSession(mActivityTaskManager,
                 mPortraitDisplayLayout, data, 0 /* dragFlags */);
-        dragSession.initialize();
+        dragSession.initialize(false /* skipUpdateRunningTask */);
         mPolicy.start(dragSession, mLoggerSessionId);
         ArrayList<Target> targets = assertExactTargetTypes(
                 mPolicy.getTargets(mInsets), TYPE_SPLIT_TOP, TYPE_SPLIT_BOTTOM);
@@ -276,7 +276,7 @@ public class SplitDragPolicyTest extends ShellTestCase {
         setRunningTask(mFullscreenAppTask);
         DragSession dragSession = new DragSession(mActivityTaskManager,
                 mLandscapeDisplayLayout, mActivityClipData, 0 /* dragFlags */);
-        dragSession.initialize();
+        dragSession.initialize(false /* skipUpdateRunningTask */);
         mPolicy.start(dragSession, mLoggerSessionId);
         ArrayList<Target> targets = mPolicy.getTargets(mInsets);
         for (Target t : targets) {

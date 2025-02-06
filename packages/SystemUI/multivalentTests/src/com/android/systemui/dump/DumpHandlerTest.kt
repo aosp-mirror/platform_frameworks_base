@@ -275,7 +275,9 @@ class DumpHandlerTest : SysuiTestCase() {
 
     @Test
     fun testDumpAllProtoDumpables() {
+        @Suppress("DEPRECATION")
         dumpManager.registerDumpable("protoDumpable1", protoDumpable1)
+        @Suppress("DEPRECATION")
         dumpManager.registerDumpable("protoDumpable2", protoDumpable2)
 
         val args = arrayOf(DumpHandler.PROTO)
@@ -287,7 +289,9 @@ class DumpHandlerTest : SysuiTestCase() {
 
     @Test
     fun testDumpSingleProtoDumpable() {
+        @Suppress("DEPRECATION")
         dumpManager.registerDumpable("protoDumpable1", protoDumpable1)
+        @Suppress("DEPRECATION")
         dumpManager.registerDumpable("protoDumpable2", protoDumpable2)
 
         val args = arrayOf(DumpHandler.PROTO, "protoDumpable1")

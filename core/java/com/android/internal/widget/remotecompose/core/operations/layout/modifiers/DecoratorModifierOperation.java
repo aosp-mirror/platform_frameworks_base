@@ -17,10 +17,11 @@ package com.android.internal.widget.remotecompose.core.operations.layout.modifie
 
 import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.DecoratorComponent;
+import com.android.internal.widget.remotecompose.core.serialize.Serializable;
 
 /**
  * Represents a decorator modifier (lightweight component), ie a modifier that impacts the visual
  * output (background, border...)
  */
 public abstract class DecoratorModifierOperation extends PaintOperation
-        implements ModifierOperation, DecoratorComponent {}
+        implements ModifierOperation, DecoratorComponent, Serializable {}

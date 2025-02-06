@@ -107,6 +107,9 @@ message SecureSettingsProto {
         optional SettingProto accessibility_key_gesture_targets = 59 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto hct_rect_prompt_status = 60 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto em_value = 61 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Settings for accessibility autoclick
+        optional SettingProto autoclick_cursor_area_size = 62 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto autoclick_ignore_minor_cursor_movement = 63 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     }
     optional Accessibility accessibility = 2;
@@ -578,6 +581,7 @@ message SecureSettingsProto {
         optional SettingProto activate_on_dock = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto activate_on_sleep = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto default_component = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto activate_on_postured = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Screensaver screensaver = 47;
 
@@ -645,14 +649,8 @@ message SecureSettingsProto {
     optional SettingProto theme_customization_overlay_packages = 75 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto trust_agents_initialized = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
-    message TrackpadGesture {
-        optional SettingProto trackpad_gesture_back_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto trackpad_gesture_home_enabled = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto trackpad_gesture_overview_enabled = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto trackpad_gesture_notification_enabled = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto trackpad_gesture_quick_switch_enabled = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    }
-    optional TrackpadGesture trackpad_gesture = 94;
+    reserved 94;  // formerly trackpad_gesture
+    reserved "trackpad_gesture";
 
     message Tts {
         option (android.msg_privacy).dest = DEST_EXPLICIT;

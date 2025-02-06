@@ -177,13 +177,6 @@ final class DisabledWallpaperManager extends WallpaperManager {
     }
 
     @Override
-    @NonNull
-    public SparseArray<Rect> getBitmapCrops(int which) {
-        unsupported();
-        return new SparseArray<>();
-    }
-
-    @Override
     public List<Rect> getBitmapCrops(@NonNull Point bitmapSize, @NonNull List<Point> displaySizes,
             @Nullable Map<Point, Rect> cropHints) {
         return unsupported();

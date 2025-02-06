@@ -15,12 +15,15 @@
  */
 package com.android.server.hdmi;
 
+import static android.content.pm.PackageManager.FEATURE_HDMI_CEC;
+
 import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.Constants.PATH_RELATIONSHIP_ANCESTOR;
 import static com.android.server.hdmi.HdmiControlService.WAKE_UP_SCREEN_ON;
 
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -92,6 +95,9 @@ public class HdmiCecAtomLoggingTest {
 
     @Before
     public void setUp() throws RemoteException {
+        assumeTrue("Test requires FEATURE_HDMI_CEC",
+                InstrumentationRegistry.getTargetContext().getPackageManager()
+                        .hasSystemFeature(FEATURE_HDMI_CEC));
         mHdmiCecAtomWriterSpy = spy(new HdmiCecAtomWriter());
 
         mLooper = mTestLooper.getLooper();

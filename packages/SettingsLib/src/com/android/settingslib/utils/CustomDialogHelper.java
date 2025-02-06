@@ -173,6 +173,11 @@ public class CustomDialogHelper {
      * //TODO: modify method to allow setting state for any button.
      */
     public CustomDialogHelper setButtonEnabled(boolean enabled) {
+        if (enabled) {
+            mPositiveButton.setAlpha(1f);
+        } else {
+            mPositiveButton.setAlpha(0.5f);
+        }
         mPositiveButton.setEnabled(enabled);
         return this;
     }

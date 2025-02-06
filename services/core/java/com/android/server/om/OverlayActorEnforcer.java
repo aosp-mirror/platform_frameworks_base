@@ -19,7 +19,6 @@ package com.android.server.om;
 import android.annotation.NonNull;
 import android.content.om.OverlayInfo;
 import android.content.om.OverlayableInfo;
-import android.content.res.Flags;
 import android.net.Uri;
 import android.os.Process;
 import android.text.TextUtils;
@@ -50,16 +49,16 @@ public class OverlayActorEnforcer {
      */
     static Pair<String, ActorState> getPackageNameForActor(@NonNull String actorUriString,
             @NonNull Map<String, Map<String, String>> namedActors) {
+        if (namedActors.isEmpty()) {
+            return Pair.create(null, ActorState.NO_NAMED_ACTORS);
+        }
+
         Uri actorUri = Uri.parse(actorUriString);
 
         String actorScheme = actorUri.getScheme();
         List<String> actorPathSegments = actorUri.getPathSegments();
         if (!"overlay".equals(actorScheme) || CollectionUtils.size(actorPathSegments) != 1) {
             return Pair.create(null, ActorState.INVALID_OVERLAYABLE_ACTOR_NAME);
-        }
-
-        if (namedActors.isEmpty()) {
-            return Pair.create(null, ActorState.NO_NAMED_ACTORS);
         }
 
         String actorNamespace = actorUri.getAuthority();
@@ -163,15 +162,11 @@ public class OverlayActorEnforcer {
             return ActorState.UNABLE_TO_GET_TARGET_OVERLAYABLE;
         }
 
-        // Framework doesn't have <overlayable> declaration by design, and we still want to be able
-        // to enable its overlays from the packages with the permission.
-        if (targetOverlayable == null
-                && !(Flags.rroControlForAndroidNoOverlayable() && targetPackageName.equals(
-                "android"))) {
+        if (targetOverlayable == null) {
             return ActorState.MISSING_OVERLAYABLE;
         }
 
-        final String actor = targetOverlayable == null ? null : targetOverlayable.actor;
+        String actor = targetOverlayable.actor;
         if (TextUtils.isEmpty(actor)) {
             // If there's no actor defined, fallback to the legacy permission check
             try {

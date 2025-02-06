@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.shade
 
 import android.annotation.SuppressLint
@@ -41,6 +39,7 @@ import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.ui.composable.Overlay
 import com.android.systemui.scene.ui.composable.Scene
+import com.android.systemui.scene.ui.view.SceneJankMonitor
 import com.android.systemui.scene.ui.view.SceneWindowRootView
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
@@ -61,7 +60,6 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Named
 import javax.inject.Provider
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Module for providing views related to the shade. */
 @Module
@@ -89,6 +87,7 @@ abstract class ShadeViewProviderModule {
             layoutInsetController: NotificationInsetsController,
             sceneDataSourceDelegator: Provider<SceneDataSourceDelegator>,
             qsSceneAdapter: Provider<QSSceneAdapter>,
+            sceneJankMonitorFactory: SceneJankMonitor.Factory,
         ): WindowRootView {
             return if (SceneContainerFlag.isEnabled) {
                 checkNoSceneDuplicates(scenesProvider.get())
@@ -104,6 +103,7 @@ abstract class ShadeViewProviderModule {
                     layoutInsetController = layoutInsetController,
                     sceneDataSourceDelegator = sceneDataSourceDelegator.get(),
                     qsSceneAdapter = qsSceneAdapter,
+                    sceneJankMonitorFactory = sceneJankMonitorFactory,
                 )
                 sceneWindowRootView
             } else {

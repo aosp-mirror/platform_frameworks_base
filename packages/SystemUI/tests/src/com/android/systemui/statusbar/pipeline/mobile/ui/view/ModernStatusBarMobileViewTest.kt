@@ -44,7 +44,6 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnec
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -57,7 +56,6 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper(setAsMainLooper = true)
-@OptIn(ExperimentalCoroutinesApi::class)
 class ModernStatusBarMobileViewTest : SysuiTestCase() {
     private val kosmos = testKosmos()
 

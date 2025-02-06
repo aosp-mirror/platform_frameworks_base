@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.notification.icon.domain.interactor
 
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
@@ -27,7 +25,6 @@ import com.android.systemui.statusbar.notification.data.repository.notifications
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.headsUpNotificationIconInteractor
 import com.android.wm.shell.bubbles.bubblesOptional
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.alwaysOnDisplayNotificationIconsInteractor by Fixture {
     AlwaysOnDisplayNotificationIconsInteractor(

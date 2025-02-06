@@ -16,6 +16,7 @@
 
 package com.android.server.hdmi;
 
+import static android.content.pm.PackageManager.FEATURE_HDMI_CEC;
 import static android.media.AudioProfile.AUDIO_ENCAPSULATION_TYPE_NONE;
 
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
@@ -25,6 +26,7 @@ import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_EARC_PENDING;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -84,6 +86,9 @@ public class HdmiEarcLocalDeviceTxTest {
 
     @Before
     public void setUp() {
+        assumeTrue("Test requires FEATURE_HDMI_CEC",
+                InstrumentationRegistry.getTargetContext().getPackageManager()
+                        .hasSystemFeature(FEATURE_HDMI_CEC));
         MockitoAnnotations.initMocks(this);
 
         Context context = InstrumentationRegistry.getTargetContext();

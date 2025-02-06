@@ -24,8 +24,9 @@ import com.android.systemui.keyguard.shared.model.TransitionInfo
 import java.util.function.Consumer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -36,12 +37,10 @@ import org.junit.Assert.fail
  * Gives direct control over ValueAnimator, in order to make transition tests deterministic. See
  * [AnimationHandler]. Animators are required to be run on the main thread, so dispatch accordingly.
  */
-class KeyguardTransitionRunner(val repository: KeyguardTransitionRepository) :
-    AnimationFrameCallbackProvider {
-
-    private var frameCount = 1L
-    private var frames = MutableStateFlow(Pair<Long, FrameCallback?>(0L, null))
-    private var job: Job? = null
+class KeyguardTransitionRunner(
+    val frames: Flow<Long>,
+    val repository: KeyguardTransitionRepository,
+) {
     @Volatile private var isTerminated = false
 
     /**
@@ -54,21 +53,12 @@ class KeyguardTransitionRunner(val repository: KeyguardTransitionRepository) :
         maxFrames: Int = 100,
         frameCallback: Consumer<Long>? = null,
     ) {
-        // AnimationHandler uses ThreadLocal storage, and ValueAnimators MUST start from main
-        // thread
-        withContext(Dispatchers.Main) {
-            info.animator!!.getAnimationHandler().setProvider(this@KeyguardTransitionRunner)
-        }
-
-        job =
+        val job =
             scope.launch {
-                frames.collect {
-                    val (frameNumber, callback) = it
-
+                frames.collect { frameNumber ->
                     isTerminated = frameNumber >= maxFrames
                     if (!isTerminated) {
                         try {
-                            withContext(Dispatchers.Main) { callback?.doFrame(frameNumber) }
                             frameCallback?.accept(frameNumber)
                         } catch (e: IllegalStateException) {
                             e.printStackTrace()
@@ -78,27 +68,46 @@ class KeyguardTransitionRunner(val repository: KeyguardTransitionRepository) :
             }
         withContext(Dispatchers.Main) { repository.startTransition(info) }
 
-        waitUntilComplete(info.animator!!)
+        waitUntilComplete(info, info.animator!!)
+        job.cancel()
     }
 
-    private suspend fun waitUntilComplete(animator: ValueAnimator) {
+    private suspend fun waitUntilComplete(info: TransitionInfo, animator: ValueAnimator) {
         withContext(Dispatchers.Main) {
             val startTime = System.currentTimeMillis()
             while (!isTerminated && animator.isRunning()) {
                 delay(1)
                 if (System.currentTimeMillis() - startTime > MAX_TEST_DURATION) {
-                    fail("Failed test due to excessive runtime of: $MAX_TEST_DURATION")
+                    fail("Failed due to excessive runtime of: $MAX_TEST_DURATION, info: $info")
                 }
             }
-
-            animator.getAnimationHandler().setProvider(null)
         }
+    }
 
-        job?.cancel()
+    companion object {
+        private const val MAX_TEST_DURATION = 300L
+    }
+}
+
+class FrameCallbackProvider(val scope: CoroutineScope) : AnimationFrameCallbackProvider {
+    private val callback = MutableSharedFlow<FrameCallback?>(replay = 2)
+    private var frameCount = 0L
+    val frames = MutableStateFlow(frameCount)
+
+    init {
+        scope.launch {
+            callback.collect {
+                withContext(Dispatchers.Main) {
+                    delay(1)
+                    it?.doFrame(frameCount)
+                }
+            }
+        }
     }
 
     override fun postFrameCallback(cb: FrameCallback) {
-        frames.value = Pair(frameCount++, cb)
+        frames.value = ++frameCount
+        callback.tryEmit(cb)
     }
 
     override fun postCommitCallback(runnable: Runnable) {}
@@ -108,8 +117,4 @@ class KeyguardTransitionRunner(val repository: KeyguardTransitionRepository) :
     override fun getFrameDelay() = 1L
 
     override fun setFrameDelay(delay: Long) {}
-
-    companion object {
-        private const val MAX_TEST_DURATION = 200L
-    }
 }

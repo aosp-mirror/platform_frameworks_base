@@ -36,7 +36,7 @@ class DataStoreCoordinator
 internal constructor(private val notifLiveDataStoreImpl: NotifLiveDataStoreImpl) : CoreCoordinator {
 
     override fun attach(pipeline: NotifPipeline) {
-        pipeline.addOnAfterRenderListListener { entries, _ -> onAfterRenderList(entries) }
+        pipeline.addOnAfterRenderListListener { entries -> onAfterRenderList(entries) }
     }
 
     override fun dumpPipeline(d: PipelineDumper) {

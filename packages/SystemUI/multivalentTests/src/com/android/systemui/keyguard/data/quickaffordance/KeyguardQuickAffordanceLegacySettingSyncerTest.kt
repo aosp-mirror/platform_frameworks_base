@@ -23,7 +23,6 @@ import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
@@ -37,7 +36,6 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -48,7 +46,6 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
@@ -85,7 +82,6 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = FakeUserTracker(),
-                communalSettingsInteractor = kosmos.communalSettingsInteractor,
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
         settings.putInt(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS, 0)

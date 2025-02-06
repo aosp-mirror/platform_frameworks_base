@@ -34,7 +34,6 @@ import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.fakeUserFileManager
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -44,7 +43,6 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.spy
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CommunalPrefsRepositoryImplTest : SysuiTestCase() {
@@ -85,6 +83,62 @@ class CommunalPrefsRepositoryImplTest : SysuiTestCase() {
 
             underTest.setCtaDismissed(SECONDARY_USER)
             assertThat(isCtaDismissed).isFalse()
+        }
+
+    @Test
+    fun isHubOnboardingDismissedValue_byDefault_isFalse() =
+        testScope.runTest {
+            val isHubOnboardingDismissed by
+                collectLastValue(underTest.isHubOnboardingDismissed(MAIN_USER))
+            assertThat(isHubOnboardingDismissed).isFalse()
+        }
+
+    @Test
+    fun isHubOnboardingDismissedValue_onSet_isTrue() =
+        testScope.runTest {
+            val isHubOnboardingDismissed by
+                collectLastValue(underTest.isHubOnboardingDismissed(MAIN_USER))
+
+            underTest.setHubOnboardingDismissed(MAIN_USER)
+            assertThat(isHubOnboardingDismissed).isTrue()
+        }
+
+    @Test
+    fun isHubOnboardingDismissedValue_onSetForDifferentUser_isStillFalse() =
+        testScope.runTest {
+            val isHubOnboardingDismissed by
+                collectLastValue(underTest.isHubOnboardingDismissed(MAIN_USER))
+
+            underTest.setHubOnboardingDismissed(SECONDARY_USER)
+            assertThat(isHubOnboardingDismissed).isFalse()
+        }
+
+    @Test
+    fun isDreamButtonTooltipDismissedValue_byDefault_isFalse() =
+        testScope.runTest {
+            val isDreamButtonTooltipDismissed by
+                collectLastValue(underTest.isDreamButtonTooltipDismissed(MAIN_USER))
+            assertThat(isDreamButtonTooltipDismissed).isFalse()
+        }
+
+    @Test
+    fun isDreamButtonTooltipDismissedValue_onSet_isTrue() =
+        testScope.runTest {
+            val isDreamButtonTooltipDismissed by
+                collectLastValue(underTest.isDreamButtonTooltipDismissed(MAIN_USER))
+
+            underTest.setDreamButtonTooltipDismissed(MAIN_USER)
+            assertThat(isDreamButtonTooltipDismissed).isTrue()
+        }
+
+    @Test
+    fun isDreamButtonTooltipDismissedValue_onSetForDifferentUser_isStillFalse() =
+        testScope.runTest {
+            val isDreamButtonTooltipDismissed by
+                collectLastValue(underTest.isDreamButtonTooltipDismissed(MAIN_USER))
+
+            underTest.setDreamButtonTooltipDismissed(SECONDARY_USER)
+            assertThat(isDreamButtonTooltipDismissed).isFalse()
         }
 
     @Test

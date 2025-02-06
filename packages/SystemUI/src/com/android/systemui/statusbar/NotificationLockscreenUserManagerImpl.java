@@ -66,21 +66,26 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.recents.LauncherProxyService;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.row.shared.LockscreenOtpRedaction;
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ListenerSet;
+import com.android.systemui.util.kotlin.JavaAdapterKt;
 import com.android.systemui.util.settings.SecureSettings;
 
 import dagger.Lazy;
+
+import kotlinx.coroutines.CoroutineScope;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -88,6 +93,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
@@ -111,6 +119,8 @@ public class NotificationLockscreenUserManagerImpl implements
     private static final Uri SHOW_PRIVATE_LOCKSCREEN =
             Settings.Secure.getUriFor(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
 
+    private static final long LOCK_TIME_FOR_SENSITIVE_REDACTION_MS =
+            TimeUnit.MINUTES.toMillis(10);
     private final Lazy<NotificationVisibilityProvider> mVisibilityProviderLazy;
     private final Lazy<CommonNotifCollection> mCommonNotifCollectionLazy;
     private final DevicePolicyManager mDevicePolicyManager;
@@ -142,7 +152,7 @@ public class NotificationLockscreenUserManagerImpl implements
     private final List<UserChangedListener> mListeners = new ArrayList<>();
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final NotificationClickNotifier mClickNotifier;
-    private final Lazy<OverviewProxyService> mOverviewProxyServiceLazy;
+    private final Lazy<LauncherProxyService> mLauncherProxyServiceLazy;
     private final FeatureFlagsClassic mFeatureFlags;
     private boolean mShowLockscreenNotifications;
     private LockPatternUtils mLockPatternUtils;
@@ -225,8 +235,8 @@ public class NotificationLockscreenUserManagerImpl implements
                 if (!keyguardPrivateNotifications()) {
                     // Start the overview connection to the launcher service
                     // Connect if user hasn't connected yet
-                    if (mOverviewProxyServiceLazy.get().getProxy() == null) {
-                        mOverviewProxyServiceLazy.get().startConnectionToCurrentUser();
+                    if (mLauncherProxyServiceLazy.get().getProxy() == null) {
+                        mLauncherProxyServiceLazy.get().startConnectionToCurrentUser();
                     }
                 }
             } else if (Objects.equals(action, NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION)) {
@@ -284,7 +294,21 @@ public class NotificationLockscreenUserManagerImpl implements
     protected final SparseArray<UserInfo> mCurrentProfiles = new SparseArray<>();
     protected final SparseArray<UserInfo> mCurrentManagedProfiles = new SparseArray<>();
 
+    // The last lock time. Uses currentTimeMillis
+    @VisibleForTesting
+    protected final AtomicLong mLastLockTime = new AtomicLong(-1);
+    // Whether or not the device is locked
+    @VisibleForTesting
+    protected final AtomicBoolean mLocked = new AtomicBoolean(true);
+    // The last time the device connected to a wifi network
+    @VisibleForTesting
+    protected final AtomicLong mLastWifiConnectionTime = new AtomicLong(-1);
+    // Whether the device is connected to wifi
+    @VisibleForTesting
+    protected final AtomicBoolean mConnectedToWifi = new AtomicBoolean(false);
+
     protected int mCurrentUserId = 0;
+
     protected NotificationPresenter mPresenter;
     protected ContentObserver mLockscreenSettingsObserver;
     protected ContentObserver mSettingsObserver;
@@ -300,7 +324,7 @@ public class NotificationLockscreenUserManagerImpl implements
             Lazy<NotificationVisibilityProvider> visibilityProviderLazy,
             Lazy<CommonNotifCollection> commonNotifCollectionLazy,
             NotificationClickNotifier clickNotifier,
-            Lazy<OverviewProxyService> overviewProxyServiceLazy,
+            Lazy<LauncherProxyService> launcherProxyServiceLazy,
             KeyguardManager keyguardManager,
             StatusBarStateController statusBarStateController,
             @Main Executor mainExecutor,
@@ -311,7 +335,11 @@ public class NotificationLockscreenUserManagerImpl implements
             DumpManager dumpManager,
             LockPatternUtils lockPatternUtils,
             FeatureFlagsClassic featureFlags,
-            Lazy<DeviceUnlockedInteractor> deviceUnlockedInteractorLazy) {
+            Lazy<DeviceUnlockedInteractor> deviceUnlockedInteractorLazy,
+            Lazy<KeyguardInteractor> keyguardInteractor,
+            Lazy<WifiRepository> wifiRepository,
+            @Background CoroutineScope coroutineScope
+    ) {
         mContext = context;
         mMainExecutor = mainExecutor;
         mBackgroundExecutor = backgroundExecutor;
@@ -322,7 +350,7 @@ public class NotificationLockscreenUserManagerImpl implements
         mVisibilityProviderLazy = visibilityProviderLazy;
         mCommonNotifCollectionLazy = commonNotifCollectionLazy;
         mClickNotifier = clickNotifier;
-        mOverviewProxyServiceLazy = overviewProxyServiceLazy;
+        mLauncherProxyServiceLazy = launcherProxyServiceLazy;
         statusBarStateController.addCallback(this);
         mLockPatternUtils = lockPatternUtils;
         mKeyguardManager = keyguardManager;
@@ -340,6 +368,34 @@ public class NotificationLockscreenUserManagerImpl implements
 
         if (keyguardPrivateNotifications()) {
             init();
+        }
+
+        // To avoid dependency injection cycle, finish constructing this object before using the
+        // KeyguardInteractor. The CoroutineScope will only be null in tests.
+        if (LockscreenOtpRedaction.isEnabled() && coroutineScope != null) {
+            mMainExecutor.execute(() -> {
+                JavaAdapterKt.collectFlow(coroutineScope,
+                    keyguardInteractor.get().isKeyguardDismissible(),
+                    unlocked -> {
+                        if (!unlocked) {
+                            mLastLockTime.set(System.currentTimeMillis());
+                        }
+                        mLocked.set(!unlocked);
+                        notifyNotificationStateChanged();
+                    });
+                JavaAdapterKt.collectFlow(coroutineScope, wifiRepository.get().getWifiNetwork(),
+                        n -> {
+                        boolean wasConnectedToWifi = mConnectedToWifi.get();
+                        boolean isConnectedToWifi =
+                                wifiRepository.get().isWifiConnectedWithValidSsid();
+                        if (wasConnectedToWifi != isConnectedToWifi) {
+                            // We are either connecting, or disconnecting from wifi
+                            mLastWifiConnectionTime.set(System.currentTimeMillis());
+                            mConnectedToWifi.set(isConnectedToWifi);
+                            notifyNotificationStateChanged();
+                        }
+                    });
+            });
         }
     }
 
@@ -443,7 +499,7 @@ public class NotificationLockscreenUserManagerImpl implements
         mCurrentUserId = mUserTracker.getUserId(); // in case we reg'd receiver too late
         updateCurrentProfilesCache();
 
-        // Set  up
+        // Set up
         mBackgroundExecutor.execute(() -> {
             @SuppressLint("MissingPermission") List<UserInfo> users = mUserManager.getUsers();
             for (int i = users.size() - 1; i >= 0; i--) {
@@ -667,8 +723,6 @@ public class NotificationLockscreenUserManagerImpl implements
                 !userAllowsPrivateNotificationsInPublic(mCurrentUserId);
         boolean isNotifForManagedProfile = mCurrentManagedProfiles.contains(userId);
         boolean isNotifUserRedacted = !userAllowsPrivateNotificationsInPublic(userId);
-        boolean isNotifSensitive = LockscreenOtpRedaction.isEnabled()
-                && ent.getRanking() != null && ent.getRanking().hasSensitiveContent();
 
         // redact notifications if the current user is redacting notifications or the notification
         // contains sensitive content. However if the notification is associated with a managed
@@ -689,10 +743,54 @@ public class NotificationLockscreenUserManagerImpl implements
         if (keyguardPrivateNotifications() && !mKeyguardAllowingNotifications) {
             return REDACTION_TYPE_PUBLIC;
         }
-        if (isNotifSensitive) {
+
+        if (shouldShowSensitiveContentRedactedView(ent)) {
             return REDACTION_TYPE_SENSITIVE_CONTENT;
         }
         return REDACTION_TYPE_NONE;
+    }
+
+    /*
+     * We show the sensitive content redaction view if
+     * 1. The feature is enabled
+     * 2. The device is locked
+     * 3. The device is NOT connected to Wifi
+     * 4. The notification has the `hasSensitiveContent` ranking variable set to true
+     * 5. The device has not connected to Wifi since receiving the notification
+     * 6. The notification arrived at least LOCK_TIME_FOR_SENSITIVE_REDACTION_MS before the last
+     *    lock time.
+     */
+    private boolean shouldShowSensitiveContentRedactedView(NotificationEntry ent) {
+        if (!LockscreenOtpRedaction.isEnabled()) {
+            return false;
+        }
+
+        if (!mLocked.get()) {
+            return false;
+        }
+
+        if (mConnectedToWifi.get()) {
+            return false;
+        }
+
+        if (ent.getRanking() == null || !ent.getRanking().hasSensitiveContent()) {
+            return false;
+        }
+
+        long lastWifiConnectTime = mLastWifiConnectionTime.get();
+        // If the device has connected to wifi since receiving the notification, do not redact
+        if (ent.getSbn().getPostTime() < lastWifiConnectTime) {
+            return false;
+        }
+
+        // If the lock screen was not already locked for LOCK_TIME_FOR_SENSITIVE_REDACTION_MS when
+        // this notification arrived, do not redact
+        long latestTimeForRedaction = mLastLockTime.get() + LOCK_TIME_FOR_SENSITIVE_REDACTION_MS;
+        if (ent.getSbn().getPostTime() < latestTimeForRedaction) {
+            return false;
+        }
+
+        return true;
     }
 
     private boolean packageHasVisibilityOverride(String key) {

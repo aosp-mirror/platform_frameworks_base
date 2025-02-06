@@ -25,7 +25,7 @@
     </target_preparer>
 
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
-        <option name="run-command" value="setprop intrusiondetection_service_name com.android.coretests.apps.testapp/.TestLoggingService" />
+        <option name="run-command" value="setprop debug.intrusiondetection_package_name com.android.coretests.apps.testapp/.TestLoggingService" />
     </target_preparer>
 
     <option name="test-tag" value="IntrusionDetectionServiceTests" />

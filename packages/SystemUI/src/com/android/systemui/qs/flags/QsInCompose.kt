@@ -17,11 +17,11 @@
 package com.android.systemui.qs.flags
 
 import com.android.systemui.flags.RefactorFlagUtils
-import com.android.systemui.shade.shared.flag.DualShade
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 
 /**
  * Object to help check if the new QS ui should be used. This is true if either [QSComposeFragment]
- * or [DualShade] are enabled.
+ * or [SceneContainerFlag] are enabled.
  */
 object QsInCompose {
 
@@ -29,11 +29,12 @@ object QsInCompose {
      * This is not a real flag name, but a representation of the allowed flag names. Should not be
      * used with test annotations.
      */
-    private val flagName = "${QSComposeFragment.FLAG_NAME}|${DualShade.FLAG_NAME}"
+    private val flagName =
+        "${QSComposeFragment.FLAG_NAME}|${SceneContainerFlag.getMainAconfigFlag().name}"
 
     @JvmStatic
     inline val isEnabled: Boolean
-        get() = QSComposeFragment.isEnabled || DualShade.isEnabled
+        get() = QSComposeFragment.isEnabled || SceneContainerFlag.isEnabled
 
     @JvmStatic
     fun isUnexpectedlyInLegacyMode() =

@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
 import android.graphics.Rect
 import android.graphics.drawable.Icon
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -36,6 +38,7 @@ import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.shade.shadeTestUtil
+import com.android.systemui.statusbar.headsup.shared.StatusBarNoHunBehavior
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
@@ -258,6 +261,7 @@ class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterizati
         }
 
     @Test
+    @DisableFlags(StatusBarNoHunBehavior.FLAG_NAME)
     fun isolatedIcon_animateOnAppear_shadeCollapsed() =
         testScope.runTest {
             val icon: Icon = mock()
@@ -285,6 +289,7 @@ class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterizati
         }
 
     @Test
+    @DisableFlags(StatusBarNoHunBehavior.FLAG_NAME)
     fun isolatedIcon_dontAnimateOnAppear_shadeExpanded() =
         testScope.runTest {
             val icon: Icon = mock()
@@ -312,6 +317,7 @@ class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterizati
         }
 
     @Test
+    @DisableFlags(StatusBarNoHunBehavior.FLAG_NAME)
     fun isolatedIcon_updateWhenIconDataChanges() =
         testScope.runTest {
             val icon: Icon = mock()
@@ -339,6 +345,7 @@ class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterizati
         }
 
     @Test
+    @DisableFlags(StatusBarNoHunBehavior.FLAG_NAME)
     fun isolatedIcon_lastMessageIsFromReply_notNull() =
         testScope.runTest {
             val icon: Icon = mock()
@@ -361,5 +368,33 @@ class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterizati
             runCurrent()
 
             assertThat(isolatedIcon?.value?.notifKey).isEqualTo("notif1")
+        }
+
+    @Test
+    @EnableFlags(StatusBarNoHunBehavior.FLAG_NAME)
+    fun isolatedIcon_noHunBehaviorFlagEnabled_doesNothing() =
+        testScope.runTest {
+            val icon: Icon = mock()
+            val isolatedIcon by collectLastValue(underTest.isolatedIcon)
+            runCurrent()
+
+            headsUpViewStateRepository.isolatedNotification.value = "notif1"
+            runCurrent()
+
+            activeNotificationsRepository.activeNotifications.value =
+                ActiveNotificationsStore.Builder()
+                    .apply {
+                        addIndividualNotif(
+                            activeNotificationModel(
+                                key = "notif1",
+                                groupKey = "group",
+                                statusBarIcon = icon,
+                            )
+                        )
+                    }
+                    .build()
+            runCurrent()
+
+            assertThat(isolatedIcon?.value).isNull()
         }
 }

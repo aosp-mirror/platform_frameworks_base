@@ -15,6 +15,7 @@
  */
 package com.android.server.hdmi;
 
+import static android.content.pm.PackageManager.FEATURE_HDMI_CEC;
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM;
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_PLAYBACK;
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_TV;
@@ -38,6 +39,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertEquals;
 
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -111,6 +113,9 @@ public class HdmiControlServiceTest {
 
     @Before
     public void setUp() throws Exception {
+        assumeTrue("Test requires FEATURE_HDMI_CEC",
+                InstrumentationRegistry.getTargetContext().getPackageManager()
+                        .hasSystemFeature(FEATURE_HDMI_CEC));
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
         HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);

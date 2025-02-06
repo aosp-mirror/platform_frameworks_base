@@ -32,19 +32,16 @@ object StatusBarOperatorNameViewBinder {
     fun bind(
         operatorFrameView: View,
         viewModel: StatusBarOperatorNameViewModel,
-        areaTint: (Int) -> Flow<StatusBarTintColor>,
+        areaTint: Flow<StatusBarTintColor>,
     ) {
         operatorFrameView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                val displayId = operatorFrameView.display.displayId
-
                 val operatorNameText =
                     operatorFrameView.requireViewById<TextView>(R.id.operator_name)
                 launch { viewModel.operatorName.collect { operatorNameText.text = it } }
 
                 launch {
-                    val tint = areaTint(displayId)
-                    tint.collect { statusBarTintColors ->
+                    areaTint.collect { statusBarTintColors ->
                         operatorNameText.setTextColor(
                             statusBarTintColors.tint(operatorNameText.viewBoundsOnScreen())
                         )

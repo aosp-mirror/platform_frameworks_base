@@ -18,6 +18,7 @@
 package com.android.systemui.statusbar.phone
 
 import com.android.systemui.CoreStartable
+import com.android.systemui.statusbar.layout.LetterboxBackgroundProvider
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey

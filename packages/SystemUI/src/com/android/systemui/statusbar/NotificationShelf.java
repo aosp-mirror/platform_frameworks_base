@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.IndentingPrintWriter;
 import android.util.MathUtils;
@@ -30,6 +31,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
@@ -1014,12 +1016,24 @@ public class NotificationShelf extends ActivatableNotificationView {
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         if (mInteractive) {
+            // Add two accessibility actions that both performs expanding the notification shade
             info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
-            AccessibilityNodeInfo.AccessibilityAction unlock
-                    = new AccessibilityNodeInfo.AccessibilityAction(
+
+            AccessibilityAction seeAll = new AccessibilityAction(
                     AccessibilityNodeInfo.ACTION_CLICK,
-                    getContext().getString(R.string.accessibility_overflow_action));
-            info.addAction(unlock);
+                    getContext().getString(R.string.accessibility_overflow_action)
+            );
+            info.addAction(seeAll);
+        }
+    }
+
+    @Override
+    public boolean performAccessibilityAction(int action, Bundle args) {
+        // override ACTION_EXPAND with ACTION_CLICK
+        if (action == AccessibilityNodeInfo.ACTION_EXPAND) {
+            return super.performAccessibilityAction(AccessibilityNodeInfo.ACTION_CLICK, args);
+        } else {
+            return super.performAccessibilityAction(action, args);
         }
     }
 

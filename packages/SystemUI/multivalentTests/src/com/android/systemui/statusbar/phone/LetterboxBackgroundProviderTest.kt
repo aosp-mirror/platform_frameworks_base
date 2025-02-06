@@ -25,6 +25,7 @@ import android.view.IWindowManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.layout.LetterboxBackgroundProvider
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
@@ -134,6 +135,7 @@ class LetterboxBackgroundProviderTest : SysuiTestCase() {
     fun isLetterboxBackgroundMultiColored_defaultValue_returnsFalse() {
         assertThat(provider.isLetterboxBackgroundMultiColored).isEqualTo(false)
     }
+
     @Test
     fun isLetterboxBackgroundMultiColored_afterOnStart_executorNotDone_returnsDefaultValue() {
         whenever(windowManager.isLetterboxBackgroundMultiColored).thenReturn(true)

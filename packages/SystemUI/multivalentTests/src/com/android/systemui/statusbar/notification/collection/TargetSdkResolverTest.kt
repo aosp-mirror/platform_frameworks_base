@@ -144,7 +144,8 @@ class TargetSdkResolverTest : SysuiTestCase() {
                 /* rankingAdjustment = */ 0,
                 /* isBubble = */ false,
                 /* proposedImportance = */ 0,
-                /* sensitiveContent = */ false
+                /* sensitiveContent = */ false,
+                /* summarization = */ null
         )
     }
 }

@@ -51,13 +51,6 @@ flag {
 }
 
 flag {
-  name: "notification_reduce_messagequeue_usage"
-  namespace: "systemui"
-  description: "When this flag is on, NMS will no longer call removeMessage() and hasCallbacks() on Handler"
-  bug: "311051285"
-}
-
-flag {
   name: "notification_test"
   namespace: "systemui"
   description: "Timing test, no functionality"
@@ -172,16 +165,6 @@ flag {
 }
 
 flag {
-  name: "notification_verify_channel_sound_uri"
-  namespace: "systemui"
-  description: "Verify Uri permission for sound when creating a notification channel"
-  bug: "337775777"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "notification_vibration_in_sound_uri_for_channel"
   namespace: "systemui"
   description: "Enables sound uri with vibration source in notification channel"
@@ -193,6 +176,36 @@ flag {
   namespace: "systemui"
   description: "Don't send duplicate zen-related (policy changed, etc) broadcasts"
   bug: "324376849"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "nm_binder_perf_throttle_effects_suppressor_broadcast"
+  namespace: "systemui"
+  description: "Delay sending the ACTION_EFFECTS_SUPPRESSOR_CHANGED broadcast if it changes too often"
+  bug: "371776935"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "fix_calling_uid_from_cps"
+  namespace: "systemui"
+  description: "Correctly checks zen rule ownership when a CPS notifies with a Condition"
+  bug: "379722187"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "prevent_zen_device_effects_while_driving"
+  namespace: "systemui"
+  description: "Don't apply certain device effects (such as grayscale) from active zen rules, if a rule of TYPE_DRIVING is active"
+  bug: "390389174"
   metadata {
     purpose: PURPOSE_BUGFIX
   }

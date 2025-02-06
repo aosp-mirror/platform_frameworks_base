@@ -47,7 +47,6 @@ import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -56,7 +55,6 @@ import org.junit.runner.RunWith
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {

@@ -27,9 +27,14 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.pointer.motionEventSpy
-import androidx.compose.ui.semantics.hideFromAccessibility
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.res.R
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -38,15 +43,38 @@ fun CommunalTouchableSurface(
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit,
 ) {
-
+    val context = LocalContext.current
     val interactionSource = remember { MutableInteractionSource() }
 
     Box(
         modifier =
             modifier
-                // The touchable surface is hidden for accessibility because these actions are
-                // already provided through custom accessibility actions.
-                .semantics { hideFromAccessibility() }
+                .semantics {
+                    contentDescription =
+                        context.getString(
+                            R.string.accessibility_content_description_for_communal_hub
+                        )
+                    customActions =
+                        listOf(
+                            CustomAccessibilityAction(
+                                context.getString(
+                                    R.string.accessibility_action_label_close_communal_hub
+                                )
+                            ) {
+                                viewModel.changeScene(
+                                    CommunalScenes.Blank,
+                                    "closed by accessibility",
+                                )
+                                true
+                            },
+                            CustomAccessibilityAction(
+                                context.getString(R.string.accessibility_action_label_edit_widgets)
+                            ) {
+                                viewModel.onOpenWidgetEditor()
+                                true
+                            },
+                        )
+                }
                 .combinedClickable(
                     onLongClick = viewModel::onLongClick,
                     onClick = viewModel::onClick,

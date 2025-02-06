@@ -62,6 +62,7 @@ import androidx.test.filters.SmallTest;
 import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.DockStateReader;
@@ -90,7 +91,7 @@ import java.util.function.Consumer;
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class LetterboxEduWindowManagerTest extends CompatUIShellTestCase {
+public class LetterboxEduWindowManagerTest extends ShellTestCase {
 
     private static final int USER_ID_1 = 1;
     private static final int USER_ID_2 = 2;

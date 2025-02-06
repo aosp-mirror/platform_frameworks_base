@@ -24,12 +24,12 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.wallpapers.data.repository.FakeWallpaperFocalAreaRepository
+import com.android.systemui.wallpapers.data.repository.WallpaperFocalAreaRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,12 +50,13 @@ object KeyguardInteractorFactory {
         bouncerRepository: FakeKeyguardBouncerRepository = FakeKeyguardBouncerRepository(),
         configurationRepository: FakeConfigurationRepository = FakeConfigurationRepository(),
         shadeRepository: FakeShadeRepository = FakeShadeRepository(),
+        wallpaperFocalAreaRepository: WallpaperFocalAreaRepository =
+            FakeWallpaperFocalAreaRepository(),
         sceneInteractor: SceneInteractor = mock(),
         fromGoneTransitionInteractor: FromGoneTransitionInteractor = mock(),
         fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor = mock(),
         fromOccludedTransitionInteractor: FromOccludedTransitionInteractor = mock(),
         fromAlternateBouncerTransitionInteractor: FromAlternateBouncerTransitionInteractor = mock(),
-        powerInteractor: PowerInteractor = PowerInteractorFactory.create().powerInteractor,
         testScope: CoroutineScope = TestScope(),
     ): WithDependencies {
         // Mock these until they are replaced by kosmos
@@ -73,10 +74,8 @@ object KeyguardInteractorFactory {
             bouncerRepository = bouncerRepository,
             configurationRepository = configurationRepository,
             shadeRepository = shadeRepository,
-            powerInteractor = powerInteractor,
             KeyguardInteractor(
                 repository = repository,
-                powerInteractor = powerInteractor,
                 bouncerRepository = bouncerRepository,
                 configurationInteractor = ConfigurationInteractorImpl(configurationRepository),
                 shadeRepository = shadeRepository,
@@ -89,6 +88,7 @@ object KeyguardInteractorFactory {
                     fromAlternateBouncerTransitionInteractor
                 },
                 applicationScope = testScope,
+                wallpaperFocalAreaRepository = wallpaperFocalAreaRepository,
             ),
         )
     }
@@ -99,7 +99,6 @@ object KeyguardInteractorFactory {
         val bouncerRepository: FakeKeyguardBouncerRepository,
         val configurationRepository: FakeConfigurationRepository,
         val shadeRepository: FakeShadeRepository,
-        val powerInteractor: PowerInteractor,
         val keyguardInteractor: KeyguardInteractor,
     )
 }

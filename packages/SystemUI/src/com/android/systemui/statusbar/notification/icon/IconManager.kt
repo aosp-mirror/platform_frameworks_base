@@ -162,9 +162,7 @@ constructor(
             val sbIcon = iconBuilder.createIconView(entry)
             sbIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
             val sbChipIcon: StatusBarIconView?
-            if (
-                Flags.statusBarCallChipNotificationIcon() && !StatusBarConnectedDisplays.isEnabled
-            ) {
+            if (!StatusBarConnectedDisplays.isEnabled) {
                 sbChipIcon = iconBuilder.createIconView(entry)
                 sbChipIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
             } else {
@@ -186,7 +184,7 @@ constructor(
 
             try {
                 setIcon(entry, normalIconDescriptor, sbIcon)
-                if (Flags.statusBarCallChipNotificationIcon() && sbChipIcon != null) {
+                if (sbChipIcon != null) {
                     setIcon(entry, normalIconDescriptor, sbChipIcon)
                 }
                 setIcon(entry, sensitiveIconDescriptor, shelfIcon)

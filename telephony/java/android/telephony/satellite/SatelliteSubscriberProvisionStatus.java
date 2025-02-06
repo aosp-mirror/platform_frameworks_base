@@ -21,8 +21,10 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.Rlog;
 
 import com.android.internal.telephony.flags.Flags;
+import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.util.Objects;
 
@@ -132,7 +134,7 @@ public final class SatelliteSubscriberProvisionStatus implements Parcelable {
         StringBuilder sb = new StringBuilder();
 
         sb.append("SatelliteSubscriberInfo:");
-        sb.append(mSubscriberInfo);
+        sb.append(Rlog.pii(TelephonyUtils.IS_DEBUGGABLE, mSubscriberInfo));
         sb.append(",");
 
         sb.append("ProvisionStatus:");

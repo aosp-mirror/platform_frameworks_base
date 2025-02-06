@@ -16,13 +16,27 @@
 
 package com.android.systemui.scene.domain
 
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.scene.domain.resolver.SceneResolverModule
 import dagger.Module
+import dagger.Provides
+import javax.inject.Qualifier
 
-@Module(
-    includes =
-        [
-            SceneResolverModule::class,
-        ]
-)
-object SceneDomainModule
+@Module(includes = [SceneResolverModule::class])
+object SceneDomainModule {
+
+    @JvmStatic
+    @Provides
+    @SysUISingleton
+    @SceneFrameworkTableLog
+    fun provideSceneFrameworkTableLogBuffer(factory: TableLogBufferFactory): TableLogBuffer {
+        return factory.create("SceneFrameworkTableLog", 100)
+    }
+}
+
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class SceneFrameworkTableLog

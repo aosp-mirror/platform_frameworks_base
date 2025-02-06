@@ -23,6 +23,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AccessibilityActionsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodBurnInSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
+import com.android.systemui.keyguard.ui.view.layout.sections.AodPromotedNotificationSection
 import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultDeviceEntrySection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
@@ -58,6 +59,7 @@ constructor(
     defaultStatusBarSection: DefaultStatusBarSection,
     splitShadeNotificationStackScrollLayoutSection: SplitShadeNotificationStackScrollLayoutSection,
     splitShadeGuidelines: SplitShadeGuidelines,
+    aodPromotedNotificationSection: AodPromotedNotificationSection,
     aodNotificationIconsSection: AodNotificationIconsSection,
     aodBurnInSection: AodBurnInSection,
     clockSection: ClockSection,
@@ -76,6 +78,7 @@ constructor(
             defaultStatusBarSection,
             splitShadeNotificationStackScrollLayoutSection,
             splitShadeGuidelines,
+            aodPromotedNotificationSection,
             aodNotificationIconsSection,
             smartspaceSection,
             aodBurnInSection,

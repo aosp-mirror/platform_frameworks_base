@@ -29,6 +29,8 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 import com.android.internal.widget.remotecompose.core.operations.layout.AnimatableValue;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
@@ -222,6 +224,26 @@ public class GraphicsLayerModifierOperation extends DecoratorModifierOperation {
         return OP_CODE;
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param scaleX scaleX of the layer
+     * @param scaleY scaleY of the layer
+     * @param rotationX rotationX of the layer
+     * @param rotationY rotationY of the layer
+     * @param rotationZ rotationZ of the layer
+     * @param shadowElevation the shadow elevation
+     * @param transformOriginX the X origin of the transformations
+     * @param transformOriginY the Y origin of the transformations
+     * @param alpha the alpha of the layer
+     * @param cameraDistance the camera distance
+     * @param blendMode blending mode of the layer
+     * @param spotShadowColorId the spot shadow color id
+     * @param ambientShadowColorId the ambient shadow color id
+     * @param colorFilterId the color filter id
+     * @param renderEffectId the render effect id
+     */
     public static void apply(
             WireBuffer buffer,
             float scaleX,
@@ -257,6 +279,12 @@ public class GraphicsLayerModifierOperation extends DecoratorModifierOperation {
         buffer.writeInt(renderEffectId);
     }
 
+    /**
+     * Read the operation from the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param operations the list of operations read so far
+     */
     public static void read(WireBuffer buffer, List<Operation> operations) {
         float scaleX = buffer.readFloat();
         float scaleY = buffer.readFloat();
@@ -292,6 +320,11 @@ public class GraphicsLayerModifierOperation extends DecoratorModifierOperation {
                         renderEffectId));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Modifier Operations", OP_CODE, CLASS_NAME)
                 .description("define the GraphicsLayer Modifier")
@@ -314,4 +347,26 @@ public class GraphicsLayerModifierOperation extends DecoratorModifierOperation {
 
     @Override
     public void layout(RemoteContext context, Component component, float width, float height) {}
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER)
+                .add("type", "GraphicsLayerModifierOperation")
+                .add("scaleX", mScaleX)
+                .add("scaleX", mScaleX)
+                .add("rotationX", mRotationX)
+                .add("rotationY", mRotationY)
+                .add("rotationZ", mRotationZ)
+                .add("shadowElevation", mShadowElevation)
+                .add("transformOriginX", mTransformOriginX)
+                .add("transformOriginY", mTransformOriginY)
+                .add("alpha", mAlpha)
+                .add("cameraDistance", mCameraDistance)
+                .add("blendMode", mBlendMode)
+                .add("spotShadowColorId", mSpotShadowColorId)
+                .add("ambientShadowColorId", mAmbientShadowColorId)
+                .add("colorFilterId", mColorFilterId)
+                .add("renderEffectId", mRenderEffectId);
+    }
 }

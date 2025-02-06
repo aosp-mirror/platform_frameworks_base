@@ -26,11 +26,9 @@ import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
 /** Breaks down DOZING->GONE transition into discrete steps for corresponding views to consume. */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class DozingToGoneTransitionViewModel
 @Inject

@@ -63,7 +63,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -89,7 +88,6 @@ private const val DISPLAY_HEIGHT = 1920
 private const val SENSOR_WIDTH = 30
 private const val SENSOR_HEIGHT = 60
 
-@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)

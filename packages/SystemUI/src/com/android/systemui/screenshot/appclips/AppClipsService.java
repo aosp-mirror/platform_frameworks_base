@@ -152,8 +152,8 @@ public class AppClipsService extends Service {
                     return CAPTURE_CONTENT_FOR_NOTE_FAILED;
                 }
 
-                if (!mOptionalBubbles.get().isAppBubbleTaskId(taskId)) {
-                    Log.d(TAG, String.format("Taskid %d is not app bubble task", taskId));
+                if (!mOptionalBubbles.get().isNoteBubbleTaskId(taskId)) {
+                    Log.d(TAG, String.format("Taskid %d is not note bubble task", taskId));
                     return CAPTURE_CONTENT_FOR_NOTE_WINDOW_MODE_UNSUPPORTED;
                 }
 

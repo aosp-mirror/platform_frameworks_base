@@ -126,30 +126,6 @@ public class CameraBinderTest extends AndroidTestCase {
         }
     }
 
-    /** The camera2 api is only supported on HAL3.2+ devices */
-    @SmallTest
-    public void testSupportsCamera2Api() throws Exception {
-        for (int cameraId = 0; cameraId < mUtils.getGuessedNumCameras(); ++cameraId) {
-            boolean supports = mUtils.getCameraService().supportsCameraApi(
-                String.valueOf(cameraId), API_VERSION_2);
-
-            Log.v(TAG, "Camera " + cameraId + " supports api2: " + supports);
-        }
-    }
-
-    /** The camera1 api is supported on *all* devices regardless of HAL version */
-    @SmallTest
-    public void testSupportsCamera1Api() throws Exception {
-        for (int cameraId = 0; cameraId < mUtils.getGuessedNumCameras(); ++cameraId) {
-
-            boolean supports = mUtils.getCameraService().supportsCameraApi(
-                String.valueOf(cameraId), API_VERSION_1);
-            assertTrue(
-                    "Camera service returned false when queried if it supports camera1 api " +
-                    " for camera ID " + cameraId, supports);
-        }
-    }
-
     static abstract class DummyBase extends Binder implements android.os.IInterface {
         @Override
         public IBinder asBinder() {

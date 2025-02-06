@@ -2778,7 +2778,7 @@ bool ManifestExtractor::Extract(android::IDiagnostics* diag) {
     auto file_path = it->Next()->GetSource().path.c_str();
 
     const char* last_slash =
-        android::util::ValidLibraryPathLastSlash(file_path, has_renderscript_bitcode, false);
+        android::util::ValidLibraryPathLastSlash(file_path, has_renderscript_bitcode);
     if (last_slash) {
       architectures_from_apk.insert(std::string(file_path + APK_LIB_LEN, last_slash));
     }

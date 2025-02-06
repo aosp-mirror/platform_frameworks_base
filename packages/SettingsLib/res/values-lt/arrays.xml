@@ -207,7 +207,7 @@
   <string-array name="window_animation_scale_entries">
     <item msgid="2675263395797191850">"Animacija išjungta"</item>
     <item msgid="5790132543372767872">"Animacijos mastelis 0,5x"</item>
-    <item msgid="2529692189302148746">"Animacijos mastelis 1x"</item>
+    <item msgid="2529692189302148746">"Animacijos mastelis 1 x"</item>
     <item msgid="8072785072237082286">"Animacijos mastelis 1,5x"</item>
     <item msgid="3531560925718232560">"Animacijos mastelis 2x"</item>
     <item msgid="4542853094898215187">"Animacijos mastelis 5x"</item>

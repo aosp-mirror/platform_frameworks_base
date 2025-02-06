@@ -18,9 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Menaxheri i pajisjes shoqëruese"</string>
     <string name="confirmation_title" msgid="2244241995958340998">"T\'i lejohet aplikacionit &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; qasja te &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="message_discovery_soft_timeout" msgid="473346859407859161">"Sigurohu që ky <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> të ketë të aktivizuar<xliff:g id="DISCOVERY_METHOD">%2$s</xliff:g> dhe mbaje <xliff:g id="PROFILE_NAME">%3$s</xliff:g> tënde pranë."</string>
+    <string name="message_discovery_hard_timeout" msgid="677514663495711424">"Nuk u gjet asnjë pajisje. Provo përsëri më vonë."</string>
+    <string name="discovery_bluetooth" msgid="5693557668470016164">"Bluetooth-in"</string>
+    <string name="discovery_wifi" msgid="1551782459721758773">"Wi-Fi"</string>
+    <string name="discovery_mixed" msgid="7071466134150760127">"Bluetooth-in dhe Wi-Fi"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"ora inteligjente"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"Zgjidh një pajisje që do të menaxhohet nga &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="chooser_title" msgid="2235819929238267637">"Zgjidh një <xliff:g id="PROFILE_NAME">%1$s</xliff:g> për konfigurimin"</string>
+    <string name="single_device_title" msgid="4199861437545438606">"Po kërkon për një <xliff:g id="PROFILE_NAME">%1$s</xliff:g>"</string>
     <string name="summary_watch" msgid="8134580124808507407">"Këtij aplikacioni do t\'i lejohet të sinkronizojë informacione, si p.sh. emrin e dikujt që po telefonon, si dhe të ketë qasje në këto leje te <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Të lejohet që &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; të menaxhojë &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"pajisje"</string>

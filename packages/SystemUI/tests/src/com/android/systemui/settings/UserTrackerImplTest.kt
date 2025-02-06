@@ -38,7 +38,6 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.TruthJUnit.assume
 import java.util.concurrent.Executor
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -58,7 +57,6 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(Parameterized::class)
 class UserTrackerImplTest : SysuiTestCase() {
@@ -75,6 +73,8 @@ class UserTrackerImplTest : SysuiTestCase() {
     @Mock private lateinit var userManager: UserManager
 
     @Mock private lateinit var iActivityManager: IActivityManager
+
+    @Mock private lateinit var beforeUserSwitchingReply: IRemoteCallback
 
     @Mock private lateinit var userSwitchingReply: IRemoteCallback
 
@@ -199,9 +199,10 @@ class UserTrackerImplTest : SysuiTestCase() {
 
             val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
             verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
-            captor.value.onBeforeUserSwitching(newID)
+            captor.value.onBeforeUserSwitching(newID, beforeUserSwitchingReply)
             captor.value.onUserSwitching(newID, userSwitchingReply)
             runCurrent()
+            verify(beforeUserSwitchingReply).sendResult(any())
             verify(userSwitchingReply).sendResult(any())
 
             verify(userManager).getProfiles(newID)
@@ -341,10 +342,11 @@ class UserTrackerImplTest : SysuiTestCase() {
 
             val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
             verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
-            captor.value.onBeforeUserSwitching(newID)
+            captor.value.onBeforeUserSwitching(newID, beforeUserSwitchingReply)
             captor.value.onUserSwitching(newID, userSwitchingReply)
             runCurrent()
 
+            verify(beforeUserSwitchingReply).sendResult(any())
             verify(userSwitchingReply).sendResult(any())
             assertThat(callback.calledOnUserChanging).isEqualTo(1)
             assertThat(callback.lastUser).isEqualTo(newID)
@@ -395,7 +397,7 @@ class UserTrackerImplTest : SysuiTestCase() {
 
             val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
             verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
-            captor.value.onBeforeUserSwitching(newID)
+            captor.value.onBeforeUserSwitching(newID, any())
             captor.value.onUserSwitchComplete(newID)
             runCurrent()
 
@@ -453,8 +455,10 @@ class UserTrackerImplTest : SysuiTestCase() {
 
             val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
             verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
+            captor.value.onBeforeUserSwitching(newID, beforeUserSwitchingReply)
             captor.value.onUserSwitching(newID, userSwitchingReply)
             runCurrent()
+            verify(beforeUserSwitchingReply).sendResult(any())
             verify(userSwitchingReply).sendResult(any())
             captor.value.onUserSwitchComplete(newID)
 
@@ -488,12 +492,18 @@ class UserTrackerImplTest : SysuiTestCase() {
         }
 
     private class TestCallback : UserTracker.Callback {
+        var calledOnBeforeUserChanging = 0
         var calledOnUserChanging = 0
         var calledOnUserChanged = 0
         var calledOnProfilesChanged = 0
         var lastUser: Int? = null
         var lastUserContext: Context? = null
         var lastUserProfiles = emptyList<UserInfo>()
+
+        override fun onBeforeUserSwitching(newUser: Int) {
+            calledOnBeforeUserChanging++
+            lastUser = newUser
+        }
 
         override fun onUserChanging(newUser: Int, userContext: Context) {
             calledOnUserChanging++

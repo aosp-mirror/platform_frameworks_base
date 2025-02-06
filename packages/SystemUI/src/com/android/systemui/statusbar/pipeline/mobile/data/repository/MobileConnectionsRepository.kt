@@ -48,8 +48,8 @@ interface MobileConnectionsRepository {
      */
     val activeSubChangedInGroupEvent: Flow<Unit>
 
-    /** Tracks [SubscriptionManager.getDefaultDataSubscriptionId] */
-    val defaultDataSubId: StateFlow<Int>
+    /** Tracks [SubscriptionManager.getDefaultDataSubscriptionId]. Null if there is no default */
+    val defaultDataSubId: StateFlow<Int?>
 
     /**
      * True if the default network connection is a mobile-like connection and false otherwise.

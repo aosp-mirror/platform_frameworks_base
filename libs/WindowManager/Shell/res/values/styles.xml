@@ -75,15 +75,6 @@
         <item name="android:background">@color/split_divider_background</item>
     </style>
 
-    <style name="TvPipEduText">
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:textSize">10sp</item>
-        <item name="android:lineSpacingExtra">4sp</item>
-        <item name="android:lineHeight">16sp</item>
-        <item name="android:textColor">@color/tv_pip_edu_text</item>
-    </style>
-
     <style name="LetterboxDialog" parent="@android:style/Theme.DeviceDefault.Dialog.Alert">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>

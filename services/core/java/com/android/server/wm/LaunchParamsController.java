@@ -28,6 +28,7 @@ import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
+import android.app.WindowConfiguration.WindowingMode;
 import android.content.pm.ActivityInfo.WindowLayout;
 import android.graphics.Rect;
 
@@ -79,7 +80,8 @@ class LaunchParamsController {
      * @param result    The resulting params.
      */
     void calculate(Task task, WindowLayout layout, ActivityRecord activity, ActivityRecord source,
-            ActivityOptions options, @Nullable Request request, int phase, LaunchParams result) {
+            ActivityOptions options, @Nullable Request request,
+            @LaunchParamsModifier.Phase int phase, LaunchParams result) {
         result.reset();
 
         if (task != null || activity != null) {
@@ -122,31 +124,19 @@ class LaunchParamsController {
         }
     }
 
-    /**
-     * A convenience method for laying out a task.
-     * @return {@code true} if bounds were set on the task. {@code false} otherwise.
-     */
-    boolean layoutTask(Task task, WindowLayout layout) {
-        return layoutTask(task, layout, null /*activity*/, null /*source*/, null /*options*/);
-    }
-
+    /** @return {@code true} if bounds were set on the task. {@code false} otherwise. */
     boolean layoutTask(Task task, WindowLayout layout, ActivityRecord activity,
             ActivityRecord source, ActivityOptions options) {
         calculate(task, layout, activity, source, options, null /* request */, PHASE_BOUNDS,
                 mTmpParams);
 
         // No changes, return.
-        if (mTmpParams.isEmpty()) {
+        if (mTmpParams.isEmpty() || mTmpParams.mBounds.isEmpty()) {
             return false;
         }
 
         mService.deferWindowLayout();
-
         try {
-            if (mTmpParams.mBounds.isEmpty()) {
-                return false;
-            }
-
             if (task.getRootTask().inMultiWindowMode()) {
                 task.setBounds(mTmpParams.mBounds);
                 return true;
@@ -185,6 +175,7 @@ class LaunchParamsController {
         TaskDisplayArea mPreferredTaskDisplayArea;
 
         /** The windowing mode to be in. */
+        @WindowingMode
         int mWindowingMode;
 
         /** Sets values back to default. {@link #isEmpty} will return {@code true} once called. */

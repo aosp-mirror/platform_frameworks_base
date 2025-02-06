@@ -27,7 +27,9 @@ import android.os.Trace
 import android.util.SparseArray
 import android.view.SurfaceControl
 import android.view.WindowManager
+import android.view.WindowManager.TRANSIT_OPEN
 import android.window.TransitionInfo
+import android.window.TransitionInfo.FLAG_MOVED_TO_TOP
 import androidx.annotation.VisibleForTesting
 import androidx.core.util.containsKey
 import androidx.core.util.forEach
@@ -36,10 +38,13 @@ import androidx.core.util.isNotEmpty
 import androidx.core.util.plus
 import androidx.core.util.putAll
 import com.android.internal.protolog.ProtoLog
+import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.FocusReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.TaskUpdate
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UnminimizeReason
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON
@@ -52,6 +57,8 @@ import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
+import java.util.Optional
+import kotlin.jvm.optionals.getOrNull
 
 /**
  * A [Transitions.TransitionObserver] that observes transitions and the proposed changes to log
@@ -63,6 +70,8 @@ class DesktopModeLoggerTransitionObserver(
     shellInit: ShellInit,
     private val transitions: Transitions,
     private val desktopModeEventLogger: DesktopModeEventLogger,
+    private val desktopTasksLimiter: Optional<DesktopTasksLimiter>,
+    private val shellTaskOrganizer: ShellTaskOrganizer,
 ) : Transitions.TransitionObserver {
 
     init {
@@ -84,6 +93,8 @@ class DesktopModeLoggerTransitionObserver(
     // Caching whether the previous transition was exit due to screen off. This helps check if a
     // following enter reason could be Screen On
     private var wasPreviousTransitionExitByScreenOff: Boolean = false
+
+    private var focusedFreeformTask: TaskInfo? = null
 
     @VisibleForTesting var isSessionActive: Boolean = false
 
@@ -141,9 +152,11 @@ class DesktopModeLoggerTransitionObserver(
 
         // identify if we need to log any changes and update the state of visible freeform tasks
         identifyLogEventAndUpdateState(
+            transition = transition,
             transitionInfo = info,
             preTransitionVisibleFreeformTasks = visibleFreeformTaskInfos,
             postTransitionVisibleFreeformTasks = postTransitionVisibleFreeformTasks,
+            newFocusedFreeformTask = getNewFocusedFreeformTask(info),
         )
         wasPreviousTransitionExitToOverview = info.isExitToRecentsTransition()
     }
@@ -153,6 +166,42 @@ class DesktopModeLoggerTransitionObserver(
     override fun onTransitionMerged(merged: IBinder, playing: IBinder) {}
 
     override fun onTransitionFinished(transition: IBinder, aborted: Boolean) {}
+
+    fun onTaskVanished(taskInfo: RunningTaskInfo) {
+        // At this point the task should have been cleared up due to transition. If it's not yet
+        // cleared up, it might be one of the edge cases where transitions don't give the correct
+        // signal.
+        if (visibleFreeformTaskInfos.containsKey(taskInfo.taskId)) {
+            val postTransitionFreeformTasks: SparseArray<TaskInfo> = SparseArray()
+            postTransitionFreeformTasks.putAll(visibleFreeformTaskInfos)
+            postTransitionFreeformTasks.remove(taskInfo.taskId)
+            ProtoLog.v(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopModeLogger: processing tasks after task vanished %s",
+                postTransitionFreeformTasks.size(),
+            )
+            identifyLogEventAndUpdateState(
+                transition = null,
+                transitionInfo = null,
+                preTransitionVisibleFreeformTasks = visibleFreeformTaskInfos,
+                postTransitionVisibleFreeformTasks = postTransitionFreeformTasks,
+                newFocusedFreeformTask = null,
+            )
+        }
+    }
+
+    // Returns null if there was no change in focused task
+    private fun getNewFocusedFreeformTask(info: TransitionInfo): TaskInfo? {
+        val freeformWindowChanges =
+            info.changes
+                .filter { it.taskInfo != null && it.requireTaskInfo().taskId != INVALID_TASK_ID }
+                .filter { it.requireTaskInfo().isFreeformWindow() }
+        return freeformWindowChanges
+            .findLast { change ->
+                change.hasFlags(FLAG_MOVED_TO_TOP) || change.mode == TRANSIT_OPEN
+            }
+            ?.taskInfo
+    }
 
     private fun getPostTransitionVisibleFreeformTaskInfos(
         info: TransitionInfo
@@ -227,9 +276,11 @@ class DesktopModeLoggerTransitionObserver(
      * state and update it
      */
     private fun identifyLogEventAndUpdateState(
-        transitionInfo: TransitionInfo,
+        transition: IBinder?,
+        transitionInfo: TransitionInfo?,
         preTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
         postTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
+        newFocusedFreeformTask: TaskInfo?,
     ) {
         if (
             postTransitionVisibleFreeformTasks.isEmpty() &&
@@ -238,9 +289,11 @@ class DesktopModeLoggerTransitionObserver(
         ) {
             // Sessions is finishing, log task updates followed by an exit event
             identifyAndLogTaskUpdates(
+                transition,
                 transitionInfo,
                 preTransitionVisibleFreeformTasks,
                 postTransitionVisibleFreeformTasks,
+                newFocusedFreeformTask,
             )
 
             desktopModeEventLogger.logSessionExit(getExitReason(transitionInfo))
@@ -255,38 +308,55 @@ class DesktopModeLoggerTransitionObserver(
             desktopModeEventLogger.logSessionEnter(getEnterReason(transitionInfo))
 
             identifyAndLogTaskUpdates(
+                transition,
                 transitionInfo,
                 preTransitionVisibleFreeformTasks,
                 postTransitionVisibleFreeformTasks,
+                newFocusedFreeformTask,
             )
         } else if (isSessionActive) {
             // Session is neither starting, nor finishing, log task updates if there are any
             identifyAndLogTaskUpdates(
+                transition,
                 transitionInfo,
                 preTransitionVisibleFreeformTasks,
                 postTransitionVisibleFreeformTasks,
+                newFocusedFreeformTask,
             )
         }
 
         // update the state to the new version
         visibleFreeformTaskInfos.clear()
         visibleFreeformTaskInfos.putAll(postTransitionVisibleFreeformTasks)
+        focusedFreeformTask = newFocusedFreeformTask
     }
 
     /** Compare the old and new state of taskInfos and identify and log the changes */
     private fun identifyAndLogTaskUpdates(
-        transitionInfo: TransitionInfo,
+        transition: IBinder?,
+        transitionInfo: TransitionInfo?,
         preTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
         postTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
+        newFocusedFreeformTask: TaskInfo?,
     ) {
         postTransitionVisibleFreeformTasks.forEach { taskId, taskInfo ->
+            val focusChangedReason = getFocusChangedReason(taskId, newFocusedFreeformTask)
             val currentTaskUpdate =
-                buildTaskUpdateForTask(taskInfo, postTransitionVisibleFreeformTasks.size())
+                buildTaskUpdateForTask(
+                    taskInfo,
+                    postTransitionVisibleFreeformTasks.size(),
+                    focusChangedReason = focusChangedReason,
+                )
             val previousTaskInfo = preTransitionVisibleFreeformTasks[taskId]
             when {
                 // new tasks added
                 previousTaskInfo == null -> {
-                    desktopModeEventLogger.logTaskAdded(currentTaskUpdate)
+                    // The current task is now visible while before it wasn't - this might be the
+                    // result of an unminimize action.
+                    val unminimizeReason = getUnminimizeReason(transition, taskInfo)
+                    desktopModeEventLogger.logTaskAdded(
+                        currentTaskUpdate.copy(unminimizeReason = unminimizeReason)
+                    )
                     Trace.setCounter(
                         Trace.TRACE_TAG_WINDOW_MANAGER,
                         VISIBLE_TASKS_COUNTER_NAME,
@@ -297,11 +367,14 @@ class DesktopModeLoggerTransitionObserver(
                         postTransitionVisibleFreeformTasks.size().toString(),
                     )
                 }
+                focusChangedReason != null ->
+                    desktopModeEventLogger.logTaskInfoChanged(currentTaskUpdate)
                 // old tasks that were resized or repositioned
                 // TODO(b/347935387): Log changes only once they are stable.
                 buildTaskUpdateForTask(
                     previousTaskInfo,
                     postTransitionVisibleFreeformTasks.size(),
+                    focusChangedReason = focusChangedReason,
                 ) != currentTaskUpdate ->
                     desktopModeEventLogger.logTaskInfoChanged(currentTaskUpdate)
             }
@@ -310,12 +383,9 @@ class DesktopModeLoggerTransitionObserver(
         // find old tasks that were removed
         preTransitionVisibleFreeformTasks.forEach { taskId, taskInfo ->
             if (!postTransitionVisibleFreeformTasks.containsKey(taskId)) {
-                val minimizeReason =
-                    if (transitionInfo.type == Transitions.TRANSIT_MINIMIZE) {
-                        MinimizeReason.MINIMIZE_BUTTON
-                    } else {
-                        null
-                    }
+                // The task is no longer visible, it might have been minimized, get the minimize
+                // reason (if any)
+                val minimizeReason = getMinimizeReason(transition, transitionInfo, taskInfo)
                 val taskUpdate =
                     buildTaskUpdateForTask(
                         taskInfo,
@@ -336,13 +406,51 @@ class DesktopModeLoggerTransitionObserver(
         }
     }
 
+    private fun getMinimizeReason(
+        transition: IBinder?,
+        transitionInfo: TransitionInfo?,
+        taskInfo: TaskInfo,
+    ): MinimizeReason? {
+        if (transitionInfo?.type == Transitions.TRANSIT_MINIMIZE) {
+            return MinimizeReason.MINIMIZE_BUTTON
+        }
+        val minimizingTask =
+            transition?.let { desktopTasksLimiter.getOrNull()?.getMinimizingTask(transition) }
+        if (minimizingTask?.taskId == taskInfo.taskId) {
+            return minimizingTask.minimizeReason
+        }
+        return null
+    }
+
+    private fun getUnminimizeReason(transition: IBinder?, taskInfo: TaskInfo): UnminimizeReason? {
+        val unminimizingTask =
+            transition?.let { desktopTasksLimiter.getOrNull()?.getUnminimizingTask(transition) }
+        if (unminimizingTask?.taskId == taskInfo.taskId) {
+            return unminimizingTask.unminimizeReason
+        }
+        return null
+    }
+
+    private fun getFocusChangedReason(
+        taskId: Int,
+        newFocusedFreeformTask: TaskInfo?,
+    ): FocusReason? {
+        val newFocusedTask = newFocusedFreeformTask ?: return null
+        if (taskId != newFocusedTask.taskId) return null
+        return if (newFocusedTask != focusedFreeformTask) FocusReason.UNKNOWN else null
+    }
+
     private fun buildTaskUpdateForTask(
         taskInfo: TaskInfo,
         visibleTasks: Int,
         minimizeReason: MinimizeReason? = null,
+        unminimizeReason: UnminimizeReason? = null,
+        focusChangedReason: FocusReason? = null,
     ): TaskUpdate {
         val screenBounds = taskInfo.configuration.windowConfiguration.bounds
         val positionInParent = taskInfo.positionInParent
+        // We can't both minimize and unminimize the same task in one go.
+        assert(minimizeReason == null || unminimizeReason == null)
         return TaskUpdate(
             instanceId = taskInfo.taskId,
             uid = taskInfo.effectiveUid,
@@ -352,28 +460,30 @@ class DesktopModeLoggerTransitionObserver(
             taskY = positionInParent.y,
             visibleTaskCount = visibleTasks,
             minimizeReason = minimizeReason,
+            unminimizeReason = unminimizeReason,
+            focusReason = focusChangedReason,
         )
     }
 
     /** Get [EnterReason] for this session enter */
-    private fun getEnterReason(transitionInfo: TransitionInfo): EnterReason {
+    private fun getEnterReason(transitionInfo: TransitionInfo?): EnterReason {
         val enterReason =
             when {
-                transitionInfo.type == WindowManager.TRANSIT_WAKE
+                transitionInfo?.type == WindowManager.TRANSIT_WAKE
                 // If there is a screen lock, desktop window entry is after dismissing keyguard
                 ||
-                    (transitionInfo.type == WindowManager.TRANSIT_TO_BACK &&
+                    (transitionInfo?.type == WindowManager.TRANSIT_TO_BACK &&
                         wasPreviousTransitionExitByScreenOff) -> EnterReason.SCREEN_ON
-                transitionInfo.type == TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP ->
+                transitionInfo?.type == TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP ->
                     EnterReason.APP_HANDLE_DRAG
-                transitionInfo.type == TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON ->
+                transitionInfo?.type == TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON ->
                     EnterReason.APP_HANDLE_MENU_BUTTON
-                transitionInfo.type == TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW ->
+                transitionInfo?.type == TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW ->
                     EnterReason.APP_FROM_OVERVIEW
-                transitionInfo.type == TRANSIT_ENTER_DESKTOP_FROM_KEYBOARD_SHORTCUT ->
+                transitionInfo?.type == TRANSIT_ENTER_DESKTOP_FROM_KEYBOARD_SHORTCUT ->
                     EnterReason.KEYBOARD_SHORTCUT_ENTER
                 // NOTE: the below condition also applies for EnterReason quickswitch
-                transitionInfo.type == WindowManager.TRANSIT_TO_FRONT -> EnterReason.OVERVIEW
+                transitionInfo?.type == WindowManager.TRANSIT_TO_FRONT -> EnterReason.OVERVIEW
                 // Enter desktop mode from cancelled recents has no transition. Enter is detected on
                 // the
                 // next transition involving freeform windows.
@@ -384,12 +494,13 @@ class DesktopModeLoggerTransitionObserver(
                 // after
                 //  a cancelled recents.
                 wasPreviousTransitionExitToOverview -> EnterReason.OVERVIEW
-                transitionInfo.type == WindowManager.TRANSIT_OPEN -> EnterReason.APP_FREEFORM_INTENT
+                transitionInfo?.type == WindowManager.TRANSIT_OPEN ->
+                    EnterReason.APP_FREEFORM_INTENT
                 else -> {
                     ProtoLog.w(
                         WM_SHELL_DESKTOP_MODE,
                         "Unknown enter reason for transition type: %s",
-                        transitionInfo.type,
+                        transitionInfo?.type,
                     )
                     EnterReason.UNKNOWN_ENTER
                 }
@@ -399,30 +510,31 @@ class DesktopModeLoggerTransitionObserver(
     }
 
     /** Get [ExitReason] for this session exit */
-    private fun getExitReason(transitionInfo: TransitionInfo): ExitReason =
+    private fun getExitReason(transitionInfo: TransitionInfo?): ExitReason =
         when {
-            transitionInfo.type == WindowManager.TRANSIT_SLEEP -> {
+            transitionInfo?.type == WindowManager.TRANSIT_SLEEP -> {
                 wasPreviousTransitionExitByScreenOff = true
                 ExitReason.SCREEN_OFF
             }
             // TODO(b/384490301): differentiate back gesture / button exit from clicking the close
             // button located in the window top corner.
-            transitionInfo.type == WindowManager.TRANSIT_TO_BACK -> ExitReason.TASK_MOVED_TO_BACK
-            transitionInfo.type == WindowManager.TRANSIT_CLOSE -> ExitReason.TASK_FINISHED
-            transitionInfo.type == TRANSIT_EXIT_DESKTOP_MODE_TASK_DRAG -> ExitReason.DRAG_TO_EXIT
-            transitionInfo.type == TRANSIT_EXIT_DESKTOP_MODE_HANDLE_MENU_BUTTON ->
+            transitionInfo?.type == WindowManager.TRANSIT_TO_BACK -> ExitReason.TASK_MOVED_TO_BACK
+            transitionInfo?.type == WindowManager.TRANSIT_CLOSE -> ExitReason.TASK_FINISHED
+            transitionInfo?.type == TRANSIT_EXIT_DESKTOP_MODE_TASK_DRAG -> ExitReason.DRAG_TO_EXIT
+            transitionInfo?.type == TRANSIT_EXIT_DESKTOP_MODE_HANDLE_MENU_BUTTON ->
                 ExitReason.APP_HANDLE_MENU_BUTTON_EXIT
 
-            transitionInfo.type == TRANSIT_EXIT_DESKTOP_MODE_KEYBOARD_SHORTCUT ->
+            transitionInfo?.type == TRANSIT_EXIT_DESKTOP_MODE_KEYBOARD_SHORTCUT ->
                 ExitReason.KEYBOARD_SHORTCUT_EXIT
 
-            transitionInfo.isExitToRecentsTransition() -> ExitReason.RETURN_HOME_OR_OVERVIEW
-            transitionInfo.type == Transitions.TRANSIT_MINIMIZE -> ExitReason.TASK_MINIMIZED
+            transitionInfo?.isExitToRecentsTransition() == true ->
+                ExitReason.RETURN_HOME_OR_OVERVIEW
+            transitionInfo?.type == Transitions.TRANSIT_MINIMIZE -> ExitReason.TASK_MINIMIZED
             else -> {
                 ProtoLog.w(
                     WM_SHELL_DESKTOP_MODE,
                     "Unknown exit reason for transition type: %s",
-                    transitionInfo.type,
+                    transitionInfo?.type,
                 )
                 ExitReason.UNKNOWN_EXIT
             }
@@ -434,18 +546,20 @@ class DesktopModeLoggerTransitionObserver(
         visibleFreeformTaskInfos.set(taskInfo.taskId, taskInfo)
     }
 
-    private fun TransitionInfo.Change.requireTaskInfo(): RunningTaskInfo {
-        return this.taskInfo ?: throw IllegalStateException("Expected TaskInfo in the Change")
+    /** Sets the focused task - only used for testing. */
+    @VisibleForTesting
+    fun setFocusedTaskForTesting(taskInfo: TaskInfo) {
+        focusedFreeformTask = taskInfo
     }
 
-    private fun TaskInfo.isFreeformWindow(): Boolean {
-        return this.windowingMode == WINDOWING_MODE_FREEFORM
-    }
+    private fun TransitionInfo.Change.requireTaskInfo(): RunningTaskInfo =
+        this.taskInfo ?: throw IllegalStateException("Expected TaskInfo in the Change")
 
-    private fun TransitionInfo.isExitToRecentsTransition(): Boolean {
-        return this.type == WindowManager.TRANSIT_TO_FRONT &&
+    private fun TaskInfo.isFreeformWindow(): Boolean = this.windowingMode == WINDOWING_MODE_FREEFORM
+
+    private fun TransitionInfo.isExitToRecentsTransition(): Boolean =
+        this.type == WindowManager.TRANSIT_TO_FRONT &&
             this.flags == WindowManager.TRANSIT_FLAG_IS_RECENTS
-    }
 
     companion object {
         @VisibleForTesting const val VISIBLE_TASKS_COUNTER_NAME = "desktop_mode_visible_tasks"

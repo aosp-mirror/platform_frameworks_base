@@ -73,6 +73,13 @@ public class TextData extends Operation implements SerializableToString {
         return OP_CODE;
     }
 
+    /**
+     * add a text data operation
+     *
+     * @param buffer buffer to add to
+     * @param textId the id for the text
+     * @param text the data to encode
+     */
     public static void apply(@NonNull WireBuffer buffer, int textId, @NonNull String text) {
         buffer.start(OP_CODE);
         buffer.writeInt(textId);

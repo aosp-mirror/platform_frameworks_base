@@ -36,7 +36,7 @@ import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.recents.LauncherProxyService;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.shared.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
@@ -72,7 +72,7 @@ public class NavigationBarTransitionsTest extends SysuiTestCase {
         when(mEdgeBackGestureHandlerFactory.create(any(Context.class)))
                 .thenReturn(mEdgeBackGestureHandler);
         mDependency.injectMockDependency(AssistManager.class);
-        mDependency.injectMockDependency(OverviewProxyService.class);
+        mDependency.injectMockDependency(LauncherProxyService.class);
         mDependency.injectMockDependency(StatusBarStateController.class);
         mDependency.injectMockDependency(KeyguardStateController.class);
         mDependency.injectMockDependency(NavigationBarController.class);

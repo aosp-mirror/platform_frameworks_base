@@ -32,7 +32,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
 import android.app.ActivityManager;
 import android.app.usage.NetworkStatsManager;
@@ -67,7 +66,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.os.BatteryStatsHistoryIterator;
 import com.android.internal.os.MonotonicClock;
-import com.android.internal.os.PowerProfile;
 import com.android.internal.power.EnergyConsumerStats;
 import com.android.server.power.optimization.Flags;
 import com.android.server.power.stats.BatteryStatsImpl.DualTimer;
@@ -1538,7 +1536,6 @@ public class BatteryStatsNoteTest {
     public void testGetPerStateActiveRadioDurationMs_initialModemActivity() {
         final MockClock clock = new MockClock(); // holds realtime and uptime in ms
         final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clock);
-        bi.setPowerProfile(mock(PowerProfile.class));
 
         final int ratCount = RADIO_ACCESS_TECHNOLOGY_COUNT;
         final int frequencyCount = ServiceState.FREQUENCY_RANGE_MMWAVE + 1;
@@ -1680,7 +1677,6 @@ public class BatteryStatsNoteTest {
     public void testGetPerStateActiveRadioDurationMs_withModemActivity() {
         final MockClock clock = new MockClock(); // holds realtime and uptime in ms
         final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clock);
-        bi.setPowerProfile(mock(PowerProfile.class));
         final int ratCount = RADIO_ACCESS_TECHNOLOGY_COUNT;
         final int frequencyCount = ServiceState.FREQUENCY_RANGE_MMWAVE + 1;
         final int txLevelCount = CellSignalStrength.getNumSignalStrengthLevels();
@@ -1920,7 +1916,6 @@ public class BatteryStatsNoteTest {
     public void testGetPerStateActiveRadioDurationMs_withSpecificInfoModemActivity() {
         final MockClock clock = new MockClock(); // holds realtime and uptime in ms
         final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clock);
-        bi.setPowerProfile(mock(PowerProfile.class));
         final int ratCount = RADIO_ACCESS_TECHNOLOGY_COUNT;
         final int frequencyCount = ServiceState.FREQUENCY_RANGE_MMWAVE + 1;
         final int txLevelCount = CellSignalStrength.getNumSignalStrengthLevels();
@@ -2313,7 +2308,6 @@ public class BatteryStatsNoteTest {
         boolean update;
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
-        bi.setPowerProfile(mock(PowerProfile.class));
 
         final int txLevelCount = CellSignalStrength.getNumSignalStrengthLevels();
         final ModemActivityInfo mai = new ModemActivityInfo(0L, 0L, 0L, new int[txLevelCount], 0L);

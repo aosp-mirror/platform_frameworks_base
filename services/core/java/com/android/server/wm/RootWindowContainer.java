@@ -78,11 +78,9 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEAT
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.H.WINDOW_FREEZE_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SURFACES;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
-import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_NONE;
 import static com.android.server.wm.WindowSurfacePlacer.SET_UPDATE_ROTATION;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_ACTION_PENDING;
 
@@ -140,6 +138,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.window.DesktopModeFlags;
 import android.window.TaskFragmentAnimationParams;
 import android.window.WindowContainerToken;
 
@@ -152,7 +151,6 @@ import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.UserState;
-import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.WindowManagerPolicy;
@@ -200,13 +198,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     private boolean mSustainedPerformanceModeEnabled = false;
     private boolean mSustainedPerformanceModeCurrent = false;
-
-    // During an orientation change, we track whether all windows have rendered
-    // at the new orientation, and this will be false from changing orientation until that occurs.
-    // For seamless rotation cases this always stays true, as the windows complete their orientation
-    // changes 1 by 1 without disturbing global state.
-    boolean mOrientationChangeComplete = true;
-    boolean mWallpaperActionPending = false;
 
     private final Handler mHandler;
 
@@ -843,20 +834,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
 
-        if (mWmService.mDisplayFrozen) {
-            ProtoLog.v(WM_DEBUG_ORIENTATION,
-                    "With display frozen, orientationChangeComplete=%b",
-                    mOrientationChangeComplete);
-        }
-        if (mOrientationChangeComplete) {
-            if (mWmService.mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_NONE) {
-                mWmService.mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_NONE;
-                mWmService.mLastFinishedFreezeSource = mLastWindowFreezeSource;
-                mWmService.mH.removeMessages(WINDOW_FREEZE_TIMEOUT);
-            }
-            mWmService.stopFreezingDisplayLocked();
-        }
-
         // Destroy the surface of any windows that are no longer visible.
         i = mWmService.mDestroySurface.size();
         if (i > 0) {
@@ -883,13 +860,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
 
-        if (!mWmService.mDisplayFrozen) {
-            // Post these on a handler such that we don't call into power manager service while
-            // holding the window manager lock to avoid lock contention with power manager lock.
-            mHandler.obtainMessage(SET_SCREEN_BRIGHTNESS_OVERRIDE, mDisplayBrightnessOverrides)
-                    .sendToTarget();
-            mHandler.obtainMessage(SET_USER_ACTIVITY_TIMEOUT, mUserActivityTimeout).sendToTarget();
-        }
+        // Post these on a handler such that we don't call into power manager service while
+        // holding the window manager lock to avoid lock contention with power manager lock.
+        mHandler.obtainMessage(SET_SCREEN_BRIGHTNESS_OVERRIDE, mDisplayBrightnessOverrides)
+                .sendToTarget();
+        mHandler.obtainMessage(SET_USER_ACTIVITY_TIMEOUT, mUserActivityTimeout).sendToTarget();
 
         if (mSustainedPerformanceModeCurrent != mSustainedPerformanceModeEnabled) {
             mSustainedPerformanceModeEnabled = mSustainedPerformanceModeCurrent;
@@ -904,8 +879,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         if (!mWmService.mWaitingForDrawnCallbacks.isEmpty()
-                || (mOrientationChangeComplete && !isLayoutNeeded()
-                && !mUpdateRotation)) {
+                || (!isLayoutNeeded() && !mUpdateRotation)) {
             mWmService.checkDrawnWindowsLocked();
         }
 
@@ -993,7 +967,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     private void handleResizingWindows() {
         for (int i = mWmService.mResizingWindows.size() - 1; i >= 0; i--) {
             WindowState win = mWmService.mResizingWindows.get(i);
-            if (win.mAppFreezing || win.getDisplayContent().mWaitingForConfig) {
+            if (win.getDisplayContent().mWaitingForConfig) {
                 // Don't remove this window until rotation has completed and is not waiting for the
                 // complete configuration.
                 continue;
@@ -1093,16 +1067,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         if ((bulkUpdateParams & SET_UPDATE_ROTATION) != 0) {
             mUpdateRotation = true;
             doRequest = true;
-        }
-        if (mOrientationChangeComplete) {
-            mLastWindowFreezeSource = mWmService.mAnimator.mLastWindowFreezeSource;
-            if (mWmService.mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_NONE) {
-                doRequest = true;
-            }
-        }
-
-        if ((bulkUpdateParams & SET_WALLPAPER_ACTION_PENDING) != 0) {
-            mWallpaperActionPending = true;
         }
 
         return doRequest;
@@ -1443,8 +1407,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // When display content mode management flag is enabled, the task display area is marked as
         // removed when switching from extended display to mirroring display. We need to restart the
         // task display area before starting the home.
-        if (enableDisplayContentModeManagement() && taskDisplayArea.isRemoved()) {
-            taskDisplayArea.restart();
+        if (enableDisplayContentModeManagement() && taskDisplayArea.shouldKeepNoTask()) {
+            taskDisplayArea.setShouldKeepNoTask(false);
         }
 
         Intent homeIntent = null;
@@ -1541,20 +1505,18 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         ActivityInfo aInfo = resolveHomeActivity(userId, homeIntent);
         boolean lookForSecondaryHomeActivityInPrimaryHomePackage = aInfo != null;
 
-        if (android.companion.virtual.flags.Flags.vdmCustomHome()) {
-            // Resolve the externally set home activity for this display, if any. If it is unset or
-            // we fail to resolve it, fallback to the default secondary home activity.
-            final ComponentName customHomeComponent =
-                    taskDisplayArea.getDisplayContent() != null
-                            ? taskDisplayArea.getDisplayContent().getCustomHomeComponent()
-                            : null;
-            if (customHomeComponent != null) {
-                homeIntent.setComponent(customHomeComponent);
-                ActivityInfo customHomeActivityInfo = resolveHomeActivity(userId, homeIntent);
-                if (customHomeActivityInfo != null) {
-                    aInfo = customHomeActivityInfo;
-                    lookForSecondaryHomeActivityInPrimaryHomePackage = false;
-                }
+        // Resolve the externally set home activity for this display, if any. If it is unset or
+        // we fail to resolve it, fallback to the default secondary home activity.
+        final ComponentName customHomeComponent =
+                taskDisplayArea.getDisplayContent() != null
+                        ? taskDisplayArea.getDisplayContent().getCustomHomeComponent()
+                        : null;
+        if (customHomeComponent != null) {
+            homeIntent.setComponent(customHomeComponent);
+            ActivityInfo customHomeActivityInfo = resolveHomeActivity(userId, homeIntent);
+            if (customHomeActivityInfo != null) {
+                aInfo = customHomeActivityInfo;
+                lookForSecondaryHomeActivityInPrimaryHomePackage = false;
             }
         }
 
@@ -1773,7 +1735,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // Force-update the orientation from the WindowManager, since we need the true configuration
         // to send to the client now.
         final Configuration config =
-                displayContent.updateOrientation(starting, true /* forceUpdate */);
+                displayContent.updateOrientationAndComputeConfig(true /* forceUpdate */);
         // Visibilities may change so let the starting activity have a chance to report. Can't do it
         // when visibility is changed in each AppWindowToken because it may trigger wrong
         // configuration push because the visibility of some activities may not be updated yet.
@@ -1947,7 +1909,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // appropriate.
         removeRootTasksInWindowingModes(WINDOWING_MODE_PINNED);
 
-        if (Flags.enableTopVisibleRootTaskPerUserTracking()) {
+        if (DesktopModeFlags.ENABLE_TOP_VISIBLE_ROOT_TASK_PER_USER_TRACKING.isTrue()) {
             final IntArray visibleRootTasks = new IntArray();
             forAllRootTasks(rootTask -> {
                 if ((mCurrentUser == rootTask.mUserId || rootTask.showForAllUsers())
@@ -1986,7 +1948,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final IntArray rootTaskIdsToRestore = mUserVisibleRootTasks.get(userId);
         boolean homeInFront = false;
         if (Flags.enableTopVisibleRootTaskPerUserTracking()) {
-            if (rootTaskIdsToRestore == null) {
+            if (rootTaskIdsToRestore == null || rootTaskIdsToRestore.size() == 0) {
                 // If there are no root tasks saved, try restore id 0 which should create and launch
                 // the home task.
                 handleRootTaskLaunchOnUserSwitch(/* restoreRootTaskId */INVALID_TASK_ID);
@@ -1996,11 +1958,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     handleRootTaskLaunchOnUserSwitch(rootTaskIdsToRestore.get(i));
                 }
                 // Check if the top task is type home
-                if (rootTaskIdsToRestore.size() > 0) {
-                    final int topRootTaskId = rootTaskIdsToRestore.get(
-                            rootTaskIdsToRestore.size() - 1);
-                    homeInFront = isHomeTask(topRootTaskId);
-                }
+                final int topRootTaskId = rootTaskIdsToRestore.get(rootTaskIdsToRestore.size() - 1);
+                homeInFront = isHomeTask(topRootTaskId);
             }
         } else {
             handleRootTaskLaunchOnUserSwitch(restoreRootTaskId);
@@ -2883,7 +2842,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         startHomeOnDisplay(mCurrentUser, reason, displayContent.getDisplayId());
-        displayContent.getDisplayPolicy().notifyDisplayReady();
+        if (enableDisplayContentModeManagement()) {
+            if (displayContent.isSystemDecorationsSupported()) {
+                displayContent.getDisplayPolicy().notifyDisplayAddSystemDecorations();
+            }
+        } else {
+            displayContent.getDisplayPolicy().notifyDisplayAddSystemDecorations();
+        }
     }
 
     @Override

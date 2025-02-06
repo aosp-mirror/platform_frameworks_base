@@ -22,7 +22,6 @@ import static android.view.Display.TYPE_INTERNAL;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -47,7 +46,6 @@ import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.notifications.DisplayNotificationManager;
 import com.android.server.testutils.TestHandler;
 
-import com.google.testing.junit.testparameterinjector.TestParameter;
 import com.google.testing.junit.testparameterinjector.TestParameterInjector;
 
 import org.junit.Before;
@@ -124,7 +122,6 @@ public class ExternalDisplayPolicyTest {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
         mHandler = new TestHandler(/*callback=*/ null);
-        when(mMockedFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
         when(mMockedFlags.isConnectedDisplayErrorHandlingEnabled()).thenReturn(true);
         when(mMockedInjector.getFlags()).thenReturn(mMockedFlags);
         when(mMockedInjector.getLogicalDisplayMapper()).thenReturn(mMockedLogicalDisplayMapper);
@@ -169,16 +166,6 @@ public class ExternalDisplayPolicyTest {
         mHandler.flush();
         verify(mMockedLogicalDisplayMapper, never()).setDisplayEnabledLocked(any(), anyBoolean());
         verify(mMockedDisplayNotificationManager, times(2))
-                .onHighTemperatureExternalDisplayNotAllowed();
-    }
-
-    @Test
-    public void testTryEnableExternalDisplay_featureDisabled(@TestParameter final boolean enable) {
-        when(mMockedFlags.isConnectedDisplayManagementEnabled()).thenReturn(false);
-        mExternalDisplayPolicy.setExternalDisplayEnabledLocked(mMockedLogicalDisplay, enable);
-        mHandler.flush();
-        verify(mMockedLogicalDisplayMapper, never()).setDisplayEnabledLocked(any(), anyBoolean());
-        verify(mMockedDisplayNotificationManager, never())
                 .onHighTemperatureExternalDisplayNotAllowed();
     }
 
@@ -275,21 +262,6 @@ public class ExternalDisplayPolicyTest {
         verify(mMockedInjector, never()).sendExternalDisplayEventLocked(any(), anyInt());
         verify(mMockedDisplayNotificationManager, times(2))
                 .onHighTemperatureExternalDisplayNotAllowed();
-    }
-
-    @Test
-    public void testNoThermalListenerRegistered_featureDisabled(
-            @TestParameter final boolean isConnectedDisplayManagementEnabled,
-            @TestParameter final boolean isErrorHandlingEnabled) throws RemoteException {
-        assumeFalse(isConnectedDisplayManagementEnabled && isErrorHandlingEnabled);
-        when(mMockedFlags.isConnectedDisplayManagementEnabled()).thenReturn(
-                isConnectedDisplayManagementEnabled);
-        when(mMockedFlags.isConnectedDisplayErrorHandlingEnabled()).thenReturn(
-                isErrorHandlingEnabled);
-
-        mExternalDisplayPolicy.onBootCompleted();
-        verify(mMockedThermalService, never()).registerThermalEventListenerWithType(
-                any(), anyInt());
     }
 
     @Test

@@ -72,6 +72,25 @@ public class Task {
         @ViewDebug.ExportedProperty(category = "recents")
         public final int displayId;
 
+        /**
+         * The component of the first activity in the task, can be considered the "application" of
+         * this task.
+         */
+        @Nullable
+        public ComponentName baseActivity;
+        /**
+         * The number of activities in this task (including running).
+         */
+        public int numActivities;
+        /**
+         * Whether the top activity is to be displayed. See {@link android.R.attr#windowNoDisplay}.
+         */
+        public boolean isTopActivityNoDisplay;
+        /**
+         * Whether fillsParent() is false for every activity in the tasks stack.
+         */
+        public boolean isActivityStackTransparent;
+
         // The source component name which started this task
         public final ComponentName sourceComponent;
 
@@ -90,6 +109,10 @@ public class Task {
             this.userId = t.userId;
             this.lastActiveTime = t.lastActiveTime;
             this.displayId = t.displayId;
+            this.baseActivity = t.baseActivity;
+            this.numActivities = t.numActivities;
+            this.isTopActivityNoDisplay = t.isTopActivityNoDisplay;
+            this.isActivityStackTransparent = t.isActivityStackTransparent;
             updateHashCode();
         }
 
@@ -106,7 +129,9 @@ public class Task {
         }
 
         public TaskKey(int id, int windowingMode, @NonNull Intent intent,
-                ComponentName sourceComponent, int userId, long lastActiveTime, int displayId) {
+                ComponentName sourceComponent, int userId, long lastActiveTime, int displayId,
+                @Nullable ComponentName baseActivity, int numActivities,
+                boolean isTopActivityNoDisplay, boolean isActivityStackTransparent) {
             this.id = id;
             this.windowingMode = windowingMode;
             this.baseIntent = intent;
@@ -114,6 +139,10 @@ public class Task {
             this.userId = userId;
             this.lastActiveTime = lastActiveTime;
             this.displayId = displayId;
+            this.baseActivity = baseActivity;
+            this.numActivities = numActivities;
+            this.isTopActivityNoDisplay = isTopActivityNoDisplay;
+            this.isActivityStackTransparent = isActivityStackTransparent;
             updateHashCode();
         }
 
@@ -185,6 +214,10 @@ public class Task {
             parcel.writeLong(lastActiveTime);
             parcel.writeInt(displayId);
             parcel.writeTypedObject(sourceComponent, flags);
+            parcel.writeTypedObject(baseActivity, flags);
+            parcel.writeInt(numActivities);
+            parcel.writeBoolean(isTopActivityNoDisplay);
+            parcel.writeBoolean(isActivityStackTransparent);
         }
 
         private static TaskKey readFromParcel(Parcel parcel) {
@@ -195,9 +228,14 @@ public class Task {
             long lastActiveTime = parcel.readLong();
             int displayId = parcel.readInt();
             ComponentName sourceComponent = parcel.readTypedObject(ComponentName.CREATOR);
+            ComponentName baseActivity = parcel.readTypedObject(ComponentName.CREATOR);
+            int numActivities = parcel.readInt();
+            boolean isTopActivityNoDisplay = parcel.readBoolean();
+            boolean isActivityStackTransparent = parcel.readBoolean();
 
             return new TaskKey(id, windowingMode, baseIntent, sourceComponent, userId,
-                    lastActiveTime, displayId);
+                    lastActiveTime, displayId, baseActivity, numActivities, isTopActivityNoDisplay,
+                    isActivityStackTransparent);
         }
 
         @Override

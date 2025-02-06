@@ -20,16 +20,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
-import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class WindowRootViewBlurInteractorTest : SysuiTestCase() {
@@ -37,18 +34,6 @@ class WindowRootViewBlurInteractorTest : SysuiTestCase() {
     val testScope = kosmos.testScope
 
     val underTest by lazy { kosmos.windowRootViewBlurInteractor }
-
-    @Test
-    fun bouncerBlurIsAppliedImmediately() =
-        testScope.runTest {
-            val blurRadius by collectLastValue(underTest.blurRadius)
-            val isBlurOpaque by collectLastValue(underTest.isBlurOpaque)
-
-            underTest.requestBlurForBouncer(10)
-
-            assertThat(blurRadius).isEqualTo(10)
-            assertThat(isBlurOpaque).isFalse()
-        }
 
     @Test
     fun shadeBlurIsNotAppliedWhenBouncerBlurIsActive() =

@@ -1,5 +1,7 @@
 justinweir@google.com
 syeonlee@google.com
+nicomazz@google.com
+burakov@google.com
 
 per-file *Notification* = set noparent
 per-file *Notification* = file:../statusbar/notification/OWNERS
@@ -9,13 +11,13 @@ per-file NotificationsQSContainerController.kt = kozynski@google.com, asc@google
 per-file *ShadeHeader* = syeonlee@google.com, kozynski@google.com, asc@google.com
 
 per-file *Interactor* = set noparent
-per-file *Interactor* = justinweir@google.com, syeonlee@google.com, nijamkin@google.com
+per-file *Interactor* = justinweir@google.com, syeonlee@google.com, nijamkin@google.com, nicomazz@google.com, burakov@google.com
 per-file *Repository* = set noparent
-per-file *Repository* = justinweir@google.com, syeonlee@google.com, nijamkin@google.com
+per-file *Repository* = justinweir@google.com, syeonlee@google.com, nijamkin@google.com, nicomazz@google.com, burakov@google.com
 
-per-file NotificationShadeWindow* = pixel@google.com, cinek@google.com, juliacr@google.com, justinweir@google.com, syeonlee@google.com
+per-file NotificationShadeWindow* = pixel@google.com, cinek@google.com, juliacr@google.com, justinweir@google.com, syeonlee@google.com, nicomazz@google.com, burakov@google.com
 
 per-file NotificationPanelUnfoldAnimationController.kt = alexflo@google.com, jeffdq@google.com, juliacr@google.com
 
-per-file NotificationPanelView.java = pixel@google.com, cinek@google.com, juliacr@google.com, justinweir@google.com, syeonlee@google.com
-per-file NotificationPanelViewController.java = pixel@google.com, cinek@google.com, juliacr@google.com, justinweir@google.com, syeonlee@google.com
+per-file NotificationPanelView.java = pixel@google.com, cinek@google.com, juliacr@google.com, justinweir@google.com, syeonlee@google.com, nicomazz@google.com, burakov@google.com
+per-file NotificationPanelViewController.java = pixel@google.com, cinek@google.com, juliacr@google.com, justinweir@google.com, syeonlee@google.com, nicomazz@google.com, burakov@google.com

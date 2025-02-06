@@ -458,7 +458,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(StatusBarNotifChips.FLAG_NAME)
-    fun showPromotedNotification_hasNotifEntry_shownAsHUN() =
+    fun onPromotedNotificationChipTapped_hasNotifEntry_shownAsHUN() =
         testScope.runTest {
             whenever(notifCollection.getEntry(entry.key)).thenReturn(entry)
 
@@ -473,7 +473,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(StatusBarNotifChips.FLAG_NAME)
-    fun showPromotedNotification_noNotifEntry_noHUN() =
+    fun onPromotedNotificationChipTapped_noNotifEntry_noHUN() =
         testScope.runTest {
             whenever(notifCollection.getEntry(entry.key)).thenReturn(null)
 
@@ -488,7 +488,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(StatusBarNotifChips.FLAG_NAME)
-    fun showPromotedNotification_shownAsHUNEvenIfEntryShouldNot() =
+    fun onPromotedNotificationChipTapped_shownAsHUNEvenIfEntryShouldNot() =
         testScope.runTest {
             whenever(notifCollection.getEntry(entry.key)).thenReturn(entry)
 
@@ -511,7 +511,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(StatusBarNotifChips.FLAG_NAME)
-    fun showPromotedNotification_atSameTimeAsOnAdded_promotedShownAsHUN() =
+    fun onPromotedNotificationChipTapped_atSameTimeAsOnAdded_promotedShownAsHUN() =
         testScope.runTest {
             // First, the promoted notification appears as not heads up
             val promotedEntry = NotificationEntryBuilder().setPkg("promotedPackage").build()
@@ -545,6 +545,33 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
             verify(headsUpViewBinder, never()).bindHeadsUpView(eq(entry), any(), any())
             verify(headsUpManager, never()).showNotification(eq(entry), any())
+        }
+
+    @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun onPromotedNotificationChipTapped_chipTappedTwice_hunHiddenOnSecondTap() =
+        testScope.runTest {
+            whenever(notifCollection.getEntry(entry.key)).thenReturn(entry)
+
+            // WHEN chip tapped first
+            statusBarNotificationChipsInteractor.onPromotedNotificationChipTapped(entry.key)
+            executor.advanceClockToLast()
+            executor.runAllReady()
+            beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(entry))
+
+            // THEN HUN is shown
+            finishBind(entry)
+            verify(headsUpManager).showNotification(entry, isPinnedByUser = true)
+            addHUN(entry)
+
+            // WHEN chip is tapped again
+            statusBarNotificationChipsInteractor.onPromotedNotificationChipTapped(entry.key)
+            executor.advanceClockToLast()
+            executor.runAllReady()
+            beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(entry))
+
+            // THEN HUN is hidden
+            verify(headsUpManager).removeNotification(eq(entry.key), eq(false), any())
         }
 
     @Test

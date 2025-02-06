@@ -168,6 +168,11 @@ public class WifiPowerStatsCollectorTest {
         public WifiManager getWifiManager() {
             return mWifiManager;
         }
+
+        @Override
+        public NetworkStats networkStatsDelta(NetworkStats stats, NetworkStats oldStats) {
+            return NetworkStatsTestUtils.networkStatsDelta(stats, oldStats);
+        }
     };
 
     @Before

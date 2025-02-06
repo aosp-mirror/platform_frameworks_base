@@ -20,22 +20,17 @@ package com.android.systemui.keyguard.data.quickaffordance
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.UserInfo
-import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.backup.BackupHelper
-import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.res.R
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.UserFileManager
-import com.android.systemui.testKosmos
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -54,11 +49,9 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
-    private val kosmos = testKosmos()
 
     @Mock private lateinit var userFileManager: UserFileManager
 
@@ -85,7 +78,6 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
                 context = context,
                 userFileManager = userFileManager,
                 userTracker = userTracker,
-                communalSettingsInteractor = kosmos.communalSettingsInteractor,
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
     }
@@ -313,27 +305,6 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
             .isEqualTo(
                 mapOf("leftTest" to listOf("testShortcut1"), "rightTest" to listOf("testShortcut2"))
             )
-    }
-
-    @EnableFlags(Flags.FLAG_GLANCEABLE_HUB_V2)
-    @Test
-    fun getSelections_returnsSelectionsIfHubV2Enabled() = runTest {
-        overrideResource(R.bool.custom_lockscreen_shortcuts_enabled, false)
-        overrideResource(com.android.internal.R.bool.config_glanceableHubEnabled, true)
-
-        overrideResource(R.array.config_keyguardQuickAffordanceDefaults, arrayOf<String>())
-        val affordanceIdsBySlotId = mutableListOf<Map<String, List<String>>>()
-        val job =
-            launch(UnconfinedTestDispatcher()) {
-                underTest.selections.toList(affordanceIdsBySlotId)
-            }
-        val slotId1 = "slot1"
-        val affordanceId1 = "affordance1"
-
-        underTest.setSelections(slotId = slotId1, affordanceIds = listOf(affordanceId1))
-        assertSelections(affordanceIdsBySlotId.last(), mapOf(slotId1 to listOf(affordanceId1)))
-
-        job.cancel()
     }
 
     private fun assertSelections(

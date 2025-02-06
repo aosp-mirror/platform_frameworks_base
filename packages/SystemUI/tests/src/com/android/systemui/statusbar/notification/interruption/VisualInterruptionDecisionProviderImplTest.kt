@@ -101,7 +101,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
     private fun getAvalancheSuppressor() : AvalancheSuppressor {
         return AvalancheSuppressor(
             avalancheProvider, systemClock, settingsInteractor, packageManager,
-            uiEventLogger, context, notificationManager, logger, systemSettings
+            uiEventLogger, context, notificationManager, systemSettings
         )
     }
 

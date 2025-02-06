@@ -210,7 +210,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     private TestStartingWindowOrganizer registerTestStartingWindowOrganizer() {
-        return new TestStartingWindowOrganizer(mAtm);
+        return new TestStartingWindowOrganizer(mAtm, mDisplayContent);
     }
 
     @Test
@@ -692,7 +692,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Asserts fixed orientation request is not ignored, and the orientation is changed.
         assertNotEquals(activityCurOrientation, activity.getConfiguration().orientation);
-        assertTrue(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
+        assertTrue(activity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio());
     }
 
@@ -721,13 +721,13 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertEquals(ORIENTATION_PORTRAIT, activity.getConfiguration().orientation);
 
         // Clear size compat.
-        activity.mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
+        activity.mAppCompatController.getSizeCompatModePolicy().clearSizeCompatMode();
         activity.ensureActivityConfiguration();
         mDisplayContent.sendNewConfiguration();
 
         // Relaunching the app should still respect the orientation request.
         assertEquals(ORIENTATION_PORTRAIT, activity.getConfiguration().orientation);
-        assertTrue(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
+        assertTrue(activity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio());
     }
 
@@ -742,7 +742,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertEquals(ORIENTATION_LANDSCAPE, activity.getTask().getConfiguration().orientation);
         // The app should be letterboxed.
         assertEquals(ORIENTATION_PORTRAIT, activity.getConfiguration().orientation);
-        assertTrue(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
+        assertTrue(activity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio());
     }
 
@@ -755,7 +755,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertEquals(ORIENTATION_LANDSCAPE, activity.getTask().getConfiguration().orientation);
         // Activity is not letterboxed.
         assertEquals(ORIENTATION_LANDSCAPE, activity.getConfiguration().orientation);
-        assertFalse(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
+        assertFalse(activity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio());
     }
 
@@ -770,7 +770,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertEquals(ORIENTATION_LANDSCAPE, activity.getTask().getConfiguration().orientation);
         // Activity is not letterboxed.
         assertEquals(ORIENTATION_LANDSCAPE, activity.getConfiguration().orientation);
-        assertFalse(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
+        assertFalse(activity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio());
     }
 
@@ -785,7 +785,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertEquals(ORIENTATION_LANDSCAPE, activity.getTask().getConfiguration().orientation);
         // Activity is not letterboxed.
         assertEquals(ORIENTATION_LANDSCAPE, activity.getConfiguration().orientation);
-        assertFalse(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
+        assertFalse(activity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio());
     }
 
@@ -2006,7 +2006,6 @@ public class ActivityRecordTests extends WindowTestsBase {
         display.continueUpdateOrientationForDiffOrienLaunchingApp();
         assertTrue(display.isFixedRotationLaunchingApp(activity));
 
-        activity.stopFreezingScreen(true /* unfreezeSurfaceNow */, true /* force */);
         // Simulate the rotation has been updated to previous one, e.g. sensor updates before the
         // remote rotation is completed.
         doReturn(originalRotation).when(displayRotation).rotationForOrientation(
@@ -2015,14 +2014,10 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         final DisplayInfo rotatedInfo = activity.getFixedRotationTransformDisplayInfo();
         activity.finishFixedRotationTransform();
-        final ScreenRotationAnimation rotationAnim = display.getRotationAnimation();
-        assertNotNull(rotationAnim);
 
         // Because the display doesn't rotate, the rotated activity needs to cancel the fixed
         // rotation. There should be a rotation animation to cover the change of activity.
         verify(activity).onCancelFixedRotationTransform(rotatedInfo.rotation);
-        assertTrue(activity.isFreezingScreen());
-        assertFalse(displayRotation.isRotatingSeamlessly());
 
         // Simulate the remote rotation has completed and the configuration doesn't change, then
         // the rotated activity should also be restored by clearing the transform.
@@ -2041,8 +2036,6 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.setVisibleRequested(false);
         clearInvocations(activity);
         activity.onCancelFixedRotationTransform(originalRotation);
-        // The implementation of cancellation must be executed.
-        verify(activity).startFreezingScreen(originalRotation);
     }
 
     @Test
@@ -2599,19 +2592,16 @@ public class ActivityRecordTests extends WindowTestsBase {
         final TestWindowState appWindow = createWindowState(attrs, activity);
         activity.addWindow(appWindow);
         spyOn(appWindow);
-        doNothing().when(appWindow).onStartFreezingScreen();
 
         // Set initial orientation and update.
         activity.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
-        mDisplayContent.updateOrientation(null /* freezeThisOneIfNeeded */,
-                false /* forceUpdate */);
+        mDisplayContent.updateOrientationAndComputeConfig(false /* forceUpdate */);
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, mDisplayContent.getLastOrientation());
         appWindow.mResizeReported = false;
 
         // Update the orientation to perform 180 degree rotation and check that resize was reported.
         activity.setOrientation(SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-        mDisplayContent.updateOrientation(null /* freezeThisOneIfNeeded */,
-                false /* forceUpdate */);
+        mDisplayContent.updateOrientationAndComputeConfig(false /* forceUpdate */);
         // In this test, DC will not get config update. Set the waiting flag to false.
         mDisplayContent.mWaitingForConfig = false;
         mWm.mRoot.performSurfacePlacement();
@@ -2635,8 +2625,6 @@ public class ActivityRecordTests extends WindowTestsBase {
         final TestWindowState appWindow = createWindowState(attrs, activity);
         activity.addWindow(appWindow);
         spyOn(appWindow);
-        doNothing().when(appWindow).onStartFreezingScreen();
-        doNothing().when(mWm).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
 
         // Set initial orientation and update.
         performRotation(displayRotation, Surface.ROTATION_90);
@@ -2794,9 +2782,6 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         assertEquals(Configuration.ORIENTATION_PORTRAIT, displayConfig.orientation);
         assertEquals(Configuration.ORIENTATION_PORTRAIT, activityConfig.orientation);
-
-        // Unblock the rotation animation, so the further orientation updates won't be ignored.
-        unblockDisplayRotation(activity.mDisplayContent);
 
         final ActivityRecord topActivity = createActivityRecord(activity.getTask());
         topActivity.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
@@ -3800,7 +3785,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setResizeMode(RESIZE_MODE_RESIZEABLE)
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
                 .build();
-        activity.mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
+        activity.mAppCompatController.getSizeCompatModePolicy().clearSizeCompatMode();
         return activity;
     }
 

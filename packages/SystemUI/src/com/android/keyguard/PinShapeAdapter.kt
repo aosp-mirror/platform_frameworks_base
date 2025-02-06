@@ -17,7 +17,7 @@
 package com.android.keyguard
 
 import android.content.Context
-import com.android.systemui.res.R
+import com.android.systemui.bouncer.shared.constants.PinBouncerConstants
 import kotlin.random.Random
 
 class PinShapeAdapter {
@@ -25,7 +25,7 @@ class PinShapeAdapter {
     val random = Random(System.currentTimeMillis())
 
     constructor(context: Context) {
-        val availableShapes = context.resources.obtainTypedArray(R.array.bouncer_pin_shapes)
+        val availableShapes = context.resources.obtainTypedArray(PinBouncerConstants.pinShapes)
 
         for (i in 0 until availableShapes.length()) {
             val shape = availableShapes.getResourceId(i, 0)

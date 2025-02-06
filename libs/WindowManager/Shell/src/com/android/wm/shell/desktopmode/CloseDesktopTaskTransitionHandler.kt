@@ -23,8 +23,10 @@ import android.animation.ValueAnimator
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.content.Context
 import android.graphics.Rect
+import android.os.Handler
 import android.os.IBinder
 import android.util.TypedValue
+import android.view.Choreographer
 import android.view.SurfaceControl.Transaction
 import android.view.WindowManager
 import android.window.TransitionInfo
@@ -32,7 +34,10 @@ import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
 import androidx.core.animation.addListener
 import com.android.app.animation.Interpolators
+import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_CLOSE_TASK
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.wm.shell.common.ShellExecutor
+import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.transition.Transitions
 import java.util.function.Supplier
 
@@ -44,9 +49,11 @@ constructor(
     private val mainExecutor: ShellExecutor,
     private val animExecutor: ShellExecutor,
     private val transactionSupplier: Supplier<Transaction> = Supplier { Transaction() },
+    @ShellMainThread private val handler: Handler,
 ) : Transitions.TransitionHandler {
 
     private val runningAnimations = mutableMapOf<IBinder, List<Animator>>()
+    private val interactionJankMonitor = InteractionJankMonitor.getInstance()
 
     /** Returns null, as it only handles transitions started from Shell. */
     override fun handleRequest(
@@ -71,18 +78,27 @@ constructor(
                     // All animations completed, finish the transition
                     runningAnimations.remove(transition)
                     finishCallback.onTransitionFinished(/* wct= */ null)
+                    interactionJankMonitor.end(CUJ_DESKTOP_MODE_CLOSE_TASK)
                 }
             }
         }
+        val closingChanges =
+            info.changes.filter {
+                it.mode == WindowManager.TRANSIT_CLOSE &&
+                    it.taskInfo?.windowingMode == WINDOWING_MODE_FREEFORM
+            }
         animations +=
-            info.changes
-                .filter {
-                    it.mode == WindowManager.TRANSIT_CLOSE &&
-                        it.taskInfo?.windowingMode == WINDOWING_MODE_FREEFORM
-                }
-                .map { createCloseAnimation(it, finishTransaction, onAnimFinish) }
+            closingChanges.map { createCloseAnimation(it, finishTransaction, onAnimFinish) }
         if (animations.isEmpty()) return false
         runningAnimations[transition] = animations
+        closingChanges.lastOrNull()?.leash?.let { lastChangeLeash ->
+            interactionJankMonitor.begin(
+                lastChangeLeash,
+                context,
+                handler,
+                CUJ_DESKTOP_MODE_CLOSE_TASK,
+            )
+        }
         animExecutor.execute { animations.forEach(Animator::start) }
         return true
     }
@@ -127,6 +143,7 @@ constructor(
                     .get()
                     .setPosition(change.leash, animBounds.left.toFloat(), animBounds.top.toFloat())
                     .setScale(change.leash, animScale, animScale)
+                    .setFrameTimeline(Choreographer.getInstance().vsyncId)
                     .apply()
             }
         }

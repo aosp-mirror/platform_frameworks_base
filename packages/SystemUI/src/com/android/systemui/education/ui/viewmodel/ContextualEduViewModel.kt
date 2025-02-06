@@ -37,7 +37,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
-@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class ContextualEduViewModel
 @Inject

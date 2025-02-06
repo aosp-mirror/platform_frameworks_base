@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.phone
 
 import android.testing.LeakCheck
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.utils.leaks.FakeManagedProfileController
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.fakeManagedProfileController by Fixture { FakeManagedProfileController(LeakCheck()) }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.blurConfig
 import com.android.systemui.kosmos.Kosmos
@@ -25,5 +26,6 @@ val Kosmos.glanceableHubToPrimaryBouncerTransitionViewModel by Fixture {
     GlanceableHubToPrimaryBouncerTransitionViewModel(
         animationFlow = keyguardTransitionAnimationFlow,
         blurConfig = blurConfig,
+        communalSettingsInteractor = communalSettingsInteractor,
     )
 }

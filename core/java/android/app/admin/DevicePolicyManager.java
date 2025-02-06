@@ -4051,9 +4051,12 @@ public class DevicePolicyManager {
     public static final int EXEMPT_FROM_HIBERNATION =  3;
 
     /**
-     * Exempt an app from all power-related restrictions, including app standby and doze.
+     * Exempt an app from all power-related restrictions, including app standby.
      * In addition, the app will be able to start foreground services from the background,
      * and the user will not be able to stop foreground services run by the app.
+     *
+     * <p><strong>Note:</strong> This option does NOT exempt apps from Doze mode. In fact,
+     * DPC apps themselves are not automatically exempted from Doze mode either.
      *
      * @hide
      */
@@ -4354,20 +4357,24 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Indicates that app functions are not controlled by policy.
+     * Indicates that {@link android.app.appfunctions.AppFunctionManager} is not controlled by
+     * policy.
      *
      * <p>If no admin set this policy, it means appfunctions are enabled.
      */
     @FlaggedApi(android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER)
     public static final int APP_FUNCTIONS_NOT_CONTROLLED_BY_POLICY = 0;
 
-    /** Indicates that app functions are controlled and disabled by a policy. */
+    /** Indicates that {@link android.app.appfunctions.AppFunctionManager} is controlled and
+     * disabled by policy, i.e. no apps in the current user are allowed to expose app functions.
+     */
     @FlaggedApi(android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER)
     public static final int APP_FUNCTIONS_DISABLED = 1;
 
     /**
-     * Indicates that app functions are controlled and disabled by a policy for cross profile
-     * interactions only.
+     * Indicates that {@link android.app.appfunctions.AppFunctionManager} is controlled and
+     * disabled by a policy for cross profile interactions only, i.e. app functions exposed by apps
+     * in the current user can only be invoked within the same user.
      *
      * <p>This is different from {@link #APP_FUNCTIONS_DISABLED} in that it only disables cross
      * profile interactions (even if the caller has permissions required to interact across users).
@@ -4388,7 +4395,9 @@ public class DevicePolicyManager {
     public @interface AppFunctionsPolicy {}
 
     /**
-     * Sets the app functions policy which controls app functions operations on the device.
+     * Sets the {@link android.app.appfunctions.AppFunctionManager} policy which controls app
+     * functions operations on the device. An app function is a piece of functionality that apps
+     * expose to the system for cross-app orchestration.
      *
      * <p>This function can only be called by a device owner, a profile owner or holders of the
      * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_APP_FUNCTIONS}.
@@ -4414,7 +4423,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns the current app functions policy.
+     * Returns the current {@link android.app.appfunctions.AppFunctionManager} policy.
      *
      * <p>The returned policy will be the current resolved policy rather than the policy set by the
      * calling admin.

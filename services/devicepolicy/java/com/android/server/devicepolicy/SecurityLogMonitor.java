@@ -19,10 +19,12 @@ package com.android.server.devicepolicy;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
+import android.annotation.Nullable;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.IAuditLogEventsCallback;
 import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
+import android.app.admin.flags.Flags;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
@@ -45,6 +47,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 
 /**
  * A class managing access to the security logs. It maintains an internal buffer of pending
@@ -183,6 +186,10 @@ class SecurityLogMonitor implements Runnable {
     @GuardedBy("mLock")
     private final ArrayDeque<SecurityEvent> mAuditLogEventBuffer = new ArrayDeque<>();
 
+    @GuardedBy("mLock")
+    @Nullable
+    private Consumer<List<SecurityEvent>> mInternalEventsCallback;
+
     void stop() {
         Slog.i(TAG, "Stopping security logging.");
         mLock.lock();
@@ -221,7 +228,6 @@ class SecurityLogMonitor implements Runnable {
         } finally {
             mLock.unlock();
         }
-
     }
 
     @GuardedBy("mLock")
@@ -365,7 +371,9 @@ class SecurityLogMonitor implements Runnable {
                 break;
             }
         }
-        SecurityLog.redactEvents(newLogs, mEnabledUser);
+        if (!Flags.internalLogEventListener()) {
+            SecurityLog.redactEvents(newLogs, mEnabledUser);
+        }
         if (DEBUG) Slog.d(TAG, "Got " + newLogs.size() + " new events.");
     }
 
@@ -400,7 +408,7 @@ class SecurityLogMonitor implements Runnable {
      */
     @GuardedBy("mLock")
     private void mergeBatchLocked(final ArrayList<SecurityEvent> newLogs) {
-        List<SecurityEvent> dedupedLogs = new ArrayList<>();
+        ArrayList<SecurityEvent> dedupedLogs = new ArrayList<>();
         // Run through the first events of the batch to check if there is an overlap with previous
         // batch and if so, skip overlapping events. Events are sorted by timestamp, so we can
         // compare it in linear time by advancing two pointers, one for each batch.
@@ -438,8 +446,19 @@ class SecurityLogMonitor implements Runnable {
                 curPos++;
             }
         }
-        // Assign an id to the new logs, after the overlap with mLastEvents.
+
         dedupedLogs.addAll(newLogs.subList(curPos, newLogs.size()));
+
+        if (Flags.internalLogEventListener() && !dedupedLogs.isEmpty()) {
+            if (mInternalEventsCallback != null) {
+                final ArrayList<SecurityEvent> events = new ArrayList<>(dedupedLogs);
+                final Consumer<List<SecurityEvent>> callback = mInternalEventsCallback;
+                mHandler.post(() -> callback.accept(events));
+            }
+            SecurityLog.redactEvents(dedupedLogs, mEnabledUser);
+        }
+
+        // Assign an id to the new logs, after the overlap with mLastEvents.
         for (SecurityEvent event : dedupedLogs) {
             assignLogId(event);
         }
@@ -715,6 +734,19 @@ class SecurityLogMonitor implements Runnable {
 
             Slogf.i(TAG, "Removing callback for UID %d", uid);
             mAuditLogCallbacks.removeAt(index);
+        } finally {
+            mLock.unlock();
+        }
+    }
+
+    public void setInternalEventsCallback(@Nullable Consumer<List<SecurityEvent>> callback) {
+        if (!Flags.internalLogEventListener()) {
+            Slog.wtf(TAG, "Internal callbacks not enabled");
+            return;
+        }
+        mLock.lock();
+        try {
+            this.mInternalEventsCallback = callback;
         } finally {
             mLock.unlock();
         }

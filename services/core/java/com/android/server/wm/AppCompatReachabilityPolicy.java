@@ -32,6 +32,7 @@ import android.annotation.Nullable;
 import android.graphics.Rect;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.function.Supplier;
@@ -77,7 +78,7 @@ class AppCompatReachabilityPolicy {
 
     void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
         final AppCompatReachabilityOverrides reachabilityOverrides =
-                mActivityRecord.mAppCompatController.getAppCompatReachabilityOverrides();
+                mActivityRecord.mAppCompatController.getReachabilityOverrides();
         pw.println(prefix + "  isVerticalThinLetterboxed=" + reachabilityOverrides
                 .isVerticalThinLetterboxed());
         pw.println(prefix + "  isHorizontalThinLetterboxed=" + reachabilityOverrides
@@ -96,9 +97,12 @@ class AppCompatReachabilityPolicy {
 
     private void handleHorizontalDoubleTap(int x) {
         final AppCompatReachabilityOverrides reachabilityOverrides =
-                mActivityRecord.mAppCompatController.getAppCompatReachabilityOverrides();
-        if (!reachabilityOverrides.isHorizontalReachabilityEnabled()
-                || mActivityRecord.isInTransition()) {
+                mActivityRecord.mAppCompatController.getReachabilityOverrides();
+        // We don't return early when the Shell letterbox implementation is enabled because
+        // double tap is always sent via transitions.
+        final boolean isInTransition = !Flags.appCompatRefactoring()
+                && mActivityRecord.isInTransition();
+        if (!reachabilityOverrides.isHorizontalReachabilityEnabled() || isInTransition) {
             return;
         }
         final Rect letterboxInnerFrame = getLetterboxInnerFrame();
@@ -107,7 +111,7 @@ class AppCompatReachabilityPolicy {
             return;
         }
         final AppCompatDeviceStateQuery deviceStateQuery = mActivityRecord.mAppCompatController
-                .getAppCompatDeviceStateQuery();
+                .getDeviceStateQuery();
         final boolean isInFullScreenBookMode = deviceStateQuery
                     .isDisplayFullScreenAndSeparatingHinge()
                 && mAppCompatConfiguration.getIsAutomaticReachabilityInBookModeEnabled();
@@ -142,9 +146,12 @@ class AppCompatReachabilityPolicy {
 
     private void handleVerticalDoubleTap(int y) {
         final AppCompatReachabilityOverrides reachabilityOverrides =
-                mActivityRecord.mAppCompatController.getAppCompatReachabilityOverrides();
-        if (!reachabilityOverrides.isVerticalReachabilityEnabled()
-                || mActivityRecord.isInTransition()) {
+                mActivityRecord.mAppCompatController.getReachabilityOverrides();
+        // We don't return early when the Shell letterbox implementation is enabled because
+        // double tap is always sent via transitions.
+        final boolean isInTransition = !Flags.appCompatRefactoring()
+                && mActivityRecord.isInTransition();
+        if (!reachabilityOverrides.isVerticalReachabilityEnabled() || isInTransition) {
             return;
         }
         final Rect letterboxInnerFrame = getLetterboxInnerFrame();
@@ -153,7 +160,7 @@ class AppCompatReachabilityPolicy {
             return;
         }
         final AppCompatDeviceStateQuery deviceStateQuery = mActivityRecord.mAppCompatController
-                .getAppCompatDeviceStateQuery();
+                .getDeviceStateQuery();
         final boolean isInFullScreenTabletopMode = deviceStateQuery
                 .isDisplayFullScreenAndSeparatingHinge();
         final int letterboxPositionForVerticalReachability = mAppCompatConfiguration

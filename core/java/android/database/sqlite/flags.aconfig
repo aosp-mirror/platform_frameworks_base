@@ -17,3 +17,12 @@ flag {
      description: "SQLite APIs held back for Android 15"
      bug: "279043253"
 }
+
+flag {
+     name: "concurrent_open_helper"
+     is_exported: true
+     namespace: "system_performance"
+     is_fixed_read_only: false
+     description: "Make SQLiteOpenHelper thread-safe"
+     bug: "335904370"
+}

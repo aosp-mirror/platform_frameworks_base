@@ -32,7 +32,6 @@ import com.android.systemui.power.shared.model.WakeSleepReason.FOLD
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.transform
@@ -40,7 +39,6 @@ import kotlinx.coroutines.flow.transform
 /**
  * Breaks down LOCKSCREEN->AOD transition into discrete steps for corresponding views to consume.
  */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class LockscreenToAodTransitionViewModel
 @Inject

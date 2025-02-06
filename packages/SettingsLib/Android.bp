@@ -46,6 +46,8 @@ android_library {
         "SettingsLibIntroPreference",
         "SettingsLibLayoutPreference",
         "SettingsLibMainSwitchPreference",
+        "SettingsLibMetadata",
+        "SettingsLibPreference",
         "SettingsLibProfileSelector",
         "SettingsLibProgressBar",
         "SettingsLibRestrictedLockUtils",
@@ -77,6 +79,7 @@ android_library {
         "src/**/*.kt",
         "src/**/I*.aidl",
     ],
+    kotlincflags: ["-Xjvm-default=all"],
 }
 
 // defaults for lint option

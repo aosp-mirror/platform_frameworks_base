@@ -40,7 +40,6 @@ import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
@@ -54,7 +53,6 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class MobileIconsViewModelTest : SysuiTestCase() {

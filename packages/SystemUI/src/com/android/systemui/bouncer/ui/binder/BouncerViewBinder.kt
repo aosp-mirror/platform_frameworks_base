@@ -22,10 +22,8 @@ import dagger.Lazy
 import java.util.Optional
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Helper data class that allows to lazy load all the dependencies of the legacy bouncer. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 data class LegacyBouncerDependencies
 @Inject

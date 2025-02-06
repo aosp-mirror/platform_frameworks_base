@@ -43,6 +43,7 @@ import android.telephony.TelephonyManager;
 import com.android.internal.os.Clock;
 import com.android.server.power.stats.BatteryUsageStatsRule;
 import com.android.server.power.stats.MobileRadioPowerStatsCollector;
+import com.android.server.power.stats.NetworkStatsTestUtils;
 import com.android.server.power.stats.PowerStatsCollector;
 import com.android.server.power.stats.PowerStatsUidResolver;
 import com.android.server.power.stats.format.PowerStatsLayout;
@@ -134,6 +135,11 @@ public class PhoneCallPowerStatsProcessorTest {
                 @Override
                 public LongSupplier getPhoneSignalScanDurationSupplier() {
                     return mScanDurationSupplier;
+                }
+
+                @Override
+                public NetworkStats networkStatsDelta(NetworkStats stats, NetworkStats oldStats) {
+                    return NetworkStatsTestUtils.networkStatsDelta(stats, oldStats);
                 }
             };
 

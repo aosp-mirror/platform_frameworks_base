@@ -19,7 +19,7 @@ package com.android.systemui.volume.dialog.ringer.ui.viewmodel
 /** Models volume dialog ringer */
 data class RingerViewModel(
     /** List of the available buttons according to the available modes */
-    val availableButtons: List<RingerButtonViewModel?>,
+    val availableButtons: List<RingerButtonViewModel>,
     /** The index of the currently selected button */
     val currentButtonIndex: Int,
     /** Currently selected button. */

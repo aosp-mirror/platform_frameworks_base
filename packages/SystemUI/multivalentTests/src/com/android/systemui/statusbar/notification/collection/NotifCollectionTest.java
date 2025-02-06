@@ -1383,7 +1383,6 @@ public class NotifCollectionTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_NOTIFICATIONS_DISMISS_PRUNED_SUMMARIES)
     public void testDismissNotificationsIncludesPrunedParents() {
         // GIVEN a collection with 2 groups; one has a single child, one has two.
         mCollection.addNotificationDismissInterceptor(mInterceptor1);

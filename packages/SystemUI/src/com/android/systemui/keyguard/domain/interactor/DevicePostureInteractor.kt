@@ -19,10 +19,8 @@ package com.android.systemui.keyguard.domain.interactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.DevicePostureRepository
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** DevicePosture business logic. */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class DevicePostureInteractor
 @Inject

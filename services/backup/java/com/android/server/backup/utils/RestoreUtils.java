@@ -16,7 +16,6 @@
 
 package com.android.server.backup.utils;
 
-import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.content.Context;
@@ -78,9 +77,7 @@ public class RestoreUtils {
             int userId) {
         boolean okay = true;
 
-        if (DEBUG) {
-            Slog.d(TAG, "Installing from backup: " + info.packageName);
-        }
+        Slog.d(TAG, "Installing from backup: " + info.packageName);
 
         try {
             LocalIntentReceiver receiver = new LocalIntentReceiver();

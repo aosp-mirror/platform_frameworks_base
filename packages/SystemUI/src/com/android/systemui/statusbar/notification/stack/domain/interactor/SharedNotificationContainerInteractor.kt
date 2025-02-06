@@ -29,7 +29,6 @@ import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import dagger.Lazy
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +39,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 /** Encapsulates business-logic specifically related to the shared notification stack container. */
-@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+@OptIn(FlowPreview::class)
 @SysUISingleton
 class SharedNotificationContainerInteractor
 @Inject

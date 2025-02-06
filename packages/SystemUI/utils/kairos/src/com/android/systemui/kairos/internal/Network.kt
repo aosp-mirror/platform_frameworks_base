@@ -21,9 +21,7 @@ import com.android.systemui.kairos.internal.util.HeteroMap
 import com.android.systemui.kairos.internal.util.logDuration
 import com.android.systemui.kairos.internal.util.logLn
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.Maybe.Just
-import com.android.systemui.kairos.util.just
-import com.android.systemui.kairos.util.none
+import com.android.systemui.kairos.util.Maybe.Present
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.ContinuationInterceptor
 import kotlin.time.measureTime
@@ -33,6 +31,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -148,6 +147,10 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
     /** Evaluates [block] inside of a new transaction when the network is ready. */
     fun <R> transaction(reason: String, block: suspend EvalScope.() -> R): Deferred<R> =
         CompletableDeferred<R>(parent = coroutineScope.coroutineContext.job).also { onResult ->
+            if (!coroutineScope.isActive) {
+                onResult.cancel()
+                return@also
+            }
             val job =
                 coroutineScope.launch {
                     inputScheduleChan.send(
@@ -261,25 +264,25 @@ internal class ScheduledAction<T>(
     private val onResult: CompletableDeferred<T>? = null,
     private val onStartTransaction: suspend EvalScope.() -> T,
 ) {
-    private var result: Maybe<T> = none
+    private var result: Maybe<T> = Maybe.absent
 
     suspend fun started(evalScope: EvalScope) {
-        result = just(onStartTransaction(evalScope))
+        result = Maybe.present(onStartTransaction(evalScope))
     }
 
     fun fail(ex: Exception) {
-        result = none
+        result = Maybe.absent
         onResult?.completeExceptionally(ex)
     }
 
     fun completed() {
         if (onResult != null) {
             when (val result = result) {
-                is Just -> onResult.complete(result.value)
+                is Present -> onResult.complete(result.value)
                 else -> {}
             }
         }
-        result = none
+        result = Maybe.absent
     }
 }
 

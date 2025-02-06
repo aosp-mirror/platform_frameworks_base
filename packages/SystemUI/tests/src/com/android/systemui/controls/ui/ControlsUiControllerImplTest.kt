@@ -63,6 +63,7 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
+import com.android.systemui.utils.SafeIconLoader
 import com.android.wm.shell.taskview.TaskView
 import com.android.wm.shell.taskview.TaskViewFactory
 import com.google.common.truth.Truth.assertThat
@@ -71,6 +72,7 @@ import java.util.function.Consumer
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Answers
 import org.mockito.Mock
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.doAnswer
@@ -102,6 +104,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     @Mock lateinit var featureFlags: FeatureFlags
     @Mock lateinit var packageManager: PackageManager
     @Mock lateinit var systemUIDialogFactory: SystemUIDialog.Factory
+    @Mock(answer = Answers.RETURNS_MOCKS) lateinit var safeIconLoaderFactory: SafeIconLoader.Factory
 
     private val preferredPanelRepository = kosmos.selectedComponentRepository
     private lateinit var fakeDialogController: FakeSystemUIDialogController
@@ -130,7 +133,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
             Context.LAYOUT_INFLATER_SERVICE,
             mContext.baseContext
                 .getSystemService(LayoutInflater::class.java)!!
-                .cloneInContext(mContext)
+                .cloneInContext(mContext),
         )
 
         parent = FrameLayout(mContext)
@@ -154,6 +157,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
                 authorizedPanelsRepository,
                 preferredPanelRepository,
                 featureFlags,
+                safeIconLoaderFactory,
                 ControlsDialogsFactory(systemUIDialogFactory),
                 dumpManager,
             )
@@ -303,7 +307,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
             assertThat(
                     intent.getBooleanExtra(
                         ControlsProviderService.EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS,
-                        false
+                        false,
                     )
                 )
                 .isTrue()
@@ -341,7 +345,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
             assertThat(
                     intent.getBooleanExtra(
                         ControlsProviderService.EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS,
-                        false
+                        false,
                     )
                 )
                 .isTrue()
@@ -374,7 +378,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
         assertThat(
                 pendingIntent.intent.getBooleanExtra(
                     ControlsProviderService.EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS,
-                    false
+                    false,
                 )
             )
             .isTrue()
@@ -393,7 +397,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
         assertThat(
                 newPendingIntent.intent.getBooleanExtra(
                     ControlsProviderService.EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS,
-                    false
+                    false,
                 )
             )
             .isFalse()
@@ -416,9 +420,9 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
                     StructureInfo(
                         checkNotNull(ComponentName.unflattenFromString("pkg/.cls1")),
                         "a",
-                        ArrayList()
+                        ArrayList(),
                     )
-                ),
+                )
             )
         preferredPanelRepository.setSelectedComponent(
             SelectedComponentRepository.SelectedComponent(selectedItems[0])
@@ -598,7 +602,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     private fun ControlsServiceInfo(
         componentName: ComponentName,
         label: CharSequence,
-        panelComponentName: ComponentName? = null
+        panelComponentName: ComponentName? = null,
     ): ControlsServiceInfo {
         val serviceInfo =
             ServiceInfo().apply {
@@ -621,7 +625,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
                         view: View?,
                         name: String,
                         context: Context,
-                        attrs: AttributeSet
+                        attrs: AttributeSet,
                     ): View? {
                         return onCreateView(name, context, attrs)
                     }
@@ -629,7 +633,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
                     override fun onCreateView(
                         name: String,
                         context: Context,
-                        attrs: AttributeSet
+                        attrs: AttributeSet,
                     ): View? {
                         if (FrameLayout::class.java.simpleName.equals(name)) {
                             val mock: FrameLayout = mock {

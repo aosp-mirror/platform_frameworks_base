@@ -30,6 +30,10 @@ android.util.AndroidRuntimeException
 android.util.ArrayMap
 android.util.ArraySet
 android.util.AtomicFile
+android.util.AtomicFileOutputStream
+android.util.AtomicFileBufferedOutputStream
+android.util.AtomicFilePrintWriter
+android.util.AtomicFileBufferedPrintWriter
 android.util.BackupUtils
 android.util.Base64
 android.util.Base64DataException
@@ -111,6 +115,7 @@ android.util.UtilConfig
 android.util.Xml
 
 android.util.proto.EncodedBuffer
+android.util.proto.ProtoFieldFilter
 android.util.proto.ProtoInputStream
 android.util.proto.ProtoOutputStream
 android.util.proto.ProtoParseException
@@ -146,6 +151,10 @@ android.os.Looper
 android.os.Message
 android.os.MessageQueue
 android.os.MessageQueue_ravenwood
+android.os.PerfettoTrace
+android.os.PerfettoTrace$Category
+android.os.PerfettoTrackEventExtra
+android.os.PerfettoTrackEventExtra$NoOpBuilder
 android.os.PackageTagsList
 android.os.Parcel
 android.os.ParcelFileDescriptor

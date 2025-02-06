@@ -31,7 +31,6 @@ import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -52,7 +51,6 @@ private val MAX_DIALOG_SHOW_TIME: Duration = 3.seconds
  * - it might be dismissed by the inactivity timeout;
  * - it can be dismissed by the user;
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @VolumeDialogPluginScope
 class VolumeDialogVisibilityInteractor
 @Inject

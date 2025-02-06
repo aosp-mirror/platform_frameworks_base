@@ -37,6 +37,7 @@ import static org.testng.Assert.expectThrows;
 
 import android.annotation.UserIdInt;
 import android.app.Application;
+import android.app.backup.BackupManagerInternal;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
@@ -52,6 +53,7 @@ import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
 
+import com.android.server.LocalServices;
 import com.android.server.SystemService.TargetUser;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.testing.shadows.ShadowApplicationPackageManager;
@@ -229,7 +231,7 @@ public class BackupManagerServiceRoboTest {
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
         IBinder agentBinder = mock(IBinder.class);
 
-        backupManagerService.agentConnected(mUserOneId, TEST_PACKAGE, agentBinder);
+        backupManagerService.agentConnectedForUser(TEST_PACKAGE, mUserOneId, agentBinder);
 
         verify(mUserOneBackupAgentConnectionManager).agentConnected(TEST_PACKAGE, agentBinder);
     }
@@ -242,7 +244,7 @@ public class BackupManagerServiceRoboTest {
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
         IBinder agentBinder = mock(IBinder.class);
 
-        backupManagerService.agentConnected(mUserTwoId, TEST_PACKAGE, agentBinder);
+        backupManagerService.agentConnectedForUser(TEST_PACKAGE, mUserTwoId, agentBinder);
 
         verify(mUserOneBackupAgentConnectionManager, never()).agentConnected(TEST_PACKAGE,
                 agentBinder);
@@ -1516,14 +1518,13 @@ public class BackupManagerServiceRoboTest {
     }
 
     /**
-     * Test verifying that {@link BackupManagerService#MORE_DEBUG} is set to {@code false}. This is
+     * Test verifying that {@link BackupManagerService#DEBUG} is set to {@code false}. This is
      * specifically to prevent overloading the logs in production.
      */
     @Test
-    public void testMoreDebug_isFalse() throws Exception {
-        boolean moreDebug = BackupManagerService.MORE_DEBUG;
-
-        assertThat(moreDebug).isFalse();
+    public void testDebug_isFalse() {
+        boolean debug = BackupManagerService.DEBUG;
+        assertThat(debug).isFalse();
     }
 
     /** Test that the constructor handles {@code null} parameters. */
@@ -1549,6 +1550,7 @@ public class BackupManagerServiceRoboTest {
     @Test
     public void testOnStart_publishesService() {
         BackupManagerService backupManagerService = mock(BackupManagerService.class);
+        LocalServices.removeServiceForTest(BackupManagerInternal.class);
         BackupManagerService.Lifecycle lifecycle =
                 spy(new BackupManagerService.Lifecycle(mContext, backupManagerService));
         doNothing().when(lifecycle).publishService(anyString(), any());

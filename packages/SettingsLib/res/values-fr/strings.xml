@@ -523,6 +523,8 @@
     <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"Recharge rapide"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Contrôlé par l\'administrateur"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Contrôlé par les paramètres restreints"</string>
+    <!-- no translation found for disabled_in_phone_call_text (6568931334337318320) -->
+    <skip />
     <string name="disabled" msgid="8017887509554714950">"Désactivée"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Autorisé"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Non autorisé"</string>
@@ -681,7 +683,7 @@
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Quitter la session Invité"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Toute l\'activité sera supprimée à la fin de la session"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Vous pouvez enregistrer ou supprimer l\'activité en quittant"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Réinitialisez la session pour supprimer immédiatement l\'activité. Vous pourrez aussi l\'enregistrer ou la supprimer en quittant la session."</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Réinitialisez pour supprimer immédiatement l\'activité de la session, ou choisissez d\'enregistrer ou de supprimer l\'activité à la fin de la session."</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Sélectionner une photo"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Trop de tentatives incorrectes. Les données de cet appareil vont être supprimées."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Trop de tentatives incorrectes. Ce compte utilisateur va être supprimé."</string>

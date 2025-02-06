@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.onStart
 
 @Immutable
-class TileViewModel(private val tile: QSTile, val spec: TileSpec) {
+data class TileViewModel(private val tile: QSTile, val spec: TileSpec) {
     val state: Flow<QSTile.State> =
         conflatedCallbackFlow {
                 val callback = QSTile.Callback { trySend(it.copy()) }

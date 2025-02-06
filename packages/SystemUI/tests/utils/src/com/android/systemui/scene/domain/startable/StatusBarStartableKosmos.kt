@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.scene.domain.startable
 
 import android.content.applicationContext
@@ -33,7 +31,6 @@ import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.user.domain.interactor.selectedUserInteractor
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.statusBarStartable by Fixture {
     StatusBarStartable(

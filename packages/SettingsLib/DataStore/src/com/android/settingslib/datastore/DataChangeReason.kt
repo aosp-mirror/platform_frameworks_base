@@ -39,5 +39,7 @@ annotation class DataChangeReason {
         const val RESTORE = 3
         /** Data is synced from another profile (e.g. personal profile to work profile). */
         const val SYNC_ACROSS_PROFILES = 4
+
+        fun isDataChange(reason: Int): Boolean = reason in UNKNOWN..SYNC_ACROSS_PROFILES
     }
 }

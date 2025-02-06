@@ -103,7 +103,7 @@
                     <!-- Positive Button -->
                     <Button
                         android:id="@+id/button1"
-                        style="@*android:style/Widget.DeviceDefault.Button.Filled"
+                        style="@*android:style/Widget.Material3.Button.Filled"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_gravity="center"
@@ -111,7 +111,7 @@
                     <!--Neutral Button -->
                     <Button
                         android:id="@+id/button3"
-                        style="@*android:style/Widget.DeviceDefault.Button.WearMaterial3"
+                        style="@*android:style/Widget.Material3.Button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -119,7 +119,7 @@
                     <!-- Negative Button -->
                     <Button
                         android:id="@+id/button2"
-                        style="@*android:style/Widget.DeviceDefault.Button.WearMaterial3"
+                        style="@*android:style/Widget.Material3.Button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"

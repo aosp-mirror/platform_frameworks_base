@@ -58,7 +58,6 @@ import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Binder;
 import android.os.Build;
@@ -69,7 +68,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.SystemClock;
-import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -79,7 +77,6 @@ import android.view.Display;
 import android.view.MagnificationSpec;
 import android.view.Surface;
 import android.view.ViewConfiguration;
-import android.view.WindowInfo;
 import android.view.WindowManager;
 import android.view.WindowManager.TransitionFlags;
 import android.view.WindowManager.TransitionType;
@@ -557,9 +554,6 @@ final class AccessibilityController {
 
         private static final boolean DEBUG_WINDOW_TRANSITIONS = false;
         private static final boolean DEBUG_DISPLAY_SIZE = false;
-        private static final boolean DEBUG_LAYERS = false;
-        private static final boolean DEBUG_RECTANGLE_REQUESTED = false;
-        private static final boolean DEBUG_VIEWPORT_WINDOW = false;
 
         private final Rect mTempRect1 = new Rect();
         private final Rect mTempRect2 = new Rect();
@@ -579,8 +573,6 @@ final class AccessibilityController {
         private final MagnificationCallbacks mCallbacks;
         private final UserContextChangedNotifier mUserContextChangedNotifier;
 
-        private final long mLongAnimationDuration;
-
         private boolean mIsFullscreenMagnificationActivated = false;
         private final Region mMagnificationRegion = new Region();
         private final Region mOldMagnificationRegion = new Region();
@@ -593,7 +585,6 @@ final class AccessibilityController {
         private final Point mScreenSize = new Point();
         private final SparseArray<WindowState> mTempWindowStates =
                 new SparseArray<WindowState>();
-        private final RectF mTempRectF = new RectF();
         private final Matrix mTempMatrix = new Matrix();
 
         DisplayMagnifier(WindowManagerService windowManagerService,
@@ -609,8 +600,6 @@ final class AccessibilityController {
             mUserContextChangedNotifier = new UserContextChangedNotifier(mHandler);
             mAccessibilityTracing =
                     AccessibilityController.getAccessibilityControllerInternal(mService);
-            mLongAnimationDuration = mDisplayContext.getResources().getInteger(
-                    com.android.internal.R.integer.config_longAnimTime);
             if (mDisplayContext.getResources().getConfiguration().isScreenRound()) {
                 mCircularPath = new Path();
 
@@ -838,10 +827,6 @@ final class AccessibilityController {
             // Make sure we're working with the most current bounds
             recomputeBounds();
             outMagnificationRegion.set(mMagnificationRegion);
-        }
-
-        boolean isMagnifying() {
-            return mMagnificationSpec.scale > 1.0f;
         }
 
         void destroy() {
@@ -1172,12 +1157,6 @@ final class AccessibilityController {
 
         private static final boolean DEBUG = false;
 
-        private final Set<IBinder> mTempBinderSet = new ArraySet<>();
-
-        private final Region mTempRegion = new Region();
-
-        private final Region mTempRegion2 = new Region();
-
         private final WindowManagerService mService;
 
         private final Handler mHandler;
@@ -1243,11 +1222,10 @@ final class AccessibilityController {
                 Slog.i(LOG_TAG, "computeChangedWindows()");
             }
 
-            List<WindowInfo> windows = null;
             final List<AccessibilityWindow> visibleWindows = new ArrayList<>();
             final Point screenSize = new Point();
             final int topFocusedDisplayId;
-            IBinder topFocusedWindowToken = null;
+            final IBinder topFocusedWindowToken;
 
             synchronized (mService.mGlobalLock) {
                 final WindowState topFocusedWindowState = getTopFocusWindow();

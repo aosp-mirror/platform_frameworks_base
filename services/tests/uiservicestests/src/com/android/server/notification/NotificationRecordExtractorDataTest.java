@@ -29,11 +29,18 @@ import android.os.UserHandle;
 import android.service.notification.Adjustment;
 import android.service.notification.StatusBarNotification;
 
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
+
 import com.android.server.UiServiceTestCase;
 
+import org.junit.Rule;
 import org.junit.Test;
 
 public class NotificationRecordExtractorDataTest extends UiServiceTestCase {
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Test
     public void testHasDiffs_noDiffs() {
@@ -57,7 +64,8 @@ public class NotificationRecordExtractorDataTest extends UiServiceTestCase {
                 r.getRankingScore(),
                 r.isConversation(),
                 r.getProposedImportance(),
-                r.hasSensitiveContent());
+                r.hasSensitiveContent(),
+                r.getSummarization());
 
         assertFalse(extractorData.hasDiffForRankingLocked(r, 1));
         assertFalse(extractorData.hasDiffForLoggingLocked(r, 1));
@@ -85,7 +93,8 @@ public class NotificationRecordExtractorDataTest extends UiServiceTestCase {
                 r.getRankingScore(),
                 r.isConversation(),
                 r.getProposedImportance(),
-                r.hasSensitiveContent());
+                r.hasSensitiveContent(),
+                r.getSummarization());
 
         Bundle signals = new Bundle();
         signals.putInt(Adjustment.KEY_IMPORTANCE_PROPOSAL, IMPORTANCE_HIGH);
@@ -119,7 +128,8 @@ public class NotificationRecordExtractorDataTest extends UiServiceTestCase {
                 r.getRankingScore(),
                 r.isConversation(),
                 r.getProposedImportance(),
-                r.hasSensitiveContent());
+                r.hasSensitiveContent(),
+                r.getSummarization());
 
         Bundle signals = new Bundle();
         signals.putString(Adjustment.KEY_GROUP_KEY, "ranker_group");
@@ -154,10 +164,47 @@ public class NotificationRecordExtractorDataTest extends UiServiceTestCase {
                 r.getRankingScore(),
                 r.isConversation(),
                 r.getProposedImportance(),
-                r.hasSensitiveContent());
+                r.hasSensitiveContent(),
+                r.getSummarization());
 
         Bundle signals = new Bundle();
         signals.putBoolean(Adjustment.KEY_SENSITIVE_CONTENT, true);
+        Adjustment adjustment = new Adjustment("pkg", r.getKey(), signals, "", 0);
+        r.addAdjustment(adjustment);
+        r.applyAdjustments();
+
+        assertTrue(extractorData.hasDiffForRankingLocked(r, 1));
+        assertTrue(extractorData.hasDiffForLoggingLocked(r, 1));
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_NM_SUMMARIZATION)
+    public void testHasDiffs_summarization() {
+        NotificationRecord r = generateRecord();
+
+        NotificationRecordExtractorData extractorData = new NotificationRecordExtractorData(
+                1,
+                r.getPackageVisibilityOverride(),
+                r.canShowBadge(),
+                r.canBubble(),
+                r.getNotification().isBubbleNotification(),
+                r.getChannel(),
+                r.getGroupKey(),
+                r.getPeopleOverride(),
+                r.getSnoozeCriteria(),
+                r.getUserSentiment(),
+                r.getSuppressedVisualEffects(),
+                r.getSystemGeneratedSmartActions(),
+                r.getSmartReplies(),
+                r.getImportance(),
+                r.getRankingScore(),
+                r.isConversation(),
+                r.getProposedImportance(),
+                r.hasSensitiveContent(),
+                r.getSummarization());
+
+        Bundle signals = new Bundle();
+        signals.putString(Adjustment.KEY_SUMMARIZATION, "SUMMARIZED!");
         Adjustment adjustment = new Adjustment("pkg", r.getKey(), signals, "", 0);
         r.addAdjustment(adjustment);
         r.applyAdjustments();

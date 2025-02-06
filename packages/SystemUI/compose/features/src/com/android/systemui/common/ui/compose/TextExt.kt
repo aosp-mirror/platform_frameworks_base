@@ -19,6 +19,7 @@ package com.android.systemui.common.ui.compose
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import com.android.systemui.common.shared.model.Text
@@ -26,6 +27,7 @@ import com.android.systemui.common.shared.model.Text.Companion.loadText
 
 /** Returns the loaded [String] or `null` if there isn't one. */
 @Composable
+@ReadOnlyComposable
 fun Text.load(): String? {
     return when (this) {
         is Text.Loaded -> text

@@ -27,8 +27,6 @@ import static org.mockito.Mockito.when;
 
 import android.content.Intent;
 import android.os.Handler;
-import android.platform.test.annotations.DisableFlags;
-import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.testing.TestableLooper;
@@ -38,7 +36,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.hearingaid.HearingDevicesChecker;
 import com.android.systemui.accessibility.hearingaid.HearingDevicesDialogManager;
@@ -121,18 +118,6 @@ public class HearingDevicesTileTest extends SysuiTestCase {
     public void tearDown() {
         mTile.destroy();
         mTestableLooper.processAllMessages();
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_HEARING_AIDS_QS_TILE_DIALOG)
-    public void isAvailable_flagEnabled_true() {
-        assertThat(mTile.isAvailable()).isTrue();
-    }
-
-    @Test
-    @DisableFlags(Flags.FLAG_HEARING_AIDS_QS_TILE_DIALOG)
-    public void isAvailable_flagDisabled_false() {
-        assertThat(mTile.isAvailable()).isFalse();
     }
 
     @Test

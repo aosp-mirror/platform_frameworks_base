@@ -57,16 +57,6 @@ flag {
 }
 
 flag {
-    namespace: "input_native"
-    name: "keyboard_layout_manager_multi_user_ime_setup"
-    description: "Update KeyboardLayoutManager to work correctly with multi-user IME setup"
-    bug: "354333072"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "modifier_shortcut_dump"
     namespace: "input"
     description: "Dump keyboard shortcuts in dumpsys window"
@@ -178,6 +168,13 @@ flag {
 }
 
 flag {
+    name: "enable_display_color_inversion_key_gestures"
+    namespace: "input"
+    description: "Adds key gestures for display color inversion for accessibility needs"
+    bug: "383730505"
+}
+
+flag {
     name: "enable_talkback_and_magnifier_key_gestures"
     namespace: "input"
     description: "Adds key gestures for talkback and magnifier"
@@ -217,4 +214,22 @@ flag {
     namespace: "input"
     description: "Removes modifiers from the original key event that activated the fallback, ensuring that only the intended fallback event is sent."
     bug: "382545048"
+}
+
+flag {
+    name: "abort_slow_multi_press"
+    namespace: "wear_frameworks"
+    description: "If a press that's a part of a multipress takes too long, the multipress gesture will be cancelled."
+    bug: "370095426"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "key_event_activity_detection"
+    namespace: "input"
+    is_exported: true
+    description: "Key Event Activity Detection"
+    bug: "356412905"
 }

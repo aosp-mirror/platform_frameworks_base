@@ -28,6 +28,8 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 import com.android.internal.widget.remotecompose.core.operations.layout.ActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
@@ -50,6 +52,11 @@ public class ValueFloatExpressionChangeActionOperation extends Operation
         return "ValueFloatExpressionChangeActionOperation(" + mTargetValueId + ")";
     }
 
+    /**
+     * The name of the operation used during serialization
+     *
+     * @return the operation serialized name
+     */
     @NonNull
     public String serializedName() {
         return "VALUE_FLOAT_EXPRESSION_CHANGE";
@@ -83,6 +90,13 @@ public class ValueFloatExpressionChangeActionOperation extends Operation
         document.evaluateFloatExpression(mValueExpressionId, mTargetValueId, context);
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param valueId the value id
+     * @param value the value to set
+     */
     public static void apply(@NonNull WireBuffer buffer, int valueId, int value) {
         buffer.start(OP_CODE);
         buffer.writeInt(valueId);
@@ -113,5 +127,14 @@ public class ValueFloatExpressionChangeActionOperation extends Operation
                                 + " This operation represents a value change for the given id")
                 .field(INT, "TARGET_VALUE_ID", "Value ID")
                 .field(INT, "VALUE_ID", "id of the value to be assigned to the target");
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER, SerializeTags.ACTION)
+                .add("type", "ValueFloatExpressionChangeActionOperation")
+                .add("targetValueId", mTargetValueId)
+                .add("valueExpressionId", mValueExpressionId);
     }
 }

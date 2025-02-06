@@ -34,18 +34,21 @@ flag {
 }
 
 flag {
-  name: "high_contrast_text_luminance"
-  namespace: "accessibility"
-  description: "Use luminance to determine how to make text more high contrast, instead of RGB heuristic"
-  bug: "186567103"
-}
-
-flag {
   name: "high_contrast_text_small_text_rect"
   namespace: "accessibility"
   description: "Draw a solid rectangle background behind text instead of a stroke outline"
   bug: "186567103"
   is_exported: true
+}
+
+flag {
+  name: "high_contrast_text_inner_text_color"
+  namespace: "accessibility"
+  description: "Render text color by modifying its brightness instead of defaulting to black and white"
+  bug: "384793956"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {

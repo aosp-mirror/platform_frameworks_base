@@ -17,7 +17,6 @@
 package com.android.server.backup.restore;
 
 import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_MANIFEST_FILENAME;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_METADATA_FILENAME;
@@ -215,12 +214,12 @@ public class FullRestoreEngine extends RestoreEngine {
 
         FileMetadata info;
         try {
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.v(TAG, "Reading tar header for restoring file");
             }
             info = tarBackupReader.readTarHeaders();
             if (info != null) {
-                if (MORE_DEBUG) {
+                if (DEBUG) {
                     info.dump();
                 }
 
@@ -249,9 +248,7 @@ public class FullRestoreEngine extends RestoreEngine {
                     // Clean up the previous agent relationship if necessary,
                     // and let the observer know we're considering a new app.
                     if (mAgent != null) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "Saw new package; finalizing old one");
-                        }
+                        Slog.d(TAG, "Saw new package; finalizing old one");
                         // Now we're really done
                         tearDownPipes();
                         tearDownAgent(mTargetApp, mIsAdbRestore);
@@ -307,9 +304,7 @@ public class FullRestoreEngine extends RestoreEngine {
                             // If we're in accept-if-apk state, then the first file we
                             // see MUST be the apk.
                             if (info.domain.equals(FullBackup.APK_TREE_TOKEN)) {
-                                if (DEBUG) {
-                                    Slog.d(TAG, "APK file; installing");
-                                }
+                                Slog.d(TAG, "APK file; installing");
                                 // Try to install the app.
                                 String installerPackageName = mPackageInstallers.get(pkg);
                                 boolean isSuccessfullyInstalled = RestoreUtils.installApk(
@@ -336,9 +331,7 @@ public class FullRestoreEngine extends RestoreEngine {
 
                         case ACCEPT:
                             if (info.domain.equals(FullBackup.APK_TREE_TOKEN)) {
-                                if (DEBUG) {
-                                    Slog.d(TAG, "apk present but ACCEPT");
-                                }
+                                Slog.d(TAG, "apk present but ACCEPT");
                                 // we can take the data without the apk, so we
                                 // *want* to do so.  skip the apk by declaring this
                                 // one file not-okay without changing the restore
@@ -364,11 +357,11 @@ public class FullRestoreEngine extends RestoreEngine {
 
                     // If the policy is satisfied, go ahead and set up to pipe the
                     // data to the agent.
-                    if (MORE_DEBUG && okay && mAgent != null) {
+                    if (DEBUG && okay && mAgent != null) {
                         Slog.i(TAG, "Reusing existing agent instance");
                     }
                     if (okay && mAgent == null) {
-                        if (MORE_DEBUG) {
+                        if (DEBUG) {
                             Slog.d(TAG, "Need to launch agent for " + pkg);
                         }
 
@@ -389,20 +382,18 @@ public class FullRestoreEngine extends RestoreEngine {
                                 boolean forceClear = shouldForceClearAppDataOnFullRestore(
                                         mTargetApp.packageName);
                                 if (mTargetApp.backupAgentName == null || forceClear) {
-                                    if (DEBUG) {
-                                        Slog.d(TAG,
+                                    Slog.d(TAG,
                                                 "Clearing app data preparatory to full restore");
-                                    }
                                     mBackupManagerService.clearApplicationDataBeforeRestore(pkg);
                                 } else {
-                                    if (MORE_DEBUG) {
+                                    if (DEBUG) {
                                         Slog.d(TAG, "backup agent ("
                                                 + mTargetApp.backupAgentName + ") => no clear");
                                     }
                                 }
                                 mClearedPackages.add(pkg);
                             } else {
-                                if (MORE_DEBUG) {
+                                if (DEBUG) {
                                     Slog.d(TAG, "We've initialized this app already; no clear "
                                             + "required");
                                 }
@@ -459,10 +450,8 @@ public class FullRestoreEngine extends RestoreEngine {
                                     OpType.RESTORE_WAIT);
 
                             if (FullBackup.OBB_TREE_TOKEN.equals(info.domain)) {
-                                if (DEBUG) {
-                                    Slog.d(TAG, "Restoring OBB file for " + pkg
+                                Slog.d(TAG, "Restoring OBB file for " + pkg
                                             + " : " + info.path);
-                                }
                                 mObbConnection.restoreObbFile(pkg, mPipes[0],
                                         info.size, info.type, info.path, info.mode,
                                         info.mtime, token,
@@ -470,10 +459,8 @@ public class FullRestoreEngine extends RestoreEngine {
                             } else if (FullBackup.KEY_VALUE_DATA_TOKEN.equals(info.domain)) {
                                 // This is only possible during adb restore.
                                 // TODO: Refactor to clearly separate the flows.
-                                if (DEBUG) {
-                                    Slog.d(TAG, "Restoring key-value file for " + pkg
+                                Slog.d(TAG, "Restoring key-value file for " + pkg
                                             + " : " + info.path);
-                                }
                                 // Set the version saved from manifest entry.
                                 info.version = mAppVersion;
                                 KeyValueAdbRestoreEngine restoreEngine =
@@ -483,7 +470,7 @@ public class FullRestoreEngine extends RestoreEngine {
                                                 mAgent, token);
                                 new Thread(restoreEngine, "restore-key-value-runner").start();
                             } else {
-                                if (MORE_DEBUG) {
+                                if (DEBUG) {
                                     Slog.d(TAG, "Invoking agent to restore file " + info.path);
                                 }
                                 // fire up the app's agent listening on the socket.  If
@@ -519,7 +506,7 @@ public class FullRestoreEngine extends RestoreEngine {
 
                         // Copy over the data if the agent is still good
                         if (okay) {
-                            if (MORE_DEBUG) {
+                            if (DEBUG) {
                                 Slog.v(TAG, "  copying to restore agent: " + toCopy + " bytes");
                             }
                             boolean pipeOkay = true;
@@ -586,7 +573,7 @@ public class FullRestoreEngine extends RestoreEngine {
                     // dropped file, or an already-ignored package: skip to the
                     // next stream entry by reading and discarding this file.
                     if (!okay) {
-                        if (MORE_DEBUG) {
+                        if (DEBUG) {
                             Slog.d(TAG, "[discarding file content]");
                         }
                         long bytesToConsume = (info.size + 511) & ~511;
@@ -603,9 +590,7 @@ public class FullRestoreEngine extends RestoreEngine {
                 }
             }
         } catch (IOException e) {
-            if (DEBUG) {
-                Slog.w(TAG, "io exception on restore socket read: " + e.getMessage());
-            }
+            Slog.w(TAG, "io exception on restore socket read: " + e.getMessage());
             logBMMEvent(BackupManagerMonitor.LOG_EVENT_ID_FAILED_TO_READ_DATA_FROM_TRANSPORT,
                     onlyPackage);
             setResult(RestoreEngine.TRANSPORT_FAILURE);
@@ -614,7 +599,7 @@ public class FullRestoreEngine extends RestoreEngine {
 
         // If we got here we're either running smoothly or we've finished
         if (info == null) {
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.i(TAG, "No [more] data for this package; tearing down");
             }
             tearDownPipes();
@@ -713,7 +698,7 @@ public class FullRestoreEngine extends RestoreEngine {
                     mBackupManagerService.prepareOperationTimeout(
                             token, fullBackupAgentTimeoutMillis, latch, OpType.RESTORE_WAIT);
                     if (mTargetApp.processName.equals("system")) {
-                        if (MORE_DEBUG) {
+                        if (DEBUG) {
                             Slog.d(TAG, "system agent - restoreFinished on thread");
                         }
                         Runnable runner = new AdbRestoreFinishedRunnable(mAgent, token,
@@ -749,7 +734,7 @@ public class FullRestoreEngine extends RestoreEngine {
             return true;
         }
         if (FullBackup.CACHE_TREE_TOKEN.equals(info.domain)) {
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.i(TAG, "Dropping cache file path " + info.path);
             }
             return false;
@@ -761,7 +746,7 @@ public class FullRestoreEngine extends RestoreEngine {
             // API.  Respect the no-backup intention and don't let the data get to
             // the app.
             if (info.path.startsWith("no_backup/")) {
-                if (MORE_DEBUG) {
+                if (DEBUG) {
                     Slog.i(TAG, "Dropping no_backup file path " + info.path);
                 }
                 return false;
@@ -774,7 +759,7 @@ public class FullRestoreEngine extends RestoreEngine {
 
     private static boolean isCanonicalFilePath(String path) {
         if (path.contains("..") || path.contains("//")) {
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.w(TAG, "Dropping invalid path " + path);
             }
             return false;

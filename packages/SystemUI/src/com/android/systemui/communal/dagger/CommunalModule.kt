@@ -47,6 +47,7 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSource
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
+import com.android.systemui.scene.ui.composable.ConstantSceneContainerTransitionsBuilder
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -114,9 +115,9 @@ interface CommunalModule {
                 SceneContainerConfig(
                     sceneKeys = listOf(CommunalScenes.Blank, CommunalScenes.Communal),
                     initialSceneKey = CommunalScenes.Blank,
-                    transitions = sceneTransitions,
                     navigationDistances =
                         mapOf(CommunalScenes.Blank to 0, CommunalScenes.Communal to 1),
+                    transitionsBuilder = ConstantSceneContainerTransitionsBuilder(sceneTransitions),
                 )
             return SceneDataSourceDelegator(applicationScope, config)
         }

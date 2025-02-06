@@ -34,10 +34,10 @@
 namespace flags = com::android::graphics::hwui::flags;
 #else
 namespace flags {
-constexpr bool high_contrast_text_luminance() {
+constexpr bool high_contrast_text_small_text_rect() {
     return false;
 }
-constexpr bool high_contrast_text_small_text_rect() {
+constexpr bool high_contrast_text_inner_text_color() {
     return false;
 }
 }  // namespace flags
@@ -74,6 +74,41 @@ static void simplifyPaint(int color, Paint* paint) {
     paint->setStrokeJoin(SkPaint::kRound_Join);
     paint->setLooper(nullptr);
     paint->setBlendMode(SkBlendMode::kSrcOver);
+}
+
+namespace {
+
+static bool shouldDarkenTextForHighContrast(const uirenderer::Lab& lab) {
+    // LINT.IfChange(hct_darken)
+    return lab.L <= 50;
+    // LINT.ThenChange(/core/java/android/text/Layout.java:hct_darken)
+}
+
+}  // namespace
+
+static void adjustHighContrastInnerTextColor(uirenderer::Lab* lab) {
+    bool darken = shouldDarkenTextForHighContrast(*lab);
+    bool isGrayscale = abs(lab->a) < 10 && abs(lab->b) < 10;
+    if (isGrayscale) {
+        // For near-grayscale text we first remove all color.
+        lab->a = lab->b = 0;
+        if (lab->L > 40 && lab->L < 60) {
+            // Text near "middle gray" is pushed to a more contrasty gray.
+            lab->L = darken ? 20 : 80;
+        } else {
+            // Other grayscale text is pushed completely white or black.
+            lab->L = darken ? 0 : 100;
+        }
+    } else {
+        // For color text we ensure the text is bright enough (for light text)
+        // or dark enough (for dark text) to stand out against the background,
+        // without touching the A and B components so we retain color.
+        if (darken && lab->L > 20.f) {
+            lab->L = 20.0f;
+        } else if (!darken && lab->L < 90.f) {
+            lab->L = 90.0f;
+        }
+    }
 }
 
 class DrawTextFunctor {
@@ -114,15 +149,8 @@ public:
         if (CC_UNLIKELY(canvas->isHighContrastText() && paint.getAlpha() != 0)) {
             // high contrast draw path
             int color = paint.getColor();
-            bool darken;
-            // This equation should match the one in core/java/android/text/Layout.java
-            if (flags::high_contrast_text_luminance()) {
-                uirenderer::Lab lab = uirenderer::sRGBToLab(color);
-                darken = lab.L <= 50;
-            } else {
-                int channelSum = SkColorGetR(color) + SkColorGetG(color) + SkColorGetB(color);
-                darken = channelSum < (128 * 3);
-            }
+            uirenderer::Lab lab = uirenderer::sRGBToLab(color);
+            bool darken = shouldDarkenTextForHighContrast(lab);
 
             // outline
             gDrawTextBlobMode = DrawTextBlobMode::HctOutline;
@@ -134,7 +162,12 @@ public:
             // inner
             gDrawTextBlobMode = DrawTextBlobMode::HctInner;
             Paint innerPaint(paint);
-            simplifyPaint(darken ? SK_ColorBLACK : SK_ColorWHITE, &innerPaint);
+            if (flags::high_contrast_text_inner_text_color()) {
+                adjustHighContrastInnerTextColor(&lab);
+                simplifyPaint(uirenderer::LabToSRGB(lab, SK_AlphaOPAQUE), &innerPaint);
+            } else {
+                simplifyPaint(darken ? SK_ColorBLACK : SK_ColorWHITE, &innerPaint);
+            }
             innerPaint.setStyle(SkPaint::kFill_Style);
             canvas->drawGlyphs(glyphFunc, glyphCount, innerPaint, x, y, totalAdvance);
             gDrawTextBlobMode = DrawTextBlobMode::Normal;

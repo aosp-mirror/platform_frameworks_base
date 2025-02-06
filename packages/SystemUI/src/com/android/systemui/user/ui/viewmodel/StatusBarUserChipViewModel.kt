@@ -22,12 +22,10 @@ import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class StatusBarUserChipViewModel
 @Inject
 constructor(private val interactor: UserSwitcherInteractor) {

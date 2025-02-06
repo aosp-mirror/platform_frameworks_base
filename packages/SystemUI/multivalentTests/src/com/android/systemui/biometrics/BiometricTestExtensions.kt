@@ -35,7 +35,6 @@ import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.res.R
 import com.android.systemui.util.mockito.whenever
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 
@@ -157,7 +156,6 @@ internal fun promptInfo(
     return info
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal fun TestScope.updateSfpsIndicatorRequests(
     kosmos: Kosmos,
     mContext: SysuiTestableContext,

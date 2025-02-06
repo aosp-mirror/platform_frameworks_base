@@ -34,7 +34,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.platform.test.annotations.EnableFlags;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.SurfaceControl;
 import android.window.IWindowContainerToken;
 import android.window.TransitionInfo;
@@ -43,6 +42,7 @@ import android.window.WindowContainerToken;
 import androidx.test.filters.SmallTest;
 
 import com.android.window.flags.Flags;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.desktopmode.DesktopImmersiveController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.FocusTransitionObserver;
@@ -60,9 +60,8 @@ import java.util.Optional;
 
 /** Tests for {@link FreeformTaskTransitionObserver}. */
 @SmallTest
-public class FreeformTaskTransitionObserverTest {
+public class FreeformTaskTransitionObserverTest extends ShellTestCase {
 
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     @Mock private ShellInit mShellInit;
     @Mock private Transitions mTransitions;
     @Mock private DesktopImmersiveController mDesktopImmersiveController;

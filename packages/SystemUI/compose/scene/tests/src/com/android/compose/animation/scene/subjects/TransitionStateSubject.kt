@@ -19,6 +19,7 @@ package com.android.compose.animation.scene.subjects
 import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.mechanics.GestureContext
 import com.google.common.truth.Fact.simpleFact
 import com.google.common.truth.FailureMetadata
 import com.google.common.truth.Subject
@@ -98,6 +99,17 @@ private constructor(metadata: FailureMetadata, private val actual: TransitionSta
         return actual as TransitionState.Transition.ReplaceOverlay
     }
 
+    fun hasGestureContext(): GestureContext {
+        if (actual !is TransitionState.Transition) {
+            failWithActual(simpleFact("expected to be TransitionState.Transition"))
+        }
+
+        val gestureContext = ((actual as TransitionState.Transition).gestureContext)
+        check("transition.gestureContext").that(gestureContext).isNotNull()
+
+        return checkNotNull(gestureContext)
+    }
+
     companion object {
         fun transitionStates() = Factory { metadata, actual: TransitionState ->
             TransitionStateSubject(metadata, actual)
@@ -117,22 +129,22 @@ abstract class BaseTransitionSubject<T : TransitionState.Transition>(
         check("currentOverlays").that(actual.currentOverlays).containsExactlyElementsIn(overlays)
     }
 
-    fun hasProgress(progress: Float, tolerance: Float = 0f) {
+    fun hasProgress(progress: Float, tolerance: Float = 0.01f) {
         check("progress").that(actual.progress).isWithin(tolerance).of(progress)
     }
 
-    fun hasProgressVelocity(progressVelocity: Float, tolerance: Float = 0f) {
+    fun hasProgressVelocity(progressVelocity: Float, tolerance: Float = 0.01f) {
         check("progressVelocity")
             .that(actual.progressVelocity)
             .isWithin(tolerance)
             .of(progressVelocity)
     }
 
-    fun hasPreviewProgress(progress: Float, tolerance: Float = 0f) {
+    fun hasPreviewProgress(progress: Float, tolerance: Float = 0.01f) {
         check("previewProgress").that(actual.previewProgress).isWithin(tolerance).of(progress)
     }
 
-    fun hasPreviewProgressVelocity(progressVelocity: Float, tolerance: Float = 0f) {
+    fun hasPreviewProgressVelocity(progressVelocity: Float, tolerance: Float = 0.01f) {
         check("previewProgressVelocity")
             .that(actual.previewProgressVelocity)
             .isWithin(tolerance)

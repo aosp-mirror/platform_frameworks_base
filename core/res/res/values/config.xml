@@ -1214,6 +1214,9 @@
             3 - Really go to sleep and go home (don't doze)
             4 - Go to home
             5 - Dismiss IME if shown. Otherwise go to home
+            6 - Lock if keyguard enabled or go to sleep (doze)
+            7 - Dream if possible or go to sleep (doze)
+            8 - Go to glanceable hub or dream if possible, or sleep if neither is available (doze)
     -->
     <integer name="config_shortPressOnPowerBehavior">1</integer>
 
@@ -2009,6 +2012,10 @@
     <!-- Component name of the built in wallpaper used to display bitmap wallpapers. This must not be null. -->
     <string name="image_wallpaper_component" translatable="false">com.android.systemui/com.android.systemui.wallpapers.ImageWallpaper</string>
 
+    <!-- Component name of the built in wallpaper that is used when the user-selected wallpaper is
+         incompatible with the display's resolution or aspect ratio. -->
+    <string name="fallback_wallpaper_component" translatable="false">com.android.systemui/com.android.systemui.wallpapers.GradientColorWallpaper</string>
+
     <!-- True if WallpaperService is enabled -->
     <bool name="config_enableWallpaperService">true</bool>
 
@@ -2082,6 +2089,18 @@
          telephony time zone detection are supported and enabled on a device.
          See com.android.server.timezonedetector.TimeZoneDetectorStrategy for more information. -->
     <bool name="config_supportTelephonyTimeZoneFallback" translatable="false">true</bool>
+
+    <!-- Whether the time notifications feature is enabled. Settings this to false means the feature
+         cannot be used. Setting this to true means the feature can be enabled on the device. -->
+    <bool name="config_enableTimeZoneNotificationsSupported" translatable="false">true</bool>
+
+    <!-- Whether the time zone notifications tracking feature is enabled. Settings this to false
+         means the feature cannot be used. -->
+    <bool name="config_enableTimeZoneNotificationsTrackingSupported" translatable="false">true</bool>
+
+    <!-- Whether the time zone manual change tracking feature is enabled. Settings this to false
+         means the feature cannot be used. -->
+    <bool name="config_enableTimeZoneManualChangeTrackingSupported" translatable="false">true</bool>
 
     <!-- Whether to enable network location overlay which allows network location provider to be
          replaced by an app at run-time. When disabled, only the
@@ -2754,6 +2773,9 @@
     <bool name="config_dreamsActivatedOnDockByDefault">true</bool>
     <!-- If supported and enabled, are dreams activated when asleep and charging? (by default) -->
     <bool name="config_dreamsActivatedOnSleepByDefault">false</bool>
+    <!-- If supported and enabled, are dreams enabled while device is stationary and upright?
+         (by default) -->
+    <bool name="config_dreamsActivatedOnPosturedByDefault">false</bool>
     <!-- ComponentName of the default dream (Settings.Secure.DEFAULT_SCREENSAVER_COMPONENT) -->
     <string name="config_dreamsDefaultComponent" translatable="false">com.android.deskclock/com.android.deskclock.Screensaver</string>
     <!-- ComponentNames of the dreams that we should hide -->
@@ -2874,7 +2896,7 @@
     <bool name="config_dozeAlwaysOnEnabled">true</bool>
 
     <!-- If AOD can show an ambient version of the wallpaper -->
-    <bool name="config_dozeSupportsAodWallpaper">true</bool>
+    <bool name="config_dozeSupportsAodWallpaper">false</bool>
 
     <!-- Whether the display blanks itself when transitioning from a doze to a non-doze state -->
     <bool name="config_displayBlanksAfterDoze">false</bool>
@@ -3140,6 +3162,16 @@
     <!-- Whether multiple admins are allowed on the device. If set to true, new users can be created
          with admin privileges and admin privileges can be granted/revoked from existing users. -->
     <bool name="config_enableMultipleAdmins">false</bool>
+
+    <!-- Whether to start stopped users before their scheduled alarms. If set to true, users will be
+         started in background before the alarm time so that it can go off. If false, alarms of
+         stopped users will not go off and users will remain stopped. -->
+    <bool name="config_allowAlarmsOnStoppedUsers">true</bool>
+
+    <!-- Whether notification is shown to foreground user when alarm/timer goes off on background
+         user. If set to true, foreground user will receive a notification with ability to mute
+         sound or switch user. If false, system notification will not be shown. -->
+    <bool name="config_showNotificationForBackgroundUserAlarms">true</bool>
 
     <!-- Whether there is a communal profile which should always be running.
          Only relevant for Headless System User Mode (HSUM) devices. -->
@@ -4244,12 +4276,19 @@
          is non-interactive. -->
     <bool name="config_cameraDoubleTapPowerGestureEnabled">true</bool>
 
-    <!-- Allow the gesture to double tap the power button to trigger a target action. -->
-    <bool name="config_doubleTapPowerGestureEnabled">true</bool>
-    <!-- Default target action for double tap of the power button gesture.
+    <!-- Controls the double tap power button gesture to trigger a target action.
+         0: Gesture is disabled
+         1: Launch camera mode, allowing the user to disable/enable the double tap power gesture
+            from launching the camera application.
+         2: Multi target mode, allowing the user to select one of the targets defined in
+            config_doubleTapPowerGestureMultiTargetDefaultAction and to disable/enable the double
+            tap power gesture from triggering the selected target action.
+    -->
+    <integer name="config_doubleTapPowerGestureMode">2</integer>
+    <!-- Default target action for double tap of the power button gesture in multi target mode.
          0: Launch camera
          1: Launch wallet -->
-    <integer name="config_defaultDoubleTapPowerGestureAction">0</integer>
+    <integer name="config_doubleTapPowerGestureMultiTargetDefaultAction">0</integer>
 
     <!-- Allow the gesture to quick tap the power button multiple times to start the emergency sos
          experience while the device is non-interactive. -->
@@ -5203,10 +5242,6 @@
     <!-- Whether or not swipe up gesture's opt-in setting is available on this device -->
     <bool name="config_swipe_up_gesture_setting_available">true</bool>
 
-    <!-- Applications which are disabled unless matching a particular sku -->
-    <string-array name="config_disableApksUnlessMatchedSku_apk_list" translatable="false" />
-    <string-array name="config_disableApkUnlessMatchedSku_skus_list" translatable="false" />
-
     <!-- Whether or not we should show the option to show battery percentage -->
     <bool name="config_battery_percentage_setting_available">true</bool>
 
@@ -5925,6 +5960,9 @@
         <!-- Add account types here, example: -->
         <!-- <item>com.google</item> -->
     </string-array>
+
+    <!-- Whether to restrict the accounts that raw contacts can be created in. -->
+    <bool name = "config_rawContactsAccountRestrictionEnabled">true</bool>
 
     <!-- Whether or not to use assistant stream volume separately from music volume -->
     <bool name="config_useAssistantVolume">false</bool>
@@ -7213,6 +7251,9 @@
     <!-- Whether desktop mode is supported on the current device  -->
     <bool name="config_isDesktopModeSupported">false</bool>
 
+    <!-- Whether the developer option for desktop mode is supported on the current device  -->
+    <bool name="config_isDesktopModeDevOptionSupported">false</bool>
+
     <!-- Maximum number of active tasks on a given Desktop Windowing session. Set to 0 for unlimited. -->
     <integer name="config_maxDesktopWindowingActiveTasks">0</integer>
 
@@ -7271,6 +7312,10 @@
     <!-- Whether to enable fp unlock when screen turns off on udfps devices -->
     <bool name="config_screen_off_udfps_enabled">false</bool>
 
+    <!-- Default value for fp screen off unlock toggle, it only works for the devices that support
+         fp screen off unlock-->
+    <bool name="config_screen_off_udfps_default_on">false</bool>
+
     <!-- The name of the system package that will hold the dependency installer role. -->
     <string name="config_systemDependencyInstaller" translatable="false" />
 
@@ -7291,4 +7336,8 @@
 
     <!-- Whether the device supports Wi-Fi USD feature. -->
     <bool name="config_deviceSupportsWifiUsd">false</bool>
+
+    <!-- Array containing the notification assistant service adjustments that are not supported by
+     default on this device-->
+    <string-array translatable="false" name="config_notificationDefaultUnsupportedAdjustments" />
 </resources>

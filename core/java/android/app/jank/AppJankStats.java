@@ -57,6 +57,8 @@ public final class AppJankStats {
     // Histogram of relative frame times encoded in predetermined buckets.
     private RelativeFrameTimeHistogram mRelativeFrameTimeHistogram;
 
+    // Navigation component associated to this stat.
+    private String mNavigationComponent;
 
     /** Used to indicate no widget category has been set. */
     public static final String WIDGET_CATEGORY_UNSPECIFIED = "unspecified";
@@ -158,6 +160,8 @@ public final class AppJankStats {
      *
      * @param appUid the Uid of the App that is collecting jank stats.
      * @param widgetId the widget id that frames will be associated to.
+     * @param navigationComponent the intended navigation target within the activity, this could be
+     *                            a navigation destination, screen and/or pane.
      * @param widgetCategory a category used to organize widgets in a structured way that indicates
      *                       they serve a similar purpose or perform related functions. Must be
      *                       prefixed with WIDGET_CATEGORY_ and have a suffix of one of the
@@ -172,14 +176,14 @@ public final class AppJankStats {
      * @param jankyFrames the total number of janky frames that were counted for this stat.
      * @param relativeFrameTimeHistogram the histogram with predefined buckets. See
      * {@link #getRelativeFrameTimeHistogram()} for details.
-     *
      */
-    public AppJankStats(int appUid, @NonNull String widgetId,
+    public AppJankStats(int appUid, @NonNull String widgetId, @Nullable String navigationComponent,
             @Nullable @WidgetCategory String widgetCategory,
             @Nullable @WidgetState String widgetState, long totalFrames, long jankyFrames,
             @NonNull RelativeFrameTimeHistogram relativeFrameTimeHistogram) {
         mUid = appUid;
         mWidgetId = widgetId;
+        mNavigationComponent = navigationComponent;
         mWidgetCategory = widgetCategory != null ? widgetCategory : WIDGET_CATEGORY_UNSPECIFIED;
         mWidgetState = widgetState != null ? widgetState : WIDGET_STATE_UNSPECIFIED;
         mTotalFrames = totalFrames;
@@ -253,5 +257,14 @@ public final class AppJankStats {
      */
     public @NonNull RelativeFrameTimeHistogram getRelativeFrameTimeHistogram() {
         return mRelativeFrameTimeHistogram;
+    }
+
+    /**
+     * Returns the navigation component if it exists that this stat applies to.
+     *
+     * @return the navigation component if it exists that this stat applies to.
+     */
+    public @Nullable String getNavigationComponent() {
+        return mNavigationComponent;
     }
 }

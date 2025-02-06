@@ -18,8 +18,8 @@ package com.android.systemui.wallpapers.ui.viewmodel
 
 import com.android.systemui.wallpapers.domain.interactor.WallpaperInteractor
 import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 
 class WallpaperViewModel @Inject constructor(interactor: WallpaperInteractor) {
-    val wallpaperSupportsAmbientMode: StateFlow<Boolean> = interactor.wallpaperSupportsAmbientMode
+    val wallpaperSupportsAmbientMode: Flow<Boolean> = interactor.wallpaperSupportsAmbientMode
 }

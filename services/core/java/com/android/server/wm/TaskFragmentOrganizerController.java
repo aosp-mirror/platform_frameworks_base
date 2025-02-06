@@ -570,10 +570,6 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
     private boolean restoreFromCachedStateIfPossible(@NonNull ITaskFragmentOrganizer organizer,
             int pid, int uid, @NonNull Bundle outSavedState) {
-        if (!Flags.aeBackStackRestore()) {
-            return false;
-        }
-
         TaskFragmentOrganizerState cachedState = null;
         int i = mCachedTaskFragmentOrganizerStates.size() - 1;
         for (; i >= 0; i--) {
@@ -842,7 +838,6 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             return;
         }
         validateAndGetState(organizer);
-        Slog.w(TAG, "onTaskFragmentError ", exception);
         addPendingEvent(new PendingTaskFragmentEvent.Builder(
                 PendingTaskFragmentEvent.EVENT_ERROR, organizer)
                 .setErrorCallbackToken(errorCallbackToken)

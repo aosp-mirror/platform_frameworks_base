@@ -14,12 +14,15 @@ android_library {
         "SettingsLintDefaults",
     ],
 
-    srcs: ["src/**/*.java"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
     resource_dirs: ["res"],
 
     static_libs: [
-        "androidx.preference_preference",
         "SettingsLibSettingsTheme",
+        "androidx.preference_preference",
     ],
 
     sdk_version: "system_current",

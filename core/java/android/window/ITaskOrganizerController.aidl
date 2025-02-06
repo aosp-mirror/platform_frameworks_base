@@ -39,7 +39,12 @@ interface ITaskOrganizerController {
      */
     void unregisterTaskOrganizer(ITaskOrganizer organizer);
 
-    /** Creates a persistent root task in WM for a particular windowing-mode. */
+    /**
+    * Creates a persistent root task in WM for a particular windowing-mode.
+    *
+    * It may be removed using {@link #deleteRootTask} or through
+    * {@link WindowContainerTransaction#removeRootTask}.
+    */
     void createRootTask(int displayId, int windowingMode, IBinder launchCookie,
             boolean removeWithTaskOrganizer);
 

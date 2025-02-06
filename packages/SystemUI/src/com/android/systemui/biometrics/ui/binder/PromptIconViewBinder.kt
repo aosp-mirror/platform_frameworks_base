@@ -22,7 +22,9 @@ import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.settingslib.widget.LottieColorUtils
+import com.android.systemui.Flags.bpColors
 import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel
 import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel.AuthType
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
@@ -32,7 +34,6 @@ import com.android.systemui.util.kotlin.Quad
 import com.android.systemui.util.kotlin.Utils.Companion.toQuint
 import com.android.systemui.util.kotlin.sample
 import kotlinx.coroutines.flow.combine
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 private const val TAG = "PromptIconViewBinder"
 
@@ -40,10 +41,7 @@ private const val TAG = "PromptIconViewBinder"
 object PromptIconViewBinder {
     /** Binds [BiometricPromptLayout.iconView] to [PromptIconViewModel]. */
     @JvmStatic
-    fun bind(
-        iconView: LottieAnimationView,
-        promptViewModel: PromptViewModel
-    ) {
+    fun bind(iconView: LottieAnimationView, promptViewModel: PromptViewModel) {
         val viewModel = promptViewModel.iconViewModel
         iconView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -57,9 +55,9 @@ object PromptIconViewBinder {
                                 viewModel.shouldAnimateIconView,
                                 viewModel.shouldLoopIconView,
                                 viewModel.showingError,
-                                ::Quad
+                                ::Quad,
                             ),
-                            ::toQuint
+                            ::toQuint,
                         )
                         .collect {
                             (
@@ -74,7 +72,7 @@ object PromptIconViewBinder {
                                     iconAsset,
                                     shouldAnimateIconView,
                                     shouldLoopIconView,
-                                    activeAuthType
+                                    activeAuthType,
                                 )
                                 viewModel.setPreviousIconWasError(showingError)
                             }
@@ -102,7 +100,7 @@ fun LottieAnimationView.updateAsset(
     asset: Int,
     shouldAnimateIconView: Boolean,
     shouldLoopIconView: Boolean,
-    activeAuthType: AuthType
+    activeAuthType: AuthType,
 ) {
     setFailureListener(type, asset, activeAuthType)
     pauseAnimation()
@@ -118,6 +116,9 @@ fun LottieAnimationView.updateAsset(
         playAnimation()
     }
     LottieColorUtils.applyDynamicColors(context, this)
+    if (bpColors()) {
+        LottieColorUtils.applyMaterialColor(context, this)
+    }
 }
 
 private fun animatingFromSfpsAuthenticating(asset: Int): Boolean =
@@ -174,7 +175,7 @@ private fun LottieAnimationView.setFailureListener(type: String, asset: Int, aut
                 "activeAuthType = $authType | " +
                 "Invalid resource id: $asset, " +
                 "name $assetName",
-            result
+            result,
         )
     }
 }

@@ -24,6 +24,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +37,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
@@ -45,6 +48,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.integerResource
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.Easings
@@ -212,23 +216,27 @@ fun PatternBouncer(
     var gridCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
     var offset: Offset by remember { mutableStateOf(Offset.Zero) }
     var scale: Float by remember { mutableStateOf(1f) }
+    // This is the size of the drawing area, in dips.
+    val dotDrawingArea =
+        remember(colCount, rowCount) {
+            DpSize(
+                // Because the width also includes spacing to the left and right of the leftmost and
+                // rightmost dots in the grid and because UX mocks specify the width without that
+                // spacing, the actual width needs to be defined slightly bigger than the UX mock
+                // width.
+                width = (262 * colCount / 2).dp,
+                // Because the height also includes spacing above and below the topmost and
+                // bottommost
+                // dots in the grid and because UX mocks specify the height without that spacing,
+                // the
+                // actual height needs to be defined slightly bigger than the UX mock height.
+                height = (262 * rowCount / 2).dp,
+            )
+        }
 
-    Canvas(
-        modifier
-            .sysuiResTag("bouncer_pattern_root")
-            // Because the width also includes spacing to the left and right of the leftmost and
-            // rightmost dots in the grid and because UX mocks specify the width without that
-            // spacing, the actual width needs to be defined slightly bigger than the UX mock width.
-            .width((262 * colCount / 2).dp)
-            // Because the height also includes spacing above and below the topmost and bottommost
-            // dots in the grid and because UX mocks specify the height without that spacing, the
-            // actual height needs to be defined slightly bigger than the UX mock height.
-            .height((262 * rowCount / 2).dp)
-            // Need to clip to bounds to make sure that the lines don't follow the input pointer
-            // when it leaves the bounds of the dot grid.
-            .clipToBounds()
-            .onGloballyPositioned { coordinates -> gridCoordinates = coordinates }
-            .thenIf(isInputEnabled) {
+    Box(
+        modifier =
+            modifier.fillMaxWidth().thenIf(isInputEnabled) {
                 Modifier.pointerInput(Unit) {
                         awaitEachGesture {
                             awaitFirstDown()
@@ -257,105 +265,125 @@ fun PatternBouncer(
                             inputPosition = change.position
                             change.position.minus(offset).div(scale).let {
                                 viewModel.onDrag(
-                                    xPx = it.x,
+                                    xPx =
+                                        it.x -
+                                            ((size.width - dotDrawingArea.width.roundToPx()) / 2),
                                     yPx = it.y,
-                                    containerSizePx = size.width,
+                                    containerSizePx = dotDrawingArea.width.roundToPx(),
                                 )
                             }
                         }
                     }
             }
-            .motionTestValues {
-                entryAnimationCompleted exportAs entryCompleted
-                dotAppearFadeInAnimatables.map { it.value.value } exportAs dotAppearFadeIn
-                dotAppearMoveUpAnimatables.map { it.value.value } exportAs dotAppearMoveUp
-                dotScalingAnimatables.map { it.value.value } exportAs dotScaling
-            }
     ) {
-        gridCoordinates?.let { nonNullCoordinates ->
-            val containerSize = nonNullCoordinates.size
-            if (containerSize.width <= 0 || containerSize.height <= 0) {
-                return@let
-            }
+        Canvas(
+            Modifier.sysuiResTag("bouncer_pattern_root")
+                .width(dotDrawingArea.width)
+                .height(dotDrawingArea.height)
+                // Need to clip to bounds to make sure that the lines don't follow the input pointer
+                // when it leaves the bounds of the dot grid.
+                .clipToBounds()
+                .align(Alignment.Center)
+                .onGloballyPositioned { coordinates -> gridCoordinates = coordinates }
+                .motionTestValues {
+                    entryAnimationCompleted exportAs entryCompleted
+                    dotAppearFadeInAnimatables.map { it.value.value } exportAs dotAppearFadeIn
+                    dotAppearMoveUpAnimatables.map { it.value.value } exportAs dotAppearMoveUp
+                    dotScalingAnimatables.map { it.value.value } exportAs dotScaling
+                }
+        ) {
+            gridCoordinates?.let { nonNullCoordinates ->
+                val containerSize = nonNullCoordinates.size
+                if (containerSize.width <= 0 || containerSize.height <= 0) {
+                    return@let
+                }
 
-            val horizontalSpacing = containerSize.width.toFloat() / colCount
-            val verticalSpacing = containerSize.height.toFloat() / rowCount
-            val spacing = min(horizontalSpacing, verticalSpacing)
-            val horizontalOffset =
-                offset(
-                    availableSize = containerSize.width,
-                    spacingPerDot = spacing,
-                    dotCount = colCount,
-                    isCentered = true,
-                )
-            val verticalOffset =
-                offset(
-                    availableSize = containerSize.height,
-                    spacingPerDot = spacing,
-                    dotCount = rowCount,
-                    isCentered = centerDotsVertically,
-                )
-            offset = Offset(horizontalOffset, verticalOffset)
-            scale = (colCount * spacing) / containerSize.width
+                val horizontalSpacing = containerSize.width.toFloat() / colCount
+                val verticalSpacing = containerSize.height.toFloat() / rowCount
+                val spacing = min(horizontalSpacing, verticalSpacing)
+                val horizontalOffset =
+                    offset(
+                        availableSize = containerSize.width,
+                        spacingPerDot = spacing,
+                        dotCount = colCount,
+                        isCentered = true,
+                    )
+                val verticalOffset =
+                    offset(
+                        availableSize = containerSize.height,
+                        spacingPerDot = spacing,
+                        dotCount = rowCount,
+                        isCentered = centerDotsVertically,
+                    )
+                offset = Offset(horizontalOffset, verticalOffset)
+                scale = (colCount * spacing) / containerSize.width
 
-            if (isAnimationEnabled) {
-                // Draw lines between dots.
-                selectedDots.forEachIndexed { index, dot ->
-                    if (index > 0) {
-                        val previousDot = selectedDots[index - 1]
-                        val lineFadeOutAnimationProgress =
-                            lineFadeOutAnimatables[previousDot]!!.value
-                        val startLerp = 1 - lineFadeOutAnimationProgress
-                        val from =
-                            pixelOffset(previousDot, spacing, horizontalOffset, verticalOffset)
-                        val to = pixelOffset(dot, spacing, horizontalOffset, verticalOffset)
-                        val lerpedFrom =
-                            Offset(
-                                x = from.x + (to.x - from.x) * startLerp,
-                                y = from.y + (to.y - from.y) * startLerp,
+                if (isAnimationEnabled) {
+                    // Draw lines between dots.
+                    selectedDots.forEachIndexed { index, dot ->
+                        if (index > 0) {
+                            val previousDot = selectedDots[index - 1]
+                            val lineFadeOutAnimationProgress =
+                                lineFadeOutAnimatables[previousDot]!!.value
+                            val startLerp = 1 - lineFadeOutAnimationProgress
+                            val from =
+                                pixelOffset(previousDot, spacing, horizontalOffset, verticalOffset)
+                            val to = pixelOffset(dot, spacing, horizontalOffset, verticalOffset)
+                            val lerpedFrom =
+                                Offset(
+                                    x = from.x + (to.x - from.x) * startLerp,
+                                    y = from.y + (to.y - from.y) * startLerp,
+                                )
+                            drawLine(
+                                start = lerpedFrom,
+                                end = to,
+                                cap = StrokeCap.Round,
+                                alpha = lineFadeOutAnimationProgress * lineAlpha(spacing),
+                                color = lineColor,
+                                strokeWidth = lineStrokeWidth,
                             )
-                        drawLine(
-                            start = lerpedFrom,
-                            end = to,
-                            cap = StrokeCap.Round,
-                            alpha = lineFadeOutAnimationProgress * lineAlpha(spacing),
-                            color = lineColor,
-                            strokeWidth = lineStrokeWidth,
-                        )
+                        }
+                    }
+
+                    // Draw the line between the most recently-selected dot and the input pointer
+                    // position.
+                    inputPosition?.let { lineEnd ->
+                        currentDot?.let { dot ->
+                            val from = pixelOffset(dot, spacing, horizontalOffset, verticalOffset)
+                            val lineLength =
+                                sqrt((from.y - lineEnd.y).pow(2) + (from.x - lineEnd.x).pow(2))
+                            drawLine(
+                                start = from,
+                                end = lineEnd,
+                                cap = StrokeCap.Round,
+                                alpha = lineAlpha(spacing, lineLength),
+                                color = lineColor,
+                                strokeWidth = lineStrokeWidth,
+                            )
+                        }
                     }
                 }
 
-                // Draw the line between the most recently-selected dot and the input pointer
-                // position.
-                inputPosition?.let { lineEnd ->
-                    currentDot?.let { dot ->
-                        val from = pixelOffset(dot, spacing, horizontalOffset, verticalOffset)
-                        val lineLength =
-                            sqrt((from.y - lineEnd.y).pow(2) + (from.x - lineEnd.x).pow(2))
-                        drawLine(
-                            start = from,
-                            end = lineEnd,
-                            cap = StrokeCap.Round,
-                            alpha = lineAlpha(spacing, lineLength),
-                            color = lineColor,
-                            strokeWidth = lineStrokeWidth,
-                        )
-                    }
+                // Draw each dot on the grid.
+                dots.forEach { dot ->
+                    val initialOffset = checkNotNull(dotAppearMaxOffsetPixels[dot])
+                    val appearOffset =
+                        (1 - checkNotNull(dotAppearMoveUpAnimatables[dot]).value) * initialOffset
+                    drawCircle(
+                        center =
+                            pixelOffset(
+                                dot,
+                                spacing,
+                                horizontalOffset,
+                                verticalOffset + appearOffset,
+                            ),
+                        color =
+                            dotColor.copy(
+                                alpha = checkNotNull(dotAppearFadeInAnimatables[dot]).value
+                            ),
+                        radius = dotRadius * checkNotNull(dotScalingAnimatables[dot]).value,
+                    )
                 }
-            }
-
-            // Draw each dot on the grid.
-            dots.forEach { dot ->
-                val initialOffset = checkNotNull(dotAppearMaxOffsetPixels[dot])
-                val appearOffset =
-                    (1 - checkNotNull(dotAppearMoveUpAnimatables[dot]).value) * initialOffset
-                drawCircle(
-                    center =
-                        pixelOffset(dot, spacing, horizontalOffset, verticalOffset + appearOffset),
-                    color =
-                        dotColor.copy(alpha = checkNotNull(dotAppearFadeInAnimatables[dot]).value),
-                    radius = dotRadius * checkNotNull(dotScalingAnimatables[dot]).value,
-                )
             }
         }
     }

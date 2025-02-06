@@ -36,12 +36,12 @@ import com.android.systemui.lifecycle.InstantTaskExecutorRule
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import javax.inject.Provider
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.resetMain
@@ -62,7 +62,6 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 @RunWithLooper
-@OptIn(ExperimentalCoroutinesApi::class)
 @EnableSceneContainer
 class QSPanelControllerBaseSceneContainerTest : SysuiTestCase() {
 
@@ -82,6 +81,7 @@ class QSPanelControllerBaseSceneContainerTest : SysuiTestCase() {
     private val configuration = Configuration()
     @Mock private lateinit var viewTreeObserver: ViewTreeObserver
     @Mock private lateinit var mediaHost: MediaHost
+    @Mock private lateinit var configurationController: ConfigurationController
 
     private var isSplitShade = false
     private val splitShadeStateController =
@@ -260,6 +260,7 @@ class QSPanelControllerBaseSceneContainerTest : SysuiTestCase() {
             splitShadeStateController,
             longPressEffectProvider,
             mediaVisible,
+            configurationController,
         )
     }
 
@@ -274,7 +275,8 @@ class QSPanelControllerBaseSceneContainerTest : SysuiTestCase() {
         dumpManager: DumpManager,
         splitShadeStateController: SplitShadeStateController,
         longPressEffectProvider: Provider<QSLongPressEffect>,
-        private val mediaVisibleFlow: StateFlow<Boolean>
+        private val mediaVisibleFlow: StateFlow<Boolean>,
+        configurationController: ConfigurationController,
     ) :
         QSPanelControllerBase<QSPanel>(
             view,
@@ -287,12 +289,14 @@ class QSPanelControllerBaseSceneContainerTest : SysuiTestCase() {
             qsLogger,
             dumpManager,
             splitShadeStateController,
-            longPressEffectProvider
+            longPressEffectProvider,
+            configurationController,
         ) {
 
         init {
             whenever(view.dumpableTag).thenReturn(hashCode().toString())
         }
+
         override fun getMediaVisibleFlow(): StateFlow<Boolean> {
             return mediaVisibleFlow
         }

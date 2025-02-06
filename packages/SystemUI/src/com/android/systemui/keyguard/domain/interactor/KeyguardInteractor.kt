@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.keyguard.domain.interactor
 
 import android.app.StatusBarManager
@@ -44,7 +42,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.StatusBarState
-import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -53,16 +52,18 @@ import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import com.android.systemui.util.kotlin.sample
+import com.android.systemui.wallpapers.data.repository.WallpaperFocalAreaRepository
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.debounce
@@ -84,8 +85,8 @@ class KeyguardInteractor
 @Inject
 constructor(
     private val repository: KeyguardRepository,
-    powerInteractor: PowerInteractor,
     bouncerRepository: KeyguardBouncerRepository,
+    private val wallpaperFocalAreaRepository: WallpaperFocalAreaRepository,
     @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     shadeRepository: ShadeRepository,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
@@ -205,6 +206,7 @@ constructor(
      * examining the value of this flow, to let other consumers have enough time to also see that
      * same new value.
      */
+    @OptIn(FlowPreview::class)
     val isAbleToDream: Flow<Boolean> =
         dozeTransitionModel
             .flatMapLatest { dozeTransitionModel ->
@@ -216,11 +218,7 @@ constructor(
                     // should actually be quite strange to leave AOD and then go straight to
                     // DREAMING so this should be fine.
                     delay(IS_ABLE_TO_DREAM_DELAY_MS)
-                    isDreaming
-                        .sample(powerInteractor.isAwake) { isDreaming, isAwake ->
-                            isDreaming && isAwake
-                        }
-                        .debounce(50L)
+                    isDreaming.debounce(50L)
                 } else {
                     flowOf(false)
                 }
@@ -341,6 +339,9 @@ constructor(
     @Deprecated("SceneContainer uses NotificationStackAppearanceInteractor")
     val panelAlpha: StateFlow<Float> = repository.panelAlpha.asStateFlow()
 
+    /** Sets the zoom out scale of spatial model pushback from e.g. pulling down the shade. */
+    val zoomOut: StateFlow<Float> = repository.zoomOut
+
     /**
      * When the lockscreen can be dismissed, emit an alpha value as the user swipes up. This is
      * useful just before the code commits to moving to GONE.
@@ -418,8 +419,6 @@ constructor(
                 initialValue = 0f,
             )
 
-    val clockShouldBeCentered: Flow<Boolean> = repository.clockShouldBeCentered
-
     /** Whether to animate the next doze mode transition. */
     val animateDozingTransitions: Flow<Boolean> by lazy {
         if (SceneContainerFlag.isEnabled) {
@@ -481,12 +480,12 @@ constructor(
         repository.setPanelAlpha(alpha)
     }
 
-    fun setAnimateDozingTransitions(animate: Boolean) {
-        repository.setAnimateDozingTransitions(animate)
+    fun setZoomOut(zoomOutFromShadeRadius: Float) {
+        repository.setZoomOut(zoomOutFromShadeRadius)
     }
 
-    fun setClockShouldBeCentered(shouldBeCentered: Boolean) {
-        repository.setClockShouldBeCentered(shouldBeCentered)
+    fun setAnimateDozingTransitions(animate: Boolean) {
+        repository.setAnimateDozingTransitions(animate)
     }
 
     fun setLastRootViewTapPosition(point: Point?) {
@@ -535,7 +534,7 @@ constructor(
     }
 
     fun setShortcutAbsoluteTop(top: Float) {
-        repository.setShortcutAbsoluteTop(top)
+        wallpaperFocalAreaRepository.setShortcutAbsoluteTop(top)
     }
 
     fun setIsKeyguardGoingAway(isGoingAway: Boolean) {
@@ -543,7 +542,17 @@ constructor(
     }
 
     fun setNotificationStackAbsoluteBottom(bottom: Float) {
-        repository.setNotificationStackAbsoluteBottom(bottom)
+        wallpaperFocalAreaRepository.setNotificationStackAbsoluteBottom(bottom)
+    }
+
+    suspend fun hydrateTableLogBuffer(tableLogBuffer: TableLogBuffer) {
+        isDozing
+            .logDiffsForTable(
+                tableLogBuffer = tableLogBuffer,
+                columnName = "isDozing",
+                initialValue = isDozing.value,
+            )
+            .collect()
     }
 
     companion object {

@@ -37,7 +37,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.eq
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -59,7 +58,6 @@ import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 import org.mockito.kotlin.firstValue
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)

@@ -150,17 +150,47 @@ public class AnimatedFloatExpression {
     /** RAND_SEED operator */
     public static final float RAND_SEED = asNan(OFFSET + 40);
 
+    /** NOISE_FROM operator calculate a random 0..1 number based on a seed */
+    public static final float NOISE_FROM = asNan(OFFSET + 41);
+
+    /** RANDOM_IN_RANGE random number in range */
+    public static final float RAND_IN_RANGE = asNan(OFFSET + 42);
+
+    /** SQUARE_SUM the sum of the square of two numbers */
+    public static final float SQUARE_SUM = asNan(OFFSET + 43);
+
+    /** STEP x > edge ? 1 : 0; */
+    public static final float STEP = asNan(OFFSET + 44);
+
+    /** SQUARE x*x; */
+    public static final float SQUARE = asNan(OFFSET + 45);
+
+    /** DUP x,x; */
+    public static final float DUP = asNan(OFFSET + 46);
+
+    /** HYPOT sqrt(x*x+y*y); */
+    public static final float HYPOT = asNan(OFFSET + 47);
+
+    /** SWAP y,x; */
+    public static final float SWAP = asNan(OFFSET + 48);
+
+    /** LERP (1-t)*x+t*y; */
+    public static final float LERP = asNan(OFFSET + 49);
+
+    /** SMOOTH_STEP (1-smoothstep(edge0,edge1,x)); */
+    public static final float SMOOTH_STEP = asNan(OFFSET + 50);
+
     /** LAST valid operator */
-    public static final int LAST_OP = OFFSET + 40;
+    public static final int LAST_OP = OFFSET + 50;
 
     /** VAR1 operator */
-    public static final float VAR1 = asNan(OFFSET + 41);
+    public static final float VAR1 = asNan(OFFSET + 51);
 
     /** VAR2 operator */
-    public static final float VAR2 = asNan(OFFSET + 42);
+    public static final float VAR2 = asNan(OFFSET + 52);
 
     /** VAR2 operator */
-    public static final float VAR3 = asNan(OFFSET + 43);
+    public static final float VAR3 = asNan(OFFSET + 53);
 
     // TODO SQUARE, DUP, HYPOT, SWAP
     //    private static final float FP_PI = (float) Math.PI;
@@ -399,6 +429,17 @@ public class AnimatedFloatExpression {
         sNames.put(k++, "RAND");
         sNames.put(k++, "RAND_SEED");
 
+        sNames.put(k++, "noise_from");
+        sNames.put(k++, "rand_in_range");
+        sNames.put(k++, "square_sum");
+        sNames.put(k++, "step");
+        sNames.put(k++, "square");
+        sNames.put(k++, "dup");
+        sNames.put(k++, "hypot");
+        sNames.put(k++, "swap");
+        sNames.put(k++, "lerp");
+        sNames.put(k++, "smooth_step");
+
         sNames.put(k++, "a[0]");
         sNames.put(k++, "a[1]");
         sNames.put(k++, "a[2]");
@@ -615,9 +656,20 @@ public class AnimatedFloatExpression {
     private static final int OP_RAND = OFFSET + 39;
     private static final int OP_RAND_SEED = OFFSET + 40;
 
-    private static final int OP_FIRST_VAR = OFFSET + 41;
-    private static final int OP_SECOND_VAR = OFFSET + 42;
-    private static final int OP_THIRD_VAR = OFFSET + 43;
+    private static final int OP_NOISE_FROM = OFFSET + 41;
+    private static final int OP_RAND_IN_RANGE = OFFSET + 42;
+    private static final int OP_SQUARE_SUM = OFFSET + 43;
+    private static final int OP_STEP = OFFSET + 44;
+    private static final int OP_SQUARE = OFFSET + 45;
+    private static final int OP_DUP = OFFSET + 46;
+    private static final int OP_HYPOT = OFFSET + 47;
+    private static final int OP_SWAP = OFFSET + 48;
+    private static final int OP_LERP = OFFSET + 49;
+    private static final int OP_SMOOTH_STEP = OFFSET + 50;
+
+    private static final int OP_FIRST_VAR = OFFSET + 51;
+    private static final int OP_SECOND_VAR = OFFSET + 52;
+    private static final int OP_THIRD_VAR = OFFSET + 53;
 
     int opEval(int sp, int id) {
         float[] array;
@@ -824,6 +876,66 @@ public class AnimatedFloatExpression {
                     }
                 }
                 return sp - 1;
+            case OP_NOISE_FROM:
+                int x = Float.floatToRawIntBits(mStack[sp]);
+                x = (x << 13) ^ x; // / Bitwise scrambling return
+                mStack[sp] =
+                        (1.0f
+                                - ((x * (x * x * 15731 + 789221) + 1376312589) & 0x7fffffff)
+                                        / 1073741824.0f);
+                return sp;
+
+            case OP_RAND_IN_RANGE:
+                if (sRandom == null) {
+                    sRandom = new Random();
+                }
+                mStack[sp] = sRandom.nextFloat() * (mStack[sp] - mStack[sp - 1]) + mStack[sp - 1];
+                return sp;
+            case OP_SQUARE_SUM:
+                mStack[sp - 1] = mStack[sp - 1] * mStack[sp - 1] + mStack[sp] * mStack[sp];
+                return sp - 1;
+            case OP_STEP:
+                System.out.println(mStack[sp] + " > " + mStack[sp - 1]);
+                mStack[sp - 1] = (mStack[sp - 1] > mStack[sp]) ? 1f : 0f;
+                return sp - 1;
+            case OP_SQUARE:
+                mStack[sp] = mStack[sp] * mStack[sp];
+                return sp;
+            case OP_DUP:
+                mStack[sp + 1] = mStack[sp];
+                return sp + 1;
+            case OP_HYPOT:
+                mStack[sp - 1] = (float) Math.hypot(mStack[sp - 1], mStack[sp]);
+                return sp - 1;
+            case OP_SWAP:
+                float swap = mStack[sp - 1];
+                mStack[sp - 1] = mStack[sp];
+                mStack[sp] = swap;
+                return sp;
+            case OP_LERP:
+                float tmp1 = mStack[sp - 2];
+                float tmp2 = mStack[sp - 1];
+                float tmp3 = mStack[sp];
+                mStack[sp - 2] = tmp1 + (tmp2 - tmp1) * tmp3;
+                return sp - 2;
+            case OP_SMOOTH_STEP:
+                float val3 = mStack[sp - 2];
+                float max2 = mStack[sp - 1];
+                float min1 = mStack[sp];
+                System.out.println("val3 = " + val3 + " min1 = " + min1 + " max2 = " + max2);
+                if (val3 < min1) {
+                    mStack[sp - 2] = 0f;
+                    System.out.println("below min ");
+                } else if (val3 > max2) {
+                    mStack[sp - 2] = 1f;
+                    System.out.println("above max ");
+
+                } else {
+                    float v = (val3 - min1) / (max2 - min1);
+                    System.out.println("v = " + v);
+                    mStack[sp - 2] = v * v * (3 - 2 * v);
+                }
+                return sp - 2;
 
             case OP_FIRST_VAR:
                 mStack[sp] = mVar[0];

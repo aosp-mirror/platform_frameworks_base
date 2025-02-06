@@ -21,6 +21,7 @@ import static android.service.autofill.Flags.improveFillDialogAconfig;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.provider.DeviceConfig;
+import android.service.autofill.Flags;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.view.View;
@@ -348,6 +349,14 @@ public class AutofillFeatureFlags {
     // END AUTOFILL REMOVE PRE_TRIGGER FLAGS
 
     /**
+     * Whether per Session FillEventHistory is enabled.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_SESSION_FILL_EVENT_HISTORY =
+            "session_fill_event_history";
+
+    /**
      * Define the max input length for autofill to show suggesiton UI
      *
      * E.g. if flag is set to 3, autofill will only show suggestions when user inputs less than 3
@@ -407,6 +416,13 @@ public class AutofillFeatureFlags {
     /** @hide */
     public static final long DEFAULT_FILL_DIALOG_MIN_WAIT_AFTER_IME_ANIMATION_END_MS = 0; // 0 ms
     // END AUTOFILL REMOVE PRE_TRIGGER FLAGS DEFAULTS
+
+    /**
+     * Default for whether per Session FillEventHistory is enabled
+     *
+     * @hide
+     */
+    public static final boolean DEFAULT_SESSION_FILL_EVENT_HISTORY_ENABLED = false;
 
     /**
      * @hide
@@ -696,5 +712,21 @@ public class AutofillFeatureFlags {
                 DeviceConfig.NAMESPACE_AUTOFILL,
                 DEVICE_CONFIG_FILL_DIALOG_MIN_WAIT_AFTER_IME_ANIMATION_END_MS,
                 DEFAULT_FILL_DIALOG_MIN_WAIT_AFTER_IME_ANIMATION_END_MS);
+    }
+
+    /**
+     * Whether tracking FillEventHistory per Session is enabled
+     *
+     * @hide
+     */
+    public static boolean isMultipleFillEventHistoryEnabled() {
+        if (!Flags.multipleFillHistory()) {
+            return false;
+        }
+
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_SESSION_FILL_EVENT_HISTORY,
+                DEFAULT_SESSION_FILL_EVENT_HISTORY_ENABLED);
     }
 }

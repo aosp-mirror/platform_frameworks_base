@@ -1684,10 +1684,14 @@ public class AppWidgetManager {
             private IBinder mIBinder;
 
             ConnectionTask(@NonNull FilterComparison filter) {
-                mContext.bindService(filter.getIntent(),
-                        Context.BindServiceFlags.of(Context.BIND_AUTO_CREATE),
-                        mHandler::post,
-                        this);
+                try {
+                    mContext.bindService(filter.getIntent(),
+                            Context.BindServiceFlags.of(Context.BIND_AUTO_CREATE),
+                            mHandler::post,
+                            this);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error connecting to service in connection cache", e);
+                }
             }
 
             @Override
@@ -1737,7 +1741,11 @@ public class AppWidgetManager {
                     handleNext();
                     return;
                 }
-                mContext.unbindService(this);
+                try {
+                    mContext.unbindService(this);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error unbinding the cached connection", e);
+                }
                 mActiveConnections.values().remove(this);
             }
         }

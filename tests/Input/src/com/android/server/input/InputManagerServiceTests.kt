@@ -314,7 +314,17 @@ class InputManagerServiceTests {
         }
     }
 
-    private fun createVirtualDisplays(count: Int): List<VirtualDisplay> {
+    private class AutoClosingVirtualDisplays(val displays: List<VirtualDisplay>) : AutoCloseable {
+        operator fun get(i: Int): VirtualDisplay = displays[i]
+
+        override fun close() {
+            for (display in displays) {
+                display.release()
+            }
+        }
+    }
+
+    private fun createVirtualDisplays(count: Int): AutoClosingVirtualDisplays {
         val displayManager: DisplayManager = context.getSystemService(
                 DisplayManager::class.java
         ) as DisplayManager
@@ -329,7 +339,7 @@ class InputManagerServiceTests {
                     /* flags= */ 0
             ))
         }
-        return virtualDisplays
+        return AutoClosingVirtualDisplays(virtualDisplays)
     }
 
     // Helper function that creates a KeyEvent with Keycode A with the given action
@@ -374,50 +384,51 @@ class InputManagerServiceTests {
         val mockSurfaceHolder2 = mock(SurfaceHolder::class.java)
         `when`(mockSurfaceView2.holder).thenReturn(mockSurfaceHolder2)
 
-        val virtualDisplays = createVirtualDisplays(2)
+        createVirtualDisplays(2).use { virtualDisplays ->
+            // Simulate an InputDevice
+            val inputDevice = createInputDevice()
 
-        // Simulate an InputDevice
-        val inputDevice = createInputDevice()
+            // Associate input device with display
+            service.addUniqueIdAssociationByDescriptor(
+                    inputDevice.descriptor,
+                    virtualDisplays[0].display.displayId.toString()
+            )
 
-        // Associate input device with display
-        service.addUniqueIdAssociationByDescriptor(
-                inputDevice.descriptor,
-                virtualDisplays[0].display.displayId.toString()
-        )
+            // Simulate 2 different KeyEvents
+            val downEvent = createKeycodeAEvent(inputDevice, KeyEvent.ACTION_DOWN)
+            val upEvent = createKeycodeAEvent(inputDevice, KeyEvent.ACTION_UP)
 
-        // Simulate 2 different KeyEvents
-        val downEvent = createKeycodeAEvent(inputDevice, KeyEvent.ACTION_DOWN)
-        val upEvent = createKeycodeAEvent(inputDevice, KeyEvent.ACTION_UP)
+            // Create a mock OnKeyListener object
+            val mockOnKeyListener = mock(OnKeyListener::class.java)
 
-        // Create a mock OnKeyListener object
-        val mockOnKeyListener = mock(OnKeyListener::class.java)
+            // Verify that the event went to Display 1 not Display 2
+            service.injectInputEvent(downEvent, InputEventInjectionSync.NONE)
 
-        // Verify that the event went to Display 1 not Display 2
-        service.injectInputEvent(downEvent, InputEventInjectionSync.NONE)
+            // Call the onKey method on the mock OnKeyListener object
+            mockOnKeyListener.onKey(mockSurfaceView1, /* keyCode= */ KeyEvent.KEYCODE_A, downEvent)
+            mockOnKeyListener.onKey(mockSurfaceView2, /* keyCode= */ KeyEvent.KEYCODE_A, upEvent)
 
-        // Call the onKey method on the mock OnKeyListener object
-        mockOnKeyListener.onKey(mockSurfaceView1, /* keyCode= */ KeyEvent.KEYCODE_A, downEvent)
-        mockOnKeyListener.onKey(mockSurfaceView2, /* keyCode= */ KeyEvent.KEYCODE_A, upEvent)
+            // Verify that the onKey method was called with the expected arguments
+            verify(mockOnKeyListener).onKey(mockSurfaceView1, KeyEvent.KEYCODE_A, downEvent)
+            verify(mockOnKeyListener, never())
+                .onKey(mockSurfaceView2, KeyEvent.KEYCODE_A, downEvent)
 
-        // Verify that the onKey method was called with the expected arguments
-        verify(mockOnKeyListener).onKey(mockSurfaceView1, KeyEvent.KEYCODE_A, downEvent)
-        verify(mockOnKeyListener, never()).onKey(mockSurfaceView2, KeyEvent.KEYCODE_A, downEvent)
+            // Remove association
+            service.removeUniqueIdAssociationByDescriptor(inputDevice.descriptor)
 
-        // Remove association
-        service.removeUniqueIdAssociationByDescriptor(inputDevice.descriptor)
+            // Associate with Display 2
+            service.addUniqueIdAssociationByDescriptor(
+                    inputDevice.descriptor,
+                    virtualDisplays[1].display.displayId.toString()
+            )
 
-        // Associate with Display 2
-        service.addUniqueIdAssociationByDescriptor(
-                inputDevice.descriptor,
-                virtualDisplays[1].display.displayId.toString()
-        )
+            // Simulate a KeyEvent
+            service.injectInputEvent(upEvent, InputEventInjectionSync.NONE)
 
-        // Simulate a KeyEvent
-        service.injectInputEvent(upEvent, InputEventInjectionSync.NONE)
-
-        // Verify that the event went to Display 2 not Display 1
-        verify(mockOnKeyListener).onKey(mockSurfaceView2, KeyEvent.KEYCODE_A, upEvent)
-        verify(mockOnKeyListener, never()).onKey(mockSurfaceView1, KeyEvent.KEYCODE_A, upEvent)
+            // Verify that the event went to Display 2 not Display 1
+            verify(mockOnKeyListener).onKey(mockSurfaceView2, KeyEvent.KEYCODE_A, upEvent)
+            verify(mockOnKeyListener, never()).onKey(mockSurfaceView1, KeyEvent.KEYCODE_A, upEvent)
+        }
     }
 
     @Test
@@ -436,50 +447,51 @@ class InputManagerServiceTests {
         val mockSurfaceHolder2 = mock(SurfaceHolder::class.java)
         `when`(mockSurfaceView2.holder).thenReturn(mockSurfaceHolder2)
 
-        val virtualDisplays = createVirtualDisplays(2)
+        createVirtualDisplays(2).use { virtualDisplays ->
+            // Simulate an InputDevice
+            val inputDevice = createInputDevice()
 
-        // Simulate an InputDevice
-        val inputDevice = createInputDevice()
+            // Associate input device with display
+            service.addUniqueIdAssociationByPort(
+                    inputDevice.name,
+                    virtualDisplays[0].display.displayId.toString()
+            )
 
-        // Associate input device with display
-        service.addUniqueIdAssociationByPort(
-                inputDevice.name,
-                virtualDisplays[0].display.displayId.toString()
-        )
+            // Simulate 2 different KeyEvents
+            val downEvent = createKeycodeAEvent(inputDevice, KeyEvent.ACTION_DOWN)
+            val upEvent = createKeycodeAEvent(inputDevice, KeyEvent.ACTION_UP)
 
-        // Simulate 2 different KeyEvents
-        val downEvent = createKeycodeAEvent(inputDevice, KeyEvent.ACTION_DOWN)
-        val upEvent = createKeycodeAEvent(inputDevice, KeyEvent.ACTION_UP)
+            // Create a mock OnKeyListener object
+            val mockOnKeyListener = mock(OnKeyListener::class.java)
 
-        // Create a mock OnKeyListener object
-        val mockOnKeyListener = mock(OnKeyListener::class.java)
+            // Verify that the event went to Display 1 not Display 2
+            service.injectInputEvent(downEvent, InputEventInjectionSync.NONE)
 
-        // Verify that the event went to Display 1 not Display 2
-        service.injectInputEvent(downEvent, InputEventInjectionSync.NONE)
+            // Call the onKey method on the mock OnKeyListener object
+            mockOnKeyListener.onKey(mockSurfaceView1, /* keyCode= */ KeyEvent.KEYCODE_A, downEvent)
+            mockOnKeyListener.onKey(mockSurfaceView2, /* keyCode= */ KeyEvent.KEYCODE_A, upEvent)
 
-        // Call the onKey method on the mock OnKeyListener object
-        mockOnKeyListener.onKey(mockSurfaceView1, /* keyCode= */ KeyEvent.KEYCODE_A, downEvent)
-        mockOnKeyListener.onKey(mockSurfaceView2, /* keyCode= */ KeyEvent.KEYCODE_A, upEvent)
+            // Verify that the onKey method was called with the expected arguments
+            verify(mockOnKeyListener).onKey(mockSurfaceView1, KeyEvent.KEYCODE_A, downEvent)
+            verify(mockOnKeyListener, never())
+                .onKey(mockSurfaceView2, KeyEvent.KEYCODE_A, downEvent)
 
-        // Verify that the onKey method was called with the expected arguments
-        verify(mockOnKeyListener).onKey(mockSurfaceView1, KeyEvent.KEYCODE_A, downEvent)
-        verify(mockOnKeyListener, never()).onKey(mockSurfaceView2, KeyEvent.KEYCODE_A, downEvent)
+            // Remove association
+            service.removeUniqueIdAssociationByPort(inputDevice.name)
 
-        // Remove association
-        service.removeUniqueIdAssociationByPort(inputDevice.name)
+            // Associate with Display 2
+            service.addUniqueIdAssociationByPort(
+                    inputDevice.name,
+                    virtualDisplays[1].display.displayId.toString()
+            )
 
-        // Associate with Display 2
-        service.addUniqueIdAssociationByPort(
-                inputDevice.name,
-                virtualDisplays[1].display.displayId.toString()
-        )
+            // Simulate a KeyEvent
+            service.injectInputEvent(upEvent, InputEventInjectionSync.NONE)
 
-        // Simulate a KeyEvent
-        service.injectInputEvent(upEvent, InputEventInjectionSync.NONE)
-
-        // Verify that the event went to Display 2 not Display 1
-        verify(mockOnKeyListener).onKey(mockSurfaceView2, KeyEvent.KEYCODE_A, upEvent)
-        verify(mockOnKeyListener, never()).onKey(mockSurfaceView1, KeyEvent.KEYCODE_A, upEvent)
+            // Verify that the event went to Display 2 not Display 1
+            verify(mockOnKeyListener).onKey(mockSurfaceView2, KeyEvent.KEYCODE_A, upEvent)
+            verify(mockOnKeyListener, never()).onKey(mockSurfaceView1, KeyEvent.KEYCODE_A, upEvent)
+        }
     }
 
     @Test

@@ -29,6 +29,7 @@ import android.content.Context;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
@@ -41,7 +42,7 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class DevicePostureControllerTest {
+public class DevicePostureControllerTest extends ShellTestCase {
     @Mock
     private Context mContext;
 

@@ -20,52 +20,22 @@ import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
 import com.android.compose.animation.scene.transformation.TransformationWithRange
 
-/**
- * Whether this element should be rendered by the given [content]. This method returns true only for
- * exactly one content at any given time.
- */
-internal fun Element.shouldBeRenderedBy(content: ContentKey): Boolean {
-    // The current strategy is that always the content with the lowest nestingDepth has authority.
-    // This content is supposed to render the shared element because this is also the level at which
-    // the transition is running. If the [renderAuthority.size] is 1 it means that that this element
-    // is currently composed only in one nesting level, which means that the render authority
-    // is determined by "classic" shared element code.
-    return renderAuthority.size > 0 &&
-        (renderAuthority.size == 1 || renderAuthority.first() == content)
-}
-
-/**
- * Whether this element is currently composed in multiple [SceneTransitionLayout]s.
- *
- * Note: Shared elements across [NestedSceneTransitionLayout]s side-by-side are not supported.
- */
-internal fun Element.isPresentInMultipleStls(): Boolean {
-    return renderAuthority.size > 1
-}
-
 internal fun shouldPlaceSharedElement(
     layoutImpl: SceneTransitionLayoutImpl,
     content: ContentKey,
     elementKey: ElementKey,
     transition: TransitionState.Transition,
 ): Boolean {
-    val element = layoutImpl.elements.getValue(elementKey)
-    if (element.isPresentInMultipleStls()) {
-        // If the element is present in multiple STLs we require the highest STL to render it and
-        // we don't want contentPicker to potentially return false for the highest STL.
-        return element.shouldBeRenderedBy(content)
-    }
-
-    val scenePicker = elementKey.contentPicker
-    val pickedScene =
-        scenePicker.contentDuringTransition(
+    val contentPicker = elementKey.contentPicker
+    val pickedContent =
+        contentPicker.contentDuringTransition(
             element = elementKey,
             transition = transition,
-            fromContentZIndex = layoutImpl.content(transition.fromContent).zIndex,
-            toContentZIndex = layoutImpl.content(transition.toContent).zIndex,
+            fromContentZIndex = layoutImpl.content(transition.fromContent).globalZIndex,
+            toContentZIndex = layoutImpl.content(transition.toContent).globalZIndex,
         )
 
-    return pickedScene == content
+    return pickedContent == content || layoutImpl.isAncestorContent(pickedContent)
 }
 
 internal fun isSharedElementEnabled(

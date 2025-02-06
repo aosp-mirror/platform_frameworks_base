@@ -19,7 +19,6 @@ package com.android.wm.shell.desktopmode
 import android.app.ActivityManager.RunningTaskInfo
 import android.graphics.Rect
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import com.android.dx.mockito.inline.extended.ExtendedMockito.clearInvocations
 import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.ExtendedMockito.staticMockMarker
@@ -35,12 +34,14 @@ import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.FocusReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.NO_SESSION_ID
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.TaskSizeUpdate
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.TaskUpdate
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UNSET_FOCUS_REASON
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UNSET_MINIMIZE_REASON
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UNSET_UNMINIMIZE_REASON
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UnminimizeReason
@@ -52,6 +53,7 @@ import org.junit.Test
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.whenever
 
 /** Tests for [DesktopModeEventLogger]. */
@@ -62,14 +64,12 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
     val displayLayout = mock<DisplayLayout>()
 
     @JvmField
-    @Rule(order = 0)
+    @Rule()
     val extendedMockitoRule =
         ExtendedMockitoRule.Builder(this)
             .mockStatic(FrameworkStatsLog::class.java)
             .mockStatic(EventLogTags::class.java)
             .build()!!
-
-    @JvmField @Rule(order = 1) val setFlagsRule = SetFlagsRule()
 
     @Before
     fun setUp() {
@@ -90,20 +90,12 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
 
         val sessionId = desktopModeEventLogger.currentSessionId.get()
         assertThat(sessionId).isNotEqualTo(NO_SESSION_ID)
-        verify {
-            FrameworkStatsLog.write(
-                eq(FrameworkStatsLog.DESKTOP_MODE_UI_CHANGED),
-                /* event */
-                eq(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EVENT__ENTER),
-                /* enter_reason */
-                eq(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__ENTER_REASON__KEYBOARD_SHORTCUT_ENTER),
-                /* exit_reason */
-                eq(0),
-                /* sessionId */
-                eq(sessionId),
-            )
-        }
-        verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
+        verifyOnlyOneUiChangedLogging(
+            FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EVENT__ENTER,
+            FrameworkStatsLog.DESKTOP_MODE_UICHANGED__ENTER_REASON__KEYBOARD_SHORTCUT_ENTER,
+            0,
+            sessionId,
+        )
         verify {
             EventLogTags.writeWmShellEnterDesktopMode(
                 eq(EnterReason.KEYBOARD_SHORTCUT_ENTER.reason),
@@ -122,20 +114,13 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
         val sessionId = desktopModeEventLogger.currentSessionId.get()
         assertThat(sessionId).isNotEqualTo(NO_SESSION_ID)
         assertThat(sessionId).isNotEqualTo(previousSessionId)
-        verify {
-            FrameworkStatsLog.write(
-                eq(FrameworkStatsLog.DESKTOP_MODE_UI_CHANGED),
-                /* event */
-                eq(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EVENT__ENTER),
-                /* enter_reason */
-                eq(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__ENTER_REASON__KEYBOARD_SHORTCUT_ENTER),
-                /* exit_reason */
-                eq(0),
-                /* sessionId */
-                eq(sessionId),
-            )
-        }
-        verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
+        verifyOnlyOneUiChangedLogging(
+            FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EVENT__ENTER,
+            FrameworkStatsLog.DESKTOP_MODE_UICHANGED__ENTER_REASON__KEYBOARD_SHORTCUT_ENTER,
+            /* exit_reason */
+            0,
+            sessionId,
+        )
         verify {
             EventLogTags.writeWmShellEnterDesktopMode(
                 eq(EnterReason.KEYBOARD_SHORTCUT_ENTER.reason),
@@ -149,7 +134,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
     fun logSessionExit_noOngoingSession_doesNotLog() {
         desktopModeEventLogger.logSessionExit(ExitReason.DRAG_TO_EXIT)
 
-        verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
+        verifyNoLogging()
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
     }
 
@@ -159,20 +144,13 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
 
         desktopModeEventLogger.logSessionExit(ExitReason.DRAG_TO_EXIT)
 
-        verify {
-            FrameworkStatsLog.write(
-                eq(FrameworkStatsLog.DESKTOP_MODE_UI_CHANGED),
-                /* event */
-                eq(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EVENT__EXIT),
-                /* enter_reason */
-                eq(0),
-                /* exit_reason */
-                eq(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__DRAG_TO_EXIT),
-                /* sessionId */
-                eq(sessionId),
-            )
-        }
-        verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
+        verifyOnlyOneUiChangedLogging(
+            FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EVENT__EXIT,
+            /* enter_reason */
+            0,
+            FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__DRAG_TO_EXIT,
+            sessionId,
+        )
         verify {
             EventLogTags.writeWmShellExitDesktopMode(
                 eq(ExitReason.DRAG_TO_EXIT.reason),
@@ -187,7 +165,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
     fun logTaskAdded_noOngoingSession_doesNotLog() {
         desktopModeEventLogger.logTaskAdded(TASK_UPDATE)
 
-        verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
+        verifyNoLogging()
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
     }
 
@@ -197,32 +175,20 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
 
         desktopModeEventLogger.logTaskAdded(TASK_UPDATE)
 
-        verify {
-            FrameworkStatsLog.write(
-                eq(FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE),
-                /* task_event */
-                eq(FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_ADDED),
-                /* instance_id */
-                eq(TASK_UPDATE.instanceId),
-                /* uid */
-                eq(TASK_UPDATE.uid),
-                /* task_height */
-                eq(TASK_UPDATE.taskHeight),
-                /* task_width */
-                eq(TASK_UPDATE.taskWidth),
-                /* task_x */
-                eq(TASK_UPDATE.taskX),
-                /* task_y */
-                eq(TASK_UPDATE.taskY),
-                /* session_id */
-                eq(sessionId),
-                eq(UNSET_MINIMIZE_REASON),
-                eq(UNSET_UNMINIMIZE_REASON),
-                /* visible_task_count */
-                eq(TASK_COUNT),
-            )
-        }
-        verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
+        verifyOnlyOneTaskUpdateLogging(
+            FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_ADDED,
+            TASK_UPDATE.instanceId,
+            TASK_UPDATE.uid,
+            TASK_UPDATE.taskHeight,
+            TASK_UPDATE.taskWidth,
+            TASK_UPDATE.taskX,
+            TASK_UPDATE.taskY,
+            sessionId,
+            UNSET_MINIMIZE_REASON,
+            UNSET_UNMINIMIZE_REASON,
+            TASK_COUNT,
+            UNSET_FOCUS_REASON,
+        )
         verify {
             EventLogTags.writeWmShellDesktopModeTaskUpdate(
                 eq(FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_ADDED),
@@ -236,6 +202,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
                 eq(UNSET_MINIMIZE_REASON),
                 eq(UNSET_UNMINIMIZE_REASON),
                 eq(TASK_COUNT),
+                eq(UNSET_FOCUS_REASON),
             )
         }
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
@@ -245,7 +212,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
     fun logTaskRemoved_noOngoingSession_doesNotLog() {
         desktopModeEventLogger.logTaskRemoved(TASK_UPDATE)
 
-        verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
+        verifyNoLogging()
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
     }
 
@@ -255,32 +222,20 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
 
         desktopModeEventLogger.logTaskRemoved(TASK_UPDATE)
 
-        verify {
-            FrameworkStatsLog.write(
-                eq(FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE),
-                /* task_event */
-                eq(FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_REMOVED),
-                /* instance_id */
-                eq(TASK_UPDATE.instanceId),
-                /* uid */
-                eq(TASK_UPDATE.uid),
-                /* task_height */
-                eq(TASK_UPDATE.taskHeight),
-                /* task_width */
-                eq(TASK_UPDATE.taskWidth),
-                /* task_x */
-                eq(TASK_UPDATE.taskX),
-                /* task_y */
-                eq(TASK_UPDATE.taskY),
-                /* session_id */
-                eq(sessionId),
-                eq(UNSET_MINIMIZE_REASON),
-                eq(UNSET_UNMINIMIZE_REASON),
-                /* visible_task_count */
-                eq(TASK_COUNT),
-            )
-        }
-        verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
+        verifyOnlyOneTaskUpdateLogging(
+            FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_REMOVED,
+            TASK_UPDATE.instanceId,
+            TASK_UPDATE.uid,
+            TASK_UPDATE.taskHeight,
+            TASK_UPDATE.taskWidth,
+            TASK_UPDATE.taskX,
+            TASK_UPDATE.taskY,
+            sessionId,
+            UNSET_MINIMIZE_REASON,
+            UNSET_UNMINIMIZE_REASON,
+            TASK_COUNT,
+            UNSET_FOCUS_REASON,
+        )
         verify {
             EventLogTags.writeWmShellDesktopModeTaskUpdate(
                 eq(FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_REMOVED),
@@ -294,6 +249,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
                 eq(UNSET_MINIMIZE_REASON),
                 eq(UNSET_UNMINIMIZE_REASON),
                 eq(TASK_COUNT),
+                eq(UNSET_FOCUS_REASON),
             )
         }
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
@@ -303,7 +259,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
     fun logTaskInfoChanged_noOngoingSession_doesNotLog() {
         desktopModeEventLogger.logTaskInfoChanged(TASK_UPDATE)
 
-        verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
+        verifyNoLogging()
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
     }
 
@@ -313,35 +269,20 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
 
         desktopModeEventLogger.logTaskInfoChanged(TASK_UPDATE)
 
-        verify {
-            FrameworkStatsLog.write(
-                eq(FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE),
-                /* task_event */
-                eq(
-                    FrameworkStatsLog
-                        .DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INFO_CHANGED
-                ),
-                /* instance_id */
-                eq(TASK_UPDATE.instanceId),
-                /* uid */
-                eq(TASK_UPDATE.uid),
-                /* task_height */
-                eq(TASK_UPDATE.taskHeight),
-                /* task_width */
-                eq(TASK_UPDATE.taskWidth),
-                /* task_x */
-                eq(TASK_UPDATE.taskX),
-                /* task_y */
-                eq(TASK_UPDATE.taskY),
-                /* session_id */
-                eq(sessionId),
-                eq(UNSET_MINIMIZE_REASON),
-                eq(UNSET_UNMINIMIZE_REASON),
-                /* visible_task_count */
-                eq(TASK_COUNT),
-            )
-        }
-        verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
+        verifyOnlyOneTaskUpdateLogging(
+            FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INFO_CHANGED,
+            TASK_UPDATE.instanceId,
+            TASK_UPDATE.uid,
+            TASK_UPDATE.taskHeight,
+            TASK_UPDATE.taskWidth,
+            TASK_UPDATE.taskX,
+            TASK_UPDATE.taskY,
+            sessionId,
+            UNSET_MINIMIZE_REASON,
+            UNSET_UNMINIMIZE_REASON,
+            TASK_COUNT,
+            UNSET_FOCUS_REASON,
+        )
         verify {
             EventLogTags.writeWmShellDesktopModeTaskUpdate(
                 eq(
@@ -358,6 +299,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
                 eq(UNSET_MINIMIZE_REASON),
                 eq(UNSET_UNMINIMIZE_REASON),
                 eq(TASK_COUNT),
+                eq(UNSET_FOCUS_REASON),
             )
         }
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
@@ -371,37 +313,20 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
             createTaskUpdate(minimizeReason = MinimizeReason.TASK_LIMIT)
         )
 
-        verify {
-            FrameworkStatsLog.write(
-                eq(FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE),
-                /* task_event */
-                eq(
-                    FrameworkStatsLog
-                        .DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INFO_CHANGED
-                ),
-                /* instance_id */
-                eq(TASK_UPDATE.instanceId),
-                /* uid */
-                eq(TASK_UPDATE.uid),
-                /* task_height */
-                eq(TASK_UPDATE.taskHeight),
-                /* task_width */
-                eq(TASK_UPDATE.taskWidth),
-                /* task_x */
-                eq(TASK_UPDATE.taskX),
-                /* task_y */
-                eq(TASK_UPDATE.taskY),
-                /* session_id */
-                eq(sessionId),
-                /* minimize_reason */
-                eq(MinimizeReason.TASK_LIMIT.reason),
-                /* unminimize_reason */
-                eq(UNSET_UNMINIMIZE_REASON),
-                /* visible_task_count */
-                eq(TASK_COUNT),
-            )
-        }
-        verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
+        verifyOnlyOneTaskUpdateLogging(
+            FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INFO_CHANGED,
+            TASK_UPDATE.instanceId,
+            TASK_UPDATE.uid,
+            TASK_UPDATE.taskHeight,
+            TASK_UPDATE.taskWidth,
+            TASK_UPDATE.taskX,
+            TASK_UPDATE.taskY,
+            sessionId,
+            MinimizeReason.TASK_LIMIT.reason,
+            UNSET_UNMINIMIZE_REASON,
+            TASK_COUNT,
+            UNSET_FOCUS_REASON,
+        )
         verify {
             EventLogTags.writeWmShellDesktopModeTaskUpdate(
                 eq(
@@ -418,6 +343,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
                 eq(MinimizeReason.TASK_LIMIT.reason),
                 eq(UNSET_UNMINIMIZE_REASON),
                 eq(TASK_COUNT),
+                eq(UNSET_FOCUS_REASON),
             )
         }
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
@@ -431,37 +357,20 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
             createTaskUpdate(unminimizeReason = UnminimizeReason.TASKBAR_TAP)
         )
 
-        verify {
-            FrameworkStatsLog.write(
-                eq(FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE),
-                /* task_event */
-                eq(
-                    FrameworkStatsLog
-                        .DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INFO_CHANGED
-                ),
-                /* instance_id */
-                eq(TASK_UPDATE.instanceId),
-                /* uid */
-                eq(TASK_UPDATE.uid),
-                /* task_height */
-                eq(TASK_UPDATE.taskHeight),
-                /* task_width */
-                eq(TASK_UPDATE.taskWidth),
-                /* task_x */
-                eq(TASK_UPDATE.taskX),
-                /* task_y */
-                eq(TASK_UPDATE.taskY),
-                /* session_id */
-                eq(sessionId),
-                /* minimize_reason */
-                eq(UNSET_MINIMIZE_REASON),
-                /* unminimize_reason */
-                eq(UnminimizeReason.TASKBAR_TAP.reason),
-                /* visible_task_count */
-                eq(TASK_COUNT),
-            )
-        }
-        verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
+        verifyOnlyOneTaskUpdateLogging(
+            FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INFO_CHANGED,
+            TASK_UPDATE.instanceId,
+            TASK_UPDATE.uid,
+            TASK_UPDATE.taskHeight,
+            TASK_UPDATE.taskWidth,
+            TASK_UPDATE.taskX,
+            TASK_UPDATE.taskY,
+            sessionId,
+            UNSET_MINIMIZE_REASON,
+            UnminimizeReason.TASKBAR_TAP.reason,
+            TASK_COUNT,
+            UNSET_FOCUS_REASON,
+        )
         verify {
             EventLogTags.writeWmShellDesktopModeTaskUpdate(
                 eq(
@@ -478,6 +387,51 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
                 eq(UNSET_MINIMIZE_REASON),
                 eq(UnminimizeReason.TASKBAR_TAP.reason),
                 eq(TASK_COUNT),
+                eq(UNSET_FOCUS_REASON),
+            )
+        }
+        verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
+    }
+
+    @Test
+    fun logTaskInfoChanged_logsTaskUpdateWithFocusReason() {
+        val sessionId = startDesktopModeSession()
+
+        desktopModeEventLogger.logTaskInfoChanged(
+            createTaskUpdate(focusChangesReason = FocusReason.UNKNOWN)
+        )
+
+        verifyOnlyOneTaskUpdateLogging(
+            FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INFO_CHANGED,
+            TASK_UPDATE.instanceId,
+            TASK_UPDATE.uid,
+            TASK_UPDATE.taskHeight,
+            TASK_UPDATE.taskWidth,
+            TASK_UPDATE.taskX,
+            TASK_UPDATE.taskY,
+            sessionId,
+            UNSET_MINIMIZE_REASON,
+            UNSET_UNMINIMIZE_REASON,
+            TASK_COUNT,
+            FocusReason.UNKNOWN.reason,
+        )
+        verify {
+            EventLogTags.writeWmShellDesktopModeTaskUpdate(
+                eq(
+                    FrameworkStatsLog
+                        .DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INFO_CHANGED
+                ),
+                eq(TASK_UPDATE.instanceId),
+                eq(TASK_UPDATE.uid),
+                eq(TASK_UPDATE.taskHeight),
+                eq(TASK_UPDATE.taskWidth),
+                eq(TASK_UPDATE.taskX),
+                eq(TASK_UPDATE.taskY),
+                eq(sessionId),
+                eq(UNSET_MINIMIZE_REASON),
+                eq(UNSET_UNMINIMIZE_REASON),
+                eq(TASK_COUNT),
+                eq(FocusReason.UNKNOWN.reason),
             )
         }
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
@@ -491,7 +445,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
             createTaskInfo(),
         )
 
-        verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
+        verifyNoLogging()
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
     }
 
@@ -509,39 +463,17 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
             displayController,
         )
 
-        verify {
-            FrameworkStatsLog.write(
-                eq(FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED),
-                /* resize_trigger */
-                eq(
-                    FrameworkStatsLog
-                        .DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZE_TRIGGER__CORNER_RESIZE_TRIGGER
-                ),
-                /* resizing_stage */
-                eq(
-                    FrameworkStatsLog
-                        .DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZING_STAGE__START_RESIZING_STAGE
-                ),
-                /* input_method */
-                eq(
-                    FrameworkStatsLog
-                        .DESKTOP_MODE_TASK_SIZE_UPDATED__INPUT_METHOD__UNKNOWN_INPUT_METHOD
-                ),
-                /* desktop_mode_session_id */
-                eq(sessionId),
-                /* instance_id */
-                eq(TASK_SIZE_UPDATE.instanceId),
-                /* uid */
-                eq(TASK_SIZE_UPDATE.uid),
-                /* task_width */
-                eq(TASK_SIZE_UPDATE.taskWidth),
-                /* task_height */
-                eq(TASK_SIZE_UPDATE.taskHeight),
-                /* display_area */
-                eq(DISPLAY_AREA),
-            )
-        }
-        verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
+        verifyOnlyOneTaskSizeUpdatedLogging(
+            FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZE_TRIGGER__CORNER_RESIZE_TRIGGER,
+            FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZING_STAGE__START_RESIZING_STAGE,
+            FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__INPUT_METHOD__UNKNOWN_INPUT_METHOD,
+            sessionId,
+            TASK_SIZE_UPDATE.instanceId,
+            TASK_SIZE_UPDATE.uid,
+            TASK_SIZE_UPDATE.taskWidth,
+            TASK_SIZE_UPDATE.taskHeight,
+            DISPLAY_AREA,
+        )
     }
 
     @Test
@@ -552,7 +484,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
             createTaskInfo(),
         )
 
-        verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
+        verifyNoLogging()
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
     }
 
@@ -568,39 +500,17 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
             displayController = displayController,
         )
 
-        verify {
-            FrameworkStatsLog.write(
-                eq(FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED),
-                /* resize_trigger */
-                eq(
-                    FrameworkStatsLog
-                        .DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZE_TRIGGER__CORNER_RESIZE_TRIGGER
-                ),
-                /* resizing_stage */
-                eq(
-                    FrameworkStatsLog
-                        .DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZING_STAGE__END_RESIZING_STAGE
-                ),
-                /* input_method */
-                eq(
-                    FrameworkStatsLog
-                        .DESKTOP_MODE_TASK_SIZE_UPDATED__INPUT_METHOD__UNKNOWN_INPUT_METHOD
-                ),
-                /* desktop_mode_session_id */
-                eq(sessionId),
-                /* instance_id */
-                eq(TASK_SIZE_UPDATE.instanceId),
-                /* uid */
-                eq(TASK_SIZE_UPDATE.uid),
-                /* task_width */
-                eq(TASK_SIZE_UPDATE.taskWidth),
-                /* task_height */
-                eq(TASK_SIZE_UPDATE.taskHeight),
-                /* display_area */
-                eq(DISPLAY_AREA),
-            )
-        }
-        verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
+        verifyOnlyOneTaskSizeUpdatedLogging(
+            FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZE_TRIGGER__CORNER_RESIZE_TRIGGER,
+            FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZING_STAGE__END_RESIZING_STAGE,
+            FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__INPUT_METHOD__UNKNOWN_INPUT_METHOD,
+            sessionId,
+            TASK_SIZE_UPDATE.instanceId,
+            TASK_SIZE_UPDATE.uid,
+            TASK_SIZE_UPDATE.taskWidth,
+            TASK_SIZE_UPDATE.taskHeight,
+            DISPLAY_AREA,
+        )
     }
 
     private fun startDesktopModeSession(): Int {
@@ -640,16 +550,186 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
                 eq(UNSET_UNMINIMIZE_REASON),
                 /* visible_task_count */
                 eq(0),
+                /* focus_reason */
+                eq(UNSET_FOCUS_REASON),
             )
         }
     }
 
-    private fun createTaskInfo(): RunningTaskInfo {
-        return TestRunningTaskInfoBuilder()
+    private fun createTaskInfo(): RunningTaskInfo =
+        TestRunningTaskInfoBuilder()
             .setTaskId(TASK_ID)
             .setUid(TASK_UID)
             .setBounds(Rect(TASK_X, TASK_Y, TASK_WIDTH, TASK_HEIGHT))
             .build()
+
+    private fun verifyNoLogging() {
+        verify(
+            {
+                FrameworkStatsLog.write(
+                    eq(FrameworkStatsLog.DESKTOP_MODE_UI_CHANGED),
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                )
+            },
+            never(),
+        )
+        verify(
+            {
+                FrameworkStatsLog.write(
+                    eq(FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE),
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                )
+            },
+            never(),
+        )
+        verify(
+            {
+                FrameworkStatsLog.write(
+                    eq(FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED),
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                )
+            },
+            never(),
+        )
+    }
+
+    private fun verifyOnlyOneUiChangedLogging(
+        event: Int,
+        enterReason: Int,
+        exitReason: Int,
+        sessionId: Int,
+    ) {
+        verify({
+            FrameworkStatsLog.write(
+                eq(FrameworkStatsLog.DESKTOP_MODE_UI_CHANGED),
+                eq(event),
+                eq(enterReason),
+                eq(exitReason),
+                eq(sessionId),
+            )
+        })
+        verify({
+            FrameworkStatsLog.write(
+                eq(FrameworkStatsLog.DESKTOP_MODE_UI_CHANGED),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+            )
+        })
+    }
+
+    private fun verifyOnlyOneTaskUpdateLogging(
+        taskEvent: Int,
+        instanceId: Int,
+        uid: Int,
+        taskHeight: Int,
+        taskWidth: Int,
+        taskX: Int,
+        taskY: Int,
+        sessionId: Int,
+        minimizeReason: Int,
+        unminimizeReason: Int,
+        visibleTaskCount: Int,
+        focusChangedReason: Int,
+    ) {
+        verify({
+            FrameworkStatsLog.write(
+                eq(FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE),
+                eq(taskEvent),
+                eq(instanceId),
+                eq(uid),
+                eq(taskHeight),
+                eq(taskWidth),
+                eq(taskX),
+                eq(taskY),
+                eq(sessionId),
+                eq(minimizeReason),
+                eq(unminimizeReason),
+                eq(visibleTaskCount),
+                eq(focusChangedReason),
+            )
+        })
+        verify({
+            FrameworkStatsLog.write(
+                eq(FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+            )
+        })
+    }
+
+    private fun verifyOnlyOneTaskSizeUpdatedLogging(
+        resizeTrigger: Int,
+        resizingStage: Int,
+        inputMethod: Int,
+        sessionId: Int,
+        instanceId: Int,
+        uid: Int,
+        taskWidth: Int,
+        taskHeight: Int,
+        displayArea: Int,
+    ) {
+        verify({
+            FrameworkStatsLog.write(
+                eq(FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED),
+                eq(resizeTrigger),
+                eq(resizingStage),
+                eq(inputMethod),
+                eq(sessionId),
+                eq(instanceId),
+                eq(uid),
+                eq(taskWidth),
+                eq(taskHeight),
+                eq(displayArea),
+            )
+        })
+        verify({
+            FrameworkStatsLog.write(
+                eq(FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+            )
+        })
     }
 
     private companion object {
@@ -689,6 +769,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
         private fun createTaskUpdate(
             minimizeReason: MinimizeReason? = null,
             unminimizeReason: UnminimizeReason? = null,
+            focusChangesReason: FocusReason? = null,
         ) =
             TaskUpdate(
                 TASK_ID,
@@ -700,6 +781,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
                 minimizeReason,
                 unminimizeReason,
                 TASK_COUNT,
+                focusChangesReason,
             )
     }
 }

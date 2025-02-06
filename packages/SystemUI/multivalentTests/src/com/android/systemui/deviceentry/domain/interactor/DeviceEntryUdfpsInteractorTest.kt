@@ -31,13 +31,11 @@ import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintA
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class DeviceEntryUdfpsInteractorTest : SysuiTestCase() {

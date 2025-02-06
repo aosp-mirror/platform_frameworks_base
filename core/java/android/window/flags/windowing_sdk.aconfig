@@ -91,14 +91,6 @@ flag {
 
 flag {
     namespace: "windowing_sdk"
-    name: "ae_back_stack_restore"
-    description: "Allow the ActivityEmbedding back stack to be restored after process restarted"
-    bug: "289875940"
-    is_fixed_read_only: true
-}
-
-flag {
-    namespace: "windowing_sdk"
     name: "touch_pass_through_opt_in"
     description: "Requires apps to opt-in to overlay pass through touches and provide APIs to opt-in"
     bug: "358129114"
@@ -163,6 +155,35 @@ flag {
     name: "condense_configuration_change_for_simple_mode"
     description: "Condense configuration change for simple mode"
     bug: "356738240"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "use_self_sync_transaction_for_layer"
+    description: "Always use this.getSyncTransaction for assignLayer"
+    bug: "388127825"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "safe_region_letterboxing"
+    description: "Enables letterboxing for a safe region"
+    bug: "380132497"
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "fix_layout_existing_task"
+    description: "Layout the existing task to ensure the bounds are updated."
+    bug: "390291971"
+    is_fixed_read_only: true
     metadata {
         purpose: PURPOSE_BUGFIX
     }

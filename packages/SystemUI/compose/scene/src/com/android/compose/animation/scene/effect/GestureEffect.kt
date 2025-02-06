@@ -16,14 +16,14 @@
 
 package com.android.compose.animation.scene.effect
 
+import androidx.compose.foundation.OverscrollEffect
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.unit.Velocity
-import com.android.compose.gesture.effect.ContentOverscrollEffect
 
 /** An overscroll effect that ensures only a single fling animation is triggered. */
-internal class GestureEffect(private val delegate: ContentOverscrollEffect) :
-    ContentOverscrollEffect by delegate {
+internal class GestureEffect(private val delegate: OverscrollEffect) :
+    OverscrollEffect by delegate {
     private var shouldFling = false
 
     override fun applyToScroll(
@@ -49,27 +49,5 @@ internal class GestureEffect(private val delegate: ContentOverscrollEffect) :
 
     suspend fun ensureApplyToFlingIsCalled() {
         applyToFling(Velocity.Zero) { Velocity.Zero }
-    }
-}
-
-/**
- * An overscroll effect that only applies visual effects and does not interfere with the actual
- * scrolling or flinging behavior.
- */
-internal class VisualEffect(private val delegate: ContentOverscrollEffect) :
-    ContentOverscrollEffect by delegate {
-    override fun applyToScroll(
-        delta: Offset,
-        source: NestedScrollSource,
-        performScroll: (Offset) -> Offset,
-    ): Offset {
-        return performScroll(delta)
-    }
-
-    override suspend fun applyToFling(
-        velocity: Velocity,
-        performFling: suspend (Velocity) -> Velocity,
-    ) {
-        performFling(velocity)
     }
 }

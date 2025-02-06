@@ -53,7 +53,6 @@ import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import java.util.function.Consumer
 import kotlin.test.Test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -71,7 +70,6 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.doThrow
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {

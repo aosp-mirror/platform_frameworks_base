@@ -27,6 +27,8 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
+import android.graphics.RenderEffect;
+import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.os.Looper;
 import android.util.AttributeSet;
@@ -39,10 +41,8 @@ import androidx.core.graphics.ColorUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.systemui.res.R;
 import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.util.LargeScreenUtils;
-import com.android.systemui.window.flag.WindowBlurFlag;
 
 import java.util.concurrent.Executor;
 
@@ -252,13 +252,6 @@ public class ScrimView extends View {
             if (mBlendWithMainColor) {
                 mainTinted = ColorUtils.blendARGB(mColors.getMainColor(), mTintColor, tintAmount);
             }
-            if (WindowBlurFlag.isEnabled()) {
-                int layerAbove = ColorUtils.setAlphaComponent(
-                        getResources().getColor(R.color.shade_panel, null),
-                        (int) (0.4f * 255));
-                int layerBelow = ColorUtils.setAlphaComponent(Color.WHITE, (int) (0.1f * 255));
-                mainTinted = ColorUtils.compositeColors(layerAbove, layerBelow);
-            }
             drawable.setColor(mainTinted, animated);
         } else {
             boolean hasAlpha = Color.alpha(mTintColor) != 0;
@@ -380,6 +373,20 @@ public class ScrimView extends View {
     public void setCornerRadius(int radius) {
         if (mDrawable instanceof ScrimDrawable) {
             ((ScrimDrawable) mDrawable).setRoundedCorners(radius);
+        }
+    }
+
+    /**
+     * Blur the view with the specific blur radius or clear any blurs if the radius is 0
+     */
+    public void setBlurRadius(float blurRadius) {
+        if (blurRadius > 0) {
+            setRenderEffect(RenderEffect.createBlurEffect(
+                    blurRadius,
+                    blurRadius,
+                    Shader.TileMode.CLAMP));
+        } else {
+            setRenderEffect(null);
         }
     }
 }

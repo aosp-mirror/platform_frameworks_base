@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_COMMAND_H
-#define AAPT_COMMAND_H
+#pragma once
 
+#include <deque>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <ostream>
 #include <string>
@@ -30,10 +31,17 @@ namespace aapt {
 
 class Command {
  public:
-  explicit Command(android::StringPiece name) : name_(name), full_subcommand_name_(name){};
+  explicit Command(android::StringPiece name) : Command(name, {}) {
+  }
 
   explicit Command(android::StringPiece name, android::StringPiece short_name)
-      : name_(name), short_name_(short_name), full_subcommand_name_(name){};
+      : name_(name), short_name_(short_name), full_subcommand_name_(name) {
+    flags_.emplace_back("--help", "Displays this help menu", false, 0,
+                        [this](android::StringPiece arg, std::ostream* out) {
+                          Usage(out);
+                          return false;
+                        });
+  }
 
   Command(Command&&) = default;
   Command& operator=(Command&&) = default;
@@ -76,41 +84,51 @@ class Command {
   // Parses the command line arguments, sets the flag variable values, and runs the action of
   // the command. If the arguments fail to parse to the command and its subcommands, then the action
   // will not be run and the usage will be printed instead.
-  int Execute(const std::vector<android::StringPiece>& args, std::ostream* outError);
+  int Execute(std::vector<android::StringPiece>& args, std::ostream* out_error);
+
+  // Same, but for a temporary vector of args.
+  int Execute(std::vector<android::StringPiece>&& args, std::ostream* out_error) {
+    return Execute(args, out_error);
+  }
 
   // The action to preform when the command is executed.
   virtual int Action(const std::vector<std::string>& args) = 0;
 
  private:
   struct Flag {
-    explicit Flag(android::StringPiece name, android::StringPiece description,
-                  const bool is_required, const size_t num_args,
-                  std::function<bool(android::StringPiece value)>&& action)
+    explicit Flag(android::StringPiece name, android::StringPiece description, bool is_required,
+                  const size_t num_args,
+                  std::function<bool(android::StringPiece value, std::ostream* out_err)>&& action)
         : name(name),
           description(description),
-          is_required(is_required),
+          action(std::move(action)),
           num_args(num_args),
-          action(std::move(action)) {
+          is_required(is_required) {
     }
 
-    const std::string name;
-    const std::string description;
-    const bool is_required;
-    const size_t num_args;
-    const std::function<bool(android::StringPiece value)> action;
+    std::string name;
+    std::string description;
+    std::function<bool(android::StringPiece value, std::ostream* out_error)> action;
+    size_t num_args;
+    bool is_required;
     bool found = false;
   };
 
+  const std::string& addEnvironmentArg(const Flag& flag, const char* env);
+  void parseFlagsFromEnvironment(std::vector<android::StringPiece>& args);
+
   std::string name_;
   std::string short_name_;
-  std::string description_ = "";
+  std::string description_;
   std::string full_subcommand_name_;
 
   std::vector<Flag> flags_;
   std::vector<std::unique_ptr<Command>> subcommands_;
   std::vector<std::unique_ptr<Command>> experimental_subcommands_;
+  // A collection of arguments loaded from environment variables, with stable positions
+  // in memory - we add them to the vector of string views so the pointers may not change,
+  // with or without short string buffer utilization in std::string.
+  std::deque<std::string> environment_args_;
 };
 
 }  // namespace aapt
-
-#endif  // AAPT_COMMAND_H

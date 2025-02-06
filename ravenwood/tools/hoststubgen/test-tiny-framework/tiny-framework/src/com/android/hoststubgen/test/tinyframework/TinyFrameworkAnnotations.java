@@ -28,7 +28,7 @@ import android.hosttest.annotation.HostSideTestThrow;
 @HostSideTestKeep
 @HostSideTestClassLoadHook(
         "com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHook.onClassLoaded")
-public class TinyFrameworkAnnotations {
+public final class TinyFrameworkAnnotations {
     @HostSideTestKeep
     public TinyFrameworkAnnotations() {
     }
@@ -42,7 +42,7 @@ public class TinyFrameworkAnnotations {
     public int remove;
 
     @HostSideTestKeep
-    public int addOne(int value) {
+    public final int addOne(int value) {
         return value + 1;
     }
 
@@ -61,10 +61,10 @@ public class TinyFrameworkAnnotations {
     }
 
     @HostSideTestSubstitute(suffix = "_host")
-    public static native int nativeAddThree(int value);
+    public final static native int nativeAddThree(int value);
 
     // This method is private, but at runtime, it'll inherit the visibility of the original method
-    private static int nativeAddThree_host(int value) {
+    private final static int nativeAddThree_host(int value) {
         return value + 3;
     }
 

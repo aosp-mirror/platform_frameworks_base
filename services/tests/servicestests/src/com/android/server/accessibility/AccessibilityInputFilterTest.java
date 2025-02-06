@@ -26,6 +26,7 @@ import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEA
 import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEATURE_INJECT_MOTION_EVENTS;
 import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEATURE_TOUCH_EXPLORATION;
 import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER;
+import static com.android.server.accessibility.Flags.FLAG_ENABLE_MAGNIFICATION_KEYBOARD_CONTROL;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -39,6 +40,10 @@ import android.content.Context;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.util.SparseArray;
 import android.view.Display;
@@ -52,15 +57,18 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.LocalServices;
+import com.android.server.accessibility.autoclick.AutoclickController;
 import com.android.server.accessibility.gestures.TouchExplorer;
 import com.android.server.accessibility.magnification.FullScreenMagnificationGestureHandler;
 import com.android.server.accessibility.magnification.MagnificationGestureHandler;
+import com.android.server.accessibility.magnification.MagnificationKeyHandler;
 import com.android.server.accessibility.magnification.MagnificationProcessor;
 import com.android.server.accessibility.magnification.WindowMagnificationGestureHandler;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -88,8 +96,16 @@ public class AccessibilityInputFilterTest {
             | FLAG_FEATURE_INJECT_MOTION_EVENTS
             | FLAG_FEATURE_FILTER_KEY_EVENTS;
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
     // The expected order of EventStreamTransformations.
     private final Class[] mExpectedEventHandlerTypes =
+            {MagnificationKeyHandler.class, KeyboardInterceptor.class, MotionEventInjector.class,
+                    FullScreenMagnificationGestureHandler.class, TouchExplorer.class,
+                    AutoclickController.class, AccessibilityInputFilter.class};
+
+    private final Class[] mExpectedEventHandlerTypesWithoutMagKeyboard =
             {KeyboardInterceptor.class, MotionEventInjector.class,
                     FullScreenMagnificationGestureHandler.class, TouchExplorer.class,
                     AutoclickController.class, AccessibilityInputFilter.class};
@@ -176,6 +192,7 @@ public class AccessibilityInputFilterTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(FLAG_ENABLE_MAGNIFICATION_KEYBOARD_CONTROL)
     public void testEventHandler_shouldIncreaseAndHaveCorrectOrderAfterOnDisplayAdded() {
         prepareLooper();
 
@@ -191,9 +208,9 @@ public class AccessibilityInputFilterTest {
         EventStreamTransformation next = mEventHandler.get(SECOND_DISPLAY);
         assertNotNull(next);
 
-        // Start from index 1 because KeyboardInterceptor only exists in EventHandler for
-        // DEFAULT_DISPLAY.
-        for (int i = 1; next != null; i++) {
+        // Start from index 2 because KeyboardInterceptor and MagnificationKeyHandler only exist in
+        // EventHandler for DEFAULT_DISPLAY.
+        for (int i = 2; next != null; i++) {
             assertEquals(next.getClass(), mExpectedEventHandlerTypes[i]);
             next = next.getNext();
         }
@@ -232,6 +249,7 @@ public class AccessibilityInputFilterTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(FLAG_ENABLE_MAGNIFICATION_KEYBOARD_CONTROL)
     public void testEventHandler_shouldHaveCorrectOrderForEventStreamTransformation() {
         prepareLooper();
 
@@ -248,10 +266,36 @@ public class AccessibilityInputFilterTest {
         }
 
         next = mEventHandler.get(SECOND_DISPLAY);
+        // Start from index 2 because KeyboardInterceptor and MagnificationKeyHandler only exist
+        // in EventHandler for DEFAULT_DISPLAY.
+        for (int i = 2; next != null; i++) {
+            assertEquals(next.getClass(), mExpectedEventHandlerTypes[i]);
+            next = next.getNext();
+        }
+    }
+
+    @Test
+    @RequiresFlagsDisabled(FLAG_ENABLE_MAGNIFICATION_KEYBOARD_CONTROL)
+    public void testEventHandler_shouldHaveCorrectOrderForEventStreamTransformation_noMagKeys() {
+        prepareLooper();
+
+        setDisplayCount(2);
+        mA11yInputFilter.setUserAndEnabledFeatures(0, mFeatures);
+        assertEquals(2, mEventHandler.size());
+
+        // Check if mEventHandler for each display has correct order of the
+        // EventStreamTransformations.
+        EventStreamTransformation next = mEventHandler.get(DEFAULT_DISPLAY);
+        for (int i = 0; next != null; i++) {
+            assertEquals(next.getClass(), mExpectedEventHandlerTypesWithoutMagKeyboard[i]);
+            next = next.getNext();
+        }
+
+        next = mEventHandler.get(SECOND_DISPLAY);
         // Start from index 1 because KeyboardInterceptor only exists in EventHandler for
         // DEFAULT_DISPLAY.
         for (int i = 1; next != null; i++) {
-            assertEquals(next.getClass(), mExpectedEventHandlerTypes[i]);
+            assertEquals(next.getClass(), mExpectedEventHandlerTypesWithoutMagKeyboard[i]);
             next = next.getNext();
         }
     }
@@ -387,7 +431,6 @@ public class AccessibilityInputFilterTest {
         assertNotNull(handler);
         assertEquals(WindowMagnificationGestureHandler.class, handler.getClass());
         assertEquals(nextEventStream.getClass(), handler.getNext().getClass());
-
     }
 
     @Test public void
@@ -410,6 +453,32 @@ public class AccessibilityInputFilterTest {
         assertNotNull(handler);
         assertEquals(WindowMagnificationGestureHandler.class, handler.getClass());
         assertEquals(nextEventStream.getClass(), handler.getNext().getClass());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_ENABLE_MAGNIFICATION_KEYBOARD_CONTROL)
+    public void testEnabledFeatures_windowMagnificationMode_expectedMagnificationKeyHandler() {
+        prepareLooper();
+        doReturn(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW).when(
+                mAms).getMagnificationMode(DEFAULT_DISPLAY);
+
+        mA11yInputFilter.setUserAndEnabledFeatures(0, mFeatures);
+
+        MagnificationKeyHandler handler = getMagnificationKeyHandlerFromEventHandler();
+        assertNotNull(handler);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_ENABLE_MAGNIFICATION_KEYBOARD_CONTROL)
+    public void testEnabledFeatures_fullscreenMagnificationMode_expectedMagnificationKeyHandler() {
+        prepareLooper();
+        doReturn(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN).when(
+                mAms).getMagnificationMode(DEFAULT_DISPLAY);
+
+        mA11yInputFilter.setUserAndEnabledFeatures(0, mFeatures);
+
+        MagnificationKeyHandler handler = getMagnificationKeyHandlerFromEventHandler();
+        assertNotNull(handler);
     }
 
     private static void prepareLooper() {
@@ -453,6 +522,18 @@ public class AccessibilityInputFilterTest {
         while (next != null) {
             if (next instanceof MagnificationGestureHandler) {
                 return (MagnificationGestureHandler) next;
+            }
+            next = next.getNext();
+        }
+        return null;
+    }
+
+    @Nullable
+    private MagnificationKeyHandler getMagnificationKeyHandlerFromEventHandler() {
+        EventStreamTransformation next = mEventHandler.get(DEFAULT_DISPLAY);
+        while (next != null) {
+            if (next instanceof MagnificationKeyHandler) {
+                return (MagnificationKeyHandler) next;
             }
             next = next.getNext();
         }

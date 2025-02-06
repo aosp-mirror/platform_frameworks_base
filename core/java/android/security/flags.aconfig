@@ -42,6 +42,16 @@ flag {
 }
 
 flag {
+    name: "secure_array_zeroization"
+    namespace: "security"
+    description: "Enable secure array zeroization"
+    bug: "320392352"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "deprecate_fsv_sig"
     namespace: "hardware_backed_security"
     description: "Feature flag for deprecating .fsv_sig"
@@ -145,4 +155,11 @@ flag {
     description: "Feature flag to add the privileged flag to the SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE permission"
     bug: "380120712"
     is_fixed_read_only: true
+}
+
+flag {
+    name: "disable_adaptive_auth_counter_lock"
+    namespace: "biometrics"
+    description: "Flag to allow an adb secure setting to disable the adaptive auth lock"
+    bug: "371057865"
 }

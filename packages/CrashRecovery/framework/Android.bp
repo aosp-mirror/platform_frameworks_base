@@ -1,8 +1,8 @@
 filegroup {
     name: "framework-crashrecovery-sources",
     srcs: [
-        "java/**/*.java",
         "java/**/*.aidl",
+        "java/**/*.java",
     ],
     path: "java",
     visibility: [
@@ -12,11 +12,14 @@ filegroup {
 
 java_sdk_library {
     name: "framework-platformcrashrecovery",
-    srcs: [":framework-crashrecovery-sources"],
+    srcs: [
+        ":framework-crashrecovery-module-sources",
+        ":framework-crashrecovery-sources",
+    ],
     defaults: ["framework-non-updatable-unbundled-defaults"],
     permitted_packages: [
-        "android.service.watchdog",
         "android.crashrecovery",
+        "android.service.watchdog",
     ],
     static_libs: ["android.crashrecovery.flags-aconfig-java"],
     aidl: {

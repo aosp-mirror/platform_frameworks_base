@@ -38,6 +38,7 @@ import android.location.provider.LocationProviderBase;
 import android.location.provider.ProviderProperties;
 import android.location.provider.ProviderRequest;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -301,8 +302,13 @@ public class FusedLocationProvider extends LocationProviderBase {
                             .setWorkSource(mRequest.getWorkSource())
                             .setHiddenFromAppOps(true)
                             .build();
-                    mLocationManager.requestLocationUpdates(mProvider, request,
-                            mContext.getMainExecutor(), this);
+
+                    try {
+                        mLocationManager.requestLocationUpdates(
+                                mProvider, request, mContext.getMainExecutor(), this);
+                    } catch (IllegalArgumentException e) {
+                        Log.e(TAG, "Failed to request location updates");
+                    }
                 }
             }
         }
@@ -311,7 +317,11 @@ public class FusedLocationProvider extends LocationProviderBase {
             synchronized (mLock) {
                 int requestCode = mNextFlushCode++;
                 mPendingFlushes.put(requestCode, callback);
-                mLocationManager.requestFlush(mProvider, this, requestCode);
+                try {
+                    mLocationManager.requestFlush(mProvider, this, requestCode);
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, "Failed to request flush");
+                }
             }
         }
 

@@ -46,15 +46,12 @@ import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
-import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceTimeBy
@@ -64,7 +61,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardInteractorTest : SysuiTestCase() {
@@ -76,7 +72,6 @@ class KeyguardInteractorTest : SysuiTestCase() {
     private val configRepository by lazy { kosmos.fakeConfigurationRepository }
     private val bouncerRepository by lazy { kosmos.keyguardBouncerRepository }
     private val shadeRepository by lazy { kosmos.shadeRepository }
-    private val powerInteractor by lazy { kosmos.powerInteractor }
     private val keyguardRepository by lazy { kosmos.keyguardRepository }
     private val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
 
@@ -444,7 +439,6 @@ class KeyguardInteractorTest : SysuiTestCase() {
             repository.setDozeTransitionModel(
                 DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
             )
-            powerInteractor.setAwakeForTest()
             advanceTimeBy(1000L)
 
             assertThat(isAbleToDream).isEqualTo(false)
@@ -460,9 +454,6 @@ class KeyguardInteractorTest : SysuiTestCase() {
             repository.setDozeTransitionModel(
                 DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
             )
-            powerInteractor.setAwakeForTest()
-            runCurrent()
-
             // After some delay, still false
             advanceTimeBy(300L)
             assertThat(isAbleToDream).isEqualTo(false)

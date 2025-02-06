@@ -5,34 +5,37 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.systemui.shade.ui.composable.ShadeHeader.Colors.shadeHeaderText
-import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
+import com.android.compose.theme.colorAttr
+import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel.HeaderChipHighlight
 
 @Composable
 fun VariableDayDate(
-    viewModel: ShadeHeaderViewModel,
+    longerDateText: String,
+    shorterDateText: String,
+    chipHighlight: HeaderChipHighlight,
     modifier: Modifier = Modifier,
 ) {
-    val longerText = viewModel.longerDateText.collectAsStateWithLifecycle()
-    val shorterText = viewModel.shorterDateText.collectAsStateWithLifecycle()
+    val textColor =
+        if (chipHighlight is HeaderChipHighlight.Strong)
+            colorAttr(android.R.attr.textColorPrimaryInverse)
+        else colorAttr(android.R.attr.textColorPrimary)
 
     Layout(
         contents =
             listOf(
                 {
                     Text(
-                        text = longerText.value,
+                        text = longerDateText,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.shadeHeaderText,
+                        color = textColor,
                         maxLines = 1,
                     )
                 },
                 {
                     Text(
-                        text = shorterText.value,
+                        text = shorterDateText,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.shadeHeaderText,
+                        color = textColor,
                         maxLines = 1,
                     )
                 },

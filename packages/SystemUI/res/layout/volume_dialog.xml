@@ -19,6 +19,7 @@
     android:id="@+id/volume_dialog_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:alpha="0"
     android:clipChildren="false"
     app:layoutDescription="@xml/volume_dialog_scene">
 
@@ -44,7 +45,7 @@
         app:layout_constraintBottom_toTopOf="@id/volume_dialog_main_slider_container"
         app:layout_constraintEnd_toEndOf="@id/volume_dialog_main_slider_container"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <include
         android:id="@+id/volume_dialog_main_slider_container"

@@ -33,6 +33,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.shared.TransactionPool;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class DefaultSurfaceAnimator {
 
@@ -58,42 +59,12 @@ public class DefaultSurfaceAnimator {
         // Animation length is already expected to be scaled.
         va.overrideDurationScale(1.0f);
         va.setDuration(anim.computeDurationHint());
-        va.addUpdateListener(updateListener);
-        va.addListener(new AnimatorListenerAdapter() {
-            // It is possible for the end/cancel to be called more than once, which may cause
-            // issues if the animating surface has already been released. Track the finished
-            // state here to skip duplicate callbacks. See b/252872225.
-            private boolean mFinished;
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                onFinish();
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                onFinish();
-            }
-
-            private void onFinish() {
-                if (mFinished) return;
-                mFinished = true;
-                // Apply transformation of end state in case the animation is canceled.
-                if (va.getAnimatedFraction() < 1f) {
-                    va.setCurrentFraction(1f);
-                }
-
-                pool.release(transaction);
-                mainExecutor.execute(() -> {
-                    animations.remove(va);
-                    finishCallback.run();
-                });
-                // The update listener can continue to be called after the animation has ended if
-                // end() is called manually again before the finisher removes the animation.
-                // Remove it manually here to prevent animating a released surface.
-                // See b/252872225.
-                va.removeUpdateListener(updateListener);
-            }
+        setupValueAnimator(va, updateListener, (vanim) -> {
+            pool.release(transaction);
+            mainExecutor.execute(() -> {
+                animations.remove(vanim);
+                finishCallback.run();
+            });
         });
         animations.add(va);
     }
@@ -187,5 +158,51 @@ public class DefaultSurfaceAnimator {
                 }
             }
         }
+    }
+
+    /**
+     * Setup some callback logic on a value-animator. This helper ensures that a value animator
+     * finishes at its final fraction (1f) and that relevant callbacks are only called once.
+     */
+    public static ValueAnimator setupValueAnimator(ValueAnimator animator,
+            ValueAnimator.AnimatorUpdateListener updateListener,
+            Consumer<ValueAnimator> afterFinish) {
+        animator.addUpdateListener(updateListener);
+        animator.addListener(new AnimatorListenerAdapter() {
+            // It is possible for the end/cancel to be called more than once, which may cause
+            // issues if the animating surface has already been released. Track the finished
+            // state here to skip duplicate callbacks. See b/252872225.
+            private boolean mFinished;
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                onFinish();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                onFinish();
+            }
+
+            private void onFinish() {
+                if (mFinished) return;
+                mFinished = true;
+                // Apply transformation of end state in case the animation is canceled.
+                if (animator.getAnimatedFraction() < 1f) {
+                    animator.setCurrentFraction(1f);
+                }
+                afterFinish.accept(animator);
+                // The update listener can continue to be called after the animation has ended if
+                // end() is called manually again before the finisher removes the animation.
+                // Remove it manually here to prevent animating a released surface.
+                // See b/252872225.
+                animator.removeUpdateListener(updateListener);
+            }
+        });
+        return animator;
     }
 }

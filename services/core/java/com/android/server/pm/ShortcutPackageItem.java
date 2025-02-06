@@ -179,7 +179,7 @@ abstract class ShortcutPackageItem {
                 itemOut.endDocument();
 
                 os.flush();
-                file.finishWrite(os);
+                mShortcutUser.mService.injectFinishWrite(file, os);
             } catch (XmlPullParserException | IOException e) {
                 Slog.e(TAG, "Failed to write to file " + file.getBaseFile(), e);
                 file.failWrite(os);

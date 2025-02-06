@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
-import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -41,7 +38,6 @@ import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRo
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.setActiveNotifs
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
-import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeUserSetupRepository
@@ -50,7 +46,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.value
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -63,7 +58,6 @@ import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-@EnableFlags(FooterViewRefactor.FLAG_NAME)
 class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {

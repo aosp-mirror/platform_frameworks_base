@@ -36,7 +36,6 @@ import com.android.systemui.qs.tiles.impl.custom.customTileStatePersister
 import com.android.systemui.qs.tiles.impl.custom.data.entity.CustomTileDefaults
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
@@ -47,7 +46,6 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class CustomTileInteractorTest : SysuiTestCase() {
 
     private val kosmos = testKosmos().apply { customTileSpec = TileSpec.create(TEST_COMPONENT) }

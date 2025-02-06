@@ -85,15 +85,16 @@ import static android.view.contentprotection.flags.Flags.createAccessibilityOver
 
 import static com.android.hardware.input.Flags.enableNew25q2Keycodes;
 import static com.android.hardware.input.Flags.enableTalkbackAndMagnifierKeyGestures;
+import static com.android.hardware.input.Flags.enableVoiceAccessKeyGestures;
 import static com.android.hardware.input.Flags.inputManagerLifecycleSupport;
 import static com.android.hardware.input.Flags.keyboardA11yShortcutControl;
 import static com.android.hardware.input.Flags.modifierShortcutDump;
 import static com.android.hardware.input.Flags.overridePowerKeyBehaviorInFocusedWindow;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREENSHOT_KEYCHORD_DELAY;
 import static com.android.server.GestureLauncherService.DOUBLE_POWER_TAP_COUNT_THRESHOLD;
 import static com.android.server.flags.Flags.modifierShortcutManagerMultiuser;
 import static com.android.server.flags.Flags.newBugreportKeyboardShortcut;
-import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREENSHOT_KEYCHORD_DELAY;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_UNCOVERED;
@@ -230,6 +231,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.os.RoSystemProperties;
 import com.android.internal.policy.IKeyguardDismissCallback;
+import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.policy.LogDecelerateInterpolator;
@@ -238,6 +240,7 @@ import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.AccessibilityManagerInternal;
+import com.android.server.DockObserverInternal;
 import com.android.server.ExtconStateObserver;
 import com.android.server.ExtconUEventObserver;
 import com.android.server.GestureLauncherService;
@@ -307,6 +310,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int SHORT_PRESS_POWER_CLOSE_IME_OR_GO_HOME = 5;
     static final int SHORT_PRESS_POWER_LOCK_OR_SLEEP = 6;
     static final int SHORT_PRESS_POWER_DREAM_OR_SLEEP = 7;
+    static final int SHORT_PRESS_POWER_HUB_OR_DREAM_OR_SLEEP = 8;
 
     // must match: config_LongPressOnPowerBehavior in config.xml
     // The config value can be overridden using Settings.Global.POWER_BUTTON_LONG_PRESS
@@ -401,6 +405,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     public static final String TRACE_WAIT_FOR_ALL_WINDOWS_DRAWN_METHOD = "waitForAllWindowsDrawn";
 
+    /**
+     * String extra key passed in the bundle of {@link IKeyguardService#doKeyguardTimeout(Bundle)}
+     * if the value is {@code true}, indicates to keyguard that the device should show the
+     * glanceable hub upon locking. If the hub is already visible, the device should go to sleep.
+     */
+    public static final String EXTRA_TRIGGER_HUB = "extra_trigger_hub";
+
     private static final int POWER_BUTTON_SUPPRESSION_DELAY_DEFAULT_MILLIS = 800;
 
     /**
@@ -472,6 +483,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     DisplayManager mDisplayManager;
     DisplayManagerInternal mDisplayManagerInternal;
     UserManagerInternal mUserManagerInternal;
+    DockObserverInternal mDockObserverInternal;
 
     private WallpaperManagerInternal mWallpaperManagerInternal;
 
@@ -501,6 +513,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private AccessibilityShortcutController mAccessibilityShortcutController;
 
     private TalkbackShortcutController mTalkbackShortcutController;
+
+    private VoiceAccessShortcutController mVoiceAccessShortcutController;
 
     private WindowWakeUpPolicy mWindowWakeUpPolicy;
 
@@ -562,8 +576,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mPowerKeyHandled;
     volatile boolean mBackKeyHandled;
     volatile boolean mEndCallKeyHandled;
-    volatile boolean mCameraGestureTriggered;
-    volatile boolean mCameraGestureTriggeredDuringGoingToSleep;
+    volatile boolean mPowerButtonLaunchGestureTriggered;
+    volatile boolean mPowerButtonLaunchGestureTriggeredDuringGoingToSleep;
 
     /**
      * {@code true} if the device is entering a low-power state; {@code false otherwise}.
@@ -1149,7 +1163,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void powerPress(long eventTime, int count, int displayId) {
+    @VisibleForTesting
+    void powerPress(long eventTime, int count, int displayId) {
         // SideFPS still needs to know about suppressed power buttons, in case it needs to block
         // an auth attempt.
         if (count == 1) {
@@ -1224,6 +1239,43 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             () -> sleepDefaultDisplayFromPowerButton(eventTime, 0));
                     break;
                 }
+                case SHORT_PRESS_POWER_HUB_OR_DREAM_OR_SLEEP: {
+                    // With this power button behavior, the following behavior is expected from each
+                    // system space on a power button short press:
+                    // - Unlocked: go to hub if available, dream if not, screen off if neither
+                    // - Lock screen, hub, or dream: go to screen off
+                    // - Screen off: go to hub if available, dream if not, lock screen if enabled,
+                    //               unlocked if lockscreen is disabled
+                    // TODO(b/394657933): consolidate policy into SysUI
+                    final boolean hubEnabled = Settings.Secure.getIntForUser(
+                            mContext.getContentResolver(), Settings.Secure.GLANCEABLE_HUB_ENABLED,
+                            1, mCurrentUserId) == 1;
+
+                    if (mDreamManagerInternal.isDreaming() || isKeyguardShowing()) {
+                        // If the device is already dreaming or on keyguard, go to sleep.
+                        sleepDefaultDisplayFromPowerButton(eventTime, 0);
+                        break;
+                    }
+
+                    // Check isLockScreenDisabled to exclude NONE lock screen option, which cannot
+                    // show hub.
+                    boolean keyguardAvailable = !mLockPatternUtils.isLockScreenDisabled(
+                            mCurrentUserId);
+                    if (mUserManagerInternal.isUserUnlocked(mCurrentUserId) && hubEnabled
+                            && keyguardAvailable && mDreamManagerInternal.dreamConditionActive()) {
+                        // If the hub can be launched, send a message to keyguard.
+                        Bundle options = new Bundle();
+                        options.putBoolean(EXTRA_TRIGGER_HUB, true);
+                        lockNow(options);
+                    } else {
+                        // If the hub cannot be run, attempt to dream instead.
+                        attemptToDreamFromShortPowerButtonPress(
+                                /* isScreenOn */ true,
+                                /* noDreamAction */
+                                () -> sleepDefaultDisplayFromPowerButton(eventTime, 0));
+                    }
+                    break;
+                }
             }
         }
     }
@@ -1274,7 +1326,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     private void attemptToDreamFromShortPowerButtonPress(
             boolean isScreenOn, Runnable noDreamAction) {
-        if (mShortPressOnPowerBehavior != SHORT_PRESS_POWER_DREAM_OR_SLEEP) {
+        if (mShortPressOnPowerBehavior != SHORT_PRESS_POWER_DREAM_OR_SLEEP
+                && mShortPressOnPowerBehavior != SHORT_PRESS_POWER_HUB_OR_DREAM_OR_SLEEP) {
+            // If the power button behavior isn't one that should be able to trigger the dream, give
+            // up.
             noDreamAction.run();
             return;
         }
@@ -2265,6 +2320,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return new TalkbackShortcutController(mContext);
         }
 
+        VoiceAccessShortcutController getVoiceAccessShortcutController() {
+            return new VoiceAccessShortcutController(mContext);
+        }
+
         WindowWakeUpPolicy getWindowWakeUpPolicy() {
             return new WindowWakeUpPolicy(mContext);
         }
@@ -2445,12 +2504,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         filter.addAction(UiModeManager.ACTION_ENTER_DESK_MODE);
         filter.addAction(UiModeManager.ACTION_EXIT_DESK_MODE);
         filter.addAction(Intent.ACTION_DOCK_EVENT);
-        Intent intent = mContext.registerReceiver(mDockReceiver, filter);
-        if (intent != null) {
-            // Retrieve current sticky dock event broadcast.
-            mDefaultDisplayPolicy.setDockMode(intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
-                    Intent.EXTRA_DOCK_STATE_UNDOCKED));
-        }
+        mContext.registerReceiver(mDockReceiver, filter);
 
         // register for multiuser-relevant broadcasts
         filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
@@ -2512,6 +2566,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_keyguardDrawnTimeout);
         mKeyguardDelegate = injector.getKeyguardServiceDelegate();
         mTalkbackShortcutController = injector.getTalkbackShortcutController();
+        mVoiceAccessShortcutController = injector.getVoiceAccessShortcutController();
         mWindowWakeUpPolicy = injector.getWindowWakeUpPolicy();
         initKeyCombinationRules();
         initSingleKeyGestureRules(injector.getLooper());
@@ -3659,7 +3714,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_S:
-                if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
+                if (firstDown && event.isMetaPressed()) {
                     interceptScreenshotChord(SCREENSHOT_KEY_OTHER, 0 /*pressDelay*/);
                     notifyKeyGestureCompleted(event,
                             KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT);
@@ -3793,10 +3848,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 true /* leftOrTop */);
                         notifyKeyGestureCompleted(event,
                                 KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT);
-                    } else if (event.isAltPressed()) {
-                        setSplitscreenFocus(true /* leftOrTop */);
-                        notifyKeyGestureCompleted(event,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT);
                     } else {
                         notifyKeyGestureCompleted(event,
                                 KeyGestureEvent.KEY_GESTURE_TYPE_BACK);
@@ -3812,11 +3863,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 false /* leftOrTop */);
                         notifyKeyGestureCompleted(event,
                                 KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT);
-                        return true;
-                    } else if (event.isAltPressed()) {
-                        setSplitscreenFocus(false /* leftOrTop */);
-                        notifyKeyGestureCompleted(event,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT);
                         return true;
                     }
                 }
@@ -4233,9 +4279,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     case KeyGestureEvent.KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_DESKTOP_MODE:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT:
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT:
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_BRIGHTNESS_UP:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_BRIGHTNESS_DOWN:
@@ -4262,6 +4306,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 .isAccessibilityShortcutAvailable(false);
                     case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK:
                         return enableTalkbackAndMagnifierKeyGestures();
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_VOICE_ACCESS:
+                        return enableVoiceAccessKeyGestures();
                     default:
                         return false;
                 }
@@ -4369,20 +4415,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             true /* leftOrTop */);
                 }
                 return true;
-            case KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT:
-                if (complete) {
-                    setSplitscreenFocus(true /* leftOrTop */);
-                }
-                return true;
             case KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT:
                 if (complete) {
                     moveFocusedTaskToStageSplit(getTargetDisplayIdForKeyGestureEvent(event),
                             false /* leftOrTop */);
-                }
-                return true;
-            case KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT:
-                if (complete) {
-                    setSplitscreenFocus(false /* leftOrTop */);
                 }
                 return true;
             case KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER:
@@ -4488,6 +4524,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (complete) {
                         mTalkbackShortcutController.toggleTalkback(mCurrentUserId,
                                 TalkbackShortcutController.ShortcutSource.KEYBOARD);
+                    }
+                    return true;
+                }
+                break;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_VOICE_ACCESS:
+                if (enableVoiceAccessKeyGestures()) {
+                    if (complete) {
+                        mVoiceAccessShortcutController.toggleVoiceAccess(mCurrentUserId);
                     }
                     return true;
                 }
@@ -5066,13 +5110,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void setSplitscreenFocus(boolean leftOrTop) {
-        StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
-        if (statusbar != null) {
-            statusbar.setSplitscreenFocus(leftOrTop);
-        }
-    }
-
     void launchHomeFromHotKey(int displayId) {
         launchHomeFromHotKey(displayId, true /* awakenFromDreams */, true /*respectKeyguard*/);
     }
@@ -5145,8 +5182,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /**
-     * Updates the occluded state of the Keyguard immediately via
-     * {@link com.android.internal.policy.IKeyguardService}.
+     * Updates the occluded state of the Keyguard immediately via {@link IKeyguardService}.
      *
      * @param isOccluded Whether the Keyguard is occluded by another window.
      * @return Whether the flags have changed and we have to redo the layout.
@@ -5893,7 +5929,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mGestureLauncherService == null) {
             return false;
         }
-        mCameraGestureTriggered = false;
+        mPowerButtonLaunchGestureTriggered = false;
         final MutableBoolean outLaunched = new MutableBoolean(false);
         final boolean intercept =
                 mGestureLauncherService.interceptPowerKeyDown(event, interactive, outLaunched);
@@ -5903,9 +5939,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // detector from processing the power key later on.
             return intercept;
         }
-        mCameraGestureTriggered = true;
+        mPowerButtonLaunchGestureTriggered = true;
         if (mRequestedOrSleepingDefaultDisplay) {
-            mCameraGestureTriggeredDuringGoingToSleep = true;
+            mPowerButtonLaunchGestureTriggeredDuringGoingToSleep = true;
             // Wake device up early to prevent display doing redundant turning off/on stuff.
             mWindowWakeUpPolicy.wakeUpFromPowerKeyCameraGesture();
         }
@@ -6282,13 +6318,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.onFinishedGoingToSleep(pmSleepReason,
-                    mCameraGestureTriggeredDuringGoingToSleep);
+                    mPowerButtonLaunchGestureTriggeredDuringGoingToSleep);
         }
         if (mDisplayFoldController != null) {
             mDisplayFoldController.finishedGoingToSleep();
         }
-        mCameraGestureTriggeredDuringGoingToSleep = false;
-        mCameraGestureTriggered = false;
+        mPowerButtonLaunchGestureTriggeredDuringGoingToSleep = false;
+        mPowerButtonLaunchGestureTriggered = false;
     }
 
     // Called on the PowerManager's Notifier thread.
@@ -6319,10 +6355,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDefaultDisplayRotation.updateOrientationListener();
 
         if (mKeyguardDelegate != null) {
-            mKeyguardDelegate.onStartedWakingUp(pmWakeReason, mCameraGestureTriggered);
+            mKeyguardDelegate.onStartedWakingUp(pmWakeReason, mPowerButtonLaunchGestureTriggered);
         }
 
-        mCameraGestureTriggered = false;
+        mPowerButtonLaunchGestureTriggered = false;
     }
 
     // Called on the PowerManager's Notifier thread.
@@ -6764,6 +6800,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mVrManagerInternal = LocalServices.getService(VrManagerInternal.class);
         if (mVrManagerInternal != null) {
             mVrManagerInternal.addPersistentVrModeStateListener(mPersistentVrModeListener);
+        }
+
+        mDockObserverInternal = LocalServices.getService(DockObserverInternal.class);
+        if (mDockObserverInternal != null) {
+            // Get initial state from DockObserverInternal, DockObserver starts after WM.
+            int dockMode = mDockObserverInternal.getActualDockState();
+            mDefaultDisplayPolicy.setDockMode(dockMode);
         }
 
         readCameraLensCoverState();

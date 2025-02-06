@@ -33,7 +33,10 @@ import java.util.function.Consumer
  */
 class ScrollViewFields {
     /** Used to produce the clipping path */
-    var scrimClippingShape: ShadeScrimShape? = null
+    var clippingShape: ShadeScrimShape? = null
+
+    /** Used to produce a negative clipping path */
+    var negativeClippingShape: ShadeScrimShape? = null
 
     /** Scroll state of the notification shade. */
     var scrollState: ShadeScrollState = ShadeScrollState()
@@ -97,7 +100,8 @@ class ScrollViewFields {
 
     fun dump(pw: IndentingPrintWriter) {
         pw.printSection("StackViewStates") {
-            pw.println("scrimClippingShape", scrimClippingShape)
+            pw.println("scrimClippingShape", clippingShape)
+            pw.println("negativeClippingShape", negativeClippingShape)
             pw.println("scrollState", scrollState)
         }
     }

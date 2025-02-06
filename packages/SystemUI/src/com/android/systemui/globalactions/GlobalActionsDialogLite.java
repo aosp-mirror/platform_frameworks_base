@@ -463,6 +463,9 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mTelephonyListenerManager.removeServiceStateListener(mPhoneStateListener);
         mGlobalSettings.unregisterContentObserverSync(mAirplaneModeObserver);
         mConfigurationController.removeCallback(this);
+        if (mShowSilentToggle) {
+            mRingerModeTracker.getRingerMode().removeObservers(this);
+        }
     }
 
     protected Context getContext() {

@@ -18,7 +18,6 @@ package com.android.wm.shell.desktopmode
 
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
@@ -26,7 +25,6 @@ import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFreeformTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFullscreenTask
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
@@ -43,8 +41,6 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class DesktopTaskChangeListenerTest : ShellTestCase() {
-
-    @JvmField @Rule val setFlagsRule = SetFlagsRule()
 
     private lateinit var desktopTaskChangeListener: DesktopTaskChangeListener
 
@@ -68,8 +64,7 @@ class DesktopTaskChangeListenerTest : ShellTestCase() {
 
         verify(desktopUserRepositories.current, never())
             .addTask(task.displayId, task.taskId, task.isVisible)
-        verify(desktopUserRepositories.current, never())
-            .removeFreeformTask(task.displayId, task.taskId)
+        verify(desktopUserRepositories.current, never()).removeTask(task.displayId, task.taskId)
     }
 
     @Test
@@ -79,7 +74,7 @@ class DesktopTaskChangeListenerTest : ShellTestCase() {
 
         desktopTaskChangeListener.onTaskOpening(task)
 
-        verify(desktopUserRepositories.current).removeFreeformTask(task.displayId, task.taskId)
+        verify(desktopUserRepositories.current).removeTask(task.displayId, task.taskId)
     }
 
     @Test
@@ -109,7 +104,7 @@ class DesktopTaskChangeListenerTest : ShellTestCase() {
 
         desktopTaskChangeListener.onTaskChanging(task)
 
-        verify(desktopUserRepositories.current).removeFreeformTask(task.displayId, task.taskId)
+        verify(desktopUserRepositories.current).removeTask(task.displayId, task.taskId)
     }
 
     @Test
@@ -141,7 +136,17 @@ class DesktopTaskChangeListenerTest : ShellTestCase() {
 
         desktopTaskChangeListener.onTaskMovingToFront(task)
 
-        verify(desktopUserRepositories.current).removeFreeformTask(task.displayId, task.taskId)
+        verify(desktopUserRepositories.current).removeTask(task.displayId, task.taskId)
+    }
+
+    @Test
+    fun onTaskMovingToFront_freeformTaskOutsideDesktop_addsTaskToRepo() {
+        val task = createFullscreenTask().apply { isVisible = true }
+        whenever(desktopUserRepositories.current.isActiveTask(task.taskId)).thenReturn(true)
+
+        desktopTaskChangeListener.onTaskMovingToFront(task)
+
+        verify(desktopUserRepositories.current).addTask(task.displayId, task.taskId, task.isVisible)
     }
 
     @Test
@@ -169,7 +174,7 @@ class DesktopTaskChangeListenerTest : ShellTestCase() {
 
         verify(desktopUserRepositories.current, never()).minimizeTask(task.displayId, task.taskId)
         verify(desktopUserRepositories.current).removeClosingTask(task.taskId)
-        verify(desktopUserRepositories.current).removeFreeformTask(task.displayId, task.taskId)
+        verify(desktopUserRepositories.current).removeTask(task.displayId, task.taskId)
     }
 
     @Test
@@ -182,6 +187,6 @@ class DesktopTaskChangeListenerTest : ShellTestCase() {
         desktopTaskChangeListener.onTaskClosing(task)
 
         verify(desktopUserRepositories.current).removeClosingTask(task.taskId)
-        verify(desktopUserRepositories.current).removeFreeformTask(task.displayId, task.taskId)
+        verify(desktopUserRepositories.current).removeTask(task.displayId, task.taskId)
     }
 }

@@ -16,6 +16,8 @@
 
 package com.android.settingslib.dream;
 
+import static android.service.dreams.Flags.allowDreamWhenPostured;
+
 import android.annotation.IntDef;
 import android.content.ComponentName;
 import android.content.Context;
@@ -78,14 +80,21 @@ public class DreamBackend {
     }
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({WHILE_CHARGING, WHILE_DOCKED, EITHER, NEVER})
+    @IntDef({
+            WHILE_CHARGING,
+            WHILE_DOCKED,
+            WHILE_POSTURED,
+            WHILE_CHARGING_OR_DOCKED,
+            NEVER
+    })
     public @interface WhenToDream {
     }
 
     public static final int WHILE_CHARGING = 0;
     public static final int WHILE_DOCKED = 1;
-    public static final int EITHER = 2;
-    public static final int NEVER = 3;
+    public static final int WHILE_POSTURED = 2;
+    public static final int WHILE_CHARGING_OR_DOCKED = 3;
+    public static final int NEVER = 4;
 
     /**
      * The type of dream complications which can be provided by a
@@ -134,6 +143,8 @@ public class DreamBackend {
             .DREAM_SETTING_CHANGED__WHEN_TO_DREAM__WHEN_TO_DREAM_WHILE_CHARGING_ONLY;
     private static final int WHEN_TO_DREAM_DOCKED = FrameworkStatsLog
             .DREAM_SETTING_CHANGED__WHEN_TO_DREAM__WHEN_TO_DREAM_WHILE_DOCKED_ONLY;
+    private static final int WHEN_TO_DREAM_POSTURED = FrameworkStatsLog
+            .DREAM_SETTING_CHANGED__WHEN_TO_DREAM__WHEN_TO_DREAM_WHILE_POSTURED_ONLY;
     private static final int WHEN_TO_DREAM_CHARGING_OR_DOCKED = FrameworkStatsLog
             .DREAM_SETTING_CHANGED__WHEN_TO_DREAM__WHEN_TO_DREAM_EITHER_CHARGING_OR_DOCKED;
 
@@ -143,6 +154,7 @@ public class DreamBackend {
     private final boolean mDreamsEnabledByDefault;
     private final boolean mDreamsActivatedOnSleepByDefault;
     private final boolean mDreamsActivatedOnDockByDefault;
+    private final boolean mDreamsActivatedOnPosturedByDefault;
     private final Set<ComponentName> mDisabledDreams;
     private final List<String> mLoggableDreamPrefixes;
     private Set<Integer> mSupportedComplications;
@@ -168,6 +180,8 @@ public class DreamBackend {
                 com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault);
         mDreamsActivatedOnDockByDefault = resources.getBoolean(
                 com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault);
+        mDreamsActivatedOnPosturedByDefault = resources.getBoolean(
+                com.android.internal.R.bool.config_dreamsActivatedOnPosturedByDefault);
         mDisabledDreams = Arrays.stream(resources.getStringArray(
                         com.android.internal.R.array.config_disabledDreamComponents))
                 .map(ComponentName::unflattenFromString)
@@ -280,10 +294,11 @@ public class DreamBackend {
 
     @WhenToDream
     public int getWhenToDreamSetting() {
-        return isActivatedOnDock() && isActivatedOnSleep() ? EITHER
+        return isActivatedOnDock() && isActivatedOnSleep() ? WHILE_CHARGING_OR_DOCKED
                 : isActivatedOnDock() ? WHILE_DOCKED
-                        : isActivatedOnSleep() ? WHILE_CHARGING
-                                : NEVER;
+                        : isActivatedOnPostured() ? WHILE_POSTURED
+                                : isActivatedOnSleep() ? WHILE_CHARGING
+                                        : NEVER;
     }
 
     public void setWhenToDream(@WhenToDream int whenToDream) {
@@ -293,16 +308,25 @@ public class DreamBackend {
             case WHILE_CHARGING:
                 setActivatedOnDock(false);
                 setActivatedOnSleep(true);
+                setActivatedOnPostured(false);
                 break;
 
             case WHILE_DOCKED:
                 setActivatedOnDock(true);
                 setActivatedOnSleep(false);
+                setActivatedOnPostured(false);
                 break;
 
-            case EITHER:
+            case WHILE_CHARGING_OR_DOCKED:
                 setActivatedOnDock(true);
                 setActivatedOnSleep(true);
+                setActivatedOnPostured(false);
+                break;
+
+            case WHILE_POSTURED:
+                setActivatedOnPostured(true);
+                setActivatedOnSleep(false);
+                setActivatedOnDock(false);
                 break;
 
             case NEVER:
@@ -405,6 +429,22 @@ public class DreamBackend {
     public void setActivatedOnSleep(boolean value) {
         logd("setActivatedOnSleep(%s)", value);
         setBoolean(Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, value);
+    }
+
+    public boolean isActivatedOnPostured() {
+        return allowDreamWhenPostured()
+                && getBoolean(Settings.Secure.SCREENSAVER_ACTIVATE_ON_POSTURED,
+                        mDreamsActivatedOnPosturedByDefault);
+    }
+
+    /**
+     * Sets whether dreams should be activated when the device is postured (stationary and upright)
+     */
+    public void setActivatedOnPostured(boolean value) {
+        if (allowDreamWhenPostured()) {
+            logd("setActivatedOnPostured(%s)", value);
+            setBoolean(Settings.Secure.SCREENSAVER_ACTIVATE_ON_POSTURED, value);
+        }
     }
 
     private boolean getBoolean(String key, boolean def) {
@@ -548,7 +588,9 @@ public class DreamBackend {
                 return WHEN_TO_DREAM_CHARGING;
             case WHILE_DOCKED:
                 return WHEN_TO_DREAM_DOCKED;
-            case EITHER:
+            case WHILE_POSTURED:
+                return WHEN_TO_DREAM_POSTURED;
+            case WHILE_CHARGING_OR_DOCKED:
                 return WHEN_TO_DREAM_CHARGING_OR_DOCKED;
             case NEVER:
             default:

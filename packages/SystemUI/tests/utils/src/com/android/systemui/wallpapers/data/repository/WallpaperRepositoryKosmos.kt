@@ -16,28 +16,9 @@
 
 package com.android.systemui.wallpapers.data.repository
 
-import android.content.applicationContext
-import com.android.app.wallpaperManager
-import com.android.systemui.broadcast.broadcastDispatcher
-import com.android.systemui.keyguard.data.repository.keyguardClockRepository
-import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.kosmos.testScope
-import com.android.systemui.user.data.repository.userRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@OptIn(ExperimentalCoroutinesApi::class)
-val Kosmos.wallpaperRepository by Fixture {
-    WallpaperRepositoryImpl(
-        context = applicationContext,
-        scope = testScope,
-        bgDispatcher = testDispatcher,
-        broadcastDispatcher = broadcastDispatcher,
-        userRepository = userRepository,
-        wallpaperManager = wallpaperManager,
-        keyguardClockRepository = keyguardClockRepository,
-        keyguardRepository = keyguardRepository,
-    )
-}
+var Kosmos.fakeWallpaperRepository by Kosmos.Fixture { FakeWallpaperRepository() }
+
+var Kosmos.wallpaperRepository: WallpaperRepository by Kosmos.Fixture { fakeWallpaperRepository }

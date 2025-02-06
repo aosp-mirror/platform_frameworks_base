@@ -23,12 +23,10 @@ import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class QSColumnsRepository
 @Inject

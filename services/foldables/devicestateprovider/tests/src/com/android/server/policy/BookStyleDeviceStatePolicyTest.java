@@ -45,6 +45,8 @@ import android.hardware.SensorManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.input.InputSensorInfo;
 import android.os.Handler;
+import android.os.PowerManager;
+import android.os.PowerManager.ScreenTimeoutPolicyListener;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.view.Display;
@@ -98,6 +100,8 @@ public final class BookStyleDeviceStatePolicyTest {
     @Mock
     DisplayManager mDisplayManager;
     @Mock
+    PowerManager mPowerManager;
+    @Mock
     private Display mDisplay;
 
     private final FakeFeatureFlagsImpl mFakeFeatureFlags = new FakeFeatureFlagsImpl();
@@ -118,6 +122,7 @@ public final class BookStyleDeviceStatePolicyTest {
 
     private Map<Sensor, List<SensorEventListener>> mSensorEventListeners = new HashMap<>();
     private DeviceStateProvider mProvider;
+    private BookStyleDeviceStatePolicy mPolicy;
 
     @Before
     public void setup() {
@@ -125,6 +130,7 @@ public final class BookStyleDeviceStatePolicyTest {
 
         mFakeFeatureFlags.setFlag(Flags.FLAG_ENABLE_FOLDABLES_POSTURE_BASED_CLOSED_STATE, true);
         mFakeFeatureFlags.setFlag(Flags.FLAG_ENABLE_DUAL_DISPLAY_BLOCKING, true);
+        mFakeFeatureFlags.setFlag(Flags.FLAG_FORCE_FOLDABLES_TENT_MODE_WITH_SCREEN_WAKELOCK, true);
 
         when(mInputSensorInfo.getName()).thenReturn("hall-effect");
         mHallSensor = new Sensor(mInputSensorInfo);
@@ -146,6 +152,7 @@ public final class BookStyleDeviceStatePolicyTest {
 
         when(mDisplayManager.getDisplay(eq(DEFAULT_DISPLAY))).thenReturn(mDisplay);
         mContext.addMockSystemService(DisplayManager.class, mDisplayManager);
+        mContext.addMockSystemService(PowerManager.class, mPowerManager);
 
         mContext.ensureTestableResources();
         when(mContext.getResources().getConfiguration()).thenReturn(mConfiguration);
@@ -592,6 +599,62 @@ public final class BookStyleDeviceStatePolicyTest {
     }
 
     @Test
+    public void test_unfoldTo85Degrees_screenWakeLockExists_forceTentModeWithWakeLockEnabled()
+            throws Exception {
+        mFakeFeatureFlags.setFlag(Flags.FLAG_FORCE_FOLDABLES_TENT_MODE_WITH_SCREEN_WAKELOCK, true);
+        mInstrumentation.runOnMainSync(() -> mProvider = createProvider());
+        mPolicy.getDeviceStateProvider().onSystemReady();
+        sendHingeAngle(0f);
+        final ScreenTimeoutPolicyListener listener = captureScreenTimeoutPolicyListener();
+        listener.onScreenTimeoutPolicyChanged(PowerManager.SCREEN_TIMEOUT_KEEP_DISPLAY_ON);
+        mProvider.setListener(mListener);
+        assertLatestReportedState(DEVICE_STATE_CLOSED);
+        sendHingeAngle(180f);
+        assertLatestReportedState(DEVICE_STATE_OPENED);
+        sendHingeAngle(0f);
+        sendHingeAngle(15f);
+        assertLatestReportedState(DEVICE_STATE_CLOSED);
+
+        sendHingeAngle(85f);
+
+        // Keeps 'closed' state meaning that it is in 'tent' mode as we have a screen wakelock
+        assertLatestReportedState(DEVICE_STATE_CLOSED);
+    }
+
+    @Test
+    public void test_unfoldTo85Degrees_noScreenWakelock_forceTentModeWithWakeLockEnabled()
+            throws Exception {
+        mFakeFeatureFlags.setFlag(Flags.FLAG_FORCE_FOLDABLES_TENT_MODE_WITH_SCREEN_WAKELOCK, true);
+        mInstrumentation.runOnMainSync(() -> mProvider = createProvider());
+        mPolicy.getDeviceStateProvider().onSystemReady();
+        sendHingeAngle(0f);
+        final ScreenTimeoutPolicyListener listener = captureScreenTimeoutPolicyListener();
+        listener.onScreenTimeoutPolicyChanged(PowerManager.SCREEN_TIMEOUT_ACTIVE);
+        mProvider.setListener(mListener);
+        assertLatestReportedState(DEVICE_STATE_CLOSED);
+        sendHingeAngle(180f);
+        assertLatestReportedState(DEVICE_STATE_OPENED);
+        sendHingeAngle(0f);
+        assertLatestReportedState(DEVICE_STATE_CLOSED);
+
+        sendHingeAngle(85f);
+
+        // Switches to half-opened state as we don't have a screen wakelock
+        assertLatestReportedState(DEVICE_STATE_HALF_OPENED);
+    }
+
+    @Test
+    public void test_unfoldTo85Degrees_notSubscribedToWakeLocks_forceTentModeWithWakeLockDisabled()
+            throws Exception {
+        mFakeFeatureFlags.setFlag(Flags.FLAG_FORCE_FOLDABLES_TENT_MODE_WITH_SCREEN_WAKELOCK, false);
+        mInstrumentation.runOnMainSync(() -> mProvider = createProvider());
+
+        mPolicy.getDeviceStateProvider().onSystemReady();
+
+        verify(mPowerManager, never()).addScreenTimeoutPolicyListener(anyInt(), any(), any());
+    }
+
+    @Test
     public void test_foldTo10_leftSideIsFlat_keepsInnerScreenForReverseWedge() {
         sendHingeAngle(180f);
         sendLeftSideFlatSensorEvent(true);
@@ -751,8 +814,17 @@ public final class BookStyleDeviceStatePolicyTest {
     }
 
     private DeviceStateProvider createProvider() {
-        return new BookStyleDeviceStatePolicy(mFakeFeatureFlags, mContext, mHingeAngleSensor,
+        mPolicy = new BookStyleDeviceStatePolicy(mFakeFeatureFlags, mContext, mHingeAngleSensor,
                 mHallSensor, mLeftAccelerometer, mRightAccelerometer,
-                /* closeAngleDegrees= */ null).getDeviceStateProvider();
+                /* closeAngleDegrees= */ null);
+        return mPolicy.getDeviceStateProvider();
+    }
+
+    private ScreenTimeoutPolicyListener captureScreenTimeoutPolicyListener() {
+        final ArgumentCaptor<ScreenTimeoutPolicyListener> captor = ArgumentCaptor
+                .forClass(ScreenTimeoutPolicyListener.class);
+        verify(mPowerManager, atLeastOnce())
+                .addScreenTimeoutPolicyListener(anyInt(), any(), captor.capture());
+        return captor.getValue();
     }
 }

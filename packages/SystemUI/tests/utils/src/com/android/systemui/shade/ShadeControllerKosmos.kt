@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.shade
 
 import com.android.systemui.assist.AssistManager
@@ -39,7 +37,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.deviceProvisionedController
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.util.mockito.mock
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.shadeControllerSceneImpl by
     Kosmos.Fixture {

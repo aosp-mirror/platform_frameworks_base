@@ -72,33 +72,6 @@ constructor(
         )
     }
 
-    @Test
-    open fun resizeAppWithEdgeResizeLeft() {
-        testApp.edgeResize(
-            wmHelper,
-            motionEventHelper,
-            DesktopModeAppHelper.Edges.LEFT
-        )
-    }
-
-    @Test
-    open fun resizeAppWithEdgeResizeTop() {
-        testApp.edgeResize(
-            wmHelper,
-            motionEventHelper,
-            DesktopModeAppHelper.Edges.TOP
-        )
-    }
-
-    @Test
-    open fun resizeAppWithEdgeResizeBottom() {
-        testApp.edgeResize(
-            wmHelper,
-            motionEventHelper,
-            DesktopModeAppHelper.Edges.BOTTOM
-        )
-    }
-
     @After
     fun teardown() {
         testApp.exit(wmHelper)

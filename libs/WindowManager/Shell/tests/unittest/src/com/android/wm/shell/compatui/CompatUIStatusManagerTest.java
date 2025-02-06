@@ -27,6 +27,8 @@ import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.ShellTestCase;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,7 +44,7 @@ import java.util.function.IntSupplier;
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class CompatUIStatusManagerTest extends CompatUIShellTestCase {
+public class CompatUIStatusManagerTest extends ShellTestCase {
 
     private FakeCompatUIStatusManagerTest mTestState;
     private CompatUIStatusManager mStatusManager;

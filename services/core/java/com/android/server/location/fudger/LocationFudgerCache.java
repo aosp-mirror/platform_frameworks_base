@@ -26,6 +26,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.location.geometry.S2CellIdUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.location.provider.proxy.ProxyPopulationDensityProvider;
 
 import java.util.Objects;
@@ -68,6 +69,15 @@ public class LocationFudgerCache {
     // The provider that asynchronously provides what is stored in the cache.
     private final ProxyPopulationDensityProvider mPopulationDensityProvider;
 
+    // If two calls to logDensityBasedLocsUsed are made in an interval shorter than this value,
+    // the second is dropped.
+    protected static final int LOG_DENSITY_BASED_LOCS_USED_RATE_LIMIT_MS = 1000 * 60 * 10; // 10 min
+
+    // The system time at which the last query to logDensityBasedLocsUsed was made.
+    // Initialized to -LOG_DENSITY_BASED_LOCS_USED_RATE_LIMIT_MS, so even if made at time 0, the
+    // first call succeeds.
+    private long mLastQueryToLogDensityBasedLocsUsedMs = -LOG_DENSITY_BASED_LOCS_USED_RATE_LIMIT_MS;
+
     private static String sTAG = "LocationFudgerCache";
 
     public LocationFudgerCache(@NonNull ProxyPopulationDensityProvider provider) {
@@ -76,11 +86,17 @@ public class LocationFudgerCache {
         asyncFetchDefaultCoarseningLevel();
     }
 
-    /** If the cache's default coarsening value hasn't been set, asynchronously fetches it. */
-    public void fetchDefaultCoarseningLevelIfNeeded() {
+    /**
+     * Called by the LocationFudger when a query couldn't be fulfilled because the cache isn't set.
+     */
+    public void onDefaultCoarseningLevelNotSet() {
         if (!hasDefaultValue()) {
             asyncFetchDefaultCoarseningLevel();
         }
+        logDensityBasedLocsUsed(/* nowMs=*/ System.currentTimeMillis(),
+            /* skippedNoDefault= */ true,
+            /* isCacheHit= */ false,
+            /* defaultCoarseningLevel= */ -1);
     }
 
     /** Returns true if the cache has successfully received a default value from the provider. */
@@ -101,14 +117,43 @@ public class LocationFudgerCache {
             asyncFetchDefaultCoarseningLevel();
         }
         Long s2CellId = readCacheForLatLng(latitudeDegrees, longitudeDegrees);
+        int defaultLevel = getDefaultCoarseningLevel();
         if (s2CellId == null) {
             // Asynchronously queries the density from the provider. The answer won't come in time,
             // but it will update the cache for the following queries.
             refreshCache(latitudeDegrees, longitudeDegrees);
 
-            return getDefaultCoarseningLevel();
+            logDensityBasedLocsUsed(/* nowMs=*/ System.currentTimeMillis(),
+                    /* skippedNoDefault= */ false,
+                    /* isCacheHit= */ false,
+                    /* defaultCoarseningLevel= */ defaultLevel);
+            return defaultLevel;
         }
+        logDensityBasedLocsUsed(/* nowMs=*/ System.currentTimeMillis(),
+            /* skippedNoDefault= */ false,
+            /* isCacheHit= */ true,
+            /* defaultCoarseningLevel= */ defaultLevel);
         return S2CellIdUtils.getLevel(s2CellId);
+    }
+
+    /**
+     * A simple wrapper around FrameworkStatsLog.write() that rate-limits the calls.
+     * Returns true on success, false if the call was dropped.
+     */
+    protected boolean logDensityBasedLocsUsed(long nowMs, boolean skippedNoDefault,
+            boolean isCacheHit, int defaultCoarseningLevel) {
+
+        if (nowMs - mLastQueryToLogDensityBasedLocsUsedMs
+                < LOG_DENSITY_BASED_LOCS_USED_RATE_LIMIT_MS) {
+            return false;
+        }
+        mLastQueryToLogDensityBasedLocsUsedMs = nowMs;
+
+        FrameworkStatsLog.write(FrameworkStatsLog.DENSITY_BASED_COARSE_LOCATIONS_USAGE_REPORTED,
+                /* skipped_no_default= */ skippedNoDefault,
+                /* is_cache_hit= */ isCacheHit,
+                /* default_coarsening_level= */ defaultCoarseningLevel);
+        return true;
     }
 
     /**
@@ -176,15 +221,26 @@ public class LocationFudgerCache {
      *  Queries the population density provider and store the result in the cache.
      */
     private void refreshCache(double latitude, double longitude) {
+        long startTime = System.currentTimeMillis();
         IS2CellIdsCallback callback = new IS2CellIdsCallback.Stub() {
             @Override
             public void onResult(long[] s2CellIds) {
+                int durationMs = (int) (System.currentTimeMillis() - startTime);
+                FrameworkStatsLog.write(
+                        FrameworkStatsLog.DENSITY_BASED_COARSE_LOCATIONS_PROVIDER_QUERY_REPORTED,
+                        /* query_duration_millis= */ durationMs,
+                        /* is_error= */ false);
                 addToCache(s2CellIds);
             }
 
             @Override
             public void onError() {
                 Log.e(sTAG, "could not get population density");
+                int durationMs = (int) (System.currentTimeMillis() - startTime);
+                FrameworkStatsLog.write(
+                        FrameworkStatsLog.DENSITY_BASED_COARSE_LOCATIONS_PROVIDER_QUERY_REPORTED,
+                        /* query_duration_millis= */ durationMs,
+                        /* is_error= */ true);
             }
         };
         mPopulationDensityProvider.getCoarsenedS2Cells(latitude, longitude, MAX_CACHE_SIZE - 1,

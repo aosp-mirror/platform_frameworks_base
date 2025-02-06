@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.Assert.assertThat;
 
+import android.app.UiAutomation;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -38,6 +39,7 @@ import android.test.AndroidTestCase;
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.filters.Suppress;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import java.util.HashMap;
 import java.util.List;
@@ -445,6 +447,52 @@ public class SettingsProviderTest extends AndroidTestCase {
             // clean up
             r.call(Settings.Config.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, name, null);
             r.call(Settings.Config.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, newName, null);
+        }
+    }
+
+    @SmallTest
+    public void testCall_putOverrideConfig() throws Exception {
+        // The shell user is restricted to a set of allowlisted flags / namespaces that can be
+        // written. When an flag override is requested, the flag is rewritten to be in the form:
+        // device_config_overrides/namespace:flagname
+        // To avoid requiring allowlisting both the base flag and the override version,
+        // SettingsProvider will parse out the overridden flag and check if it has been allowlisted.
+        // This test verifies that this is properly handled for both the good case as well as when
+        // the overridden flag is not in the proper format by ensuring a SecurityException is not
+        // thrown since these flags have been allowlisted.
+        UiAutomation uiAutomation =
+                InstrumentationRegistry.getInstrumentation().getUiAutomation();
+        uiAutomation.adoptShellPermissionIdentity();
+        ContentResolver r = getContext().getContentResolver();
+        String overridesNamespace = "device_config_overrides";
+        String namespace = "namespace1";
+        String flagName = "key1";
+        String validFlag = overridesNamespace + "/" + namespace + ":" + flagName;
+        String invalidFlag1 = overridesNamespace + "/";
+        String invalidFlag2 = overridesNamespace + "/" + namespace + ":";
+        String invalidFlag3 = overridesNamespace + "/" + ":";
+        String value = "value1";
+        Bundle args = new Bundle();
+        args.putString(Settings.NameValueTable.VALUE, value);
+
+        try {
+            r.call(Settings.Config.CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, validFlag, args);
+            r.call(Settings.Config.CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, invalidFlag1,
+                    args);
+            r.call(Settings.Config.CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, invalidFlag2,
+                    args);
+            r.call(Settings.Config.CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, invalidFlag3,
+                    args);
+        } finally {
+            r.call(Settings.Config.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, validFlag,
+                    null);
+            r.call(Settings.Config.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, invalidFlag1,
+                    null);
+            r.call(Settings.Config.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, invalidFlag2,
+                    null);
+            r.call(Settings.Config.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, invalidFlag3,
+                    null);
+            uiAutomation.dropShellPermissionIdentity();
         }
     }
 }

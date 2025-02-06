@@ -25,6 +25,8 @@ interface IPowerStatsService {
     const String KEY_ENERGY = "energy";
     /** @hide */
     const String KEY_TIMESTAMPS = "timestamps";
+    /** @hide */
+    const String KEY_GRANULARITY = "granularity";
 
     /** @hide */
     const int RESULT_SUCCESS = 0;

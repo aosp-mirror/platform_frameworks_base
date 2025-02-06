@@ -70,6 +70,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.statusbar.notification.NmSummarizationUiFlag;
 import com.android.systemui.statusbar.notification.NotificationChannelHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
@@ -118,6 +119,7 @@ public class NotificationConversationInfo extends LinearLayout implements
     private OnSettingsClickListener mOnSettingsClickListener;
     private NotificationGuts mGutsContainer;
     private OnConversationSettingsClickListener mOnConversationSettingsClickListener;
+    private NotificationInfo.OnFeedbackClickListener mFeedbackClickListener;
 
     private UserManager mUm;
 
@@ -202,6 +204,7 @@ public class NotificationConversationInfo extends LinearLayout implements
             NotificationEntry entry,
             Notification.BubbleMetadata bubbleMetadata,
             OnSettingsClickListener onSettingsClick,
+            NotificationInfo.OnFeedbackClickListener onFeedbackClickListener,
             ConversationIconFactory conversationIconFactory,
             Context userContext,
             boolean isDeviceProvisioned,
@@ -234,6 +237,7 @@ public class NotificationConversationInfo extends LinearLayout implements
         mBgHandler = bgHandler;
         mShortcutManager = shortcutManager;
         mShortcutInfo = entry.getRanking().getConversationShortcutInfo();
+        mFeedbackClickListener = onFeedbackClickListener;
         if (mShortcutInfo == null) {
             throw new IllegalArgumentException("Does not have required information");
         }
@@ -288,6 +292,8 @@ public class NotificationConversationInfo extends LinearLayout implements
         settingsButton.setOnClickListener(getSettingsOnClickListener());
         settingsButton.setVisibility(settingsButton.hasOnClickListeners() ? VISIBLE : GONE);
 
+        bindFeedback();
+
         updateToggleActions(mSelectedAction == -1 ? getPriority() : mSelectedAction,
                 false);
     }
@@ -297,6 +303,25 @@ public class NotificationConversationInfo extends LinearLayout implements
 
         // Delegate
         bindDelegate();
+    }
+
+    private void bindFeedback() {
+        View feedbackButton = findViewById(R.id.feedback);
+        if (!NmSummarizationUiFlag.isEnabled()
+                || TextUtils.isEmpty(mEntry.getRanking().getSummarization())) {
+            feedbackButton.setVisibility(GONE);
+        } else {
+            Intent intent = NotificationInfo.getAssistantFeedbackIntent(
+                    mINotificationManager, mPm, mEntry);
+            if (intent == null) {
+                feedbackButton.setVisibility(GONE);
+            } else {
+                feedbackButton.setVisibility(VISIBLE);
+                feedbackButton.setOnClickListener((View v) -> {
+                    mFeedbackClickListener.onClick(v, intent);
+                });
+            }
+        }
     }
 
     private OnClickListener getSettingsOnClickListener() {

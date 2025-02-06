@@ -35,6 +35,7 @@ interface BlockedByAdmin : RestrictedMode {
 
 interface BlockedByEcm : RestrictedMode {
     fun showRestrictedSettingsDetails()
+    fun isBlockedByPhoneCall() = false
 }
 
 internal data class BlockedByAdminImpl(
@@ -72,8 +73,13 @@ internal data class BlockedByEcmImpl(
     private val context: Context,
     private val intent: Intent,
 ) : BlockedByEcm {
+    private val reasonPhoneState = "phone_state"
 
     override fun showRestrictedSettingsDetails() {
         context.startActivity(intent)
+    }
+
+    override fun isBlockedByPhoneCall(): Boolean {
+        return intent.getStringExtra(Intent.EXTRA_REASON) == reasonPhoneState
     }
 }

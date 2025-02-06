@@ -364,7 +364,7 @@ public class AppCompatLetterboxPolicyTest extends WindowTestsBase {
 
         @NonNull
         private AppCompatAspectRatioPolicy getAspectRatioPolicy() {
-            return activity().top().mAppCompatController.getAppCompatAspectRatioPolicy();
+            return activity().top().mAppCompatController.getAspectRatioPolicy();
         }
 
         @NonNull
@@ -374,7 +374,7 @@ public class AppCompatLetterboxPolicyTest extends WindowTestsBase {
 
         @NonNull
         private AppCompatLetterboxPolicy getAppCompatLetterboxPolicy() {
-            return activity().top().mAppCompatController.getAppCompatLetterboxPolicy();
+            return activity().top().mAppCompatController.getLetterboxPolicy();
         }
 
     }

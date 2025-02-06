@@ -47,7 +47,7 @@ public abstract class RemoteContext {
             new RemoteComposeState(); // todo, is this a valid use of RemoteComposeState -- bbade@
 
     @Nullable protected PaintContext mPaintContext = null;
-    protected float mDensity = 2.75f;
+    protected float mDensity = Float.NaN;
 
     @NonNull ContextMode mMode = ContextMode.UNSET;
 
@@ -77,7 +77,7 @@ public abstract class RemoteContext {
      * @param density
      */
     public void setDensity(float density) {
-        if (density > 0) {
+        if (!Float.isNaN(density) && density > 0) {
             mDensity = density;
         }
     }
@@ -234,23 +234,60 @@ public abstract class RemoteContext {
      */
     public abstract void addCollection(int id, @NonNull ArrayAccess collection);
 
+    /**
+     * put DataMap under an id
+     *
+     * @param id the id of the DataMap
+     * @param map the DataMap
+     */
     public abstract void putDataMap(int id, @NonNull DataMap map);
 
+    /**
+     * Get a DataMap given an id
+     *
+     * @param id the id of the DataMap
+     * @return the DataMap
+     */
     public abstract @Nullable DataMap getDataMap(int id);
 
+    /**
+     * Run an action
+     *
+     * @param id the id of the action
+     * @param metadata the metadata of the action
+     */
     public abstract void runAction(int id, @NonNull String metadata);
 
     // TODO: we might add an interface to group all valid parameter types
+
+    /**
+     * Run an action with a named parameter
+     *
+     * @param textId the text id of the action
+     * @param value the value of the parameter
+     */
     public abstract void runNamedAction(int textId, Object value);
 
+    /**
+     * Put an object under an id
+     *
+     * @param mId the id of the object
+     * @param command the object
+     */
     public abstract void putObject(int mId, @NonNull Object command);
 
+    /**
+     * Get an object given an id
+     *
+     * @param mId the id of the object
+     * @return the object
+     */
     public abstract @Nullable Object getObject(int mId);
 
     /**
      * Add a touch listener to the context
      *
-     * @param touchExpression
+     * @param touchExpression the touch expression
      */
     public void addTouchListener(TouchListener touchExpression) {}
 
@@ -668,11 +705,24 @@ public abstract class RemoteContext {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Click handling
     ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Is this a time id float
+     *
+     * @param fl the floatId to test
+     * @return true if it is a time id
+     */
     public static boolean isTime(float fl) {
         int value = Utils.idFromNan(fl);
         return value >= ID_CONTINUOUS_SEC && value <= ID_DAY_OF_MONTH;
     }
 
+    /**
+     * get the time from a float id that indicates a type of time
+     *
+     * @param fl id of the type of time information requested
+     * @return various time information such as seconds or min
+     */
     public static float getTime(float fl) {
         LocalDateTime dateTime =
                 LocalDateTime.now(ZoneId.systemDefault()); // TODO, pass in a timezone explicitly?
@@ -716,6 +766,17 @@ public abstract class RemoteContext {
         return fl;
     }
 
+    /**
+     * Add a click area to the doc
+     *
+     * @param id the id of the click area
+     * @param contentDescription the content description of the click area
+     * @param left the left bounds of the click area
+     * @param top the top bounds of the click area
+     * @param right the right bounds of the click area
+     * @param bottom the
+     * @param metadataId the id of the metadata string
+     */
     public abstract void addClickArea(
             int id,
             int contentDescription,

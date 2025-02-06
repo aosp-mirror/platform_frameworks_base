@@ -16,7 +16,7 @@
 
 package com.android.server.backup;
 
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.annotation.Nullable;
@@ -76,7 +76,9 @@ public class BackupAgentConnectionManager {
     @Nullable
     private BackupAgentConnection mCurrentConnection;
 
+    @GuardedBy("mAgentConnectLock")
     private final ArraySet<String> mRestoreNoRestrictedModePackages = new ArraySet<>();
+    @GuardedBy("mAgentConnectLock")
     private final ArraySet<String> mBackupNoRestrictedModePackages = new ArraySet<>();
 
     private final IActivityManager mActivityManager;
@@ -302,7 +304,7 @@ public class BackupAgentConnectionManager {
                 // that the package being backed up doesn't get stuck in restricted mode until the
                 // backup time-out elapses.
                 for (int token : mOperationStorage.operationTokensForPackage(packageName)) {
-                    if (MORE_DEBUG) {
+                    if (DEBUG) {
                         Slog.d(TAG,
                                 mUserIdMsg + "agentDisconnected: will handleCancel(all) for token:"
                                         + Integer.toHexString(token));
@@ -322,14 +324,16 @@ public class BackupAgentConnectionManager {
      */
     public void setNoRestrictedModePackages(Set<String> packageNames,
             @BackupAnnotations.OperationType int opType) {
-        if (opType == BackupAnnotations.OperationType.BACKUP) {
-            mBackupNoRestrictedModePackages.clear();
-            mBackupNoRestrictedModePackages.addAll(packageNames);
-        } else if (opType == BackupAnnotations.OperationType.RESTORE) {
-            mRestoreNoRestrictedModePackages.clear();
-            mRestoreNoRestrictedModePackages.addAll(packageNames);
-        } else {
-            throw new IllegalArgumentException("opType must be BACKUP or RESTORE");
+        synchronized (mAgentConnectLock) {
+            if (opType == BackupAnnotations.OperationType.BACKUP) {
+                mBackupNoRestrictedModePackages.clear();
+                mBackupNoRestrictedModePackages.addAll(packageNames);
+            } else if (opType == BackupAnnotations.OperationType.RESTORE) {
+                mRestoreNoRestrictedModePackages.clear();
+                mRestoreNoRestrictedModePackages.addAll(packageNames);
+            } else {
+                throw new IllegalArgumentException("opType must be BACKUP or RESTORE");
+            }
         }
     }
 
@@ -338,8 +342,10 @@ public class BackupAgentConnectionManager {
      * restore.
      */
     public void clearNoRestrictedModePackages() {
-        mBackupNoRestrictedModePackages.clear();
-        mRestoreNoRestrictedModePackages.clear();
+        synchronized (mAgentConnectLock) {
+            mBackupNoRestrictedModePackages.clear();
+            mRestoreNoRestrictedModePackages.clear();
+        }
     }
 
     /**
@@ -353,6 +359,7 @@ public class BackupAgentConnectionManager {
      * {@link #mRestoreNoRestrictedModePackages} so this method will immediately return without
      * any IPC to the transport.
      */
+    @GuardedBy("mAgentConnectLock")
     private boolean shouldUseRestrictedBackupModeForPackage(
             @BackupAnnotations.OperationType int mode, String packageName) {
         // Key/Value apps are never put in restricted mode.

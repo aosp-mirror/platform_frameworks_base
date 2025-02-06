@@ -23,16 +23,15 @@ import com.android.systemui.kairos.internal.util.awaitCancellationAndThen
 import com.android.systemui.kairos.internal.util.childScope
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 
-/**
- * Marks declarations that are still **experimental** and shouldn't be used in general production
- * code.
- */
+/** Marks APIs that are still **experimental** and shouldn't be used in general production code. */
 @RequiresOptIn(
     message = "This API is experimental and should not be used in general production code."
 )
@@ -139,36 +138,45 @@ internal class LocalNetwork(
     private val endSignal: Events<Any>,
 ) : KairosNetwork {
     override suspend fun <R> transact(block: TransactionScope.() -> R): R =
-        network.transaction("KairosNetwork.transact") { block() }.await()
+        network.transaction("KairosNetwork.transact") { block() }.awaitOrCancel()
 
     override suspend fun activateSpec(spec: BuildSpec<*>) {
-        val stopEmitter =
-            CoalescingMutableEvents(
-                name = "activateSpec",
-                coalesce = { _, _: Unit -> },
-                network = network,
-                getInitialValue = {},
-            )
-        val job =
-            network
-                .transaction("KairosNetwork.activateSpec") {
-                    val buildScope =
-                        BuildScopeImpl(
-                            stateScope =
-                                StateScopeImpl(
-                                    evalScope = this,
-                                    endSignal = mergeLeft(stopEmitter, endSignal),
-                                ),
-                            coroutineScope = scope,
-                        )
-                    buildScope.launchScope(spec)
+        val stopEmitter = conflatedMutableEvents<Unit>()
+        network
+            .transaction("KairosNetwork.activateSpec") {
+                val buildScope =
+                    BuildScopeImpl(
+                        stateScope =
+                            StateScopeImpl(
+                                evalScope = this,
+                                endSignalLazy = lazy { mergeLeft(stopEmitter, endSignal) },
+                            ),
+                        coroutineScope = scope,
+                    )
+                buildScope.launchScope {
+                    spec.applySpec()
+                    launchEffect { awaitCancellationAndThen { stopEmitter.emit(Unit) } }
                 }
-                .await()
-        awaitCancellationAndThen {
-            stopEmitter.emit(Unit)
-            job.cancel()
-        }
+            }
+            .awaitOrCancel()
+            .joinOrCancel()
     }
+
+    private suspend fun <T> Deferred<T>.awaitOrCancel(): T =
+        try {
+            await()
+        } catch (ex: CancellationException) {
+            cancel(ex)
+            throw ex
+        }
+
+    private suspend fun Job.joinOrCancel(): Unit =
+        try {
+            join()
+        } catch (ex: CancellationException) {
+            cancel(ex)
+            throw ex
+        }
 
     override fun <In, Out> coalescingMutableEvents(
         coalesce: (old: Out, new: In) -> Out,
@@ -214,3 +222,45 @@ fun CoroutineScope.launchKairosNetwork(
     scope.launch(CoroutineName("launchKairosNetwork scheduler")) { network.runInputScheduler() }
     return RootKairosNetwork(network, scope, scope.coroutineContext.job)
 }
+
+@ExperimentalKairosApi
+interface HasNetwork : KairosScope {
+    /**
+     * A [KairosNetwork] handle that is bound to the lifetime of a [BuildScope].
+     *
+     * It supports all of the standard functionality by which external code can interact with this
+     * Kairos network, but all [activated][KairosNetwork.activateSpec] [BuildSpec]s are bound as
+     * children to the [BuildScope], such that when the [BuildScope] is destroyed, all children are
+     * also destroyed.
+     */
+    val kairosNetwork: KairosNetwork
+}
+
+/** Returns a [MutableEvents] that can emit values into this [KairosNetwork]. */
+@ExperimentalKairosApi
+fun <T> HasNetwork.MutableEvents(): MutableEvents<T> = MutableEvents(kairosNetwork)
+
+/** Returns a [MutableState] with initial state [initialValue]. */
+@ExperimentalKairosApi
+fun <T> HasNetwork.MutableState(initialValue: T): MutableState<T> =
+    MutableState(kairosNetwork, initialValue)
+
+/** Returns a [CoalescingMutableEvents] that can emit values into this [KairosNetwork]. */
+@ExperimentalKairosApi
+fun <In, Out> HasNetwork.CoalescingMutableEvents(
+    coalesce: (old: Out, new: In) -> Out,
+    initialValue: Out,
+): CoalescingMutableEvents<In, Out> = CoalescingMutableEvents(kairosNetwork, coalesce, initialValue)
+
+/** Returns a [CoalescingMutableEvents] that can emit values into this [KairosNetwork]. */
+@ExperimentalKairosApi
+fun <In, Out> HasNetwork.CoalescingMutableEvents(
+    coalesce: (old: Out, new: In) -> Out,
+    getInitialValue: () -> Out,
+): CoalescingMutableEvents<In, Out> =
+    CoalescingMutableEvents(kairosNetwork, coalesce, getInitialValue)
+
+/** Returns a [CoalescingMutableEvents] that can emit values into this [KairosNetwork]. */
+@ExperimentalKairosApi
+fun <T> HasNetwork.ConflatedMutableEvents(): CoalescingMutableEvents<T, T> =
+    ConflatedMutableEvents(kairosNetwork)

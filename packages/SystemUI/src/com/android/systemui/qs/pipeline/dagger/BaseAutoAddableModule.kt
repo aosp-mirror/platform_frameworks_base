@@ -17,7 +17,6 @@
 package com.android.systemui.qs.pipeline.dagger
 
 import android.content.res.Resources
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.pipeline.domain.autoaddable.A11yShortcutAutoAddable
 import com.android.systemui.qs.pipeline.domain.autoaddable.A11yShortcutAutoAddableList
 import com.android.systemui.qs.pipeline.domain.autoaddable.AutoAddableSetting
@@ -27,10 +26,10 @@ import com.android.systemui.qs.pipeline.domain.autoaddable.DataSaverAutoAddable
 import com.android.systemui.qs.pipeline.domain.autoaddable.DeviceControlsAutoAddable
 import com.android.systemui.qs.pipeline.domain.autoaddable.HotspotAutoAddable
 import com.android.systemui.qs.pipeline.domain.autoaddable.NightDisplayAutoAddable
-import com.android.systemui.qs.pipeline.domain.autoaddable.ReduceBrightColorsAutoAddable
 import com.android.systemui.qs.pipeline.domain.autoaddable.WalletAutoAddable
 import com.android.systemui.qs.pipeline.domain.autoaddable.WorkTileAutoAddable
 import com.android.systemui.qs.pipeline.domain.model.AutoAddable
+import com.android.systemui.shade.ShadeDisplayAware
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -44,12 +43,12 @@ interface BaseAutoAddableModule {
         @Provides
         @ElementsIntoSet
         fun providesAutoAddableSetting(
-            @Main resources: Resources,
-            autoAddableSettingFactory: AutoAddableSetting.Factory
+            @ShadeDisplayAware resources: Resources,
+            autoAddableSettingFactory: AutoAddableSetting.Factory,
         ): Set<AutoAddable> {
             return AutoAddableSettingList.parseSettingsResource(
                     resources,
-                    autoAddableSettingFactory
+                    autoAddableSettingFactory,
                 )
                 .toSet()
         }
@@ -74,10 +73,6 @@ interface BaseAutoAddableModule {
     @Binds @IntoSet fun bindHotspotAutoAddable(impl: HotspotAutoAddable): AutoAddable
 
     @Binds @IntoSet fun bindNightDisplayAutoAddable(impl: NightDisplayAutoAddable): AutoAddable
-
-    @Binds
-    @IntoSet
-    fun bindReduceBrightColorsAutoAddable(impl: ReduceBrightColorsAutoAddable): AutoAddable
 
     @Binds @IntoSet fun bindWalletAutoAddable(impl: WalletAutoAddable): AutoAddable
 

@@ -49,7 +49,6 @@ import com.android.systemui.util.kotlin.Utils.Companion.sampleFilter
 import com.android.systemui.util.kotlin.combine
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.combine
@@ -68,7 +67,6 @@ import kotlinx.coroutines.flow.merge
  * bypass biometric or, if the device is already unlocked, by triggering an affordance that
  * dismisses the lockscreen.
  */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class DeviceEntrySourceInteractor
 @Inject

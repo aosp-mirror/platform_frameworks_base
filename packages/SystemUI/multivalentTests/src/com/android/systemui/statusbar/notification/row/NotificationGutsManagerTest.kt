@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License
  */
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.notification.row
 
 import android.R
@@ -81,7 +79,6 @@ import com.android.systemui.wmshell.BubblesManager
 import java.util.Optional
 import kotlin.test.assertNotNull
 import kotlin.test.fail
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -269,6 +266,36 @@ class NotificationGutsManagerTest(flags: FlagsParameterization) : SysuiTestCase(
     }
 
     @Test
+    fun testOpenAndCloseGutsWithoutSave() {
+        val guts = spy(NotificationGuts(mContext))
+        whenever(guts.post(any())).thenAnswer { invocation: InvocationOnMock ->
+            handler.post(((invocation.arguments[0] as Runnable)))
+            null
+        }
+
+        // Test doesn't support animation since the guts view is not attached.
+        doNothing().whenever(guts).openControls(anyInt(), anyInt(), anyBoolean(), any())
+
+        val realRow = createTestNotificationRow()
+        val menuItem = createTestMenuItem(realRow)
+
+        val row = spy(realRow)
+        whenever(row.windowToken).thenReturn(Binder())
+        whenever(row.guts).thenReturn(guts)
+
+        assertTrue(gutsManager.openGutsInternal(row, 0, 0, menuItem))
+        executor.runAllReady()
+        verify(guts).openControls(anyInt(), anyInt(), anyBoolean(), any<Runnable>())
+
+        gutsManager.closeAndUndoGuts()
+
+        verify(guts).closeControls(anyInt(), anyInt(), eq(false), eq(false))
+        verify(row, times(1)).setGutsView(any<MenuItem>())
+        executor.runAllReady()
+        verify(headsUpManager).setGutsShown(realRow.entry, false)
+    }
+
+    @Test
     fun testLockscreenShadeVisible_visible_gutsNotClosed() =
         testScope.runTest {
             // First, start out lockscreen or shade as not visible
@@ -375,52 +402,6 @@ class NotificationGutsManagerTest(flags: FlagsParameterization) : SysuiTestCase(
             // THEN the list container is reset
             verify(notificationListContainer).resetExposedMenuView(anyBoolean(), anyBoolean())
         }
-
-    @Test
-    fun testChangeDensityOrFontScale() {
-        val guts = spy(NotificationGuts(mContext))
-        whenever(guts.post(any())).thenAnswer { invocation: InvocationOnMock ->
-            handler.post(((invocation.arguments[0] as Runnable)))
-            null
-        }
-
-        // Test doesn't support animation since the guts view is not attached.
-        doNothing().whenever(guts).openControls(anyInt(), anyInt(), anyBoolean(), any<Runnable>())
-
-        val realRow = createTestNotificationRow()
-        val menuItem = createTestMenuItem(realRow)
-
-        val row = spy(realRow)
-
-        whenever(row.windowToken).thenReturn(Binder())
-        whenever(row.guts).thenReturn(guts)
-        doNothing().whenever(row).ensureGutsInflated()
-
-        val realEntry = realRow.entry
-        val entry = spy(realEntry)
-
-        whenever(entry.row).thenReturn(row)
-        whenever(entry.guts).thenReturn(guts)
-
-        assertTrue(gutsManager.openGutsInternal(row, 0, 0, menuItem))
-        executor.runAllReady()
-        verify(guts).openControls(anyInt(), anyInt(), anyBoolean(), any<Runnable>())
-
-        // called once by mGutsManager.bindGuts() in mGutsManager.openGuts()
-        verify(row).setGutsView(any<MenuItem>())
-
-        row.onDensityOrFontScaleChanged()
-        gutsManager.onDensityOrFontScaleChanged(entry)
-
-        executor.runAllReady()
-
-        gutsManager.closeAndSaveGuts(false, false, false, 0, 0, false)
-
-        verify(guts).closeControls(anyBoolean(), anyBoolean(), anyInt(), anyInt(), anyBoolean())
-
-        // called again by mGutsManager.bindGuts(), in mGutsManager.onDensityOrFontScaleChanged()
-        verify(row, times(2)).setGutsView(any<MenuItem>())
-    }
 
     @Test
     fun testAppOpsSettingsIntent_camera() {
@@ -538,12 +519,14 @@ class NotificationGutsManagerTest(flags: FlagsParameterization) : SysuiTestCase(
                 eq(entry),
                 any<NotificationInfo.OnSettingsClickListener>(),
                 any<NotificationInfo.OnAppSettingsClickListener>(),
+                any<NotificationInfo.OnFeedbackClickListener>(),
                 any<UiEventLogger>(),
                 /* isDeviceProvisioned = */ eq(false),
                 /* isNonblockable = */ eq(false),
                 /* wasShownHighPriority = */ eq(true),
                 eq(assistantFeedbackController),
                 eq(metricsLogger),
+                any<View.OnClickListener>(),
             )
     }
 
@@ -574,12 +557,14 @@ class NotificationGutsManagerTest(flags: FlagsParameterization) : SysuiTestCase(
                 eq(entry),
                 any<NotificationInfo.OnSettingsClickListener>(),
                 any<NotificationInfo.OnAppSettingsClickListener>(),
+                any<NotificationInfo.OnFeedbackClickListener>(),
                 any<UiEventLogger>(),
                 /* isDeviceProvisioned = */ eq(true),
                 /* isNonblockable = */ eq(false),
                 /* wasShownHighPriority = */ eq(false),
                 eq(assistantFeedbackController),
                 eq(metricsLogger),
+                any<View.OnClickListener>(),
             )
     }
 
@@ -608,49 +593,14 @@ class NotificationGutsManagerTest(flags: FlagsParameterization) : SysuiTestCase(
                 eq(entry),
                 any<NotificationInfo.OnSettingsClickListener>(),
                 any<NotificationInfo.OnAppSettingsClickListener>(),
+                any<NotificationInfo.OnFeedbackClickListener>(),
                 any<UiEventLogger>(),
                 /* isDeviceProvisioned = */ eq(false),
                 /* isNonblockable = */ eq(false),
                 /* wasShownHighPriority = */ eq(false),
                 eq(assistantFeedbackController),
                 eq(metricsLogger),
-            )
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testInitializeBundleNotificationInfoView() {
-        val infoView: BundleNotificationInfo = mock()
-        val row = spy(helper.createRow())
-        val entry = row.entry
-
-        // Modify the notification entry to have a channel that is in SYSTEM_RESERVED_IDS
-        val channel = NotificationChannel(NotificationChannel.NEWS_ID, "name", 2)
-        NotificationEntryHelper.modifyRanking(entry).setChannel(channel).build()
-
-        whenever(row.isNonblockable).thenReturn(false)
-        val statusBarNotification = entry.sbn
-        // Can we change this to a call to bindGuts instead? We have the row,
-        // we need a MenuItem that we can put the infoView into.
-        gutsManager.initializeBundleNotificationInfo(row, infoView)
-
-        verify(infoView)
-            .bindNotification(
-                any<PackageManager>(),
-                any<INotificationManager>(),
-                eq(onUserInteractionCallback),
-                eq(channelEditorDialogController),
-                eq(statusBarNotification.packageName),
-                any<NotificationChannel>(),
-                eq(entry),
-                any<NotificationInfo.OnSettingsClickListener>(),
-                any<NotificationInfo.OnAppSettingsClickListener>(),
-                any<UiEventLogger>(),
-                /* isDeviceProvisioned = */ eq(false),
-                /* isNonblockable = */ eq(false),
-                /* wasShownHighPriority = */ eq(false),
-                eq(assistantFeedbackController),
-                eq(metricsLogger),
+                any<View.OnClickListener>(),
             )
     }
 

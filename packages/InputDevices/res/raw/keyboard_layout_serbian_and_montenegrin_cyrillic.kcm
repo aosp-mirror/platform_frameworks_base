@@ -104,149 +104,173 @@ key EQUALS {
 
 key Q {
     label:                              '\u0409'
-    base, capslock+shift:               '\u0459'
+    base:                               '\u0459'
     shift, capslock:                    '\u0409'
+    shift+capslock:                     '\u0459'
 }
 
 key W {
     label:                              '\u040a'
-    base, capslock+shift:               '\u045a'
+    base:                               '\u045a'
     shift, capslock:                    '\u040a'
+    shift+capslock:                     '\u045a'
 }
 
 key E {
     label:                              '\u0415'
-    base, capslock+shift:               '\u0435'
+    base:                               '\u0435'
     shift, capslock:                    '\u0415'
+    shift+capslock:                     '\u0435'
     ralt:                               '\u20ac'
 }
 
 key R {
     label:                              '\u0420'
-    base, capslock+shift:               '\u0440'
+    base:                               '\u0440'
     shift, capslock:                    '\u0420'
+    shift+capslock:                     '\u0440'
 }
 
 key T {
     label:                              '\u0422'
-    base, capslock+shift:               '\u0442'
+    base:                               '\u0442'
     shift, capslock:                    '\u0422'
+    shift+capslock:                     '\u0442'
 }
 
 key Y {
     label:                              '\u0417'
-    base, capslock+shift:               '\u0437'
+    base:                               '\u0437'
     shift, capslock:                    '\u0417'
+    shift+capslock:                     '\u0437'
 }
 
 key U {
     label:                              '\u0423'
-    base, capslock+shift:               '\u0443'
+    base:                               '\u0443'
     shift, capslock:                    '\u0423'
+    shift+capslock:                     '\u0443'
 }
 
 key I {
     label:                              '\u0418'
-    base, capslock+shift:               '\u0438'
+    base:                               '\u0438'
     shift, capslock:                    '\u0418'
+    shift+capslock:                     '\u0438'
 }
 
 key O {
     label:                              '\u041e'
-    base, capslock+shift:               '\u043e'
+    base:                               '\u043e'
     shift, capslock:                    '\u041e'
+    shift+capslock:                     '\u043e'
 }
 
 key P {
     label:                              '\u041f'
-    base, capslock+shift:               '\u043f'
+    base:                               '\u043f'
     shift, capslock:                    '\u041f'
+    shift+capslock:                     '\u043f'
 }
 
 key LEFT_BRACKET {
     label:                              '\u0428'
-    base, capslock+shift:               '\u0448'
+    base:                               '\u0448'
     shift, capslock:                    '\u0428'
+    shift+capslock:                     '\u0448'
 }
 
 key RIGHT_BRACKET {
     label:                              '\u0402'
-    base, capslock+shift:               '\u0452'
+    base:                               '\u0452'
     shift, capslock:                    '\u0402'
+    shift+capslock:                     '\u0452'
 }
 
 ### ROW 3
 
 key A {
     label:                              '\u0410'
-    base, capslock+shift:               '\u0430'
+    base:                               '\u0430'
     shift, capslock:                    '\u0410'
+    shift+capslock:                     '\u0430'
 }
 
 key S {
     label:                              '\u0421'
-    base, capslock+shift:               '\u0441'
+    base:                               '\u0441'
     shift, capslock:                    '\u0421'
+    shift+capslock:                     '\u0441'
 }
 
 key D {
     label:                              '\u0414'
-    base, capslock+shift:               '\u0434'
+    base:                               '\u0434'
     shift, capslock:                    '\u0414'
+    shift+capslock:                     '\u0434'
 }
 
 key F {
     label:                              '\u0424'
-    base, capslock+shift:               '\u0444'
+    base:                               '\u0444'
     shift, capslock:                    '\u0424'
+    shift+capslock:                     '\u0444'
 }
 
 key G {
     label:                              '\u0413'
-    base, capslock+shift:               '\u0433'
+    base:                               '\u0433'
     shift, capslock:                    '\u0413'
+    shift+capslock:                     '\u0433'
 }
 
 key H {
     label:                              '\u0425'
-    base, capslock+shift:               '\u0445'
+    base:                               '\u0445'
     shift, capslock:                    '\u0425'
+    shift+capslock:                     '\u0445'
 }
 
 key J {
     label:                              '\u0408'
-    base, capslock+shift:               '\u0458'
+    base:                               '\u0458'
     shift, capslock:                    '\u0408'
+    shift+capslock:                     '\u0458'
 }
 
 key K {
     label:                              '\u041a'
-    base, capslock+shift:               '\u043a'
+    base:                               '\u043a'
     shift, capslock:                    '\u041a'
+    shift+capslock:                     '\u043a'
 }
 
 key L {
     label:                              '\u041b'
-    base, capslock+shift:               '\u043b'
+    base:                               '\u043b'
     shift, capslock:                    '\u041b'
+    shift+capslock:                     '\u043b'
 }
 
 key SEMICOLON {
     label:                              '\u0427'
-    base, capslock+shift:               '\u0447'
+    base:                               '\u0447'
     shift, capslock:                    '\u0427'
+    shift+capslock:                     '\u0447'
 }
 
 key APOSTROPHE {
     label:                              '\u040b'
-    base, capslock+shift:               '\u045b'
+    base:                               '\u045b'
     shift, capslock:                    '\u040b'
+    shift+capslock:                     '\u045b'
 }
 
 key BACKSLASH {
     label:                              '\u0416'
-    base, capslock+shift:               '\u0436'
+    base:                               '\u0436'
     shift, capslock:                    '\u0416'
+    shift+capslock:                     '\u0436'
 }
 
 ### ROW 4
@@ -259,44 +283,51 @@ key PLUS {
 
 key Z {
     label:                              '\u0405'
-    base, capslock+shift:               '\u0455'
+    base:                               '\u0455'
     shift, capslock:                    '\u0405'
+    shift+capslock:                     '\u0455'
 }
 
 key X {
     label:                              '\u040f'
-    base, capslock+shift:               '\u045f'
+    base:                               '\u045f'
     shift, capslock:                    '\u040f'
+    shift+capslock:                     '\u045f'
 }
 
 key C {
     label:                              '\u0426'
-    base, capslock+shift:               '\u0446'
+    base:                               '\u0446'
     shift, capslock:                    '\u0426'
+    shift+capslock:                     '\u0446'
 }
 
 key V {
     label:                              '\u0412'
-    base, capslock+shift:               '\u0432'
+    base:                               '\u0432'
     shift, capslock:                    '\u0412'
+    shift+capslock:                     '\u0432'
 }
 
 key B {
     label:                              '\u0411'
-    base, capslock+shift:               '\u0431'
+    base:                               '\u0431'
     shift, capslock:                    '\u0411'
+    shift+capslock:                     '\u0431'
 }
 
 key N {
     label:                              '\u041d'
-    base, capslock+shift:               '\u043d'
+    base:                               '\u043d'
     shift, capslock:                    '\u041d'
+    shift+capslock:                     '\u043d'
 }
 
 key M {
     label:                              '\u041c'
-    base, capslock+shift:               '\u043c'
+    base:                               '\u043c'
     shift, capslock:                    '\u041c'
+    shift+capslock:                     '\u043c'
 }
 
 key COMMA {

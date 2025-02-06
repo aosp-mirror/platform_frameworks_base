@@ -1,5 +1,11 @@
 # Android Asset Packaging Tool 2.0 (AAPT2) release notes
 
+## Version 2.20
+- Too many features, bug fixes, and improvements to list since the last minor version update in
+  2017. This README will be updated more frequently in the future.
+- Sparse encoding is now always enabled by default if the minSdkVersion is >= 32 (S_V2). The
+  `--enable-sparse-encoding` flag still exists, but is a no-op.
+
 ## Version 2.19
 - Added navigation resource type.
 - Fixed issue with resource deduplication. (bug 64397629)

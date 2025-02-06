@@ -52,7 +52,7 @@ import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManager.Sensors;
 import android.hardware.SensorPrivacyManagerInternal;
 import android.hardware.display.DisplayManagerInternal;
-import android.hardware.display.DisplayTopology;
+import android.hardware.display.DisplayTopologyGraph;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.AidlInputGestureData;
 import android.hardware.input.HostUsiVersion;
@@ -662,8 +662,8 @@ public class InputManagerService extends IInputManager.Stub
         mNative.setPointerDisplayId(mWindowManagerCallbacks.getPointerDisplayId());
     }
 
-    private void setDisplayTopologyInternal(DisplayTopology topology) {
-        mNative.setDisplayTopology(topology.getGraph());
+    private void setDisplayTopologyInternal(DisplayTopologyGraph topology) {
+        mNative.setDisplayTopology(topology);
     }
 
     /**
@@ -1261,6 +1261,15 @@ public class InputManagerService extends IInputManager.Stub
 
     @EnforcePermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
     @Override // Binder call
+    public void setKeyboardLayoutOverrideForInputDevice(InputDeviceIdentifier identifier,
+            String keyboardLayoutDescriptor) {
+        super.setKeyboardLayoutOverrideForInputDevice_enforcePermission();
+        mKeyboardLayoutManager.setKeyboardLayoutOverrideForInputDevice(identifier,
+                keyboardLayoutDescriptor);
+    }
+
+    @EnforcePermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
+    @Override // Binder call
     public void setKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
             @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
             @Nullable InputMethodSubtype imeSubtype, String keyboardLayoutDescriptor) {
@@ -1382,9 +1391,9 @@ public class InputManagerService extends IInputManager.Stub
         mNative.setPointerSpeed(speed);
     }
 
-    private void setMousePointerAccelerationEnabled(boolean enabled, int displayId) {
+    private void setMouseScalingEnabled(boolean enabled, int displayId) {
         updateAdditionalDisplayInputProperties(displayId,
-                properties -> properties.mousePointerAccelerationEnabled = enabled);
+                properties -> properties.mouseScalingEnabled = enabled);
     }
 
     private void setPointerIconVisible(boolean visible, int displayId) {
@@ -2232,8 +2241,8 @@ public class InputManagerService extends IInputManager.Stub
                     pw.println("displayId: " + mAdditionalDisplayInputProperties.keyAt(i));
                     final AdditionalDisplayInputProperties properties =
                             mAdditionalDisplayInputProperties.valueAt(i);
-                    pw.println("mousePointerAccelerationEnabled: "
-                            + properties.mousePointerAccelerationEnabled);
+                    pw.println("mouseScalingEnabled: "
+                            + properties.mouseScalingEnabled);
                     pw.println("pointerIconVisible: " + properties.pointerIconVisible);
                 }
             } finally {
@@ -3061,6 +3070,16 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override
     @PermissionManuallyEnforced
+    public AidlInputGestureData getInputGesture(@UserIdInt int userId,
+            @NonNull AidlInputGestureData.Trigger trigger) {
+        enforceManageKeyGesturePermission();
+
+        Objects.requireNonNull(trigger);
+        return mKeyGestureController.getInputGesture(userId, trigger);
+    }
+
+    @Override
+    @PermissionManuallyEnforced
     public int addCustomInputGesture(@UserIdInt int userId,
             @NonNull AidlInputGestureData inputGestureData) {
         enforceManageKeyGesturePermission();
@@ -3514,7 +3533,7 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
-        public void setDisplayTopology(DisplayTopology topology) {
+        public void setDisplayTopology(DisplayTopologyGraph topology) {
             setDisplayTopologyInternal(topology);
         }
 
@@ -3575,8 +3594,8 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
-        public void setMousePointerAccelerationEnabled(boolean enabled, int displayId) {
-            InputManagerService.this.setMousePointerAccelerationEnabled(enabled, displayId);
+        public void setMouseScalingEnabled(boolean enabled, int displayId) {
+            InputManagerService.this.setMouseScalingEnabled(enabled, displayId);
         }
 
         @Override
@@ -3716,15 +3735,15 @@ public class InputManagerService extends IInputManager.Stub
     private static class AdditionalDisplayInputProperties {
 
         static final boolean DEFAULT_POINTER_ICON_VISIBLE = true;
-        static final boolean DEFAULT_MOUSE_POINTER_ACCELERATION_ENABLED = true;
+        static final boolean DEFAULT_MOUSE_SCALING_ENABLED = true;
 
         /**
-         * Whether to enable mouse pointer acceleration on this display. Note that this only affects
+         * Whether to enable mouse pointer scaling on this display. Note that this only affects
          * pointer movements from mice (that is, pointing devices which send relative motions,
          * including trackballs and pointing sticks), not from other pointer devices such as
          * touchpads and styluses.
          */
-        public boolean mousePointerAccelerationEnabled;
+        public boolean mouseScalingEnabled;
 
         // Whether the pointer icon should be visible or hidden on this display.
         public boolean pointerIconVisible;
@@ -3734,12 +3753,12 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         public boolean allDefaults() {
-            return mousePointerAccelerationEnabled == DEFAULT_MOUSE_POINTER_ACCELERATION_ENABLED
+            return mouseScalingEnabled == DEFAULT_MOUSE_SCALING_ENABLED
                     && pointerIconVisible == DEFAULT_POINTER_ICON_VISIBLE;
         }
 
         public void reset() {
-            mousePointerAccelerationEnabled = DEFAULT_MOUSE_POINTER_ACCELERATION_ENABLED;
+            mouseScalingEnabled = DEFAULT_MOUSE_SCALING_ENABLED;
             pointerIconVisible = DEFAULT_POINTER_ICON_VISIBLE;
         }
     }
@@ -3754,14 +3773,14 @@ public class InputManagerService extends IInputManager.Stub
                 mAdditionalDisplayInputProperties.put(displayId, properties);
             }
             final boolean oldPointerIconVisible = properties.pointerIconVisible;
-            final boolean oldMouseAccelerationEnabled = properties.mousePointerAccelerationEnabled;
+            final boolean oldMouseScalingEnabled = properties.mouseScalingEnabled;
             updater.accept(properties);
             if (oldPointerIconVisible != properties.pointerIconVisible) {
                 mNative.setPointerIconVisibility(displayId, properties.pointerIconVisible);
             }
-            if (oldMouseAccelerationEnabled != properties.mousePointerAccelerationEnabled) {
-                mNative.setMousePointerAccelerationEnabled(displayId,
-                        properties.mousePointerAccelerationEnabled);
+            if (oldMouseScalingEnabled != properties.mouseScalingEnabled) {
+                mNative.setMouseScalingEnabled(displayId,
+                        properties.mouseScalingEnabled);
             }
             if (properties.allDefaults()) {
                 mAdditionalDisplayInputProperties.remove(displayId);

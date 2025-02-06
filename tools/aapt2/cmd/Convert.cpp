@@ -425,9 +425,6 @@ int ConvertCommand::Action(const std::vector<std::string>& args) {
                                     << output_format_.value());
     return 1;
   }
-  if (enable_sparse_encoding_) {
-    table_flattener_options_.sparse_entries = SparseEntriesMode::Enabled;
-  }
   if (force_sparse_encoding_) {
     table_flattener_options_.sparse_entries = SparseEntriesMode::Forced;
   }

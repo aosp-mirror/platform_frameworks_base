@@ -41,7 +41,7 @@ import java.io.File;
  * Test class for {@link TaskSnapshotPersister} and {@link AppSnapshotLoader}
  *
  * Build/Install/Run:
- * atest TaskSnapshotPersisterLoaderTest
+ * atest TaskSnapshotLowResDisabledTest
  */
 @MediumTest
 @Presubmit
@@ -126,7 +126,7 @@ public class TaskSnapshotLowResDisabledTest extends TaskSnapshotPersisterTestBas
 
     @Test
     public void testReduced_notCached() {
-        final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
+        final WindowState window = newWindowBuilder("window", FIRST_APPLICATION_WINDOW).build();
         mPersister.persistSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId, createSnapshot());
         mSnapshotPersistQueue.waitForQueueEmpty();
         assertNull(mCache.getSnapshot(window.getTask().mTaskId, false /* isLowResolution */));

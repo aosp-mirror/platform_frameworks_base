@@ -51,12 +51,13 @@ class ImplGeneratingAdapter(
 
     override fun visit(
         version: Int,
-        access: Int,
+        origAccess: Int,
         name: String,
         signature: String?,
         superName: String?,
         interfaces: Array<String>
     ) {
+        val access = modifyClassAccess(origAccess)
         super.visit(version, access, name, signature, superName, interfaces)
 
         classLoadHooks = filter.getClassLoadHooks(currentClassName)

@@ -7,3 +7,13 @@ flag {
     description: "Persist list of users with alarms scheduled and wakeup stopped users before alarms are due"
     bug: "314907186"
 }
+
+flag {
+    name: "acquire_wakelock_before_send"
+    namespace: "backstage_power"
+    description: "Acquire the userspace alarm wakelock before sending the alarm"
+    bug: "391413964"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

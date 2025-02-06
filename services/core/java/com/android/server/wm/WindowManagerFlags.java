@@ -58,6 +58,8 @@ class WindowManagerFlags {
 
     final boolean mEnsureWallpaperInTransitions;
 
+    final boolean mAodTransition = Flags.aodTransition();
+
     /* End Available Flags */
 
     WindowManagerFlags() {

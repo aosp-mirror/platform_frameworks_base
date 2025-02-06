@@ -38,7 +38,6 @@ import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import org.junit.Before
@@ -49,7 +48,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
-@ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class DefaultDeviceEntrySectionTest : SysuiTestCase() {
@@ -81,6 +79,7 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
                 { falsingManager },
                 { mock(VibratorHelper::class.java) },
                 logcatLogBuffer(),
+                logcatLogBuffer("blueprints"),
             )
     }
 

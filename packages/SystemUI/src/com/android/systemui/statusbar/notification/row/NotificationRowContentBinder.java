@@ -143,11 +143,8 @@ public interface NotificationRowContentBinder {
      */
     class BindParams {
 
-        public BindParams(boolean minimized, boolean increasedHeight,
-                boolean increasedHeadsUpHeight, int redaction) {
+        public BindParams(boolean minimized, int redaction) {
             isMinimized = minimized;
-            usesIncreasedHeight = increasedHeight;
-            usesIncreasedHeadsUpHeight = increasedHeadsUpHeight;
             redactionType = redaction;
         }
 
@@ -155,16 +152,6 @@ public interface NotificationRowContentBinder {
          * Bind a minimized version of the content views.
          */
         public final boolean isMinimized;
-
-        /**
-         * Use increased height when binding contracted view.
-         */
-        public final boolean usesIncreasedHeight;
-
-        /**
-         * Use increased height when binding heads up views.
-         */
-        public final boolean usesIncreasedHeadsUpHeight;
 
         /**
          * Controls the type of public view to show, if a public view is requested

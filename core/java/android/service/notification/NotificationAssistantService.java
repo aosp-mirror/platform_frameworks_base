@@ -113,6 +113,8 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * <p>
      * Input: {@link #EXTRA_NOTIFICATION_KEY}, the {@link StatusBarNotification#getKey()} of the
      * notification the user wants to file feedback for.
+     * Input: {@link #EXTRA_NOTIFICATION_ADJUSTMENT}, the {@link Adjustment} key that the user wants
+     * to file feedback about.
      * <p>
      * Output: Nothing.
      */
@@ -129,6 +131,16 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     @FlaggedApi(Flags.FLAG_NOTIFICATION_CLASSIFICATION)
     public static final String EXTRA_NOTIFICATION_KEY
             = "android.service.notification.extra.NOTIFICATION_KEY";
+
+    /**
+     * A string extra containing the {@link Adjustment} key that the user wants to file feedback
+     * about.
+     *
+     * Extra for {@link #ACTION_NOTIFICATION_ASSISTANT_FEEDBACK_SETTINGS}.
+     */
+    @FlaggedApi(android.app.Flags.FLAG_NM_SUMMARIZATION)
+    public static final String EXTRA_NOTIFICATION_ADJUSTMENT
+            = "android.service.notification.extra.NOTIFICATION_ADJUSTMENT";
 
     /**
      * Data type: int, the feedback rating score provided by user. The score can be any integer

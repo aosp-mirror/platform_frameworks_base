@@ -183,6 +183,12 @@ public class UserInfo implements Parcelable {
      *
      * <p>This is not necessarily the system user. For example, it will not be the system user on
      * devices for which {@link UserManager#isHeadlessSystemUserMode()} returns true.
+     *
+     * <p>NB: Features should ideally not limit functionality to the main user. Ideally, they
+     * should either work for all users or for all admin users. If a feature should only work for
+     * select users, its determination of which user should be done intelligently or be
+     * customizable. Not all devices support a main user, and the idea of singling out one user as
+     * special is contrary to overall multiuser goals.
      */
     public static final int FLAG_MAIN = 0x00004000;
 

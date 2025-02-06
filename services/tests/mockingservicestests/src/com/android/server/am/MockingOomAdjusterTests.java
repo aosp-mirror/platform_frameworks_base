@@ -258,7 +258,6 @@ public class MockingOomAdjusterTests {
         mService.mOomAdjuster = mService.mProcessStateController.getOomAdjuster();
         mService.mOomAdjuster.mAdjSeq = 10000;
         mService.mWakefulness = new AtomicInteger(PowerManagerInternal.WAKEFULNESS_AWAKE);
-        mSetFlagsRule.enableFlags(Flags.FLAG_NEW_FGS_RESTRICTION_LOGIC);
 
         mUiTierSize = mService.mConstants.TIERED_CACHED_ADJ_UI_TIER_SIZE;
         mFirstNonUiCachedAdj = sFirstUiCachedAdj + mUiTierSize;
@@ -740,6 +739,43 @@ public class MockingOomAdjusterTests {
 
         assertNoCpuTime(app);
         assertNoCpuTime(app2);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    @EnableFlags(Flags.FLAG_USE_CPU_TIME_CAPABILITY)
+    public void testUpdateOomAdjFreezeState_receivers() {
+        final ProcessRecord app = makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true);
+
+        updateOomAdj(app);
+        assertNoCpuTime(app);
+
+        app.mReceivers.incrementCurReceivers();
+        updateOomAdj(app);
+        assertCpuTime(app);
+
+        app.mReceivers.decrementCurReceivers();
+        updateOomAdj(app);
+        assertNoCpuTime(app);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    @EnableFlags(Flags.FLAG_USE_CPU_TIME_CAPABILITY)
+    public void testUpdateOomAdjFreezeState_activeInstrumentation() {
+        ProcessRecord app = makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID, MOCKAPP_PROCESSNAME,
+                MOCKAPP_PACKAGENAME, true);
+        updateOomAdj(app);
+        assertNoCpuTime(app);
+
+        mProcessStateController.setActiveInstrumentation(app, mock(ActiveInstrumentation.class));
+        updateOomAdj(app);
+        assertCpuTime(app);
+
+        mProcessStateController.setActiveInstrumentation(app, null);
+        updateOomAdj(app);
+        assertNoCpuTime(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -3357,6 +3393,51 @@ public class MockingOomAdjusterTests {
             final int cur = mInjector.mSetOomAdjAppliedAt.get(apps[i].mPid);
             assertTrue("setOomAdj is called in wrong order", pre < cur);
         }
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoAll_BindUiServiceFromClientService() {
+        ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
+        ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+        ServiceRecord s = makeServiceRecord(client);
+        mProcessStateController.setStartRequested(s, true);
+        mProcessStateController.setServiceLastActivityTime(s, SystemClock.uptimeMillis());
+        bindService(app, client, null, null, 0, mock(IBinder.class));
+
+        setWakefulness(PowerManagerInternal.WAKEFULNESS_AWAKE);
+        updateOomAdj(app, client);
+        if (Flags.raiseBoundUiServiceThreshold()) {
+            assertProcStates(app, PROCESS_STATE_SERVICE, SERVICE_ADJ, SCHED_GROUP_BACKGROUND,
+                    "service");
+        } else {
+            final int expectedAdj = mService.mConstants.USE_TIERED_CACHED_ADJ
+                    ? sFirstUiCachedAdj : sFirstCachedAdj;
+            assertProcStates(app, PROCESS_STATE_SERVICE, expectedAdj, SCHED_GROUP_BACKGROUND,
+                    "cch-bound-ui-services");
+        }
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoAll_BindUiServiceFromClientHome() {
+        ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
+        ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+
+        WindowProcessController wpc = client.getWindowProcessController();
+        doReturn(true).when(wpc).isHomeProcess();
+        bindService(app, client, null, null, 0, mock(IBinder.class));
+        setWakefulness(PowerManagerInternal.WAKEFULNESS_AWAKE);
+        updateOomAdj(app, client);
+
+        final int expectedAdj = mService.mConstants.USE_TIERED_CACHED_ADJ
+                ? sFirstUiCachedAdj : sFirstCachedAdj;
+        assertProcStates(app, PROCESS_STATE_HOME, expectedAdj, SCHED_GROUP_BACKGROUND,
+                "cch-bound-ui-services");
     }
 
     private ProcessRecord makeDefaultProcessRecord(int pid, int uid, String processName,

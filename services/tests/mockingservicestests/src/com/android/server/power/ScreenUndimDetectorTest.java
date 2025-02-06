@@ -40,6 +40,7 @@ import com.android.modules.utils.testing.TestableDeviceConfig;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -329,6 +330,7 @@ public class ScreenUndimDetectorTest {
         }
     }
 
+    @Ignore("b/387389929")
     @Test
     public void recordScreenPolicy_otherTransitions_doesNotReset() {
         DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,

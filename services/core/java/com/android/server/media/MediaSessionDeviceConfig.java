@@ -46,6 +46,7 @@ class MediaSessionDeviceConfig {
     private static volatile long sMediaSessionCallbackFgsAllowlistDurationMs =
             DEFAULT_MEDIA_SESSION_CALLBACK_FGS_ALLOWLIST_DURATION_MS;
 
+
     /**
      * Denotes the duration for which an app receiving a media session callback and the FGS started
      * there can be temporarily allowed to have while-in-use permissions such as
@@ -57,6 +58,16 @@ class MediaSessionDeviceConfig {
             = 10_000;
     private static volatile long sMediaSessionCallbackFgsWhileInUseTempAllowDurationMs =
             DEFAULT_MEDIA_SESSION_CALLBACK_FGS_WHILE_IN_USE_TEMP_ALLOW_DURATION_MS;
+
+    /**
+     * Denotes the duration (in milliseconds) that a media session can remain in an engaged state,
+     * where it is only considered engaged if transitioning from active playback.
+     */
+    private static final String KEY_MEDIA_SESSION_TEMP_USER_ENGAGED_DURATION_MS =
+            "media_session_temp_user_engaged_duration_ms";
+    private static final long DEFAULT_MEDIA_SESSION_TEMP_USER_ENGAGED_DURATION_MS = 600_000;
+    private static volatile long sMediaSessionTempUserEngagedDurationMs =
+            DEFAULT_MEDIA_SESSION_TEMP_USER_ENGAGED_DURATION_MS;
 
     private static void refresh(DeviceConfig.Properties properties) {
         final Set<String> keys = properties.getKeyset();
@@ -73,6 +84,11 @@ class MediaSessionDeviceConfig {
                 case KEY_MEDIA_SESSION_CALLBACK_FGS_WHILE_IN_USE_TEMP_ALLOW_DURATION_MS:
                     sMediaSessionCallbackFgsWhileInUseTempAllowDurationMs = properties.getLong(key,
                             DEFAULT_MEDIA_SESSION_CALLBACK_FGS_WHILE_IN_USE_TEMP_ALLOW_DURATION_MS);
+                    break;
+                case KEY_MEDIA_SESSION_TEMP_USER_ENGAGED_DURATION_MS:
+                    sMediaSessionTempUserEngagedDurationMs = properties.getLong(key,
+                            DEFAULT_MEDIA_SESSION_TEMP_USER_ENGAGED_DURATION_MS);
+                    break;
             }
         });
     }
@@ -110,6 +126,15 @@ class MediaSessionDeviceConfig {
         return sMediaSessionCallbackFgsWhileInUseTempAllowDurationMs;
     }
 
+    /**
+     * Returns the duration (in milliseconds) that a media session can remain in an engaged state,
+     * where it is only considered engaged if transitioning from active playback. After this
+     * duration, the session is disengaged until explicit user action triggers active playback.
+     */
+    public static long getMediaSessionTempUserEngagedDurationMs() {
+        return sMediaSessionTempUserEngagedDurationMs;
+    }
+
     public static void dump(PrintWriter pw, String prefix) {
         pw.println("Media session config:");
         final String dumpFormat = prefix + "  %s: [cur: %s, def: %s]";
@@ -125,5 +150,9 @@ class MediaSessionDeviceConfig {
                 KEY_MEDIA_SESSION_CALLBACK_FGS_WHILE_IN_USE_TEMP_ALLOW_DURATION_MS,
                 sMediaSessionCallbackFgsWhileInUseTempAllowDurationMs,
                 DEFAULT_MEDIA_SESSION_CALLBACK_FGS_WHILE_IN_USE_TEMP_ALLOW_DURATION_MS));
+        pw.println(TextUtils.formatSimple(dumpFormat,
+                KEY_MEDIA_SESSION_TEMP_USER_ENGAGED_DURATION_MS,
+                sMediaSessionTempUserEngagedDurationMs,
+                DEFAULT_MEDIA_SESSION_TEMP_USER_ENGAGED_DURATION_MS));
     }
 }

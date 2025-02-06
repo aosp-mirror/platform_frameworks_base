@@ -29,7 +29,6 @@ import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
@@ -39,7 +38,6 @@ import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @RunWith(AndroidJUnit4::class)
 class AirplaneModeViewModelImplTest : SysuiTestCase() {

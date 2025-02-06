@@ -25,6 +25,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.util.settings.data.repository.userAwareSecureSettingsRepository
 
@@ -40,6 +41,7 @@ val Kosmos.deviceUnlockedInteractor by Fixture {
             systemPropertiesHelper = fakeSystemPropertiesHelper,
             userAwareSecureSettingsRepository = userAwareSecureSettingsRepository,
             keyguardInteractor = keyguardInteractor,
+            tableLogBuffer = logcatTableLogBuffer(this, "sceneFrameworkTableLogBuffer"),
         )
         .apply { activateIn(testScope) }
 }

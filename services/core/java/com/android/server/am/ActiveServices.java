@@ -8950,18 +8950,12 @@ public final class ActiveServices {
         if (!mAm.mConstants.mFgsStartRestrictionCheckCallerTargetSdk) {
             return true; // In this case, we only check the service's target SDK level.
         }
-        final int callingUid;
-        if (Flags.newFgsRestrictionLogic()) {
-            // We always consider SYSTEM_UID to target S+, so just enable the restrictions.
-            if (actualCallingUid == Process.SYSTEM_UID) {
-                return true;
-            }
-            callingUid = actualCallingUid;
-        } else {
-            // Legacy logic used mRecentCallingUid.
-            callingUid = r.mRecentCallingUid;
+        // We always consider SYSTEM_UID to target S+, so just enable the restrictions.
+        if (actualCallingUid == Process.SYSTEM_UID) {
+            return true;
         }
-        if (!CompatChanges.isChangeEnabled(FGS_BG_START_RESTRICTION_CHANGE_ID, callingUid)) {
+        if (!CompatChanges.isChangeEnabled(FGS_BG_START_RESTRICTION_CHANGE_ID,
+                actualCallingUid)) {
             return false; // If the caller targets < S, then we still disable the restrictions.
         }
 

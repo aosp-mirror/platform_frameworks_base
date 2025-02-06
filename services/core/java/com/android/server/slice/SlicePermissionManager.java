@@ -29,6 +29,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.Xml.Encoding;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
 import com.android.server.slice.SliceProviderPermissions.SliceAuthority;
@@ -76,8 +77,11 @@ public class SlicePermissionManager implements DirtyTracker {
     private final File mSliceDir;
     private final Context mContext;
     private final Handler mHandler;
+    @GuardedBy("itself")
     private final ArrayMap<PkgUser, SliceProviderPermissions> mCachedProviders = new ArrayMap<>();
+    @GuardedBy("itself")
     private final ArrayMap<PkgUser, SliceClientPermissions> mCachedClients = new ArrayMap<>();
+    @GuardedBy("this")
     private final ArraySet<Persistable> mDirty = new ArraySet<>();
 
     @VisibleForTesting
@@ -354,14 +358,22 @@ public class SlicePermissionManager implements DirtyTracker {
     // use addPersistableDirty(); this is just for tests
     @VisibleForTesting
     void addDirtyImmediate(Persistable obj) {
-        mDirty.add(obj);
+        synchronized (this) {
+            mDirty.add(obj);
+        }
     }
 
     private void handleRemove(PkgUser pkgUser) {
         getFile(SliceClientPermissions.getFileName(pkgUser)).delete();
         getFile(SliceProviderPermissions.getFileName(pkgUser)).delete();
-        mDirty.remove(mCachedClients.remove(pkgUser));
-        mDirty.remove(mCachedProviders.remove(pkgUser));
+        synchronized (this) {
+            synchronized (mCachedClients) {
+                mDirty.remove(mCachedClients.remove(pkgUser));
+            }
+            synchronized (mCachedProviders) {
+                mDirty.remove(mCachedProviders.remove(pkgUser));
+            }
+        }
     }
 
     private final class H extends Handler {
@@ -379,7 +391,9 @@ public class SlicePermissionManager implements DirtyTracker {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_ADD_DIRTY:
-                    mDirty.add((Persistable) msg.obj);
+                    synchronized (SlicePermissionManager.this) {
+                        mDirty.add((Persistable) msg.obj);
+                    }
                     break;
                 case MSG_PERSIST:
                     handlePersist();

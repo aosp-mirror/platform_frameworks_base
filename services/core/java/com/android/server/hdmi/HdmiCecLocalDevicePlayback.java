@@ -21,7 +21,6 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.display.DeviceProductInfo;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
@@ -32,7 +31,6 @@ import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.sysprop.HdmiProperties;
 import android.util.Slog;
-import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.LocalePicker;
@@ -151,10 +149,6 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     private void launchDeviceDiscovery() {
         assertRunOnServiceThread();
         clearDeviceInfoList();
-        if (hasAction(DeviceDiscoveryAction.class)) {
-            Slog.i(TAG, "Device Discovery Action is in progress. Restarting.");
-            removeAction(DeviceDiscoveryAction.class);
-        }
         DeviceDiscoveryAction action = new DeviceDiscoveryAction(this,
                 new DeviceDiscoveryAction.DeviceDiscoveryCallback() {
                     @Override
@@ -163,25 +157,21 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                             mService.getHdmiCecNetwork().addCecDevice(info);
                         }
 
-                        // Since we removed all devices when it starts and device discovery action
-                        // does not poll local devices, we should put device info of local device
-                        // manually here.
+                        // Since we removed all devices when it starts and device discovery
+                        // action does not poll local devices, we should put device info of
+                        // local device manually here.
                         for (HdmiCecLocalDevice device : mService.getAllCecLocalDevices()) {
                             mService.getHdmiCecNetwork().addCecDevice(device.getDeviceInfo());
                         }
 
-                        List<HotplugDetectionAction> hotplugActions =
-                                getActions(HotplugDetectionAction.class);
-                        if (hotplugActions.isEmpty()) {
+                        if (!hasAction(HotplugDetectionAction.class)) {
                             addAndStartAction(
-                                    new HotplugDetectionAction(HdmiCecLocalDevicePlayback.this));
+                                    new HotplugDetectionAction(
+                                            HdmiCecLocalDevicePlayback.this));
                         }
 
                         if (mService.isHdmiControlEnhancedBehaviorFlagEnabled()) {
-                            List<PowerStatusMonitorActionFromPlayback>
-                                    powerStatusMonitorActionsFromPlayback =
-                                    getActions(PowerStatusMonitorActionFromPlayback.class);
-                            if (powerStatusMonitorActionsFromPlayback.isEmpty()) {
+                            if (!hasAction(PowerStatusMonitorActionFromPlayback.class)) {
                                 addAndStartAction(
                                         new PowerStatusMonitorActionFromPlayback(
                                                 HdmiCecLocalDevicePlayback.this));
@@ -189,7 +179,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                         }
                     }
                 });
-        addAndStartAction(action);
+        addAndStartAction(action, true);
     }
 
     @Override
@@ -235,8 +225,16 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
         }
-        removeAction(DeviceSelectActionFromPlayback.class);
-        addAndStartAction(new DeviceSelectActionFromPlayback(this, targetDevice, callback));
+        List<DeviceSelectActionFromPlayback> actions = getActions(
+                DeviceSelectActionFromPlayback.class);
+        if (!actions.isEmpty()) {
+            DeviceSelectActionFromPlayback action = actions.get(0);
+            if (action.getTargetAddress() == targetDevice.getLogicalAddress()) {
+                return;
+            }
+        }
+        addAndStartAction(new DeviceSelectActionFromPlayback(this, targetDevice, callback),
+                true);
     }
 
     @Override

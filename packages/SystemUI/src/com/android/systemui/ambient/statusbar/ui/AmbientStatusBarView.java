@@ -75,8 +75,8 @@ public class AmbientStatusBarView extends ConstraintLayout {
     private ShadowInfo mAmbientShadowInfo;
     private int mDrawableSize;
     private int mDrawableInsetSize;
-    private static final float KEY_SHADOW_ALPHA = 0.8f;
-    private static final float AMBIENT_SHADOW_ALPHA = 0.6f;
+    private static final float KEY_SHADOW_ALPHA = 0.9f;
+    private static final float AMBIENT_SHADOW_ALPHA = 0.7f;
 
     public AmbientStatusBarView(Context context) {
         this(context, null);
@@ -102,14 +102,14 @@ public class AmbientStatusBarView extends ConstraintLayout {
         super.onFinishInflate();
 
         mKeyShadowInfo = createShadowInfo(
-            R.dimen.dream_overlay_status_bar_key_text_shadow_radius,
+            R.dimen.dream_overlay_icon_shadow_radius,
             R.dimen.dream_overlay_status_bar_key_text_shadow_dx,
             R.dimen.dream_overlay_status_bar_key_text_shadow_dy,
             KEY_SHADOW_ALPHA
         );
 
         mAmbientShadowInfo = createShadowInfo(
-            R.dimen.dream_overlay_status_bar_ambient_text_shadow_radius,
+            R.dimen.dream_overlay_icon_ambient_shadow_radius,
             R.dimen.dream_overlay_status_bar_ambient_text_shadow_dx,
             R.dimen.dream_overlay_status_bar_ambient_text_shadow_dy,
             AMBIENT_SHADOW_ALPHA

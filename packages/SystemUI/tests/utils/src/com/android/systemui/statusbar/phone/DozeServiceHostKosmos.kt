@@ -31,9 +31,7 @@ import com.android.systemui.statusbar.notificationShadeWindowController
 import com.android.systemui.statusbar.policy.batteryController
 import com.android.systemui.statusbar.policy.deviceProvisionedController
 import com.android.systemui.statusbar.pulseExpansionHandler
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@OptIn(ExperimentalCoroutinesApi::class)
 val Kosmos.dozeServiceHost: DozeServiceHost by
     Kosmos.Fixture {
         DozeServiceHost(

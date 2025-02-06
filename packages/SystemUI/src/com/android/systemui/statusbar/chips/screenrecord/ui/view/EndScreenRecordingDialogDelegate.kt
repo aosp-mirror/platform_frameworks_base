@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.chips.screenrecord.ui.view
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Bundle
+import android.view.View
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
 import com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel.ScreenRecordChipViewModel
@@ -56,6 +57,11 @@ class EndScreenRecordingDialogDelegate(
                 R.string.screenrecord_stop_dialog_button,
                 endMediaProjectionDialogHelper.wrapStopAction(stopAction),
             )
+            if (com.android.media.projection.flags.Flags.showStopDialogPostCallEnd()) {
+                window
+                    ?.decorView
+                    ?.setAccessibilityDataSensitive(View.ACCESSIBILITY_DATA_SENSITIVE_YES)
+            }
         }
     }
 }

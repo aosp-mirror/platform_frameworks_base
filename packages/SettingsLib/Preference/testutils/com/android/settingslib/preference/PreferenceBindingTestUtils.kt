@@ -22,6 +22,8 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceScreen
 import com.android.settingslib.metadata.PersistentPreference
 import com.android.settingslib.metadata.PreferenceMetadata
+import com.android.settingslib.metadata.PreferenceScreenMetadata
+import org.mockito.kotlin.mock
 
 /** Creates [Preference] widget and binds with metadata. */
 @Suppress("UNCHECKED_CAST")
@@ -29,13 +31,13 @@ import com.android.settingslib.metadata.PreferenceMetadata
 fun <P : Preference> PreferenceMetadata.createAndBindWidget(
     context: Context,
     preferenceScreen: PreferenceScreen? = null,
+    preferenceScreenMetadata: PreferenceScreenMetadata = mock(),
 ): P {
     val binding = PreferenceBindingFactory.defaultFactory.getPreferenceBinding(this)!!
     return (binding.createWidget(context) as P).also {
         if (this is PersistentPreference<*>) {
-            storage(context).let { keyValueStore ->
-                it.preferenceDataStore = PreferenceDataStoreAdapter(keyValueStore)
-            }
+            it.preferenceDataStore =
+                storage(context).toPreferenceDataStore(preferenceScreenMetadata, this)
             // Attach preference to preference screen, otherwise `Preference.performClick` does not
             // interact with underlying datastore
             (preferenceScreen ?: PreferenceScreenFactory(context).getOrCreatePreferenceScreen())

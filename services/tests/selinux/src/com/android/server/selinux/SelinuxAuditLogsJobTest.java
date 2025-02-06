@@ -53,7 +53,7 @@ public class SelinuxAuditLogsJobTest {
     }
 
     @Test
-    public void testFinishSuccessfully() {
+    public void testFinishSuccessfully() throws Exception {
         when(mAuditLogsCollector.collect(anyInt())).thenReturn(true);
 
         mAuditLogsJob.start(mJobService, mParams);
@@ -63,7 +63,7 @@ public class SelinuxAuditLogsJobTest {
     }
 
     @Test
-    public void testInterrupt() {
+    public void testInterrupt() throws Exception {
         when(mAuditLogsCollector.collect(anyInt())).thenReturn(false);
 
         mAuditLogsJob.start(mJobService, mParams);
@@ -73,7 +73,7 @@ public class SelinuxAuditLogsJobTest {
     }
 
     @Test
-    public void testInterruptAndResume() {
+    public void testInterruptAndResume() throws Exception {
         when(mAuditLogsCollector.collect(anyInt())).thenReturn(false);
         mAuditLogsJob.start(mJobService, mParams);
         verify(mJobService, never()).jobFinished(any(), anyBoolean());
@@ -85,7 +85,7 @@ public class SelinuxAuditLogsJobTest {
     }
 
     @Test
-    public void testRequestStop() throws InterruptedException {
+    public void testRequestStop() throws Exception {
         Semaphore isRunning = new Semaphore(0);
         Semaphore stopRequested = new Semaphore(0);
         AtomicReference<Throwable> uncaughtException = new AtomicReference<>();

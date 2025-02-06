@@ -74,14 +74,16 @@
                     <TextView
                         android:id="@+id/timeout_message"
                         android:layout_width="match_parent"
-                        android:layout_height="100dp"
+                        android:layout_height="match_parent"
                         android:visibility="gone"
                         style="@style/TimeoutMessage" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/device_list"
                         android:layout_width="match_parent"
-                        android:layout_height="200dp"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintHeight_max="220dp"
+                        app:layout_constraintHeight_min="200dp"
                         android:scrollbars="vertical"
                         android:visibility="gone" />
 
@@ -96,6 +98,10 @@
 
                     <ProgressBar
                         android:id="@+id/progress_bar"
+                        android:importantForAccessibility="no"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
                         style="@style/HorizontalProgressBar" />
 
                     <View

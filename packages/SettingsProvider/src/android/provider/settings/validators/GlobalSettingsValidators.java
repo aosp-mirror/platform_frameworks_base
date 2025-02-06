@@ -102,6 +102,7 @@ public class GlobalSettingsValidators {
                 });
         VALIDATORS.put(Global.AUTO_TIME, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.AUTO_TIME_ZONE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.TIME_ZONE_NOTIFICATIONS, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.POWER_SOUNDS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.DOCK_SOUNDS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.CHARGING_SOUNDS_ENABLED, BOOLEAN_VALIDATOR);
@@ -176,7 +177,7 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.REQUIRE_PASSWORD_TO_DECRYPT, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.DEVICE_DEMO_MODE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.AWARE_ALLOWED, BOOLEAN_VALIDATOR);
-        VALIDATORS.put(Global.POWER_BUTTON_SHORT_PRESS, new InclusiveIntegerRangeValidator(0, 7));
+        VALIDATORS.put(Global.POWER_BUTTON_SHORT_PRESS, new InclusiveIntegerRangeValidator(0, 8));
         VALIDATORS.put(Global.POWER_BUTTON_DOUBLE_PRESS, new InclusiveIntegerRangeValidator(0, 3));
         VALIDATORS.put(Global.POWER_BUTTON_TRIPLE_PRESS, new InclusiveIntegerRangeValidator(0, 3));
         VALIDATORS.put(Global.POWER_BUTTON_LONG_PRESS, new InclusiveIntegerRangeValidator(0, 5));

@@ -643,8 +643,9 @@ final class ColorFade {
                     .setSecure(isSecure)
                     .setBLASTLayer();
             mBLASTSurfaceControl = b.build();
-            mBLASTBufferQueue = new BLASTBufferQueue("ColorFade", mBLASTSurfaceControl,
-                    mDisplayWidth, mDisplayHeight, PixelFormat.TRANSLUCENT);
+            mBLASTBufferQueue = new BLASTBufferQueue("ColorFade", /*updateDestinationFrame*/ true);
+            mBLASTBufferQueue.update(mBLASTSurfaceControl, mDisplayWidth, mDisplayHeight,
+                    PixelFormat.TRANSLUCENT);
             mSurface = mBLASTBufferQueue.createSurface();
         }
         return true;

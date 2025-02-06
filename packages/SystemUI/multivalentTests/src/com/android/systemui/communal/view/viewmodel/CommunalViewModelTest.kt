@@ -29,6 +29,7 @@ import com.android.systemui.Flags.FLAG_BOUNCER_UI_REVAMP
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.Flags.FLAG_COMMUNAL_RESPONSIVE_GRID
 import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_DIRECT_EDIT_MODE
+import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_V2
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.communal.data.model.CommunalSmartspaceTimer
@@ -94,7 +95,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -116,7 +116,6 @@ import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
@@ -219,6 +218,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     fun ordering_smartspaceBeforeUmoBeforeWidgetsBeforeCtaTile() =
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
@@ -258,7 +258,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     /** TODO(b/378171351): Handle ongoing content in responsive grid. */
     @Test
-    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID)
+    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID, FLAG_GLANCEABLE_HUB_V2)
     fun ongoingContent_umoAndOneTimer_sizedAppropriately() =
         testScope.runTest {
             // Widgets available.
@@ -296,7 +296,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     /** TODO(b/378171351): Handle ongoing content in responsive grid. */
     @Test
-    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID)
+    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID, FLAG_GLANCEABLE_HUB_V2)
     fun ongoingContent_umoAndTwoTimers_sizedAppropriately() =
         testScope.runTest {
             // Widgets available.
@@ -342,6 +342,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     fun communalContent_mediaHostVisible_umoIncluded() =
         testScope.runTest {
             // Media playing.
@@ -353,6 +354,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     fun communalContent_mediaHostVisible_umoExcluded() =
         testScope.runTest {
             whenever(mediaHost.visible).thenReturn(false)
@@ -408,6 +410,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     fun dismissCta_hidesCtaTileAndShowsPopup_thenHidesPopupAfterTimeout() =
         testScope.runTest {
             setIsMainUser(true)
@@ -734,6 +737,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     fun communalContent_emitsFrozenContent_whenFrozen() =
         testScope.runTest {
             val communalContent by collectLastValue(underTest.communalContent)
@@ -790,6 +794,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     fun communalContent_emitsLatestContent_whenNotFrozen() =
         testScope.runTest {
             val communalContent by collectLastValue(underTest.communalContent)

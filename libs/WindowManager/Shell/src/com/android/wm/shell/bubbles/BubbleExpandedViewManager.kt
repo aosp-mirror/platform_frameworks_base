@@ -28,7 +28,7 @@ interface BubbleExpandedViewManager {
     fun promoteBubbleFromOverflow(bubble: Bubble)
     fun removeBubble(key: String, reason: Int)
     fun dismissBubble(bubble: Bubble, reason: Int)
-    fun setAppBubbleTaskId(key: String, taskId: Int)
+    fun setNoteBubbleTaskId(key: String, taskId: Int)
     fun isStackExpanded(): Boolean
     fun isShowingAsBubbleBar(): Boolean
     fun hideCurrentInputMethod()
@@ -73,8 +73,8 @@ interface BubbleExpandedViewManager {
                     controller.dismissBubble(bubble, reason)
                 }
 
-                override fun setAppBubbleTaskId(key: String, taskId: Int) {
-                    controller.setAppBubbleTaskId(key, taskId)
+                override fun setNoteBubbleTaskId(key: String, taskId: Int) {
+                    controller.setNoteBubbleTaskId(key, taskId)
                 }
 
                 override fun isStackExpanded(): Boolean = controller.isStackExpanded

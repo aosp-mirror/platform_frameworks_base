@@ -31,7 +31,6 @@ import static org.mockito.Mockito.when;
 
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.VirtualDevice;
-import android.companion.virtual.flags.Flags;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
@@ -109,8 +108,6 @@ public class VirtualDeviceTest {
 
     @Test
     public void virtualDevice_getDisplayIds() throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_VDM_PUBLIC_APIS);
-
         VirtualDevice virtualDevice =
                 new VirtualDevice(
                         mVirtualDevice, VIRTUAL_DEVICE_ID, /*persistentId=*/null, /*name=*/null);
@@ -125,8 +122,6 @@ public class VirtualDeviceTest {
 
     @Test
     public void virtualDevice_hasCustomSensorSupport() throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_VDM_PUBLIC_APIS);
-
         VirtualDevice virtualDevice =
                 new VirtualDevice(
                         mVirtualDevice, VIRTUAL_DEVICE_ID, /*persistentId=*/null, /*name=*/null);
@@ -140,7 +135,6 @@ public class VirtualDeviceTest {
 
     @Test
     public void virtualDevice_hasCustomAudioInputSupport() throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_VDM_PUBLIC_APIS);
         mSetFlagsRule.enableFlags(android.media.audiopolicy.Flags.FLAG_AUDIO_MIX_TEST_API);
 
         VirtualDevice virtualDevice =
@@ -160,8 +154,6 @@ public class VirtualDeviceTest {
 
     @Test
     public void virtualDevice_hasCustomCameraSupport() throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_VDM_PUBLIC_APIS);
-
         VirtualDevice virtualDevice =
                 new VirtualDevice(
                         mVirtualDevice, VIRTUAL_DEVICE_ID, /*persistentId=*/null, /*name=*/null);

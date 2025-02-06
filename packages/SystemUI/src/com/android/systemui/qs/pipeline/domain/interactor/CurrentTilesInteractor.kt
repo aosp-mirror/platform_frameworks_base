@@ -52,7 +52,6 @@ import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -133,7 +132,6 @@ interface CurrentTilesInteractor : ProtoDumpable {
  * * Platform tiles will be kept between users, with a call to [QSTile.userSwitch]
  * * [CustomTile]s will only be destroyed if the user changes.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class CurrentTilesInteractorImpl
 @Inject

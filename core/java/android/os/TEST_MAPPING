@@ -112,6 +112,32 @@
     {
       "file_patterns": ["Bugreport[^/]*\\.java"],
       "name": "ShellTests"
+    },
+    {
+      "file_patterns": [
+        "CpuHeadroom[^/]*",
+        "GpuHeadroom[^/]*",
+        "health/SystemHealthManager\\.java"
+      ],
+      "name": "CtsOsTestCases",
+      "options": [
+        {"include-filter": "android.os.health.cts.HeadroomTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    },
+    {
+      "file_patterns": [
+        "CpuHeadroom[^/]*",
+        "GpuHeadroom[^/]*",
+        "health/SystemHealthManager\\.java"
+      ],
+      "name": "FrameworksCoreTests",
+      "options": [
+        {"include-filter": "android.os.SystemHealthManagerUnitTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
     }
   ],
   "ravenwood-presubmit": [

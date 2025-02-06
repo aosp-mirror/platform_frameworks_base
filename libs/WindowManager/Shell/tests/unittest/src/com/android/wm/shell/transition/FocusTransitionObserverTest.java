@@ -17,7 +17,9 @@
 package com.android.wm.shell.transition;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 
@@ -33,8 +35,6 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.os.RemoteException;
 import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.TransitionInfo.TransitionMode;
@@ -48,7 +48,6 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.shared.FocusTransitionListener;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -65,8 +64,6 @@ public class FocusTransitionObserverTest extends ShellTestCase {
 
     static final int SECONDARY_DISPLAY_ID = 1;
 
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
     private FocusTransitionListener mListener;
     private final TestShellExecutor mShellExecutor = new TestShellExecutor();
     private FocusTransitionObserver mFocusTransitionObserver;
@@ -127,18 +124,135 @@ public class FocusTransitionObserverTest extends ShellTestCase {
                 true /* isFocusedOnDisplay */, false /* isFocusedGlobally */);
     }
 
+    @Test
+    public void testTaskFocusSwitch() throws RemoteException {
+        final SurfaceControl.Transaction tx = mock(SurfaceControl.Transaction.class);
+
+        // Open 2 tasks on the default display.
+        TransitionInfo info = mock(TransitionInfo.class);
+        final List<TransitionInfo.Change> changes = new ArrayList<>();
+        setupTaskChange(changes, 1 /* taskId */, TRANSIT_OPEN,
+                DEFAULT_DISPLAY, true /* focused */);
+        when(info.getChanges()).thenReturn(changes);
+        mFocusTransitionObserver.updateFocusState(info);
+        mShellExecutor.flushAll();
+        verify(mListener, never()).onFocusedDisplayChanged(anyInt());
+        verify(mListener, times(1)).onFocusedTaskChanged(1 /* taskId */,
+                true /* isFocusedOnDisplay */, true /* isFocusedGlobally */);
+        clearInvocations(mListener);
+        changes.clear();
+
+        setupTaskChange(changes, 2 /* taskId */, TRANSIT_OPEN,
+                DEFAULT_DISPLAY, true /* focused */);
+        when(info.getChanges()).thenReturn(changes);
+        mFocusTransitionObserver.updateFocusState(info);
+        mShellExecutor.flushAll();
+        verify(mListener, times(1)).onFocusedTaskChanged(1 /* taskId */,
+                false /* isFocusedOnDisplay */, false /* isFocusedGlobally */);
+        verify(mListener, times(1)).onFocusedTaskChanged(2 /* taskId */,
+                true /* isFocusedOnDisplay */, true /* isFocusedGlobally */);
+        clearInvocations(mListener);
+        changes.clear();
+
+        // Moving a task to front.
+        changes.clear();
+        setupTaskChange(changes, 1 /* taskId */, TRANSIT_TO_FRONT,
+                DEFAULT_DISPLAY, true /* focused */);
+        when(info.getChanges()).thenReturn(changes);
+        mFocusTransitionObserver.updateFocusState(info);
+        mShellExecutor.flushAll();
+        verify(mListener, times(1)).onFocusedTaskChanged(1 /* taskId */,
+                true /* isFocusedOnDisplay */, true /* isFocusedGlobally */);
+        verify(mListener, times(1)).onFocusedTaskChanged(2 /* taskId */,
+                false /* isFocusedOnDisplay */, false /* isFocusedGlobally */);
+    }
+
+
+    @Test
+    public void testTaskMoveToAnotherDisplay() throws RemoteException {
+        final SurfaceControl.Transaction tx = mock(SurfaceControl.Transaction.class);
+
+        // First, open a task on the default display.
+        TransitionInfo info = mock(TransitionInfo.class);
+        final List<TransitionInfo.Change> changes = new ArrayList<>();
+        setupTaskChange(changes, 1 /* taskId */, TRANSIT_OPEN,
+                DEFAULT_DISPLAY, true /* focused */);
+        when(info.getChanges()).thenReturn(changes);
+        mFocusTransitionObserver.updateFocusState(info);
+        mShellExecutor.flushAll();
+        verify(mListener, never()).onFocusedDisplayChanged(anyInt());
+        verify(mListener, times(1)).onFocusedTaskChanged(1 /* taskId */,
+                true /* isFocusedOnDisplay */, true /* isFocusedGlobally */);
+        clearInvocations(mListener);
+        changes.clear();
+
+        // Open 2 tasks on the secondary display.
+        setupTaskChange(changes, 2 /* taskId */, TRANSIT_OPEN,
+                SECONDARY_DISPLAY_ID, true /* focused */);
+        setupDisplayToTopChange(changes, SECONDARY_DISPLAY_ID);
+        when(info.getChanges()).thenReturn(changes);
+        mFocusTransitionObserver.updateFocusState(info);
+        mShellExecutor.flushAll();
+        verify(mListener, times(1))
+                .onFocusedDisplayChanged(SECONDARY_DISPLAY_ID);
+        verify(mListener, times(1)).onFocusedTaskChanged(1 /* taskId */,
+                true /* isFocusedOnDisplay */, false /* isFocusedGlobally */);
+        verify(mListener, times(1)).onFocusedTaskChanged(2 /* taskId */,
+                true /* isFocusedOnDisplay */, true /* isFocusedGlobally */);
+        clearInvocations(mListener);
+        changes.clear();
+
+        setupTaskChange(changes, 3 /* taskId */, TRANSIT_OPEN,
+                SECONDARY_DISPLAY_ID, true /* focused */);
+        setupDisplayToTopChange(changes, SECONDARY_DISPLAY_ID);
+        when(info.getChanges()).thenReturn(changes);
+        mFocusTransitionObserver.updateFocusState(info);
+        mShellExecutor.flushAll();
+        verify(mListener, times(1)).onFocusedTaskChanged(2 /* taskId */,
+                false /* isFocusedOnDisplay */, false /* isFocusedGlobally */);
+        verify(mListener, times(1)).onFocusedTaskChanged(3 /* taskId */,
+                true /* isFocusedOnDisplay */, true /* isFocusedGlobally */);
+        clearInvocations(mListener);
+        changes.clear();
+
+        // Move focused task in the secondary display to the default display
+        setupTaskChange(changes, 3 /* taskId */, TRANSIT_CHANGE,
+                SECONDARY_DISPLAY_ID, DEFAULT_DISPLAY, true /* focused */);
+        setupTaskChange(changes, 2 /* taskId */, TRANSIT_TO_FRONT,
+                SECONDARY_DISPLAY_ID, true /* focused */);
+        setupDisplayToTopChange(changes, DEFAULT_DISPLAY);
+        when(info.getChanges()).thenReturn(changes);
+        mFocusTransitionObserver.updateFocusState(info);
+        mShellExecutor.flushAll();
+        verify(mListener, times(1)).onFocusedTaskChanged(1 /* taskId */,
+                false /* isFocusedOnDisplay */, false /* isFocusedGlobally */);
+        verify(mListener, times(1)).onFocusedTaskChanged(2 /* taskId */,
+                true /* isFocusedOnDisplay */, false /* isFocusedGlobally */);
+        verify(mListener, times(1)).onFocusedTaskChanged(3 /* taskId */,
+                true /* isFocusedOnDisplay */, true /* isFocusedGlobally */);
+        clearInvocations(mListener);
+    }
+
     private void setupTaskChange(List<TransitionInfo.Change> changes, int taskId,
             @TransitionMode int mode, int displayId, boolean focused) {
+        setupTaskChange(changes, taskId, mode, displayId, displayId, focused);
+    }
+
+    private void setupTaskChange(List<TransitionInfo.Change> changes, int taskId,
+            @TransitionMode int mode, int startDisplayId, int endDisplayId, boolean focused) {
         TransitionInfo.Change change = mock(TransitionInfo.Change.class);
         RunningTaskInfo taskInfo = mock(RunningTaskInfo.class);
         taskInfo.taskId = taskId;
         taskInfo.isFocused = focused;
         when(change.hasFlags(FLAG_MOVED_TO_TOP)).thenReturn(focused);
-        taskInfo.displayId = displayId;
+        taskInfo.displayId = endDisplayId;
+        when(change.getStartDisplayId()).thenReturn(startDisplayId);
+        when(change.getEndDisplayId()).thenReturn(endDisplayId);
         when(change.getTaskInfo()).thenReturn(taskInfo);
         when(change.getMode()).thenReturn(mode);
         changes.add(change);
     }
+
 
     private void setupDisplayToTopChange(List<TransitionInfo.Change> changes, int displayId) {
         TransitionInfo.Change change = mock(TransitionInfo.Change.class);

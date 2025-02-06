@@ -51,7 +51,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.testKosmos
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runCurrent
@@ -61,7 +60,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class FromOccludedTransitionInteractorTest : SysuiTestCase() {

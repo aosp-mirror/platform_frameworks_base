@@ -122,7 +122,6 @@ android_test {
         "android.view.flags-aconfig-java",
     ],
     jni_libs: [
-        "libperfetto_trace_test_jni",
         "libpowermanagertest_jni",
         "libviewRootImplTest_jni",
         "libworksourceparceltest_jni",
@@ -313,6 +312,7 @@ android_ravenwood_test {
         "res/xml/power_profile_test_modem.xml",
     ],
     auto_gen_config: true,
+    team: "trendy_team_ravenwood",
 }
 
 test_module_config {

@@ -86,8 +86,6 @@ public class ConversationLayout extends FrameLayout
     public static final Interpolator FAST_OUT_LINEAR_IN = new PathInterpolator(0.4f, 0f, 1f, 1f);
     public static final Interpolator FAST_OUT_SLOW_IN = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
     public static final Interpolator OVERSHOOT = new PathInterpolator(0.4f, 0f, 0.2f, 1.4f);
-    public static final OnLayoutChangeListener MESSAGING_PROPERTY_ANIMATOR
-            = new MessagingPropertyAnimator();
     public static final int IMPORTANCE_ANIM_GROW_DURATION = 250;
     public static final int IMPORTANCE_ANIM_SHRINK_DURATION = 200;
     public static final int IMPORTANCE_ANIM_SHRINK_DELAY = 25;
@@ -96,15 +94,16 @@ public class ConversationLayout extends FrameLayout
     private List<MessagingMessage> mHistoricMessages = new ArrayList<>();
     private MessagingLinearLayout mMessagingLinearLayout;
     private boolean mShowHistoricMessages;
-    private ArrayList<MessagingGroup> mGroups = new ArrayList<>();
+    private final ArrayList<MessagingGroup> mGroups = new ArrayList<>();
     private int mLayoutColor;
     private int mSenderTextColor;
     private int mMessageTextColor;
     private Icon mAvatarReplacement;
     private boolean mIsOneToOne;
-    private ArrayList<MessagingGroup> mAddedGroups = new ArrayList<>();
+    private final ArrayList<MessagingGroup> mAddedGroups = new ArrayList<>();
     private Person mUser;
     private CharSequence mNameReplacement;
+    private CharSequence mSummarizedContent;
     private boolean mIsCollapsed;
     private ImageResolver mImageResolver;
     private CachingIconView mConversationIconView;
@@ -162,8 +161,8 @@ public class ConversationLayout extends FrameLayout
     private Icon mConversationIcon;
     private Icon mShortcutIcon;
     private View mAppNameDivider;
-    private TouchDelegateComposite mTouchDelegate = new TouchDelegateComposite(this);
-    private ArrayList<MessagingLinearLayout.MessagingChild> mToRecycle = new ArrayList<>();
+    private final TouchDelegateComposite mTouchDelegate = new TouchDelegateComposite(this);
+    private final ArrayList<MessagingLinearLayout.MessagingChild> mToRecycle = new ArrayList<>();
     private boolean mPrecomputedTextEnabled = false;
     @Nullable
     private ConversationHeaderData mConversationHeaderData;
@@ -397,12 +396,21 @@ public class ConversationLayout extends FrameLayout
      *
      * @param isCollapsed is it collapsed
      */
-    @RemotableViewMethod
+    @RemotableViewMethod(asyncImpl = "setIsCollapsedAsync")
     public void setIsCollapsed(boolean isCollapsed) {
         mIsCollapsed = isCollapsed;
         mMessagingLinearLayout.setMaxDisplayedLines(isCollapsed ? 1 : Integer.MAX_VALUE);
         updateExpandButton();
         updateContentEndPaddings();
+    }
+
+    /**
+     * setDataAsync needs to do different stuff for the collapsed vs expanded view, so store the
+     * collapsed state early.
+     */
+    public Runnable setIsCollapsedAsync(boolean isCollapsed) {
+        mIsCollapsed = isCollapsed;
+        return () -> setIsCollapsed(isCollapsed);
     }
 
     /**
@@ -430,17 +438,24 @@ public class ConversationLayout extends FrameLayout
         // mUser now set (would be nice to avoid the side effect but WHATEVER)
         final Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON, Person.class);
         // Append remote input history to newMessages (again, side effect is lame but WHATEVS)
-        RemoteInputHistoryItem[] history = (RemoteInputHistoryItem[])
-                extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS,
-                        RemoteInputHistoryItem.class);
+        RemoteInputHistoryItem[] history = extras.getParcelableArray(
+                Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS, RemoteInputHistoryItem.class);
         addRemoteInputHistoryToMessages(newMessages, history);
 
         boolean showSpinner =
                 extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
         int unreadCount = extras.getInt(Notification.EXTRA_CONVERSATION_UNREAD_MESSAGE_COUNT);
 
-        final List<MessagingMessage> newMessagingMessages =
-                createMessages(newMessages, /* isHistoric= */false, usePrecomputedText);
+        List<MessagingMessage> newMessagingMessages;
+        mSummarizedContent = extras.getCharSequence(Notification.EXTRA_SUMMARIZED_CONTENT);
+        if (mSummarizedContent != null && mIsCollapsed) {
+            Notification.MessagingStyle.Message summary =
+                    new Notification.MessagingStyle.Message(mSummarizedContent,  0, "");
+            newMessagingMessages = createMessages(List.of(summary), false, usePrecomputedText);
+        } else {
+            newMessagingMessages =
+                    createMessages(newMessages, /* isHistoric= */false, usePrecomputedText);
+        }
         final List<MessagingMessage> newHistoricMessagingMessages =
                 createMessages(newHistoricMessages, /* isHistoric= */true, usePrecomputedText);
 
@@ -463,7 +478,7 @@ public class ConversationLayout extends FrameLayout
 
         return new MessagingData(user, showSpinner, unreadCount,
                 newHistoricMessagingMessages, newMessagingMessages, groups, senders,
-                conversationHeaderData);
+                conversationHeaderData, mSummarizedContent);
     }
 
     /**
@@ -529,7 +544,7 @@ public class ConversationLayout extends FrameLayout
         for (int i = remoteInputHistory.length - 1; i >= 0; i--) {
             RemoteInputHistoryItem historyMessage = remoteInputHistory[i];
             Notification.MessagingStyle.Message message = new Notification.MessagingStyle.Message(
-                    historyMessage.getText(), 0, (Person) null, true /* remoteHistory */);
+                    historyMessage.getText(), 0, null, true /* remoteHistory */);
             if (historyMessage.getUri() != null) {
                 message.setData(historyMessage.getMimeType(), historyMessage.getUri());
             }
@@ -700,11 +715,11 @@ public class ConversationLayout extends FrameLayout
 
     private void updateImageMessages() {
         View newMessage = null;
-        if (mIsCollapsed && mGroups.size() > 0) {
+        if (mIsCollapsed && !mGroups.isEmpty()) {
 
             // When collapsed, we're displaying the image message in a dedicated container
             // on the right of the layout instead of inline. Let's add the isolated image there
-            MessagingGroup messagingGroup = mGroups.get(mGroups.size() - 1);
+            MessagingGroup messagingGroup = mGroups.getLast();
             MessagingImageMessage isolatedMessage = messagingGroup.getIsolatedMessage();
             if (isolatedMessage != null) {
                 newMessage = isolatedMessage.getView();
@@ -1216,7 +1231,7 @@ public class ConversationLayout extends FrameLayout
                 final Person sender = message.getSenderPerson();
                 final CharSequence senderKey = getKey(sender);
                 if ((sender != null && senderKey != userKey) || i == 0) {
-                    if (conversationText == null || conversationText.length() == 0) {
+                    if (conversationText == null || conversationText.isEmpty()) {
                         conversationText = sender != null ? sender.getName() : "";
                     }
                     if (conversationIcon == null) {
@@ -1622,6 +1637,9 @@ public class ConversationLayout extends FrameLayout
 
     @Nullable
     public CharSequence getConversationText() {
+        if (mSummarizedContent != null) {
+            return mSummarizedContent;
+        }
         if (mMessages.isEmpty()) {
             return null;
         }

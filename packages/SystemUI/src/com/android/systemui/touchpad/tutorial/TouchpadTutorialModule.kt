@@ -39,6 +39,8 @@ import com.android.systemui.touchpad.tutorial.ui.viewmodel.HomeGestureRecognizer
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.HomeGestureScreenViewModel
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.RecentAppsGestureRecognizerProvider
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.RecentAppsGestureScreenViewModel
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.SwitchAppsGestureRecognizerProvider
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.SwitchAppsGestureScreenViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -66,6 +68,14 @@ interface TouchpadTutorialModule {
                 homeGestureScreenViewModel,
                 easterEggGestureViewModel,
             )
+        }
+
+        @Provides
+        fun switchAppsViewModel(
+            recognizerProvider: SwitchAppsGestureRecognizerProvider,
+            adapterFactory: GestureRecognizerAdapter.Factory,
+        ): SwitchAppsGestureScreenViewModel {
+            return SwitchAppsGestureScreenViewModel(adapterFactory.create(recognizerProvider))
         }
 
         @Provides

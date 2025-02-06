@@ -18,10 +18,12 @@ package com.android.systemui.bluetooth
 
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
+import org.mockito.kotlin.mock
 
 var Kosmos.localBluetoothManager: LocalBluetoothManager? by
     Kosmos.Fixture {
-        mock { whenever(cachedDeviceManager).thenReturn(cachedBluetoothDeviceManager) }
+        mock {
+            on { cachedDeviceManager }.thenReturn(cachedBluetoothDeviceManager)
+            on { profileManager }.thenReturn(localBluetoothProfileManager)
+        }
     }

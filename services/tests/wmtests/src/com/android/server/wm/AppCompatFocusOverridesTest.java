@@ -188,7 +188,7 @@ public class AppCompatFocusOverridesTest extends WindowTestsBase {
         }
 
         void checkShouldSendFakeFocusOnTopActivity(boolean expected) {
-            Assert.assertEquals(activity().top().mAppCompatController.getAppCompatFocusOverrides()
+            Assert.assertEquals(activity().top().mAppCompatController.getFocusOverrides()
                     .shouldSendFakeFocus(), expected);
         }
     }

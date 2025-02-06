@@ -316,5 +316,7 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
         dialog.onConfigurationChanged(config)
         testableLooper.processAllMessages()
         assertThat(doneButton.isEnabled).isTrue()
+
+        dialog.dismiss()
     }
 }

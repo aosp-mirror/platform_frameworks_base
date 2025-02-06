@@ -89,9 +89,23 @@ interface PreferenceMetadata {
     /**
      * Return the extras Bundle object associated with this preference.
      *
-     * It is used to provide more information for metadata.
+     * It is used to provide more *internal* information for metadata. External app is not expected
+     * to use this information as it could be changed in future. Consider [tags] for external usage.
      */
     fun extras(context: Context): Bundle? = null
+
+    /**
+     * Returns the tags associated with this preference.
+     *
+     * Unlike [extras], tags are exposed for external usage. The returned tag list must be constants
+     * and **append only**. Do not edit/delete existing tag strings as it can cause backward
+     * compatibility issue.
+     *
+     * Use cases:
+     * - identify a specific preference
+     * - identify a group of preferences related to network settings
+     */
+    fun tags(context: Context): Array<String> = arrayOf()
 
     /**
      * Returns if preference is indexable, default value is `true`.

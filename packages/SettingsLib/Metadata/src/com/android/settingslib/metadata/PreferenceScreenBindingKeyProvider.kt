@@ -17,13 +17,20 @@
 package com.android.settingslib.metadata
 
 import android.content.Context
+import android.os.Bundle
 
 /** Provides the associated preference screen key for binding. */
 interface PreferenceScreenBindingKeyProvider {
 
     /** Returns the associated preference screen key. */
     fun getPreferenceScreenBindingKey(context: Context): String?
+
+    /** Returns the arguments to build preference screen. */
+    fun getPreferenceScreenBindingArgs(context: Context): Bundle?
 }
 
 /** Extra key to provide the preference screen key for binding. */
 const val EXTRA_BINDING_SCREEN_KEY = "settingslib:binding_screen_key"
+
+/** Extra key to provide arguments for preference screen binding. */
+const val EXTRA_BINDING_SCREEN_ARGS = "settingslib:binding_screen_args"

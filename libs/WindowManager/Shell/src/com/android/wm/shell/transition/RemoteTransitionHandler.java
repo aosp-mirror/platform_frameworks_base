@@ -211,7 +211,9 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
 
     @Override
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+            @NonNull SurfaceControl.Transaction startT,
+            @NonNull SurfaceControl.Transaction finishT,
+            @NonNull IBinder mergeTarget,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         final RemoteTransition remoteTransition = mRequestedRemotes.get(mergeTarget);
         if (remoteTransition == null) return;
@@ -230,7 +232,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
                 // process won't be cleared if the remote applied it. We don't actually know if the
                 // remote applied the transaction, but applying twice will break surfaceflinger
                 // so just assume the worst-case and clear the local transaction.
-                t.clear();
+                startT.clear();
                 mMainExecutor.execute(() -> {
                     if (!mRequestedRemotes.containsKey(mergeTarget)) {
                         Log.e(TAG, "Merged transition finished after it's mergeTarget (the "
@@ -245,8 +247,8 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
         try {
             // If the remote is actually in the same process, then make a copy of parameters since
             // remote impls assume that they have to clean-up native references.
-            final SurfaceControl.Transaction remoteT = copyIfLocal(t, remote);
-            final TransitionInfo remoteInfo = remoteT == t ? info : info.localRemoteCopy();
+            final SurfaceControl.Transaction remoteT = copyIfLocal(startT, remote);
+            final TransitionInfo remoteInfo = remoteT == startT ? info : info.localRemoteCopy();
             remote.mergeAnimation(transition, remoteInfo, remoteT, mergeTarget, cb);
         } catch (RemoteException e) {
             Log.e(Transitions.TAG, "Error attempting to merge remote transition.", e);

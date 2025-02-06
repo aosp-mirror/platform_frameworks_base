@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.mockito.kotlin.MatchersKt.eq;
@@ -164,6 +165,25 @@ public class PipTaskListenerTest {
     }
 
     @Test
+    public void onTaskInfoChanged_withNullPipParams_doNothing() {
+        mPipTaskListener = new PipTaskListener(mMockContext, mMockShellTaskOrganizer,
+                mMockPipTransitionState, mMockPipScheduler, mMockPipBoundsState,
+                mMockPipBoundsAlgorithm, mMockShellExecutor);
+        mPipTaskListener.addParamsChangedListener(mMockPipParamsChangedCallback);
+        Rational aspectRatio = new Rational(4, 3);
+        when(mMockPipBoundsState.getAspectRatio()).thenReturn(aspectRatio.toFloat());
+        String action1 = "action1";
+        mPipTaskListener.onTaskInfoChanged(getTaskInfo(aspectRatio, action1));
+
+        clearInvocations(mMockPipParamsChangedCallback);
+        mPipTaskListener.onTaskInfoChanged(new ActivityManager.RunningTaskInfo());
+
+        verifyZeroInteractions(mMockPipParamsChangedCallback);
+        verify(mMockPipTransitionState, times(0))
+                .setOnIdlePipTransitionStateRunnable(any(Runnable.class));
+    }
+
+    @Test
     public void onTaskInfoChanged_withActionsChanged_callbackActionsChanged() {
         mPipTaskListener = new PipTaskListener(mMockContext, mMockShellTaskOrganizer,
                 mMockPipTransitionState, mMockPipScheduler, mMockPipBoundsState,
@@ -193,6 +213,12 @@ public class PipTaskListenerTest {
                 mMockPipTransitionState, mMockPipScheduler, mMockPipBoundsState,
                 mMockPipBoundsAlgorithm, mMockShellExecutor);
         mPipTaskListener.addParamsChangedListener(mMockPipParamsChangedCallback);
+
+        // For this test case, any aspect ratio passed is considered within allowed range.
+        when(mMockPipBoundsAlgorithm
+                .isValidPictureInPictureAspectRatio(anyFloat()))
+                .thenReturn(true);
+
         Rational aspectRatio = new Rational(4, 3);
         when(mMockPipBoundsState.getAspectRatio()).thenReturn(aspectRatio.toFloat());
         String action1 = "action1";
@@ -222,6 +248,29 @@ public class PipTaskListenerTest {
         mPipTaskListener.onTaskInfoChanged(getTaskInfo(aspectRatio, action1));
 
         verifyZeroInteractions(mMockPipParamsChangedCallback);
+        verify(mMockPipTransitionState, times(0))
+                .setOnIdlePipTransitionStateRunnable(any(Runnable.class));
+    }
+
+    @Test
+    public void onTaskInfoChanged_nonValidAspectRatio_doesNotCallbackAspectRatioChanged() {
+        mPipTaskListener = new PipTaskListener(mMockContext, mMockShellTaskOrganizer,
+                mMockPipTransitionState, mMockPipScheduler, mMockPipBoundsState,
+                mMockPipBoundsAlgorithm, mMockShellExecutor);
+        mPipTaskListener.addParamsChangedListener(mMockPipParamsChangedCallback);
+
+        String action1 = "action1";
+        mPipTaskListener.onTaskInfoChanged(getTaskInfo(null, action1));
+        verify(mMockPipTransitionState, times(0))
+                .setOnIdlePipTransitionStateRunnable(any(Runnable.class));
+
+        // Define an invalid aspect ratio and try and update the params with it.
+        Rational aspectRatio = new Rational(100, 3);
+        when(mMockPipBoundsAlgorithm
+                .isValidPictureInPictureAspectRatio(eq(aspectRatio.floatValue())))
+                .thenReturn(false);
+
+        mPipTaskListener.onTaskInfoChanged(getTaskInfo(aspectRatio, action1));
         verify(mMockPipTransitionState, times(0))
                 .setOnIdlePipTransitionStateRunnable(any(Runnable.class));
     }

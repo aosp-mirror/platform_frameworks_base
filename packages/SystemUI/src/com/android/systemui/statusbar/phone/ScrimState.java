@@ -16,17 +16,26 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.graphics.Color;
-import android.os.Trace;
+import static com.android.systemui.statusbar.phone.ScrimController.BUSY_SCRIM_ALPHA;
+import static com.android.systemui.statusbar.phone.ScrimController.TRANSPARENT_BOUNCER_SCRIM_ALPHA;
 
+import android.graphics.Color;
+
+import com.android.app.tracing.coroutines.TrackTracer;
+import com.android.systemui.Flags;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.keyguard.ui.transitions.BlurConfig;
 import com.android.systemui.res.R;
 import com.android.systemui.scrim.ScrimView;
+import com.android.systemui.shade.ui.ShadeColors;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 /**
  * Possible states of the ScrimController state machine.
  */
+@ExperimentalCoroutinesApi
 public enum ScrimState {
 
     /**
@@ -79,44 +88,24 @@ public enum ScrimState {
             } else {
                 mAnimationDuration = ScrimController.ANIMATION_DURATION;
             }
-            mFrontTint = mBackgroundColor;
-            mBehindTint = mBackgroundColor;
-            mNotifTint = mClipQsScrim ? mBackgroundColor : Color.TRANSPARENT;
-
-            mFrontAlpha = 0;
-            mBehindAlpha = mClipQsScrim ? 1 : mScrimBehindAlphaKeyguard;
-            mNotifAlpha = mClipQsScrim ? mScrimBehindAlphaKeyguard : 0;
-            if (mClipQsScrim) {
-                updateScrimColor(mScrimBehind, 1f /* alpha */, mBackgroundColor);
+            if (Flags.notificationShadeBlur()) {
+                mBehindTint = Color.TRANSPARENT;
+                mNotifTint = ShadeColors.notificationScrim(mScrimBehind.getResources());
+                mBehindAlpha = 0.0f;
+                mNotifAlpha = 0.0f;
+                mFrontAlpha = 0.0f;
+            } else {
+                mFrontTint = mBackgroundColor;
+                mBehindTint = mBackgroundColor;
+                mNotifTint = mClipQsScrim ? mBackgroundColor : Color.TRANSPARENT;
+                mFrontAlpha = 0;
+                mBehindAlpha = mClipQsScrim ? 1 : mScrimBehindAlphaKeyguard;
+                mNotifAlpha = mClipQsScrim ? mScrimBehindAlphaKeyguard : 0;
+                if (mClipQsScrim) {
+                    updateScrimColor(mScrimBehind, 1f /* alpha */, mBackgroundColor);
+                }
             }
-        }
-    },
 
-    AUTH_SCRIMMED_SHADE {
-        @Override
-        public void prepare(ScrimState previousState) {
-            // notif scrim alpha values are determined by ScrimController#applyState
-            // based on the shade expansion
-
-            mFrontTint = mBackgroundColor;
-            mFrontAlpha = .66f;
-
-            mBehindTint = mBackgroundColor;
-            mBehindAlpha = 1f;
-        }
-    },
-
-    AUTH_SCRIMMED {
-        @Override
-        public void prepare(ScrimState previousState) {
-            mNotifTint = previousState.mNotifTint;
-            mNotifAlpha = previousState.mNotifAlpha;
-
-            mBehindTint = previousState.mBehindTint;
-            mBehindAlpha = previousState.mBehindAlpha;
-
-            mFrontTint = mBackgroundColor;
-            mFrontAlpha = .66f;
         }
     },
 
@@ -126,6 +115,13 @@ public enum ScrimState {
     BOUNCER {
         @Override
         public void prepare(ScrimState previousState) {
+            if (Flags.bouncerUiRevamp()) {
+                mBehindAlpha = mClipQsScrim ? 0.0f : TRANSPARENT_BOUNCER_SCRIM_ALPHA;
+                mNotifAlpha = mClipQsScrim ? TRANSPARENT_BOUNCER_SCRIM_ALPHA : 0;
+                mBehindTint = mNotifTint = mSurfaceColor;
+                mFrontAlpha = 0f;
+                return;
+            }
             mBehindAlpha = mClipQsScrim ? 1 : mDefaultScrimAlpha;
             mBehindTint = mClipQsScrim ? mBackgroundColor : mSurfaceColor;
             mNotifAlpha = mClipQsScrim ? mDefaultScrimAlpha : 0;
@@ -136,6 +132,10 @@ public enum ScrimState {
         @Override
         public void setSurfaceColor(int surfaceColor) {
             super.setSurfaceColor(surfaceColor);
+            if (Flags.bouncerUiRevamp()) {
+                mBehindTint = mNotifTint = mSurfaceColor;
+                return;
+            }
             if (!mClipQsScrim) {
                 mBehindTint = mSurfaceColor;
             }
@@ -146,23 +146,61 @@ public enum ScrimState {
      * Showing password challenge on top of a FLAG_SHOW_WHEN_LOCKED activity.
      */
     BOUNCER_SCRIMMED {
+        @ExperimentalCoroutinesApi
         @Override
         public void prepare(ScrimState previousState) {
+            if (Flags.bouncerUiRevamp()) {
+                if (previousState == SHADE_LOCKED) {
+                    mBehindAlpha = previousState.getBehindAlpha();
+                    mNotifAlpha = previousState.getNotifAlpha();
+                    mNotifBlurRadius = mBlurConfig.getMaxBlurRadiusPx();
+                } else {
+                    mNotifAlpha = 0f;
+                    mBehindAlpha = 0f;
+                }
+                mFrontAlpha = TRANSPARENT_BOUNCER_SCRIM_ALPHA;
+                mFrontTint = mSurfaceColor;
+                return;
+            }
             mBehindAlpha = 0;
             mFrontAlpha = mDefaultScrimAlpha;
+        }
+
+        @Override
+        public boolean shouldBlendWithMainColor() {
+            return !Flags.bouncerUiRevamp();
         }
     },
 
     SHADE_LOCKED {
         @Override
-        public void prepare(ScrimState previousState) {
-            mBehindAlpha = mClipQsScrim ? 1 : mDefaultScrimAlpha;
-            mNotifAlpha = 1f;
-            mFrontAlpha = 0f;
-            mBehindTint = mClipQsScrim ? Color.TRANSPARENT : mBackgroundColor;
+        public void setDefaultScrimAlpha(float defaultScrimAlpha) {
+            super.setDefaultScrimAlpha(defaultScrimAlpha);
+            if (!Flags.notificationShadeBlur()) {
+                // Temporary change that prevents the shade from being semi-transparent when
+                // bouncer blur is enabled but notification shade blur is not enabled. This is
+                // required to perf test these two flags independently.
+                mDefaultScrimAlpha = BUSY_SCRIM_ALPHA;
+            }
+        }
 
-            if (mClipQsScrim) {
-                updateScrimColor(mScrimBehind, 1f /* alpha */, mBackgroundColor);
+        @Override
+        public void prepare(ScrimState previousState) {
+            if (Flags.notificationShadeBlur()) {
+                mBehindTint = ShadeColors.shadePanel(mScrimBehind.getResources());
+                mBehindAlpha = Color.alpha(mBehindTint) / 255.0f;
+                mNotifTint = ShadeColors.notificationScrim(mScrimBehind.getResources());
+                mNotifAlpha = Color.alpha(mNotifTint) / 255.0f;
+                mFrontAlpha = 0.0f;
+            } else {
+                mBehindAlpha = mClipQsScrim ? 1 : mDefaultScrimAlpha;
+                mNotifAlpha = 1f;
+                mFrontAlpha = 0f;
+                mBehindTint = mClipQsScrim ? Color.TRANSPARENT : mBackgroundColor;
+
+                if (mClipQsScrim) {
+                    updateScrimColor(mScrimBehind, 1f /* alpha */, mBackgroundColor);
+                }
             }
         }
     },
@@ -269,6 +307,13 @@ public enum ScrimState {
                 mFrontTint = mBackgroundColor;
                 mBehindTint = mBackgroundColor;
                 mBlankScreen = true;
+            } else if (Flags.notificationShadeBlur()) {
+                mBehindTint = ShadeColors.shadePanel(mScrimBehind.getResources());
+                mBehindAlpha = Color.alpha(mBehindTint) / 255.0f;
+                mNotifTint = ShadeColors.notificationScrim(mScrimBehind.getResources());
+                mNotifAlpha = Color.alpha(mNotifTint) / 255.0f;
+                mFrontAlpha = 0.0f;
+                return;
             }
 
             if (mClipQsScrim) {
@@ -358,6 +403,7 @@ public enum ScrimState {
     DozeParameters mDozeParameters;
     DockManager mDockManager;
     boolean mDisplayRequiresBlanking;
+    protected BlurConfig mBlurConfig;
     boolean mLaunchingAffordanceWithPreview;
     boolean mOccludeAnimationPlaying;
     boolean mWakeLockScreenSensorActive;
@@ -366,8 +412,12 @@ public enum ScrimState {
     boolean mClipQsScrim;
     int mBackgroundColor;
 
+    // This is needed to blur the scrim behind the scrimmed bouncer to avoid showing
+    // the notification section border
+    protected float mNotifBlurRadius = 0.0f;
+
     public void init(ScrimView scrimInFront, ScrimView scrimBehind, DozeParameters dozeParameters,
-            DockManager dockManager) {
+            DockManager dockManager, BlurConfig blurConfig) {
         mBackgroundColor = scrimBehind.getContext().getColor(R.color.shade_scrim_background_dark);
         mScrimInFront = scrimInFront;
         mScrimBehind = scrimBehind;
@@ -375,6 +425,7 @@ public enum ScrimState {
         mDozeParameters = dozeParameters;
         mDockManager = dockManager;
         mDisplayRequiresBlanking = dozeParameters.getDisplayNeedsBlanking();
+        mBlurConfig = blurConfig;
     }
 
     /** Prepare state for transition. */
@@ -425,11 +476,11 @@ public enum ScrimState {
             tint = scrim == mScrimInFront ? ScrimController.DEBUG_FRONT_TINT
                     : ScrimController.DEBUG_BEHIND_TINT;
         }
-        Trace.traceCounter(Trace.TRACE_TAG_APP,
+        TrackTracer.instantForGroup("scrim",
                 scrim == mScrimInFront ? "front_scrim_alpha" : "back_scrim_alpha",
                 (int) (alpha * 255));
 
-        Trace.traceCounter(Trace.TRACE_TAG_APP,
+        TrackTracer.instantForGroup("scrim",
                 scrim == mScrimInFront ? "front_scrim_tint" : "back_scrim_tint",
                 Color.alpha(tint));
 
@@ -480,5 +531,9 @@ public enum ScrimState {
 
     public void setClipQsScrim(boolean clipsQsScrim) {
         mClipQsScrim = clipsQsScrim;
+    }
+
+    public float getNotifBlurRadius() {
+        return mNotifBlurRadius;
     }
 }

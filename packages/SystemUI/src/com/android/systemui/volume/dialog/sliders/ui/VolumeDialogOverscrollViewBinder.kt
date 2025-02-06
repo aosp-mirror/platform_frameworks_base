@@ -20,11 +20,9 @@ import android.view.View
 import androidx.dynamicanimation.animation.FloatValueHolder
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
-import com.android.systemui.res.R
 import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogOverscrollViewModel
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogOverscrollViewModel.OverscrollEventModel
-import com.google.android.material.slider.Slider
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
@@ -50,10 +48,6 @@ constructor(private val viewModel: VolumeDialogOverscrollViewModel) {
                     }
                 )
                 .addUpdateListener { _, value, _ -> viewsToAnimate.setTranslationY(value) }
-
-        view.requireViewById<Slider>(R.id.volume_dialog_slider).addOnChangeListener { s, value, _ ->
-            viewModel.setSlider(value = value, min = s.valueFrom, max = s.valueTo)
-        }
 
         viewModel.overscrollEvent
             .onEach { event ->

@@ -47,7 +47,6 @@ constructor(
     private val audioSystemRepository: AudioSystemRepository,
     private val ringerFeedbackRepository: VolumeDialogRingerFeedbackRepository,
 ) {
-
     val ringerModel: Flow<VolumeDialogRingerModel> =
         volumeDialogStateInteractor.volumeDialogState
             .mapNotNull { toRingerModel(it) }

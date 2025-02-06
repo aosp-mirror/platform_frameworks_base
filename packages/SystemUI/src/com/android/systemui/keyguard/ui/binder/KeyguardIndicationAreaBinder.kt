@@ -23,13 +23,13 @@ import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.systemui.Flags
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.util.kotlin.DisposableHandles
 import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
@@ -42,7 +42,6 @@ import kotlinx.coroutines.flow.map
  * view-binding, binding each view only once. It is okay and expected for the same instance of the
  * view-model to be reused for multiple view/view-binder bindings.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 object KeyguardIndicationAreaBinder {
 
     /** Binds the view to the view-model, continuing to update the former based on the latter. */
@@ -73,7 +72,6 @@ object KeyguardIndicationAreaBinder {
         disposables +=
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
-
                     launch("$TAG#viewModel.indicationAreaTranslationX") {
                         viewModel.indicationAreaTranslationX.collect { translationX ->
                             view.translationX = translationX
@@ -119,6 +117,9 @@ object KeyguardIndicationAreaBinder {
                     launch("$TAG#viewModel.configurationChange") {
                         viewModel.configurationChange.collect {
                             configurationBasedDimensions.value = loadFromResources(view)
+                            if (Flags.indicationTextA11yFix()) {
+                                indicationController.onConfigurationChanged()
+                            }
                         }
                     }
 
@@ -140,7 +141,7 @@ object KeyguardIndicationAreaBinder {
                 view.resources.getDimensionPixelOffset(R.dimen.keyguard_indication_area_padding),
             indicationTextSizePx =
                 view.resources.getDimensionPixelSize(
-                    com.android.internal.R.dimen.text_size_small_material,
+                    com.android.internal.R.dimen.text_size_small_material
                 ),
         )
     }

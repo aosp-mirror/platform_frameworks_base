@@ -110,6 +110,14 @@ flag {
 }
 
 flag {
+    name: "allow_thermal_hal_skin_forecast"
+    is_exported: true
+    namespace: "game"
+    description: "Enable thermal HAL skin temperature forecast to be used by headroom API"
+    bug: "383211885"
+}
+
+flag {
     name: "allow_thermal_headroom_thresholds"
     is_exported: true
     namespace: "game"
@@ -139,6 +147,13 @@ flag {
     description: "Public API app developers use to check if a known issue is fixed on a device."
     bug: "308461809"
     is_exported: true
+}
+
+flag {
+     name: "app_zygote_retry_start"
+     namespace: "arc_next"
+     description: "Guard the new added retry logic in app zygote."
+     bug: "361799815"
 }
 
 flag {
@@ -180,6 +195,13 @@ flag {
     description: "Feature flag for adding CPU/GPU headroom API"
     bug: "346604998"
     is_exported: true
+}
+
+flag {
+     name: "disable_madvise_artfile_default"
+     namespace: "system_performance"
+     description: "Disables madvise of .art files by default during app start."
+     bug: "382110550"
 }
 
 flag {

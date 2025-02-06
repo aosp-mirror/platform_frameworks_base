@@ -68,6 +68,7 @@ class DragAndDropTest : SysuiTestCase() {
             columns = 4,
             largeTilesSpan = 4,
             modifier = Modifier.fillMaxSize(),
+            onAddTile = {},
             onRemoveTile = {},
             onSetTiles = onSetTiles,
             onResize = { _, _ -> },

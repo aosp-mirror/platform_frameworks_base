@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.app.UiModeManager.MODE_NIGHT_NO;
+import static android.app.UiModeManager.MODE_NIGHT_YES;
 import static android.util.SequenceUtils.getInitSeq;
 import static android.view.HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING;
 import static android.view.InputDevice.SOURCE_ROTARY_ENCODER;
@@ -67,8 +69,10 @@ import static org.junit.Assume.assumeTrue;
 import android.annotation.NonNull;
 import android.app.Instrumentation;
 import android.app.UiModeManager;
+import android.app.UiModeManager.ForceInvertType;
 import android.content.Context;
 import android.graphics.ForceDarkType;
+import android.graphics.ForceDarkType.ForceDarkTypeDef;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Binder;
@@ -93,8 +97,11 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.compatibility.common.util.ShellIdentityUtils;
+import com.android.compatibility.common.util.TestUtils;
 import com.android.cts.input.BlockingQueueEventVerifier;
 import com.android.window.flags.Flags;
+
+import com.google.common.truth.Expect;
 
 import org.hamcrest.Matcher;
 import org.junit.After;
@@ -124,6 +131,8 @@ public class ViewRootImplTest {
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    @Rule
+    public final Expect mExpect = Expect.create();
 
     private ViewRootImpl mViewRootImpl;
     private View mView;
@@ -1507,49 +1516,34 @@ public class ViewRootImplTest {
     }
 
     @Test
-    public void forceInvertOffDarkThemeOff_forceDarkModeDisabled() {
-        mSetFlagsRule.enableFlags(FLAG_FORCE_INVERT_COLOR);
-        ShellIdentityUtils.invokeWithShellPermissions(() -> {
-            Settings.Secure.putInt(
-                    sContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED,
-                    /* value= */ 0
-            );
-            var uiModeManager = sContext.getSystemService(UiModeManager.class);
-            uiModeManager.setNightMode(UiModeManager.MODE_NIGHT_NO);
-        });
+    @RequiresFlagsEnabled(FLAG_FORCE_INVERT_COLOR)
+    public void updateConfiguration_returnsExpectedForceDarkMode() {
+        waitForSystemNightModeActivated(true);
 
-        sInstrumentation.runOnMainSync(() ->
-                mViewRootImpl.updateConfiguration(sContext.getDisplayNoVerify().getDisplayId())
-        );
+        verifyForceDarkType(/* isAppInNightMode= */ true, /* isForceInvertEnabled= */ true,
+                UiModeManager.FORCE_INVERT_TYPE_DARK, ForceDarkType.FORCE_INVERT_COLOR_DARK);
+        verifyForceDarkType(/* isAppInNightMode= */ true, /* isForceInvertEnabled= */ false,
+                UiModeManager.FORCE_INVERT_TYPE_OFF, ForceDarkType.NONE);
+        verifyForceDarkType(/* isAppInNightMode= */ false, /* isForceInvertEnabled= */ true,
+                UiModeManager.FORCE_INVERT_TYPE_DARK, ForceDarkType.FORCE_INVERT_COLOR_DARK);
+        verifyForceDarkType(/* isAppInNightMode= */ false, /* isForceInvertEnabled= */ false,
+                UiModeManager.FORCE_INVERT_TYPE_OFF, ForceDarkType.NONE);
 
-        assertThat(mViewRootImpl.determineForceDarkType()).isEqualTo(ForceDarkType.NONE);
+        waitForSystemNightModeActivated(false);
+
+        verifyForceDarkType(/* isAppInNightMode= */ true, /* isForceInvertEnabled= */ true,
+                UiModeManager.FORCE_INVERT_TYPE_OFF, ForceDarkType.NONE);
+        verifyForceDarkType(/* isAppInNightMode= */ true, /* isForceInvertEnabled= */ false,
+                UiModeManager.FORCE_INVERT_TYPE_OFF, ForceDarkType.NONE);
+        verifyForceDarkType(/* isAppInNightMode= */ false, /* isForceInvertEnabled= */ true,
+                UiModeManager.FORCE_INVERT_TYPE_OFF, ForceDarkType.NONE);
+        verifyForceDarkType(/* isAppInNightMode= */ false, /* isForceInvertEnabled= */ false,
+                UiModeManager.FORCE_INVERT_TYPE_OFF, ForceDarkType.NONE);
     }
 
     @Test
-    public void forceInvertOnDarkThemeOff_forceDarkModeEnabled() {
-        mSetFlagsRule.enableFlags(FLAG_FORCE_INVERT_COLOR);
-        ShellIdentityUtils.invokeWithShellPermissions(() -> {
-            Settings.Secure.putInt(
-                    sContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED,
-                    /* value= */ 1
-            );
-            var uiModeManager = sContext.getSystemService(UiModeManager.class);
-            uiModeManager.setNightMode(UiModeManager.MODE_NIGHT_NO);
-        });
-
-        sInstrumentation.runOnMainSync(() ->
-                mViewRootImpl.updateConfiguration(sContext.getDisplayNoVerify().getDisplayId())
-        );
-
-        assertThat(mViewRootImpl.determineForceDarkType())
-                .isEqualTo(ForceDarkType.FORCE_INVERT_COLOR_DARK);
-    }
-
-    @Test
+    @EnableFlags(FLAG_FORCE_INVERT_COLOR)
     public void forceInvertOffForceDarkOff_forceDarkModeDisabled() {
-        mSetFlagsRule.enableFlags(FLAG_FORCE_INVERT_COLOR);
         ShellIdentityUtils.invokeWithShellPermissions(() -> {
             Settings.Secure.putInt(
                     sContext.getContentResolver(),
@@ -1562,15 +1556,14 @@ public class ViewRootImplTest {
         });
 
         sInstrumentation.runOnMainSync(() ->
-                mViewRootImpl.updateConfiguration(sContext.getDisplayNoVerify().getDisplayId())
-        );
+                mViewRootImpl.updateConfiguration(sContext.getDisplayNoVerify().getDisplayId()));
 
         assertThat(mViewRootImpl.determineForceDarkType()).isEqualTo(ForceDarkType.NONE);
     }
 
     @Test
+    @EnableFlags(FLAG_FORCE_INVERT_COLOR)
     public void forceInvertOffForceDarkOn_forceDarkModeEnabled() {
-        mSetFlagsRule.enableFlags(FLAG_FORCE_INVERT_COLOR);
         ShellIdentityUtils.invokeWithShellPermissions(() -> {
             Settings.Secure.putInt(
                     sContext.getContentResolver(),
@@ -1582,8 +1575,7 @@ public class ViewRootImplTest {
         });
 
         sInstrumentation.runOnMainSync(() ->
-                mViewRootImpl.updateConfiguration(sContext.getDisplayNoVerify().getDisplayId())
-        );
+                mViewRootImpl.updateConfiguration(sContext.getDisplayNoVerify().getDisplayId()));
 
         assertThat(mViewRootImpl.determineForceDarkType()).isEqualTo(ForceDarkType.FORCE_DARK);
     }
@@ -1789,5 +1781,40 @@ public class ViewRootImplTest {
             sInstrumentation.runOnMainSync(
                     () -> view.getViewTreeObserver().removeOnDrawListener(listener));
         }
+    }
+
+    private void waitForSystemNightModeActivated(boolean active) {
+        ShellIdentityUtils.invokeWithShellPermissions(() ->
+                sInstrumentation.runOnMainSync(() -> {
+                    var uiModeManager = sContext.getSystemService(UiModeManager.class);
+                    uiModeManager.setNightModeActivated(active);
+                }));
+        sInstrumentation.waitForIdleSync();
+    }
+
+    private void verifyForceDarkType(boolean isAppInNightMode, boolean isForceInvertEnabled,
+            @ForceInvertType int expectedForceInvertType,
+            @ForceDarkTypeDef int expectedForceDarkType) {
+        var uiModeManager = sContext.getSystemService(UiModeManager.class);
+        ShellIdentityUtils.invokeWithShellPermissions(() -> {
+            uiModeManager.setApplicationNightMode(
+                    isAppInNightMode ? MODE_NIGHT_YES : MODE_NIGHT_NO);
+            Settings.Secure.putInt(
+                    sContext.getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED,
+                    isForceInvertEnabled ? 1 : 0);
+        });
+
+        sInstrumentation.runOnMainSync(() ->
+                mViewRootImpl.updateConfiguration(sContext.getDisplayNoVerify().getDisplayId()));
+        try {
+            TestUtils.waitUntil("Waiting for force invert state changed",
+                    () -> (uiModeManager.getForceInvertState() == expectedForceInvertType));
+        } catch (Exception e) {
+            Log.e(TAG, "Unexpected error trying to apply force invert state. " + e);
+            e.printStackTrace();
+        }
+
+        mExpect.that(mViewRootImpl.determineForceDarkType()).isEqualTo(expectedForceDarkType);
     }
 }

@@ -20,10 +20,8 @@ package com.android.systemui.shade.ui.composable
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.rememberScrollableState
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -44,58 +42,49 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexContentPicker
-import com.android.compose.gesture.effect.rememberOffsetOverscrollEffect
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.res.R
 
 /** Renders a lightweight shade UI container, as an overlay. */
 @Composable
 fun ContentScope.OverlayShade(
+    panelElement: ElementKey,
     panelAlignment: Alignment,
     onScrimClicked: () -> Unit,
     modifier: Modifier = Modifier,
+    header: @Composable () -> Unit,
     content: @Composable () -> Unit,
 ) {
-    // TODO(b/384653288) This should be removed when b/378470603 is done.
-    val idleEffect = rememberOffsetOverscrollEffect(Orientation.Vertical)
-    Box(
-        modifier
-            .overscroll(idleEffect)
-            .nestedScroll(
-                remember {
-                    object : NestedScrollConnection {
-                        override suspend fun onPreFling(available: Velocity): Velocity {
-                            return available
-                        }
-                    }
-                }
-            )
-            .scrollable(rememberScrollableState { 0f }, Orientation.Vertical, idleEffect)
-    ) {
+    val isFullWidth = isFullWidthShade()
+    Box(modifier) {
         Scrim(onClicked = onScrimClicked)
 
-        Box(modifier = Modifier.fillMaxSize().panelPadding(), contentAlignment = panelAlignment) {
+        Box(
+            modifier = Modifier.fillMaxSize().panelContainerPadding(isFullWidth),
+            contentAlignment = panelAlignment,
+        ) {
             Panel(
                 modifier =
-                    Modifier.element(OverlayShade.Elements.Panel)
-                        .overscroll(verticalOverscrollEffect)
-                        .panelSize(),
+                    Modifier.overscroll(verticalOverscrollEffect)
+                        .element(panelElement)
+                        .panelWidth(isFullWidth),
+                header = header.takeIf { isFullWidth },
                 content = content,
             )
+        }
+
+        if (!isFullWidth) {
+            header()
         }
     }
 }
@@ -113,8 +102,15 @@ private fun ContentScope.Scrim(onClicked: () -> Unit, modifier: Modifier = Modif
 }
 
 @Composable
-private fun ContentScope.Panel(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    Box(modifier = modifier.clip(OverlayShade.Shapes.RoundedCornerPanel)) {
+private fun ContentScope.Panel(
+    modifier: Modifier = Modifier,
+    header: (@Composable () -> Unit)?,
+    content: @Composable () -> Unit,
+) {
+    Box(
+        modifier =
+            modifier.clip(OverlayShade.Shapes.RoundedCornerPanel).disableSwipesWhenScrolling()
+    ) {
         Spacer(
             modifier =
                 Modifier.element(OverlayShade.Elements.PanelBackground)
@@ -125,46 +121,49 @@ private fun ContentScope.Panel(modifier: Modifier = Modifier, content: @Composab
                     )
         )
 
-        // This content is intentionally rendered as a separate element from the background in order
-        // to allow for more flexibility when defining transitions.
-        content()
+        Column {
+            header?.invoke()
+
+            // This content is intentionally rendered as a separate element from the background in
+            // order to allow for more flexibility when defining transitions.
+            content()
+        }
     }
 }
 
 @Composable
-private fun Modifier.panelSize(): Modifier {
-    val widthSizeClass = LocalWindowSizeClass.current.widthSizeClass
-    return this.then(
-        if (widthSizeClass == WindowWidthSizeClass.Compact) {
-            Modifier.fillMaxWidth()
-        } else {
-            Modifier.width(dimensionResource(id = R.dimen.shade_panel_width))
-        }
-    )
+private fun Modifier.panelWidth(isFullWidthPanel: Boolean): Modifier {
+    return if (isFullWidthPanel) {
+        fillMaxWidth()
+    } else {
+        width(dimensionResource(id = R.dimen.shade_panel_width))
+    }
 }
 
 @Composable
-private fun Modifier.panelPadding(): Modifier {
-    val widthSizeClass = LocalWindowSizeClass.current.widthSizeClass
+@ReadOnlyComposable
+internal fun isFullWidthShade(): Boolean {
+    return LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Compact
+}
+
+@Composable
+private fun Modifier.panelContainerPadding(isFullWidthPanel: Boolean): Modifier {
+    if (isFullWidthPanel) {
+        return this
+    }
     val systemBars = WindowInsets.systemBarsIgnoringVisibility
     val displayCutout = WindowInsets.displayCutout
     val waterfall = WindowInsets.waterfall
     val horizontalPadding =
         PaddingValues(horizontal = dimensionResource(id = R.dimen.shade_panel_margin_horizontal))
-
-    val combinedPadding =
+    return padding(
         combinePaddings(
             systemBars.asPaddingValues(),
             displayCutout.asPaddingValues(),
             waterfall.asPaddingValues(),
             horizontalPadding,
         )
-
-    return if (widthSizeClass == WindowWidthSizeClass.Compact) {
-        padding(bottom = combinedPadding.calculateBottomPadding())
-    } else {
-        padding(combinedPadding)
-    }
+    )
 }
 
 /** Creates a union of [paddingValues] by using the max padding of each edge. */

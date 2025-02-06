@@ -24,6 +24,7 @@ import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_HOME
 import android.os.SystemClock
 import android.view.KeyEvent
 import android.view.KeyEvent.ACTION_DOWN
+import android.view.KeyEvent.ACTION_UP
 import android.view.KeyEvent.KEYCODE_A
 import android.view.KeyEvent.META_ALT_ON
 import android.view.KeyEvent.META_CTRL_ON
@@ -540,11 +541,7 @@ object TestShortcuts {
             simpleShortcutCategory(System, "System apps", "Take a note"),
             simpleShortcutCategory(System, "System controls", "Take screenshot"),
             simpleShortcutCategory(System, "System controls", "Go back"),
-            simpleShortcutCategory(
-                MultiTasking,
-                "Split screen",
-                "Switch to full screen",
-            ),
+            simpleShortcutCategory(MultiTasking, "Split screen", "Switch to full screen"),
             simpleShortcutCategory(
                 MultiTasking,
                 "Split screen",
@@ -704,7 +701,7 @@ object TestShortcuts {
             android.view.KeyEvent(
                 /* downTime = */ SystemClock.uptimeMillis(),
                 /* eventTime = */ SystemClock.uptimeMillis(),
-                /* action = */ ACTION_DOWN,
+                /* action = */ ACTION_UP,
                 /* code = */ KEYCODE_A,
                 /* repeat = */ 0,
                 /* metaState = */ 0,

@@ -33,7 +33,6 @@ import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -51,7 +50,6 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class MuteQuickAffordanceCoreStartableTest : SysuiTestCase() {

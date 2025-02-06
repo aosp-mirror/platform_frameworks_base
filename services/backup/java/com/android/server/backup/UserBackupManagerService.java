@@ -19,8 +19,6 @@ package com.android.server.backup;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_BACKUP_IN_FOREGROUND;
 
 import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.DEBUG_SCHEDULING;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_OPERATION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_FULL_CONFIRMATION_TIMEOUT;
@@ -88,7 +86,6 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -174,88 +171,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /** System service that performs backup/restore operations. */
 public class UserBackupManagerService {
-    /**
-     * Wrapper over {@link PowerManager.WakeLock} to prevent double-free exceptions on release()
-     * after quit().
-     */
-    public static class BackupWakeLock {
-        private final PowerManager.WakeLock mPowerManagerWakeLock;
-        private boolean mHasQuit = false;
-        private final int mUserId;
-        private final BackupManagerConstants mBackupManagerConstants;
-
-        public BackupWakeLock(PowerManager.WakeLock powerManagerWakeLock, int userId,
-                BackupManagerConstants backupManagerConstants) {
-            mPowerManagerWakeLock = powerManagerWakeLock;
-            mUserId = userId;
-            mBackupManagerConstants = backupManagerConstants;
-        }
-
-        /** Acquires the {@link PowerManager.WakeLock} if hasn't been quit. */
-        public synchronized void acquire() {
-            if (mHasQuit) {
-                Slog.v(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId,
-                                "Ignore wakelock acquire after quit: "
-                                        + mPowerManagerWakeLock.getTag()));
-                return;
-            }
-            // Set a timeout for the wakelock. Otherwise if we fail internally and never call
-            // release(), the device might stay awake and drain battery indefinitely.
-            mPowerManagerWakeLock.acquire(mBackupManagerConstants.getWakelockTimeoutMillis());
-            Slog.v(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId, "Acquired wakelock:" + mPowerManagerWakeLock.getTag()));
-        }
-
-        /** Releases the {@link PowerManager.WakeLock} if hasn't been quit. */
-        public synchronized void release() {
-            if (mHasQuit) {
-                Slog.v(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId,
-                                "Ignore wakelock release after quit: "
-                                        + mPowerManagerWakeLock.getTag()));
-                return;
-            }
-
-            if (!mPowerManagerWakeLock.isHeld()) {
-                Slog.w(TAG, addUserIdToLogMessage(mUserId,
-                        "Wakelock not held: " + mPowerManagerWakeLock.getTag()));
-                return;
-            }
-
-            mPowerManagerWakeLock.release();
-            Slog.v(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId, "Released wakelock:" + mPowerManagerWakeLock.getTag()));
-        }
-
-        /**
-         * Returns true if the {@link PowerManager.WakeLock} has been acquired but not yet released.
-         */
-        public synchronized boolean isHeld() {
-            return mPowerManagerWakeLock.isHeld();
-        }
-
-        /** Release the {@link PowerManager.WakeLock} till it isn't held. */
-        public synchronized void quit() {
-            while (mPowerManagerWakeLock.isHeld()) {
-                Slog.v(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId, "Releasing wakelock: " + mPowerManagerWakeLock.getTag()));
-                mPowerManagerWakeLock.release();
-            }
-            mHasQuit = true;
-        }
-    }
-
     // Persistently track the need to do a full init.
     private static final String INIT_SENTINEL_FILE_NAME = "_need_init_";
 
@@ -321,12 +236,13 @@ public class UserBackupManagerService {
 
     // If an app is busy when we want to do a full-data backup, how long to defer the retry.
     // This is fuzzed, so there are two parameters; backoff_min + Rand[0, backoff_fuzz)
-    private static final long BUSY_BACKOFF_MIN_MILLIS = 1000 * 60 * 60;  // one hour
-    private static final int BUSY_BACKOFF_FUZZ = 1000 * 60 * 60 * 2;  // two hours
+    private static final long BUSY_BACKOFF_MIN_MILLIS = 1000 * 60 * 60; // one hour
+    private static final int BUSY_BACKOFF_FUZZ = 1000 * 60 * 60 * 2; // two hours
 
     private static final String SERIAL_ID_FILE = "serial_id";
 
     private final @UserIdInt int mUserId;
+    private final String mLogIdMsg; // Prepended to Logcat messages.
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
     private final TransportManager mTransportManager;
 
@@ -344,13 +260,13 @@ public class UserBackupManagerService {
 
     private final IBackupManager mBackupManagerBinder;
 
-    private boolean mEnabled;   // writes to this are synchronized on 'this'
+    private boolean mEnabled; // writes to this are synchronized on 'this'
     private boolean mSetupComplete;
     private boolean mAutoRestore;
 
     private final PendingIntent mRunInitIntent;
 
-    private final ArraySet<String> mPendingInits = new ArraySet<>();  // transport names
+    private final ArraySet<String> mPendingInits = new ArraySet<>(); // transport names
 
     // map UIDs to the set of participating packages under that UID
     private final SparseArray<HashSet<String>> mBackupParticipants = new SparseArray<>();
@@ -400,8 +316,7 @@ public class UserBackupManagerService {
     private final File mBaseStateDir;
     private final File mDataDir;
     private final File mJournalDir;
-    @Nullable
-    private DataChangedJournal mJournal;
+    @Nullable private DataChangedJournal mJournal;
     private final File mFullBackupScheduleFile;
 
     // Keep a log of all the apps we've ever backed up.
@@ -422,7 +337,7 @@ public class UserBackupManagerService {
      * includes setting up the directories where we keep our bookkeeping and transport management.
      *
      * @see #createAndInitializeService(int, Context, BackupManagerService, HandlerThread, File,
-     * File, TransportManager)
+     *     File, TransportManager)
      */
     static UserBackupManagerService createAndInitializeService(
             @UserIdInt int userId,
@@ -436,11 +351,7 @@ public class UserBackupManagerService {
             currentTransport = null;
         }
 
-        if (DEBUG) {
-            Slog.v(
-                    TAG,
-                    addUserIdToLogMessage(userId, "Starting with transport " + currentTransport));
-        }
+        Slog.d(TAG, "Starting with transport " + currentTransport + " for user " + userId);
         TransportManager transportManager =
                 new TransportManager(userId, context, transportWhitelist, currentTransport);
 
@@ -450,11 +361,7 @@ public class UserBackupManagerService {
         HandlerThread userBackupThread =
                 new HandlerThread("backup-" + userId, Process.THREAD_PRIORITY_BACKGROUND);
         userBackupThread.start();
-        if (DEBUG) {
-            Slog.d(
-                    TAG,
-                    addUserIdToLogMessage(userId, "Started thread " + userBackupThread.getName()));
-        }
+        Slog.d(TAG, "Started thread " + userBackupThread.getName() + " for user " + userId);
 
         return createAndInitializeService(
                 userId,
@@ -491,7 +398,7 @@ public class UserBackupManagerService {
         // if so delete expired events and do not print them to dumpsys
         BackupManagerMonitorDumpsysUtils backupManagerMonitorDumpsysUtils =
                 new BackupManagerMonitorDumpsysUtils();
-        if (backupManagerMonitorDumpsysUtils.deleteExpiredBMMEvents() && DEBUG){
+        if (backupManagerMonitorDumpsysUtils.deleteExpiredBMMEvents()) {
             Slog.d(TAG, "BMM Events recorded for dumpsys have expired");
         }
         return new UserBackupManagerService(
@@ -510,26 +417,32 @@ public class UserBackupManagerService {
      */
     public static boolean getSetupCompleteSettingForUser(Context context, int userId) {
         return Settings.Secure.getIntForUser(
-                context.getContentResolver(),
-                Settings.Secure.USER_SETUP_COMPLETE,
-                0,
-                userId)
+                        context.getContentResolver(),
+                        Settings.Secure.USER_SETUP_COMPLETE,
+                        0,
+                        userId)
                 != 0;
     }
 
     @VisibleForTesting
-    UserBackupManagerService(Context context, PackageManager packageManager,
-            LifecycleOperationStorage operationStorage, TransportManager transportManager,
-            BackupHandler backupHandler, BackupManagerConstants backupManagerConstants,
-            IActivityManager activityManager, ActivityManagerInternal activityManagerInternal) {
+    UserBackupManagerService(
+            Context context,
+            PackageManager packageManager,
+            LifecycleOperationStorage operationStorage,
+            TransportManager transportManager,
+            BackupHandler backupHandler,
+            BackupManagerConstants backupManagerConstants,
+            IActivityManager activityManager,
+            ActivityManagerInternal activityManagerInternal) {
         mContext = context;
 
         mUserId = 0;
+        mLogIdMsg = "[UserID:" + mUserId + "] ";
         mRegisterTransportsRequestedTime = 0;
         mPackageManager = packageManager;
         mOperationStorage = operationStorage;
-        mBackupAgentConnectionManager = new BackupAgentConnectionManager(mOperationStorage,
-                mPackageManager, this, mUserId);
+        mBackupAgentConnectionManager =
+                new BackupAgentConnectionManager(mOperationStorage, mPackageManager, this, mUserId);
         mTransportManager = transportManager;
         mFullBackupQueue = new ArrayList<>();
         mBackupHandler = backupHandler;
@@ -563,13 +476,14 @@ public class UserBackupManagerService {
             File dataDir,
             TransportManager transportManager) {
         mUserId = userId;
+        mLogIdMsg = "[UserID:" + mUserId + "] ";
         mContext = Objects.requireNonNull(context, "context cannot be null");
         mPackageManager = context.getPackageManager();
         mPackageManagerBinder = AppGlobals.getPackageManager();
         mActivityManager = ActivityManager.getService();
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
-        mScheduledBackupEligibility = getEligibilityRules(mPackageManager, userId, mContext,
-                BackupDestination.CLOUD);
+        mScheduledBackupEligibility =
+                getEligibilityRules(mPackageManager, userId, mContext, BackupDestination.CLOUD);
 
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -577,13 +491,13 @@ public class UserBackupManagerService {
         Objects.requireNonNull(parent, "parent cannot be null");
         mBackupManagerBinder = BackupManagerService.asInterface(parent.asBinder());
 
-        mAgentTimeoutParameters = new
-                BackupAgentTimeoutParameters(Handler.getMain(), mContext.getContentResolver());
+        mAgentTimeoutParameters =
+                new BackupAgentTimeoutParameters(Handler.getMain(), mContext.getContentResolver());
         mAgentTimeoutParameters.start();
 
         mOperationStorage = new LifecycleOperationStorage(mUserId);
-        mBackupAgentConnectionManager = new BackupAgentConnectionManager(mOperationStorage,
-                mPackageManager, this, mUserId);
+        mBackupAgentConnectionManager =
+                new BackupAgentConnectionManager(mOperationStorage, mPackageManager, this, mUserId);
 
         Objects.requireNonNull(userBackupThread, "userBackupThread cannot be null");
         mBackupHandler = new BackupHandler(this, mOperationStorage, userBackupThread);
@@ -591,8 +505,10 @@ public class UserBackupManagerService {
         // Set up our bookkeeping
         final ContentResolver resolver = context.getContentResolver();
         mSetupComplete = getSetupCompleteSettingForUser(context, userId);
-        mAutoRestore = Settings.Secure.getIntForUser(resolver,
-                Settings.Secure.BACKUP_AUTO_RESTORE, 1, userId) != 0;
+        mAutoRestore =
+                Settings.Secure.getIntForUser(
+                                resolver, Settings.Secure.BACKUP_AUTO_RESTORE, 1, userId)
+                        != 0;
 
         mSetupObserver = new SetupObserver(this, mBackupHandler);
         resolver.registerContentObserver(
@@ -607,10 +523,7 @@ public class UserBackupManagerService {
         if (userId == UserHandle.USER_SYSTEM) {
             mBaseStateDir.mkdirs();
             if (!SELinux.restorecon(mBaseStateDir)) {
-                Slog.w(
-                        TAG,
-                        addUserIdToLogMessage(
-                                userId, "SELinux restorecon failed on " + mBaseStateDir));
+                Slog.w(TAG, mLogIdMsg + "SELinux restorecon failed on " + mBaseStateDir);
             }
         }
 
@@ -642,8 +555,8 @@ public class UserBackupManagerService {
 
         // Set up the backup-request journaling
         mJournalDir = new File(mBaseStateDir, "pending");
-        mJournalDir.mkdirs();   // creates mBaseStateDir along the way
-        mJournal = null;        // will be created on first use
+        mJournalDir.mkdirs(); // creates mBaseStateDir along the way
+        mJournal = null; // will be created on first use
 
         mConstants = new BackupManagerConstants(mBackupHandler, mContext.getContentResolver());
         // We are observing changes to the constants throughout the lifecycle of BMS. This is
@@ -673,14 +586,20 @@ public class UserBackupManagerService {
         // if so delete expired events and do not print them to dumpsys
         BackupManagerMonitorDumpsysUtils backupManagerMonitorDumpsysUtils =
                 new BackupManagerMonitorDumpsysUtils();
-        mBackupHandler.postDelayed(backupManagerMonitorDumpsysUtils::deleteExpiredBMMEvents,
+        mBackupHandler.postDelayed(
+                backupManagerMonitorDumpsysUtils::deleteExpiredBMMEvents,
                 INITIALIZATION_DELAY_MILLIS);
 
         mBackupPreferences = new UserBackupPreferences(mContext, mBaseStateDir);
 
         // Power management
-        mWakelock = new BackupWakeLock(mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                "*backup*-" + userId + "-" + userBackupThread.getThreadId()), userId, mConstants);
+        mWakelock =
+                new BackupWakeLock(
+                        mPowerManager.newWakeLock(
+                                PowerManager.PARTIAL_WAKE_LOCK,
+                                "*backup*-" + userId + "-" + userBackupThread.getThreadId()),
+                        userId,
+                        mConstants);
 
         // Set up the various sorts of package tracking we do
         mFullBackupScheduleFile = new File(mBaseStateDir, "fb-schedule");
@@ -766,18 +685,8 @@ public class UserBackupManagerService {
         mSetupComplete = setupComplete;
     }
 
-    public BackupWakeLock getWakelock() {
+    public BackupWakeLock getWakeLock() {
         return mWakelock;
-    }
-
-    /**
-     * Sets the {@link WorkSource} of the {@link PowerManager.WakeLock} returned by {@link
-     * #getWakelock()}.
-     */
-    @VisibleForTesting
-    public void setWorkSource(@Nullable WorkSource workSource) {
-        // TODO: This is for testing, unfortunately WakeLock is final and WorkSource is not exposed
-        mWakelock.mPowerManagerWakeLock.setWorkSource(workSource);
     }
 
     public Handler getBackupHandler() {
@@ -891,14 +800,13 @@ public class UserBackupManagerService {
         mPendingInits.clear();
     }
 
-    public void setRunningFullBackupTask(
-            PerformFullTransportBackupTask runningFullBackupTask) {
+    public void setRunningFullBackupTask(PerformFullTransportBackupTask runningFullBackupTask) {
         mRunningFullBackupTask = runningFullBackupTask;
     }
 
     /**
-     *  Utility: build a new random integer token. The low bits are the ordinal of the operation for
-     *  near-time uniqueness, and the upper bits are random for app-side unpredictability.
+     * Utility: build a new random integer token. The low bits are the ordinal of the operation for
+     * near-time uniqueness, and the upper bits are random for app-side unpredictability.
      */
     public int generateRandomIntegerToken() {
         int token = mTokenGenerator.nextInt();
@@ -918,16 +826,14 @@ public class UserBackupManagerService {
 
     public BackupAgent makeMetadataAgentWithEligibilityRules(
             BackupEligibilityRules backupEligibilityRules) {
-        PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(mPackageManager, mUserId,
-                backupEligibilityRules);
+        PackageManagerBackupAgent pmAgent =
+                new PackageManagerBackupAgent(mPackageManager, mUserId, backupEligibilityRules);
         pmAgent.attach(mContext);
         pmAgent.onCreate(UserHandle.of(mUserId));
         return pmAgent;
     }
 
-    /**
-     * Same as {@link #makeMetadataAgent()} but with explicit package-set configuration.
-     */
+    /** Same as {@link #makeMetadataAgent()} but with explicit package-set configuration. */
     public PackageManagerBackupAgent makeMetadataAgent(List<PackageInfo> packages) {
         PackageManagerBackupAgent pmAgent =
                 new PackageManagerBackupAgent(mPackageManager, packages, mUserId);
@@ -937,12 +843,12 @@ public class UserBackupManagerService {
     }
 
     private void initPackageTracking() {
-        if (MORE_DEBUG) Slog.v(TAG, addUserIdToLogMessage(mUserId, "` tracking"));
+        if (DEBUG) Slog.v(TAG, mLogIdMsg + "` tracking");
 
         // Remember our ancestral dataset
         mTokenFile = new File(mBaseStateDir, "ancestral");
-        try (DataInputStream tokenStream = new DataInputStream(new BufferedInputStream(
-                new FileInputStream(mTokenFile)))) {
+        try (DataInputStream tokenStream =
+                new DataInputStream(new BufferedInputStream(new FileInputStream(mTokenFile)))) {
             int version = tokenStream.readInt();
             if (version == CURRENT_ANCESTRAL_RECORD_VERSION) {
                 mAncestralToken = tokenStream.readLong();
@@ -959,9 +865,9 @@ public class UserBackupManagerService {
             }
         } catch (FileNotFoundException fnf) {
             // Probably innocuous
-            Slog.v(TAG, addUserIdToLogMessage(mUserId, "No ancestral data"));
+            Slog.d(TAG, mLogIdMsg + "No ancestral data");
         } catch (IOException e) {
-            Slog.w(TAG, addUserIdToLogMessage(mUserId, "Unable to read token file"), e);
+            Slog.w(TAG, mLogIdMsg + "Unable to read token file", e);
         }
 
         mProcessedPackagesJournal = new ProcessedPackagesJournal(mBaseStateDir);
@@ -1002,20 +908,20 @@ public class UserBackupManagerService {
         boolean changed = false;
         ArrayList<FullBackupEntry> schedule = null;
         List<PackageInfo> apps =
-                PackageManagerBackupAgent.getStorableApplications(mPackageManager, mUserId,
-                        mScheduledBackupEligibility);
+                PackageManagerBackupAgent.getStorableApplications(
+                        mPackageManager, mUserId, mScheduledBackupEligibility);
 
         if (mFullBackupScheduleFile.exists()) {
             try (FileInputStream fstream = new FileInputStream(mFullBackupScheduleFile);
-                 BufferedInputStream bufStream = new BufferedInputStream(fstream);
-                 DataInputStream in = new DataInputStream(bufStream)) {
+                    BufferedInputStream bufStream = new BufferedInputStream(fstream);
+                    DataInputStream in = new DataInputStream(bufStream)) {
                 int version = in.readInt();
                 if (version != SCHEDULE_FILE_VERSION) {
                     // The file version doesn't match the expected value.
                     // Since this is within a "try" block, this exception will be treated like
                     // any other exception, and caught below.
-                    throw new IllegalArgumentException("Unknown backup schedule version "
-                            + version);
+                    throw new IllegalArgumentException(
+                            "Unknown backup schedule version " + version);
                 }
 
                 final int numPackages = in.readInt();
@@ -1038,16 +944,20 @@ public class UserBackupManagerService {
                                         pkg.applicationInfo)) {
                             schedule.add(new FullBackupEntry(pkgName, lastBackup));
                         } else {
-                            if (DEBUG) {
-                                Slog.i(TAG, addUserIdToLogMessage(mUserId, "Package " + pkgName
-                                        + " no longer eligible for full backup"));
-                            }
+                            Slog.i(
+                                    TAG,
+                                    mLogIdMsg
+                                            + "Package "
+                                            + pkgName
+                                            + " no longer eligible for full backup");
                         }
                     } catch (NameNotFoundException e) {
-                        if (DEBUG) {
-                            Slog.i(TAG, addUserIdToLogMessage(mUserId, "Package " + pkgName
-                                    + " not installed; dropping from full backup"));
-                        }
+                        Slog.i(
+                                TAG,
+                                mLogIdMsg
+                                        + "Package "
+                                        + pkgName
+                                        + " not installed; dropping from full backup");
                     }
                 }
 
@@ -1058,14 +968,13 @@ public class UserBackupManagerService {
                             && mScheduledBackupEligibility.appIsEligibleForBackup(
                                     app.applicationInfo)) {
                         if (!foundApps.contains(app.packageName)) {
-                            if (MORE_DEBUG) {
+                            if (DEBUG) {
                                 Slog.i(
                                         TAG,
-                                        addUserIdToLogMessage(
-                                                mUserId,
-                                                "New full backup app "
-                                                        + app.packageName
-                                                        + " found"));
+                                        mLogIdMsg
+                                                + "New full backup app "
+                                                + app.packageName
+                                                + " found");
                             }
                             schedule.add(new FullBackupEntry(app.packageName, 0));
                             changed = true;
@@ -1075,7 +984,7 @@ public class UserBackupManagerService {
 
                 Collections.sort(schedule);
             } catch (Exception e) {
-                Slog.e(TAG, addUserIdToLogMessage(mUserId, "Unable to read backup schedule"), e);
+                Slog.e(TAG, mLogIdMsg + "Unable to read backup schedule", e);
                 mFullBackupScheduleFile.delete();
                 schedule = null;
             }
@@ -1101,46 +1010,43 @@ public class UserBackupManagerService {
         return schedule;
     }
 
-    private Runnable mFullBackupScheduleWriter = new Runnable() {
-        @Override
-        public void run() {
-            synchronized (mQueueLock) {
-                try {
-                    ByteArrayOutputStream bufStream = new ByteArrayOutputStream(4096);
-                    DataOutputStream bufOut = new DataOutputStream(bufStream);
-                    bufOut.writeInt(SCHEDULE_FILE_VERSION);
+    private Runnable mFullBackupScheduleWriter =
+            new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (mQueueLock) {
+                        try {
+                            ByteArrayOutputStream bufStream = new ByteArrayOutputStream(4096);
+                            DataOutputStream bufOut = new DataOutputStream(bufStream);
+                            bufOut.writeInt(SCHEDULE_FILE_VERSION);
 
-                    // version 1:
-                    //
-                    // [int] # of packages in the queue = N
-                    // N * {
-                    //     [utf8] package name
-                    //     [long] last backup time for this package
-                    //     }
-                    int numPackages = mFullBackupQueue.size();
-                    bufOut.writeInt(numPackages);
+                            // version 1:
+                            //
+                            // [int] # of packages in the queue = N
+                            // N * {
+                            //     [utf8] package name
+                            //     [long] last backup time for this package
+                            //     }
+                            int numPackages = mFullBackupQueue.size();
+                            bufOut.writeInt(numPackages);
 
-                    for (int i = 0; i < numPackages; i++) {
-                        FullBackupEntry entry = mFullBackupQueue.get(i);
-                        bufOut.writeUTF(entry.packageName);
-                        bufOut.writeLong(entry.lastBackup);
+                            for (int i = 0; i < numPackages; i++) {
+                                FullBackupEntry entry = mFullBackupQueue.get(i);
+                                bufOut.writeUTF(entry.packageName);
+                                bufOut.writeLong(entry.lastBackup);
+                            }
+                            bufOut.flush();
+
+                            AtomicFile af = new AtomicFile(mFullBackupScheduleFile);
+                            FileOutputStream out = af.startWrite();
+                            out.write(bufStream.toByteArray());
+                            af.finishWrite(out);
+                        } catch (Exception e) {
+                            Slog.e(TAG, mLogIdMsg + "Unable to write backup schedule!", e);
+                        }
                     }
-                    bufOut.flush();
-
-                    AtomicFile af = new AtomicFile(mFullBackupScheduleFile);
-                    FileOutputStream out = af.startWrite();
-                    out.write(bufStream.toByteArray());
-                    af.finishWrite(out);
-                } catch (Exception e) {
-                    Slog.e(
-                            TAG,
-                            addUserIdToLogMessage(
-                                    mUserId, "Unable to write backup schedule!"),
-                            e);
                 }
-            }
-        }
-    };
+            };
 
     private void writeFullBackupScheduleAsync() {
         mBackupHandler.removeCallbacks(mFullBackupScheduleWriter);
@@ -1151,28 +1057,33 @@ public class UserBackupManagerService {
         ArrayList<DataChangedJournal> journals = DataChangedJournal.listJournals(mJournalDir);
         journals.removeAll(Collections.singletonList(mJournal));
         if (!journals.isEmpty()) {
-            Slog.i(TAG, addUserIdToLogMessage(mUserId,
-                    "Found " + journals.size() + " stale backup journal(s), scheduling."));
+            Slog.i(
+                    TAG,
+                    mLogIdMsg
+                            + "Found "
+                            + journals.size()
+                            + " stale backup journal(s), scheduling.");
         }
         Set<String> packageNames = new LinkedHashSet<>();
         for (DataChangedJournal journal : journals) {
             try {
-                journal.forEach(packageName -> {
-                    if (packageNames.add(packageName)) {
-                        dataChangedImpl(packageName);
-                    }
-                });
+                journal.forEach(
+                        packageName -> {
+                            if (packageNames.add(packageName)) {
+                                dataChangedImpl(packageName);
+                            }
+                        });
             } catch (IOException e) {
-                Slog.e(TAG, addUserIdToLogMessage(mUserId, "Can't read " + journal), e);
+                Slog.e(TAG, mLogIdMsg + "Can't read " + journal, e);
             }
         }
         if (!packageNames.isEmpty()) {
-            String msg = "Stale backup journals: Scheduled " + packageNames.size()
-                    + " package(s) total";
-            if (MORE_DEBUG) {
+            String msg =
+                    "Stale backup journals: Scheduled " + packageNames.size() + " package(s) total";
+            if (DEBUG) {
                 msg += ": " + packageNames;
             }
-            Slog.i(TAG, addUserIdToLogMessage(mUserId, msg));
+            Slog.i(TAG, mLogIdMsg + msg);
         }
     }
 
@@ -1209,15 +1120,14 @@ public class UserBackupManagerService {
     public void recordInitPending(
             boolean isPending, String transportName, String transportDirName) {
         synchronized (mQueueLock) {
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.i(
                         TAG,
-                        addUserIdToLogMessage(
-                                mUserId,
-                                "recordInitPending("
-                                        + isPending
-                                        + ") on transport "
-                                        + transportName));
+                        mLogIdMsg
+                                + "recordInitPending("
+                                + isPending
+                                + ") on transport "
+                                + transportName);
             }
 
             File stateDir = new File(mBaseStateDir, transportDirName);
@@ -1276,20 +1186,17 @@ public class UserBackupManagerService {
     }
 
     private void onTransportRegistered(String transportName, String transportDirName) {
-        if (DEBUG) {
-            long timeMs = SystemClock.elapsedRealtime() - mRegisterTransportsRequestedTime;
-            Slog.d(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "Transport "
-                                    + transportName
-                                    + " registered "
-                                    + timeMs
-                                    + "ms after first request (delay = "
-                                    + INITIALIZATION_DELAY_MILLIS
-                                    + "ms)"));
-        }
+        long timeMs = SystemClock.elapsedRealtime() - mRegisterTransportsRequestedTime;
+        Slog.d(
+                TAG,
+                mLogIdMsg
+                        + "Transport "
+                        + transportName
+                        + " registered "
+                        + timeMs
+                        + "ms after first request (delay = "
+                        + INITIALIZATION_DELAY_MILLIS
+                        + "ms)");
 
         File stateDir = new File(mBaseStateDir, transportDirName);
         stateDir.mkdirs();
@@ -1301,8 +1208,10 @@ public class UserBackupManagerService {
 
                 // TODO: pick a better starting time than now + 1 minute
                 long delay = 1000 * 60; // one minute, in milliseconds
-                mAlarmManager.set(AlarmManager.RTC_WAKEUP,
-                        System.currentTimeMillis() + delay, mRunInitIntent);
+                mAlarmManager.set(
+                        AlarmManager.RTC_WAKEUP,
+                        System.currentTimeMillis() + delay,
+                        mRunInitIntent);
             }
         }
     }
@@ -1311,142 +1220,131 @@ public class UserBackupManagerService {
      * A {@link BroadcastReceiver} tracking changes to packages and sd cards in order to update our
      * internal bookkeeping.
      */
-    private BroadcastReceiver mPackageTrackingReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            if (MORE_DEBUG) {
-                Slog.d(TAG, addUserIdToLogMessage(mUserId, "Received broadcast " + intent));
-            }
+    private BroadcastReceiver mPackageTrackingReceiver =
+            new BroadcastReceiver() {
+                public void onReceive(Context context, Intent intent) {
+                    if (DEBUG) {
+                        Slog.d(TAG, mLogIdMsg + "Received broadcast " + intent);
+                    }
 
-            String action = intent.getAction();
-            boolean replacing = false;
-            boolean added = false;
-            boolean changed = false;
-            Bundle extras = intent.getExtras();
-            String[] packageList = null;
+                    String action = intent.getAction();
+                    boolean replacing = false;
+                    boolean added = false;
+                    boolean changed = false;
+                    Bundle extras = intent.getExtras();
+                    String[] packageList = null;
 
-            if (Intent.ACTION_PACKAGE_ADDED.equals(action)
-                    || Intent.ACTION_PACKAGE_REMOVED.equals(action)
-                    || Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
-                Uri uri = intent.getData();
-                if (uri == null) {
-                    return;
-                }
-
-                String packageName = uri.getSchemeSpecificPart();
-                if (packageName != null) {
-                    packageList = new String[] {packageName};
-                }
-
-                changed = Intent.ACTION_PACKAGE_CHANGED.equals(action);
-                if (changed) {
-                    // Look at new transport states for package changed events.
-                    String[] components =
-                            intent.getStringArrayExtra(
-                                    Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
-
-                    if (MORE_DEBUG) {
-                        Slog.i(
-                                TAG,
-                                addUserIdToLogMessage(
-                                        mUserId, "Package " + packageName + " changed"));
-                        for (int i = 0; i < components.length; i++) {
-                            Slog.i(
-                                    TAG,
-                                    addUserIdToLogMessage(
-                                            mUserId, "   * " + components[i]));
+                    if (Intent.ACTION_PACKAGE_ADDED.equals(action)
+                            || Intent.ACTION_PACKAGE_REMOVED.equals(action)
+                            || Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
+                        Uri uri = intent.getData();
+                        if (uri == null) {
+                            return;
                         }
-                    }
 
-                    mBackupHandler.post(
-                            () ->
-                                    mTransportManager.onPackageChanged(
-                                            packageName, components));
-                    return;
-                }
+                        String packageName = uri.getSchemeSpecificPart();
+                        if (packageName != null) {
+                            packageList = new String[] {packageName};
+                        }
 
-                added = Intent.ACTION_PACKAGE_ADDED.equals(action);
-                replacing = extras.getBoolean(Intent.EXTRA_REPLACING, false);
-            } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
-                added = true;
-                packageList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-            } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
-                added = false;
-                packageList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-            }
+                        changed = Intent.ACTION_PACKAGE_CHANGED.equals(action);
+                        if (changed) {
+                            // Look at new transport states for package changed events.
+                            String[] components =
+                                    intent.getStringArrayExtra(
+                                            Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
 
-            if (packageList == null || packageList.length == 0) {
-                return;
-            }
-
-            int uid = extras.getInt(Intent.EXTRA_UID);
-            if (added) {
-                synchronized (mBackupParticipants) {
-                    if (replacing) {
-                        // Remove the entry under the old uid and fall through to re-add. If
-                        // an app
-                        // just opted into key/value backup, add it as a known participant.
-                        removePackageParticipantsLocked(packageList, uid);
-                    }
-                    addPackageParticipantsLocked(packageList);
-                }
-
-                long now = System.currentTimeMillis();
-                for (String packageName : packageList) {
-                    try {
-                        PackageInfo app =
-                                mPackageManager.getPackageInfoAsUser(
-                                        packageName, /* flags */ 0, mUserId);
-                        if (mScheduledBackupEligibility.appGetsFullBackup(app)
-                                && mScheduledBackupEligibility.appIsEligibleForBackup(
-                                        app.applicationInfo)) {
-                            enqueueFullBackup(packageName, now);
-                            scheduleNextFullBackupJob(0);
-                        } else {
-                            // The app might have just transitioned out of full-data into
-                            // doing
-                            // key/value backups, or might have just disabled backups
-                            // entirely. Make
-                            // sure it is no longer in the full-data queue.
-                            synchronized (mQueueLock) {
-                                dequeueFullBackupLocked(packageName);
+                            if (DEBUG) {
+                                Slog.i(TAG, mLogIdMsg + "Package " + packageName + " changed");
+                                for (int i = 0; i < components.length; i++) {
+                                    Slog.i(TAG, mLogIdMsg + "   * " + components[i]);
+                                }
                             }
-                            writeFullBackupScheduleAsync();
+
+                            mBackupHandler.post(
+                                    () ->
+                                            mTransportManager.onPackageChanged(
+                                                    packageName, components));
+                            return;
                         }
 
-                        mBackupHandler.post(
-                                () -> mTransportManager.onPackageAdded(packageName));
-                    } catch (NameNotFoundException e) {
-                        if (DEBUG) {
-                            Slog.w(
-                                    TAG,
-                                    addUserIdToLogMessage(
-                                            mUserId,
-                                            "Can't resolve new app " + packageName));
+                        added = Intent.ACTION_PACKAGE_ADDED.equals(action);
+                        replacing = extras.getBoolean(Intent.EXTRA_REPLACING, false);
+                    } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
+                        added = true;
+                        packageList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                    } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
+                        added = false;
+                        packageList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                    }
+
+                    if (packageList == null || packageList.length == 0) {
+                        return;
+                    }
+
+                    int uid = extras.getInt(Intent.EXTRA_UID);
+                    if (added) {
+                        synchronized (mBackupParticipants) {
+                            if (replacing) {
+                                // Remove the entry under the old uid and fall through to re-add. If
+                                // an app
+                                // just opted into key/value backup, add it as a known participant.
+                                removePackageParticipantsLocked(packageList, uid);
+                            }
+                            addPackageParticipantsLocked(packageList);
+                        }
+
+                        long now = System.currentTimeMillis();
+                        for (String packageName : packageList) {
+                            try {
+                                PackageInfo app =
+                                        mPackageManager.getPackageInfoAsUser(
+                                                packageName, /* flags */ 0, mUserId);
+                                if (mScheduledBackupEligibility.appGetsFullBackup(app)
+                                        && mScheduledBackupEligibility.appIsEligibleForBackup(
+                                                app.applicationInfo)) {
+                                    enqueueFullBackup(packageName, now);
+                                    scheduleNextFullBackupJob(0);
+                                } else {
+                                    // The app might have just transitioned out of full-data into
+                                    // doing
+                                    // key/value backups, or might have just disabled backups
+                                    // entirely. Make
+                                    // sure it is no longer in the full-data queue.
+                                    synchronized (mQueueLock) {
+                                        dequeueFullBackupLocked(packageName);
+                                    }
+                                    writeFullBackupScheduleAsync();
+                                }
+
+                                mBackupHandler.post(
+                                        () -> mTransportManager.onPackageAdded(packageName));
+                            } catch (NameNotFoundException e) {
+                                Slog.w(TAG, mLogIdMsg + "Can't resolve new app " + packageName);
+                            }
+                        }
+
+                        // Whenever a package is added or updated we need to update the package
+                        // metadata
+                        // bookkeeping.
+                        dataChangedImpl(PACKAGE_MANAGER_SENTINEL);
+                    } else {
+                        if (!replacing) {
+                            // Outright removal. In the full-data case, the app will be dropped from
+                            // the
+                            // queue when its (now obsolete) name comes up again for backup.
+                            synchronized (mBackupParticipants) {
+                                removePackageParticipantsLocked(packageList, uid);
+                            }
+                        }
+
+                        for (String packageName : packageList) {
+                            mBackupHandler.post(
+                                    () -> mTransportManager.onPackageRemoved(packageName));
                         }
                     }
                 }
-
-                // Whenever a package is added or updated we need to update the package
-                // metadata
-                // bookkeeping.
-                dataChangedImpl(PACKAGE_MANAGER_SENTINEL);
-            } else {
-                if (!replacing) {
-                    // Outright removal. In the full-data case, the app will be dropped from
-                    // the
-                    // queue when its (now obsolete) name comes up again for backup.
-                    synchronized (mBackupParticipants) {
-                        removePackageParticipantsLocked(packageList, uid);
-                    }
-                }
-
-                for (String packageName : packageList) {
-                    mBackupHandler.post(
-                            () -> mTransportManager.onPackageRemoved(packageName));
-                }
-            }
-        }
-    };
+            };
 
     // Add the backup agents in the given packages to our set of known backup participants.
     // If 'packageNames' is null, adds all backup agents in the whole system.
@@ -1454,30 +1352,24 @@ public class UserBackupManagerService {
         // Look for apps that define the android:backupAgent attribute
         List<PackageInfo> targetApps = allAgentPackages();
         if (packageNames != null) {
-            if (MORE_DEBUG) {
-                Slog.v(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId, "addPackageParticipantsLocked: #" + packageNames.length));
+            if (DEBUG) {
+                Slog.v(TAG, mLogIdMsg + "addPackageParticipantsLocked: #" + packageNames.length);
             }
             for (String packageName : packageNames) {
                 addPackageParticipantsLockedInner(packageName, targetApps);
             }
         } else {
-            if (MORE_DEBUG) {
-                Slog.v(TAG, addUserIdToLogMessage(mUserId, "addPackageParticipantsLocked: all"));
+            if (DEBUG) {
+                Slog.v(TAG, mLogIdMsg + "addPackageParticipantsLocked: all");
             }
             addPackageParticipantsLockedInner(null, targetApps);
         }
     }
 
-    private void addPackageParticipantsLockedInner(String packageName,
-            List<PackageInfo> targetPkgs) {
-        if (MORE_DEBUG) {
-            Slog.v(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId, "Examining " + packageName + " for backup agent"));
+    private void addPackageParticipantsLockedInner(
+            String packageName, List<PackageInfo> targetPkgs) {
+        if (DEBUG) {
+            Slog.v(TAG, mLogIdMsg + "Examining " + packageName + " for backup agent");
         }
 
         for (PackageInfo pkg : targetPkgs) {
@@ -1489,17 +1381,14 @@ public class UserBackupManagerService {
                     mBackupParticipants.put(uid, set);
                 }
                 set.add(pkg.packageName);
-                if (MORE_DEBUG) Slog.v(TAG, addUserIdToLogMessage(mUserId, "Agent found; added"));
+                if (DEBUG) Slog.v(TAG, mLogIdMsg + "Agent found; added");
 
                 // Schedule a backup for it on general principles
-                if (MORE_DEBUG) {
-                    Slog.i(
-                            TAG,
-                            addUserIdToLogMessage(
-                                    mUserId, "Scheduling backup for new app " + pkg.packageName));
+                if (DEBUG) {
+                    Slog.i(TAG, mLogIdMsg + "Scheduling backup for new app " + pkg.packageName);
                 }
-                Message msg = mBackupHandler
-                        .obtainMessage(MSG_SCHEDULE_BACKUP_PACKAGE, pkg.packageName);
+                Message msg =
+                        mBackupHandler.obtainMessage(MSG_SCHEDULE_BACKUP_PACKAGE, pkg.packageName);
                 mBackupHandler.sendMessage(msg);
             }
         }
@@ -1508,19 +1397,18 @@ public class UserBackupManagerService {
     // Remove the given packages' entries from our known active set.
     private void removePackageParticipantsLocked(String[] packageNames, int oldUid) {
         if (packageNames == null) {
-            Slog.w(TAG, addUserIdToLogMessage(mUserId, "removePackageParticipants with null list"));
+            Slog.w(TAG, mLogIdMsg + "removePackageParticipants with null list");
             return;
         }
 
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.v(
                     TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "removePackageParticipantsLocked: uid="
-                                    + oldUid
-                                    + " #"
-                                    + packageNames.length));
+                    mLogIdMsg
+                            + "removePackageParticipantsLocked: uid="
+                            + oldUid
+                            + " #"
+                            + packageNames.length);
         }
         for (String pkg : packageNames) {
             // Known previous UID, so we know which package set to check
@@ -1528,11 +1416,8 @@ public class UserBackupManagerService {
             if (set != null && set.contains(pkg)) {
                 removePackageFromSetLocked(set, pkg);
                 if (set.isEmpty()) {
-                    if (MORE_DEBUG) {
-                        Slog.v(
-                                TAG,
-                                addUserIdToLogMessage(
-                                        mUserId, "  last one of this uid; purging set"));
+                    if (DEBUG) {
+                        Slog.v(TAG, mLogIdMsg + "  last one of this uid; purging set");
                     }
                     mBackupParticipants.remove(oldUid);
                 }
@@ -1540,8 +1425,7 @@ public class UserBackupManagerService {
         }
     }
 
-    private void removePackageFromSetLocked(final HashSet<String> set,
-            final String packageName) {
+    private void removePackageFromSetLocked(final HashSet<String> set, final String packageName) {
         if (set.contains(packageName)) {
             // Found it.  Remove this one package from the bookkeeping, and
             // if it's the last participating app under this uid we drop the
@@ -1549,10 +1433,8 @@ public class UserBackupManagerService {
             // Note that we deliberately leave it 'known' in the "ever backed up"
             // bookkeeping so that its current-dataset data will be retrieved
             // if the app is subsequently reinstalled
-            if (MORE_DEBUG) {
-                Slog.v(
-                        TAG,
-                        addUserIdToLogMessage(mUserId, "  removing participant " + packageName));
+            if (DEBUG) {
+                Slog.v(TAG, mLogIdMsg + "  removing participant " + packageName);
             }
             set.remove(packageName);
             mPendingBackups.remove(packageName);
@@ -1577,8 +1459,11 @@ public class UserBackupManagerService {
                     // we will need the shared library path, so look that up and store it here.
                     // This is used implicitly when we pass the PackageInfo object off to
                     // the Activity Manager to launch the app for backup/restore purposes.
-                    app = mPackageManager.getApplicationInfoAsUser(pkg.packageName,
-                            PackageManager.GET_SHARED_LIBRARY_FILES, mUserId);
+                    app =
+                            mPackageManager.getApplicationInfoAsUser(
+                                    pkg.packageName,
+                                    PackageManager.GET_SHARED_LIBRARY_FILES,
+                                    mUserId);
                     pkg.applicationInfo.sharedLibraryFiles = app.sharedLibraryFiles;
                     pkg.applicationInfo.sharedLibraryInfos = app.sharedLibraryInfos;
                 }
@@ -1600,8 +1485,8 @@ public class UserBackupManagerService {
             final Intent notification = new Intent();
             notification.setAction(BACKUP_FINISHED_ACTION);
             notification.setPackage(receiver);
-            notification.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES
-                    | Intent.FLAG_RECEIVER_FOREGROUND);
+            notification.addFlags(
+                    Intent.FLAG_INCLUDE_STOPPED_PACKAGES | Intent.FLAG_RECEIVER_FOREGROUND);
             notification.putExtra(BACKUP_FINISHED_PACKAGE_EXTRA, packageName);
             mContext.sendBroadcastAsUser(notification, UserHandle.of(mUserId));
         }
@@ -1627,19 +1512,14 @@ public class UserBackupManagerService {
                 af.writeInt(-1);
             } else {
                 af.writeInt(mAncestralPackages.size());
-                if (DEBUG) {
-                    Slog.v(
-                            TAG,
-                            addUserIdToLogMessage(
-                                    mUserId, "Ancestral packages:  " + mAncestralPackages.size()));
-                }
+                Slog.d(TAG, mLogIdMsg + "Ancestral packages:  " + mAncestralPackages.size());
                 for (String pkgName : mAncestralPackages) {
                     af.writeUTF(pkgName);
-                    if (MORE_DEBUG) Slog.v(TAG, addUserIdToLogMessage(mUserId, "   " + pkgName));
+                    if (DEBUG) Slog.v(TAG, mLogIdMsg + "   " + pkgName);
                 }
             }
         } catch (IOException e) {
-            Slog.w(TAG, addUserIdToLogMessage(mUserId, "Unable to write token file:"), e);
+            Slog.w(TAG, mLogIdMsg + "Unable to write token file:", e);
         }
     }
 
@@ -1662,45 +1542,39 @@ public class UserBackupManagerService {
     /**
      * Clear an application's data, blocking until the operation completes or times out.
      *
-     * @param checkFlagAllowClearUserDataOnFailedRestore if {@code true} uses
-     *    {@link ApplicationInfo#PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE} to decide if
-     *    clearing data is allowed after a failed restore.
-     *
+     * @param checkFlagAllowClearUserDataOnFailedRestore if {@code true} uses {@link
+     *     ApplicationInfo#PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE} to decide if
+     *     clearing data is allowed after a failed restore.
      * @param keepSystemState if {@code true}, we don't clear system state such as already restored
-     *    notification settings, permission grants, etc.
+     *     notification settings, permission grants, etc.
      */
-    private void clearApplicationDataSynchronous(String packageName,
-            boolean checkFlagAllowClearUserDataOnFailedRestore, boolean keepSystemState) {
+    private void clearApplicationDataSynchronous(
+            String packageName,
+            boolean checkFlagAllowClearUserDataOnFailedRestore,
+            boolean keepSystemState) {
         try {
-            ApplicationInfo applicationInfo = mPackageManager.getPackageInfoAsUser(
-                    packageName, 0, mUserId).applicationInfo;
+            ApplicationInfo applicationInfo =
+                    mPackageManager.getPackageInfoAsUser(packageName, 0, mUserId).applicationInfo;
 
             boolean shouldClearData;
             if (checkFlagAllowClearUserDataOnFailedRestore
                     && applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q) {
-                shouldClearData = (applicationInfo.privateFlags
-                    & ApplicationInfo.PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE) != 0;
+                int clearOnFailedRestoreFlag =
+                        ApplicationInfo.PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE;
+                shouldClearData = (applicationInfo.privateFlags & clearOnFailedRestoreFlag) != 0;
             } else {
                 shouldClearData =
-                    (applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_CLEAR_USER_DATA) != 0;
+                        (applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_CLEAR_USER_DATA) != 0;
             }
 
             if (!shouldClearData) {
-                if (MORE_DEBUG) {
-                    Slog.i(
-                            TAG,
-                            addUserIdToLogMessage(
-                                    mUserId,
-                                    "Clearing app data is not allowed so not wiping "
-                                            + packageName));
+                if (DEBUG) {
+                    Slog.i(TAG, mLogIdMsg + "Clearing app data is not allowed " + packageName);
                 }
                 return;
             }
         } catch (NameNotFoundException e) {
-            Slog.w(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId, "Tried to clear data for " + packageName + " but not found"));
+            Slog.w(TAG, mLogIdMsg + "Tried to clear data for " + packageName + " but not found");
             return;
         }
 
@@ -1708,8 +1582,8 @@ public class UserBackupManagerService {
 
         synchronized (mClearDataLock) {
             mClearingData = true;
-            mActivityManagerInternal.clearApplicationUserData(packageName, keepSystemState,
-                    /*isRestore=*/ true, observer, mUserId);
+            mActivityManagerInternal.clearApplicationUserData(
+                    packageName, keepSystemState, /* isRestore= */ true, observer, mUserId);
 
             // Only wait 30 seconds for the clear data to happen.
             long timeoutMark = System.currentTimeMillis() + CLEAR_DATA_TIMEOUT_INTERVAL;
@@ -1721,20 +1595,16 @@ public class UserBackupManagerService {
                     mClearingData = false;
                     Slog.w(
                             TAG,
-                            addUserIdToLogMessage(
-                                    mUserId,
-                                    "Interrupted while waiting for "
-                                            + packageName
-                                            + " data to be cleared"),
+                            mLogIdMsg
+                                    + "Interrupted while waiting for "
+                                    + packageName
+                                    + " data to be cleared",
                             e);
                 }
             }
 
             if (mClearingData) {
-                Slog.w(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId, "Clearing app data for " + packageName + " timed out"));
+                Slog.w(TAG, mLogIdMsg + "Clearing app data for " + packageName + " timed out");
             }
         }
     }
@@ -1755,23 +1625,20 @@ public class UserBackupManagerService {
      * the active set if possible, else the ancestral one. Returns zero if none available.
      */
     public long getAvailableRestoreToken(String packageName) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "getAvailableRestoreToken");
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "getAvailableRestoreToken");
 
         long token = mAncestralToken;
         synchronized (mQueueLock) {
             if (mCurrentToken != 0 && mProcessedPackagesJournal.hasBeenProcessed(packageName)) {
-                if (MORE_DEBUG) {
-                    Slog.i(
-                            TAG,
-                            addUserIdToLogMessage(
-                                    mUserId, "App in ever-stored, so using current token"));
+                if (DEBUG) {
+                    Slog.i(TAG, mLogIdMsg + "App in ever-stored, so using current token");
                 }
                 token = mCurrentToken;
             }
         }
-        if (MORE_DEBUG) {
-            Slog.i(TAG, addUserIdToLogMessage(mUserId, "getAvailableRestoreToken() == " + token));
+        if (DEBUG) {
+            Slog.i(TAG, mLogIdMsg + "getAvailableRestoreToken() == " + token);
         }
         return token;
     }
@@ -1789,35 +1656,40 @@ public class UserBackupManagerService {
      * Requests a backup for the inputted {@code packages} with a specified {@link
      * IBackupManagerMonitor} and {@link OperationType}.
      */
-    public int requestBackup(String[] packages, IBackupObserver observer,
-            IBackupManagerMonitor monitor, int flags) {
-        BackupManagerMonitorEventSender  mBackupManagerMonitorEventSender =
+    public int requestBackup(
+            String[] packages, IBackupObserver observer, IBackupManagerMonitor monitor, int flags) {
+        BackupManagerMonitorEventSender mBackupManagerMonitorEventSender =
                 getBMMEventSender(monitor);
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "requestBackup");
 
         if (packages == null || packages.length < 1) {
-            Slog.e(TAG, addUserIdToLogMessage(mUserId, "No packages named for backup request"));
+            Slog.e(TAG, mLogIdMsg + "No packages named for backup request");
             BackupObserverUtils.sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
             mBackupManagerMonitorEventSender.monitorEvent(
-                    BackupManagerMonitor.LOG_EVENT_ID_NO_PACKAGES,
-                    null, BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT, null);
+                    BackupManagerMonitor.LOG_EVENT_ID_NO_PACKAGES, null,
+                    BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT, null);
             throw new IllegalArgumentException("No packages are provided for backup");
         }
 
         if (!mEnabled || !mSetupComplete) {
             Slog.i(
                     TAG,
-                    addUserIdToLogMessage(mUserId, "Backup requested but enabled="
+                    mLogIdMsg
+                            + "Backup requested but enabled="
                             + mEnabled
                             + " setupComplete="
-                            + mSetupComplete));
-            BackupObserverUtils.sendBackupFinished(observer,
-                    BackupManager.ERROR_BACKUP_NOT_ALLOWED);
-            final int logTag = mSetupComplete
-                    ? BackupManagerMonitor.LOG_EVENT_ID_BACKUP_DISABLED
-                    : BackupManagerMonitor.LOG_EVENT_ID_DEVICE_NOT_PROVISIONED;
-            mBackupManagerMonitorEventSender.monitorEvent(logTag, null,
-                    BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY, null);
+                            + mSetupComplete);
+            BackupObserverUtils.sendBackupFinished(
+                    observer, BackupManager.ERROR_BACKUP_NOT_ALLOWED);
+            final int logTag =
+                    mSetupComplete
+                            ? BackupManagerMonitor.LOG_EVENT_ID_BACKUP_DISABLED
+                            : BackupManagerMonitor.LOG_EVENT_ID_DEVICE_NOT_PROVISIONED;
+            mBackupManagerMonitorEventSender.monitorEvent(
+                    logTag,
+                    null,
+                    BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                    null);
             return BackupManager.ERROR_BACKUP_NOT_ALLOWED;
         }
 
@@ -1831,31 +1703,45 @@ public class UserBackupManagerService {
             transportConnection =
                     mTransportManager.getCurrentTransportClientOrThrow("BMS.requestBackup()");
             backupDestination = getBackupDestinationFromTransport(transportConnection);
-        } catch (TransportNotRegisteredException | TransportNotAvailableException
+        } catch (TransportNotRegisteredException
+                | TransportNotAvailableException
                 | RemoteException e) {
             BackupObserverUtils.sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
             mBackupManagerMonitorEventSender.monitorEvent(
-                    BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_IS_NULL,
-                    null, BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT, null);
+                    BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_IS_NULL, null,
+                    BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT, null);
             return BackupManager.ERROR_TRANSPORT_ABORTED;
         }
 
         OnTaskFinishedListener listener =
                 caller -> mTransportManager.disposeOfTransportClient(transportConnection, caller);
-        BackupEligibilityRules backupEligibilityRules = getEligibilityRulesForOperation(
-                backupDestination);
+        BackupEligibilityRules backupEligibilityRules =
+                getEligibilityRulesForOperation(backupDestination);
 
         Message msg = mBackupHandler.obtainMessage(MSG_REQUEST_BACKUP);
-        msg.obj = getRequestBackupParams(packages, observer, monitor, flags, backupEligibilityRules,
-                transportConnection, transportDirName, listener);
+        msg.obj =
+                getRequestBackupParams(
+                        packages,
+                        observer,
+                        monitor,
+                        flags,
+                        backupEligibilityRules,
+                        transportConnection,
+                        transportDirName,
+                        listener);
         mBackupHandler.sendMessage(msg);
         return BackupManager.SUCCESS;
     }
 
     @VisibleForTesting
-    BackupParams getRequestBackupParams(String[] packages, IBackupObserver observer,
-            IBackupManagerMonitor monitor, int flags, BackupEligibilityRules backupEligibilityRules,
-            TransportConnection transportConnection, String transportDirName,
+    BackupParams getRequestBackupParams(
+            String[] packages,
+            IBackupObserver observer,
+            IBackupManagerMonitor monitor,
+            int flags,
+            BackupEligibilityRules backupEligibilityRules,
+            TransportConnection transportConnection,
+            String transportDirName,
             OnTaskFinishedListener listener) {
         ArrayList<String> fullBackupList = new ArrayList<>();
         ArrayList<String> kvBackupList = new ArrayList<>();
@@ -1865,11 +1751,12 @@ public class UserBackupManagerService {
                 continue;
             }
             try {
-                PackageInfo packageInfo = mPackageManager.getPackageInfoAsUser(packageName,
-                        PackageManager.GET_SIGNING_CERTIFICATES, mUserId);
+                PackageInfo packageInfo =
+                        mPackageManager.getPackageInfoAsUser(
+                                packageName, PackageManager.GET_SIGNING_CERTIFICATES, mUserId);
                 if (!backupEligibilityRules.appIsEligibleForBackup(packageInfo.applicationInfo)) {
-                    BackupObserverUtils.sendBackupOnPackageResult(observer, packageName,
-                            BackupManager.ERROR_BACKUP_NOT_ALLOWED);
+                    BackupObserverUtils.sendBackupOnPackageResult(
+                            observer, packageName, BackupManager.ERROR_BACKUP_NOT_ALLOWED);
                     continue;
                 }
                 if (backupEligibilityRules.appGetsFullBackup(packageInfo)) {
@@ -1878,39 +1765,49 @@ public class UserBackupManagerService {
                     kvBackupList.add(packageInfo.packageName);
                 }
             } catch (NameNotFoundException e) {
-                BackupObserverUtils.sendBackupOnPackageResult(observer, packageName,
-                        BackupManager.ERROR_PACKAGE_NOT_FOUND);
+                BackupObserverUtils.sendBackupOnPackageResult(
+                        observer, packageName, BackupManager.ERROR_PACKAGE_NOT_FOUND);
             }
         }
 
-        EventLog.writeEvent(EventLogTags.BACKUP_REQUESTED, packages.length, kvBackupList.size(),
+        EventLog.writeEvent(
+                EventLogTags.BACKUP_REQUESTED,
+                packages.length,
+                kvBackupList.size(),
                 fullBackupList.size());
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.i(
                     TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "Backup requested for "
-                                    + packages.length
-                                    + " packages, of them: "
-                                    + fullBackupList.size()
-                                    + " full backups, "
-                                    + kvBackupList.size()
-                                    + " k/v backups"));
+                    mLogIdMsg
+                            + "Backup requested for "
+                            + packages.length
+                            + " packages, of them: "
+                            + fullBackupList.size()
+                            + " full backups, "
+                            + kvBackupList.size()
+                            + " k/v backups");
         }
 
         boolean nonIncrementalBackup = (flags & BackupManager.FLAG_NON_INCREMENTAL_BACKUP) != 0;
 
-        return new BackupParams(transportConnection, transportDirName, kvBackupList, fullBackupList,
-                observer, monitor, listener, /* userInitiated */ true, nonIncrementalBackup,
+        return new BackupParams(
+                transportConnection,
+                transportDirName,
+                kvBackupList,
+                fullBackupList,
+                observer,
+                monitor,
+                listener, /* userInitiated */
+                true,
+                nonIncrementalBackup,
                 backupEligibilityRules);
     }
 
     /** Cancel all running backups. */
     public void cancelBackups() {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "cancelBackups");
-        if (MORE_DEBUG) {
-            Slog.i(TAG, addUserIdToLogMessage(mUserId, "cancelBackups() called."));
+        if (DEBUG) {
+            Slog.i(TAG, mLogIdMsg + "cancelBackups() called.");
         }
         final long oldToken = Binder.clearCallingIdentity();
         try {
@@ -1918,14 +1815,24 @@ public class UserBackupManagerService {
                     mOperationStorage.operationTokensForOpType(OpType.BACKUP);
 
             for (Integer token : operationsToCancel) {
-                mOperationStorage.cancelOperation(token, /* cancelAll */ true,
-                        operationType -> { /* no callback needed here */ });
+                mOperationStorage.cancelOperation(
+                        token, /* cancelAll */
+                        true,
+                        operationType -> {
+                            /* no callback needed here */
+                        });
             }
             // We don't want the backup jobs to kick in any time soon.
             // Reschedules them to run in the distant future.
-            KeyValueBackupJob.schedule(mUserId, mContext, BUSY_BACKOFF_MIN_MILLIS,
+            KeyValueBackupJob.schedule(
+                    mUserId,
+                    mContext,
+                    BUSY_BACKOFF_MIN_MILLIS,
                     /* userBackupManagerService */ this);
-            FullBackupJob.schedule(mUserId, mContext, 2 * BUSY_BACKOFF_MIN_MILLIS,
+            FullBackupJob.schedule(
+                    mUserId,
+                    mContext,
+                    2 * BUSY_BACKOFF_MIN_MILLIS,
                     /* userBackupManagerService */ this);
         } finally {
             Binder.restoreCallingIdentity(oldToken);
@@ -1933,35 +1840,34 @@ public class UserBackupManagerService {
     }
 
     /** Schedule a timeout message for the operation identified by {@code token}. */
-    public void prepareOperationTimeout(int token, long interval, BackupRestoreTask callback,
-            int operationType) {
+    public void prepareOperationTimeout(
+            int token, long interval, BackupRestoreTask callback, int operationType) {
         if (operationType != OpType.BACKUP_WAIT && operationType != OpType.RESTORE_WAIT) {
             Slog.wtf(
                     TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "prepareOperationTimeout() doesn't support operation "
-                                    + Integer.toHexString(token)
-                                    + " of type "
-                                    + operationType));
+                    mLogIdMsg
+                            + "prepareOperationTimeout() doesn't support operation "
+                            + Integer.toHexString(token)
+                            + " of type "
+                            + operationType);
             return;
         }
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.v(
                     TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "starting timeout: token="
-                                    + Integer.toHexString(token)
-                                    + " interval="
-                                    + interval
-                                    + " callback="
-                                    + callback));
+                    mLogIdMsg
+                            + "starting timeout: token="
+                            + Integer.toHexString(token)
+                            + " interval="
+                            + interval
+                            + " callback="
+                            + callback);
         }
 
         mOperationStorage.registerOperation(token, OpState.PENDING, callback, operationType);
-        Message msg = mBackupHandler.obtainMessage(getMessageIdForOperationType(operationType),
-                token, 0, callback);
+        Message msg =
+                mBackupHandler.obtainMessage(
+                        getMessageIdForOperationType(operationType), token, 0, callback);
         mBackupHandler.sendMessageDelayed(msg, interval);
     }
 
@@ -1974,19 +1880,20 @@ public class UserBackupManagerService {
             default:
                 Slog.wtf(
                         TAG,
-                        addUserIdToLogMessage(
-                                mUserId,
-                                "getMessageIdForOperationType called on invalid operation type: "
-                                        + operationType));
+                        mLogIdMsg
+                                + "getMessageIdForOperationType called on invalid operation type: "
+                                + operationType);
                 return -1;
         }
     }
 
     /** Block until we received an operation complete message (from the agent or cancellation). */
     public boolean waitUntilOperationComplete(int token) {
-        return mOperationStorage.waitUntilOperationComplete(token, operationType -> {
-            mBackupHandler.removeMessages(getMessageIdForOperationType(operationType));
-        });
+        return mOperationStorage.waitUntilOperationComplete(
+                token,
+                operationType -> {
+                    mBackupHandler.removeMessages(getMessageIdForOperationType(operationType));
+                });
     }
 
     /** Cancel the operation associated with {@code token}. */
@@ -1994,11 +1901,15 @@ public class UserBackupManagerService {
         // Remove all pending timeout messages of types OpType.BACKUP_WAIT and
         // OpType.RESTORE_WAIT. On the other hand, OP_TYPE_BACKUP cannot time out and
         // doesn't require cancellation.
-        mOperationStorage.cancelOperation(token, cancelAll, operationType -> {
-            if (operationType == OpType.BACKUP_WAIT || operationType == OpType.RESTORE_WAIT) {
-                mBackupHandler.removeMessages(getMessageIdForOperationType(operationType));
-            }
-        });
+        mOperationStorage.cancelOperation(
+                token,
+                cancelAll,
+                operationType -> {
+                    if (operationType == OpType.BACKUP_WAIT
+                            || operationType == OpType.RESTORE_WAIT) {
+                        mBackupHandler.removeMessages(getMessageIdForOperationType(operationType));
+                    }
+                });
     }
 
     /** Returns {@code true} if a backup is currently running, else returns {@code false}. */
@@ -2008,9 +1919,7 @@ public class UserBackupManagerService {
 
     // ----- Full-data backup scheduling -----
 
-    /**
-     * Schedule a job to tell us when it's a good time to run a full backup
-     */
+    /** Schedule a job to tell us when it's a good time to run a full backup */
     public void scheduleNextFullBackupJob(long transportMinLatency) {
         synchronized (mQueueLock) {
             if (mFullBackupQueue.size() > 0) {
@@ -2022,22 +1931,15 @@ public class UserBackupManagerService {
                 final long interval = mConstants.getFullBackupIntervalMilliseconds();
                 final long appLatency = (timeSinceLast < interval) ? (interval - timeSinceLast) : 0;
                 final long latency = Math.max(transportMinLatency, appLatency);
-                FullBackupJob.schedule(mUserId, mContext, latency,
-                        /* userBackupManagerService */ this);
+                FullBackupJob.schedule(
+                        mUserId, mContext, latency, /* userBackupManagerService */ this);
             } else {
-                if (DEBUG_SCHEDULING) {
-                    Slog.i(
-                            TAG,
-                            addUserIdToLogMessage(
-                                    mUserId, "Full backup queue empty; not scheduling"));
-                }
+                Slog.i(TAG, mLogIdMsg + "Full backup queue empty; not scheduling");
             }
         }
     }
 
-    /**
-     * Remove a package from the full-data queue.
-     */
+    /** Remove a package from the full-data queue. */
     @GuardedBy("mQueueLock")
     private void dequeueFullBackupLocked(String packageName) {
         final int numPackages = mFullBackupQueue.size();
@@ -2049,9 +1951,7 @@ public class UserBackupManagerService {
         }
     }
 
-    /**
-     * Enqueue full backup for the given app, with a note about when it last ran.
-     */
+    /** Enqueue full backup for the given app, with a note about when it last ran. */
     public void enqueueFullBackup(String packageName, long lastBackedUp) {
         FullBackupEntry newEntry = new FullBackupEntry(packageName, lastBackedUp);
         synchronized (mQueueLock) {
@@ -2084,10 +1984,7 @@ public class UserBackupManagerService {
 
     private boolean fullBackupAllowable(String transportName) {
         if (!mTransportManager.isTransportRegistered(transportName)) {
-            Slog.w(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId, "Transport not registered; full data backup not performed"));
+            Slog.w(TAG, mLogIdMsg + "Transport not registered; full data backup not performed");
             return false;
         }
 
@@ -2098,20 +1995,11 @@ public class UserBackupManagerService {
             File stateDir = new File(mBaseStateDir, transportDirName);
             File pmState = new File(stateDir, PACKAGE_MANAGER_SENTINEL);
             if (pmState.length() <= 0) {
-                if (DEBUG) {
-                    Slog.i(
-                            TAG,
-                            addUserIdToLogMessage(
-                                    mUserId,
-                                    "Full backup requested but dataset not yet initialized"));
-                }
+                Slog.i(TAG, mLogIdMsg + "Full backup requested but dataset not yet initialized");
                 return false;
             }
         } catch (Exception e) {
-            Slog.w(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId, "Unable to get transport name: " + e.getMessage()));
+            Slog.w(TAG, mLogIdMsg + "Unable to get transport name: " + e.getMessage());
             return false;
         }
 
@@ -2119,14 +2007,14 @@ public class UserBackupManagerService {
     }
 
     /**
-     * Conditions are right for a full backup operation, so run one.  The model we use is
-     * to perform one app backup per scheduled job execution, and to reschedule the job
-     * with zero latency as long as conditions remain right and we still have work to do.
+     * Conditions are right for a full backup operation, so run one. The model we use is to perform
+     * one app backup per scheduled job execution, and to reschedule the job with zero latency as
+     * long as conditions remain right and we still have work to do.
      *
      * <p>This is the "start a full backup operation" entry point called by the scheduled job.
      *
-     * @return Whether ongoing work will continue.  The return value here will be passed
-     * along as the return value to the scheduled job's onStartJob() callback.
+     * @return Whether ongoing work will continue. The return value here will be passed along as the
+     *     return value to the scheduled job's onStartJob() callback.
      */
     public boolean beginFullBackup(FullBackupJob scheduledJob) {
         final long now = System.currentTimeMillis();
@@ -2143,42 +2031,35 @@ public class UserBackupManagerService {
             // Backups are globally disabled, so don't proceed.  We also don't reschedule
             // the job driving automatic backups; that job will be scheduled again when
             // the user enables backup.
-            if (MORE_DEBUG) {
-                Slog.i(TAG, addUserIdToLogMessage(mUserId, "beginFullBackup but enabled=" + mEnabled
-                        + " setupComplete=" + mSetupComplete + "; ignoring"));
+            if (DEBUG) {
+                Slog.i(
+                        TAG,
+                        mLogIdMsg
+                                + "beginFullBackup but enabled="
+                                + mEnabled
+                                + " setupComplete="
+                                + mSetupComplete
+                                + "; ignoring");
             }
             return false;
         }
 
         // Don't run the backup if we're in battery saver mode, but reschedule
         // to try again in the not-so-distant future.
-        final PowerSaveState result =
-                mPowerManager.getPowerSaveState(ServiceType.FULL_BACKUP);
+        final PowerSaveState result = mPowerManager.getPowerSaveState(ServiceType.FULL_BACKUP);
         if (result.batterySaverEnabled) {
-            if (DEBUG) {
-                Slog.i(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId, "Deferring scheduled full backups in battery saver mode"));
-            }
-            FullBackupJob.schedule(mUserId, mContext, keyValueBackupInterval,
-                    /* userBackupManagerService */ this);
+            Slog.i(TAG, mLogIdMsg + "Deferring scheduled full backups in battery saver mode");
+            FullBackupJob.schedule(
+                    mUserId, mContext, keyValueBackupInterval, /* userBackupManagerService */ this);
             return false;
         }
 
-        if (DEBUG_SCHEDULING) {
-            Slog.i(
-                    TAG,
-                    addUserIdToLogMessage(mUserId, "Beginning scheduled full backup operation"));
-        }
+        Slog.i(TAG, mLogIdMsg + "Beginning scheduled full backup operation");
 
         // Great; we're able to run full backup jobs now.  See if we have any work to do.
         synchronized (mQueueLock) {
             if (mRunningFullBackupTask != null) {
-                Slog.e(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId, "Backup triggered but one already/still running!"));
+                Slog.e(TAG, mLogIdMsg + "Backup triggered but one already/still running!");
                 return false;
             }
 
@@ -2193,12 +2074,7 @@ public class UserBackupManagerService {
                 // have emptied the queue.
                 if (mFullBackupQueue.size() == 0) {
                     // no work to do so just bow out
-                    if (DEBUG) {
-                        Slog.i(
-                                TAG,
-                                addUserIdToLogMessage(
-                                        mUserId, "Backup queue empty; doing nothing"));
-                    }
+                    Slog.i(TAG, mLogIdMsg + "Backup queue empty; doing nothing");
                     runBackup = false;
                     break;
                 }
@@ -2207,11 +2083,8 @@ public class UserBackupManagerService {
 
                 String transportName = mTransportManager.getCurrentTransportName();
                 if (!fullBackupAllowable(transportName)) {
-                    if (MORE_DEBUG) {
-                        Slog.i(
-                                TAG,
-                                addUserIdToLogMessage(
-                                        mUserId, "Preconditions not met; not running full backup"));
+                    if (DEBUG) {
+                        Slog.i(TAG, mLogIdMsg + "Preconditions not met; not running full backup");
                     }
                     runBackup = false;
                     // Typically this means we haven't run a key/value backup yet.  Back off
@@ -2226,34 +2099,31 @@ public class UserBackupManagerService {
                     runBackup = (timeSinceRun >= fullBackupInterval);
                     if (!runBackup) {
                         // It's too early to back up the next thing in the queue, so bow out
-                        if (MORE_DEBUG) {
+                        if (DEBUG) {
                             Slog.i(
                                     TAG,
-                                    addUserIdToLogMessage(
-                                            mUserId,
-                                            "Device ready but too early to back up next app"));
+                                    mLogIdMsg + "Device ready but too early to back up next app");
                         }
                         // Wait until the next app in the queue falls due for a full data backup
                         latency = fullBackupInterval - timeSinceRun;
-                        break;  // we know we aren't doing work yet, so bail.
+                        break; // we know we aren't doing work yet, so bail.
                     }
 
                     try {
-                        PackageInfo appInfo = mPackageManager.getPackageInfoAsUser(
-                                entry.packageName, 0, mUserId);
+                        PackageInfo appInfo =
+                                mPackageManager.getPackageInfoAsUser(entry.packageName, 0, mUserId);
                         if (!mScheduledBackupEligibility.appGetsFullBackup(appInfo)) {
                             // The head app isn't supposed to get full-data backups [any more];
                             // so we cull it and force a loop around to consider the new head
                             // app.
-                            if (MORE_DEBUG) {
+                            if (DEBUG) {
                                 Slog.i(
                                         TAG,
-                                        addUserIdToLogMessage(
-                                                mUserId,
-                                                "Culling package "
-                                                        + entry.packageName
-                                                        + " in full-backup queue but not"
-                                                        + " eligible"));
+                                        mLogIdMsg
+                                                + "Culling package "
+                                                + entry.packageName
+                                                + " in full-backup queue but not"
+                                                + " eligible");
                             }
                             mFullBackupQueue.remove(0);
                             headBusy = true; // force the while() condition
@@ -2261,25 +2131,24 @@ public class UserBackupManagerService {
                         }
 
                         final int privFlags = appInfo.applicationInfo.privateFlags;
-                        headBusy = (privFlags & PRIVATE_FLAG_BACKUP_IN_FOREGROUND) == 0
-                                && mActivityManagerInternal.isAppForeground(
-                                        appInfo.applicationInfo.uid);
+                        headBusy =
+                                (privFlags & PRIVATE_FLAG_BACKUP_IN_FOREGROUND) == 0
+                                        && mActivityManagerInternal.isAppForeground(
+                                                appInfo.applicationInfo.uid);
 
                         if (headBusy) {
-                            final long nextEligible = System.currentTimeMillis()
-                                    + BUSY_BACKOFF_MIN_MILLIS
-                                    + mTokenGenerator.nextInt(BUSY_BACKOFF_FUZZ);
-                            if (DEBUG_SCHEDULING) {
-                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                                Slog.i(
-                                        TAG,
-                                        addUserIdToLogMessage(
-                                                mUserId,
-                                                "Full backup time but "
-                                                        + entry.packageName
-                                                        + " is busy; deferring to "
-                                                        + sdf.format(new Date(nextEligible))));
-                            }
+                            final long nextEligible =
+                                    System.currentTimeMillis()
+                                            + BUSY_BACKOFF_MIN_MILLIS
+                                            + mTokenGenerator.nextInt(BUSY_BACKOFF_FUZZ);
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            Slog.i(
+                                    TAG,
+                                    mLogIdMsg
+                                            + "Full backup time but "
+                                            + entry.packageName
+                                            + " is busy; deferring to "
+                                            + sdf.format(new Date(nextEligible)));
                             // This relocates the app's entry from the head of the queue to
                             // its order-appropriate position further down, so upon looping
                             // a new candidate will be considered at the head.
@@ -2297,21 +2166,22 @@ public class UserBackupManagerService {
 
             if (runBackup) {
                 CountDownLatch latch = new CountDownLatch(1);
-                String[] pkg = new String[]{entry.packageName};
+                String[] pkg = new String[] {entry.packageName};
                 try {
-                    mRunningFullBackupTask = PerformFullTransportBackupTask.newWithCurrentTransport(
-                            this,
-                            mOperationStorage,
-                            /* observer */ null,
-                            pkg,
-                            /* updateSchedule */ true,
-                            scheduledJob,
-                            latch,
-                            /* backupObserver */ null,
-                            /* monitor */ null,
-                            /* userInitiated */ false,
-                            "BMS.beginFullBackup()",
-                            getEligibilityRulesForOperation(BackupDestination.CLOUD));
+                    mRunningFullBackupTask =
+                            PerformFullTransportBackupTask.newWithCurrentTransport(
+                                    this,
+                                    mOperationStorage,
+                                    /* observer */ null,
+                                    pkg,
+                                    /* updateSchedule */ true,
+                                    scheduledJob,
+                                    latch,
+                                    /* backupObserver */ null,
+                                    /* monitor */ null,
+                                    /* userInitiated */ false,
+                                    "BMS.beginFullBackup()",
+                                    getEligibilityRulesForOperation(BackupDestination.CLOUD));
                 } catch (IllegalStateException e) {
                     Slog.w(TAG, "Failed to start backup", e);
                     runBackup = false;
@@ -2319,17 +2189,15 @@ public class UserBackupManagerService {
             }
 
             if (!runBackup) {
-                if (DEBUG_SCHEDULING) {
-                    Slog.i(
-                            TAG,
-                            addUserIdToLogMessage(
-                                    mUserId,
-                                    "Nothing pending full backup or failed to start the "
-                                            + "operation; rescheduling +" + latency));
-                }
-                final long deferTime = latency;     // pin for the closure
-                FullBackupJob.schedule(mUserId, mContext, deferTime,
-                        /* userBackupManagerService */ this);
+                Slog.i(
+                        TAG,
+                        mLogIdMsg
+                                + "Nothing pending full backup or failed to start the "
+                                + "operation; rescheduling +"
+                                + latency);
+                final long deferTime = latency; // pin for the closure
+                FullBackupJob.schedule(
+                        mUserId, mContext, deferTime, /* userBackupManagerService */ this);
                 return false;
             }
 
@@ -2350,34 +2218,30 @@ public class UserBackupManagerService {
     public void endFullBackup() {
         // offload the mRunningFullBackupTask.handleCancel() call to another thread,
         // as we might have to wait for mCancelLock
-        Runnable endFullBackupRunnable = new Runnable() {
-            @Override
-            public void run() {
-                PerformFullTransportBackupTask pftbt = null;
-                synchronized (mQueueLock) {
-                    if (mRunningFullBackupTask != null) {
-                        pftbt = mRunningFullBackupTask;
+        Runnable endFullBackupRunnable =
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        PerformFullTransportBackupTask pftbt = null;
+                        synchronized (mQueueLock) {
+                            if (mRunningFullBackupTask != null) {
+                                pftbt = mRunningFullBackupTask;
+                            }
+                        }
+                        if (pftbt != null) {
+                            Slog.i(TAG, mLogIdMsg + "Telling running backup to stop");
+                            pftbt.handleCancel(true);
+                        }
                     }
-                }
-                if (pftbt != null) {
-                    if (DEBUG_SCHEDULING) {
-                        Slog.i(
-                                TAG,
-                                addUserIdToLogMessage(
-                                        mUserId, "Telling running backup to stop"));
-                    }
-                    pftbt.handleCancel(true);
-                }
-            }
-        };
+                };
         new Thread(endFullBackupRunnable, "end-full-backup").start();
     }
 
     /** Used by both incremental and full restore to restore widget data. */
     public void restoreWidgetData(String packageName, byte[] widgetData) {
         // Apply the restored widget state and generate the ID update for the app
-        if (MORE_DEBUG) {
-            Slog.i(TAG, addUserIdToLogMessage(mUserId, "Incorporating restored widget data"));
+        if (DEBUG) {
+            Slog.i(TAG, mLogIdMsg + "Incorporating restored widget data");
         }
         AppWidgetBackupBridge.restoreWidgetState(packageName, widgetData, mUserId);
     }
@@ -2395,13 +2259,12 @@ public class UserBackupManagerService {
         if (targets == null) {
             Slog.w(
                     TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "dataChanged but no participant pkg='"
-                                    + packageName
-                                    + "'"
-                                    + " uid="
-                                    + Binder.getCallingUid()));
+                    mLogIdMsg
+                            + "dataChanged but no participant pkg='"
+                            + packageName
+                            + "'"
+                            + " uid="
+                            + Binder.getCallingUid());
             return;
         }
 
@@ -2412,11 +2275,8 @@ public class UserBackupManagerService {
                 // one already there, then overwrite it, but no harm done.
                 BackupRequest req = new BackupRequest(packageName);
                 if (mPendingBackups.put(packageName, req) == null) {
-                    if (MORE_DEBUG) {
-                        Slog.d(
-                                TAG,
-                                addUserIdToLogMessage(
-                                        mUserId, "Now staging backup of " + packageName));
+                    if (DEBUG) {
+                        Slog.d(TAG, mLogIdMsg + "Now staging backup of " + packageName);
                     }
 
                     // Journal this request in case of crash.  The put()
@@ -2428,16 +2288,18 @@ public class UserBackupManagerService {
         }
 
         // ...and schedule a backup pass if necessary
-        KeyValueBackupJob.schedule(mUserId, mContext,
-                /* userBackupManagerService */ this);
+        KeyValueBackupJob.schedule(mUserId, mContext, /* userBackupManagerService */ this);
     }
 
     // Note: packageName is currently unused, but may be in the future
     private HashSet<String> dataChangedTargets(String packageName) {
         // If the caller does not hold the BACKUP permission, it can only request a
         // backup of its own data.
-        if ((mContext.checkPermission(android.Manifest.permission.BACKUP, Binder.getCallingPid(),
-                Binder.getCallingUid())) == PackageManager.PERMISSION_DENIED) {
+        if ((mContext.checkPermission(
+                        android.Manifest.permission.BACKUP,
+                        Binder.getCallingPid(),
+                        Binder.getCallingUid()))
+                == PackageManager.PERMISSION_DENIED) {
             synchronized (mBackupParticipants) {
                 return mBackupParticipants.get(Binder.getCallingUid());
             }
@@ -2458,10 +2320,7 @@ public class UserBackupManagerService {
             if (mJournal == null) mJournal = DataChangedJournal.newJournal(mJournalDir);
             mJournal.addPackage(str);
         } catch (IOException e) {
-            Slog.e(
-                    TAG,
-                    addUserIdToLogMessage(mUserId, "Can't write " + str + " to backup journal"),
-                    e);
+            Slog.e(TAG, mLogIdMsg + "Can't write " + str + " to backup journal", e);
             mJournal = null;
         }
     }
@@ -2474,31 +2333,28 @@ public class UserBackupManagerService {
         if (targets == null) {
             Slog.w(
                     TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "dataChanged but no participant pkg='"
-                                    + packageName
-                                    + "'"
-                                    + " uid="
-                                    + Binder.getCallingUid()));
+                    mLogIdMsg
+                            + "dataChanged but no participant pkg='"
+                            + packageName
+                            + "'"
+                            + " uid="
+                            + Binder.getCallingUid());
             return;
         }
 
-        mBackupHandler.post(new Runnable() {
-            public void run() {
-                dataChangedImpl(packageName, targets);
-            }
-        });
+        mBackupHandler.post(
+                new Runnable() {
+                    public void run() {
+                        dataChangedImpl(packageName, targets);
+                    }
+                });
     }
 
     /** Run an initialize operation for the given transport. */
     public void initializeTransports(String[] transportNames, IBackupObserver observer) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "initializeTransport");
-        Slog.v(
-                TAG,
-                addUserIdToLogMessage(
-                        mUserId, "initializeTransport(): " + Arrays.asList(transportNames)));
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "initializeTransport");
+        Slog.d(TAG, mLogIdMsg + "initializeTransport(): " + Arrays.asList(transportNames));
 
         final long oldId = Binder.clearCallingIdentity();
         try {
@@ -2511,32 +2367,23 @@ public class UserBackupManagerService {
         }
     }
 
-    /**
-     * Sets the work profile serial number of the ancestral work profile.
-     */
+    /** Sets the work profile serial number of the ancestral work profile. */
     public void setAncestralSerialNumber(long ancestralSerialNumber) {
-        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
-                "setAncestralSerialNumber");
-        Slog.v(
-                TAG,
-                addUserIdToLogMessage(
-                        mUserId, "Setting ancestral work profile id to " + ancestralSerialNumber));
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.BACKUP, "setAncestralSerialNumber");
+        Slog.d(TAG, mLogIdMsg + "Setting ancestral work profile id to " + ancestralSerialNumber);
 
         try (RandomAccessFile af =
                 new RandomAccessFile(getAncestralSerialNumberFile(), /* mode */ "rwd")) {
             af.writeLong(ancestralSerialNumber);
         } catch (IOException e) {
-            Slog.w(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId, "Unable to write to work profile serial mapping file:"),
-                    e);
+            Slog.w(TAG, mLogIdMsg + "Unable to write to work profile serial mapping file:", e);
         }
     }
 
     /**
-     * Returns the work profile serial number of the ancestral device. This will be set by
-     * {@link #setAncestralSerialNumber(long)}. Will return {@code -1} if not set.
+     * Returns the work profile serial number of the ancestral device. This will be set by {@link
+     * #setAncestralSerialNumber(long)}. Will return {@code -1} if not set.
      */
     public long getAncestralSerialNumber() {
         try (RandomAccessFile af =
@@ -2545,20 +2392,15 @@ public class UserBackupManagerService {
         } catch (FileNotFoundException e) {
             // It's OK not to have the file present, so we just return -1 to indicate no value.
         } catch (IOException e) {
-            Slog.w(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId, "Unable to read work profile serial number file:"),
-                    e);
+            Slog.w(TAG, mLogIdMsg + "Unable to read work profile serial number file:", e);
         }
         return -1;
     }
 
     private File getAncestralSerialNumberFile() {
         if (mAncestralSerialNumberFile == null) {
-            mAncestralSerialNumberFile = new File(
-                UserBackupManagerFiles.getBaseStateDir(getUserId()),
-                SERIAL_ID_FILE);
+            mAncestralSerialNumberFile =
+                    new File(UserBackupManagerFiles.getBaseStateDir(getUserId()), SERIAL_ID_FILE);
         }
         return mAncestralSerialNumberFile;
     }
@@ -2568,75 +2410,70 @@ public class UserBackupManagerService {
         mAncestralSerialNumberFile = ancestralSerialNumberFile;
     }
 
-
     /** Clear the given package's backup data from the current transport. */
     public void clearBackupData(String transportName, String packageName) {
-        if (DEBUG) {
-            Slog.v(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "clearBackupData() of " + packageName + " on " + transportName));
-        }
+        Slog.d(TAG, mLogIdMsg + "clearBackupData() of " + packageName + " on " + transportName);
 
         PackageInfo info;
         try {
-            info = mPackageManager.getPackageInfoAsUser(packageName,
-                    PackageManager.GET_SIGNING_CERTIFICATES, mUserId);
+            info =
+                    mPackageManager.getPackageInfoAsUser(
+                            packageName, PackageManager.GET_SIGNING_CERTIFICATES, mUserId);
         } catch (NameNotFoundException e) {
             Slog.d(
                     TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "No such package '" + packageName + "' - not clearing backup data"));
+                    mLogIdMsg + "No such package '" + packageName + "' - not clearing backup data");
             return;
         }
 
         // If the caller does not hold the BACKUP permission, it can only request a
         // wipe of its own backed-up data.
         Set<String> apps;
-        if ((mContext.checkPermission(android.Manifest.permission.BACKUP, Binder.getCallingPid(),
-                Binder.getCallingUid())) == PackageManager.PERMISSION_DENIED) {
+        if ((mContext.checkPermission(
+                        android.Manifest.permission.BACKUP,
+                        Binder.getCallingPid(),
+                        Binder.getCallingUid()))
+                == PackageManager.PERMISSION_DENIED) {
             apps = mBackupParticipants.get(Binder.getCallingUid());
         } else {
             // a caller with full permission can ask to back up any participating app
             // !!! TODO: allow data-clear of ANY app?
-            if (MORE_DEBUG) {
-                Slog.v(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId, "Privileged caller, allowing clear of other apps"));
+            if (DEBUG) {
+                Slog.v(TAG, mLogIdMsg + "Privileged caller, allowing clear of other apps");
             }
             apps = mProcessedPackagesJournal.getPackagesCopy();
         }
 
         if (apps.contains(packageName)) {
             // found it; fire off the clear request
-            if (MORE_DEBUG) {
-                Slog.v(
-                        TAG,
-                        addUserIdToLogMessage(mUserId, "Found the app - running clear process"));
+            if (DEBUG) {
+                Slog.v(TAG, mLogIdMsg + "Found the app - running clear process");
             }
             mBackupHandler.removeMessages(MSG_RETRY_CLEAR);
             synchronized (mQueueLock) {
                 TransportConnection transportConnection =
-                        mTransportManager
-                                .getTransportClient(transportName, "BMS.clearBackupData()");
+                        mTransportManager.getTransportClient(
+                                transportName, "BMS.clearBackupData()");
                 if (transportConnection == null) {
                     // transport is currently unregistered -- make sure to retry
-                    Message msg = mBackupHandler.obtainMessage(MSG_RETRY_CLEAR,
-                            new ClearRetryParams(transportName, packageName));
+                    Message msg =
+                            mBackupHandler.obtainMessage(
+                                    MSG_RETRY_CLEAR,
+                                    new ClearRetryParams(transportName, packageName));
                     mBackupHandler.sendMessageDelayed(msg, TRANSPORT_RETRY_INTERVAL);
                     return;
                 }
                 final long oldId = Binder.clearCallingIdentity();
                 try {
-                    OnTaskFinishedListener listener = caller -> mTransportManager
-                            .disposeOfTransportClient(transportConnection, caller);
+                    OnTaskFinishedListener listener =
+                            caller ->
+                                    mTransportManager.disposeOfTransportClient(
+                                            transportConnection, caller);
                     mWakelock.acquire();
-                    Message msg = mBackupHandler.obtainMessage(
-                            MSG_RUN_CLEAR,
-                            new ClearParams(transportConnection, info, listener));
+                    Message msg =
+                            mBackupHandler.obtainMessage(
+                                    MSG_RUN_CLEAR,
+                                    new ClearParams(transportConnection, info, listener));
                     mBackupHandler.sendMessage(msg);
                 } finally {
                     Binder.restoreCallingIdentity(oldId);
@@ -2657,37 +2494,24 @@ public class UserBackupManagerService {
             final PowerSaveState result =
                     mPowerManager.getPowerSaveState(ServiceType.KEYVALUE_BACKUP);
             if (result.batterySaverEnabled) {
-                if (DEBUG) {
-                    Slog.v(
-                            TAG,
-                            addUserIdToLogMessage(
-                                    mUserId, "Not running backup while in battery save mode"));
-                }
+                Slog.d(TAG, mLogIdMsg + "Not running backup while in battery save mode");
                 // Try again in several hours.
-                KeyValueBackupJob.schedule(mUserId, mContext,
-                        /* userBackupManagerService */ this);
+                KeyValueBackupJob.schedule(mUserId, mContext, /* userBackupManagerService */ this);
             } else {
-                if (DEBUG) {
-                    Slog.v(TAG, addUserIdToLogMessage(mUserId, "Scheduling immediate backup pass"));
-                }
+                Slog.d(TAG, mLogIdMsg + "Scheduling immediate backup pass");
 
                 synchronized (getQueueLock()) {
                     if (getPendingInits().size() > 0) {
                         // If there are pending init operations, we process those and then settle
                         // into the usual periodic backup schedule.
-                        if (MORE_DEBUG) {
-                            Slog.v(
-                                    TAG,
-                                    addUserIdToLogMessage(
-                                            mUserId, "Init pending at scheduled backup"));
+                        if (DEBUG) {
+                            Slog.v(TAG, mLogIdMsg + "Init pending at scheduled backup");
                         }
                         try {
                             getAlarmManager().cancel(mRunInitIntent);
                             mRunInitIntent.send();
                         } catch (PendingIntent.CanceledException ce) {
-                            Slog.w(
-                                    TAG,
-                                    addUserIdToLogMessage(mUserId, "Run init intent cancelled"));
+                            Slog.w(TAG, mLogIdMsg + "Run init intent cancelled");
                         }
                         return;
                     }
@@ -2697,8 +2521,11 @@ public class UserBackupManagerService {
                 if (!isEnabled() || !isSetupComplete()) {
                     Slog.w(
                             TAG,
-                            addUserIdToLogMessage(mUserId, "Backup pass but enabled="  + isEnabled()
-                                    + " setupComplete=" + isSetupComplete()));
+                            mLogIdMsg
+                                    + "Backup pass but enabled="
+                                    + isEnabled()
+                                    + " setupComplete="
+                                    + isSetupComplete());
                     return;
                 }
 
@@ -2719,9 +2546,17 @@ public class UserBackupManagerService {
      * return to the caller until the backup has been completed. It requires on-screen confirmation
      * by the user.
      */
-    public void adbBackup(ParcelFileDescriptor fd, boolean includeApks,
-            boolean includeObbs, boolean includeShared, boolean doWidgets, boolean doAllApps,
-            boolean includeSystem, boolean compress, boolean doKeyValue, String[] pkgList) {
+    public void adbBackup(
+            ParcelFileDescriptor fd,
+            boolean includeApks,
+            boolean includeObbs,
+            boolean includeShared,
+            boolean doWidgets,
+            boolean doAllApps,
+            boolean includeSystem,
+            boolean compress,
+            boolean doKeyValue,
+            String[] pkgList) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "adbBackup");
 
         final int callingUserHandle = UserHandle.getCallingUserId();
@@ -2745,68 +2580,66 @@ public class UserBackupManagerService {
         final long oldId = Binder.clearCallingIdentity();
         try {
             if (!mSetupComplete) {
-                Slog.i(TAG, addUserIdToLogMessage(mUserId, "Backup not supported before setup"));
+                Slog.i(TAG, mLogIdMsg + "Backup not supported before setup");
                 return;
             }
 
-            if (DEBUG) {
-                Slog.v(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId,
-                                "Requesting backup: apks="
-                                        + includeApks
-                                        + " obb="
-                                        + includeObbs
-                                        + " shared="
-                                        + includeShared
-                                        + " all="
-                                        + doAllApps
-                                        + " system="
-                                        + includeSystem
-                                        + " includekeyvalue="
-                                        + doKeyValue
-                                        + " pkgs="
-                                        + Arrays.toString(pkgList)));
-            }
-            Slog.i(TAG, addUserIdToLogMessage(mUserId, "Beginning adb backup..."));
+            Slog.d(
+                    TAG,
+                    mLogIdMsg
+                            + "Requesting backup: apks="
+                            + includeApks
+                            + " obb="
+                            + includeObbs
+                            + " shared="
+                            + includeShared
+                            + " all="
+                            + doAllApps
+                            + " system="
+                            + includeSystem
+                            + " includekeyvalue="
+                            + doKeyValue
+                            + " pkgs="
+                            + Arrays.toString(pkgList));
+            Slog.i(TAG, mLogIdMsg + "Beginning adb backup...");
 
-            BackupEligibilityRules eligibilityRules = getEligibilityRulesForOperation(
-                    BackupDestination.ADB_BACKUP);
-            AdbBackupParams params = new AdbBackupParams(fd, includeApks, includeObbs,
-                    includeShared, doWidgets, doAllApps, includeSystem, compress, doKeyValue,
-                    pkgList, eligibilityRules);
+            BackupEligibilityRules eligibilityRules =
+                    getEligibilityRulesForOperation(BackupDestination.ADB_BACKUP);
+            AdbBackupParams params =
+                    new AdbBackupParams(
+                            fd,
+                            includeApks,
+                            includeObbs,
+                            includeShared,
+                            doWidgets,
+                            doAllApps,
+                            includeSystem,
+                            compress,
+                            doKeyValue,
+                            pkgList,
+                            eligibilityRules);
             final int token = generateRandomIntegerToken();
             synchronized (mAdbBackupRestoreConfirmations) {
                 mAdbBackupRestoreConfirmations.put(token, params);
             }
 
             // start up the confirmation UI
-            if (DEBUG) {
-                Slog.d(
-                        TAG,
-                        addUserIdToLogMessage(mUserId, "Starting backup confirmation UI"));
-            }
+            Slog.d(TAG, mLogIdMsg + "Starting backup confirmation UI");
             if (!startConfirmationUi(token, FullBackup.FULL_BACKUP_INTENT_ACTION)) {
-                Slog.e(
-                        TAG,
-                        addUserIdToLogMessage(mUserId, "Unable to launch backup confirmation UI"));
+                Slog.e(TAG, mLogIdMsg + "Unable to launch backup confirmation UI");
                 mAdbBackupRestoreConfirmations.delete(token);
                 return;
             }
 
             // make sure the screen is lit for the user interaction
-            mPowerManager.userActivity(SystemClock.uptimeMillis(),
-                    PowerManager.USER_ACTIVITY_EVENT_OTHER,
-                    0);
+            mPowerManager.userActivity(
+                    SystemClock.uptimeMillis(), PowerManager.USER_ACTIVITY_EVENT_OTHER, 0);
 
             // start the confirmation countdown
             startConfirmationTimeout(token, params);
 
             // wait for the backup to be performed
-            if (DEBUG) {
-                Slog.d(TAG, addUserIdToLogMessage(mUserId, "Waiting for backup completion..."));
-            }
+            Slog.d(TAG, mLogIdMsg + "Waiting for backup completion...");
             waitForCompletion(params);
         } finally {
             try {
@@ -2814,19 +2647,17 @@ public class UserBackupManagerService {
             } catch (IOException e) {
                 Slog.e(
                         TAG,
-                        addUserIdToLogMessage(
-                                mUserId,
-                                "IO error closing output for adb backup: " + e.getMessage()));
+                        mLogIdMsg + "IO error closing output for adb backup: " + e.getMessage());
             }
             Binder.restoreCallingIdentity(oldId);
-            Slog.d(TAG, addUserIdToLogMessage(mUserId, "Adb backup processing complete."));
+            Slog.d(TAG, mLogIdMsg + "Adb backup processing complete.");
         }
     }
 
     /** Run a full backup pass for the given packages. Used by 'adb shell bmgr'. */
     public void fullTransportBackup(String[] pkgNames) {
-        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
-                "fullTransportBackup");
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.BACKUP, "fullTransportBackup");
         final int callingUserHandle = UserHandle.getCallingUserId();
         // TODO: http://b/22388012
         if (callingUserHandle != UserHandle.USER_SYSTEM) {
@@ -2835,32 +2666,27 @@ public class UserBackupManagerService {
 
         String transportName = mTransportManager.getCurrentTransportName();
         if (!fullBackupAllowable(transportName)) {
-            Slog.i(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "Full backup not currently possible -- key/value backup not yet run?"));
+            Slog.i(TAG, mLogIdMsg + "Full backup not possible. Key/value backup not yet run?");
         } else {
-            if (DEBUG) {
-                Slog.d(TAG, addUserIdToLogMessage(mUserId, "fullTransportBackup()"));
-            }
+            Slog.d(TAG, mLogIdMsg + "fullTransportBackup()");
 
             final long oldId = Binder.clearCallingIdentity();
             try {
                 CountDownLatch latch = new CountDownLatch(1);
-                Runnable task = PerformFullTransportBackupTask.newWithCurrentTransport(
-                        this,
-                        mOperationStorage,
-                        /* observer */ null,
-                        pkgNames,
-                        /* updateSchedule */ false,
-                        /* runningJob */ null,
-                        latch,
-                        /* backupObserver */ null,
-                        /* monitor */ null,
-                        /* userInitiated */ false,
-                        "BMS.fullTransportBackup()",
-                        getEligibilityRulesForOperation(BackupDestination.CLOUD));
+                Runnable task =
+                        PerformFullTransportBackupTask.newWithCurrentTransport(
+                                this,
+                                mOperationStorage,
+                                /* observer */ null,
+                                pkgNames,
+                                /* updateSchedule */ false,
+                                /* runningJob */ null,
+                                latch,
+                                /* backupObserver */ null,
+                                /* monitor */ null,
+                                /* userInitiated */ false,
+                                "BMS.fullTransportBackup()",
+                                getEligibilityRulesForOperation(BackupDestination.CLOUD));
                 // Acquiring wakelock for PerformFullTransportBackupTask before its start.
                 mWakelock.acquire();
                 (new Thread(task, "full-transport-master")).start();
@@ -2886,9 +2712,7 @@ public class UserBackupManagerService {
             }
         }
 
-        if (DEBUG) {
-            Slog.d(TAG, addUserIdToLogMessage(mUserId, "Done with full transport backup."));
-        }
+        Slog.d(TAG, mLogIdMsg + "Done with full transport backup.");
     }
 
     /**
@@ -2907,13 +2731,11 @@ public class UserBackupManagerService {
 
         try {
             if (!mSetupComplete) {
-                Slog.i(
-                        TAG,
-                        addUserIdToLogMessage(mUserId, "Full restore not permitted before setup"));
+                Slog.i(TAG, mLogIdMsg + "Full restore not permitted before setup");
                 return;
             }
 
-            Slog.i(TAG, addUserIdToLogMessage(mUserId, "Beginning restore..."));
+            Slog.i(TAG, mLogIdMsg + "Beginning restore...");
 
             AdbRestoreParams params = new AdbRestoreParams(fd);
             final int token = generateRandomIntegerToken();
@@ -2922,44 +2744,31 @@ public class UserBackupManagerService {
             }
 
             // start up the confirmation UI
-            if (DEBUG) {
-                Slog.d(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId, "Starting restore confirmation UI, token=" + token));
-            }
+            Slog.d(TAG, mLogIdMsg + "Starting restore confirmation UI, token=" + token);
             if (!startConfirmationUi(token, FullBackup.FULL_RESTORE_INTENT_ACTION)) {
-                Slog.e(
-                        TAG,
-                        addUserIdToLogMessage(mUserId, "Unable to launch restore confirmation"));
+                Slog.e(TAG, mLogIdMsg + "Unable to launch restore confirmation");
                 mAdbBackupRestoreConfirmations.delete(token);
                 return;
             }
 
             // make sure the screen is lit for the user interaction
-            mPowerManager.userActivity(SystemClock.uptimeMillis(),
-                    PowerManager.USER_ACTIVITY_EVENT_OTHER,
-                    0);
+            mPowerManager.userActivity(
+                    SystemClock.uptimeMillis(), PowerManager.USER_ACTIVITY_EVENT_OTHER, 0);
 
             // start the confirmation countdown
             startConfirmationTimeout(token, params);
 
             // wait for the restore to be performed
-            if (DEBUG) {
-                Slog.d(TAG, addUserIdToLogMessage(mUserId, "Waiting for restore completion..."));
-            }
+            Slog.d(TAG, mLogIdMsg + "Waiting for restore completion...");
             waitForCompletion(params);
         } finally {
             try {
                 fd.close();
             } catch (IOException e) {
-                Slog.w(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId, "Error trying to close fd after adb restore: " + e));
+                Slog.w(TAG, mLogIdMsg + "Error trying to close fd after adb restore: " + e);
             }
             Binder.restoreCallingIdentity(oldId);
-            Slog.i(TAG, addUserIdToLogMessage(mUserId, "adb restore processing complete."));
+            Slog.i(TAG, mLogIdMsg + "adb restore processing complete.");
         }
     }
 
@@ -2968,13 +2777,14 @@ public class UserBackupManagerService {
      * to the backup agent during restore.
      */
     public void excludeKeysFromRestore(String packageName, List<String> keys) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "excludeKeysFromRestore");
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "excludeKeysFromRestore");
         mBackupPreferences.addExcludedKeys(packageName, keys);
     }
 
-    public void reportDelayedRestoreResult(String packageName,
-            List<BackupRestoreEventLogger.DataTypeResult> results) {
+    /** See {@link BackupManager#reportDelayedRestoreResult(BackupRestoreEventLogger)}. */
+    public void reportDelayedRestoreResult(
+            String packageName, List<BackupRestoreEventLogger.DataTypeResult> results) {
         String transport = mTransportManager.getCurrentTransportName();
         if (transport == null) {
             Slog.w(TAG, "Failed to send delayed restore logs as no transport selected");
@@ -2983,26 +2793,34 @@ public class UserBackupManagerService {
 
         TransportConnection transportConnection = null;
         try {
-            PackageInfo packageInfo = getPackageManager().getPackageInfoAsUser(packageName,
-                    PackageManager.PackageInfoFlags.of(/* value */ 0), getUserId());
+            PackageInfo packageInfo =
+                    getPackageManager()
+                            .getPackageInfoAsUser(
+                                    packageName,
+                                    PackageManager.PackageInfoFlags.of(/* value */ 0),
+                                    getUserId());
 
-            transportConnection = mTransportManager.getTransportClientOrThrow(
-                    transport, /* caller */"BMS.reportDelayedRestoreResult");
-            BackupTransportClient transportClient = transportConnection.connectOrThrow(
-                    /* caller */ "BMS.reportDelayedRestoreResult");
+            transportConnection =
+                    mTransportManager.getTransportClientOrThrow(
+                            transport, /* caller */ "BMS.reportDelayedRestoreResult");
+            BackupTransportClient transportClient =
+                    transportConnection.connectOrThrow(
+                            /* caller */ "BMS.reportDelayedRestoreResult");
 
             IBackupManagerMonitor monitor = transportClient.getBackupManagerMonitor();
-            BackupManagerMonitorEventSender  mBackupManagerMonitorEventSender =
+            BackupManagerMonitorEventSender mBackupManagerMonitorEventSender =
                     getBMMEventSender(monitor);
-            mBackupManagerMonitorEventSender.sendAgentLoggingResults(packageInfo, results,
-                    BackupAnnotations.OperationType.RESTORE);
-        } catch (NameNotFoundException | TransportNotAvailableException
-                | TransportNotRegisteredException | RemoteException e) {
+            mBackupManagerMonitorEventSender.sendAgentLoggingResults(
+                    packageInfo, results, BackupAnnotations.OperationType.RESTORE);
+        } catch (NameNotFoundException
+                | TransportNotAvailableException
+                | TransportNotRegisteredException
+                | RemoteException e) {
             Slog.w(TAG, "Failed to send delayed restore logs: " + e);
         } finally {
             if (transportConnection != null) {
-                mTransportManager.disposeOfTransportClient(transportConnection,
-                        /* caller */"BMS.reportDelayedRestoreResult");
+                mTransportManager.disposeOfTransportClient(
+                        transportConnection, /* caller */ "BMS.reportDelayedRestoreResult");
             }
         }
     }
@@ -3010,7 +2828,8 @@ public class UserBackupManagerService {
     private boolean startConfirmationUi(int token, String action) {
         try {
             Intent confIntent = new Intent(action);
-            confIntent.setClassName("com.android.backupconfirm",
+            confIntent.setClassName(
+                    "com.android.backupconfirm",
                     "com.android.backupconfirm.BackupRestoreConfirmation");
             confIntent.putExtra(FullBackup.CONF_TOKEN_INTENT_EXTRA, token);
             confIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -3022,12 +2841,15 @@ public class UserBackupManagerService {
     }
 
     private void startConfirmationTimeout(int token, AdbParams params) {
-        if (MORE_DEBUG) {
-            Slog.d(TAG, addUserIdToLogMessage(mUserId, "Posting conf timeout msg after "
-                    + TIMEOUT_FULL_CONFIRMATION + " millis"));
+        if (DEBUG) {
+            Slog.d(
+                    TAG,
+                    mLogIdMsg
+                            + "Posting conf timeout msg after "
+                            + TIMEOUT_FULL_CONFIRMATION
+                            + " millis");
         }
-        Message msg = mBackupHandler.obtainMessage(MSG_FULL_CONFIRMATION_TIMEOUT,
-                token, 0, params);
+        Message msg = mBackupHandler.obtainMessage(MSG_FULL_CONFIRMATION_TIMEOUT, token, 0, params);
         mBackupHandler.sendMessageDelayed(msg, TIMEOUT_FULL_CONFIRMATION);
     }
 
@@ -3036,7 +2858,9 @@ public class UserBackupManagerService {
             while (!params.latch.get()) {
                 try {
                     params.latch.wait();
-                } catch (InterruptedException e) { /* never interrupted */ }
+                } catch (InterruptedException e) {
+                    /* never interrupted */
+                }
             }
         }
     }
@@ -3053,20 +2877,20 @@ public class UserBackupManagerService {
      * Confirm that the previously-requested full backup/restore operation can proceed. This is used
      * to require a user-facing disclosure about the operation.
      */
-    public void acknowledgeAdbBackupOrRestore(int token, boolean allow,
-            String curPassword, String encPpassword, IFullBackupRestoreObserver observer) {
-        if (DEBUG) {
-            Slog.d(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "acknowledgeAdbBackupOrRestore : token=" + token + " allow=" + allow));
-        }
+    public void acknowledgeAdbBackupOrRestore(
+            int token,
+            boolean allow,
+            String curPassword,
+            String encPpassword,
+            IFullBackupRestoreObserver observer) {
+        Slog.d(
+                TAG,
+                mLogIdMsg + "acknowledgeAdbBackupOrRestore : token=" + token + " allow=" + allow);
 
         // TODO: possibly require not just this signature-only permission, but even
         // require that the specific designated confirmation-UI app uid is the caller?
-        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
-                "acknowledgeAdbBackupOrRestore");
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.BACKUP, "acknowledgeAdbBackupOrRestore");
 
         final long oldId = Binder.clearCallingIdentity();
         try {
@@ -3079,38 +2903,31 @@ public class UserBackupManagerService {
                     mAdbBackupRestoreConfirmations.delete(token);
 
                     if (allow) {
-                        final int verb = params instanceof AdbBackupParams
-                                ? MSG_RUN_ADB_BACKUP
-                                : MSG_RUN_ADB_RESTORE;
+                        final int verb =
+                                params instanceof AdbBackupParams
+                                        ? MSG_RUN_ADB_BACKUP
+                                        : MSG_RUN_ADB_RESTORE;
 
                         params.observer = observer;
                         params.curPassword = curPassword;
 
                         params.encryptPassword = encPpassword;
 
-                        if (MORE_DEBUG) {
-                            Slog.d(
-                                    TAG,
-                                    addUserIdToLogMessage(
-                                            mUserId, "Sending conf message with verb " + verb));
+                        if (DEBUG) {
+                            Slog.d(TAG, mLogIdMsg + "Sending conf message with verb " + verb);
                         }
                         mWakelock.acquire();
                         Message msg = mBackupHandler.obtainMessage(verb, params);
                         mBackupHandler.sendMessage(msg);
                     } else {
-                        Slog.w(
-                                TAG,
-                                addUserIdToLogMessage(
-                                        mUserId, "User rejected full backup/restore operation"));
+                        Slog.w(TAG, mLogIdMsg + "User rejected full backup/restore operation");
                         // indicate completion without having actually transferred any data
                         signalAdbBackupRestoreCompletion(params);
                     }
                 } else {
                     Slog.w(
                             TAG,
-                            addUserIdToLogMessage(
-                                    mUserId,
-                                    "Attempted to ack full backup/restore with invalid token"));
+                            mLogIdMsg + "Attempted to ack full backup/restore with invalid token");
                 }
             }
         } finally {
@@ -3129,10 +2946,10 @@ public class UserBackupManagerService {
     }
 
     private void setBackupEnabled(boolean enable, boolean persistToDisk) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "setBackupEnabled");
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "setBackupEnabled");
 
-        Slog.i(TAG, addUserIdToLogMessage(mUserId, "Backup enabled => " + enable));
+        Slog.i(TAG, mLogIdMsg + "Backup enabled => " + enable);
 
         final long oldId = Binder.clearCallingIdentity();
         try {
@@ -3151,23 +2968,25 @@ public class UserBackupManagerService {
     }
 
     synchronized void setFrameworkSchedulingEnabled(boolean isEnabled) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "setFrameworkSchedulingEnabled");
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "setFrameworkSchedulingEnabled");
 
         boolean wasEnabled = isFrameworkSchedulingEnabled();
         if (wasEnabled == isEnabled) {
             return;
         }
 
-        Slog.i(TAG, addUserIdToLogMessage(mUserId,
-                (isEnabled ? "Enabling" : "Disabling") + " backup scheduling"));
+        Slog.i(TAG, mLogIdMsg + (isEnabled ? "Enabling" : "Disabling") + " backup scheduling");
 
         final long oldId = Binder.clearCallingIdentity();
         try {
             // TODO(b/264889098): Consider at a later point if we should us a sentinel file as
             // setBackupEnabled.
-            Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.BACKUP_SCHEDULING_ENABLED, isEnabled ? 1 : 0, mUserId);
+            Settings.Secure.putIntForUser(
+                    mContext.getContentResolver(),
+                    Settings.Secure.BACKUP_SCHEDULING_ENABLED,
+                    isEnabled ? 1 : 0,
+                    mUserId);
 
             if (!isEnabled) {
                 KeyValueBackupJob.cancel(mUserId, mContext);
@@ -3184,8 +3003,12 @@ public class UserBackupManagerService {
     synchronized boolean isFrameworkSchedulingEnabled() {
         // By default scheduling is enabled
         final int defaultSetting = 1;
-        int isEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.BACKUP_SCHEDULING_ENABLED, defaultSetting, mUserId);
+        int isEnabled =
+                Settings.Secure.getIntForUser(
+                        mContext.getContentResolver(),
+                        Settings.Secure.BACKUP_SCHEDULING_ENABLED,
+                        defaultSetting,
+                        mUserId);
         return isEnabled == 1;
     }
 
@@ -3198,8 +3021,8 @@ public class UserBackupManagerService {
                 scheduleNextFullBackupJob(0);
             } else if (!enable) {
                 // No longer enabled, so stop running backups
-                if (MORE_DEBUG) {
-                    Slog.i(TAG, addUserIdToLogMessage(mUserId, "Opting out of backup"));
+                if (DEBUG) {
+                    Slog.i(TAG, mLogIdMsg + "Opting out of backup");
                 }
 
                 KeyValueBackupJob.cancel(mUserId, mContext);
@@ -3219,11 +3042,7 @@ public class UserBackupManagerService {
                                     dirName = mTransportManager.getTransportDirName(name);
                                 } catch (TransportNotRegisteredException e) {
                                     // Should never happen
-                                    Slog.e(
-                                            TAG,
-                                            addUserIdToLogMessage(
-                                                    mUserId, "Unexpected unregistered transport"),
-                                            e);
+                                    Slog.e(TAG, mLogIdMsg + "Unexpected unregistered transport", e);
                                     return;
                                 }
                                 transportNames.add(name);
@@ -3232,13 +3051,10 @@ public class UserBackupManagerService {
 
                     // build the set of transports for which we are posting an init
                     for (int i = 0; i < transportNames.size(); i++) {
-                        recordInitPending(
-                                true,
-                                transportNames.get(i),
-                                transportDirNames.get(i));
+                        recordInitPending(true, transportNames.get(i), transportDirNames.get(i));
                     }
-                    mAlarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
-                            mRunInitIntent);
+                    mAlarmManager.set(
+                            AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), mRunInitIntent);
                 }
             }
         }
@@ -3256,16 +3072,19 @@ public class UserBackupManagerService {
 
     /** Enable/disable automatic restore of app data at install time. */
     public void setAutoRestore(boolean doAutoRestore) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "setAutoRestore");
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "setAutoRestore");
 
-        Slog.i(TAG, addUserIdToLogMessage(mUserId, "Auto restore => " + doAutoRestore));
+        Slog.i(TAG, mLogIdMsg + "Auto restore => " + doAutoRestore);
 
         final long oldId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.BACKUP_AUTO_RESTORE, doAutoRestore ? 1 : 0, mUserId);
+                Settings.Secure.putIntForUser(
+                        mContext.getContentResolver(),
+                        Settings.Secure.BACKUP_AUTO_RESTORE,
+                        doAutoRestore ? 1 : 0,
+                        mUserId);
                 mAutoRestore = doAutoRestore;
             }
         } finally {
@@ -3275,21 +3094,18 @@ public class UserBackupManagerService {
 
     /** Report whether the backup mechanism is currently enabled. */
     public boolean isBackupEnabled() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "isBackupEnabled");
-        return mEnabled;    // no need to synchronize just to read it
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "isBackupEnabled");
+        return mEnabled; // no need to synchronize just to read it
     }
 
     /** Report the name of the currently active transport. */
     public String getCurrentTransport() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "getCurrentTransport");
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "getCurrentTransport");
         String currentTransport = mTransportManager.getCurrentTransportName();
-        if (MORE_DEBUG) {
-            Slog.v(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId, "... getCurrentTransport() returning " + currentTransport));
+        if (DEBUG) {
+            Slog.v(TAG, mLogIdMsg + "... getCurrentTransport() returning " + currentTransport);
         }
         return currentTransport;
     }
@@ -3314,16 +3130,16 @@ public class UserBackupManagerService {
 
     /** Report all known, available backup transports by name. */
     public String[] listAllTransports() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "listAllTransports");
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "listAllTransports");
 
         return mTransportManager.getRegisteredTransportNames();
     }
 
     /** Report all known, available backup transports by component. */
     public ComponentName[] listAllTransportComponents() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "listAllTransportComponents");
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "listAllTransportComponents");
         return mTransportManager.getRegisteredTransportComponents();
     }
 
@@ -3336,18 +3152,17 @@ public class UserBackupManagerService {
      * @param transportComponent The identity of the transport being described.
      * @param name A {@link String} with the new name for the transport. This is NOT for
      *     identification. MUST NOT be {@code null}.
-     * @param configurationIntent An {@link Intent} that can be passed to
-     *     {@link Context#startActivity} in order to launch the transport's configuration UI. It may
-     *     be {@code null} if the transport does not offer any user-facing configuration UI.
+     * @param configurationIntent An {@link Intent} that can be passed to {@link
+     *     Context#startActivity} in order to launch the transport's configuration UI. It may be
+     *     {@code null} if the transport does not offer any user-facing configuration UI.
      * @param currentDestinationString A {@link String} describing the destination to which the
      *     transport is currently sending data. MUST NOT be {@code null}.
-     * @param dataManagementIntent An {@link Intent} that can be passed to
-     *     {@link Context#startActivity} in order to launch the transport's data-management UI. It
-     *     may be {@code null} if the transport does not offer any user-facing data
-     *     management UI.
+     * @param dataManagementIntent An {@link Intent} that can be passed to {@link
+     *     Context#startActivity} in order to launch the transport's data-management UI. It may be
+     *     {@code null} if the transport does not offer any user-facing data management UI.
      * @param dataManagementLabel A {@link CharSequence} to be used as the label for the transport's
-     *     data management affordance. This MUST be {@code null} when dataManagementIntent is
-     *     {@code null} and MUST NOT be {@code null} when dataManagementIntent is not {@code null}.
+     *     data management affordance. This MUST be {@code null} when dataManagementIntent is {@code
+     *     null} and MUST NOT be {@code null} when dataManagementIntent is not {@code null}.
      * @throws SecurityException If the UID of the calling process differs from the package UID of
      *     {@code transportComponent} or if the caller does NOT have BACKUP permission.
      */
@@ -3382,8 +3197,7 @@ public class UserBackupManagerService {
 
         Objects.requireNonNull(transportComponent, "transportComponent can't be null");
         Objects.requireNonNull(name, "name can't be null");
-        Objects.requireNonNull(
-                currentDestinationString, "currentDestinationString can't be null");
+        Objects.requireNonNull(currentDestinationString, "currentDestinationString can't be null");
         Preconditions.checkArgument(
                 (dataManagementIntent == null) == (dataManagementLabel == null),
                 "dataManagementLabel should be null iff dataManagementIntent is null");
@@ -3418,7 +3232,7 @@ public class UserBackupManagerService {
      * selected transport. Returns {@code null} if the transport is not registered.
      *
      * @deprecated Use {@link #selectBackupTransportAsync(ComponentName,
-     * ISelectBackupTransportCallback)} instead.
+     *     ISelectBackupTransportCallback)} instead.
      */
     @Deprecated
     @Nullable
@@ -3429,26 +3243,24 @@ public class UserBackupManagerService {
         final long oldId = Binder.clearCallingIdentity();
         try {
             if (!mTransportManager.isTransportRegistered(transportName)) {
-                Slog.v(
+                Slog.d(
                         TAG,
-                        addUserIdToLogMessage(
-                                mUserId,
-                                "Could not select transport "
-                                        + transportName
-                                        + ", as the transport is not registered."));
+                        mLogIdMsg
+                                + "Could not select transport "
+                                + transportName
+                                + ", as the transport is not registered.");
                 return null;
             }
 
             String previousTransportName = mTransportManager.selectTransport(transportName);
             updateStateForTransport(transportName);
-            Slog.v(
+            Slog.d(
                     TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "selectBackupTransport(transport = "
-                                    + transportName
-                                    + "): previous transport = "
-                                    + previousTransportName));
+                    mLogIdMsg
+                            + "selectBackupTransport(transport = "
+                            + transportName
+                            + "): previous transport = "
+                            + previousTransportName);
             return previousTransportName;
         } finally {
             Binder.restoreCallingIdentity(oldId);
@@ -3467,11 +3279,9 @@ public class UserBackupManagerService {
         final long oldId = Binder.clearCallingIdentity();
         try {
             String transportString = transportComponent.flattenToShortString();
-            Slog.v(
+            Slog.d(
                     TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "selectBackupTransportAsync(transport = " + transportString + ")"));
+                    mLogIdMsg + "selectBackupTransportAsync(transport = " + transportString + ")");
             mBackupHandler.post(
                     () -> {
                         String transportName = null;
@@ -3483,10 +3293,7 @@ public class UserBackupManagerService {
                                         mTransportManager.getTransportName(transportComponent);
                                 updateStateForTransport(transportName);
                             } catch (TransportNotRegisteredException e) {
-                                Slog.e(
-                                        TAG,
-                                        addUserIdToLogMessage(
-                                                mUserId, "Transport got unregistered"));
+                                Slog.e(TAG, mLogIdMsg + "Transport got unregistered");
                                 result = BackupManager.ERROR_TRANSPORT_UNAVAILABLE;
                             }
                         }
@@ -3500,10 +3307,9 @@ public class UserBackupManagerService {
                         } catch (RemoteException e) {
                             Slog.e(
                                     TAG,
-                                    addUserIdToLogMessage(
-                                            mUserId,
-                                            "ISelectBackupTransportCallback listener not"
-                                                + " available"));
+                                    mLogIdMsg
+                                            + "ISelectBackupTransportCallback listener not"
+                                            + " available");
                         }
                     });
         } finally {
@@ -3513,8 +3319,11 @@ public class UserBackupManagerService {
 
     private void updateStateForTransport(String newTransportName) {
         // Publish the name change
-        Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                Settings.Secure.BACKUP_TRANSPORT, newTransportName, mUserId);
+        Settings.Secure.putStringForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.BACKUP_TRANSPORT,
+                newTransportName,
+                mUserId);
 
         // And update our current-dataset bookkeeping
         String callerLogString = "BMS.updateStateForTransport()";
@@ -3522,8 +3331,8 @@ public class UserBackupManagerService {
                 mTransportManager.getTransportClient(newTransportName, callerLogString);
         if (transportConnection != null) {
             try {
-                BackupTransportClient transport = transportConnection.connectOrThrow(
-                        callerLogString);
+                BackupTransportClient transport =
+                        transportConnection.connectOrThrow(callerLogString);
                 mCurrentToken = transport.getCurrentRestoreSet();
             } catch (Exception e) {
                 // Oops.  We can't know the current dataset token, so reset and figure it out
@@ -3531,21 +3340,19 @@ public class UserBackupManagerService {
                 mCurrentToken = 0;
                 Slog.w(
                         TAG,
-                        addUserIdToLogMessage(
-                                mUserId,
-                                "Transport "
-                                        + newTransportName
-                                        + " not available: current token = 0"));
+                        mLogIdMsg
+                                + "Transport "
+                                + newTransportName
+                                + " not available: current token = 0");
             }
             mTransportManager.disposeOfTransportClient(transportConnection, callerLogString);
         } else {
             Slog.w(
                     TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "Transport "
-                                    + newTransportName
-                                    + " not registered: current token = 0"));
+                    mLogIdMsg
+                            + "Transport "
+                            + newTransportName
+                            + " not registered: current token = 0");
             // The named transport isn't registered, so we can't know what its current dataset token
             // is. Reset as above.
             mCurrentToken = 0;
@@ -3558,24 +3365,20 @@ public class UserBackupManagerService {
      * returns {@code null}.
      */
     public Intent getConfigurationIntent(String transportName) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "getConfigurationIntent");
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "getConfigurationIntent");
         try {
             Intent intent = mTransportManager.getTransportConfigurationIntent(transportName);
-            if (MORE_DEBUG) {
-                Slog.d(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId, "getConfigurationIntent() returning intent " + intent));
+            if (DEBUG) {
+                Slog.d(TAG, mLogIdMsg + "getConfigurationIntent() returning intent " + intent);
             }
             return intent;
         } catch (TransportNotRegisteredException e) {
             Slog.e(
                     TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "Unable to get configuration intent from transport: "
-                                    + e.getMessage()));
+                    mLogIdMsg
+                            + "Unable to get configuration intent from transport: "
+                            + e.getMessage());
             return null;
         }
     }
@@ -3595,43 +3398,37 @@ public class UserBackupManagerService {
 
         try {
             String string = mTransportManager.getTransportCurrentDestinationString(transportName);
-            if (MORE_DEBUG) {
-                Slog.d(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId, "getDestinationString() returning " + string));
+            if (DEBUG) {
+                Slog.d(TAG, mLogIdMsg + "getDestinationString() returning " + string);
             }
             return string;
         } catch (TransportNotRegisteredException e) {
             Slog.e(
                     TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "Unable to get destination string from transport: " + e.getMessage()));
+                    mLogIdMsg
+                            + "Unable to get destination string from transport: "
+                            + e.getMessage());
             return null;
         }
     }
 
     /** Supply the manage-data intent for the given transport. */
     public Intent getDataManagementIntent(String transportName) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "getDataManagementIntent");
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "getDataManagementIntent");
 
         try {
             Intent intent = mTransportManager.getTransportDataManagementIntent(transportName);
-            if (MORE_DEBUG) {
-                Slog.d(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId, "getDataManagementIntent() returning intent " + intent));
+            if (DEBUG) {
+                Slog.d(TAG, mLogIdMsg + "getDataManagementIntent() returning intent " + intent);
             }
             return intent;
         } catch (TransportNotRegisteredException e) {
             Slog.e(
                     TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "Unable to get management intent from transport: " + e.getMessage()));
+                    mLogIdMsg
+                            + "Unable to get management intent from transport: "
+                            + e.getMessage());
             return null;
         }
     }
@@ -3641,24 +3438,19 @@ public class UserBackupManagerService {
      * transport.
      */
     public CharSequence getDataManagementLabel(String transportName) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "getDataManagementLabel");
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "getDataManagementLabel");
 
         try {
             CharSequence label = mTransportManager.getTransportDataManagementLabel(transportName);
-            if (MORE_DEBUG) {
-                Slog.d(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId, "getDataManagementLabel() returning " + label));
+            if (DEBUG) {
+                Slog.d(TAG, mLogIdMsg + "getDataManagementLabel() returning " + label);
             }
             return label;
         } catch (TransportNotRegisteredException e) {
             Slog.e(
                     TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "Unable to get management label from transport: " + e.getMessage()));
+                    mLogIdMsg + "Unable to get management label from transport: " + e.getMessage());
             return null;
         }
     }
@@ -3671,70 +3463,64 @@ public class UserBackupManagerService {
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
             Slog.w(
                     TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "Non-system process uid="
-                                    + Binder.getCallingUid()
-                                    + " attemping install-time restore"));
+                    mLogIdMsg
+                            + "Non-system process uid="
+                            + Binder.getCallingUid()
+                            + " attemping install-time restore");
             return;
         }
 
         boolean skip = false;
 
         long restoreSet = getAvailableRestoreToken(packageName);
-        if (DEBUG) {
-            Slog.v(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "restoreAtInstall pkg="
-                                    + packageName
-                                    + " token="
-                                    + Integer.toHexString(token)
-                                    + " restoreSet="
-                                    + Long.toHexString(restoreSet)));
-        }
+        Slog.d(
+                TAG,
+                mLogIdMsg
+                        + "restoreAtInstall pkg="
+                        + packageName
+                        + " token="
+                        + Integer.toHexString(token)
+                        + " restoreSet="
+                        + Long.toHexString(restoreSet));
         if (restoreSet == 0) {
-            if (MORE_DEBUG) Slog.i(TAG, addUserIdToLogMessage(mUserId, "No restore set"));
+            if (DEBUG) Slog.i(TAG, mLogIdMsg + "No restore set");
             skip = true;
         }
 
-        BackupManagerMonitorEventSender  mBMMEventSender =
-                getBMMEventSender(/*monitor=*/ null);
+        BackupManagerMonitorEventSender mBMMEventSender = getBMMEventSender(/* monitor= */ null);
         PackageInfo packageInfo = getPackageInfoForBMMLogging(packageName);
         TransportConnection transportConnection =
                 mTransportManager.getCurrentTransportClient("BMS.restoreAtInstall()");
         if (transportConnection == null) {
-            if (DEBUG) Slog.w(TAG, addUserIdToLogMessage(mUserId, "No transport client"));
+            Slog.w(TAG, mLogIdMsg + "No transport client");
             skip = true;
         } else if (Flags.enableIncreasedBmmLoggingForRestoreAtInstall()) {
             try {
-                BackupTransportClient transportClient = transportConnection.connectOrThrow(
-                        "BMS.restoreAtInstall");
+                BackupTransportClient transportClient =
+                        transportConnection.connectOrThrow("BMS.restoreAtInstall");
                 mBMMEventSender.setMonitor(transportClient.getBackupManagerMonitor());
             } catch (TransportNotAvailableException | RemoteException e) {
                 mBMMEventSender.monitorEvent(
-                        BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_IS_NULL, packageInfo,
-                        BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT, null);
+                        BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_IS_NULL,
+                        packageInfo,
+                        BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT,
+                        null);
             }
         }
 
         if (Flags.enableIncreasedBmmLoggingForRestoreAtInstall()) {
             mBMMEventSender.monitorEvent(
-                    BackupManagerMonitor.LOG_EVENT_ID_RESTORE_AT_INSTALL_INVOKED, packageInfo,
+                    BackupManagerMonitor.LOG_EVENT_ID_RESTORE_AT_INSTALL_INVOKED,
+                    packageInfo,
                     BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                    mBMMEventSender.putMonitoringExtra(/*extras=*/null,
+                    mBMMEventSender.putMonitoringExtra(
+                            /* extras= */ null,
                             BackupManagerMonitor.EXTRA_LOG_OPERATION_TYPE,
                             BackupAnnotations.OperationType.RESTORE));
         }
 
         if (!mAutoRestore) {
-            if (DEBUG) {
-                Slog.w(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId, "Non-restorable state: auto=" + mAutoRestore));
-            }
+            Slog.w(TAG, mLogIdMsg + "Non-restorable state: auto=" + mAutoRestore);
             skip = true;
         }
 
@@ -3746,15 +3532,14 @@ public class UserBackupManagerService {
 
                 mWakelock.acquire();
 
-                OnTaskFinishedListener listener = caller -> {
-                    mTransportManager.disposeOfTransportClient(transportConnection, caller);
-                    mWakelock.release();
-                };
+                OnTaskFinishedListener listener =
+                        caller -> {
+                            mTransportManager.disposeOfTransportClient(transportConnection, caller);
+                            mWakelock.release();
+                        };
 
-                if (MORE_DEBUG) {
-                    Slog.d(
-                            TAG,
-                            addUserIdToLogMessage(mUserId, "Restore at install of " + packageName));
+                if (DEBUG) {
+                    Slog.d(TAG, mLogIdMsg + "Restore at install of " + packageName);
                 }
                 Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
                 msg.obj =
@@ -3770,10 +3555,7 @@ public class UserBackupManagerService {
                 mBackupHandler.sendMessage(msg);
             } catch (Exception e) {
                 // Calling into the transport broke; back off and proceed with the installation.
-                Slog.e(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId, "Unable to contact transport: " + e.getMessage()));
+                Slog.e(TAG, mLogIdMsg + "Unable to contact transport: " + e.getMessage());
                 skip = true;
             }
         }
@@ -3783,9 +3565,11 @@ public class UserBackupManagerService {
 
             if (Flags.enableIncreasedBmmLoggingForRestoreAtInstall()) {
                 mBMMEventSender.monitorEvent(
-                        BackupManagerMonitor.LOG_EVENT_ID_SKIP_RESTORE_AT_INSTALL, packageInfo,
+                        BackupManagerMonitor.LOG_EVENT_ID_SKIP_RESTORE_AT_INSTALL,
+                        packageInfo,
                         BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                        mBMMEventSender.putMonitoringExtra(/*extras=*/null,
+                        mBMMEventSender.putMonitoringExtra(
+                                /* extras= */ null,
                                 BackupManagerMonitor.EXTRA_LOG_OPERATION_TYPE,
                                 BackupAnnotations.OperationType.RESTORE));
             }
@@ -3796,10 +3580,12 @@ public class UserBackupManagerService {
             }
 
             // Tell the PackageManager to proceed with the post-install handling for this package.
-            if (DEBUG) Slog.v(TAG, addUserIdToLogMessage(mUserId, "Finishing install immediately"));
+            Slog.d(TAG, mLogIdMsg + "Finishing install immediately");
             try {
                 mPackageManagerBinder.finishPackageInstall(token, false);
-            } catch (RemoteException e) { /* can't happen */ }
+            } catch (RemoteException e) {
+                /* can't happen */
+            }
         }
     }
 
@@ -3812,13 +3598,9 @@ public class UserBackupManagerService {
 
     /** Hand off a restore session. */
     public IRestoreSession beginRestoreSession(String packageName, String transport) {
-        if (DEBUG) {
-            Slog.v(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "beginRestoreSession: pkg=" + packageName + " transport=" + transport));
-        }
+        Slog.d(
+                TAG,
+                mLogIdMsg + "beginRestoreSession: pkg=" + packageName + " transport=" + transport);
 
         boolean needPermission = true;
         if (transport == null) {
@@ -3829,10 +3611,7 @@ public class UserBackupManagerService {
                 try {
                     app = mPackageManager.getPackageInfoAsUser(packageName, 0, mUserId);
                 } catch (NameNotFoundException nnf) {
-                    Slog.w(
-                            TAG,
-                            addUserIdToLogMessage(
-                                    mUserId, "Asked to restore nonexistent pkg " + packageName));
+                    Slog.w(TAG, mLogIdMsg + "Asked to restore nonexistent pkg " + packageName);
                     throw new IllegalArgumentException("Package " + packageName + " not found");
                 }
 
@@ -3849,51 +3628,45 @@ public class UserBackupManagerService {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.BACKUP, "beginRestoreSession");
         } else {
-            if (DEBUG) {
-                Slog.d(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId,
-                                "restoring self on current transport; no permission needed"));
-            }
+            Slog.d(TAG, mLogIdMsg + "restoring self on current transport; no permission needed");
         }
 
         int backupDestination;
         TransportConnection transportConnection = null;
         try {
-            transportConnection = mTransportManager.getTransportClientOrThrow(
-                    transport, /* caller */"BMS.beginRestoreSession");
+            transportConnection =
+                    mTransportManager.getTransportClientOrThrow(
+                            transport, /* caller */ "BMS.beginRestoreSession");
             backupDestination = getBackupDestinationFromTransport(transportConnection);
-        } catch (TransportNotAvailableException | TransportNotRegisteredException
+        } catch (TransportNotAvailableException
+                | TransportNotRegisteredException
                 | RemoteException e) {
             Slog.w(TAG, "Failed to get operation type from transport: " + e);
             return null;
         } finally {
             if (transportConnection != null) {
-                mTransportManager.disposeOfTransportClient(transportConnection,
-                        /* caller */"BMS.beginRestoreSession");
+                mTransportManager.disposeOfTransportClient(
+                        transportConnection, /* caller */ "BMS.beginRestoreSession");
             }
         }
 
         synchronized (this) {
             if (mActiveRestoreSession != null) {
-                Slog.i(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId, "Restore session requested but one already active"));
+                Slog.i(TAG, mLogIdMsg + "Restore session requested but one already active");
                 return null;
             }
             if (mBackupRunning) {
-                Slog.i(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId,
-                                "Restore session requested but currently running backups"));
+                Slog.i(TAG, mLogIdMsg + "Restore session requested but currently running backups");
                 return null;
             }
-            mActiveRestoreSession = new ActiveRestoreSession(this, packageName, transport,
-                    getEligibilityRulesForOperation(backupDestination));
-            mBackupHandler.sendEmptyMessageDelayed(MSG_RESTORE_SESSION_TIMEOUT,
+            mActiveRestoreSession =
+                    new ActiveRestoreSession(
+                            this,
+                            packageName,
+                            transport,
+                            getEligibilityRulesForOperation(backupDestination));
+            mBackupHandler.sendEmptyMessageDelayed(
+                    MSG_RESTORE_SESSION_TIMEOUT,
                     mAgentTimeoutParameters.getRestoreSessionTimeoutMillis());
         }
         return mActiveRestoreSession;
@@ -3903,14 +3676,9 @@ public class UserBackupManagerService {
     public void clearRestoreSession(ActiveRestoreSession currentSession) {
         synchronized (this) {
             if (currentSession != mActiveRestoreSession) {
-                Slog.e(TAG, addUserIdToLogMessage(mUserId, "ending non-current restore session"));
+                Slog.e(TAG, mLogIdMsg + "ending non-current restore session");
             } else {
-                if (DEBUG) {
-                    Slog.v(
-                            TAG,
-                            addUserIdToLogMessage(
-                                    mUserId, "Clearing restore session and halting timeout"));
-                }
+                Slog.d(TAG, mLogIdMsg + "Clearing restore session and halting timeout");
                 mActiveRestoreSession = null;
                 mBackupHandler.removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
             }
@@ -3922,11 +3690,14 @@ public class UserBackupManagerService {
      * outstanding asynchronous backup/restore operation.
      */
     public void opComplete(int token, long result) {
-        mOperationStorage.onOperationComplete(token, result, callback -> {
-            Pair<BackupRestoreTask, Long> callbackAndResult = Pair.create(callback, result);
-            Message msg = mBackupHandler.obtainMessage(MSG_OP_COMPLETE, callbackAndResult);
-            mBackupHandler.sendMessage(msg);
-        });
+        mOperationStorage.onOperationComplete(
+                token,
+                result,
+                callback -> {
+                    Pair<BackupRestoreTask, Long> callbackAndResult = Pair.create(callback, result);
+                    Message msg = mBackupHandler.obtainMessage(MSG_OP_COMPLETE, callbackAndResult);
+                    mBackupHandler.sendMessage(msg);
+                });
     }
 
     /** Checks if the package is eligible for backup. */
@@ -3982,10 +3753,16 @@ public class UserBackupManagerService {
         return getEligibilityRules(mPackageManager, mUserId, mContext, backupDestination);
     }
 
-    private static BackupEligibilityRules getEligibilityRules(PackageManager packageManager,
-            int userId, Context context, @BackupDestination int backupDestination) {
-        return new BackupEligibilityRules(packageManager,
-                LocalServices.getService(PackageManagerInternal.class), userId, context,
+    private static BackupEligibilityRules getEligibilityRules(
+            PackageManager packageManager,
+            int userId,
+            Context context,
+            @BackupDestination int backupDestination) {
+        return new BackupEligibilityRules(
+                packageManager,
+                LocalServices.getService(PackageManagerInternal.class),
+                userId,
+                context,
                 backupDestination);
     }
 
@@ -4027,20 +3804,20 @@ public class UserBackupManagerService {
     }
 
     private void dumpBMMEvents(PrintWriter pw) {
-        BackupManagerMonitorDumpsysUtils bm =
-                new BackupManagerMonitorDumpsysUtils();
+        BackupManagerMonitorDumpsysUtils bm = new BackupManagerMonitorDumpsysUtils();
         if (bm.deleteExpiredBMMEvents()) {
             pw.println("BACKUP MANAGER MONITOR EVENTS HAVE EXPIRED");
             return;
         }
         File events = bm.getBMMEventsFile();
-        if (events.length() == 0){
+        if (events.length() == 0) {
             // We have not recorded BMMEvents yet.
             pw.println("NO BACKUP MANAGER MONITOR EVENTS");
             return;
-        } else if (bm.isFileLargerThanSizeLimit(events)){
-            pw.println("BACKUP MANAGER MONITOR EVENTS FILE OVER SIZE LIMIT - "
-                    + "future events will not be recorded");
+        } else if (bm.isFileLargerThanSizeLimit(events)) {
+            pw.println(
+                    "BACKUP MANAGER MONITOR EVENTS FILE OVER SIZE LIMIT - "
+                            + "future events will not be recorded");
         }
         pw.println("START OF BACKUP MANAGER MONITOR EVENTS");
         try (BufferedReader reader = new BufferedReader(new FileReader(events))) {
@@ -4060,16 +3837,27 @@ public class UserBackupManagerService {
         // Add prefix for only non-system users so that system user dumpsys is the same as before
         String userPrefix = mUserId == UserHandle.USER_SYSTEM ? "" : "User " + mUserId + ":";
         synchronized (mQueueLock) {
-            pw.println(userPrefix + "Backup Manager is " + (mEnabled ? "enabled" : "disabled")
-                    + " / " + (!mSetupComplete ? "not " : "") + "setup complete / "
-                    + (this.mPendingInits.size() == 0 ? "not " : "") + "pending init");
+            pw.println(
+                    userPrefix
+                            + "Backup Manager is "
+                            + (mEnabled ? "enabled" : "disabled")
+                            + " / "
+                            + (!mSetupComplete ? "not " : "")
+                            + "setup complete / "
+                            + (this.mPendingInits.size() == 0 ? "not " : "")
+                            + "pending init");
             pw.println("Auto-restore is " + (mAutoRestore ? "enabled" : "disabled"));
             if (mBackupRunning) pw.println("Backup currently running");
             pw.println(isBackupOperationInProgress() ? "Backup in progress" : "No backups running");
-            pw.println("Framework scheduling is "
-                    + (isFrameworkSchedulingEnabled() ? "enabled" : "disabled"));
-            pw.println("Last backup pass started: " + mLastBackupPass
-                    + " (now = " + System.currentTimeMillis() + ')');
+            pw.println(
+                    "Framework scheduling is "
+                            + (isFrameworkSchedulingEnabled() ? "enabled" : "disabled"));
+            pw.println(
+                    "Last backup pass started: "
+                            + mLastBackupPass
+                            + " (now = "
+                            + System.currentTimeMillis()
+                            + ')');
             pw.println("  next scheduled: " + KeyValueBackupJob.nextScheduled(mUserId));
 
             pw.println(userPrefix + "Transport whitelist:");
@@ -4082,21 +3870,27 @@ public class UserBackupManagerService {
             final String[] transports = listAllTransports();
             if (transports != null) {
                 for (String t : transports) {
-                    pw.println((t.equals(mTransportManager.getCurrentTransportName()) ? "  * "
-                            : "    ") + t);
+                    pw.println(
+                            (t.equals(mTransportManager.getCurrentTransportName())
+                                            ? "  * "
+                                            : "    ")
+                                    + t);
                     try {
-                        File dir = new File(mBaseStateDir,
-                                mTransportManager.getTransportDirName(t));
-                        pw.println("       destination: "
-                                + mTransportManager.getTransportCurrentDestinationString(t));
-                        pw.println("       intent: "
-                                + mTransportManager.getTransportConfigurationIntent(t));
+                        File dir =
+                                new File(mBaseStateDir, mTransportManager.getTransportDirName(t));
+                        pw.println(
+                                "       destination: "
+                                        + mTransportManager.getTransportCurrentDestinationString(
+                                                t));
+                        pw.println(
+                                "       intent: "
+                                        + mTransportManager.getTransportConfigurationIntent(t));
                         for (File f : dir.listFiles()) {
                             pw.println(
                                     "       " + f.getName() + " - " + f.length() + " state bytes");
                         }
                     } catch (Exception e) {
-                        Slog.e(TAG, addUserIdToLogMessage(mUserId, "Error in transport"), e);
+                        Slog.e(TAG, mLogIdMsg + "Error in transport", e);
                         pw.println("        Error: " + e);
                     }
                 }
@@ -4126,8 +3920,10 @@ public class UserBackupManagerService {
                 }
             }
 
-            pw.println(userPrefix + "Ancestral packages: "
-                    + (mAncestralPackages == null ? "none" : mAncestralPackages.size()));
+            pw.println(
+                    userPrefix
+                            + "Ancestral packages: "
+                            + (mAncestralPackages == null ? "none" : mAncestralPackages.size()));
             if (mAncestralPackages != null) {
                 for (String pkg : mAncestralPackages) {
                     pw.println("    " + pkg);
@@ -4153,29 +3949,35 @@ public class UserBackupManagerService {
                 pw.println(entry.packageName);
             }
             pw.println(userPrefix + "Agent timeouts:");
-            pw.println("    KvBackupAgentTimeoutMillis: "
-                    + mAgentTimeoutParameters.getKvBackupAgentTimeoutMillis());
-            pw.println("    FullBackupAgentTimeoutMillis: "
-                    + mAgentTimeoutParameters.getFullBackupAgentTimeoutMillis());
-            pw.println("    SharedBackupAgentTimeoutMillis: "
-                    + mAgentTimeoutParameters.getSharedBackupAgentTimeoutMillis());
-            pw.println("    RestoreAgentTimeoutMillis (system): "
-                    + mAgentTimeoutParameters.getRestoreAgentTimeoutMillis(
-                    Process.FIRST_APPLICATION_UID - 1));
-            pw.println("    RestoreAgentTimeoutMillis: "
-                    + mAgentTimeoutParameters.getRestoreAgentTimeoutMillis(
-                    Process.FIRST_APPLICATION_UID));
-            pw.println("    RestoreAgentFinishedTimeoutMillis: "
-                    + mAgentTimeoutParameters.getRestoreAgentFinishedTimeoutMillis());
-            pw.println("    QuotaExceededTimeoutMillis: "
-                    + mAgentTimeoutParameters.getQuotaExceededTimeoutMillis());
-
+            pw.println(
+                    "    KvBackupAgentTimeoutMillis: "
+                            + mAgentTimeoutParameters.getKvBackupAgentTimeoutMillis());
+            pw.println(
+                    "    FullBackupAgentTimeoutMillis: "
+                            + mAgentTimeoutParameters.getFullBackupAgentTimeoutMillis());
+            pw.println(
+                    "    SharedBackupAgentTimeoutMillis: "
+                            + mAgentTimeoutParameters.getSharedBackupAgentTimeoutMillis());
+            pw.println(
+                    "    RestoreAgentTimeoutMillis (system): "
+                            + mAgentTimeoutParameters.getRestoreAgentTimeoutMillis(
+                                    Process.FIRST_APPLICATION_UID - 1));
+            pw.println(
+                    "    RestoreAgentTimeoutMillis: "
+                            + mAgentTimeoutParameters.getRestoreAgentTimeoutMillis(
+                                    Process.FIRST_APPLICATION_UID));
+            pw.println(
+                    "    RestoreAgentFinishedTimeoutMillis: "
+                            + mAgentTimeoutParameters.getRestoreAgentFinishedTimeoutMillis());
+            pw.println(
+                    "    QuotaExceededTimeoutMillis: "
+                            + mAgentTimeoutParameters.getQuotaExceededTimeoutMillis());
         }
     }
 
     @VisibleForTesting
-    @BackupDestination int getBackupDestinationFromTransport(
-            TransportConnection transportConnection)
+    @BackupDestination
+    int getBackupDestinationFromTransport(TransportConnection transportConnection)
             throws TransportNotAvailableException, RemoteException {
         if (!shouldUseNewBackupEligibilityRules()) {
             // Return the default to stick to the legacy behaviour.
@@ -4184,8 +3986,9 @@ public class UserBackupManagerService {
 
         final long oldCallingId = Binder.clearCallingIdentity();
         try {
-            BackupTransportClient transport = transportConnection.connectOrThrow(
-                    /* caller */ "BMS.getBackupDestinationFromTransport");
+            BackupTransportClient transport =
+                    transportConnection.connectOrThrow(
+                            /* caller */ "BMS.getBackupDestinationFromTransport");
             if ((transport.getTransportFlags() & BackupAgent.FLAG_DEVICE_TO_DEVICE_TRANSFER) != 0) {
                 return BackupDestination.DEVICE_TRANSFER;
             } else {
@@ -4198,14 +4001,9 @@ public class UserBackupManagerService {
 
     @VisibleForTesting
     boolean shouldUseNewBackupEligibilityRules() {
-        return FeatureFlagUtils.isEnabled(mContext,
-                FeatureFlagUtils.SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES);
+        return FeatureFlagUtils.isEnabled(
+                mContext, FeatureFlagUtils.SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES);
     }
-
-    private static String addUserIdToLogMessage(int userId, String message) {
-        return "[UserID:" + userId + "] " + message;
-    }
-
 
     public IBackupManager getBackupManagerBinder() {
         return mBackupManagerBinder;

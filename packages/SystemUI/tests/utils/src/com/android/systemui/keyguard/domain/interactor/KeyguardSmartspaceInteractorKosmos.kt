@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.keyguard.data.repository.keyguardSmartspaceRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 var Kosmos.keyguardSmartspaceInteractor by Fixture {
     KeyguardSmartspaceInteractor(

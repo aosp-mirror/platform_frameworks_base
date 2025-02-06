@@ -23,6 +23,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import androidx.preference.PreferenceViewHolder;
+import androidx.test.core.app.ApplicationProvider;
 
 import com.android.settingslib.widget.mainswitch.R;
 
@@ -30,19 +31,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
 public class MainSwitchPreferenceTest {
 
-    private Context mContext;
+    private final Context mContext = ApplicationProvider.getApplicationContext();
     private View mRootView;
     private PreferenceViewHolder mHolder;
     private MainSwitchPreference mPreference;
 
     @Before
     public void setUp() {
-        mContext = RuntimeEnvironment.application;
         mRootView = View.inflate(mContext, R.layout.settingslib_main_switch_layout,
                 null /* parent */);
         mHolder = PreferenceViewHolder.createInstanceForTests(mRootView);
@@ -50,23 +49,22 @@ public class MainSwitchPreferenceTest {
     }
 
     @Test
-    public void setTitle_shouldUpdateTitle() {
+    public void onBindViewHolder_title() {
         final String defaultOnText = "Test title";
 
-        mPreference.onBindViewHolder(mHolder);
         mPreference.setTitle(defaultOnText);
-        mPreference.updateStatus(true /* checked */);
+        mPreference.onBindViewHolder(mHolder);
 
-        assertThat(((TextView) mRootView.findViewById(R.id.switch_text)).getText())
-                .isEqualTo(defaultOnText);
+        assertThat(mRootView.<TextView>requireViewById(
+                R.id.switch_text).getText().toString()).isEqualTo(defaultOnText);
     }
 
     @Test
-    public void updateStatus_shouldMatchTheStatus() {
+    public void onBindViewHolder_checked() {
+        mPreference.setChecked(true);
         mPreference.onBindViewHolder(mHolder);
-        mPreference.updateStatus(true);
 
-        assertThat(mPreference.isChecked()).isTrue();
+        assertThat(mRootView.<MainSwitchBar>requireViewById(
+                R.id.settingslib_main_switch_bar).isChecked()).isTrue();
     }
-
 }

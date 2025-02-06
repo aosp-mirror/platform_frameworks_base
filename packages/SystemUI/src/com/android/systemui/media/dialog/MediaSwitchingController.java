@@ -37,9 +37,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.media.AudioManager;
@@ -174,10 +171,6 @@ public class MediaSwitchingController
     private int mColorConnectedItemBackground;
     private int mColorPositiveButtonText;
     private int mColorDialogBackground;
-    private int mItemMarginEndDefault;
-    private int mItemMarginEndSelectable;
-    private float mInactiveRadius;
-    private float mActiveRadius;
     private FeatureFlags mFeatureFlags;
     private UserTracker mUserTracker;
     private VolumePanelGlobalStateInteractor mVolumePanelGlobalStateInteractor;
@@ -249,16 +242,8 @@ public class MediaSwitchingController
                 R.color.media_dialog_connected_item_background);
         mColorPositiveButtonText = Utils.getColorStateListDefaultColor(mContext,
                 R.color.media_dialog_solid_button_text);
-        mInactiveRadius = mContext.getResources().getDimension(
-                R.dimen.media_output_dialog_background_radius);
-        mActiveRadius = mContext.getResources().getDimension(
-                R.dimen.media_output_dialog_active_background_radius);
         mColorDialogBackground = Utils.getColorStateListDefaultColor(mContext,
                 R.color.media_dialog_background);
-        mItemMarginEndDefault = (int) mContext.getResources().getDimension(
-                R.dimen.media_output_dialog_default_margin_end);
-        mItemMarginEndSelectable = (int) mContext.getResources().getDimension(
-                R.dimen.media_output_dialog_selectable_margin_end);
 
         if (enableInputRouting()) {
             mInputRouteManager = new InputRouteManager(mContext, audioManager);
@@ -535,15 +520,7 @@ public class MediaSwitchingController
             // Use default Bluetooth device icon to handle getIcon() is null case.
             drawable = mContext.getDrawable(com.android.internal.R.drawable.ic_bt_headphones_a2dp);
         }
-        if (!(drawable instanceof BitmapDrawable)) {
-            setColorFilter(drawable, isActiveItem(device));
-        }
         return BluetoothUtils.createIconWithDrawable(drawable);
-    }
-
-    void setColorFilter(Drawable drawable, boolean isActive) {
-        drawable.setColorFilter(new PorterDuffColorFilter(mColorItemContent,
-                PorterDuff.Mode.SRC_IN));
     }
 
     boolean isActiveItem(MediaDevice device) {
@@ -647,22 +624,6 @@ public class MediaSwitchingController
 
     public int getColorItemBackground() {
         return mColorItemBackground;
-    }
-
-    public float getInactiveRadius() {
-        return mInactiveRadius;
-    }
-
-    public float getActiveRadius() {
-        return mActiveRadius;
-    }
-
-    public int getItemMarginEndDefault() {
-        return mItemMarginEndDefault;
-    }
-
-    public int getItemMarginEndSelectable() {
-        return mItemMarginEndSelectable;
     }
 
     private void buildMediaItems(List<MediaDevice> devices) {
@@ -771,14 +732,26 @@ public class MediaSwitchingController
         if (connectedMediaDevice != null) {
             selectedDevicesIds.add(connectedMediaDevice.getId());
         }
+        boolean groupSelectedDevices =
+                com.android.media.flags.Flags.enableOutputSwitcherSessionGrouping();
+        int nextSelectedItemIndex = 0;
         boolean suggestedDeviceAdded = false;
         boolean displayGroupAdded = false;
+        boolean selectedDeviceAdded = false;
         for (MediaDevice device : devices) {
             if (needToHandleMutingExpectedDevice && device.isMutingExpectedDevice()) {
                 finalMediaItems.add(0, MediaItem.createDeviceMediaItem(device));
+                nextSelectedItemIndex++;
             } else if (!needToHandleMutingExpectedDevice && selectedDevicesIds.contains(
                     device.getId())) {
-                finalMediaItems.add(0, MediaItem.createDeviceMediaItem(device));
+                if (groupSelectedDevices) {
+                    finalMediaItems.add(
+                            nextSelectedItemIndex++,
+                            MediaItem.createDeviceMediaItem(device, !selectedDeviceAdded));
+                    selectedDeviceAdded = true;
+                } else {
+                    finalMediaItems.add(0, MediaItem.createDeviceMediaItem(device));
+                }
             } else {
                 if (device.isSuggestedDevice() && !suggestedDeviceAdded) {
                     addSuggestedDeviceGroupDivider(finalMediaItems);
@@ -940,6 +913,10 @@ public class MediaSwitchingController
         return mLocalMediaManager.getSelectableMediaDevice();
     }
 
+    List<MediaDevice> getTransferableMediaDevices() {
+        return mLocalMediaManager.getTransferableMediaDevices();
+    }
+
     public List<MediaDevice> getSelectedMediaDevice() {
         if (!enableInputRouting()) {
             return mLocalMediaManager.getSelectedMediaDevice();
@@ -971,6 +948,7 @@ public class MediaSwitchingController
         return mLocalMediaManager.getSessionVolume();
     }
 
+    @Nullable
     CharSequence getSessionName() {
         return mLocalMediaManager.getSessionName();
     }
@@ -1340,6 +1318,10 @@ public class MediaSwitchingController
 
     boolean isVolumeControlEnabled(@NonNull MediaDevice device) {
         return !device.isVolumeFixed();
+    }
+
+    boolean isVolumeControlEnabledForSession() {
+        return mLocalMediaManager.isMediaSessionAvailableForVolumeControl();
     }
 
     private void startActivity(Intent intent, ActivityTransitionAnimator.Controller controller) {

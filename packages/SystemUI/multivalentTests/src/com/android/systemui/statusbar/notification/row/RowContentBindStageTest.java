@@ -214,54 +214,6 @@ public class RowContentBindStageTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSetUseIncreasedHeight() {
-        // GIVEN a view with all content bound.
-        RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
-        params.requireContentViews(FLAG_CONTENT_VIEW_ALL);
-        params.clearDirtyContentViews();
-
-        // WHEN use increased height is set and stage executed.
-        params.setUseIncreasedCollapsedHeight(true);
-        mRowContentBindStage.executeStage(mEntry, mRow, (en) -> { });
-
-        // THEN binder is called with group view and contracted is bound.
-        ArgumentCaptor<BindParams> bindParamsCaptor = ArgumentCaptor.forClass(BindParams.class);
-        verify(mBinder).bindContent(
-                eq(mEntry),
-                any(),
-                eq(FLAG_CONTENT_VIEW_CONTRACTED),
-                bindParamsCaptor.capture(),
-                anyBoolean(),
-                any());
-        BindParams usedParams = bindParamsCaptor.getValue();
-        assertTrue(usedParams.usesIncreasedHeight);
-    }
-
-    @Test
-    public void testSetUseIncreasedHeadsUpHeight() {
-        // GIVEN a view with all content bound.
-        RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
-        params.requireContentViews(FLAG_CONTENT_VIEW_ALL);
-        params.clearDirtyContentViews();
-
-        // WHEN use increased heads up height is set and stage executed.
-        params.setUseIncreasedHeadsUpHeight(true);
-        mRowContentBindStage.executeStage(mEntry, mRow, (en) -> { });
-
-        // THEN binder is called with use group view and heads up is bound.
-        ArgumentCaptor<BindParams> bindParamsCaptor = ArgumentCaptor.forClass(BindParams.class);
-        verify(mBinder).bindContent(
-                eq(mEntry),
-                any(),
-                eq(FLAG_CONTENT_VIEW_HEADS_UP),
-                bindParamsCaptor.capture(),
-                anyBoolean(),
-                any());
-        BindParams usedParams = bindParamsCaptor.getValue();
-        assertTrue(usedParams.usesIncreasedHeadsUpHeight);
-    }
-
-    @Test
     public void testSetNeedsReinflation() {
         // GIVEN a view with all content bound.
         RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);

@@ -684,7 +684,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 removalInfo.playRevealAnimation = false;
             } else if (removalInfo.playRevealAnimation && playShiftUpAnimation) {
                 removalInfo.roundedCornerRadius =
-                        topActivity.mAppCompatController.getAppCompatLetterboxPolicy()
+                        topActivity.mAppCompatController.getLetterboxPolicy()
                                 .getRoundedCornersRadius(mainWindow);
                 removalInfo.windowAnimationLeash = applyStartingWindowAnimation(mainWindow);
                 removalInfo.mainFrame = new Rect(mainWindow.getFrame());

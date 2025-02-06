@@ -20,7 +20,6 @@ import static com.android.systemui.statusbar.NotificationLockscreenUserManager.R
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.RedactionType;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED;
-import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
 
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 
@@ -29,8 +28,6 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
  */
 public final class RowContentBindParams {
     private boolean mUseMinimized;
-    private boolean mUseIncreasedHeight;
-    private boolean mUseIncreasedHeadsUpHeight;
     private boolean mViewsNeedReinflation;
     private @InflationFlag int mContentViews = DEFAULT_INFLATION_FLAGS;
     private @RedactionType int mRedactionType = REDACTION_TYPE_NONE;
@@ -72,34 +69,6 @@ public final class RowContentBindParams {
      */
     public void setRedactionType(@RedactionType int redactionType) {
         mRedactionType = redactionType;
-    }
-
-    /**
-     * Set whether content should use an increased height version of its contracted view.
-     */
-    public void setUseIncreasedCollapsedHeight(boolean useIncreasedHeight) {
-        if (mUseIncreasedHeight != useIncreasedHeight) {
-            mDirtyContentViews |= FLAG_CONTENT_VIEW_CONTRACTED;
-        }
-        mUseIncreasedHeight = useIncreasedHeight;
-    }
-
-    public boolean useIncreasedHeight() {
-        return mUseIncreasedHeight;
-    }
-
-    /**
-     * Set whether content should use an increased height version of its heads up view.
-     */
-    public void setUseIncreasedHeadsUpHeight(boolean useIncreasedHeadsUpHeight) {
-        if (mUseIncreasedHeadsUpHeight != useIncreasedHeadsUpHeight) {
-            mDirtyContentViews |= FLAG_CONTENT_VIEW_HEADS_UP;
-        }
-        mUseIncreasedHeadsUpHeight = useIncreasedHeadsUpHeight;
-    }
-
-    public boolean useIncreasedHeadsUpHeight() {
-        return mUseIncreasedHeadsUpHeight;
     }
 
     /**
@@ -169,10 +138,8 @@ public final class RowContentBindParams {
     @Override
     public String toString() {
         return String.format("RowContentBindParams[mContentViews=%x mDirtyContentViews=%x "
-                + "mUseMinimized=%b mUseIncreasedHeight=%b "
-                + "mUseIncreasedHeadsUpHeight=%b mViewsNeedReinflation=%b]",
-                mContentViews, mDirtyContentViews, mUseMinimized, mUseIncreasedHeight,
-                mUseIncreasedHeadsUpHeight, mViewsNeedReinflation);
+                + "mUseMinimized=%b mViewsNeedReinflation=%b]",
+                mContentViews, mDirtyContentViews, mUseMinimized, mViewsNeedReinflation);
     }
 
     /**

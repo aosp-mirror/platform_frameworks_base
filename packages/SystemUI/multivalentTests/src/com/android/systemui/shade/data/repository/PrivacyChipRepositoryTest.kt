@@ -36,7 +36,6 @@ import com.android.systemui.util.mockito.kotlinArgumentCaptor
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -47,7 +46,6 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations.initMocks
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class PrivacyChipRepositoryTest : SysuiTestCase() {

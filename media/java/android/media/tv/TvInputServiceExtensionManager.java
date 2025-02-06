@@ -16,13 +16,9 @@
 
 package android.media.tv;
 
-import android.annotation.FlaggedApi;
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.annotation.StringDef;
-import android.media.tv.flags.Flags;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -30,21 +26,17 @@ import android.util.Log;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 
 /**
  * This class provides a list of available standardized TvInputService extension interface names
- * and a container storing IBinder objects that implement these interfaces created by SoC/OEMs.
- * It also provides an API for SoC/OEMs to register implemented IBinder objects.
+ * and checks if IBinder objects created by SoC/OEMs implement these interfaces.
  *
  * @hide
  */
-@FlaggedApi(Flags.FLAG_TIF_EXTENSION_STANDARDIZATION)
 public final class TvInputServiceExtensionManager {
     private static final String TAG = "TvInputServiceExtensionManager";
     private static final String SCAN_PACKAGE = "android.media.tv.extension.scan.";
@@ -62,33 +54,6 @@ public final class TvInputServiceExtensionManager {
     private static final String EVENT_PACKAGE = "android.media.tv.extension.event.";
     private static final String ANALOG_PACKAGE = "android.media.tv.extension.analog.";
     private static final String TUNE_PACKAGE = "android.media.tv.extension.tune.";
-
-    @IntDef(prefix = {"REGISTER_"}, value = {
-            REGISTER_SUCCESS,
-            REGISTER_FAIL_NAME_NOT_STANDARDIZED,
-            REGISTER_FAIL_IMPLEMENTATION_NOT_STANDARDIZED,
-            REGISTER_FAIL_REMOTE_EXCEPTION
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface RegisterResult {}
-
-    /**
-     * Registering binder returns success when it abides standardized interface structure
-     */
-    public static final int REGISTER_SUCCESS = 0;
-    /**
-     * Registering binder returns failure when the extension name is not in the standardization
-     * list
-     */
-    public static final int REGISTER_FAIL_NAME_NOT_STANDARDIZED = 1;
-    /**
-     * Registering binder returns failure when the IBinder does not implement standardized interface
-     */
-    public static final int REGISTER_FAIL_IMPLEMENTATION_NOT_STANDARDIZED = 2;
-    /**
-     * Registering binder returns failure when remote server is not available
-     */
-    public static final int REGISTER_FAIL_REMOTE_EXCEPTION = 3;
 
     @StringDef({
             ISCAN_INTERFACE,
@@ -673,12 +638,6 @@ public final class TvInputServiceExtensionManager {
             IMUX_TUNE
     ));
 
-    // Store the mapping between interface names and IBinder
-    private Map<String, IBinder> mExtensionInterfaceIBinderMapping = new HashMap<>();
-
-    TvInputServiceExtensionManager() {
-    }
-
     /**
      * Function to return available extension interface names
      */
@@ -694,43 +653,18 @@ public final class TvInputServiceExtensionManager {
     }
 
     /**
-     * Registers IBinder objects that implement standardized AIDL interfaces.
-     * <p>This function should be used by SoCs/OEMs
-     *
-     * @param extensionName Extension Interface Name
-     * @param binder        IBinder object to be registered
-     * @return {@link #REGISTER_SUCCESS} on success of registering IBinder object
-     *         {@link #REGISTER_FAIL_NAME_NOT_STANDARDIZED} on failure due to registering extension
-     *              with non-standardized name
-     *         {@link #REGISTER_FAIL_IMPLEMENTATION_NOT_STANDARDIZED} on failure due to IBinder not
-     *              implementing standardized AIDL interface
-     *         {@link #REGISTER_FAIL_REMOTE_EXCEPTION} on failure due to remote exception
+     * Function check if the IBinder object implements standardized interface
      */
-    @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE)
-    @RegisterResult
-    public int registerExtensionIBinder(@StandardizedExtensionName @NonNull String extensionName,
-            @NonNull IBinder binder) {
-        if (!checkIsStandardizedInterfaces(extensionName)) {
-            return REGISTER_FAIL_NAME_NOT_STANDARDIZED;
-        }
-        try {
-            if (binder.getInterfaceDescriptor().equals(extensionName)) {
-                mExtensionInterfaceIBinderMapping.put(extensionName, binder);
-                return REGISTER_SUCCESS;
-            } else {
-                return REGISTER_FAIL_IMPLEMENTATION_NOT_STANDARDIZED;
+    public static boolean checkIsStandardizedIBinder(@NonNull String extensionName,
+            @Nullable IBinder binder) {
+        if (binder != null) {
+            try {
+                return binder.getInterfaceDescriptor().equals(extensionName);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Fetching IBinder object failure due to " + e);
             }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Fetching IBinder object failure due to " + e);
-            return REGISTER_FAIL_REMOTE_EXCEPTION;
         }
-    }
-
-    /**
-     * Function to get corresponding IBinder object
-     */
-    @Nullable IBinder getExtensionIBinder(@NonNull String extensionName) {
-        return mExtensionInterfaceIBinderMapping.get(extensionName);
+        return false;
     }
 
 }

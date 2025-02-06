@@ -22,6 +22,7 @@
 #include <android-base/parsebool.h>
 #include <android-base/properties.h>
 #include <android/graphics/jni_runtime.h>
+#include <android_os.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <assert.h>
 #include <binder/IBinder.h>
@@ -893,9 +894,13 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
                        madviseWillNeedFileSizeOdex,
                        "-XMadviseWillNeedOdexFileSize:");
 
-    parseRuntimeOption("dalvik.vm.madvise.artfile.size",
-                       madviseWillNeedFileSizeArt,
-                       "-XMadviseWillNeedArtFileSize:");
+    // Historically, dalvik.vm.madvise.artfile.size was set to UINT_MAX by default. With the
+    // disable_madvise_art_default flag rollout, we use this default only when the flag is disabled.
+    // TODO(b/382110550): Remove this property/flag entirely after validating and ramping.
+    const char* madvise_artfile_size_default =
+            android::os::disable_madvise_artfile_default() ? "" : "4294967295";
+    parseRuntimeOption("dalvik.vm.madvise.artfile.size", madviseWillNeedFileSizeArt,
+                       "-XMadviseWillNeedArtFileSize:", madvise_artfile_size_default);
 
     /*
      * Profile related options.

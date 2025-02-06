@@ -16,31 +16,52 @@
 package com.android.ravenwoodtest.bivalenttest.compat
 
 import android.app.compat.CompatChanges
+import android.compat.testing.PlatformCompatChangeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.internal.ravenwood.RavenwoodEnvironment.CompatIdsForTest
-import org.junit.Assert
+import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges
+import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class RavenwoodCompatFrameworkTest {
+
+    @get:Rule
+    val compatRule = PlatformCompatChangeRule()
+
     @Test
     fun testEnabled() {
-        Assert.assertTrue(CompatChanges.isChangeEnabled(CompatIdsForTest.TEST_COMPAT_ID_1))
+        assertTrue(CompatChanges.isChangeEnabled(CompatIdsForTest.TEST_COMPAT_ID_1))
     }
 
     @Test
     fun testDisabled() {
-        Assert.assertFalse(CompatChanges.isChangeEnabled(CompatIdsForTest.TEST_COMPAT_ID_2))
+        assertFalse(CompatChanges.isChangeEnabled(CompatIdsForTest.TEST_COMPAT_ID_2))
     }
 
     @Test
     fun testEnabledAfterSForUApps() {
-        Assert.assertTrue(CompatChanges.isChangeEnabled(CompatIdsForTest.TEST_COMPAT_ID_3))
+        assertTrue(CompatChanges.isChangeEnabled(CompatIdsForTest.TEST_COMPAT_ID_3))
     }
 
     @Test
     fun testEnabledAfterUForUApps() {
-        Assert.assertFalse(CompatChanges.isChangeEnabled(CompatIdsForTest.TEST_COMPAT_ID_4))
+        assertFalse(CompatChanges.isChangeEnabled(CompatIdsForTest.TEST_COMPAT_ID_4))
+    }
+
+    @Test
+    @EnableCompatChanges(CompatIdsForTest.TEST_COMPAT_ID_5)
+    fun testEnableCompatChanges() {
+        assertTrue(CompatChanges.isChangeEnabled(CompatIdsForTest.TEST_COMPAT_ID_5))
+    }
+
+    @Test
+    @DisableCompatChanges(CompatIdsForTest.TEST_COMPAT_ID_5)
+    fun testDisableCompatChanges() {
+        assertFalse(CompatChanges.isChangeEnabled(CompatIdsForTest.TEST_COMPAT_ID_5))
     }
 }

@@ -18,9 +18,7 @@ package com.android.systemui.deviceentry.domain.interactor
 
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.kosmos.Kosmos
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 val Kosmos.deviceEntryBiometricSettingsInteractor by
     Kosmos.Fixture {
         DeviceEntryBiometricSettingsInteractor(

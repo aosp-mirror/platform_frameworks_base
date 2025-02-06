@@ -23,6 +23,7 @@
     android:orientation="vertical"
     android:padding="@dimen/magnification_setting_background_padding"
     android:focusable="true"
+    android:accessibilityPaneTitle="@string/accessibility_magnification_settings_panel_description"
     android:contentDescription="@string/accessibility_magnification_settings_panel_description">
     <LinearLayout
         android:layout_width="match_parent"
@@ -132,7 +133,8 @@
             android:layout_height="wrap_content"
             android:track="@drawable/settingslib_track_selector"
             android:thumb="@drawable/settingslib_thumb_selector"
-            android:theme="@style/MainSwitch.Settingslib"/>
+            android:theme="@style/MainSwitch.Settingslib"
+            android:minHeight="48dp" />
 
     </LinearLayout>
 

@@ -75,8 +75,7 @@ public class TunerServiceImpl extends TunerService {
     private static final String[] RESET_EXCEPTION_LIST = new String[] {
             QSHost.TILES_SETTING,
             Settings.Secure.DOZE_ALWAYS_ON,
-            Settings.Secure.MEDIA_CONTROLS_RESUME,
-            Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION
+            Settings.Secure.MEDIA_CONTROLS_RESUME
     };
 
     private final Observer mObserver = new Observer();

@@ -17,12 +17,14 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.dagger.GlanceableHubBlurComponent
 import com.android.systemui.keyguard.domain.interactor.FromGlanceableHubTransitionInteractor.Companion.TO_OCCLUDED_DURATION
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.keyguard.ui.transitions.GlanceableHubTransition
 import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -32,7 +34,8 @@ class GlanceableHubToOccludedTransitionViewModel
 @Inject
 constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
-) : DeviceEntryIconTransition {
+    private val blurFactory: GlanceableHubBlurComponent.Factory,
+) : DeviceEntryIconTransition, GlanceableHubTransition {
 
     private val transitionAnimation =
         animationFlow
@@ -44,4 +47,7 @@ constructor(
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(0f)
+
+    override val windowBlurRadius: Flow<Float> =
+        blurFactory.create(transitionAnimation).getBlurProvider().exitBlurRadius
 }

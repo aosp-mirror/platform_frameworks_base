@@ -40,7 +40,6 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -50,7 +49,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class DisableFlagsRepositoryTest : SysuiTestCase() {
 

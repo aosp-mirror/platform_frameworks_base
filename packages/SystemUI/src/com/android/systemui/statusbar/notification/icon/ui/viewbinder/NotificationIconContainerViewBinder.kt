@@ -32,6 +32,7 @@ import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.headsup.shared.StatusBarNoHunBehavior
 import com.android.systemui.statusbar.notification.collection.NotifCollection
 import com.android.systemui.statusbar.notification.icon.IconPack
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder.IconViewStore
@@ -81,7 +82,9 @@ object NotificationIconContainerViewBinder {
                 StatusBarIconViewBinder.bindIconColors(sbiv, iconColors, contrastColorUtil)
             }
         }
-        launch { viewModel.bindIsolatedIcon(view, viewStore) }
+        if (!StatusBarNoHunBehavior.isEnabled) {
+            launch { viewModel.bindIsolatedIcon(view, viewStore) }
+        }
         launch { viewModel.animationsEnabled.bindAnimationsEnabled(view) }
     }
 
@@ -146,6 +149,7 @@ object NotificationIconContainerViewBinder {
         view: NotificationIconContainer,
         viewStore: IconViewStore,
     ) {
+        StatusBarNoHunBehavior.assertInLegacyMode()
         coroutineScope {
             launch {
                 isolatedIconLocation.collectTracingEach("NIC#isolatedIconLocation") { location ->

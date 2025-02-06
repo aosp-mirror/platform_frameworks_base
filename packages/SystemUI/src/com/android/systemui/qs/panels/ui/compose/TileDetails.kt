@@ -38,12 +38,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
+import com.android.systemui.bluetooth.qsdialog.BluetoothDetailsContent
+import com.android.systemui.bluetooth.qsdialog.BluetoothDetailsViewModel
+import com.android.systemui.plugins.qs.TileDetailsViewModel
 import com.android.systemui.qs.flags.QsDetailedView
 import com.android.systemui.qs.panels.ui.viewmodel.DetailsViewModel
+import com.android.systemui.qs.tiles.dialog.InternetDetailsContent
+import com.android.systemui.qs.tiles.dialog.InternetDetailsViewModel
+import com.android.systemui.qs.tiles.dialog.ModesDetailsContent
+import com.android.systemui.qs.tiles.dialog.ModesDetailsViewModel
+import com.android.systemui.qs.tiles.dialog.ScreenRecordDetailsContent
+import com.android.systemui.qs.tiles.dialog.ScreenRecordDetailsViewModel
 
 @Composable
-fun TileDetails(detailsViewModel: DetailsViewModel) {
+fun TileDetails(modifier: Modifier = Modifier, detailsViewModel: DetailsViewModel) {
 
     if (!QsDetailedView.isEnabled) {
         throw IllegalStateException("QsDetailedView should be enabled")
@@ -54,10 +62,11 @@ fun TileDetails(detailsViewModel: DetailsViewModel) {
     DisposableEffect(Unit) { onDispose { detailsViewModel.closeDetailedView() } }
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            // The height of the details view is TBD.
-            .fillMaxHeight()
+        modifier =
+            modifier
+                .fillMaxWidth()
+                // The height of the details view is TBD.
+                .fillMaxHeight()
     ) {
         CompositionLocalProvider(
             value = LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant
@@ -65,15 +74,14 @@ fun TileDetails(detailsViewModel: DetailsViewModel) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-
                 IconButton(
                     onClick = { detailsViewModel.closeDetailedView() },
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .height(TileDetailsDefaults.IconHeight)
-                        .padding(start = TileDetailsDefaults.IconPadding),
+                    modifier =
+                        Modifier.align(Alignment.CenterVertically)
+                            .height(TileDetailsDefaults.IconHeight)
+                            .padding(start = TileDetailsDefaults.IconPadding),
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -83,17 +91,16 @@ fun TileDetails(detailsViewModel: DetailsViewModel) {
                 }
                 Text(
                     text = tileDetailedViewModel.getTitle(),
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically),
+                    modifier = Modifier.align(Alignment.CenterVertically),
                     textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
                 )
                 IconButton(
                     onClick = { tileDetailedViewModel.clickOnSettingsButton() },
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .height(TileDetailsDefaults.IconHeight)
-                        .padding(end = TileDetailsDefaults.IconPadding),
+                    modifier =
+                        Modifier.align(Alignment.CenterVertically)
+                            .height(TileDetailsDefaults.IconHeight)
+                            .padding(end = TileDetailsDefaults.IconPadding),
                 ) {
                     Icon(
                         imageVector = Icons.Default.Settings,
@@ -104,14 +111,23 @@ fun TileDetails(detailsViewModel: DetailsViewModel) {
             }
             Text(
                 text = tileDetailedViewModel.getSubTitle(),
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleSmall
-
+                style = MaterialTheme.typography.titleSmall,
             )
         }
-        tileDetailedViewModel.GetContentView()
+        MapTileDetailsContent(tileDetailedViewModel)
+    }
+}
+
+@Composable
+private fun MapTileDetailsContent(tileDetailsViewModel: TileDetailsViewModel) {
+    when (tileDetailsViewModel) {
+        is InternetDetailsViewModel -> InternetDetailsContent(tileDetailsViewModel)
+        is ScreenRecordDetailsViewModel -> ScreenRecordDetailsContent(tileDetailsViewModel)
+        is BluetoothDetailsViewModel ->
+            BluetoothDetailsContent(tileDetailsViewModel.detailsContentViewModel)
+        is ModesDetailsViewModel -> ModesDetailsContent(tileDetailsViewModel)
     }
 }
 

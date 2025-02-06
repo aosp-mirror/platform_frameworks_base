@@ -483,14 +483,18 @@ public class HearingAidDeviceManager {
 
     void onActiveDeviceChanged(CachedBluetoothDevice device) {
         if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_AUDIO_ROUTING)) {
-            if (device.isConnectedHearingAidDevice()) {
+            if (device.isConnectedHearingAidDevice()
+                    && (device.isActiveDevice(BluetoothProfile.HEARING_AID)
+                    || device.isActiveDevice(BluetoothProfile.LE_AUDIO))) {
                 setAudioRoutingConfig(device);
             } else {
                 clearAudioRoutingConfig();
             }
         }
         if (com.android.settingslib.flags.Flags.hearingDevicesInputRoutingControl()) {
-            if (device.isConnectedHearingAidDevice()) {
+            if (device.isConnectedHearingAidDevice()
+                    && (device.isActiveDevice(BluetoothProfile.HEARING_AID)
+                    || device.isActiveDevice(BluetoothProfile.LE_AUDIO))) {
                 setMicrophoneForCalls(device);
             } else {
                 clearMicrophoneForCalls();

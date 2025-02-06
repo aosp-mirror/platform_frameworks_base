@@ -74,11 +74,16 @@ public class WindowTokenTests extends WindowTestsBase {
 
         assertEquals(0, token.getWindowsCount());
 
-        final WindowState window1 = createWindow(null, TYPE_APPLICATION, token, "window1");
-        final WindowState window11 = createWindow(window1, FIRST_SUB_WINDOW, token, "window11");
-        final WindowState window12 = createWindow(window1, FIRST_SUB_WINDOW, token, "window12");
-        final WindowState window2 = createWindow(null, TYPE_APPLICATION, token, "window2");
-        final WindowState window3 = createWindow(null, TYPE_APPLICATION, token, "window3");
+        final WindowState window1 = newWindowBuilder("window1", TYPE_APPLICATION).setWindowToken(
+                token).build();
+        final WindowState window11 = newWindowBuilder("window11", FIRST_SUB_WINDOW).setParent(
+                window1).setWindowToken(token).build();
+        final WindowState window12 = newWindowBuilder("window12", FIRST_SUB_WINDOW).setParent(
+                window1).setWindowToken(token).build();
+        final WindowState window2 = newWindowBuilder("window2", TYPE_APPLICATION).setWindowToken(
+                token).build();
+        final WindowState window3 = newWindowBuilder("window3", TYPE_APPLICATION).setWindowToken(
+                token).build();
 
         token.addWindow(window1);
         // NOTE: Child windows will not be added to the token as window containers can only
@@ -105,8 +110,10 @@ public class WindowTokenTests extends WindowTestsBase {
     public void testAddWindow_assignsLayers() {
         final TestWindowToken token1 = createTestWindowToken(0, mDisplayContent);
         final TestWindowToken token2 = createTestWindowToken(0, mDisplayContent);
-        final WindowState window1 = createWindow(null, TYPE_STATUS_BAR, token1, "window1");
-        final WindowState window2 = createWindow(null, TYPE_STATUS_BAR, token2, "window2");
+        final WindowState window1 = newWindowBuilder("window1", TYPE_STATUS_BAR).setWindowToken(
+                token1).build();
+        final WindowState window2 = newWindowBuilder("window2", TYPE_STATUS_BAR).setWindowToken(
+                token2).build();
 
         token1.addWindow(window1);
         token2.addWindow(window2);
@@ -122,8 +129,10 @@ public class WindowTokenTests extends WindowTestsBase {
 
         assertEquals(token, dc.getWindowToken(token.token));
 
-        final WindowState window1 = createWindow(null, TYPE_APPLICATION, token, "window1");
-        final WindowState window2 = createWindow(null, TYPE_APPLICATION, token, "window2");
+        final WindowState window1 = newWindowBuilder("window1", TYPE_APPLICATION).setWindowToken(
+                token).build();
+        final WindowState window2 = newWindowBuilder("window2", TYPE_APPLICATION).setWindowToken(
+                token).build();
 
         window2.removeImmediately();
         // The token should still be mapped in the display content since it still has a child.
@@ -147,8 +156,10 @@ public class WindowTokenTests extends WindowTestsBase {
         // Verify that the token is on the display
         assertNotNull(mDisplayContent.getWindowToken(token.token));
 
-        final WindowState window1 = createWindow(null, TYPE_TOAST, token, "window1");
-        final WindowState window2 = createWindow(null, TYPE_TOAST, token, "window2");
+        final WindowState window1 = newWindowBuilder("window1", TYPE_TOAST).setWindowToken(
+                token).build();
+        final WindowState window2 = newWindowBuilder("window2", TYPE_TOAST).setWindowToken(
+                token).build();
 
         mDisplayContent.removeWindowToken(token.token, true /* animateExit */);
         // Verify that the token is no longer mapped on the display
@@ -231,7 +242,8 @@ public class WindowTokenTests extends WindowTestsBase {
 
         assertNull(fromClientToken.mSurfaceControl);
 
-        createWindow(null, TYPE_APPLICATION_OVERLAY, fromClientToken, "window");
+        newWindowBuilder("window", TYPE_APPLICATION_OVERLAY).setWindowToken(
+                fromClientToken).build();
         assertNotNull(fromClientToken.mSurfaceControl);
 
         final WindowToken nonClientToken = new WindowToken.Builder(mDisplayContent.mWmService,
@@ -285,7 +297,7 @@ public class WindowTokenTests extends WindowTestsBase {
 
         // Simulate an app window to be the IME layering target, assume the app window has no
         // frozen insets state by default.
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        final WindowState app = newWindowBuilder("app", TYPE_APPLICATION).build();
         mDisplayContent.setImeLayeringTarget(app);
         assertNull(app.getFrozenInsetsState());
         assertTrue(app.isImeLayeringTarget());
@@ -299,7 +311,8 @@ public class WindowTokenTests extends WindowTestsBase {
     @Test
     public void testRemoveWindowToken_noAnimateExitWhenSet() {
         final TestWindowToken token = createTestWindowToken(0, mDisplayContent);
-        final WindowState win = createWindow(null, TYPE_APPLICATION, token, "win");
+        final WindowState win = newWindowBuilder("win", TYPE_APPLICATION).setWindowToken(
+                token).build();
         makeWindowVisible(win);
         assertTrue(win.isOnScreen());
         spyOn(win);

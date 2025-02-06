@@ -1,6 +1,7 @@
 package com.android.systemui.statusbar.phone
 
 import android.view.View
+import com.android.systemui.Flags
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.TransitionAnimator
 import com.android.systemui.animation.TransitionAnimator.Companion.getProgress
@@ -22,7 +23,7 @@ class StatusBarTransitionAnimatorController(
     private val notificationShadeWindowController: NotificationShadeWindowController,
     private val commandQueue: CommandQueue,
     @DisplayId private val displayId: Int,
-    private val isLaunchForActivity: Boolean = true
+    private val isLaunchForActivity: Boolean = true,
 ) : ActivityTransitionAnimator.Controller by delegate {
     private var hideIconsDuringLaunchAnimation: Boolean = true
 
@@ -41,8 +42,16 @@ class StatusBarTransitionAnimatorController(
     }
 
     override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
-        delegate.onTransitionAnimationStart(isExpandingFullyAbove)
-        shadeAnimationInteractor.setIsLaunchingActivity(true)
+        if (Flags.shadeLaunchAccessibility()) {
+            // We set this before calling the delegate to make sure that accessibility is disabled
+            // for the whole duration of the transition, so that we don't have stray TalkBack events
+            // once the animating view becomes invisible.
+            shadeAnimationInteractor.setIsLaunchingActivity(true)
+            delegate.onTransitionAnimationStart(isExpandingFullyAbove)
+        } else {
+            delegate.onTransitionAnimationStart(isExpandingFullyAbove)
+            shadeAnimationInteractor.setIsLaunchingActivity(true)
+        }
         if (!isExpandingFullyAbove) {
             shadeController.collapseWithDuration(
                 ActivityTransitionAnimator.TIMINGS.totalDuration.toInt()
@@ -59,7 +68,7 @@ class StatusBarTransitionAnimatorController(
     override fun onTransitionAnimationProgress(
         state: TransitionAnimator.State,
         progress: Float,
-        linearProgress: Float
+        linearProgress: Float,
     ) {
         delegate.onTransitionAnimationProgress(state, progress, linearProgress)
         val hideIcons =
@@ -67,7 +76,7 @@ class StatusBarTransitionAnimatorController(
                 ActivityTransitionAnimator.TIMINGS,
                 linearProgress,
                 ANIMATION_DELAY_ICON_FADE_IN,
-                100
+                100,
             ) == 0.0f
         if (hideIcons != hideIconsDuringLaunchAnimation) {
             hideIconsDuringLaunchAnimation = hideIcons

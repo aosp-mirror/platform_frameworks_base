@@ -17,7 +17,6 @@
 package com.android.server.backup.restore;
 
 import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_SESSION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_GET_RESTORE_SETS;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
@@ -41,6 +40,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
+import com.android.server.backup.BackupWakeLock;
 import com.android.server.backup.Flags;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
@@ -121,7 +121,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
             // comes in.
             mBackupManagerService.getBackupHandler().removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
 
-            UserBackupManagerService.BackupWakeLock wakelock = mBackupManagerService.getWakelock();
+            BackupWakeLock wakelock = mBackupManagerService.getWakeLock();
             wakelock.acquire();
 
             // Prevent lambda from leaking 'this'
@@ -150,10 +150,8 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
                 android.Manifest.permission.BACKUP,
                 "performRestore");
 
-        if (DEBUG) {
-            Slog.d(TAG, "restoreAll token=" + Long.toHexString(token)
+        Slog.d(TAG, "restoreAll token=" + Long.toHexString(token)
                     + " observer=" + observer);
-        }
 
         if (mEnded) {
             throw new IllegalStateException("Restore session already ended");
@@ -213,40 +211,38 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
                 android.Manifest.permission.BACKUP,
                 "performRestore");
 
-        if (DEBUG) {
-            StringBuilder b = new StringBuilder(128);
-            b.append("restorePackages token=");
-            b.append(Long.toHexString(token));
-            b.append(" observer=");
-            if (observer == null) {
-                b.append("null");
-            } else {
-                b.append(observer.toString());
-            }
-            b.append(" monitor=");
-            if (monitor == null) {
-                b.append("null");
-            } else {
-                b.append(monitor.toString());
-            }
-            b.append(" packages=");
-            if (packages == null) {
-                b.append("null");
-            } else {
-                b.append('{');
-                boolean first = true;
-                for (String s : packages) {
-                    if (!first) {
-                        b.append(", ");
-                    } else {
-                        first = false;
-                    }
-                    b.append(s);
-                }
-                b.append('}');
-            }
-            Slog.d(TAG, b.toString());
+        StringBuilder b = new StringBuilder(128);
+        b.append("restorePackages token=");
+        b.append(Long.toHexString(token));
+        b.append(" observer=");
+        if (observer == null) {
+            b.append("null");
+        } else {
+            b.append(observer.toString());
         }
+        b.append(" monitor=");
+        if (monitor == null) {
+            b.append("null");
+        } else {
+            b.append(monitor.toString());
+        }
+        b.append(" packages=");
+        if (packages == null) {
+            b.append("null");
+        } else {
+            b.append('{');
+            boolean first = true;
+            for (String s : packages) {
+                if (!first) {
+                    b.append(", ");
+                } else {
+                    first = false;
+                }
+                b.append(s);
+            }
+            b.append('}');
+        }
+        Slog.d(TAG, b.toString());
 
         if (mEnded) {
             throw new IllegalStateException("Restore session already ended");
@@ -325,10 +321,8 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
 
     public synchronized int restorePackage(String packageName, IRestoreObserver observer,
             IBackupManagerMonitor monitor) {
-        if (DEBUG) {
-            Slog.v(TAG, "restorePackage pkg=" + packageName + " obs=" + observer
+        Slog.d(TAG, "restorePackage pkg=" + packageName + " obs=" + observer
                     + "monitor=" + monitor);
-        }
 
         if (mEnded) {
             throw new IllegalStateException("Restore session already ended");
@@ -379,18 +373,14 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
             // Check whether there is data for it in the current dataset, falling back
             // to the ancestral dataset if not.
             long token = mBackupManagerService.getAvailableRestoreToken(packageName);
-            if (DEBUG) {
-                Slog.v(TAG, "restorePackage pkg=" + packageName
+            Slog.d(TAG, "restorePackage pkg=" + packageName
                         + " token=" + Long.toHexString(token));
-            }
 
             // If we didn't come up with a place to look -- no ancestral dataset and
             // the app has never been backed up from this device -- there's nothing
             // to do but return failure.
             if (token == 0) {
-                if (DEBUG) {
-                    Slog.w(TAG, "No data available for this package; not restoring");
-                }
+                Slog.w(TAG, "No data available for this package; not restoring");
                 return -1;
             }
 
@@ -431,9 +421,9 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         Handler backupHandler = mBackupManagerService.getBackupHandler();
         backupHandler.removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
 
-        UserBackupManagerService.BackupWakeLock wakelock = mBackupManagerService.getWakelock();
+        BackupWakeLock wakelock = mBackupManagerService.getWakeLock();
         wakelock.acquire();
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.d(TAG, callerLogString);
         }
 
@@ -473,9 +463,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
     }
 
     public synchronized void endRestoreSession() {
-        if (DEBUG) {
-            Slog.d(TAG, "endRestoreSession");
-        }
+        Slog.d(TAG, "endRestoreSession");
 
         if (mTimedOut) {
             Slog.i(TAG, "Session already timed out");

@@ -18,7 +18,6 @@ package com.android.wm.shell.windowdecor;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
 import static android.view.InsetsSource.FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR;
 import static android.view.WindowInsets.Type.captionBar;
@@ -62,7 +61,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Handler;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
 import android.view.AttachedSurfaceControl;
@@ -93,7 +91,6 @@ import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHost;
 import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHostSupplier;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -119,9 +116,6 @@ public class WindowDecorationTests extends ShellTestCase {
     private static final int CORNER_RADIUS = 20;
     private static final int SHADOW_RADIUS = 10;
     private static final int STATUS_BAR_INSET_SOURCE_ID = 0;
-
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
 
     private final WindowDecoration.RelayoutResult<TestView> mRelayoutResult =
             new WindowDecoration.RelayoutResult<>();
@@ -834,6 +828,54 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(mMockWindowContainerTransaction).addInsetsSource(eq(token), any(),
                 eq(0) /* index */, eq(captionBar()), any(), any(),
                 eq(FLAG_FORCE_CONSUMING | FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR));
+    }
+
+    @Test
+    public void testRelayout_setAppBoundsIfNeeded() {
+        final Display defaultDisplay = mock(Display.class);
+        doReturn(defaultDisplay).when(mMockDisplayController).getDisplay(Display.DEFAULT_DISPLAY);
+        final WindowContainerToken token = TestRunningTaskInfoBuilder.createMockWCToken();
+        final TestRunningTaskInfoBuilder builder = new TestRunningTaskInfoBuilder()
+                .setDisplayId(Display.DEFAULT_DISPLAY)
+                .setVisible(true);
+
+        final ActivityManager.RunningTaskInfo taskInfo =
+                builder.setToken(token).setBounds(TASK_BOUNDS).build();
+        final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
+        mRelayoutParams.mIsCaptionVisible = true;
+        mRelayoutParams.mShouldSetAppBounds = true;
+
+        windowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
+        final Rect appBounds = new Rect(TASK_BOUNDS);
+        appBounds.top += WindowDecoration.loadDimensionPixelSize(
+                windowDecor.mDecorWindowContext.getResources(), mRelayoutParams.mCaptionHeightId);
+        verify(mMockWindowContainerTransaction).setAppBounds(eq(token), eq(appBounds));
+    }
+
+    @Test
+    public void testRelayout_setAppBoundsIfNeeded_reset() {
+        final Display defaultDisplay = mock(Display.class);
+        doReturn(defaultDisplay).when(mMockDisplayController).getDisplay(Display.DEFAULT_DISPLAY);
+        final WindowContainerToken token = TestRunningTaskInfoBuilder.createMockWCToken();
+        final TestRunningTaskInfoBuilder builder = new TestRunningTaskInfoBuilder()
+                .setDisplayId(Display.DEFAULT_DISPLAY)
+                .setVisible(true);
+
+        final ActivityManager.RunningTaskInfo taskInfo =
+                builder.setToken(token).setBounds(TASK_BOUNDS).build();
+        final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
+
+        mRelayoutParams.mIsCaptionVisible = true;
+        mRelayoutParams.mIsInsetSource = true;
+        mRelayoutParams.mShouldSetAppBounds = true;
+        windowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
+
+        mRelayoutParams.mIsCaptionVisible = true;
+        mRelayoutParams.mIsInsetSource = false;
+        mRelayoutParams.mShouldSetAppBounds = false;
+        windowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
+
+        verify(mMockWindowContainerTransaction).setAppBounds(eq(token), eq(new Rect()));
     }
 
     @Test

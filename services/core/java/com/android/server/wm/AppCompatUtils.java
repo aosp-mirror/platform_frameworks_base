@@ -138,7 +138,7 @@ final class AppCompatUtils {
             return;
         }
         final AppCompatReachabilityOverrides reachabilityOverrides = top.mAppCompatController
-                .getAppCompatReachabilityOverrides();
+                .getReachabilityOverrides();
         final boolean isTopActivityResumed = top.getOrganizedTask() == task && top.isState(RESUMED);
         final boolean isTopActivityVisible = top.getOrganizedTask() == task && top.isVisible();
         // Whether the direct top activity is in size compat mode.
@@ -150,13 +150,15 @@ final class AppCompatUtils {
             appCompatTaskInfo.setTopActivityInSizeCompat(top.fillsParent());
         }
         // Whether the direct top activity is eligible for letterbox education.
-        appCompatTaskInfo.setEligibleForLetterboxEducation(
-                isTopActivityResumed && top.isEligibleForLetterboxEducation());
-        appCompatTaskInfo.setLetterboxEducationEnabled(top.mAppCompatController
-                .getAppCompatLetterboxOverrides().isLetterboxEducationEnabled());
+        appCompatTaskInfo.setEligibleForLetterboxEducation(isTopActivityResumed
+                && top.mAppCompatController.getLetterboxPolicy()
+                    .isEligibleForLetterboxEducation());
+        appCompatTaskInfo.setLetterboxEducationEnabled(
+                top.mAppCompatController.getLetterboxOverrides()
+                        .isLetterboxEducationEnabled());
 
         final AppCompatAspectRatioOverrides aspectRatioOverrides =
-                top.mAppCompatController.getAppCompatAspectRatioOverrides();
+                top.mAppCompatController.getAspectRatioOverrides();
         appCompatTaskInfo.setUserFullscreenOverrideEnabled(
                 aspectRatioOverrides.shouldApplyUserFullscreenOverride());
         appCompatTaskInfo.setSystemFullscreenOverrideEnabled(
@@ -206,7 +208,7 @@ final class AppCompatUtils {
         appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode =
                 AppCompatCameraPolicy.getCameraCompatFreeformMode(top);
         appCompatTaskInfo.setHasMinAspectRatioOverride(top.mAppCompatController
-                .getDesktopAppCompatAspectRatioPolicy().hasMinAspectRatioOverride(task));
+                .getDesktopAspectRatioPolicy().hasMinAspectRatioOverride(task));
     }
 
     /**
@@ -222,7 +224,7 @@ final class AppCompatUtils {
             return "SIZE_COMPAT_MODE";
         }
         final AppCompatAspectRatioPolicy aspectRatioPolicy = activityRecord.mAppCompatController
-                .getAppCompatAspectRatioPolicy();
+                .getAspectRatioPolicy();
         if (aspectRatioPolicy.isLetterboxedForFixedOrientationAndAspectRatio()) {
             return "FIXED_ORIENTATION";
         }

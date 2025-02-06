@@ -43,6 +43,8 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.emergency.EmergencyGestureModule.EmergencyGestureIntentFactory;
+import com.android.systemui.flags.DisableSceneContainer;
+import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.plugins.ActivityStarter;
@@ -55,10 +57,8 @@ import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeHeaderController;
-import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
-import com.android.systemui.shade.shared.flag.DualShade;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -66,6 +66,8 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
+
+import dagger.Lazy;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -76,8 +78,6 @@ import org.mockito.stubbing.Answer;
 
 import java.util.Optional;
 
-import dagger.Lazy;
-
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
@@ -87,7 +87,6 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private ShadeController mShadeController;
     @Mock private CommandQueue mCommandQueue;
     @Mock private QuickSettingsController mQuickSettingsController;
-    @Mock private ShadeViewController mShadeViewController;
     @Mock private PanelExpansionInteractor mPanelExpansionInteractor;
     @Mock private Lazy<ShadeInteractor> mShadeInteractorLazy;
     @Mock private ShadeHeaderController mShadeHeaderController;
@@ -242,7 +241,8 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(value = {QSComposeFragment.FLAG_NAME, DualShade.FLAG_NAME})
+    @DisableSceneContainer
+    @DisableFlags(QSComposeFragment.FLAG_NAME)
     public void clickQsTile_flagsDisabled_callsQSPanelController() {
         ComponentName c = new ComponentName("testpkg", "testcls");
 
@@ -251,7 +251,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(DualShade.FLAG_NAME)
+    @DisableSceneContainer
     @EnableFlags(QSComposeFragment.FLAG_NAME)
     public void clickQsTile_onlyQSComposeFlag_callsQSHost() {
         ComponentName c = new ComponentName("testpkg", "testcls");
@@ -262,9 +262,9 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
+    @EnableSceneContainer
     @DisableFlags(QSComposeFragment.FLAG_NAME)
-    public void clickQsTile_onlyDualShadeFlag_callsQSHost() {
+    public void clickQsTile_onlySceneContainerFlag_callsQSHost() {
         ComponentName c = new ComponentName("testpkg", "testcls");
 
         mSbcqCallbacks.clickTile(c);
@@ -273,8 +273,9 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(value = {QSComposeFragment.FLAG_NAME, DualShade.FLAG_NAME})
-    public void clickQsTile_qsComposeAndDualShadeFlags_callsQSHost() {
+    @EnableSceneContainer
+    @EnableFlags(QSComposeFragment.FLAG_NAME)
+    public void clickQsTile_qsComposeAndSceneContainerFlags_callsQSHost() {
         ComponentName c = new ComponentName("testpkg", "testcls");
 
         mSbcqCallbacks.clickTile(c);

@@ -18,9 +18,9 @@ package com.android.systemui.keyguard.ui.composable.section
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 
 /** Defines interface for classes that can render the ambient indication area. */
 interface AmbientIndicationSection {
-    @Composable fun SceneScope.AmbientIndication(modifier: Modifier)
+    @Composable fun ContentScope.AmbientIndication(modifier: Modifier)
 }

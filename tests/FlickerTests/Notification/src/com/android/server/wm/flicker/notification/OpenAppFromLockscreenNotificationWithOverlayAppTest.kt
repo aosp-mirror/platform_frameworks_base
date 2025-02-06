@@ -16,8 +16,6 @@
 
 package com.android.server.wm.flicker.notification
 
-import android.platform.test.annotations.Postsubmit
-import android.platform.test.annotations.Presubmit
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
@@ -47,7 +45,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Postsubmit
+@FlakyTest(bugId = 384046002)
 class OpenAppFromLockscreenNotificationWithOverlayAppTest(flicker: LegacyFlickerTest) :
     OpenAppFromLockscreenNotificationColdTest(flicker) {
     private val showWhenLockedApp = ShowWhenLockedAppHelper(instrumentation)
@@ -106,7 +104,7 @@ class OpenAppFromLockscreenNotificationWithOverlayAppTest(flicker: LegacyFlicker
     }
 
     /** {@inheritDoc} */
-    @Presubmit @Test override fun appLayerBecomesVisible() = super.appLayerBecomesVisible()
+    @Test override fun appLayerBecomesVisible() = super.appLayerBecomesVisible()
 
     /** {@inheritDoc} */
     @FlakyTest(bugId = 227143265)
@@ -120,7 +118,6 @@ class OpenAppFromLockscreenNotificationWithOverlayAppTest(flicker: LegacyFlicker
     override fun navBarLayerIsVisibleAtStartAndEnd() {}
 
     /** {@inheritDoc} */
-    @Presubmit
     @Test
     override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 

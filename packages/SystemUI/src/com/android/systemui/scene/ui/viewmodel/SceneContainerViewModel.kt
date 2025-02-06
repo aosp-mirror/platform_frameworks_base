@@ -30,6 +30,8 @@ import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.power.domain.interactor.PowerInteractor
@@ -37,10 +39,11 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.Overlay
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
+import com.android.systemui.wallpapers.ui.viewmodel.WallpaperViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -57,11 +60,14 @@ constructor(
     private val sceneInteractor: SceneInteractor,
     private val falsingInteractor: FalsingInteractor,
     private val powerInteractor: PowerInteractor,
-    shadeInteractor: ShadeInteractor,
+    shadeModeInteractor: ShadeModeInteractor,
     private val remoteInputInteractor: RemoteInputInteractor,
     private val splitEdgeDetector: SplitEdgeDetector,
     private val logger: SceneLogger,
     hapticsViewModelFactory: SceneContainerHapticsViewModel.Factory,
+    val lightRevealScrim: LightRevealScrimViewModel,
+    val wallpaperViewModel: WallpaperViewModel,
+    keyguardInteractor: KeyguardInteractor,
     @Assisted view: View,
     @Assisted private val motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
 ) : ExclusiveActivatable() {
@@ -76,7 +82,7 @@ constructor(
 
     val allContentKeys: List<ContentKey> = sceneInteractor.allContentKeys
 
-    private val hapticsViewModel = hapticsViewModelFactory.create(view)
+    val hapticsViewModel: SceneContainerHapticsViewModel = hapticsViewModelFactory.create(view)
 
     /**
      * The [SwipeSourceDetector] to use for defining which edges of the screen can be defined in the
@@ -87,9 +93,17 @@ constructor(
             traceName = "edgeDetector",
             initialValue = DefaultEdgeDetector,
             source =
-                shadeInteractor.shadeMode.map {
+                shadeModeInteractor.shadeMode.map {
                     if (it is ShadeMode.Dual) splitEdgeDetector else DefaultEdgeDetector
                 },
+        )
+
+    /** Amount of color saturation for the Flexi🥃 ribbon. */
+    val ribbonColorSaturation: Float by
+        hydrator.hydratedStateOf(
+            traceName = "ribbonColorSaturation",
+            source = keyguardInteractor.dozeAmount.map { 1 - it },
+            initialValue = 1f,
         )
 
     override suspend fun onActivated(): Nothing {

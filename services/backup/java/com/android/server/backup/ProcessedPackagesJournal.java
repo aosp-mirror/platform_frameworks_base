@@ -46,7 +46,6 @@ import java.util.Set;
 final class ProcessedPackagesJournal {
     private static final String TAG = "ProcessedPackagesJournal";
     private static final String JOURNAL_FILE_NAME = "processed";
-    private static final boolean DEBUG = BackupManagerService.DEBUG;
 
     // using HashSet instead of ArraySet since we expect 100-500 elements range
     @GuardedBy("mProcessedPackages")
@@ -136,9 +135,7 @@ final class ProcessedPackagesJournal {
                 new BufferedInputStream(new FileInputStream(journalFile)))) {
             while (true) {
                 String packageName = oldJournal.readUTF();
-                if (DEBUG) {
-                    Slog.v(TAG, "   + " + packageName);
-                }
+                Slog.d(TAG, "   + " + packageName);
                 mProcessedPackages.add(packageName);
             }
         } catch (EOFException e) {

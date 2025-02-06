@@ -19,7 +19,6 @@ package com.android.systemui.volume.panel.component.volume.ui.composable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -70,8 +69,6 @@ private const val SHRINK_FRACTION = 0.55f
 private const val SCALE_FRACTION = 0.9f
 private const val EXPAND_BUTTON_SCALE = 0.8f
 
-/** Volume sliders laid out in a collapsable column */
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ColumnVolumeSliders(
     viewModels: List<SliderViewModel>,
@@ -144,8 +141,7 @@ fun ColumnVolumeSliders(
 
                         VolumeSlider(
                             modifier =
-                                Modifier.padding(top = 16.dp)
-                                    .fillMaxWidth()
+                                Modifier.fillMaxWidth()
                                     .animateEnterExit(
                                         enter =
                                             enterTransition(
@@ -157,7 +153,10 @@ fun ColumnVolumeSliders(
                                                 index = index,
                                                 totalCount = viewModels.size,
                                             ),
-                                    ),
+                                    )
+                                    .thenIf(!Flags.volumeRedesign()) {
+                                        Modifier.padding(top = 16.dp)
+                                    },
                             state = sliderState,
                             onValueChange = { newValue: Float ->
                                 sliderViewModel.onValueChanged(sliderState, newValue)

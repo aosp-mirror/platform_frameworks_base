@@ -30,6 +30,9 @@ interface PrimaryBouncerTransition {
     /** Radius of blur applied to the window's root view. */
     val windowBlurRadius: Flow<Float>
 
+    /** Radius of blur applied to the notifications on expanded shade */
+    val notificationBlurRadius: Flow<Float>
+
     fun transitionProgressToBlurRadius(
         starBlurRadius: Float,
         endBlurRadius: Float,

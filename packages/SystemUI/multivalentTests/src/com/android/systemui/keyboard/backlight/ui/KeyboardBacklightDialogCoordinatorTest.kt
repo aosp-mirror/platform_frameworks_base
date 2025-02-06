@@ -29,7 +29,6 @@ import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -44,7 +43,6 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class KeyboardBacklightDialogCoordinatorTest : SysuiTestCase() {

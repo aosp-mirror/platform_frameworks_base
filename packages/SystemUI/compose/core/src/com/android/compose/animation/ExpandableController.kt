@@ -319,7 +319,7 @@ internal class ExpandableControllerImpl(
 
             override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
                 delegate.onTransitionAnimationStart(isExpandingFullyAbove)
-                overlay.value = composeViewRoot.rootView.overlay as ViewGroupOverlay
+                overlay.value = transitionContainer.overlay as ViewGroupOverlay
                 cujType?.let { InteractionJankMonitor.getInstance().begin(composeViewRoot, it) }
             }
 

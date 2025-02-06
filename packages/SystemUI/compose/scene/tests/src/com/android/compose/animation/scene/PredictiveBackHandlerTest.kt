@@ -32,9 +32,11 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestOverlays.OverlayA
 import com.android.compose.animation.scene.TestOverlays.OverlayB
+import com.android.compose.animation.scene.TestOverlays.OverlayC
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
+import com.android.compose.animation.scene.UserActionResult.ShowOverlay
 import com.android.compose.animation.scene.subjects.assertThat
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
@@ -50,7 +52,7 @@ class PredictiveBackHandlerTest {
 
     @Test
     fun testBack() {
-        val layoutState = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val layoutState = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
         rule.setContent {
             SceneTransitionLayout(layoutState) {
                 scene(SceneA, mapOf(Back to SceneB)) { Box(Modifier.fillMaxSize()) }
@@ -70,7 +72,7 @@ class PredictiveBackHandlerTest {
         val transitionFrames = 2
         val layoutState =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     SceneA,
                     transitions =
                         transitions {
@@ -142,7 +144,7 @@ class PredictiveBackHandlerTest {
     fun testPredictiveBackWithPreview() {
         val layoutState =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     SceneA,
                     transitions = transitions { from(SceneA, to = SceneB, preview = {}) },
                 )
@@ -192,7 +194,7 @@ class PredictiveBackHandlerTest {
         var canChangeSceneCalled = false
         val layoutState =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     SceneA,
                     canChangeScene = {
                         canChangeSceneCalled = true
@@ -241,7 +243,7 @@ class PredictiveBackHandlerTest {
     fun backDismissesOverlayWithHighestZIndexByDefault() {
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     SceneA,
                     initialOverlays = setOf(OverlayA, OverlayB),
                 )
@@ -271,6 +273,57 @@ class PredictiveBackHandlerTest {
         rule.onNode(hasTestTag(SceneA.testTag)).assertIsDisplayed()
         rule.onNode(hasTestTag(OverlayA.testTag)).assertDoesNotExist()
         rule.onNode(hasTestTag(OverlayB.testTag)).assertDoesNotExist()
+    }
+
+    @Test
+    fun showOverlay_hideSomeOverlays() {
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutStateForTests(
+                    SceneA,
+                    initialOverlays = setOf(OverlayA, OverlayB),
+                )
+            }
+
+        rule.setContent {
+            SceneTransitionLayout(state) {
+                scene(SceneA) { Box(Modifier.fillMaxSize()) }
+                overlay(OverlayA) { Box(Modifier.fillMaxSize()) }
+                overlay(
+                    OverlayB,
+                    mapOf(
+                        Back to
+                            ShowOverlay(
+                                OverlayC,
+                                hideCurrentOverlays = ShowOverlay.HideCurrentOverlays.Some(OverlayA),
+                            )
+                    ),
+                ) {
+                    Box(Modifier.fillMaxSize())
+                }
+                overlay(OverlayC) { Box(Modifier.fillMaxSize()) }
+            }
+        }
+
+        assertThat(state.transitionState).hasCurrentOverlays(OverlayA, OverlayB)
+
+        val dispatcher = rule.activity.onBackPressedDispatcher
+        rule.runOnUiThread { dispatcher.dispatchOnBackStarted(backEvent()) }
+
+        val transition = assertThat(state.transitionState).isShowOrHideOverlayTransition()
+        assertThat(transition).hasCurrentScene(SceneA)
+        assertThat(transition).hasCurrentOverlays(OverlayB)
+        assertThat(transition).hasProgress(0f)
+        assertThat(transition).hasOverlay(OverlayC)
+
+        rule.runOnUiThread { dispatcher.dispatchOnBackProgressed(backEvent(progress = 0.5f)) }
+        assertThat(transition).hasProgress(0.5f)
+
+        rule.runOnUiThread { dispatcher.onBackPressed() }
+        rule.waitForIdle()
+        assertThat(state.transitionState).isIdle()
+        assertThat(state.transitionState).hasCurrentScene(SceneA)
+        assertThat(state.transitionState).hasCurrentOverlays(OverlayB, OverlayC)
     }
 
     private fun backEvent(progress: Float = 0f): BackEventCompat {

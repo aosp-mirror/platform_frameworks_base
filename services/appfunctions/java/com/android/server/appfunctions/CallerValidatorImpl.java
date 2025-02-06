@@ -18,7 +18,6 @@ package com.android.server.appfunctions;
 
 import static android.app.appfunctions.AppFunctionStaticMetadataHelper.APP_FUNCTION_STATIC_METADATA_DB;
 import static android.app.appfunctions.AppFunctionStaticMetadataHelper.APP_FUNCTION_STATIC_NAMESPACE;
-import static android.app.appfunctions.AppFunctionStaticMetadataHelper.STATIC_PROPERTY_RESTRICT_CALLERS_WITH_EXECUTE_APP_FUNCTIONS;
 import static android.app.appfunctions.AppFunctionStaticMetadataHelper.getDocumentIdForAppFunction;
 
 import static com.android.server.appfunctions.AppFunctionExecutors.THREAD_POOL_EXECUTOR;
@@ -84,12 +83,7 @@ class CallerValidatorImpl implements CallerValidator {
     }
 
     @Override
-    @RequiresPermission(
-            anyOf = {
-                Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
-                Manifest.permission.EXECUTE_APP_FUNCTIONS
-            },
-            conditional = true)
+    @RequiresPermission(Manifest.permission.EXECUTE_APP_FUNCTIONS)
     public AndroidFuture<Boolean> verifyCallerCanExecuteAppFunction(
             int callingUid,
             int callingPid,
@@ -98,17 +92,6 @@ class CallerValidatorImpl implements CallerValidator {
             @NonNull String targetPackageName,
             @NonNull String functionId) {
         if (callerPackageName.equals(targetPackageName)) {
-            return AndroidFuture.completedFuture(true);
-        }
-
-        boolean hasTrustedExecutionPermission =
-                mContext.checkPermission(
-                                Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
-                                callingPid,
-                                callingUid)
-                        == PackageManager.PERMISSION_GRANTED;
-
-        if (hasTrustedExecutionPermission) {
             return AndroidFuture.completedFuture(true);
         }
 
@@ -138,7 +121,8 @@ class CallerValidatorImpl implements CallerValidator {
                                 .build())
                 .thenApply(
                         batchResult -> getGenericDocumentFromBatchResult(batchResult, documentId))
-                .thenApply(document -> !getRestrictCallersWithExecuteAppFunctionsProperty(document))
+                // At this point, already checked the app has the permission.
+                .thenApply(document -> true)
                 .whenComplete(
                         (result, throwable) -> {
                             futureAppSearchSession.close();
@@ -158,12 +142,6 @@ class CallerValidatorImpl implements CallerValidator {
                         + documentId
                         + " due to "
                         + failedResult.getErrorMessage());
-    }
-
-    private static boolean getRestrictCallersWithExecuteAppFunctionsProperty(
-            GenericDocument genericDocument) {
-        return genericDocument.getPropertyBoolean(
-                STATIC_PROPERTY_RESTRICT_CALLERS_WITH_EXECUTE_APP_FUNCTIONS);
     }
 
     @Override

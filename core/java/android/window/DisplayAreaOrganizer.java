@@ -121,6 +121,14 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
     public static final int FEATURE_WINDOWING_LAYER = FEATURE_SYSTEM_FIRST + 9;
 
     /**
+     * Display area for rendering app zoom out. When there are multiple layers on the screen,
+     * we want to render these layers based on a depth model. Here we zoom out the layer behind,
+     * whether it's an app or the homescreen.
+     * @hide
+     */
+    public static final int FEATURE_APP_ZOOM_OUT = FEATURE_SYSTEM_FIRST + 10;
+
+    /**
      * The last boundary of display area for system features
      */
     public static final int FEATURE_SYSTEM_LAST = 10_000;

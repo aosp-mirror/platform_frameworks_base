@@ -281,6 +281,23 @@ class AppListRepositoryTest {
         )
     }
 
+    @EnableFlags(Flags.FLAG_REMOVE_HIDDEN_MODULE_USAGE)
+    @Test
+    fun loadApps_shouldIncludeAllSystemModuleApps() = runTest {
+        packageManager.stub {
+            on { getInstalledModules(any()) } doReturn listOf(HIDDEN_MODULE)
+        }
+        mockInstalledApplications(
+            listOf(NORMAL_APP, HIDDEN_APEX_APP, HIDDEN_MODULE_APP),
+            ADMIN_USER_ID
+        )
+
+        val appList = repository.loadApps(userId = ADMIN_USER_ID)
+
+        assertThat(appList).containsExactly(NORMAL_APP, HIDDEN_APEX_APP, HIDDEN_MODULE_APP)
+    }
+
+    @DisableFlags(Flags.FLAG_REMOVE_HIDDEN_MODULE_USAGE)
     @EnableFlags(Flags.FLAG_PROVIDE_INFO_OF_APK_IN_APEX)
     @Test
     fun loadApps_hasApkInApexInfo_shouldNotIncludeAllHiddenApps() = runTest {
@@ -297,7 +314,7 @@ class AppListRepositoryTest {
         assertThat(appList).containsExactly(NORMAL_APP)
     }
 
-    @DisableFlags(Flags.FLAG_PROVIDE_INFO_OF_APK_IN_APEX)
+    @DisableFlags(Flags.FLAG_PROVIDE_INFO_OF_APK_IN_APEX, Flags.FLAG_REMOVE_HIDDEN_MODULE_USAGE)
     @Test
     fun loadApps_noApkInApexInfo_shouldNotIncludeHiddenSystemModule() = runTest {
         packageManager.stub {
@@ -456,6 +473,7 @@ class AppListRepositoryTest {
             isArchived = true
         }
 
+        // TODO(b/382016780): to be removed after flag cleanup.
         val HIDDEN_APEX_APP = ApplicationInfo().apply {
             packageName = "hidden.apex.package"
         }

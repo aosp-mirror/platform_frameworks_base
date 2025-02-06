@@ -25,7 +25,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 
@@ -33,7 +32,6 @@ import kotlinx.coroutines.flow.flatMapLatest
  * Breaks down ALTERNATE BOUNCER->DOZING transition into discrete steps for corresponding views to
  * consume.
  */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class AlternateBouncerToDozingTransitionViewModel
 @Inject

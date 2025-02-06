@@ -17,6 +17,7 @@
 package com.android.systemui.mediaprojection.data.repository
 
 import android.hardware.display.displayManager
+import android.media.projection.MediaProjectionEvent
 import android.media.projection.MediaProjectionInfo
 import android.media.projection.StopReason
 import android.os.Binder
@@ -32,8 +33,11 @@ import com.android.systemui.Flags.FLAG_STATUS_BAR_SHOW_AUDIO_ONLY_PROJECTION_CHI
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
@@ -42,7 +46,7 @@ import com.android.systemui.mediaprojection.taskswitcher.FakeMediaProjectionMana
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeTasksRepository
 import com.android.systemui.mediaprojection.taskswitcher.fakeActivityTaskManager
 import com.android.systemui.mediaprojection.taskswitcher.fakeMediaProjectionManager
-import com.android.systemui.mediaprojection.taskswitcher.taskSwitcherKosmos
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -55,7 +59,7 @@ import org.mockito.kotlin.whenever
 @SmallTest
 class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
 
-    private val kosmos = taskSwitcherKosmos()
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val testScope = kosmos.testScope
 
     private val fakeMediaProjectionManager = kosmos.fakeMediaProjectionManager
@@ -345,4 +349,40 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
             verify(fakeMediaProjectionManager.mediaProjectionManager)
                 .stopActiveProjection(StopReason.STOP_QS_TILE)
         }
+
+    @Test
+    @EnableFlags(com.android.media.projection.flags.Flags.FLAG_SHOW_STOP_DIALOG_POST_CALL_END)
+    fun projectionStartedDuringCallAndActivePostCallEvent_flagEnabled_emitsUnit() =
+        kosmos.runTest {
+            val projectionStartedDuringCallAndActivePostCallEvent by
+                collectLastValue(repo.projectionStartedDuringCallAndActivePostCallEvent)
+
+            fakeMediaProjectionManager.dispatchEvent(
+                PROJECTION_STARTED_DURING_CALL_AND_ACTIVE_POST_CALL_EVENT
+            )
+
+            assertThat(projectionStartedDuringCallAndActivePostCallEvent).isEqualTo(Unit)
+        }
+
+    @Test
+    @DisableFlags(com.android.media.projection.flags.Flags.FLAG_SHOW_STOP_DIALOG_POST_CALL_END)
+    fun projectionStartedDuringCallAndActivePostCallEvent_flagDisabled_doesNotEmit() =
+        testScope.runTest {
+            val projectionStartedDuringCallAndActivePostCallEvent by
+                collectLastValue(repo.projectionStartedDuringCallAndActivePostCallEvent)
+
+            fakeMediaProjectionManager.dispatchEvent(
+                PROJECTION_STARTED_DURING_CALL_AND_ACTIVE_POST_CALL_EVENT
+            )
+
+            assertThat(projectionStartedDuringCallAndActivePostCallEvent).isNull()
+        }
+
+    companion object {
+        private val PROJECTION_STARTED_DURING_CALL_AND_ACTIVE_POST_CALL_EVENT =
+            MediaProjectionEvent(
+                MediaProjectionEvent.PROJECTION_STARTED_DURING_CALL_AND_ACTIVE_POST_CALL,
+                /* timestampMillis= */ 100L,
+            )
+    }
 }

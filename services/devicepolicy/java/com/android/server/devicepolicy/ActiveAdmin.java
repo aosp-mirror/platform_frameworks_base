@@ -73,9 +73,6 @@ import java.util.stream.Collectors;
 
 class ActiveAdmin {
 
-    private final int userId;
-    public final boolean isPermissionBased;
-
     private static final String TAG_DISABLE_KEYGUARD_FEATURES = "disable-keyguard-features";
     private static final String TAG_TEST_ONLY_ADMIN = "test-only-admin";
     private static final String TAG_DISABLE_CAMERA = "disable-camera";
@@ -364,23 +361,8 @@ class ActiveAdmin {
     private static final int PROVISIONING_CONTEXT_LENGTH_LIMIT = 1000;
 
     ActiveAdmin(DeviceAdminInfo info, boolean isParent) {
-        this.userId = -1;
         this.info = info;
         this.isParent = isParent;
-        this.isPermissionBased = false;
-    }
-
-    ActiveAdmin(int userId, boolean permissionBased) {
-        if (Flags.activeAdminCleanup()) {
-            throw new UnsupportedOperationException("permission based admin no longer supported");
-        }
-        if (permissionBased == false) {
-            throw new IllegalArgumentException("Can only pass true for permissionBased admin");
-        }
-        this.userId = userId;
-        this.isPermissionBased = permissionBased;
-        this.isParent = false;
-        this.info = null;
     }
 
     ActiveAdmin getParentActiveAdmin() {
@@ -397,16 +379,10 @@ class ActiveAdmin {
     }
 
     int getUid() {
-        if (isPermissionBased) {
-            return -1;
-        }
         return info.getActivityInfo().applicationInfo.uid;
     }
 
     public UserHandle getUserHandle() {
-        if (isPermissionBased) {
-            return UserHandle.of(userId);
-        }
         return UserHandle.of(UserHandle.getUserId(info.getActivityInfo().applicationInfo.uid));
     }
 

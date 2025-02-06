@@ -84,6 +84,16 @@ flag {
 }
 
 flag {
+   name: "notification_ambient_suppression_after_inflation"
+   namespace: "systemui"
+   description: "Move the DND visual effects filter to the finalize stage of the pipeline when it is doze-dependent, but keep it in the pre-group stage when it is doze-independent."
+   bug: "373411431"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "notification_over_expansion_clipping_fix"
    namespace: "systemui"
    description: "Fix NSSL clipping when over-expanding; fixes split shade bug."
@@ -133,14 +143,6 @@ flag {
 }
 
 flag {
-    name: "notifications_footer_view_refactor"
-    namespace: "systemui"
-    description: "Enables the refactored version of the footer view in the notification shade "
-        "(containing the \"Clear all\" button). Should not bring any behavior changes"
-    bug: "293167744"
-}
-
-flag {
     name: "notifications_icon_container_refactor"
     namespace: "systemui"
     description: "Enables the refactored version of the notification icon container in StatusBar, "
@@ -174,13 +176,6 @@ flag {
 }
 
 flag {
-    name: "notifications_dismiss_pruned_summaries"
-    namespace: "systemui"
-    description: "NotifCollection.dismissNotifications will now dismiss summaries that are pruned from the shade."
-    bug: "355967751"
-}
-
-flag {
    name: "notification_transparent_header_fix"
    namespace: "systemui"
    description: "fix the transparent group header issue for async header inflation."
@@ -188,6 +183,28 @@ flag {
    metadata {
         purpose: PURPOSE_BUGFIX
    }
+}
+
+flag {
+    name: "notifications_pinned_hun_in_shade"
+    namespace: "systemui"
+    description: "Fixes displaying pinned HUNs in the Shade, making sure that their y and z positions are correct."
+    bug: "385041854"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "notification_undo_guts_on_config_changed"
+    namespace: "systemui"
+    description: "Fixes a bug where a theme or font change while notification guts were open"
+        " (e.g. the snooze options or notification info) would show an empty notification by"
+        " closing the guts and undoing changes."
+    bug: "379267630"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -232,6 +249,13 @@ flag {
 }
 
 flag {
+  name: "notification_bundle_ui"
+  namespace: "systemui"
+  description: "Three-level group UI for notification bundles"
+  bug: "367996732"
+}
+
+flag {
     name: "notification_background_tint_optimization"
     namespace: "systemui"
     description: "Re-enable the codepath that removed tinting of notifications when the"
@@ -255,13 +279,6 @@ flag {
     namespace: "systemui"
     description: "Enables the scene container framework go/flexiglass."
     bug: "283121968"
-}
-
-flag {
-    name: "dual_shade"
-    namespace: "systemui"
-    description: "Enables Dual Shade (go/dual-shade-design-doc)."
-    bug: "337259436"
 }
 
 flag {
@@ -380,6 +397,13 @@ flag {
 }
 
 flag {
+    name: "status_bar_mobile_icon_kairos"
+    namespace: "systemui"
+    description: "Refactors the mobile connection icon in the status bar to use the Kairos library"
+    bug: "383172066"
+}
+
+flag {
     name: "status_bar_monochrome_icons_fix"
     namespace: "systemui"
     description: "Fixes the status bar icon size when drawing InsetDrawables (ie. monochrome icons)"
@@ -387,14 +411,6 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
-}
-
-flag {
-    name: "status_bar_screen_sharing_chips"
-    namespace: "systemui"
-    description: "Show chips on the left side of the status bar when a user is screen sharing, "
-        "recording, or casting"
-    bug: "332662551"
 }
 
 flag {
@@ -429,24 +445,6 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
-}
-
-flag {
-    name: "status_bar_use_repos_for_call_chip"
-    namespace: "systemui"
-    description: "Use repositories as the source of truth for call notifications shown as a chip in"
-        "the status bar"
-    bug: "328584859"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
-    name: "status_bar_call_chip_notification_icon"
-    namespace: "systemui"
-    description: "Use the small icon set on the notification for the status bar call chip"
-    bug: "354930838"
 }
 
 flag {
@@ -510,6 +508,14 @@ flag {
 }
 
 flag {
+    name: "status_bar_no_hun_behavior"
+    namespace: "systemui"
+    description: "When there's a HUN, don't show the HUN text or icon in the status bar. Instead, "
+       "continue showing the usual status bar."
+    bug: "385740230"
+}
+
+flag {
     name: "promote_notifications_automatically"
     namespace: "systemui"
     description: "Flag to automatically turn certain notifications into promoted notifications so "
@@ -540,6 +546,26 @@ flag {
 }
 
 flag {
+   name: "face_scanning_animation_npe_fix"
+   namespace: "systemui"
+   description: "Fix for the face scanning animation NPE"
+   bug: "392032258"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+    name: "indication_text_a11y_fix"
+    namespace: "systemui"
+    description: "add double shadow to the indication text at the bottom of the lock screen"
+    bug: "349297241"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
    name: "rest_to_unlock"
    namespace: "systemui"
    description: "Require prolonged touch for fingerprint authentication"
@@ -551,20 +577,6 @@ flag {
    namespace: "systemui"
    description: "Replace Record Trace QS Tile with expanded Record Issue QS Tile"
    bug: "305049544"
-}
-
-flag {
-   name: "clock_reactive_variants"
-   namespace: "systemui"
-   description: "Add reactive variant fonts to some clocks"
-   bug: "343495953"
-}
-
-flag {
-   name: "lockscreen_custom_clocks"
-   namespace: "systemui"
-   description: "Enable lockscreen custom clocks"
-   bug: "378486437"
 }
 
 flag {
@@ -612,13 +624,6 @@ flag {
 }
 
 flag {
-   name: "quick_settings_visual_haptics_longpress"
-   namespace: "systemui"
-   description: "Enable special visual and haptic effects for quick settings tiles with long-press actions"
-   bug: "229856884"
-}
-
-flag {
    name: "switch_user_on_bg"
    namespace: "systemui"
    description: "Does user switching on a background thread"
@@ -631,13 +636,6 @@ flag {
     description: "(Upstream request) Always show the network activity inout indicators and "
         "prefer using alpha to distinguish network activity."
     bug: "310715220"
-}
-
-flag {
-  name: "status_bar_connected_displays"
-  namespace: "lse_desktop_experience"
-  description: "Shows the status bar on connected displays"
-  bug: "379264862"
 }
 
 flag {
@@ -1200,6 +1198,13 @@ flag {
 }
 
 flag {
+  name: "glanceable_hub_blurred_background"
+  namespace: "systemui"
+  description: "Allow blurred background on glanceable hub"
+  bug: "389788272"
+}
+
+flag {
   name: "communal_widget_resizing"
   namespace: "systemui"
   description: "Allow resizing of widgets on glanceable hub"
@@ -1321,10 +1326,13 @@ flag {
 }
 
 flag {
-  name: "media_controls_drawables_reuse"
+  name: "media_controls_drawables_reuse_bugfix"
   namespace: "systemui"
   description: "Re-use created media drawables for media controls"
   bug: "358402034"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -1349,6 +1357,13 @@ flag {
   namespace: "systemui"
   description: "Enables media visuals update"
   bug: "379044958"
+}
+
+flag {
+  name: "output_switcher_redesign"
+  namespace: "systemui"
+  description: "Enables visual update for Media Output Switcher"
+  bug: "388296370"
 }
 
 flag {
@@ -1524,16 +1539,6 @@ flag {
 }
 
 flag {
-   name: "sim_pin_talkback_fix_for_double_submit"
-   namespace: "systemui"
-   description: "The SIM PIN entry screens show the wrong message due"
-   bug: "346932439"
-   metadata {
-        purpose: PURPOSE_BUGFIX
-   }
-}
-
-flag {
    name: "sim_pin_bouncer_reset"
    namespace: "systemui"
    description: "The SIM PIN bouncer does not close after unlocking"
@@ -1685,13 +1690,6 @@ flag {
 }
 
 flag {
-   name: "magic_portrait_wallpapers"
-   namespace: "systemui"
-   description: "Magic Portrait related changes in systemui"
-   bug: "370863642"
-}
-
-flag {
   name: "notes_role_qs_tile"
   namespace: "systemui"
   description: "Enables notes role qs tile which opens default notes role app in app bubbles"
@@ -1795,7 +1793,14 @@ flag {
 flag {
     name: "bouncer_ui_revamp"
     namespace: "systemui"
-    description: "Updates to background (blur), button animations and font changes."
+    description: "Updates to background (blur) for bouncer"
+    bug: "370555003"
+}
+
+flag {
+    name: "bouncer_ui_revamp_2"
+    namespace: "systemui"
+    description: "Updates to button animations and font changes for bouncer, bouncer_ui_revamp will cover only the blur changes."
     bug: "376491880"
 }
 
@@ -1807,20 +1812,17 @@ flag {
 }
 
 flag {
+    name: "notification_row_transparency"
+    namespace: "systemui"
+    description: "Enables transparency on the Notification Shade."
+    bug: "392187268"
+}
+
+flag {
   name: "shade_expands_on_status_bar_long_press"
   namespace: "systemui"
   description: "Expands the shade on long press of any status bar"
   bug: "371224114"
-}
-
-flag {
-  name: "disable_shade_expands_on_trackpad_two_finger_swipe"
-  namespace: "systemui"
-  description: "Disables expansion of the shade via two finger swipe on a trackpad"
-  bug: "356804470"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
 }
 
 flag {
@@ -1861,6 +1863,13 @@ flag {
 }
 
 flag {
+    name: "double_tap_to_sleep"
+    namespace: "systemui"
+    description: "Enable Double Tap to Sleep"
+    bug: "385194612"
+}
+
+flag{
     name: "gsf_bouncer"
     namespace: "systemui"
     description: "Applies GSF font styles to Bouncer surfaces."
@@ -1872,13 +1881,6 @@ flag {
     namespace: "systemui"
     description: "Applies GSF font styles to Quick Settings surfaces."
     bug: "379364381"
-}
-
-flag {
-    name: "glanceable_hub_shortcut_button"
-    namespace: "systemui"
-    description: "Adds a shortcut button to lockscreen to show glanceable hub."
-    bug: "378173531"
 }
 
 flag {
@@ -1924,8 +1926,97 @@ flag {
 }
 
 flag {
+  name: "disable_shade_trackpad_two_finger_swipe"
+  namespace: "systemui"
+  description: "Disables expansion of the shade via two finger swipe on a trackpad"
+  bug: "356804470"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
    name: "notification_magic_actions_treatment"
    namespace: "systemui"
    description: "Special UI treatment for magic actions"
    bug: "383567383"
+}
+
+flag {
+    name: "show_audio_sharing_slider_in_volume_panel"
+    namespace: "cross_device_experiences"
+    description: "Show two sliders in volume panel when audio sharing."
+    bug: "336183611"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+   name: "magnetic_notification_swipes"
+   namespace: "systemui"
+   description: "Add support for magnetic behavior on horizontal notification swipes."
+   bug: "390179908"
+}
+
+flag {
+    name: "ui_rich_ongoing_force_expanded"
+    namespace: "systemui"
+    description: "Force promoted notifications to always be expanded"
+    bug: "380901479"
+}
+
+flag {
+  name: "permission_helper_ui_rich_ongoing"
+  namespace: "systemui"
+  description: "[RONs] Guards inline permission helper for demoting RONs"
+  bug: "379186372"
+}
+
+flag {
+    name: "aod_ui_rich_ongoing"
+    namespace: "systemui"
+    description: "Show a rich ongoing notification on the always-on display (depends on ui_rich_ongoing)"
+    bug: "369151941"
+}
+
+flag {
+    name: "stabilize_heads_up_group_v2"
+    namespace: "systemui"
+    description: "Stabilize heads up groups in VisualStabilityCoordinator"
+    bug: "357753857"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+   name: "shade_launch_accessibility"
+   namespace: "systemui"
+   description: "Intercept accessibility focus events for the Shade during launch animations to avoid stray TalkBack events."
+   bug: "379222226"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+    name: "show_locked_by_your_watch_keyguard_indicator"
+    namespace: "systemui"
+    description: "Show a Locked by your watch indicator on the keyguard when the device is locked by the watch."
+    bug: "387322459"
+}
+
+flag {
+    name: "decouple_view_controller_in_animlib"
+    namespace: "systemui"
+    description: "Decouple view and controller in AnimLib."
+    bug: "393241010"
+}
+
+flag {
+    name: "clock_fidget_animation"
+    namespace: "systemui"
+    description: "Enables the clock fidget animation"
+    bug: "364664389"
 }

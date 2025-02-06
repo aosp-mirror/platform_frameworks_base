@@ -20,11 +20,9 @@ import static android.media.MediaRouter2.SCANNING_STATE_NOT_SCANNING;
 import static android.media.MediaRouter2.SCANNING_STATE_WHILE_INTERACTIVE;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
-import static com.android.media.flags.Flags.FLAG_ENABLE_MEDIA_ROUTE_2_INFO_PROVIDER_PACKAGE_NAME;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -287,7 +285,6 @@ public final class MediaRouter2Manager {
                 (route) -> sessionInfo.isSystemSession() ^ route.isSystemRoute());
     }
 
-    @FlaggedApi(FLAG_ENABLE_MEDIA_ROUTE_2_INFO_PROVIDER_PACKAGE_NAME)
     private List<MediaRoute2Info> getSortedRoutes(RouteDiscoveryPreference preference) {
         if (!preference.shouldRemoveDuplicates()) {
             synchronized (mRoutesLock) {
@@ -311,7 +308,6 @@ public final class MediaRouter2Manager {
         return routes;
     }
 
-    @FlaggedApi(FLAG_ENABLE_MEDIA_ROUTE_2_INFO_PROVIDER_PACKAGE_NAME)
     private List<MediaRoute2Info> getFilteredRoutes(
             @NonNull RoutingSessionInfo sessionInfo,
             boolean includeSelectedRoutes,

@@ -23,6 +23,8 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  *
  * Defines a message containing a description and arbitrary data object that can be
@@ -36,6 +38,13 @@ import com.android.internal.annotations.VisibleForTesting;
  */
 @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class Message implements Parcelable {
+    /**
+     * For tracing
+     *
+     * @hide Only for use within the system server.
+     */
+    public final AtomicInteger mEventId = new AtomicInteger();
+
     /**
      * User-defined message code so that the recipient can identify
      * what this message is about. Each {@link Handler} has its own name-space
@@ -100,6 +109,13 @@ public final class Message implements Parcelable {
      * @hide Only for use within the system server.
      */
     public int workSourceUid = UID_NONE;
+
+    /**
+     * Sending thread
+     *
+     * @hide
+     */
+    public String mSendingThreadName;
 
     /** If set message is in use.
      * This flag is set when the message is enqueued and remains set while it

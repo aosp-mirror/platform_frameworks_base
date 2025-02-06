@@ -51,7 +51,8 @@ static const char* kPathAllowlist[] = {
         "/dev/blkio/tasks",
         "/metadata/aconfig/maps/system.package.map",
         "/metadata/aconfig/maps/system.flag.map",
-        "/metadata/aconfig/boot/system.val"
+        "/metadata/aconfig/boot/system.val",
+        "/metadata/libprocessgroup/memcg_v2_max_activation_depth" // TODO Revert after go/android-memcgv2-exp b/386797433
 };
 
 static const char kFdPath[] = "/proc/self/fd";

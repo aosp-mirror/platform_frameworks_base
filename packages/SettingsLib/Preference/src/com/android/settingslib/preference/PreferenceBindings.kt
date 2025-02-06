@@ -22,6 +22,7 @@ import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.TwoStatePreference
+import com.android.settingslib.metadata.EXTRA_BINDING_SCREEN_ARGS
 import com.android.settingslib.metadata.EXTRA_BINDING_SCREEN_KEY
 import com.android.settingslib.metadata.PreferenceMetadata
 import com.android.settingslib.metadata.PreferenceScreenMetadata
@@ -35,9 +36,11 @@ interface PreferenceScreenBinding : PreferenceBinding {
         super.bind(preference, metadata)
         val context = preference.context
         val screenMetadata = metadata as PreferenceScreenMetadata
+        val extras = preference.extras
         // Pass the preference key to fragment, so that the fragment could find associated
         // preference screen registered in PreferenceScreenRegistry
-        preference.extras.putString(EXTRA_BINDING_SCREEN_KEY, preference.key)
+        extras.putString(EXTRA_BINDING_SCREEN_KEY, preference.key)
+        screenMetadata.arguments?.let { extras.putBundle(EXTRA_BINDING_SCREEN_ARGS, it) }
         if (preference is PreferenceScreen) {
             val screenTitle = screenMetadata.screenTitle
             preference.title =
@@ -45,7 +48,7 @@ interface PreferenceScreenBinding : PreferenceBinding {
                     context.getString(screenTitle)
                 } else {
                     screenMetadata.getScreenTitle(context)
-                        ?: (this as? PreferenceTitleProvider)?.getTitle(context)
+                        ?: (screenMetadata as? PreferenceTitleProvider)?.getTitle(context)
                 }
         }
     }
@@ -66,7 +69,7 @@ interface PreferenceCategoryBinding : PreferenceBinding {
 }
 
 /** A boolean value type preference associated with the abstract [TwoStatePreference]. */
-interface TwoStatePreferenceBinding : PreferenceBinding {
+interface BooleanValuePreferenceBinding : PreferenceBinding {
 
     override fun bind(preference: Preference, metadata: PreferenceMetadata) {
         super.bind(preference, metadata)
@@ -78,7 +81,7 @@ interface TwoStatePreferenceBinding : PreferenceBinding {
 }
 
 /** A boolean value type preference associated with [SwitchPreferenceCompat]. */
-interface SwitchPreferenceBinding : TwoStatePreferenceBinding {
+interface SwitchPreferenceBinding : BooleanValuePreferenceBinding {
 
     override fun createWidget(context: Context): Preference = SwitchPreferenceCompat(context)
 
@@ -88,7 +91,7 @@ interface SwitchPreferenceBinding : TwoStatePreferenceBinding {
 }
 
 /** A boolean value type preference associated with [MainSwitchPreference]. */
-interface MainSwitchPreferenceBinding : TwoStatePreferenceBinding {
+interface MainSwitchPreferenceBinding : BooleanValuePreferenceBinding {
 
     override fun createWidget(context: Context): Preference = MainSwitchPreference(context)
 

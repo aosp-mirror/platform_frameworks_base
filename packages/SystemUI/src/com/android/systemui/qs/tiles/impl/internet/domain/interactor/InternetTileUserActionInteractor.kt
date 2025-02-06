@@ -43,6 +43,7 @@ constructor(
     private val wifiStateWorker: WifiStateWorker,
     private val accessPointController: AccessPointController,
     private val qsTileIntentUserActionHandler: QSTileIntentUserInputHandler,
+    private val internetDetailsViewModelFactory: InternetDetailsViewModel.Factory,
 ) : QSTileUserActionInteractor<InternetTileModel> {
 
     override suspend fun handleInput(input: QSTileInput<InternetTileModel>): Unit =
@@ -70,7 +71,7 @@ constructor(
         }
 
     override val detailsViewModel: TileDetailsViewModel =
-        InternetDetailsViewModel { handleLongClick(null) }
+        internetDetailsViewModelFactory.create { handleLongClick(null) }
 
     private fun handleLongClick(expandable:Expandable?){
         qsTileIntentUserActionHandler.handle(

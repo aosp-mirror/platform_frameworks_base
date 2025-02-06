@@ -51,6 +51,7 @@ public class BatteryChargeCalculatorTest {
 
     @Before
     public void setup() {
+        mStatsRule.getBatteryStats().setNoAutoReset(true);
         mStatsRule.getBatteryStats().onSystemReady(mock(Context.class));
     }
 
@@ -83,8 +84,8 @@ public class BatteryChargeCalculatorTest {
                 .isWithin(PRECISION).of(360.0);
         assertThat(batteryUsageStats.getDischargedPowerRange().getUpper())
                 .isWithin(PRECISION).of(400.0);
-        // 5_000_000 (current time) - 1_000_000 (started discharging)
-        assertThat(batteryUsageStats.getDischargeDurationMs()).isEqualTo(4_000_000);
+        // 5_000_000 (current time) - 0 (started discharging, see BatteryUsageStatsRule)
+        assertThat(batteryUsageStats.getDischargeDurationMs()).isEqualTo(5_000_000);
         assertThat(batteryUsageStats.getBatteryTimeRemainingMs()).isEqualTo(8_000_000);
         assertThat(batteryUsageStats.getChargeTimeRemainingMs()).isEqualTo(-1);
 

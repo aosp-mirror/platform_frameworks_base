@@ -1846,6 +1846,7 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /** @hide */
+    @WindowConfiguration.WindowingMode
     public int getLaunchWindowingMode() {
         return mLaunchWindowingMode;
     }
@@ -1855,7 +1856,7 @@ public class ActivityOptions extends ComponentOptions {
      * @hide
      */
     @TestApi
-    public void setLaunchWindowingMode(int windowingMode) {
+    public void setLaunchWindowingMode(@WindowConfiguration.WindowingMode int windowingMode) {
         mLaunchWindowingMode = windowingMode;
     }
 

@@ -682,9 +682,9 @@ public class PaintBundle {
      * @param radius Must be positive. The radius of the gradient.
      * @param colors The sRGB colors distributed between the center and edge
      * @param stops May be <code>null</code>. Valid values are between <code>0.0f</code> and <code>
-     *      1.0f</code>. The relative position of each corresponding color in the colors array. If
-     *     <code>null</code>, colors are distributed evenly between the center and edge of the
-     *     circle.
+     *                 1.0f</code>. The relative position of each corresponding color in the colors
+     *     array. If <code>null</code>, colors are distributed evenly between the center and edge of
+     *     the circle.
      * @param tileMode The Shader tiling mode
      */
     public void setRadialGradient(
@@ -808,7 +808,7 @@ public class PaintBundle {
     }
 
     /**
-     * Set the color based the R,G,B,A values
+     * Set the color based the R,G,B,A values (Warning this does not support NaN ids)
      *
      * @param r red (0.0 to 1.0)
      * @param g green (0.0 to 1.0)
@@ -816,7 +816,7 @@ public class PaintBundle {
      * @param a alpha (0.0 to 1.0)
      */
     public void setColor(float r, float g, float b, float a) {
-        setColor((int) (r * 255), (int) (g * 255), (int) (b * 255), (int) (a * 255));
+        setColor(Utils.toARGB(a, r, g, b));
     }
 
     /**
@@ -897,6 +897,11 @@ public class PaintBundle {
         mPos++;
     }
 
+    /**
+     * set Filter Bitmap
+     *
+     * @param filter set to false to disable interpolation
+     */
     public void setFilterBitmap(boolean filter) {
         mArray[mPos] = FILTER_BITMAP | (filter ? (1 << 16) : 0);
         mPos++;
@@ -944,6 +949,12 @@ public class PaintBundle {
         }
     }
 
+    /**
+     * Convert a blend mode integer as a string
+     *
+     * @param mode the blend mode
+     * @return the blend mode as a string
+     */
     public static @NonNull String blendModeString(int mode) {
         switch (mode) {
             case PaintBundle.BLEND_MODE_CLEAR:

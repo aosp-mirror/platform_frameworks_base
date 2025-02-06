@@ -83,19 +83,28 @@ constructor(
             printSection("SeenNotificationsInteractor") {
                 print(
                     "hasFilteredOutSeenNotifications",
-                    notificationListRepository.hasFilteredOutSeenNotifications.value
+                    notificationListRepository.hasFilteredOutSeenNotifications.value,
                 )
                 print(
                     "topOngoingNotificationKey",
-                    notificationListRepository.topOngoingNotificationKey.value
+                    notificationListRepository.topOngoingNotificationKey.value,
                 )
                 print(
                     "topUnseenNotificationKey",
-                    notificationListRepository.topUnseenNotificationKey.value
+                    notificationListRepository.topUnseenNotificationKey.value,
                 )
             }
         }
 
+    /**
+     * There are three states for LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS.
+     *
+     * 0: unset_off, default value for phones.
+     *
+     * 1: on, default value for tablets.
+     *
+     * 2: off.
+     */
     fun isLockScreenShowOnlyUnseenNotificationsEnabled(): Flow<Boolean> =
         secureSettings
             // emit whenever the setting has changed
@@ -109,7 +118,7 @@ constructor(
             .map {
                 secureSettings.getIntForUser(
                     name = Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-                    default = 0,
+                    default = 0, // 0 is unset_off, which should be treated as off
                     userHandle = UserHandle.USER_CURRENT,
                 ) == 1
             }
@@ -124,10 +133,7 @@ constructor(
     fun isLockScreenNotificationMinimalismEnabled(): Flow<Boolean> =
         secureSettings
             // emit whenever the setting has changed
-            .observerFlow(
-                UserHandle.USER_ALL,
-                Settings.Secure.LOCK_SCREEN_NOTIFICATION_MINIMALISM,
-            )
+            .observerFlow(UserHandle.USER_ALL, Settings.Secure.LOCK_SCREEN_NOTIFICATION_MINIMALISM)
             // perform a query immediately
             .onStart { emit(Unit) }
             // for each change, lookup the new value

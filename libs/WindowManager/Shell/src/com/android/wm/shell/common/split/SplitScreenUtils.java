@@ -27,13 +27,9 @@ import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSIT
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 
 import android.app.ActivityManager;
-import android.app.PendingIntent;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
-
-import androidx.annotation.Nullable;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.wm.shell.Flags;
@@ -65,31 +61,6 @@ public class SplitScreenUtils {
                 && ArrayUtils.contains(CONTROLLED_WINDOWING_MODES, taskInfo.getWindowingMode());
     }
 
-    /** Retrieve package name from an intent */
-    @Nullable
-    public static String getPackageName(Intent intent) {
-        if (intent == null || intent.getComponent() == null) {
-            return null;
-        }
-        return intent.getComponent().getPackageName();
-    }
-
-    /** Retrieve package name from a PendingIntent */
-    @Nullable
-    public static String getPackageName(PendingIntent pendingIntent) {
-        if (pendingIntent == null || pendingIntent.getIntent() == null) {
-            return null;
-        }
-        return getPackageName(pendingIntent.getIntent());
-    }
-
-    /** Retrieve package name from a taskId */
-    @Nullable
-    public static String getPackageName(int taskId, ShellTaskOrganizer taskOrganizer) {
-        final ActivityManager.RunningTaskInfo taskInfo = taskOrganizer.getRunningTaskInfo(taskId);
-        return taskInfo != null ? getPackageName(taskInfo.baseIntent) : null;
-    }
-
     /** Retrieve user id from a taskId */
     public static int getUserId(int taskId, ShellTaskOrganizer taskOrganizer) {
         final ActivityManager.RunningTaskInfo taskInfo = taskOrganizer.getRunningTaskInfo(taskId);
@@ -105,8 +76,7 @@ public class SplitScreenUtils {
      * Returns whether left/right split is allowed in portrait.
      */
     public static boolean allowLeftRightSplitInPortrait(Resources res) {
-        return Flags.enableLeftRightSplitInPortrait() && res.getBoolean(
-                com.android.internal.R.bool.config_leftRightSplitInPortrait);
+        return res.getBoolean(com.android.internal.R.bool.config_leftRightSplitInPortrait);
     }
 
     /**

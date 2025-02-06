@@ -17,6 +17,8 @@
 package com.android.systemui.shade.data.repository
 
 import android.view.Display
+import com.android.systemui.shade.display.FakeShadeDisplayPolicy
+import com.android.systemui.shade.display.ShadeDisplayPolicy
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -30,7 +32,6 @@ class FakeShadeDisplayRepository : ShadeDisplaysRepository {
     override val displayId: StateFlow<Int>
         get() = _displayId
 
-    fun resetDisplayId() {
-        _displayId.value = Display.DEFAULT_DISPLAY
-    }
+    override val currentPolicy: ShadeDisplayPolicy
+        get() = FakeShadeDisplayPolicy
 }

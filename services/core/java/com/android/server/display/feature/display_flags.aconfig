@@ -29,14 +29,6 @@ flag {
 }
 
 flag {
-    name: "enable_connected_display_management"
-    namespace: "display_manager"
-    description: "Feature flag for Connected Display management"
-    bug: "280739508"
-    is_fixed_read_only: true
-}
-
-flag {
     name: "enable_power_throttling_clamper"
     namespace: "display_manager"
     description: "Feature flag for Power Throttling Clamper"
@@ -462,6 +454,14 @@ flag {
 }
 
 flag {
+    name: "enable_hdr_override_plugin_type"
+    namespace: "display_manager"
+    description: "Enable hdr override plugin type"
+    bug: "389873155"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "enable_display_content_mode_management"
     namespace: "lse_desktop_experience"
     description: "Enable switching the content mode of connected displays between mirroring and extened. Also change the default content mode to extended mode."
@@ -478,4 +478,42 @@ flag {
     metadata {
       purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    name: "base_density_for_external_displays"
+    namespace: "lse_desktop_experience"
+    description: "Feature flag for setting a base density for external displays."
+    bug: "382954433"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "framerate_override_triggers_rr_callbacks"
+    namespace: "display_manager"
+    description: "Feature flag to trigger the RR callbacks when framerate overridding happens."
+    bug: "390113266"
+    is_fixed_read_only: true
+        metadata {
+          purpose: PURPOSE_BUGFIX
+        }
+}
+
+flag {
+    name: "refresh_rate_event_for_foreground_apps"
+    namespace: "display_manager"
+    description: "Send Refresh Rate events only for the apps in foreground."
+    bug: "390107600"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "display_category_built_in"
+    namespace: "windowing_sdk"
+    description: "Add a new category to get the built in displays."
+    bug: "293651324"
+    is_fixed_read_only: false
 }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.notification.domain.interactor
 
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -48,6 +49,7 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
             val startingNotif =
                 activeNotificationModel(
                     key = "notif1",
+                    appName = "Fake Name",
                     statusBarChipIcon = icon,
                     promotedContent = PROMOTED_CONTENT,
                 )
@@ -57,6 +59,7 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
             val latest by collectLastValue(underTest.notificationChip)
 
             assertThat(latest!!.key).isEqualTo("notif1")
+            assertThat(latest!!.appName).isEqualTo("Fake Name")
             assertThat(latest!!.statusBarChipIconView).isEqualTo(icon)
             assertThat(latest!!.promotedContent).isEqualTo(PROMOTED_CONTENT)
         }
@@ -69,6 +72,7 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
                 factory.create(
                     activeNotificationModel(
                         key = "notif1",
+                        appName = "Fake Name",
                         statusBarChipIcon = originalIconView,
                         promotedContent = PROMOTED_CONTENT,
                     ),
@@ -81,12 +85,14 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
             underTest.setNotification(
                 activeNotificationModel(
                     key = "notif1",
+                    appName = "New Name",
                     statusBarChipIcon = newIconView,
                     promotedContent = PROMOTED_CONTENT,
                 )
             )
 
             assertThat(latest!!.key).isEqualTo("notif1")
+            assertThat(latest!!.appName).isEqualTo("New Name")
             assertThat(latest!!.statusBarChipIconView).isEqualTo(newIconView)
         }
 
@@ -148,7 +154,8 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun notificationChip_missingStatusBarIconChipView_inConstructor_emitsNull() =
+    @DisableFlags(StatusBarConnectedDisplays.FLAG_NAME)
+    fun notificationChip_missingStatusBarIconChipView_cdFlagDisabled_inConstructor_emitsNull() =
         kosmos.runTest {
             val underTest =
                 factory.create(
@@ -163,6 +170,25 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
             val latest by collectLastValue(underTest.notificationChip)
 
             assertThat(latest).isNull()
+        }
+
+    @Test
+    @EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
+    fun notificationChip_missingStatusBarIconChipView_cdFlagEnabled_inConstructor_emitsNotNull() =
+        kosmos.runTest {
+            val underTest =
+                factory.create(
+                    activeNotificationModel(
+                        key = "notif1",
+                        statusBarChipIcon = null,
+                        promotedContent = PROMOTED_CONTENT,
+                    ),
+                    32L,
+                )
+
+            val latest by collectLastValue(underTest.notificationChip)
+
+            assertThat(latest).isNotNull()
         }
 
     @Test
@@ -186,7 +212,8 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun notificationChip_missingStatusBarIconChipView_inSet_emitsNull() =
+    @DisableFlags(StatusBarConnectedDisplays.FLAG_NAME)
+    fun notificationChip_cdFlagDisabled_missingStatusBarIconChipView_inSet_emitsNull() =
         kosmos.runTest {
             val startingNotif =
                 activeNotificationModel(
@@ -207,6 +234,31 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
             )
 
             assertThat(latest).isNull()
+        }
+
+    @Test
+    @EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
+    fun notificationChip_cdFlagEnabled_missingStatusBarIconChipView_inSet_emitsNotNull() =
+        kosmos.runTest {
+            val startingNotif =
+                activeNotificationModel(
+                    key = "notif1",
+                    statusBarChipIcon = mock(),
+                    promotedContent = PROMOTED_CONTENT,
+                )
+            val underTest = factory.create(startingNotif, 123L)
+            val latest by collectLastValue(underTest.notificationChip)
+            assertThat(latest).isNotNull()
+
+            underTest.setNotification(
+                activeNotificationModel(
+                    key = "notif1",
+                    statusBarChipIcon = null,
+                    promotedContent = PROMOTED_CONTENT,
+                )
+            )
+
+            assertThat(latest).isNotNull()
         }
 
     @Test

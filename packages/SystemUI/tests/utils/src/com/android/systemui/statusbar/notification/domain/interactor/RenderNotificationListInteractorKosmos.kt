@@ -16,11 +16,16 @@
 
 package com.android.systemui.statusbar.notification.domain.interactor
 
+import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.statusbar.notification.collection.provider.sectionStyleProvider
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 
 val Kosmos.renderNotificationListInteractor by
     Kosmos.Fixture {
-        RenderNotificationListInteractor(activeNotificationListRepository, sectionStyleProvider)
+        RenderNotificationListInteractor(
+            activeNotificationListRepository,
+            sectionStyleProvider,
+            applicationContext,
+        )
     }

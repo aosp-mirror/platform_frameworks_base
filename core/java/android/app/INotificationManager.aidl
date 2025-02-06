@@ -121,6 +121,7 @@ interface INotificationManager
     void deleteNotificationChannelGroup(String pkg, String channelGroupId);
     NotificationChannelGroup getNotificationChannelGroup(String pkg, String channelGroupId);
     ParceledListSlice getNotificationChannelGroups(String pkg);
+    ParceledListSlice getNotificationChannelGroupsWithoutChannels(String pkg);
     boolean onlyHasDefaultChannel(String pkg, int uid);
     boolean areChannelsBypassingDnd();
     ParceledListSlice getNotificationChannelsBypassingDnd(String pkg, int uid);
@@ -270,6 +271,10 @@ interface INotificationManager
 
     int[] getAllowedAdjustmentKeyTypes();
     void setAssistantAdjustmentKeyTypeState(int type, boolean enabled);
-    int[] getAllowedAdjustmentKeyTypesForPackage(String pkg);
-    void setAssistantAdjustmentKeyTypeStateForPackage(String pkg, int type, boolean enabled);
+    String[] getAdjustmentDeniedPackages(String key);
+    boolean isAdjustmentSupportedForPackage(String key, String pkg);
+    void setAdjustmentSupportedForPackage(String key, String pkg, boolean enabled);
+
+    // TODO: b/389918945 - Remove once nm_binder_perf flags are going to Nextfood.
+    void incrementCounter(String metricId);
 }

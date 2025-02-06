@@ -36,7 +36,6 @@ import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSIONS_MATC
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER;
 
 import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_MANIFEST_FILENAME;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_MANIFEST_VERSION;
@@ -175,7 +174,7 @@ public class TarBackupReader {
                     }
                     case 0: {
                         // presume EOF
-                        if (MORE_DEBUG) {
+                        if (DEBUG) {
                             Slog.w(TAG, "Saw type=0 in tar header block, info=" + info);
                         }
                         return null;
@@ -195,9 +194,7 @@ public class TarBackupReader {
                     info.path = info.path.substring(FullBackup.SHARED_PREFIX.length());
                     info.packageName = SHARED_BACKUP_AGENT_PACKAGE;
                     info.domain = FullBackup.SHARED_STORAGE_TOKEN;
-                    if (DEBUG) {
-                        Slog.i(TAG, "File in shared storage: " + info.path);
-                    }
+                    Slog.i(TAG, "File in shared storage: " + info.path);
                 } else if (FullBackup.APPS_PREFIX.regionMatches(0,
                         info.path, 0, FullBackup.APPS_PREFIX.length())) {
                     // App content!  Parse out the package name and domain
@@ -227,11 +224,9 @@ public class TarBackupReader {
                     }
                 }
             } catch (IOException e) {
+                Slog.e(TAG, "Parse error in header: " + e.getMessage());
                 if (DEBUG) {
-                    Slog.e(TAG, "Parse error in header: " + e.getMessage());
-                    if (MORE_DEBUG) {
-                        hexLog(block);
-                    }
+                    hexLog(block);
                 }
                 throw e;
             }
@@ -254,20 +249,20 @@ public class TarBackupReader {
         if (size <= 0) {
             throw new IllegalArgumentException("size must be > 0");
         }
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.i(TAG, "  ... readExactly(" + size + ") called");
         }
         int soFar = 0;
         while (soFar < size) {
             int nRead = in.read(buffer, offset + soFar, size - soFar);
             if (nRead <= 0) {
-                if (MORE_DEBUG) {
+                if (DEBUG) {
                     Slog.w(TAG, "- wanted exactly " + size + " but got only " + soFar);
                 }
                 break;
             }
             soFar += nRead;
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soFar));
             }
         }
@@ -290,7 +285,7 @@ public class TarBackupReader {
         }
 
         byte[] buffer = new byte[(int) info.size];
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.i(TAG,
                     "   readAppManifestAndReturnSignatures() looking for " + info.size + " bytes");
         }
@@ -514,10 +509,7 @@ public class TarBackupReader {
                             null);
                 }
             } else {
-                if (DEBUG) {
-                    Slog.i(TAG,
-                            "Restore manifest from " + info.packageName + " but allowBackup=false");
-                }
+                Slog.i(TAG, "Restore manifest from " + info.packageName + " but allowBackup=false");
                 mBackupManagerMonitorEventSender.monitorEvent(
                         LOG_EVENT_ID_FULL_RESTORE_ALLOW_BACKUP_FALSE,
                         pkgInfo,
@@ -529,10 +521,8 @@ public class TarBackupReader {
             // the restore properly only if the dataset provides the
             // apk file and we can successfully install it.
             if (allowApks) {
-                if (DEBUG) {
-                    Slog.i(TAG, "Package " + info.packageName
-                            + " not installed; requiring apk in dataset");
-                }
+                Slog.i(TAG,
+                        "Package " + info.packageName + " not installed; requiring apk in dataset");
                 policy = RestorePolicy.ACCEPT_IF_APK;
             } else {
                 policy = RestorePolicy.IGNORE;
@@ -570,7 +560,7 @@ public class TarBackupReader {
         long partial = (size + 512) % 512;
         if (partial > 0) {
             final int needed = 512 - (int) partial;
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.i(TAG, "Skipping tar padding: " + needed + " bytes");
             }
             byte[] buffer = new byte[needed];
@@ -619,7 +609,7 @@ public class TarBackupReader {
                     }
                     switch (token) {
                         case BACKUP_WIDGET_METADATA_TOKEN: {
-                            if (MORE_DEBUG) {
+                            if (DEBUG) {
                                 Slog.i(TAG, "Got widget metadata for " + info.packageName);
                             }
                             mWidgetData = new byte[size];
@@ -627,10 +617,9 @@ public class TarBackupReader {
                             break;
                         }
                         default: {
-                            if (DEBUG) {
-                                Slog.i(TAG, "Ignoring metadata blob " + Integer.toHexString(token)
-                                        + " for " + info.packageName);
-                            }
+                            Slog.i(TAG,
+                                    "Ignoring metadata blob " + Integer.toHexString(token) + " for "
+                                            + info.packageName);
                             in.skipBytes(size);
                             break;
                         }
@@ -759,9 +748,7 @@ public class TarBackupReader {
             } else if ("size".equals(keyStr)) {
                 info.size = Long.parseLong(valStr);
             } else {
-                if (DEBUG) {
-                    Slog.i(TAG, "Unhandled pax key: " + key);
-                }
+                Slog.i(TAG, "Unhandled pax key: " + key);
             }
 
             offset += linelen;

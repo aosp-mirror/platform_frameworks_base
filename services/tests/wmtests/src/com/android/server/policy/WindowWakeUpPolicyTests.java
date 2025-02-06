@@ -57,6 +57,7 @@ import android.content.res.Resources;
 import android.os.PowerManager;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
+import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.view.Display;
@@ -83,6 +84,7 @@ import java.util.function.BooleanSupplier;
  *
  * <p>Build/Install/Run: atest WmTests:WindowWakeUpPolicyTests
  */
+@Presubmit
 public final class WindowWakeUpPolicyTests {
     @Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
     @Rule public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();

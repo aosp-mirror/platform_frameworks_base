@@ -16,15 +16,18 @@
 
 package com.android.systemui.shade.shared.model
 
+import com.android.systemui.log.table.Diffable
+import com.android.systemui.log.table.TableRowLogger
+
 /** Enumerates all known modes of operation of the shade. */
-sealed interface ShadeMode {
+sealed class ShadeMode : Diffable<ShadeMode> {
 
     /**
      * The single or "accordion" shade where the QS and notification parts are in two vertically
      * stacked panels and the user can swipe up and down to expand or collapse between the two
      * parts.
      */
-    data object Single : ShadeMode
+    data object Single : ShadeMode()
 
     /**
      * The split shade where, on large screens and unfolded foldables, the QS and notification parts
@@ -32,14 +35,18 @@ sealed interface ShadeMode {
      *
      * Note: This isn't the only mode where the shade is wide.
      */
-    data object Split : ShadeMode
+    data object Split : ShadeMode()
 
     /**
      * The dual shade where the QS and notification parts each have their own independently
      * expandable/collapsible panel on either side of the large screen / unfolded device or sharing
      * a space on a small screen or folded device.
      */
-    data object Dual : ShadeMode
+    data object Dual : ShadeMode()
+
+    override fun logDiffs(prevVal: ShadeMode, row: TableRowLogger) {
+        row.logChange("shadeMode", toString())
+    }
 
     companion object {
         @JvmStatic fun dual(): Dual = Dual

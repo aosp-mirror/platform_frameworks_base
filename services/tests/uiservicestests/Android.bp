@@ -20,6 +20,7 @@ android_test {
     ],
 
     static_libs: [
+        "compatibility-device-util-axt-minus-dexmaker",
         "frameworks-base-testutils",
         "services.accessibility",
         "services.core",

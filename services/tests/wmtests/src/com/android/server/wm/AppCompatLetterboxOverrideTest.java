@@ -273,7 +273,7 @@ public class AppCompatLetterboxOverrideTest extends WindowTestsBase {
 
         @NonNull
         private AppCompatLetterboxOverrides getLetterboxOverrides() {
-            return activity().top().mAppCompatController.getAppCompatLetterboxOverrides();
+            return activity().top().mAppCompatController.getLetterboxOverrides();
         }
 
     }

@@ -24,10 +24,12 @@ import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.Serializable;
 
 import java.util.List;
 
-public class DrawPath extends PaintOperation {
+public class DrawPath extends PaintOperation implements Serializable {
     private static final int OP_CODE = Operations.DRAW_PATH;
     private static final String CLASS_NAME = "DrawPath";
 
@@ -81,6 +83,12 @@ public class DrawPath extends PaintOperation {
         return Operations.DRAW_PATH;
     }
 
+    /**
+     * Draw a path
+     *
+     * @param buffer the buffer to write to
+     * @param id the id of the path
+     */
     public static void apply(@NonNull WireBuffer buffer, int id) {
         buffer.start(Operations.DRAW_PATH);
         buffer.writeInt(id);
@@ -100,5 +108,10 @@ public class DrawPath extends PaintOperation {
     @Override
     public void paint(@NonNull PaintContext context) {
         context.drawPath(mId, mStart, mEnd);
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer.add("type", CLASS_NAME).add("id", mId).add("start", mStart).add("end", mEnd);
     }
 }

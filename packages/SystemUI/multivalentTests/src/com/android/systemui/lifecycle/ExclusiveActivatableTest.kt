@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.lifecycle
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -24,7 +22,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest

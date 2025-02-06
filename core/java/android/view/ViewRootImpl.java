@@ -123,6 +123,7 @@ import static android.view.flags.Flags.toolkitFrameRateTouchBoost25q1;
 import static android.view.flags.Flags.toolkitFrameRateTypingReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateVelocityMappingReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateViewEnablingReadOnly;
+import static android.view.flags.Flags.toolkitInitialTouchBoost;
 import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_FOCUS_CONTROLLER;
@@ -134,7 +135,6 @@ import static com.android.text.flags.Flags.disableHandwritingInitiatorForIme;
 import static com.android.window.flags.Flags.enableBufferTransformHintFromDisplay;
 import static com.android.window.flags.Flags.predictiveBackSwipeEdgeNoneApi;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
-import static com.android.window.flags.Flags.systemUiImmersiveConfirmationDialog;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -150,6 +150,8 @@ import android.annotation.UiContext;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ResourcesManager;
+import android.app.UiModeManager;
+import android.app.UiModeManager.ForceInvertStateChangeListener;
 import android.app.WindowConfiguration;
 import android.app.compat.CompatChanges;
 import android.app.servertransaction.WindowStateTransactionItem;
@@ -165,7 +167,6 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.database.ContentObserver;
 import android.graphics.BLASTBufferQueue;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -211,7 +212,6 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.Vibrator;
-import android.provider.Settings;
 import android.sysprop.DisplayProperties;
 import android.sysprop.ViewProperties;
 import android.text.TextUtils;
@@ -377,16 +377,6 @@ public final class ViewRootImpl implements ViewParent,
             SystemProperties.getBoolean("persist.wm.debug.client_transient", false);
 
     /**
-     * Whether the client (system UI) is handling the immersive confirmation window. If
-     * {@link CLIENT_TRANSIENT} is set to true, the immersive confirmation window will always be the
-     * client instance and this flag will be ignored. Otherwise, the immersive confirmation window
-     * can be switched freely by this flag.
-     * @hide
-     */
-    public static final boolean CLIENT_IMMERSIVE_CONFIRMATION =
-            systemUiImmersiveConfirmationDialog();
-
-    /**
      * Set this system property to true to force the view hierarchy to render
      * at 60 Hz. This can be used to measure the potential framerate.
      */
@@ -474,10 +464,8 @@ public final class ViewRootImpl implements ViewParent,
     private CompatOnBackInvokedCallback mCompatOnBackInvokedCallback;
 
     @Nullable
-    private ContentObserver mForceInvertObserver;
+    private ForceInvertStateChangeListener mForceInvertStateChangeListener;
 
-    private static final int INVALID_VALUE = Integer.MIN_VALUE;
-    private int mForceInvertEnabled = INVALID_VALUE;
     /**
      * Callback for notifying about global configuration changes.
      */
@@ -553,6 +541,8 @@ public final class ViewRootImpl implements ViewParent,
     @UnsupportedAppUsage
     @UiContext
     public final Context mContext;
+
+    private UiModeManager mUiModeManager;
 
     @UnsupportedAppUsage
     final IWindowSession mWindowSession;
@@ -1124,9 +1114,13 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mIsFrameRateConflicted = false;
     // Used to check whether SurfaceControl has been replaced.
     private boolean mSurfaceReplaced = false;
+    // Indicates whether a draw operation occurred during this frame while a touch event was active.
+    private boolean mTouchAndDrawn = false;
     // Used to set frame rate compatibility.
     @Surface.FrameRateCompatibility int mFrameRateCompatibility =
             FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
+    // time for initial touch boost period.
+    private static final int FRAME_RATE_INITIAL_TOUCH_BOOST_TIME = 30;
     // time for touch boost period.
     private static final int FRAME_RATE_TOUCH_BOOST_TIME = 3000;
     // Timeout for the other frame rate boosts other than touch boost.
@@ -1224,6 +1218,7 @@ public final class ViewRootImpl implements ViewParent,
     private static boolean sSurfaceFlingerBugfixFlagValue =
             com.android.graphics.surfaceflinger.flags.Flags.vrrBugfix24q4();
     private static final boolean sEnableVrr = ViewProperties.vrr_enabled().orElse(true);
+    private static final boolean sToolkitInitialTouchBoostFlagValue = toolkitInitialTouchBoost();
 
     static {
         sToolkitSetFrameRateReadOnlyFlagValue = toolkitSetFrameRateReadOnly();
@@ -1249,6 +1244,7 @@ public final class ViewRootImpl implements ViewParent,
     public ViewRootImpl(@UiContext Context context, Display display, IWindowSession session,
             WindowLayout windowLayout) {
         mContext = context;
+        mUiModeManager = context.getSystemService(UiModeManager.class);
         mWindowSession = session;
         mWindowLayout = windowLayout;
         mDisplay = display;
@@ -1792,23 +1788,6 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private boolean isForceInvertEnabled() {
-        if (mForceInvertEnabled == INVALID_VALUE) {
-            reloadForceInvertEnabled();
-        }
-        return mForceInvertEnabled == 1;
-    }
-
-    private void reloadForceInvertEnabled() {
-        if (forceInvertColor()) {
-            mForceInvertEnabled = Settings.Secure.getIntForUser(
-                    mContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED,
-                    /* def= */ 0,
-                    UserHandle.myUserId());
-        }
-    }
-
     /**
      * Register any kind of listeners if setView was success.
      */
@@ -1840,21 +1819,11 @@ public final class ViewRootImpl implements ViewParent,
                         mBasePackageName);
 
         if (forceInvertColor()) {
-            if (mForceInvertObserver == null) {
-                mForceInvertObserver = new ContentObserver(mHandler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        reloadForceInvertEnabled();
-                        updateForceDarkMode();
-                    }
-                };
-                mContext.getContentResolver().registerContentObserver(
-                        Settings.Secure.getUriFor(
-                                Settings.Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED
-                        ),
-                        false,
-                        mForceInvertObserver,
-                        UserHandle.myUserId());
+            if (mForceInvertStateChangeListener == null) {
+                mForceInvertStateChangeListener =
+                        forceInvertState -> updateForceDarkMode();
+                mUiModeManager.addForceInvertStateChangeListener(mExecutor,
+                        mForceInvertStateChangeListener);
             }
         }
     }
@@ -1872,9 +1841,10 @@ public final class ViewRootImpl implements ViewParent,
                 .unregisterDisplayListener(mDisplayListener);
 
         if (forceInvertColor()) {
-            if (mForceInvertObserver != null) {
-                mContext.getContentResolver().unregisterContentObserver(mForceInvertObserver);
-                mForceInvertObserver = null;
+            if (mForceInvertStateChangeListener != null) {
+                mUiModeManager.removeForceInvertStateChangeListener(
+                        mForceInvertStateChangeListener);
+                mForceInvertStateChangeListener = null;
             }
         }
 
@@ -2061,21 +2031,25 @@ public final class ViewRootImpl implements ViewParent,
         return getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
     }
 
-    /** Returns true if force dark should be enabled according to various settings */
+    /**
+     * Determines the type of force dark to apply, considering force inversion, system night mode,
+     * and app-specific settings (including developer opt-outs).
+     *
+     * @return A {@link ForceDarkType.ForceDarkTypeDef} constant indicating the force dark type.
+     */
     @VisibleForTesting
     public @ForceDarkType.ForceDarkTypeDef int determineForceDarkType() {
         if (forceInvertColor()) {
             // Force invert ignores all developer opt-outs.
             // We also ignore dark theme, since the app developer can override the user's preference
-            // for dark mode in configuration.uiMode. Instead, we assume that the force invert
-            // setting will be enabled at the same time dark theme is in the Settings app.
-            if (isForceInvertEnabled()) {
+            // for dark mode in configuration.uiMode. Instead, we assume that both force invert and
+            // the system's dark theme are enabled.
+            if (mUiModeManager.getForceInvertState() == UiModeManager.FORCE_INVERT_TYPE_DARK) {
                 return ForceDarkType.FORCE_INVERT_COLOR_DARK;
             }
         }
 
         boolean useAutoDark = getNightMode() == Configuration.UI_MODE_NIGHT_YES;
-
         if (useAutoDark) {
             boolean forceDarkAllowedDefault =
                     SystemProperties.getBoolean(ThreadedRenderer.DEBUG_FORCE_DARK, false);
@@ -2770,14 +2744,15 @@ public final class ViewRootImpl implements ViewParent,
         if (mBlastBufferQueue != null) {
             mBlastBufferQueue.destroy();
         }
-        mBlastBufferQueue = new BLASTBufferQueue(mTag, mSurfaceControl,
-                mSurfaceSize.x, mSurfaceSize.y, mWindowAttributes.format);
-        mBlastBufferQueue.setTransactionHangCallback(sTransactionHangCallback);
-        mBlastBufferQueue.setWaitForBufferReleaseCallback(mChoreographer::onWaitForBufferRelease);
+        mBlastBufferQueue = new BLASTBufferQueue(mTag, true /* updateDestinationFrame */);
         // If we create and destroy BBQ without recreating the SurfaceControl, we can end up
         // queuing buffers on multiple apply tokens causing out of order buffer submissions. We
         // fix this by setting the same apply token on all BBQs created by this VRI.
         mBlastBufferQueue.setApplyToken(mBbqApplyToken);
+        mBlastBufferQueue.update(mSurfaceControl,  mSurfaceSize.x, mSurfaceSize.y,
+                mWindowAttributes.format);
+        mBlastBufferQueue.setTransactionHangCallback(sTransactionHangCallback);
+        mBlastBufferQueue.setWaitForBufferReleaseCallback(mChoreographer::onWaitForBufferRelease);
         Surface blastSurface;
         if (addSchandleToVriSurface()) {
             blastSurface = mBlastBufferQueue.createSurfaceWithHandle();
@@ -2975,6 +2950,20 @@ public final class ViewRootImpl implements ViewParent,
     public void notifyRendererOfExpensiveFrame() {
         if (mAttachInfo.mThreadedRenderer != null) {
             mAttachInfo.mThreadedRenderer.notifyExpensiveFrame();
+        }
+    }
+
+    /**
+     * Same as notifyRendererOfExpensiveFrame(), but adding {@code reason} for tracing.
+     *
+     * @hide
+     */
+    public void notifyRendererOfExpensiveFrame(String reason) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, reason);
+        try {
+            notifyRendererOfExpensiveFrame();
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
     }
 
@@ -4452,6 +4441,10 @@ public final class ViewRootImpl implements ViewParent,
         // We set the preferred frame rate and frame rate category at the end of performTraversals
         // when the values are applicable.
         if (mDrawnThisFrame) {
+            if (sToolkitInitialTouchBoostFlagValue && mIsTouchBoosting) {
+                mTouchAndDrawn = true;
+            }
+
             mDrawnThisFrame = false;
             if (!mInvalidationIdleMessagePosted && sSurfaceFlingerBugfixFlagValue) {
                 mInvalidationIdleMessagePosted = true;
@@ -6735,6 +6728,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final int MSG_REFRESH_POINTER_ICON = 41;
     private static final int MSG_FRAME_RATE_SETTING = 42;
     private static final int MSG_SURFACE_REPLACED_TIMEOUT = 43;
+    private static final int MSG_INITIAL_TOUCH_BOOST_TIMEOUT = 44;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -6808,6 +6802,8 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_FRAME_RATE_SETTING";
                 case MSG_SURFACE_REPLACED_TIMEOUT:
                     return "MSG_SURFACE_REPLACED_TIMEOUT";
+                case MSG_INITIAL_TOUCH_BOOST_TIMEOUT:
+                    return "MSG_INITIAL_TOUCH_BOOST_TIMEOUT";
             }
             return super.getMessageName(message);
         }
@@ -7082,6 +7078,17 @@ public final class ViewRootImpl implements ViewParent,
                     if (!mDrawnThisFrame) {
                         setPreferredFrameRateCategory(FRAME_RATE_CATEGORY_NO_PREFERENCE);
                     }
+                    break;
+                case MSG_INITIAL_TOUCH_BOOST_TIMEOUT:
+                    if (mTouchAndDrawn) {
+                        mHandler.removeMessages(MSG_TOUCH_BOOST_TIMEOUT);
+                        mHandler.sendEmptyMessageDelayed(MSG_TOUCH_BOOST_TIMEOUT,
+                                FRAME_RATE_TOUCH_BOOST_TIME);
+                    } else {
+                        mIsTouchBoosting = false;
+                        setPreferredFrameRateCategory(FRAME_RATE_CATEGORY_NO_PREFERENCE);
+                    }
+                    mTouchAndDrawn = false;
                     break;
                 case MSG_REFRESH_POINTER_ICON:
                     if (mPointerIconEvent == null) {
@@ -8147,9 +8154,16 @@ public final class ViewRootImpl implements ViewParent,
              */
             if (mIsTouchBoosting && (action == MotionEvent.ACTION_UP
                     || action == MotionEvent.ACTION_CANCEL)) {
-                mHandler.removeMessages(MSG_TOUCH_BOOST_TIMEOUT);
-                mHandler.sendEmptyMessageDelayed(MSG_TOUCH_BOOST_TIMEOUT,
-                        FRAME_RATE_TOUCH_BOOST_TIME);
+
+                if (sToolkitInitialTouchBoostFlagValue) {
+                    mHandler.removeMessages(MSG_INITIAL_TOUCH_BOOST_TIMEOUT);
+                    mHandler.sendEmptyMessageDelayed(MSG_INITIAL_TOUCH_BOOST_TIMEOUT,
+                            FRAME_RATE_INITIAL_TOUCH_BOOST_TIME);
+                } else {
+                    mHandler.removeMessages(MSG_TOUCH_BOOST_TIMEOUT);
+                    mHandler.sendEmptyMessageDelayed(MSG_TOUCH_BOOST_TIMEOUT,
+                            FRAME_RATE_TOUCH_BOOST_TIME);
+                }
             }
             return handled ? FINISH_HANDLED : FORWARD;
         }
@@ -9333,6 +9347,16 @@ public final class ViewRootImpl implements ViewParent,
             mVibrator = mContext.getSystemService(Vibrator.class);
         }
         return mVibrator;
+    }
+
+    /**
+     * Clears the system vibrator.
+     *
+     * <p>This method releases the reference to the system vibrator. It's crucial to call this
+     * method when the vibrator is no longer needed to prevent any potential memory leaks.
+     */
+    public void clearSystemVibrator() {
+        mVibrator = null;
     }
 
     private @Nullable AutofillManager getAutofillManager() {
@@ -10561,13 +10585,13 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
-        public void onDragEvent(boolean isExiting, float x, float y) {
+        public void onDragEvent(boolean isExiting, float x, float y, int displayId) {
             // force DRAG_EXITED_EVENT if appropriate
             DragEvent event = DragEvent.obtain(
-                    isExiting ? DragEvent.ACTION_DRAG_EXITED : DragEvent.ACTION_DRAG_LOCATION,
-                    x, y, 0 /* offsetX */, 0 /* offsetY */, 0 /* flags */, null/* localState */,
-                    null/* description */, null /* data */, null /* dragSurface */,
-                    null /* dragAndDropPermissions */, false /* result */);
+                    isExiting ? DragEvent.ACTION_DRAG_EXITED : DragEvent.ACTION_DRAG_LOCATION, x, y,
+                    0 /* offsetX */, 0 /* offsetY */, displayId, 0 /* flags */,
+                    null/* localState */, null/* description */, null /* data */,
+                    null /* dragSurface */, null /* dragAndDropPermissions */, false /* result */);
             dispatchDragEvent(event);
         }
 

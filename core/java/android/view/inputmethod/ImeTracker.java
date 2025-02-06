@@ -134,6 +134,7 @@ public interface ImeTracker {
             ORIGIN_CLIENT,
             ORIGIN_SERVER,
             ORIGIN_IME,
+            ORIGIN_WM_SHELL,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Origin {}

@@ -312,6 +312,13 @@ public final class DeviceStateManagerService extends SystemService {
                 mProcessObserver);
     }
 
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == PHASE_SYSTEM_SERVICES_READY) {
+            mDeviceStatePolicy.getDeviceStateProvider().onSystemReady();
+        }
+    }
+
     @VisibleForTesting
     Handler getHandler() {
         return mHandler;

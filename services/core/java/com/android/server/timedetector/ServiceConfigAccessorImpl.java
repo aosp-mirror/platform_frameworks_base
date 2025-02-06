@@ -286,7 +286,8 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         // This check is racey, but the whole settings update process is racey. This check prevents
         // a ConfigurationChangeListener callback triggering due to ContentObserver's still
         // triggering *sometimes* for no-op updates. Because callbacks are async this is necessary
-        // for stable behavior during tests.
+        // for stable behavior during tests. This behavior is copied from
+        // setAutoDetectionEnabledIfRequired and assumed to be the correct way.
         if (getAutoDetectionEnabledSetting() != enabled) {
             Settings.Global.putInt(mCr, Settings.Global.AUTO_TIME, enabled ? 1 : 0);
         }

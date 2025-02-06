@@ -58,7 +58,6 @@ import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -73,7 +72,6 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class MobileIconViewModelTest : SysuiTestCase() {

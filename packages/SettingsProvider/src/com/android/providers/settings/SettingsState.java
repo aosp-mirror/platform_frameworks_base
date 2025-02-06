@@ -18,10 +18,13 @@ package com.android.providers.settings;
 
 import static android.os.Process.FIRST_APPLICATION_UID;
 
+import static com.android.aconfig_new_storage.Flags.enableAconfigStorageDaemon;
+
 import android.aconfig.Aconfig.flag_permission;
 import android.aconfig.Aconfig.flag_state;
 import android.aconfig.Aconfig.parsed_flag;
 import android.aconfig.Aconfig.parsed_flags;
+import android.aconfigd.AconfigdFlagInfo;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -65,14 +68,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.PosixFileAttributes;
-import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -84,18 +83,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
-// FOR ACONFIGD TEST MISSION AND ROLLOUT
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import android.util.proto.ProtoInputStream;
-import android.aconfigd.Aconfigd.StorageRequestMessage;
-import android.aconfigd.Aconfigd.StorageRequestMessages;
-import android.aconfigd.Aconfigd.StorageReturnMessage;
-import android.aconfigd.Aconfigd.StorageReturnMessages;
-import android.aconfigd.AconfigdClientSocket;
-import android.aconfigd.AconfigdFlagInfo;
-import android.aconfigd.AconfigdJavaUtils;
-import static com.android.aconfig_new_storage.Flags.enableAconfigStorageDaemon;
 /**
  * This class contains the state for one type of settings. It is responsible
  * for saving the state asynchronously to an XML file after a mutation and
@@ -393,92 +380,7 @@ public class SettingsState {
                     getAllAconfigFlagsFromSettings(mAconfigDefaultFlags);
                 }
             }
-
-            if (isConfigSettingsKey(mKey)) {
-                requests = handleBulkSyncToNewStorage(mAconfigDefaultFlags);
-            }
         }
-
-        if (enableAconfigStorageDaemon()) {
-            if (isConfigSettingsKey(mKey)){
-                AconfigdClientSocket localSocket = AconfigdJavaUtils.getAconfigdClientSocket();
-                if (requests != null) {
-                    InputStream res = localSocket.send(requests.getBytes());
-                    if (res == null) {
-                        Slog.w(LOG_TAG, "Bulk sync request to acongid failed.");
-                    }
-                }
-
-                if (Flags.disableBulkCompare()) {
-                    return;
-                }
-
-                // TOBO(b/312444587): remove the comparison logic after Test Mission 2.
-                if (requests == null) {
-                    Map<String, AconfigdFlagInfo> aconfigdFlagMap =
-                            AconfigdJavaUtils.listFlagsValueInNewStorage(localSocket);
-                    compareFlagValueInNewStorage(
-                            mAconfigDefaultFlags,
-                            aconfigdFlagMap);
-                }
-            }
-        }
-    }
-
-    // TODO(b/312444587): remove the comparison logic after Test Mission 2.
-    public int compareFlagValueInNewStorage(
-            Map<String, AconfigdFlagInfo> defaultFlagMap,
-            Map<String, AconfigdFlagInfo> aconfigdFlagMap) {
-
-        // Get all defaults from the default map. The mSettings may not contain
-        // all flags, since it only contains updated flags.
-        int diffNum = 0;
-        for (Map.Entry<String, AconfigdFlagInfo> entry : defaultFlagMap.entrySet()) {
-            String key = entry.getKey();
-            AconfigdFlagInfo flag = entry.getValue();
-
-            AconfigdFlagInfo aconfigdFlag = aconfigdFlagMap.get(key);
-            if (aconfigdFlag == null) {
-                Slog.w(LOG_TAG, String.format("Flag %s is missing from aconfigd", key));
-                diffNum++;
-                continue;
-            }
-            String diff = flag.dumpDiff(aconfigdFlag);
-            if (!diff.isEmpty()) {
-                Slog.w(
-                        LOG_TAG,
-                        String.format(
-                                "Flag %s is different in Settings and aconfig: %s", key, diff));
-                diffNum++;
-            }
-        }
-
-        for (String key : aconfigdFlagMap.keySet()) {
-            if (defaultFlagMap.containsKey(key)) continue;
-            Slog.w(LOG_TAG, String.format("Flag %s is missing from Settings", key));
-            diffNum++;
-        }
-
-        String compareMarkerName = "aconfigd_marker/compare_diff_num";
-        synchronized (mLock) {
-            Setting markerSetting = mSettings.get(compareMarkerName);
-            if (markerSetting == null) {
-                markerSetting =
-                        new Setting(
-                                compareMarkerName,
-                                String.valueOf(diffNum),
-                                false,
-                                "aconfig",
-                                "aconfig");
-                mSettings.put(compareMarkerName, markerSetting);
-            }
-            markerSetting.value = String.valueOf(diffNum);
-        }
-
-        if (diffNum == 0) {
-            Slog.w(LOG_TAG, "Settings and new storage have same flags.");
-        }
-        return diffNum;
     }
 
     @GuardedBy("mLock")
@@ -549,87 +451,6 @@ public class SettingsState {
             flag.setServerFlagValue(value);
         }
         return flag;
-    }
-
-
-    // TODO(b/341764371): migrate aconfig flag push to GMS core
-    @VisibleForTesting
-    @GuardedBy("mLock")
-    public ProtoOutputStream handleBulkSyncToNewStorage(
-            Map<String, AconfigdFlagInfo> aconfigFlagMap) {
-        // get marker or add marker if it does not exist
-        Setting markerSetting = mSettings.get(BULK_SYNC_MARKER);
-        int localCounter = 0;
-        if (markerSetting == null) {
-            markerSetting = new Setting(BULK_SYNC_MARKER, "0", false, "aconfig", "aconfig");
-            mSettings.put(BULK_SYNC_MARKER, markerSetting);
-        }
-        try {
-            localCounter = Integer.parseInt(markerSetting.value);
-        } catch (NumberFormatException e) {
-            // reset local counter
-            markerSetting.value = "0";
-        }
-
-        if (enableAconfigStorageDaemon()) {
-            Setting bulkSyncCounter = mSettings.get(BULK_SYNC_TRIGGER_COUNTER);
-            int serverCounter = 0;
-            if (bulkSyncCounter != null) {
-                try {
-                    serverCounter = Integer.parseInt(bulkSyncCounter.value);
-                } catch (NumberFormatException e) {
-                    // reset the local value of server counter
-                    bulkSyncCounter.value = "0";
-                }
-            }
-
-            boolean shouldSync = localCounter < serverCounter;
-            if (!shouldSync) {
-                // CASE 1, flag is on, bulk sync marker true, nothing to do
-                return null;
-            } else {
-                // CASE 2, flag is on, bulk sync marker false. Do following two tasks
-                // (1) Do bulk sync here.
-                // (2) After bulk sync, set marker to true.
-
-                // first add storage reset request
-                ProtoOutputStream requests = new ProtoOutputStream();
-                AconfigdJavaUtils.writeResetStorageRequest(requests);
-
-                // loop over all settings and add flag override requests
-                for (AconfigdFlagInfo flag : aconfigFlagMap.values()) {
-                    // don't sync read_only flags
-                    if (!flag.getIsReadWrite()) {
-                        continue;
-                    }
-
-                    if (flag.getHasServerOverride()) {
-                        AconfigdJavaUtils.writeFlagOverrideRequest(
-                                requests,
-                                flag.getPackageName(),
-                                flag.getFlagName(),
-                                flag.getServerFlagValue(),
-                                StorageRequestMessage.SERVER_ON_REBOOT);
-                    }
-
-                    if (flag.getHasLocalOverride()) {
-                        AconfigdJavaUtils.writeFlagOverrideRequest(
-                                requests,
-                                flag.getPackageName(),
-                                flag.getFlagName(),
-                                flag.getLocalFlagValue(),
-                                StorageRequestMessage.LOCAL_ON_REBOOT);
-                    }
-                }
-
-                // mark sync has been done
-                markerSetting.value = String.valueOf(serverCounter);
-                scheduleWriteIfNeededLocked();
-                return requests;
-            }
-        } else {
-            return null;
-        }
     }
 
     @GuardedBy("mLock")

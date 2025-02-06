@@ -49,9 +49,10 @@ public class WindowContainerTraversalTests extends WindowTestsBase {
     @SetupWindows(addWindows = { W_DOCK_DIVIDER, W_INPUT_METHOD })
     @Test
     public void testDockedDividerPosition() {
-        final WindowState splitScreenWindow = createWindow(null,
-                WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION,
-                mDisplayContent, "splitScreenWindow");
+        final WindowState splitScreenWindow = newWindowBuilder("splitScreenWindow",
+                TYPE_BASE_APPLICATION).setWindowingMode(
+                WINDOWING_MODE_MULTI_WINDOW).setActivityType(ACTIVITY_TYPE_STANDARD).setDisplay(
+                mDisplayContent).build();
 
         mDisplayContent.setImeLayeringTarget(splitScreenWindow);
 

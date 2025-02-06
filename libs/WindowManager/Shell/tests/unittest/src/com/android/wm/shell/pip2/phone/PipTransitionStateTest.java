@@ -110,4 +110,22 @@ public class PipTransitionStateTest extends ShellTestCase {
         mPipTransitionState.setState(PipTransitionState.ENTERED_PIP);
         mPipTransitionState.removePipTransitionStateChangedListener(mStateChangedListener);
     }
+
+    @Test
+    public void testBoundsChangeState_notInPip() {
+        Bundle extra = new Bundle();
+        extra.putParcelable(EXTRA_ENTRY_KEY, mEmptyParcelable);
+
+        mPipTransitionState.setState(PipTransitionState.UNDEFINED);
+        mPipTransitionState.setState(PipTransitionState.SCHEDULED_BOUNDS_CHANGE, extra);
+        Assert.assertEquals(PipTransitionState.UNDEFINED, mPipTransitionState.getState());
+
+        mPipTransitionState.setState(PipTransitionState.ENTERING_PIP, extra);
+        mPipTransitionState.setState(PipTransitionState.SCHEDULED_BOUNDS_CHANGE, extra);
+        Assert.assertEquals(PipTransitionState.ENTERING_PIP, mPipTransitionState.getState());
+
+        mPipTransitionState.setState(PipTransitionState.EXITING_PIP);
+        mPipTransitionState.setState(PipTransitionState.SCHEDULED_BOUNDS_CHANGE, extra);
+        Assert.assertEquals(PipTransitionState.EXITING_PIP, mPipTransitionState.getState());
+    }
 }

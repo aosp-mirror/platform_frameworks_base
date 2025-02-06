@@ -74,7 +74,12 @@ public class RankingCoordinator implements Coordinator {
         mStatusBarStateController.addCallback(mStatusBarStateCallback);
 
         pipeline.addPreGroupFilter(mSuspendedFilter);
-        pipeline.addPreGroupFilter(mDndVisualEffectsFilter);
+        if (com.android.systemui.Flags.notificationAmbientSuppressionAfterInflation()) {
+            pipeline.addPreGroupFilter(mDndPreGroupFilter);
+            pipeline.addFinalizeFilter(mDndVisualEffectsFilter);
+        } else {
+            pipeline.addPreGroupFilter(mDndVisualEffectsFilter);
+        }
     }
 
     public NotifSectioner getAlertingSectioner() {
@@ -188,6 +193,16 @@ public class RankingCoordinator implements Coordinator {
             }
 
             return !mStatusBarStateController.isDozing() && entry.shouldSuppressNotificationList();
+        }
+    };
+
+    private final NotifFilter mDndPreGroupFilter = new NotifFilter("DndPreGroupFilter") {
+        @Override
+        public boolean shouldFilterOut(NotificationEntry entry, long now) {
+            // Entries with both flags set should be suppressed ASAP regardless of dozing state.
+            // As a result of being doze-independent, they can also be suppressed early in the
+            // pipeline.
+            return entry.shouldSuppressNotificationList() && entry.shouldSuppressAmbient();
         }
     };
 

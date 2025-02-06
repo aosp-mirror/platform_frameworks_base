@@ -17,7 +17,6 @@
 package com.android.server.backup.restore;
 
 import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.BackupPasswordManager.PBKDF_CURRENT;
 import static com.android.server.backup.BackupPasswordManager.PBKDF_FALLBACK;
@@ -93,9 +92,7 @@ public class PerformAdbRestoreTask implements Runnable {
         FileInputStream rawInStream = null;
         try {
             if (!mBackupManagerService.backupPasswordMatches(mCurrentPassword)) {
-                if (DEBUG) {
-                    Slog.w(TAG, "Backup password mismatch; aborting");
-                }
+                Slog.w(TAG, "Backup password mismatch; aborting");
                 return;
             }
 
@@ -122,7 +119,7 @@ public class PerformAdbRestoreTask implements Runnable {
                     tarInputStream);
             mEngineThread.run();
 
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.v(TAG, "Done consuming input tarfile.");
             }
         } catch (Exception e) {
@@ -144,7 +141,7 @@ public class PerformAdbRestoreTask implements Runnable {
             mObbConnection.tearDown();
             mObserver = FullBackupRestoreObserverUtils.sendEndRestore(mObserver);
             Slog.d(TAG, "Full restore pass complete.");
-            mBackupManagerService.getWakelock().release();
+            mBackupManagerService.getWakeLock().release();
         }
     }
 

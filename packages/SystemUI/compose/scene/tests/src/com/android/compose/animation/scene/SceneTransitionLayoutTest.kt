@@ -17,22 +17,30 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertHeightIsEqualTo
@@ -43,6 +51,9 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChild
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
@@ -55,7 +66,6 @@ import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.assertSizeIsEqualTo
 import com.android.compose.test.subjects.DpOffsetSubject
 import com.android.compose.test.subjects.assertThat
-import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import org.junit.Assert.assertThrows
@@ -83,7 +93,9 @@ class SceneTransitionLayoutTest {
     @Composable
     private fun TestContent() {
         coroutineScope = rememberCoroutineScope()
-        layoutState = remember { MutableSceneTransitionLayoutState(SceneA, EmptyTestTransitions) }
+        layoutState = remember {
+            MutableSceneTransitionLayoutStateForTests(SceneA, EmptyTestTransitions)
+        }
 
         SceneTransitionLayout(state = layoutState, modifier = Modifier.size(LayoutSize)) {
             scene(SceneA, userActions = mapOf(Back to SceneB)) {
@@ -312,7 +324,7 @@ class SceneTransitionLayoutTest {
 
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     SceneA,
                     transitions {
                         from(SceneA, to = SceneB) {
@@ -379,8 +391,8 @@ class SceneTransitionLayoutTest {
         assertThat(transition).hasProgress(0.5f)
         rule.waitForIdle()
 
-        // B and C are composed.
-        rule.onNodeWithTag("aRoot").assertDoesNotExist()
+        // A, B and C are still composed given that B => C is not finished yet.
+        rule.onNodeWithTag("aRoot").assertExists()
         rule.onNodeWithTag("bRoot").assertExists()
         rule.onNodeWithTag("cRoot").assertExists()
 
@@ -416,7 +428,7 @@ class SceneTransitionLayoutTest {
             assertThrows(IllegalStateException::class.java) {
                 rule.setContent {
                     SceneTransitionLayout(
-                        state = remember { MutableSceneTransitionLayoutState(SceneA) },
+                        state = remember { MutableSceneTransitionLayoutStateForTests(SceneA) },
                         modifier = Modifier.size(LayoutSize),
                     ) {
                         // from SceneA to SceneA
@@ -431,7 +443,7 @@ class SceneTransitionLayoutTest {
 
     @Test
     fun sceneKeyInScope() {
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
 
         var keyInA: ContentKey? = null
         var keyInB: ContentKey? = null
@@ -460,7 +472,7 @@ class SceneTransitionLayoutTest {
         lateinit var layoutImpl: SceneTransitionLayoutImpl
         rule.setContent {
             SceneTransitionLayoutForTesting(
-                remember { MutableSceneTransitionLayoutState(SceneA) },
+                remember { MutableSceneTransitionLayoutStateForTests(SceneA) },
                 onLayoutImpl = { layoutImpl = it },
             ) {
                 scene(SceneA) { Box(Modifier.fillMaxSize()) }
@@ -468,5 +480,106 @@ class SceneTransitionLayoutTest {
         }
 
         assertThat(layoutImpl.overlaysOrNullForTest()).isNull()
+    }
+
+    @Test
+    fun transitionProgressBoundedBetween0And1() {
+        val layoutWidth = 200.dp
+        val layoutHeight = 400.dp
+
+        // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
+        // detected as a drag event.
+        var touchSlop = 0f
+        val state =
+            rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(initialScene = SceneA) }
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            SceneTransitionLayout(state, Modifier.size(layoutWidth, layoutHeight)) {
+                scene(SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
+                    Spacer(Modifier.fillMaxSize())
+                }
+                scene(SceneB) { Spacer(Modifier.fillMaxSize()) }
+            }
+        }
+        assertThat(state.transitionState).isIdle()
+
+        rule.mainClock.autoAdvance = false
+
+        // Swipe the verticalSwipeDistance.
+        rule.onRoot().performTouchInput {
+            swipeDown(endY = bottom + touchSlop, durationMillis = 50)
+        }
+
+        rule.mainClock.advanceTimeBy(16)
+        val transition = assertThat(state.transitionState).isSceneTransition()
+        assertThat(transition).isNotNull()
+        assertThat(transition).hasProgress(1f, tolerance = 0.01f)
+
+        rule.mainClock.advanceTimeBy(16)
+        // Fling animation, we are overscrolling now. Progress should always be between [0, 1].
+        assertThat(transition).hasProgress(1f)
+    }
+
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+    @Test
+    fun motionSchemeArePassedToSTLState() {
+        // Implementation inspired by MotionScheme.standard()
+        @Suppress("UNCHECKED_CAST")
+        fun motionScheme(animationSpec: FiniteAnimationSpec<Any>) =
+            object : MotionScheme {
+                override fun <T> defaultEffectsSpec() = animationSpec as FiniteAnimationSpec<T>
+
+                override fun <T> defaultSpatialSpec() = animationSpec as FiniteAnimationSpec<T>
+
+                override fun <T> fastEffectsSpec() = animationSpec as FiniteAnimationSpec<T>
+
+                override fun <T> fastSpatialSpec() = animationSpec as FiniteAnimationSpec<T>
+
+                override fun <T> slowEffectsSpec() = animationSpec as FiniteAnimationSpec<T>
+
+                override fun <T> slowSpatialSpec() = animationSpec as FiniteAnimationSpec<T>
+            }
+
+        lateinit var state1: MutableSceneTransitionLayoutState
+        lateinit var state2: MutableSceneTransitionLayoutState
+
+        lateinit var motionScheme1: MotionScheme
+        var motionScheme2 by mutableStateOf(motionScheme(animationSpec = tween(500)))
+        rule.setContent {
+            motionScheme1 = MaterialTheme.motionScheme
+            state1 = rememberMutableSceneTransitionLayoutState(initialScene = SceneA)
+            SceneTransitionLayout(state1) {
+                scene(SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
+                    Spacer(Modifier.fillMaxSize())
+                }
+            }
+
+            MaterialTheme(motionScheme = motionScheme2) {
+                // Important: we should read this state inside the MaterialTheme composable.
+                state2 = rememberMutableSceneTransitionLayoutState(initialScene = SceneA)
+                SceneTransitionLayout(state2) {
+                    scene(SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
+                        Spacer(Modifier.fillMaxSize())
+                    }
+                }
+            }
+        }
+
+        assertThat(motionScheme1).isNotNull()
+        assertThat(motionScheme1).isNotEqualTo(motionScheme2)
+
+        assertThat((state1 as MutableSceneTransitionLayoutStateImpl).motionScheme)
+            .isEqualTo(motionScheme1)
+
+        assertThat((state2 as MutableSceneTransitionLayoutStateImpl).motionScheme)
+            .isEqualTo(motionScheme2)
+
+        // Update the MaterialTheme's MotionScheme configuration.
+        motionScheme2 = motionScheme(animationSpec = spring())
+
+        // We just updated the motionScheme2 state, wait for a recomposition.
+        rule.waitForIdle()
+        assertThat((state2 as MutableSceneTransitionLayoutStateImpl).motionScheme)
+            .isEqualTo(motionScheme2)
     }
 }

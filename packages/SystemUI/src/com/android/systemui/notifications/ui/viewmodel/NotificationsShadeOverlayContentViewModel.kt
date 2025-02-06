@@ -52,11 +52,11 @@ constructor(
 
     private val hydrator = Hydrator("NotificationsShadeOverlayContentViewModel.hydrator")
 
-    val showHeader: Boolean by
+    val showClock: Boolean by
         hydrator.hydratedStateOf(
-            traceName = "showHeader",
+            traceName = "showClock",
             initialValue =
-                shouldShowHeader(
+                shouldShowClock(
                     isShadeLayoutWide = shadeInteractor.isShadeLayoutWide.value,
                     areAnyNotificationsPresent =
                         activeNotificationsInteractor.areAnyNotificationsPresentValue,
@@ -65,7 +65,7 @@ constructor(
                 combine(
                     shadeInteractor.isShadeLayoutWide,
                     activeNotificationsInteractor.areAnyNotificationsPresent,
-                    this::shouldShowHeader,
+                    this::shouldShowClock,
                 ),
         )
 
@@ -103,7 +103,7 @@ constructor(
         shadeInteractor.collapseNotificationsShade(loggingReason = "shade scrim clicked")
     }
 
-    private fun shouldShowHeader(
+    private fun shouldShowClock(
         isShadeLayoutWide: Boolean,
         areAnyNotificationsPresent: Boolean,
     ): Boolean {

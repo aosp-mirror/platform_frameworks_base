@@ -105,6 +105,9 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.Hyphens
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -115,6 +118,7 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
 import com.android.compose.modifiers.thenIf
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
+import com.android.systemui.keyboard.shortcut.shared.model.Shortcut as ShortcutModel
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
@@ -126,7 +130,6 @@ import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCategoryUi
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import com.android.systemui.res.R
 import kotlinx.coroutines.delay
-import com.android.systemui.keyboard.shortcut.shared.model.Shortcut as ShortcutModel
 
 @Composable
 fun ShortcutHelper(
@@ -386,24 +389,26 @@ private fun ShortcutHelperTwoPane(
     var isCustomizing by remember { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxSize().padding(horizontal = 24.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
             // Keep title centered whether customize button is visible or not.
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    TitleBar(isCustomizing)
-                }
-                if (isShortcutCustomizerFlagEnabled) {
-                    CustomizationButtonsContainer(
-                        isCustomizing = isCustomizing,
-                        onToggleCustomizationMode = { isCustomizing = !isCustomizing },
-                        onReset = {
-                            onCustomizationRequested(ShortcutCustomizationRequestInfo.Reset)
-                        },
-                        shouldShowResetButton = shouldShowResetButton,
-                    )
-                } else {
-                    Spacer(modifier = Modifier.width(if (isCustomizing) 69.dp else 133.dp))
-                }
+            Spacer(modifier = Modifier.weight(1f))
+            Box(modifier = Modifier.width(412.dp), contentAlignment = Alignment.Center) {
+                TitleBar(isCustomizing)
+            }
+            if (isShortcutCustomizerFlagEnabled) {
+                CustomizationButtonsContainer(
+                    modifier = Modifier.weight(1f),
+                    isCustomizing = isCustomizing,
+                    onToggleCustomizationMode = { isCustomizing = !isCustomizing },
+                    onReset = { onCustomizationRequested(ShortcutCustomizationRequestInfo.Reset) },
+                    shouldShowResetButton = shouldShowResetButton,
+                )
+            } else {
+                Spacer(modifier = Modifier.weight(1f))
             }
         }
         Spacer(modifier = Modifier.height(12.dp))
@@ -434,11 +439,13 @@ private fun CustomizationButtonsContainer(
     shouldShowResetButton: Boolean,
     onToggleCustomizationMode: () -> Unit,
     onReset: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.End) {
         if (isCustomizing) {
             if (shouldShowResetButton) {
                 ResetButton(onClick = onReset)
+                Spacer(Modifier.width(8.dp))
             }
             DoneButton(onClick = onToggleCustomizationMode)
         } else {
@@ -450,9 +457,9 @@ private fun CustomizationButtonsContainer(
 @Composable
 private fun ResetButton(onClick: () -> Unit) {
     ShortcutHelperButton(
+        modifier = Modifier.heightIn(40.dp),
         onClick = onClick,
         color = Color.Transparent,
-        width = 99.dp,
         iconSource = IconSource(imageVector = Icons.Default.Refresh),
         text = stringResource(id = R.string.shortcut_helper_reset_button_text),
         contentColor = MaterialTheme.colorScheme.primary,
@@ -463,9 +470,9 @@ private fun ResetButton(onClick: () -> Unit) {
 @Composable
 private fun CustomizeButton(onClick: () -> Unit) {
     ShortcutHelperButton(
+        modifier = Modifier.heightIn(40.dp),
         onClick = onClick,
         color = MaterialTheme.colorScheme.secondaryContainer,
-        width = 133.dp,
         iconSource = IconSource(imageVector = Icons.Default.Tune),
         text = stringResource(id = R.string.shortcut_helper_customize_button_text),
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -475,9 +482,9 @@ private fun CustomizeButton(onClick: () -> Unit) {
 @Composable
 private fun DoneButton(onClick: () -> Unit) {
     ShortcutHelperButton(
+        modifier = Modifier.heightIn(40.dp),
         onClick = onClick,
         color = MaterialTheme.colorScheme.primary,
-        width = 69.dp,
         text = stringResource(R.string.shortcut_helper_done_button_text),
         contentColor = MaterialTheme.colorScheme.onPrimary,
     )
@@ -701,8 +708,10 @@ private fun ShortcutKeyCombinations(
             }
             ShortcutCommandContainer(showBackground = command.isCustom) { ShortcutCommand(command) }
         }
-        if (isCustomizing) {
-            Spacer(modifier = Modifier.width(16.dp))
+
+        if (isCustomizing) Spacer(modifier = Modifier.width(16.dp))
+
+        AnimatedVisibility(visible = isCustomizing) {
             if (shortcut.containsCustomShortcutCommands) {
                 DeleteShortcutButton(onDeleteShortcutRequested)
             } else {
@@ -715,40 +724,32 @@ private fun ShortcutKeyCombinations(
 @Composable
 private fun AddShortcutButton(onClick: () -> Unit) {
     ShortcutHelperButton(
-        modifier =
-            Modifier.border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outline,
-                shape = CircleShape,
-            ),
+        modifier = Modifier.size(32.dp),
         onClick = onClick,
         color = Color.Transparent,
-        width = 32.dp,
-        height = 32.dp,
         iconSource = IconSource(imageVector = Icons.Default.Add),
         contentColor = MaterialTheme.colorScheme.primary,
         contentPaddingVertical = 0.dp,
         contentPaddingHorizontal = 0.dp,
+        contentDescription = stringResource(R.string.shortcut_helper_add_shortcut_button_label),
+        shape = CircleShape,
+        border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
     )
 }
 
 @Composable
 private fun DeleteShortcutButton(onClick: () -> Unit) {
     ShortcutHelperButton(
-        modifier =
-            Modifier.border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outline,
-                shape = CircleShape,
-            ),
+        modifier = Modifier.size(32.dp),
         onClick = onClick,
         color = Color.Transparent,
-        width = 32.dp,
-        height = 32.dp,
         iconSource = IconSource(imageVector = Icons.Default.DeleteOutline),
         contentColor = MaterialTheme.colorScheme.primary,
         contentPaddingVertical = 0.dp,
         contentPaddingHorizontal = 0.dp,
+        contentDescription = stringResource(R.string.shortcut_helper_delete_shortcut_button_label),
+        shape = CircleShape,
+        border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
     )
 }
 
@@ -967,7 +968,7 @@ private fun CategoryItemTwoPane(
                 Text(
                     fontSize = 18.sp,
                     color = colors.textColor(selected).value,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.titleSmall.copy(hyphens = Hyphens.Auto),
                     text = label,
                 )
             }
@@ -991,6 +992,9 @@ private fun TitleBar(isCustomizing: Boolean = false) {
                 text = text,
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.headlineSmall,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
             )
         },
         windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp, left = 0.dp, right = 0.dp),
@@ -1068,8 +1072,9 @@ private fun KeyboardSettings(horizontalPadding: Dp, verticalPadding: Dp, onClick
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 16.sp,
                 style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.weight(1f),
             )
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.width(8.dp))
             Icon(
                 imageVector = Icons.AutoMirrored.Default.OpenInNew,
                 contentDescription = null,

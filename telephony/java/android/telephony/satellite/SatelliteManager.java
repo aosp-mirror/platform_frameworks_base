@@ -3690,8 +3690,8 @@ public final class SatelliteManager {
      * @param list The list of provisioned satellite subscriber infos.
      * @param executor The executor on which the callback will be called.
      * @param callback The callback object to which the result will be delivered.
-     *                 If the request is successful, {@link OutcomeReceiver#onResult(Object)}
-     *                 will return {@code true}.
+     *                 If the request is successful, {@link OutcomeReceiver#onResult}
+     *                 will be called.
      *                 If the request is not successful,
      *                 {@link OutcomeReceiver#onError(Throwable)} will return an error with
      *                 a SatelliteException.
@@ -3704,7 +3704,7 @@ public final class SatelliteManager {
     @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public void provisionSatellite(@NonNull List<SatelliteSubscriberInfo> list,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
+            @NonNull OutcomeReceiver<Void, SatelliteException> callback) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
 
@@ -3718,8 +3718,8 @@ public final class SatelliteManager {
                             if (resultData.containsKey(KEY_PROVISION_SATELLITE_TOKENS)) {
                                 boolean isUpdated =
                                         resultData.getBoolean(KEY_PROVISION_SATELLITE_TOKENS);
-                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
-                                        callback.onResult(isUpdated)));
+                                executor.execute(() -> Binder.withCleanCallingIdentity(
+                                        () -> callback.onResult(null)));
                             } else {
                                 loge("KEY_REQUEST_PROVISION_TOKENS does not exist.");
                                 executor.execute(() -> Binder.withCleanCallingIdentity(() ->
@@ -3751,8 +3751,8 @@ public final class SatelliteManager {
      * @param list The list of deprovisioned satellite subscriber infos.
      * @param executor The executor on which the callback will be called.
      * @param callback The callback object to which the result will be delivered.
-     *                 If the request is successful, {@link OutcomeReceiver#onResult(Object)}
-     *                 will return {@code true}.
+     *                 If the request is successful, {@link OutcomeReceiver#onResult}
+     *                 will be called.
      *                 If the request is not successful,
      *                 {@link OutcomeReceiver#onError(Throwable)} will return an error with
      *                 a SatelliteException.
@@ -3765,7 +3765,7 @@ public final class SatelliteManager {
     @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public void deprovisionSatellite(@NonNull List<SatelliteSubscriberInfo> list,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
+            @NonNull OutcomeReceiver<Void, SatelliteException> callback) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
 
@@ -3780,7 +3780,7 @@ public final class SatelliteManager {
                                 boolean isUpdated =
                                         resultData.getBoolean(KEY_DEPROVISION_SATELLITE_TOKENS);
                                 executor.execute(() -> Binder.withCleanCallingIdentity(() ->
-                                        callback.onResult(isUpdated)));
+                                        callback.onResult(null)));
                             } else {
                                 loge("KEY_DEPROVISION_SATELLITE_TOKENS does not exist.");
                                 executor.execute(() -> Binder.withCleanCallingIdentity(() ->

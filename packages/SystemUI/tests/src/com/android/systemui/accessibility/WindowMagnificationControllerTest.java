@@ -63,6 +63,8 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
@@ -88,6 +90,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
@@ -128,6 +131,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(/* test= */ null);
 
     private static final int LAYOUT_CHANGE_TIMEOUT_MS = 5000;
+    private static final int INSET_BOTTOM = 10;
     @Mock
     private MirrorWindowControl mMirrorWindowControl;
     @Mock
@@ -329,9 +333,9 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         final ArgumentCaptor<Rect> sourceBoundsCaptor = ArgumentCaptor.forClass(Rect.class);
         verify(mWindowMagnifierCallback, atLeast(2)).onSourceBoundsChanged(
                 (eq(mContext.getDisplayId())), sourceBoundsCaptor.capture());
-        assertThat(mWindowMagnificationController.getCenterX())
+        assertThat(mWindowMagnificationController.getMagnificationFrameCenterX())
                 .isEqualTo(sourceBoundsCaptor.getValue().exactCenterX());
-        assertThat(mWindowMagnificationController.getCenterY())
+        assertThat(mWindowMagnificationController.getMagnificationFrameCenterY())
                 .isEqualTo(sourceBoundsCaptor.getValue().exactCenterY());
     }
 
@@ -382,6 +386,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_UPDATE_WINDOW_MAGNIFIER_BOTTOM_BOUNDARY)
     public void deleteWindowMagnification_enableAtTheBottom_overlapFlagIsFalse() {
         final WindowManager wm = mContext.getSystemService(WindowManager.class);
         final Rect bounds = wm.getCurrentWindowMetrics().getBounds();
@@ -457,12 +462,14 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         verify(mAnimationCallback, never()).onResult(eq(false));
         verify(mWindowMagnifierCallback, timeout(LAYOUT_CHANGE_TIMEOUT_MS))
                 .onSourceBoundsChanged((eq(mContext.getDisplayId())), sourceBoundsCaptor.capture());
-        assertThat(mWindowMagnificationController.getCenterX())
+        assertThat(mWindowMagnificationController.getMagnificationFrameCenterX())
                 .isEqualTo(sourceBoundsCaptor.getValue().exactCenterX());
-        assertThat(mWindowMagnificationController.getCenterY())
+        assertThat(mWindowMagnificationController.getMagnificationFrameCenterY())
                 .isEqualTo(sourceBoundsCaptor.getValue().exactCenterY());
-        assertThat(mWindowMagnificationController.getCenterX()).isEqualTo(targetCenterX);
-        assertThat(mWindowMagnificationController.getCenterY()).isEqualTo(targetCenterY);
+        assertThat(mWindowMagnificationController.getMagnificationFrameCenterX())
+                .isEqualTo(targetCenterX);
+        assertThat(mWindowMagnificationController.getMagnificationFrameCenterY())
+                .isEqualTo(targetCenterY);
     }
 
     @Test
@@ -498,12 +505,14 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         verify(mAnimationCallback, times(3)).onResult(eq(false));
         verify(mWindowMagnifierCallback, timeout(LAYOUT_CHANGE_TIMEOUT_MS))
                 .onSourceBoundsChanged((eq(mContext.getDisplayId())), sourceBoundsCaptor.capture());
-        assertThat(mWindowMagnificationController.getCenterX())
+        assertThat(mWindowMagnificationController.getMagnificationFrameCenterX())
                 .isEqualTo(sourceBoundsCaptor.getValue().exactCenterX());
-        assertThat(mWindowMagnificationController.getCenterY())
+        assertThat(mWindowMagnificationController.getMagnificationFrameCenterY())
                 .isEqualTo(sourceBoundsCaptor.getValue().exactCenterY());
-        assertThat(mWindowMagnificationController.getCenterX()).isEqualTo(centerX + 40);
-        assertThat(mWindowMagnificationController.getCenterY()).isEqualTo(centerY + 40);
+        assertThat(mWindowMagnificationController.getMagnificationFrameCenterX())
+                .isEqualTo(centerX + 40);
+        assertThat(mWindowMagnificationController.getMagnificationFrameCenterY())
+                .isEqualTo(centerY + 40);
     }
 
     @Test
@@ -545,8 +554,8 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
             mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN,
                     magnifiedCenter.x, magnifiedCenter.y);
             // Get the center again in case the center we set is out of screen.
-            magnifiedCenter.set(mWindowMagnificationController.getCenterX(),
-                    mWindowMagnificationController.getCenterY());
+            magnifiedCenter.set(mWindowMagnificationController.getMagnificationFrameCenterX(),
+                    mWindowMagnificationController.getMagnificationFrameCenterY());
         });
         // Rotate the window clockwise 90 degree.
         windowBounds.set(windowBounds.top, windowBounds.left, windowBounds.bottom,
@@ -559,8 +568,9 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         assertThat(mWindowMagnificationController.mRotation).isEqualTo(newRotation);
         final PointF expectedCenter = new PointF(magnifiedCenter.y,
                 displayWidth - magnifiedCenter.x);
-        final PointF actualCenter = new PointF(mWindowMagnificationController.getCenterX(),
-                mWindowMagnificationController.getCenterY());
+        final PointF actualCenter =
+                new PointF(mWindowMagnificationController.getMagnificationFrameCenterX(),
+                        mWindowMagnificationController.getMagnificationFrameCenterY());
         assertThat(actualCenter).isEqualTo(expectedCenter);
     }
 
@@ -603,10 +613,10 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         });
 
         // The ratio of center to window size should be the same.
-        assertThat(mWindowMagnificationController.getCenterX() / testWindowBounds.width())
-                .isEqualTo(expectedRatio);
-        assertThat(mWindowMagnificationController.getCenterY() / testWindowBounds.height())
-                .isEqualTo(expectedRatio);
+        assertThat(mWindowMagnificationController.getMagnificationFrameCenterX()
+                / testWindowBounds.width()).isEqualTo(expectedRatio);
+        assertThat(mWindowMagnificationController.getMagnificationFrameCenterY()
+                / testWindowBounds.height()).isEqualTo(expectedRatio);
     }
 
     @Test
@@ -1175,6 +1185,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_UPDATE_WINDOW_MAGNIFIER_BOTTOM_BOUNDARY)
     public void moveWindowMagnificationToTheBottom_enabledWithGestureInset_overlapFlagIsTrue() {
         final Rect bounds = mWindowManager.getCurrentWindowMetrics().getBounds();
         setSystemGestureInsets();
@@ -1188,6 +1199,30 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         });
 
         ReferenceTestUtils.waitForCondition(() -> hasMagnificationOverlapFlag());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UPDATE_WINDOW_MAGNIFIER_BOTTOM_BOUNDARY)
+    public void moveWindowMagnificationToTheBottom_stopsAtSystemGestureTop() {
+        final Rect bounds = mWindowManager.getCurrentWindowMetrics().getBounds();
+        setSystemGestureInsets();
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
+                    Float.NaN);
+        });
+
+        ViewGroup.LayoutParams params = mSurfaceControlViewHost.getView().getLayoutParams();
+        final int mOuterBorderSize = mResources.getDimensionPixelSize(
+                R.dimen.magnification_outer_border_margin);
+
+        final float expectedY =
+                (float) (bounds.bottom - INSET_BOTTOM - params.height + mOuterBorderSize);
+
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.moveWindowMagnifier(0, bounds.height());
+        });
+
+        assertThat(mWindowMagnificationController.getMagnifierWindowY()).isEqualTo(expectedY);
     }
 
     @Test
@@ -1445,8 +1480,10 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.setWindowSizeAndCenter(minimumWindowSize,
                     minimumWindowSize, bounds.right, bounds.bottom);
-            magnificationCenterX.set((int) mWindowMagnificationController.getCenterX());
-            magnificationCenterY.set((int) mWindowMagnificationController.getCenterY());
+            magnificationCenterX.set(
+                    (int) mWindowMagnificationController.getMagnificationFrameCenterX());
+            magnificationCenterY.set(
+                    (int) mWindowMagnificationController.getMagnificationFrameCenterY());
         });
 
         assertThat(magnificationCenterX.get()).isLessThan(bounds.right);
@@ -1501,7 +1538,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
     private void setSystemGestureInsets() {
         final WindowInsets testInsets = new WindowInsets.Builder()
-                .setInsets(systemGestures(), Insets.of(0, 0, 0, 10))
+                .setInsets(systemGestures(), Insets.of(0, 0, 0, INSET_BOTTOM))
                 .build();
         mWindowManager.setWindowInsets(testInsets);
     }

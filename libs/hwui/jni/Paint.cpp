@@ -609,7 +609,8 @@ namespace PaintGlue {
         SkFont* font = &paint->getSkFont();
         const Typeface* typeface = paint->getAndroidTypeface();
         typeface = Typeface::resolveDefault(typeface);
-        minikin::FakedFont baseFont = typeface->fFontCollection->baseFontFaked(typeface->fStyle);
+        minikin::FakedFont baseFont =
+                typeface->getFontCollection()->baseFontFaked(typeface->getFontStyle());
         float saveSkewX = font->getSkewX();
         bool savefakeBold = font->isEmbolden();
         MinikinFontSkia::populateSkFont(font, baseFont.typeface().get(), baseFont.fakery);
@@ -641,7 +642,7 @@ namespace PaintGlue {
         if (useLocale) {
             minikin::MinikinPaint minikinPaint = MinikinUtils::prepareMinikinPaint(paint, typeface);
             minikin::MinikinExtent extent =
-                    typeface->fFontCollection->getReferenceExtentForLocale(minikinPaint);
+                    typeface->getFontCollection()->getReferenceExtentForLocale(minikinPaint);
             metrics->fAscent = std::min(extent.ascent, metrics->fAscent);
             metrics->fDescent = std::max(extent.descent, metrics->fDescent);
             metrics->fTop = std::min(metrics->fAscent, metrics->fTop);

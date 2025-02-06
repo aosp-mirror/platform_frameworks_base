@@ -846,16 +846,23 @@
             This enum value is introduced in API level 31. -->
         <enum name="singleInstancePerTask" value="4" />
     </attr>
-    <!-- Specify the orientation an activity should be run in.  If not
-         specified, it will run in the current preferred orientation
-         of the screen.
+    <!-- Specify the orientation an activity should run in. If the orientation is not specified, the
+         system determines the best orientation for the activity.
          <p>This attribute is supported by the <a
             href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a>
             element.
-         <aside class="note"><b>Note:</b> Device manufacturers can configure devices to override
-            (ignore) this attribute to improve the layout of apps. See
-            <a href="{@docRoot}guide/practices/device-compatibility-mode">
-            Device compatibility mode</a>.
+         <aside class="note"><b>Note:</b>
+            <ul>
+                <li>Device manufacturers can configure devices to override (ignore) this attribute
+                    to improve the layout of apps.</li>
+                <li>On devices with Android 16 (API level 36) or higher installed, virtual device
+                    owners (limited to select trusted and privileged apps) can configure devices
+                    they manage to override (ignore) this attribute to improve app layout. See also
+                    <a href="https://source.android.com/docs/core/permissions/app-streaming">
+                    Companion app streaming</a>.</li>
+             </ul>
+             <p>See <a href="{@docRoot}guide/practices/device-compatibility-mode">Device
+             compatibility mode</a>.</p>
          </aside> -->
     <attr name="screenOrientation">
         <!-- No preference specified: let the system decide the best
@@ -1474,12 +1481,19 @@
             <ul>
                 <li>On Android 11 (API level 30) and lower, the value of
                     {@link android.R.attr#screenOrientation} is ignored for resizeable activities
-                    in multi-window mode.
+                    in multi-window mode.</li>
                 <li>Device manufacturers can configure devices to override (ignore) this attribute
                     to force apps to resize. The override does not affect the app's support for
                     multi-window mode. See
-                    <a href="{@docRoot}guide/practices/device-compatibility-mode">
-                    Device compatibility mode</a>.
+                    <a href="{@docRoot}guide/practices/device-compatibility-mode">Device
+                    compatibility mode</a>.</li>
+                <li>On devices with Android 16 (API level 36) or higher installed, virtual device
+                    owners (limited to select trusted and privileged apps) can configure devices
+                    they manage to override (ignore) this attribute to force apps to resize. See
+                    <a href="{@docRoot}guide/practices/device-compatibility-mode">Device
+                    compatibility mode</a>. See also
+                    <a href="https://source.android.com/docs/core/permissions/app-streaming">
+                    Companion app streaming</a>.</li>
             </ul>
          </aside> -->
     <attr name="resizeableActivity" format="boolean" />
@@ -1504,11 +1518,18 @@
          <aside class="note"><b>Note:</b>
             <ul>
                 <li>This attribute is ignored if the activity has
-                    {@link android.R.attr#resizeableActivity} set to {@code true}.
+                    {@link android.R.attr#resizeableActivity} set to {@code true}.</li>
                 <li>Device manufacturers can configure devices to override (ignore) this attribute
                     to improve the layout of apps. See
-                    <a href="{@docRoot}guide/practices/device-compatibility-mode">
-                    Device compatibility mode</a>.
+                    <a href="{@docRoot}guide/practices/device-compatibility-mode#override_any_orientation_to_user">
+                    Device compatibility mode</a>.</li>
+                <li>On devices with Android 16 (API level 36) or higher installed, virtual device
+                    owners (limited to select trusted and privileged apps) can configure devices
+                    they manage to override (ignore) this attribute to improve app layout. See
+                    <a href="{@docRoot}guide/practices/device-compatibility-mode#override_any_orientation_to_user">
+                    Device compatibility mode</a>. See also
+                    <a href="https://source.android.com/docs/core/permissions/app-streaming">
+                    Companion app streaming</a>.</li>
             </ul>
          </aside> -->
     <attr name="maxAspectRatio" format="float" />
@@ -1522,11 +1543,18 @@
          <aside class="note"><b>Note:</b>
             <ul>
                 <li>This attribute is ignored if the activity has
-                    {@link android.R.attr#resizeableActivity} set to {@code true}.
+                    {@link android.R.attr#resizeableActivity} set to {@code true}.</li>
                 <li>Device manufacturers can configure devices to override (ignore) this attribute
                     to improve the layout of apps. See
-                    <a href="{@docRoot}guide/practices/device-compatibility-mode">
-                    Device compatibility mode</a>.
+                    <a href="{@docRoot}guide/practices/device-compatibility-mode">Device
+                    compatibility mode</a>.</li>
+                <li>On devices with Android 16 (API level 36) or higher installed, virtual device
+                    owners (limited to select trusted and privileged apps) can configure devices
+                    they manage to override (ignore) this attribute to improve app layout. See
+                    <a href="{@docRoot}guide/practices/device-compatibility-mode">Device
+                    compatibility mode</a>. See also
+                    <a href="https://source.android.com/docs/core/permissions/app-streaming">
+                    Companion app streaming</a>.</li>
             </ul>
          </aside> -->
     <attr name="minAspectRatio" format="float" />
@@ -1862,9 +1890,38 @@
        <enum name="sync" value="2" />
     </attr>
 
-    <!-- This attribute will be used to override app compatibility mode on 16 KB devices.
-         If set to enabled, Natives lib will be extracted from APK if they are not page aligned on
-         16 KB device. 4 KB natives libs will be loaded app-compat mode if they are eligible.
+    <!-- This attribute overrides the user-set or platform-set 16 KB page size
+         compatibility mode, so that page agnostic compatibility is always enabled
+         or always disabled, rather than according to the user's preference.
+
+         <p>On 4 KB systems, this attribute is ignored and apps are installed
+         normally.
+
+         <p>On 16 KB systems, if an app is built for 16 KB page sizes, this
+         attribute is ignored and apps are installed normally.
+
+         <p>This attribute only affects 16 KB systems for apps that are built
+         with 4 KB page size (old) options.
+
+         <p>When page agnostic compatibility is enabled (either through this
+         flag or via the user's preference), the system specializes the app
+         installation process in ways known to improve compatibility of 4 KB
+         built apps on 16 KB systems. That is, apps which do not have aligned
+         libraries in APK files are extracted, requiring more space on the
+         device. An additional specialization when this option is enabled is
+         that the linker loads the application in a special mode intended
+         to allow 4 KB aligned program segments to load on a 16 KB page system.
+
+         <p>Here are the situations where this attribute should be most useful:
+         <ul>
+            <li>If an app works on 16 KB mode, but is not built for it, enabling this
+            attribute forces the app to be installed in 16 KB mode without
+            the user having to set these options themself.
+            <li>If an app is fully working in 16 KB mode, you can set this
+            attribute to disabled, so that any regression causes a clear failure
+            and this compatibility mode is not used.
+         </ul>
+
          @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB) -->
     <attr name="pageSizeCompat">
         <!-- value for enabled must match with
@@ -2572,10 +2629,6 @@
              against a development branch, in which case it will only work against
              the development builds. -->
         <attr name="minSdkVersion" format="integer|string" />
-        <!-- This is the minimum SDK major and minor version (e.g. "36.1") that
-             the application requires. Verified independently of minSdkVersion.
-             @FlaggedApi(android.sdk.Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME) -->
-        <attr name="minSdkVersionFull" format="string" />
         <!-- This is the SDK version number that the application is targeting.
              It is able to run on older versions (down to minSdkVersion), but
              was explicitly tested to work with the version specified here.

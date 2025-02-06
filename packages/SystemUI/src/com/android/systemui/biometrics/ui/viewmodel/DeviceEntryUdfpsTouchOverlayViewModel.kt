@@ -22,7 +22,6 @@ import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.hideAffordancesRequest
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -33,7 +32,6 @@ import kotlinx.coroutines.flow.map
  * touches as long as the device entry view is visible (the lockscreen or the alternate bouncer
  * view).
  */
-@ExperimentalCoroutinesApi
 class DeviceEntryUdfpsTouchOverlayViewModel
 @Inject
 constructor(

@@ -22,6 +22,7 @@ import static android.app.Notification.CATEGORY_EVENT;
 import static android.app.Notification.CATEGORY_MESSAGE;
 import static android.app.Notification.CATEGORY_REMINDER;
 import static android.app.Notification.FLAG_FSI_REQUESTED_BUT_DENIED;
+import static android.app.Notification.FLAG_PROMOTED_ONGOING;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
@@ -43,6 +44,8 @@ import android.graphics.drawable.Icon;
 import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
@@ -54,6 +57,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SbnBuilder;
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips;
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUi;
 import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
@@ -277,6 +282,40 @@ public class NotificationEntryTest extends SysuiTestCase {
 
         assertFalse(mEntry.isDemoted());
         assertTrue(mEntry.isStickyAndNotDemoted());
+    }
+
+    @Test
+    @EnableFlags({PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME})
+    public void isPromotedOngoing_noFlagOnNotif_false() {
+        mEntry.getSbn().getNotification().flags &= ~FLAG_PROMOTED_ONGOING;
+
+        assertFalse(mEntry.isPromotedOngoing());
+    }
+
+    @Test
+    @DisableFlags({PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME})
+    public void isPromotedOngoing_statusBarNotifChipsFlagAndUiFlagOff_false() {
+        mEntry.getSbn().getNotification().flags |= FLAG_PROMOTED_ONGOING;
+
+        assertFalse(mEntry.isPromotedOngoing());
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUi.FLAG_NAME)
+    @DisableFlags(StatusBarNotifChips.FLAG_NAME)
+    public void isPromotedOngoing_uiFlagOnAndNotifHasFlag_true() {
+        mEntry.getSbn().getNotification().flags |= FLAG_PROMOTED_ONGOING;
+
+        assertTrue(mEntry.isPromotedOngoing());
+    }
+
+    @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    @DisableFlags(PromotedNotificationUi.FLAG_NAME)
+    public void isPromotedOngoing_statusBarNotifChipsFlagOnAndNotifHasFlag_true() {
+        mEntry.getSbn().getNotification().flags |= FLAG_PROMOTED_ONGOING;
+
+        assertTrue(mEntry.isPromotedOngoing());
     }
 
     @Test

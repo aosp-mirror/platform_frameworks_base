@@ -28,7 +28,6 @@ import com.android.systemui.statusbar.pipeline.mobile.util.FakeSubscriptionManag
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -176,7 +175,6 @@ class SimBouncerRepositoryTest : SysuiTestCase() {
         }
 
     /** Emits a new sim card state and collects the last value of the flow argument. */
-    @OptIn(ExperimentalCoroutinesApi::class)
     private fun <T> TestScope.emitSubscriptionIdAndCollectLastValue(
         flow: Flow<T>,
         subId: Int = 1,

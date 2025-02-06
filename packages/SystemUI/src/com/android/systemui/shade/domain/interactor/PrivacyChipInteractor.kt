@@ -41,6 +41,7 @@ constructor(
     private val privacyDialogController: PrivacyDialogController,
     private val privacyDialogControllerV2: PrivacyDialogControllerV2,
     private val deviceProvisionedController: DeviceProvisionedController,
+    private val shadeDialogContextInteractor: ShadeDialogContextInteractor,
 ) {
     /** The list of PrivacyItems to be displayed by the privacy chip. */
     val privacyItems: StateFlow<List<PrivacyItem>> = repository.privacyItems
@@ -80,9 +81,9 @@ constructor(
         if (!deviceProvisionedController.isDeviceProvisioned) return
 
         if (repository.isSafetyCenterEnabled.value) {
-            privacyDialogControllerV2.showDialog(privacyChip.context, privacyChip)
+            privacyDialogControllerV2.showDialog(shadeDialogContextInteractor.context, privacyChip)
         } else {
-            privacyDialogController.showDialog(privacyChip.context)
+            privacyDialogController.showDialog(shadeDialogContextInteractor.context)
         }
     }
 }

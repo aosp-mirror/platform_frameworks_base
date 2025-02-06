@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.annotation.NonNull;
+import android.content.pm.PackageManager;
 
 import com.android.server.wm.utils.OptPropFactory;
 
@@ -26,72 +27,74 @@ import com.android.server.wm.utils.OptPropFactory;
 public class AppCompatOverrides {
 
     @NonNull
-    private final AppCompatOrientationOverrides mAppCompatOrientationOverrides;
+    private final AppCompatOrientationOverrides mOrientationOverrides;
     @NonNull
-    private final AppCompatCameraOverrides mAppCompatCameraOverrides;
+    private final AppCompatCameraOverrides mCameraOverrides;
     @NonNull
-    private final AppCompatAspectRatioOverrides mAppCompatAspectRatioOverrides;
+    private final AppCompatAspectRatioOverrides mAspectRatioOverrides;
     @NonNull
-    private final AppCompatFocusOverrides mAppCompatFocusOverrides;
+    private final AppCompatFocusOverrides mFocusOverrides;
     @NonNull
-    private final AppCompatResizeOverrides mAppCompatResizeOverrides;
+    private final AppCompatResizeOverrides mResizeOverrides;
     @NonNull
-    private final AppCompatReachabilityOverrides mAppCompatReachabilityOverrides;
+    private final AppCompatReachabilityOverrides mReachabilityOverrides;
     @NonNull
-    private final AppCompatLetterboxOverrides mAppCompatLetterboxOverrides;
+    private final AppCompatLetterboxOverrides mLetterboxOverrides;
 
     AppCompatOverrides(@NonNull ActivityRecord activityRecord,
+            @NonNull PackageManager packageManager,
             @NonNull AppCompatConfiguration appCompatConfiguration,
             @NonNull OptPropFactory optPropBuilder,
             @NonNull AppCompatDeviceStateQuery appCompatDeviceStateQuery) {
-        mAppCompatCameraOverrides = new AppCompatCameraOverrides(activityRecord,
+        mCameraOverrides = new AppCompatCameraOverrides(activityRecord,
                 appCompatConfiguration, optPropBuilder);
-        mAppCompatOrientationOverrides = new AppCompatOrientationOverrides(activityRecord,
-                appCompatConfiguration, optPropBuilder, mAppCompatCameraOverrides);
-        mAppCompatReachabilityOverrides = new AppCompatReachabilityOverrides(activityRecord,
+        mOrientationOverrides = new AppCompatOrientationOverrides(activityRecord,
+                appCompatConfiguration, optPropBuilder, mCameraOverrides);
+        mReachabilityOverrides = new AppCompatReachabilityOverrides(activityRecord,
                 appCompatConfiguration, appCompatDeviceStateQuery);
-        mAppCompatAspectRatioOverrides = new AppCompatAspectRatioOverrides(activityRecord,
+        mAspectRatioOverrides = new AppCompatAspectRatioOverrides(activityRecord,
                 appCompatConfiguration, optPropBuilder, appCompatDeviceStateQuery,
-                mAppCompatReachabilityOverrides);
-        mAppCompatFocusOverrides = new AppCompatFocusOverrides(activityRecord,
-                appCompatConfiguration, optPropBuilder);
-        mAppCompatResizeOverrides = new AppCompatResizeOverrides(activityRecord, optPropBuilder);
-        mAppCompatLetterboxOverrides = new AppCompatLetterboxOverrides(activityRecord,
+                mReachabilityOverrides);
+        mFocusOverrides = new AppCompatFocusOverrides(activityRecord, appCompatConfiguration,
+                optPropBuilder);
+        mResizeOverrides = new AppCompatResizeOverrides(activityRecord, packageManager,
+                optPropBuilder);
+        mLetterboxOverrides = new AppCompatLetterboxOverrides(activityRecord,
                 appCompatConfiguration);
     }
 
     @NonNull
-    AppCompatOrientationOverrides getAppCompatOrientationOverrides() {
-        return mAppCompatOrientationOverrides;
+    AppCompatOrientationOverrides getOrientationOverrides() {
+        return mOrientationOverrides;
     }
 
     @NonNull
-    AppCompatCameraOverrides getAppCompatCameraOverrides() {
-        return mAppCompatCameraOverrides;
+    AppCompatCameraOverrides getCameraOverrides() {
+        return mCameraOverrides;
     }
 
     @NonNull
-    AppCompatAspectRatioOverrides getAppCompatAspectRatioOverrides() {
-        return mAppCompatAspectRatioOverrides;
+    AppCompatAspectRatioOverrides getAspectRatioOverrides() {
+        return mAspectRatioOverrides;
     }
 
     @NonNull
-    AppCompatFocusOverrides getAppCompatFocusOverrides() {
-        return mAppCompatFocusOverrides;
+    AppCompatFocusOverrides getFocusOverrides() {
+        return mFocusOverrides;
     }
 
     @NonNull
-    AppCompatResizeOverrides getAppCompatResizeOverrides() {
-        return mAppCompatResizeOverrides;
+    AppCompatResizeOverrides getResizeOverrides() {
+        return mResizeOverrides;
     }
 
     @NonNull
-    AppCompatReachabilityOverrides getAppCompatReachabilityOverrides() {
-        return mAppCompatReachabilityOverrides;
+    AppCompatReachabilityOverrides getReachabilityOverrides() {
+        return mReachabilityOverrides;
     }
 
     @NonNull
-    AppCompatLetterboxOverrides getAppCompatLetterboxOverrides() {
-        return mAppCompatLetterboxOverrides;
+    AppCompatLetterboxOverrides getLetterboxOverrides() {
+        return mLetterboxOverrides;
     }
 }

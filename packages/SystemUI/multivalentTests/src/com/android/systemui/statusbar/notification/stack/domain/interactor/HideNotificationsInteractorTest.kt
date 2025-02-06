@@ -39,7 +39,6 @@ import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import java.time.Duration
 import java.util.Optional
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -50,7 +49,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 open class HideNotificationsInteractorTest : SysuiTestCase() {

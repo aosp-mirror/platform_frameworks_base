@@ -42,7 +42,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.testKosmos
 import com.android.systemui.tuner.TunerService
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -303,7 +302,6 @@ class KeyguardBypassControllerTest(flags: FlagsParameterization) : SysuiTestCase
         assertThat(keyguardBypassController.bypassEnabled).isFalse()
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun qsExpansion_updates() {
         testScope.runTest {

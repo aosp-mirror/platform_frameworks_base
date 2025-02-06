@@ -35,11 +35,12 @@ import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.UidBatteryConsumer;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.SparseLongArray;
 
@@ -50,6 +51,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.os.BatteryStatsHistoryIterator;
 import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerProfile;
+import com.android.server.power.optimization.Flags;
 import com.android.server.power.stats.processor.MultiStatePowerAttributor;
 
 import org.junit.Before;
@@ -60,6 +62,7 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -69,11 +72,14 @@ public class BatteryUsageStatsProviderTest {
             .setProvideMainThread(true)
             .build();
 
+    @Rule(order = 1)
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     private static final int APP_UID = Process.FIRST_APPLICATION_UID + 42;
     private static final long MINUTE_IN_MS = 60 * 1000;
     private static final double PRECISION = 0.00001;
 
-    @Rule(order = 1)
+    @Rule(order = 2)
     public final BatteryUsageStatsRule mStatsRule =
             new BatteryUsageStatsRule(12345)
                     .createTempDirectory()
@@ -180,6 +186,7 @@ public class BatteryUsageStatsProviderTest {
 
     private BatteryStatsImpl prepareBatteryStats(boolean plugInAtTheEnd) {
         BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
+        batteryStats.setNoAutoReset(true);
         batteryStats.onSystemReady(mContext);
 
         synchronized (batteryStats) {
@@ -481,13 +488,12 @@ public class BatteryUsageStatsProviderTest {
     }
 
     @Test
-    public void testAggregateBatteryStats() throws IOException {
+    public void testAggregateBatteryStats() throws Throwable {
         BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
 
         setTime(5 * MINUTE_IN_MS);
-        synchronized (batteryStats) {
-            batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
-        }
+        batteryStats.startNewSession(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
+        mStatsRule.waitForBackgroundThread();
 
         PowerStatsStore powerStatsStore = new PowerStatsStore(
                 new File(mStatsRule.getHistoryDir(), "powerstatsstore"),
@@ -501,9 +507,8 @@ public class BatteryUsageStatsProviderTest {
 
         batteryStats.saveBatteryUsageStatsOnReset(provider, powerStatsStore,
                 /* accumulateBatteryUsageStats */ false);
-        synchronized (batteryStats) {
-            batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
-        }
+        batteryStats.startNewSession(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
+        mStatsRule.waitForBackgroundThread();
 
         synchronized (batteryStats) {
             batteryStats.noteFlashlightOnLocked(APP_UID,
@@ -514,9 +519,8 @@ public class BatteryUsageStatsProviderTest {
                     20 * MINUTE_IN_MS, 20 * MINUTE_IN_MS);
         }
         setTime(25 * MINUTE_IN_MS);
-        synchronized (batteryStats) {
-            batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
-        }
+        batteryStats.startNewSession(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
+        mStatsRule.waitForBackgroundThread();
 
         synchronized (batteryStats) {
             batteryStats.noteFlashlightOnLocked(APP_UID,
@@ -527,9 +531,8 @@ public class BatteryUsageStatsProviderTest {
                     50 * MINUTE_IN_MS, 50 * MINUTE_IN_MS);
         }
         setTime(55 * MINUTE_IN_MS);
-        synchronized (batteryStats) {
-            batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
-        }
+        batteryStats.startNewSession(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
+        mStatsRule.waitForBackgroundThread();
 
         // This section should be ignored because the timestamp is out or range
         synchronized (batteryStats) {
@@ -541,9 +544,8 @@ public class BatteryUsageStatsProviderTest {
                     70 * MINUTE_IN_MS, 70 * MINUTE_IN_MS);
         }
         setTime(75 * MINUTE_IN_MS);
-        synchronized (batteryStats) {
-            batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
-        }
+        batteryStats.startNewSession(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
+        mStatsRule.waitForBackgroundThread();
 
         // This section should be ignored because it represents the current stats session
         synchronized (batteryStats) {
@@ -556,10 +558,7 @@ public class BatteryUsageStatsProviderTest {
         }
         setTime(95 * MINUTE_IN_MS);
 
-        // Await completion
-        ConditionVariable done = new ConditionVariable();
-        mStatsRule.getHandler().post(done::open);
-        done.block();
+        mStatsRule.waitForBackgroundThread();
 
         // Include the first and the second snapshot, but not the third or current
         BatteryUsageStatsQuery query = new BatteryUsageStatsQuery.Builder()
@@ -875,5 +874,73 @@ public class BatteryUsageStatsProviderTest {
         assertThat(stats.getStatsDuration()).isEqualTo(1234);
 
         stats.close();
+    }
+
+    @Test
+    @EnableFlags({
+            Flags.FLAG_EXTENDED_BATTERY_HISTORY_CONTINUOUS_COLLECTION_ENABLED,
+            Flags.FLAG_EXTENDED_BATTERY_HISTORY_COMPRESSION_ENABLED
+    })
+    public void testIncludeSubsetOfHistory() throws IOException {
+        MockBatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
+        BatteryHistoryDirectory store =
+                (BatteryHistoryDirectory) batteryStats.getHistory().getBatteryHistoryStore();
+        store.setFileCompressionEnabled(true);
+        // Make history fragment size predictable. Without this protection, holding the history
+        // directory lock in the background would prevent new fragments from being created.
+        store.makeDirectoryLockUnconditional();
+
+        batteryStats.getHistory().setMaxHistoryBufferSize(100);
+        synchronized (batteryStats) {
+            batteryStats.setRecordAllHistoryLocked(true);
+        }
+        batteryStats.forceRecordAllHistory();
+        batteryStats.setNoAutoReset(true);
+
+        long lastIncludedEventTimestamp = 0;
+        String tag = "work work work work work work work work work work work work work work work";
+        for (int i = 1; i < 50; i++) {
+            mStatsRule.advanceTime(TimeUnit.MINUTES.toMillis(9));
+            synchronized (batteryStats) {
+                batteryStats.noteJobStartLocked(tag, 42);
+            }
+            mStatsRule.advanceTime(TimeUnit.MINUTES.toMillis(1));
+            synchronized (batteryStats) {
+                batteryStats.noteJobFinishLocked(tag, 42, 0);
+            }
+            lastIncludedEventTimestamp = mMonotonicClock.monotonicTime();
+        }
+
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(mContext,
+                mock(PowerAttributor.class), mStatsRule.getPowerProfile(),
+                mStatsRule.getCpuScalingPolicies(), mock(PowerStatsStore.class), 0, mMockClock,
+                mMonotonicClock);
+
+        BatteryUsageStatsQuery query = new BatteryUsageStatsQuery.Builder()
+                .includeBatteryHistory()
+                .setPreferredHistoryDurationMs(TimeUnit.MINUTES.toMillis(20))
+                .build();
+        final BatteryUsageStats stats = provider.getBatteryUsageStats(batteryStats, query);
+        Parcel parcel = Parcel.obtain();
+        stats.writeToParcel(parcel, 0);
+        stats.close();
+
+        parcel.setDataPosition(0);
+        BatteryUsageStats actual = BatteryUsageStats.CREATOR.createFromParcel(parcel);
+
+        long firstIncludedEventTimestamp = 0;
+        try (BatteryStatsHistoryIterator it = actual.iterateBatteryStatsHistory()) {
+            BatteryStats.HistoryItem item;
+            while ((item = it.next()) != null) {
+                if (item.eventCode == BatteryStats.HistoryItem.EVENT_JOB_START) {
+                    firstIncludedEventTimestamp = item.time;
+                    break;
+                }
+            }
+        }
+        actual.close();
+
+        assertThat(firstIncludedEventTimestamp)
+                .isAtLeast(lastIncludedEventTimestamp - TimeUnit.MINUTES.toMillis(30));
     }
 }

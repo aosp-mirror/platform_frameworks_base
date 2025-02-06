@@ -47,7 +47,6 @@ import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 
@@ -77,7 +76,6 @@ import com.android.wm.shell.util.StubTransaction;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -114,9 +112,6 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
     private Transitions mTransitions;
 
     @Mock private DesktopRepository mDesktopRepository;
-
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private ShellTaskOrganizer mShellTaskOrganizer;
     private RecentTasksController mRecentTasksController;
@@ -169,7 +164,7 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
         final IResultReceiver finishCallback = mock(IResultReceiver.class);
 
         final IBinder transition = startRecentsTransition(/* synthetic= */ true, runner);
-        verify(runner).onAnimationStart(any(), any(), any(), any(), any(), any());
+        verify(runner).onAnimationStart(any(), any(), any(), any(), any(), any(), any());
 
         // Finish and verify no transition remains and that the provided finish callback is called
         mRecentsTransitionHandler.findController(transition).finish(true /* toHome */,
@@ -184,7 +179,7 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
         final IRecentsAnimationRunner runner = mock(IRecentsAnimationRunner.class);
 
         final IBinder transition = startRecentsTransition(/* synthetic= */ true, runner);
-        verify(runner).onAnimationStart(any(), any(), any(), any(), any(), any());
+        verify(runner).onAnimationStart(any(), any(), any(), any(), any(), any(), any());
 
         mRecentsTransitionHandler.findController(transition).cancel("test");
         mMainExecutor.flushAll();

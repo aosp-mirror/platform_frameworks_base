@@ -18,9 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Gailu osagarriaren kudeatzailea"</string>
     <string name="confirmation_title" msgid="2244241995958340998">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; gailua erabiltzeko baimena eman nahi diozu &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; aplikazioari?"</string>
+    <string name="message_discovery_soft_timeout" msgid="473346859407859161">"Ziurtatu <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> honen <xliff:g id="DISCOVERY_METHOD">%2$s</xliff:g> aktibatuta dagoela, eta eduki <xliff:g id="PROFILE_NAME">%3$s</xliff:g> hurbil."</string>
+    <string name="message_discovery_hard_timeout" msgid="677514663495711424">"Ez da aurkitu gailurik. Saiatu berriro geroago."</string>
+    <string name="discovery_bluetooth" msgid="5693557668470016164">"Bluetootha"</string>
+    <string name="discovery_wifi" msgid="1551782459721758773">"Wifia"</string>
+    <string name="discovery_mixed" msgid="7071466134150760127">"Bluetootha eta wifia"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"erlojua"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"Aukeratu &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; aplikazioak kudeatu behar duen gailua"</string>
     <string name="chooser_title" msgid="2235819929238267637">"Aukeratu konfiguratu nahi duzun <xliff:g id="PROFILE_NAME">%1$s</xliff:g>"</string>
+    <string name="single_device_title" msgid="4199861437545438606">"<xliff:g id="PROFILE_NAME">%1$s</xliff:g> baten bila"</string>
     <string name="summary_watch" msgid="8134580124808507407">"Informazioa sinkronizatzeko (esate baterako, deitzaileen izenak) eta hauetarako baimenak izango ditu aplikazioak <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> erabiltzean:"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; kudeatzeko baimena eman nahi diozu &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; aplikazioari?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"gailua"</string>

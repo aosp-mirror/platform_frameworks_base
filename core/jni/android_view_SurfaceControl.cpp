@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#undef ANDROID_UTILS_REF_BASE_DISABLE_IMPLICIT_CONSTRUCTION // TODO:remove this and fix code
 
 #define LOG_TAG "SurfaceControl"
 #define LOG_NDEBUG 0
@@ -1111,6 +1112,14 @@ static void nativeSetCornerRadius(JNIEnv* env, jclass clazz, jlong transactionOb
 
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     transaction->setCornerRadius(ctrl, cornerRadius);
+}
+
+static void nativeSetClientDrawnCornerRadius(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                             jlong nativeObject, jfloat clientDrawnCornerRadius) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    transaction->setClientDrawnCornerRadius(ctrl, clientDrawnCornerRadius);
 }
 
 static void nativeSetBackgroundBlurRadius(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -2547,6 +2556,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetCrop },
     {"nativeSetCornerRadius", "(JJF)V",
             (void*)nativeSetCornerRadius },
+    {"nativeSetClientDrawnCornerRadius", "(JJF)V",
+            (void*) nativeSetClientDrawnCornerRadius },
     {"nativeSetBackgroundBlurRadius", "(JJI)V",
             (void*)nativeSetBackgroundBlurRadius },
     {"nativeSetLayerStack", "(JJI)V",

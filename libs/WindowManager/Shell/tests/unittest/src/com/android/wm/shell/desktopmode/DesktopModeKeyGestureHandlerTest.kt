@@ -24,7 +24,6 @@ import android.hardware.input.InputManager
 import android.hardware.input.InputManager.KeyGestureEventHandler
 import android.hardware.input.KeyGestureEvent
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.KeyEvent
@@ -46,6 +45,7 @@ import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFreeformTask
 import com.android.wm.shell.desktopmode.common.ToggleTaskSizeInteraction
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
@@ -63,7 +63,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.anyInt
@@ -85,8 +84,6 @@ import org.mockito.quality.Strictness
 @ExperimentalCoroutinesApi
 @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
 class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
-
-    @JvmField @Rule val setFlagsRule = SetFlagsRule()
 
     private val rootTaskDisplayAreaOrganizer = mock<RootTaskDisplayAreaOrganizer>()
     private val shellTaskOrganizer = mock<ShellTaskOrganizer>()
@@ -115,7 +112,7 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
                 .strictness(Strictness.LENIENT)
                 .spyStatic(DesktopModeStatus::class.java)
                 .startMocking()
-        doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
+        doReturn(true).`when` { DesktopModeStatus.isDeviceEligibleForDesktopMode(any()) }
 
         testScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
         shellInit = spy(ShellInit(testExecutor))
@@ -294,7 +291,7 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
         testExecutor.flushAll()
 
         assertThat(result).isTrue()
-        verify(desktopTasksController).minimizeTask(task)
+        verify(desktopTasksController).minimizeTask(task, MinimizeReason.KEY_GESTURE)
     }
 
     private fun setUpFreeformTask(

@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManager;
-import android.app.admin.flags.Flags;
 import android.content.ComponentName;
 import android.os.FileUtils;
 import android.os.PersistableBundle;
@@ -124,24 +123,6 @@ class DevicePolicyData {
     final ArrayMap<ComponentName, ActiveAdmin> mAdminMap = new ArrayMap<>();
     final ArrayList<ActiveAdmin> mAdminList = new ArrayList<>();
     final ArrayList<ComponentName> mRemovingAdmins = new ArrayList<>();
-
-    /**
-     * @deprecated Do not use. Policies set by permission holders must go into DevicePolicyEngine.
-     */
-    @Deprecated
-    ActiveAdmin mPermissionBasedAdmin;
-
-    // Create or get the permission-based admin. The permission-based admin will not have a
-    // DeviceAdminInfo or ComponentName.
-    ActiveAdmin createOrGetPermissionBasedAdmin(int userId) {
-        if (Flags.activeAdminCleanup()) {
-            throw new UnsupportedOperationException("permission based admin no longer supported");
-        }
-        if (mPermissionBasedAdmin == null) {
-            mPermissionBasedAdmin = new ActiveAdmin(userId, /* permissionBased= */ true);
-        }
-        return mPermissionBasedAdmin;
-    }
 
     // TODO(b/35385311): Keep track of metadata in TrustedCertificateStore instead.
     final ArraySet<String> mAcceptedCaCertificates = new ArraySet<>();
@@ -280,12 +261,6 @@ class DevicePolicyData {
                     ap.writeToXml(out);
                     out.endTag(null, "admin");
                 }
-            }
-
-            if (!Flags.activeAdminCleanup() && policyData.mPermissionBasedAdmin != null) {
-                out.startTag(null, "permission-based-admin");
-                policyData.mPermissionBasedAdmin.writeToXml(out);
-                out.endTag(null, "permission-based-admin");
             }
 
             if (policyData.mPasswordOwner >= 0) {
@@ -495,7 +470,6 @@ class DevicePolicyData {
             policy.mLockTaskPackages.clear();
             policy.mAdminList.clear();
             policy.mAdminMap.clear();
-            policy.mPermissionBasedAdmin = null;
             policy.mAffiliationIds.clear();
             policy.mOwnerInstalledCaCerts.clear();
             policy.mUserControlDisabledPackages = null;
@@ -523,11 +497,6 @@ class DevicePolicyData {
                     } catch (RuntimeException e) {
                         Slogf.w(TAG, e, "Failed loading admin %s", name);
                     }
-                } else if (!Flags.activeAdminCleanup() && "permission-based-admin".equals(tag)) {
-
-                    ActiveAdmin ap = new ActiveAdmin(policy.mUserId, /* permissionBased= */ true);
-                    ap.readFromXml(parser, /* overwritePolicies= */ false);
-                    policy.mPermissionBasedAdmin = ap;
                 } else if ("delegation".equals(tag)) {
                     // Parse delegation info.
                     final String delegatePackage = parser.getAttributeValue(null,

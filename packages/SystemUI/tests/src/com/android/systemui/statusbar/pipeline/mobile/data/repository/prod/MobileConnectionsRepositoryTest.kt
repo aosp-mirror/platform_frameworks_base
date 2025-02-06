@@ -79,7 +79,6 @@ import com.android.wifitrackerlib.WifiEntry
 import com.android.wifitrackerlib.WifiPickerTracker
 import com.google.common.truth.Truth.assertThat
 import java.util.UUID
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -101,7 +100,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 // This is required because our [SubscriptionManager.OnSubscriptionsChangedListener] uses a looper
 // to run the callback and this makes the looper place nicely with TestScope etc.
@@ -829,7 +827,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.defaultDataSubId)
 
-            assertThat(latest).isEqualTo(INVALID_SUBSCRIPTION_ID)
+            assertThat(latest).isEqualTo(null)
 
             val intent2 =
                 Intent(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
@@ -853,6 +851,31 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             val latest by collectLastValue(underTest.defaultDataSubId)
 
             assertThat(latest).isEqualTo(2)
+        }
+
+    @Test
+    fun defaultDataSubId_filtersOutInvalidSubIds() =
+        testScope.runTest {
+            subscriptionManagerProxy.defaultDataSubId = INVALID_SUBSCRIPTION_ID
+            val latest by collectLastValue(underTest.defaultDataSubId)
+
+            assertThat(latest).isNull()
+        }
+
+    @Test
+    fun defaultDataSubId_filtersOutInvalidSubIds_fromValidToInvalid() =
+        testScope.runTest {
+            subscriptionManagerProxy.defaultDataSubId = 2
+            val latest by collectLastValue(underTest.defaultDataSubId)
+
+            assertThat(latest).isEqualTo(2)
+
+            val intent =
+                Intent(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
+                    .putExtra(PhoneConstants.SUBSCRIPTION_KEY, INVALID_SUBSCRIPTION_ID)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(context, intent)
+
+            assertThat(latest).isNull()
         }
 
     @Test

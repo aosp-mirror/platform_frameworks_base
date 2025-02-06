@@ -20,30 +20,31 @@ import android.util.LayoutDirection
 import com.android.app.animation.Interpolators
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.dagger.GlanceableHubBlurComponent
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.keyguard.ui.transitions.GlanceableHubTransition
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class GlanceableHubToDreamingTransitionViewModel
 @Inject
 constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
     @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
-) : DeviceEntryIconTransition {
+    private val blurFactory: GlanceableHubBlurComponent.Factory,
+) : DeviceEntryIconTransition, GlanceableHubTransition {
 
     private val transitionAnimation =
         animationFlow
@@ -95,6 +96,9 @@ constructor(
             onCancel = { 0f },
             onFinish = { 0f },
         )
+
+    override val windowBlurRadius: Flow<Float> =
+        blurFactory.create(transitionAnimation).getBlurProvider().exitBlurRadius
 
     private companion object {
         val FROM_GLANCEABLE_HUB_DURATION = 1.seconds

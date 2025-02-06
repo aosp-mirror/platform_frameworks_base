@@ -22,6 +22,7 @@ import android.text.TextUtils;
 import android.text.method.SingleLineTransformationMethod;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.TextView;
 
 import com.android.systemui.res.R;
@@ -63,6 +64,14 @@ public class CarrierText extends TextView {
         } else {
             setEllipsize(TextUtils.TruncateAt.END);
         }
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        // Clear selected state set by CarrierTextController so "selected" not announced by
+        // accessibility but we can still marquee.
+        info.setSelected(false);
     }
 
     public boolean getShowAirplaneMode() {

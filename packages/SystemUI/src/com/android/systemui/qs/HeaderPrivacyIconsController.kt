@@ -30,6 +30,7 @@ import javax.inject.Inject
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.shade.ShadeViewProviderModule.Companion.SHADE_HEADER
+import com.android.systemui.shade.domain.interactor.ShadeDialogContextInteractor
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import javax.inject.Named
 
@@ -63,7 +64,8 @@ class HeaderPrivacyIconsController @Inject constructor(
     private val broadcastDispatcher: BroadcastDispatcher,
     private val safetyCenterManager: SafetyCenterManager,
     private val deviceProvisionedController: DeviceProvisionedController,
-    private val featureFlags: FeatureFlags
+    private val featureFlags: FeatureFlags,
+    private val shadeDialogContextInteractor: ShadeDialogContextInteractor,
 ) {
 
     var chipVisibilityListener: ChipVisibilityListener? = null
@@ -75,6 +77,8 @@ class HeaderPrivacyIconsController @Inject constructor(
     private val cameraSlot = privacyChip.resources.getString(R.string.status_bar_camera)
     private val micSlot = privacyChip.resources.getString(R.string.status_bar_microphone)
     private val locationSlot = privacyChip.resources.getString(R.string.status_bar_location)
+    private val dialogContext: Context
+        get() = shadeDialogContextInteractor.context
 
     private val safetyCenterReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -149,12 +153,12 @@ class HeaderPrivacyIconsController @Inject constructor(
             uiEventLogger.log(PrivacyChipEvent.ONGOING_INDICATORS_CHIP_CLICK)
             if (safetyCenterEnabled) {
                 if (featureFlags.isEnabled(Flags.ENABLE_NEW_PRIVACY_DIALOG)) {
-                    privacyDialogControllerV2.showDialog(privacyChip.context, privacyChip)
+                    privacyDialogControllerV2.showDialog(dialogContext, privacyChip)
                 } else {
                     showSafetyCenter()
                 }
             } else {
-                privacyDialogController.showDialog(privacyChip.context)
+                privacyDialogController.showDialog(dialogContext)
             }
         }
         setChipVisibility(privacyChip.visibility == View.VISIBLE)

@@ -178,6 +178,33 @@ public interface BiometricConstants {
     @FlaggedApi(Flags.FLAG_IDENTITY_CHECK_API)
     int BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS = 21;
 
+
+    /**
+     * The user pressed the more options button on prompt content. This is a placeholder that is
+     * currently only used by the support library.
+     *
+     * @hide
+     */
+    int BIOMETRIC_ERROR_CONTENT_VIEW_MORE_OPTIONS_BUTTON = 22;
+
+    /**
+     * The error code returned after lock out error happens, the error dialog shows, and the users
+     * dismisses the dialog. This is a placeholder that is currently only used by the support
+     * library.
+     *
+     * @hide
+     */
+    int BIOMETRIC_ERROR_LOCKOUT_ERROR_DIALOG_DISMISSED = 23;
+
+    /**
+     * The error code returned after biometric hardware error happens, the error dialog shows, and
+     * the users dismisses the dialog.This is a placeholder that is currently only used by the
+     * support library.
+     *
+     * @hide
+     */
+    int BIOMETRIC_ERROR_BIOMETRIC_HARDWARE_ERROR_DIALOG_DISMISSED = 24;
+
     /**
      * This constant is only used by SystemUI. It notifies SystemUI that authentication was paused
      * because the authentication attempt was unsuccessful.
@@ -209,6 +236,9 @@ public interface BiometricConstants {
             BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
             BIOMETRIC_ERROR_IDENTITY_CHECK_NOT_ACTIVE,
             BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS,
+            BIOMETRIC_ERROR_CONTENT_VIEW_MORE_OPTIONS_BUTTON,
+            BIOMETRIC_ERROR_LOCKOUT_ERROR_DIALOG_DISMISSED,
+            BIOMETRIC_ERROR_BIOMETRIC_HARDWARE_ERROR_DIALOG_DISMISSED,
             BIOMETRIC_PAUSED_REJECTED})
     @Retention(RetentionPolicy.SOURCE)
     @interface Errors {}
@@ -324,6 +354,5 @@ public interface BiometricConstants {
      * Returned from {@link BiometricManager#getLastAuthenticationTime(int)} when there has
      * been no successful authentication for the given authenticator since boot.
      */
-    @FlaggedApi(Flags.FLAG_LAST_AUTHENTICATION_TIME)
     long BIOMETRIC_NO_AUTHENTICATION = -1;
 }

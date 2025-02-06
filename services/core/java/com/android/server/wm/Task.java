@@ -52,11 +52,9 @@ import static android.view.SurfaceControl.METADATA_TASK_ID;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES;
-import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -75,7 +73,6 @@ import static com.android.server.wm.ActivityRecord.TRANSFER_SPLASH_SCREEN_COPYIN
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TRANSITION;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_USER_LEAVING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
@@ -161,16 +158,15 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
-import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.InsetsState;
-import android.view.RemoteAnimationAdapter;
 import android.view.SurfaceControl;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.window.DesktopModeFlags;
 import android.window.ITaskOrganizer;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.StartingWindowInfo;
@@ -467,9 +463,6 @@ class Task extends TaskFragment {
     // This represents the last resolved activity values for this task
     // NOTE: This value needs to be persisted with each task
     private TaskDescription mTaskDescription;
-
-    /** @see #setCanAffectSystemUiFlags */
-    private boolean mCanAffectSystemUiFlags = true;
 
     private static Exception sTmpException;
 
@@ -2348,31 +2341,8 @@ class Task extends TaskFragment {
     }
 
     @VisibleForTesting
-    Point getLastSurfaceSize() {
-        return mLastSurfaceSize;
-    }
-
-    @VisibleForTesting
     boolean isInChangeTransition() {
-        return mSurfaceFreezer.hasLeash() || AppTransition.isChangeTransitOld(mTransit);
-    }
-
-    @Override
-    public SurfaceControl getFreezeSnapshotTarget() {
-        if (!mDisplayContent.mAppTransition.containsTransitRequest(TRANSIT_CHANGE)) {
-            return null;
-        }
-        // Skip creating snapshot if this transition is controlled by a remote animator which
-        // doesn't need it.
-        final ArraySet<Integer> activityTypes = new ArraySet<>();
-        activityTypes.add(getActivityType());
-        final RemoteAnimationAdapter adapter =
-                mDisplayContent.mAppTransitionController.getRemoteAnimationOverride(
-                        this, TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE, activityTypes);
-        if (adapter != null && !adapter.getChangeNeedsSnapshot()) {
-            return null;
-        }
-        return getSurfaceControl();
+        return AppTransition.isChangeTransitOld(mTransit);
     }
 
     @Override
@@ -2420,18 +2390,17 @@ class Task extends TaskFragment {
         mTaskSupervisor.mLaunchParamsPersister.saveTask(this, display);
     }
 
-    Rect updateOverrideConfigurationFromLaunchBounds() {
+    void updateOverrideConfigurationFromLaunchBounds() {
         // If the task is controlled by another organized task, do not set override
         // configurations and let its parent (organized task) to control it;
         final Task rootTask = getRootTask();
-        final Rect bounds = rootTask != this && rootTask.isOrganized() ? null : getLaunchBounds();
-        setBounds(bounds);
-        if (bounds != null && !bounds.isEmpty()) {
-            // TODO: Review if we actually want to do this - we are setting the launch bounds
-            // directly here.
-            bounds.set(getRequestedOverrideBounds());
+        boolean shouldInheritBounds = rootTask != this && rootTask.isOrganized();
+        if (Flags.enableMultipleDesktopsBackend()) {
+            // Only inherit from organized parent when this task is not organized.
+            shouldInheritBounds &= !isOrganized();
         }
-        return bounds;
+        final Rect bounds = shouldInheritBounds ? null : getLaunchBounds();
+        setBounds(bounds);
     }
 
     /** Returns the bounds that should be used to launch this task. */
@@ -3288,21 +3257,6 @@ class Task extends TaskFragment {
         return isRootTask() && callback.test(this) ? this : null;
     }
 
-    /**
-     * @param canAffectSystemUiFlags If false, all windows in this task can not affect SystemUI
-     *                               flags. See {@link WindowState#canAffectSystemUiFlags()}.
-     */
-    void setCanAffectSystemUiFlags(boolean canAffectSystemUiFlags) {
-        mCanAffectSystemUiFlags = canAffectSystemUiFlags;
-    }
-
-    /**
-     * @see #setCanAffectSystemUiFlags
-     */
-    boolean canAffectSystemUiFlags() {
-        return mCanAffectSystemUiFlags;
-    }
-
     void dontAnimateDimExit() {
         mDimmer.dontAnimateExit();
     }
@@ -3488,8 +3442,10 @@ class Task extends TaskFragment {
         info.lastNonFullscreenBounds = topTask.mLastNonFullscreenBounds;
         final WindowState windowState = top != null
                 ? top.findMainWindow(/* includeStartingApp= */ false) : null;
-        info.requestedVisibleTypes = (windowState != null && Flags.enableFullyImmersiveInDesktop())
-                ? windowState.getRequestedVisibleTypes() : WindowInsets.Type.defaultVisible();
+        info.requestedVisibleTypes =
+                (windowState != null && DesktopModeFlags.ENABLE_FULLY_IMMERSIVE_IN_DESKTOP.isTrue())
+                        ? windowState.getRequestedVisibleTypes()
+                        : WindowInsets.Type.defaultVisible();
         AppCompatUtils.fillAppCompatTaskInfo(this, info, top);
         info.topActivityMainWindowFrame = calculateTopActivityMainWindowFrameForTaskInfo(top);
     }
@@ -5119,6 +5075,7 @@ class Task extends TaskFragment {
         mTranslucentActivityWaiting = r;
         mPendingConvertFromTranslucentActivity = r;
         mUndrawnActivitiesBelowTopTranslucent.clear();
+        updateTaskDescription();
         mHandler.sendEmptyMessageDelayed(TRANSLUCENT_TIMEOUT_MSG, TRANSLUCENT_CONVERSION_TIMEOUT);
     }
 
@@ -5128,6 +5085,7 @@ class Task extends TaskFragment {
                     + " but is " + r);
         }
         mPendingConvertFromTranslucentActivity = null;
+        updateTaskDescription();
     }
 
     /**
@@ -5230,9 +5188,15 @@ class Task extends TaskFragment {
             // to ensure any necessary pause logic occurs. In the case where the Activity will be
             // shown regardless of the lock screen, the call to
             // {@link ActivityTaskSupervisor#checkReadyForSleepLocked} is skipped.
-            final ActivityRecord next = topRunningActivity(true /* focusableOnly */);
-            if (next == null || !next.canTurnScreenOn()) {
-                checkReadyForSleep();
+            if (shouldSleepActivities()) {
+                final ActivityRecord next = topRunningActivity(true /* focusableOnly */);
+                if (next != null && next.canTurnScreenOn()
+                        && !mWmService.mPowerManager.isInteractive()) {
+                    mTaskSupervisor.wakeUp(getDisplayId(), "resumeTop-turnScreenOnFlag");
+                    next.setCurrentLaunchCanTurnScreenOn(false);
+                } else {
+                    checkReadyForSleep();
+                }
             }
         } finally {
             mInResumeTopActivity = false;
@@ -5255,6 +5219,10 @@ class Task extends TaskFragment {
             return false;
         }
 
+        if (!mTaskSupervisor.readyToResume()) {
+            return false;
+        }
+
         final ActivityRecord topActivity = topRunningActivity(true /* focusableOnly */);
         if (topActivity == null) {
             // There are no activities left in this task, let's look somewhere else.
@@ -5263,7 +5231,6 @@ class Task extends TaskFragment {
 
         final boolean[] resumed = new boolean[1];
         final TaskFragment topFragment = topActivity.getTaskFragment();
-        resumed[0] = topFragment.resumeTopActivity(prev, options, deferPause);
         forAllLeafTaskFragments(f -> {
             if (topFragment == f) {
                 return;
@@ -5273,6 +5240,7 @@ class Task extends TaskFragment {
             }
             resumed[0] |= f.resumeTopActivity(prev, options, deferPause);
         }, true);
+        resumed[0] |= topFragment.resumeTopActivity(prev, options, deferPause);
         return resumed[0];
     }
 
@@ -5305,40 +5273,29 @@ class Task extends TaskFragment {
         return mRootWindowContainer.resumeHomeActivity(prev, reason, getDisplayArea());
     }
 
-    void startActivityLocked(ActivityRecord r, @Nullable Task topTask, boolean newTask,
-            boolean isTaskSwitch, ActivityOptions options, @Nullable ActivityRecord sourceRecord) {
-        Task rTask = r.getTask();
+    void startActivityLocked(@NonNull ActivityRecord r, @Nullable Task topTask, boolean newTask,
+            boolean isTaskSwitch, @Nullable ActivityOptions options,
+            @Nullable ActivityRecord sourceRecord) {
         final boolean allowMoveToFront = options == null || !options.getAvoidMoveToFront();
-        final boolean isOrhasTask = rTask == this || hasChild(rTask);
+        final Task activityTask = r.getTask();
+        final boolean isThisOrHasChildTask = activityTask == this || hasChild(activityTask);
+
         // mLaunchTaskBehind tasks get placed at the back of the task stack.
-        if (!r.mLaunchTaskBehind && allowMoveToFront && (!isOrhasTask || newTask)) {
+        if (!r.mLaunchTaskBehind && allowMoveToFront && (!isThisOrHasChildTask || newTask)) {
             // Last activity in task had been removed or ActivityManagerService is reusing task.
             // Insert or replace.
             // Might not even be in.
-            positionChildAtTop(rTask);
+            positionChildAtTop(activityTask);
         }
-        Task task = null;
-        if (!newTask && isOrhasTask && !r.shouldBeVisible()) {
+
+        if (!newTask && isThisOrHasChildTask && !r.shouldBeVisible()) {
             ActivityOptions.abort(options);
             return;
         }
 
-        // Place a new activity at top of root task, so it is next to interact with the user.
-
-        // If we are not placing the new activity frontmost, we do not want to deliver the
-        // onUserLeaving callback to the actual frontmost activity
-        final Task activityTask = r.getTask();
-        if (task == activityTask && mChildren.indexOf(task) != (getChildCount() - 1)) {
-            mTaskSupervisor.mUserLeaving = false;
-            if (DEBUG_USER_LEAVING) Slog.v(TAG_USER_LEAVING,
-                    "startActivity() behind front, mUserLeaving=false");
-        }
-
-        task = activityTask;
-
         // Slot the activity into the history root task and proceed
-        ProtoLog.i(WM_DEBUG_ADD_REMOVE, "Adding activity %s to task %s "
-                        + "callers: %s", r, task, new RuntimeException("here").fillInStackTrace());
+        ProtoLog.i(WM_DEBUG_ADD_REMOVE, "Adding activity %s to task %s callers: %s", r,
+                activityTask, new RuntimeException("here").fillInStackTrace());
 
         if (isActivityTypeHomeOrRecents() && getActivityBelow(r) == null) {
             // If this is the first activity, don't do any fancy animations,
@@ -5354,15 +5311,15 @@ class Task extends TaskFragment {
             return;
         }
 
-        final DisplayContent dc = mDisplayContent;
-        if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
-                "Prepare open transition: starting " + r);
+        if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare open transition: starting " + r);
+
+        // Place a new activity at top of root task, so it is next to interact with the user.
         if ((r.intent.getFlags() & Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
-            dc.prepareAppTransition(TRANSIT_NONE);
+            mDisplayContent.prepareAppTransition(TRANSIT_NONE);
             mTaskSupervisor.mNoAnimActivities.add(r);
             mTransitionController.setNoAnimation(r);
         } else {
-            dc.prepareAppTransition(TRANSIT_OPEN);
+            mDisplayContent.prepareAppTransition(TRANSIT_OPEN);
             mTaskSupervisor.mNoAnimActivities.remove(r);
         }
         if (newTask && !r.mLaunchTaskBehind) {
@@ -5413,8 +5370,7 @@ class Task extends TaskFragment {
             // "has the same starting icon" as the next one.  This allows the
             // window manager to keep the previous window it had previously
             // created, if it still had one.
-            Task baseTask = r.getTask();
-            final ActivityRecord prev = baseTask.getActivity(
+            final ActivityRecord prev = activityTask.getActivity(
                     a -> a.mStartingData != null && a.showToCurrentUser());
             mWmService.mStartingSurfaceController.showStartingWindow(r, prev, newTask,
                     isTaskSwitch, sourceRecord);
@@ -6076,7 +6032,7 @@ class Task extends TaskFragment {
             IVoiceInteractor voiceInteractor, boolean toTop, ActivityRecord activity,
             ActivityRecord source, ActivityOptions options) {
 
-        Task task;
+        final Task task;
         if (canReuseAsLeafTask()) {
             // This root task will only contain one task, so just return itself since all root
             // tasks ara now tasks and all tasks are now root tasks.
@@ -6086,7 +6042,6 @@ class Task extends TaskFragment {
             final int taskId = activity != null
                     ? mTaskSupervisor.getNextTaskIdForUser(activity.mUserId)
                     : mTaskSupervisor.getNextTaskIdForUser();
-            final int activityType = getActivityType();
             task = new Task.Builder(mAtmService)
                     .setTaskId(taskId)
                     .setActivityInfo(info)
@@ -6099,17 +6054,21 @@ class Task extends TaskFragment {
                     .build();
         }
 
-        int displayId = getDisplayId();
-        if (displayId == INVALID_DISPLAY) displayId = DEFAULT_DISPLAY;
-        final boolean isLockscreenShown = mAtmService.mTaskSupervisor.getKeyguardController()
-                .isKeyguardOrAodShowing(displayId);
-        if (!mTaskSupervisor.getLaunchParamsController()
-                .layoutTask(task, info.windowLayout, activity, source, options)
-                && !getRequestedOverrideBounds().isEmpty()
-                && task.isResizeable() && !isLockscreenShown) {
-            task.setBounds(getRequestedOverrideBounds());
+        if (com.android.window.flags.Flags.fixLayoutExistingTask()) {
+            mTaskSupervisor.getLaunchParamsController()
+                    .layoutTask(task, info.windowLayout, activity, source, options);
+        } else {
+            int displayId = getDisplayId();
+            if (displayId == INVALID_DISPLAY) displayId = DEFAULT_DISPLAY;
+            final boolean isLockscreenShown =
+                    mAtmService.mKeyguardController.isKeyguardOrAodShowing(displayId);
+            if (!mTaskSupervisor.getLaunchParamsController()
+                    .layoutTask(task, info.windowLayout, activity, source, options)
+                    && !getRequestedOverrideBounds().isEmpty()
+                    && task.isResizeable() && !isLockscreenShown) {
+                task.setBounds(getRequestedOverrideBounds());
+            }
         }
-
         return task;
     }
 

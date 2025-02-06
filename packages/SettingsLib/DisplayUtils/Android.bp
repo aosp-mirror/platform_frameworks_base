@@ -15,6 +15,4 @@ android_library {
     ],
 
     srcs: ["src/**/*.java"],
-
-    min_sdk_version: "21",
 }

@@ -31,7 +31,6 @@ import com.android.systemui.model.SysUiState
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -51,7 +50,6 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 
 /** Tests for [ExtraDimDialogDelegate]. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidJUnit4::class)

@@ -34,7 +34,6 @@ import com.android.systemui.log.SideFpsLogger
 import com.android.systemui.res.R
 import java.util.Optional
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -44,7 +43,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class SideFpsSensorInteractor
 @Inject

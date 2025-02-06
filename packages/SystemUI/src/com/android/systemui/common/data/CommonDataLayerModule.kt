@@ -16,6 +16,8 @@
 
 package com.android.systemui.common.data
 
+import com.android.systemui.common.data.repository.BatteryRepository
+import com.android.systemui.common.data.repository.BatteryRepositoryImpl
 import com.android.systemui.common.data.repository.PackageChangeRepository
 import com.android.systemui.common.data.repository.PackageChangeRepositoryImpl
 import dagger.Binds
@@ -27,4 +29,6 @@ abstract class CommonDataLayerModule {
     abstract fun bindPackageChangeRepository(
         impl: PackageChangeRepositoryImpl
     ): PackageChangeRepository
+
+    @Binds abstract fun bindBatteryRepository(impl: BatteryRepositoryImpl): BatteryRepository
 }

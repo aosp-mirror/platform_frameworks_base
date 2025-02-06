@@ -43,7 +43,6 @@ import com.android.systemui.util.kotlin.combine
 import javax.inject.Inject
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -58,7 +57,6 @@ private const val REBOOT_MAINLINE_UPDATE = "reboot,mainline_update"
 private const val TAG = "BouncerMessageInteractor"
 
 /** Handles business logic for the primary bouncer message area. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class BouncerMessageInteractor
 @Inject

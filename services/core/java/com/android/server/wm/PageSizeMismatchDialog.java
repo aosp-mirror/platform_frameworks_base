@@ -24,8 +24,10 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import com.android.internal.R;
 
@@ -57,9 +59,11 @@ class PageSizeMismatchDialog extends AppWarnings.BaseDialog {
 
         final AlertDialog.Builder builder =
                 new AlertDialog.Builder(context)
-                        .setPositiveButton(
-                                R.string.ok,
-                                (dialog, which) -> {/* Do nothing */})
+                        .setPositiveButton(R.string.ok, (dialog, which) ->
+                                        manager.setPackageFlag(
+                                                mUserId, mPackageName,
+                                                AppWarnings.FLAG_HIDE_PAGE_SIZE_MISMATCH,
+                                                true))
                         .setMessage(Html.fromHtml(warning, FROM_HTML_MODE_COMPACT))
                         .setTitle(label);
 
@@ -67,6 +71,14 @@ class PageSizeMismatchDialog extends AppWarnings.BaseDialog {
         mDialog.create();
 
         final Window window = mDialog.getWindow();
-        window.setType(WindowManager.LayoutParams.TYPE_PHONE);
+        window.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+    }
+
+    @Override
+    public void show() {
+        super.show();
+        // Make the links in dialog clickable
+        final TextView msgTxt = (TextView) mDialog.findViewById(android.R.id.message);
+        msgTxt.setMovementMethod(LinkMovementMethod.getInstance());
     }
 }

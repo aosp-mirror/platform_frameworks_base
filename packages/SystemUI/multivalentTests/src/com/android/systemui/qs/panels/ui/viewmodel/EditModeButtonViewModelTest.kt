@@ -23,11 +23,16 @@ import com.android.systemui.classifier.fakeFalsingManager
 import com.android.systemui.kosmos.collectLastValue
 import com.android.systemui.kosmos.runCurrent
 import com.android.systemui.kosmos.runTest
+import com.android.systemui.plugins.activityStarter
 import com.android.systemui.qs.panels.ui.viewmodel.toolbar.editModeButtonViewModelFactory
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -35,6 +40,15 @@ class EditModeButtonViewModelTest : SysuiTestCase() {
     val kosmos = testKosmos()
 
     val underTest = kosmos.editModeButtonViewModelFactory.create()
+
+    @Before
+    fun setUp() {
+        with(kosmos) {
+            whenever(activityStarter.postQSRunnableDismissingKeyguard(any())).doAnswer {
+                (it.getArgument(0) as Runnable).run()
+            }
+        }
+    }
 
     @Test
     fun falsingFalseTap_editModeDoesntStart() =

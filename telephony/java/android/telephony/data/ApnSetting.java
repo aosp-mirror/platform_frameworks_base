@@ -130,10 +130,10 @@ public class ApnSetting implements Parcelable {
     public static final int TYPE_RCS = ApnTypes.RCS;
     /** APN type for OEM_PAID networks (Automotive PANS) */
     @FlaggedApi(Flags.FLAG_OEM_PAID_PRIVATE)
-    public static final int TYPE_OEM_PAID = 1 << 16; // TODO(b/366194627): ApnTypes.OEM_PAID;
+    public static final int TYPE_OEM_PAID = ApnTypes.OEM_PAID;
     /** APN type for OEM_PRIVATE networks (Automotive PANS) */
     @FlaggedApi(Flags.FLAG_OEM_PAID_PRIVATE)
-    public static final int TYPE_OEM_PRIVATE = 1 << 17; // TODO(b/366194627): ApnTypes.OEM_PRIVATE;
+    public static final int TYPE_OEM_PRIVATE = ApnTypes.OEM_PRIVATE;
 
     /** @hide */
     @IntDef(flag = true, prefix = {"TYPE_"}, value = {

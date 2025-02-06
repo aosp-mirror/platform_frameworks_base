@@ -87,8 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Hindi makakonekta sa mobile network"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Subukang baguhin ang gustong network. I-tap para baguhin."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Hindi available ang pang-emergency na pagtawag"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"Huwag Ipakita Ulit"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Kailangan ng mobile network para sa mga emergency na tawag"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Mga Alerto"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Pagpasa ng tawag"</string>
@@ -303,6 +302,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"Mga alerto sa network"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"Available ang network"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"Status ng VPN"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"Oras at mga time zone"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"Mga alerto mula sa iyong IT admin"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"Mga Alerto"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"Retail demo"</string>
@@ -310,6 +310,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Tumatakbo ang app"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Mga app na kumokonsumo ng baterya"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Pag-magnify"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"Hearing device"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Paggamit sa pagiging accessible"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"Display"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Gumagamit ng baterya ang <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -880,7 +881,7 @@
     <item msgid="7740243458912727194">"Mobile"</item>
     <item msgid="8526146065496663766">"Trabaho"</item>
     <item msgid="8150904584178569699">"Fax sa Trabaho"</item>
-    <item msgid="4537253139152229577">"Fax sa Tahanan"</item>
+    <item msgid="4537253139152229577">"Home Fax"</item>
     <item msgid="6751245029698664340">"Pager"</item>
     <item msgid="1692790665884224905">"Iba pa"</item>
     <item msgid="6216981255272016212">"Custom"</item>
@@ -1407,6 +1408,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"I-download ang app"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"Nakalagay na ang bagong SIM"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"I-tap upang i-set up ito"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"Nagbago ang iyong time zone"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"Nasa <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>) ka na ngayon."</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"Magtakda ng oras"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"Itakda ang petsa"</string>
     <string name="date_time_set" msgid="4603445265164486816">"Itakda"</string>
@@ -1780,14 +1783,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"One-Hand mode"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Extra dim"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Mga hearing device"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"Nadiskonekta"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"Nakakonekta"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"Aktibo"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"Naglo-load"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Pinindot nang matagal ang volume keys. Na-on ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Pinindot nang matagal ang volume keys. Na-off ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Bitawan ang mga volume key. Para i-on ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, muling pindutin nang matagal ang dalawang volume key sa loob ng 3 segundo."</string>
@@ -1798,6 +1797,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Magbubukas ang feature sa susunod na gamitin mo ang shortcut na ito. Mag-swipe pataas gamit ang 2 daliri mula sa ibaba ng iyong screen at mabilis na i-release."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Magbubukas ang feature sa susunod na gamitin mo ang shortcut na ito. Mag-swipe pataas gamit ang 3 daliri mula sa ibaba ng iyong screen at mabilis na i-release."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Pag-magnify"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"Lumipat sa mikropono ng telepono?"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"Lumipat sa mikropono ng hearing aid?"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"Para sa mas malinaw na tunog o kung paubos na ang baterya ng iyong hearing aid. Inililipat lang nito ang iyong mikropono habang nasa tawag ka."</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"Puwede mong gamitin ang mikropono ng iyong hearing aid para sa hands-free na pagtawag. Inililipat lang nito ang iyong mikropono habang nasa tawag ka."</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"Lumipat"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"Mga Setting"</string>
     <string name="user_switched" msgid="7249833311585228097">"Kasalukuyang user <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Lumilipat kay <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Nila-log out si <xliff:g id="NAME">%1$s</xliff:g>..."</string>
@@ -2083,6 +2088,12 @@
     <string name="unpin_target" msgid="3963318576590204447">"I-unpin"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"I-unpin ang <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"Impormasyon ng app"</string>
+    <!-- no translation found for shortcut_group_a11y_title (2992150163811583865) -->
+    <skip />
+    <!-- no translation found for suggested_apps_group_a11y_title (2804876567839501831) -->
+    <skip />
+    <!-- no translation found for all_apps_group_a11y_title (7020352520224108745) -->
+    <skip />
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Sinisimulan ang demo…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Nire-reset ang device…"</string>
@@ -2237,6 +2248,10 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad Left"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad Right"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad Center"</string>
+    <string name="accessibility_autoclick_type_settings_panel_title" msgid="7354373370578758696">"Panel ng mga setting ng uri ng autoclick"</string>
+    <string name="accessibility_autoclick_left_click" msgid="2301793352260551080">"Mag-left click"</string>
+    <string name="accessibility_autoclick_pause" msgid="3272200156172573568">"I-pause"</string>
+    <string name="accessibility_autoclick_position" msgid="2933660969907663545">"Posisyon"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Inilagay ang <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> sa PINAGHIHIGPITANG bucket"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"nagpadala ng larawan"</string>
@@ -2454,6 +2469,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Nakatago ang content ng app mula sa pagbabahagi ng screen para sa seguridad"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Awtomatikong nakakonekta sa satellite"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Puwede kang magpadala at tumanggap ng mga mensahe nang walang mobile o Wi-Fi network"</string>
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"Puwede kang magpadala at tumanggap ng mga mensahe at gumamit ng limitadong data sa satellite"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Gumamit ng satellite messaging?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Magpadala at tumanggap ng mga mensahe nang walang mobile o Wi-Fi network"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Buksan ang Messages"</string>
@@ -2510,4 +2526,12 @@
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Mga Mapa"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Mga Application"</string>
     <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Hindi na makikilala ang iyong mga fingerprint. I-set up ulit ang Pag-unlock Gamit ang Fingerprint."</string>
+    <!-- no translation found for usb_apm_usb_plugged_in_when_locked_notification_title (468577168569874967) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_plugged_in_when_locked_notification_text (6695268246267993166) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_suspicious_activity_notification_title (3461195995882871461) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_suspicious_activity_notification_text (6537085605929303187) -->
+    <skip />
 </resources>

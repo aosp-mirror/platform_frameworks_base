@@ -27,57 +27,45 @@ using ::testing::NotNull;
 namespace android {
 TEST(ApkParsingTest, ValidArm64Path) {
   const char* path = "lib/arm64-v8a/library.so";
-  auto lastSlash = util::ValidLibraryPathLastSlash(path, false, false);
+  auto lastSlash = util::ValidLibraryPathLastSlash(path, false);
   ASSERT_THAT(lastSlash, NotNull());
   ASSERT_THAT(lastSlash, Eq(path + 13));
 }
 
 TEST(ApkParsingTest, ValidArm64PathButSuppressed) {
   const char* path = "lib/arm64-v8a/library.so";
-  auto lastSlash = util::ValidLibraryPathLastSlash(path, true, false);
+  auto lastSlash = util::ValidLibraryPathLastSlash(path, true);
   ASSERT_THAT(lastSlash, IsNull());
 }
 
 TEST(ApkParsingTest, ValidArm32Path) {
   const char* path = "lib/armeabi-v7a/library.so";
-  auto lastSlash = util::ValidLibraryPathLastSlash(path, false, false);
+  auto lastSlash = util::ValidLibraryPathLastSlash(path, false);
   ASSERT_THAT(lastSlash, NotNull());
   ASSERT_THAT(lastSlash, Eq(path + 15));
 }
 
-TEST(ApkParsingTest, InvalidMustStartWithLib) {
-  const char* path = "lib/arm64-v8a/random.so";
-  auto lastSlash = util::ValidLibraryPathLastSlash(path, false, false);
-  ASSERT_THAT(lastSlash, IsNull());
-}
-
-TEST(ApkParsingTest, InvalidMustEndInSo) {
-  const char* path = "lib/arm64-v8a/library.txt";
-  auto lastSlash = util::ValidLibraryPathLastSlash(path, false, false);
-  ASSERT_THAT(lastSlash, IsNull());
-}
-
 TEST(ApkParsingTest, InvalidCharacter) {
   const char* path = "lib/arm64-v8a/lib#.so";
-  auto lastSlash = util::ValidLibraryPathLastSlash(path, false, false);
+  auto lastSlash = util::ValidLibraryPathLastSlash(path, false);
   ASSERT_THAT(lastSlash, IsNull());
 }
 
 TEST(ApkParsingTest, InvalidSubdirectories) {
   const char* path = "lib/arm64-v8a/anything/library.so";
-  auto lastSlash = util::ValidLibraryPathLastSlash(path, false, false);
+  auto lastSlash = util::ValidLibraryPathLastSlash(path, false);
   ASSERT_THAT(lastSlash, IsNull());
 }
 
 TEST(ApkParsingTest, InvalidFileAtRoot) {
   const char* path = "lib/library.so";
-  auto lastSlash = util::ValidLibraryPathLastSlash(path, false, false);
+  auto lastSlash = util::ValidLibraryPathLastSlash(path, false);
   ASSERT_THAT(lastSlash, IsNull());
 }
 
 TEST(ApkParsingTest, InvalidPrefix) {
   const char* path = "assets/libhello.so";
-  auto lastSlash = util::ValidLibraryPathLastSlash(path, false, false);
+  auto lastSlash = util::ValidLibraryPathLastSlash(path, false);
   ASSERT_THAT(lastSlash, IsNull());
 }
 }

@@ -58,7 +58,6 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
             hostUid,
             mediaProjectionMetricsLogger,
             defaultSelectedMode,
-            dialog,
         )
     }
 
@@ -79,7 +78,7 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
         if (!::viewBinder.isInitialized) {
             viewBinder = createViewBinder()
         }
-        viewBinder.bind()
+        viewBinder.bind(dialog.requireViewById(R.id.screen_share_permission_dialog))
     }
 
     private fun updateIcon() {

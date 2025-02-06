@@ -29,3 +29,13 @@ flag {
     is_exported: true
 }
 
+flag {
+    namespace: "media_projection"
+    name: "show_stop_dialog_post_call_end"
+    description: "Shows a stop dialog for MediaProjection sessions that started during call and remain active after a call ends"
+    bug: "390343524"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+    is_exported: true
+}

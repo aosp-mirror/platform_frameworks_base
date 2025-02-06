@@ -24,8 +24,6 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.Flags
-import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.MediaTestHelper
 import com.android.systemui.media.controls.data.repository.MediaFilterRepository
@@ -140,7 +138,6 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
             val hasAnyMediaOrRecommendation by
                 collectLastValue(underTest.hasAnyMediaOrRecommendation)
             val currentMedia by collectLastValue(underTest.currentMedia)
-            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
 
             val userMedia = MediaData(active = false)
             val recsLoadingModel = SmartspaceMediaLoadingModel.Loaded(KEY_MEDIA_SMARTSPACE, true)
@@ -163,7 +160,7 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
             assertThat(currentMedia)
                 .containsExactly(
                     MediaCommonModel.MediaRecommendations(recsLoadingModel),
-                    MediaCommonModel.MediaControl(mediaLoadingModel, true)
+                    MediaCommonModel.MediaControl(mediaLoadingModel, true),
                 )
                 .inOrder()
 
@@ -176,7 +173,7 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
                     Process.INVALID_UID,
                     surface = SURFACE,
                     2,
-                    true
+                    true,
                 )
         }
 
@@ -187,7 +184,6 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
                 collectLastValue(underTest.hasActiveMediaOrRecommendation)
             val hasAnyMediaOrRecommendation by
                 collectLastValue(underTest.hasAnyMediaOrRecommendation)
-            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
 
             mediaFilterRepository.setRecommendation(mediaRecommendation)
 
@@ -207,7 +203,6 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
                 collectLastValue(underTest.hasActiveMediaOrRecommendation)
             val hasAnyMediaOrRecommendation by
                 collectLastValue(underTest.hasAnyMediaOrRecommendation)
-            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
 
             mediaFilterRepository.setRecommendation(mediaRecommendation)
 
@@ -248,7 +243,7 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
                     active = true,
                     instanceId = instanceId,
                     packageName = PACKAGE_NAME,
-                    notificationKey = KEY
+                    notificationKey = KEY,
                 )
             val smartspaceLoadingModel = SmartspaceMediaLoadingModel.Loaded(KEY_MEDIA_SMARTSPACE)
             val mediaLoadingModel = MediaDataLoadingModel.Loaded(instanceId)
@@ -269,7 +264,7 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
             assertThat(currentMedia)
                 .containsExactly(
                     MediaCommonModel.MediaControl(mediaLoadingModel, isMediaFromRec = true),
-                    MediaCommonModel.MediaRecommendations(smartspaceLoadingModel)
+                    MediaCommonModel.MediaRecommendations(smartspaceLoadingModel),
                 )
                 .inOrder()
         }
@@ -282,7 +277,7 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
                 active = true,
                 instanceId = instanceId,
                 packageName = PACKAGE_NAME,
-                notificationKey = KEY
+                notificationKey = KEY,
             )
         val smartspaceLoadingModel = SmartspaceMediaLoadingModel.Loaded(KEY_MEDIA_SMARTSPACE)
         val mediaLoadingModel = MediaDataLoadingModel.Loaded(instanceId)
@@ -297,7 +292,7 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
                 data.smartspaceId,
                 data.appUid,
                 surface = SURFACE,
-                1
+                1,
             )
 
         reset(smartspaceLogger)
@@ -311,7 +306,7 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
                 data.smartspaceId,
                 data.appUid,
                 surface = SURFACE,
-                2
+                2,
             )
 
         reset(smartspaceLogger)
@@ -327,7 +322,7 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
                 surface = SURFACE,
                 2,
                 true,
-                rank = 1
+                rank = 1,
             )
 
         reset(smartspaceLogger)
@@ -343,7 +338,7 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
                 data.smartspaceId,
                 data.appUid,
                 surface = SURFACE,
-                2
+                2,
             )
     }
 

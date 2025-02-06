@@ -81,12 +81,7 @@ constructor(
                 awaitClose { observer.isListening = false }
             }
             .distinctUntilChanged()
-            .logDiffsForTable(
-                logger,
-                columnPrefix = "",
-                columnName = "isAirplaneMode",
-                initialValue = false,
-            )
+            .logDiffsForTable(logger, columnName = "isAirplaneMode", initialValue = false)
             .stateIn(
                 scope,
                 started = SharingStarted.WhileSubscribed(),

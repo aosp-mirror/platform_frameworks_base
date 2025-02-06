@@ -36,10 +36,11 @@ import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.android.systemui.res.R
 import com.android.systemui.controls.ControlInterface
 import com.android.systemui.controls.ui.CanUseIconPredicate
 import com.android.systemui.controls.ui.RenderInfo
+import com.android.systemui.res.R
+import com.android.systemui.utils.SafeIconLoader
 
 private typealias ModelFavoriteChanger = (String, Boolean) -> Unit
 
@@ -54,6 +55,7 @@ private typealias ModelFavoriteChanger = (String, Boolean) -> Unit
 class ControlAdapter(
     private val elevation: Float,
     private val currentUserId: Int,
+    private val safeIconLoader: SafeIconLoader,
 ) : RecyclerView.Adapter<Holder>() {
 
     companion object {
@@ -62,15 +64,14 @@ class ControlAdapter(
         const val TYPE_DIVIDER = 2
 
         /**
-         * For low-dp width screens that also employ an increased font scale, adjust the
-         * number of columns. This helps prevent text truncation on these devices.
-         *
+         * For low-dp width screens that also employ an increased font scale, adjust the number of
+         * columns. This helps prevent text truncation on these devices.
          */
         @JvmStatic
         fun findMaxColumns(res: Resources): Int {
             var maxColumns = res.getInteger(R.integer.controls_max_columns)
             val maxColumnsAdjustWidth =
-                    res.getInteger(R.integer.controls_max_columns_adjust_below_width_dp)
+                res.getInteger(R.integer.controls_max_columns_adjust_below_width_dp)
 
             val outValue = TypedValue()
             res.getValue(R.dimen.controls_max_columns_adjust_above_font_scale, outValue, true)
@@ -78,10 +79,12 @@ class ControlAdapter(
 
             val config = res.configuration
             val isPortrait = config.orientation == Configuration.ORIENTATION_PORTRAIT
-            if (isPortrait &&
+            if (
+                isPortrait &&
                     config.screenWidthDp != Configuration.SCREEN_WIDTH_DP_UNDEFINED &&
                     config.screenWidthDp <= maxColumnsAdjustWidth &&
-                    config.fontScale >= maxColumnsAdjustFontScale) {
+                    config.fontScale >= maxColumnsAdjustFontScale
+            ) {
                 maxColumns--
             }
 
@@ -106,11 +109,12 @@ class ControlAdapter(
                             rightMargin = 0
                         }
                         elevation = this@ControlAdapter.elevation
-                        background = parent.context.getDrawable(
-                                R.drawable.control_background_ripple)
+                        background =
+                            parent.context.getDrawable(R.drawable.control_background_ripple)
                     },
                     currentUserId,
                     model?.moveHelper, // Indicates that position information is needed
+                    safeIconLoader,
                 ) { id, favorite ->
                     model?.changeFavoriteStatus(id, favorite)
                 }
@@ -119,8 +123,13 @@ class ControlAdapter(
                 ZoneHolder(layoutInflater.inflate(R.layout.controls_zone_header, parent, false))
             }
             TYPE_DIVIDER -> {
-                DividerHolder(layoutInflater.inflate(
-                        R.layout.controls_horizontal_divider_with_empty, parent, false))
+                DividerHolder(
+                    layoutInflater.inflate(
+                        R.layout.controls_horizontal_divider_with_empty,
+                        parent,
+                        false,
+                    )
+                )
             }
             else -> throw IllegalStateException("Wrong viewType: $viewType")
         }
@@ -134,9 +143,7 @@ class ControlAdapter(
     override fun getItemCount() = model?.elements?.size ?: 0
 
     override fun onBindViewHolder(holder: Holder, index: Int) {
-        model?.let {
-            holder.bindData(it.elements[index])
-        }
+        model?.let { holder.bindData(it.elements[index]) }
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int, payloads: MutableList<Any>) {
@@ -166,13 +173,12 @@ class ControlAdapter(
 
 /**
  * Holder for binding views in the [RecyclerView]-
+ *
  * @param view the [View] for this [Holder]
  */
 sealed class Holder(view: View) : RecyclerView.ViewHolder(view) {
 
-    /**
-     * Bind the data from the model into the view
-     */
+    /** Bind the data from the model into the view */
     abstract fun bindData(wrapper: ElementWrapper)
 
     open fun updateFavorite(favorite: Boolean) {}
@@ -181,12 +187,13 @@ sealed class Holder(view: View) : RecyclerView.ViewHolder(view) {
 /**
  * Holder for using with [DividerWrapper] to display a divider between zones.
  *
- * The divider can be shown or hidden. It also has a view the height of a control, that can
- * be toggled visible or gone.
+ * The divider can be shown or hidden. It also has a view the height of a control, that can be
+ * toggled visible or gone.
  */
 private class DividerHolder(view: View) : Holder(view) {
     private val frame: View = itemView.requireViewById(R.id.frame)
     private val divider: View = itemView.requireViewById(R.id.divider)
+
     override fun bindData(wrapper: ElementWrapper) {
         wrapper as DividerWrapper
         frame.visibility = if (wrapper.showNone) View.VISIBLE else View.GONE
@@ -194,9 +201,7 @@ private class DividerHolder(view: View) : Holder(view) {
     }
 }
 
-/**
- * Holder for using with [ZoneNameWrapper] to display names of zones.
- */
+/** Holder for using with [ZoneNameWrapper] to display names of zones. */
 private class ZoneHolder(view: View) : Holder(view) {
     private val zone: TextView = itemView as TextView
 
@@ -208,15 +213,17 @@ private class ZoneHolder(view: View) : Holder(view) {
 
 /**
  * Holder for using with [ControlStatusWrapper] to display names of zones.
+ *
  * @param moveHelper a helper interface to facilitate a11y rearranging. Null indicates no
- *                   rearranging
- * @param favoriteCallback this callback will be called whenever the favorite state of the
- *                         [Control] this view represents changes.
+ *   rearranging
+ * @param favoriteCallback this callback will be called whenever the favorite state of the [Control]
+ *   this view represents changes.
  */
 internal class ControlHolder(
     view: View,
     currentUserId: Int,
     val moveHelper: ControlsModel.MoveHelper?,
+    val safeIconLoader: SafeIconLoader,
     val favoriteCallback: ModelFavoriteChanger,
 ) : Holder(view) {
     private val favoriteStateDescription =
@@ -228,16 +235,16 @@ internal class ControlHolder(
     private val title: TextView = itemView.requireViewById(R.id.title)
     private val subtitle: TextView = itemView.requireViewById(R.id.subtitle)
     private val removed: TextView = itemView.requireViewById(R.id.status)
-    private val favorite: CheckBox = itemView.requireViewById<CheckBox>(R.id.favorite).apply {
-        visibility = View.VISIBLE
-    }
+    private val favorite: CheckBox =
+        itemView.requireViewById<CheckBox>(R.id.favorite).apply { visibility = View.VISIBLE }
 
     private val canUseIconPredicate = CanUseIconPredicate(currentUserId)
-    private val accessibilityDelegate = ControlHolderAccessibilityDelegate(
-        this::stateDescription,
-        this::getLayoutPosition,
-        moveHelper
-    )
+    private val accessibilityDelegate =
+        ControlHolderAccessibilityDelegate(
+            this::stateDescription,
+            this::getLayoutPosition,
+            moveHelper,
+        )
 
     init {
         ViewCompat.setAccessibilityDelegate(itemView, accessibilityDelegate)
@@ -252,7 +259,9 @@ internal class ControlHolder(
         } else {
             val position = layoutPosition + 1
             return itemView.context.getString(
-                R.string.accessibility_control_favorite_position, position)
+                R.string.accessibility_control_favorite_position,
+                position,
+            )
         }
     }
 
@@ -262,11 +271,12 @@ internal class ControlHolder(
         title.text = wrapper.title
         subtitle.text = wrapper.subtitle
         updateFavorite(wrapper.favorite)
-        removed.text = if (wrapper.removed) {
-            itemView.context.getText(R.string.controls_removed)
-        } else {
-            ""
-        }
+        removed.text =
+            if (wrapper.removed) {
+                itemView.context.getText(R.string.controls_removed)
+            } else {
+                ""
+            }
         itemView.setOnClickListener {
             updateFavorite(!favorite.isChecked)
             favoriteCallback(wrapper.controlId, favorite.isChecked)
@@ -282,7 +292,7 @@ internal class ControlHolder(
 
     private fun getRenderInfo(
         component: ComponentName,
-        @DeviceTypes.DeviceType deviceType: Int
+        @DeviceTypes.DeviceType deviceType: Int,
     ): RenderInfo {
         return RenderInfo.lookup(itemView.context, component, deviceType)
     }
@@ -292,18 +302,19 @@ internal class ControlHolder(
         val fg = context.getResources().getColorStateList(ri.foreground, context.getTheme())
 
         icon.imageTintList = null
-        ci.customIcon
-                ?.takeIf(canUseIconPredicate)
-                ?.let {
-            icon.setImageIcon(it)
-        } ?: run {
-            icon.setImageDrawable(ri.icon)
-
-            // Do not color app icons
-            if (ci.deviceType != DeviceTypes.TYPE_ROUTINE) {
-                icon.setImageTintList(fg)
-            }
+        ci.customIcon?.takeIf(canUseIconPredicate)?.let {
+            val drawable = safeIconLoader.load(it)
+            icon.setImageDrawable(drawable)
+            drawable
         }
+            ?: run {
+                icon.setImageDrawable(ri.icon)
+
+                // Do not color app icons
+                if (ci.deviceType != DeviceTypes.TYPE_ROUTINE) {
+                    icon.setImageTintList(fg)
+                }
+            }
     }
 }
 
@@ -317,14 +328,13 @@ internal class ControlHolder(
  *
  * @param stateRetriever function to determine the state description based on the favorite state
  * @param positionRetriever function to obtain the position of this control. It only has to be
- *                          correct in controls that are currently favorites (and therefore can
- *                          be moved).
+ *   correct in controls that are currently favorites (and therefore can be moved).
  * @param moveHelper helper interface to determine if a control can be moved and actually move it.
  */
 private class ControlHolderAccessibilityDelegate(
     val stateRetriever: (Boolean) -> CharSequence?,
     val positionRetriever: () -> Int,
-    val moveHelper: ControlsModel.MoveHelper?
+    val moveHelper: ControlsModel.MoveHelper?,
 ) : AccessibilityDelegateCompat() {
 
     var isFavorite = false
@@ -369,25 +379,29 @@ private class ControlHolderAccessibilityDelegate(
 
     private fun addClickAction(host: View, info: AccessibilityNodeInfoCompat) {
         // Change the text for the double-tap action
-        val clickActionString = if (isFavorite) {
-            host.context.getString(R.string.accessibility_control_change_unfavorite)
-        } else {
-            host.context.getString(R.string.accessibility_control_change_favorite)
-        }
-        val click = AccessibilityNodeInfoCompat.AccessibilityActionCompat(
-            AccessibilityNodeInfo.ACTION_CLICK,
-            // “favorite/unfavorite”
-            clickActionString)
+        val clickActionString =
+            if (isFavorite) {
+                host.context.getString(R.string.accessibility_control_change_unfavorite)
+            } else {
+                host.context.getString(R.string.accessibility_control_change_favorite)
+            }
+        val click =
+            AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                AccessibilityNodeInfo.ACTION_CLICK,
+                // “favorite/unfavorite”
+                clickActionString,
+            )
         info.addAction(click)
     }
 
     private fun maybeAddMoveBeforeAction(host: View, info: AccessibilityNodeInfoCompat) {
         if (moveHelper?.canMoveBefore(positionRetriever()) ?: false) {
             val newPosition = positionRetriever() + 1 - 1
-            val moveBefore = AccessibilityNodeInfoCompat.AccessibilityActionCompat(
-                MOVE_BEFORE_ID,
-                host.context.getString(R.string.accessibility_control_move, newPosition)
-            )
+            val moveBefore =
+                AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                    MOVE_BEFORE_ID,
+                    host.context.getString(R.string.accessibility_control_move, newPosition),
+                )
             info.addAction(moveBefore)
             info.isContextClickable = true
         }
@@ -396,26 +410,25 @@ private class ControlHolderAccessibilityDelegate(
     private fun maybeAddMoveAfterAction(host: View, info: AccessibilityNodeInfoCompat) {
         if (moveHelper?.canMoveAfter(positionRetriever()) ?: false) {
             val newPosition = positionRetriever() + 1 + 1
-            val moveAfter = AccessibilityNodeInfoCompat.AccessibilityActionCompat(
-                MOVE_AFTER_ID,
-                host.context.getString(R.string.accessibility_control_move, newPosition)
-            )
+            val moveAfter =
+                AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                    MOVE_AFTER_ID,
+                    host.context.getString(R.string.accessibility_control_move, newPosition),
+                )
             info.addAction(moveAfter)
             info.isContextClickable = true
         }
     }
 }
 
-class MarginItemDecorator(
-    private val topMargin: Int,
-    private val sideMargins: Int
-) : RecyclerView.ItemDecoration() {
+class MarginItemDecorator(private val topMargin: Int, private val sideMargins: Int) :
+    RecyclerView.ItemDecoration() {
 
     override fun getItemOffsets(
         outRect: Rect,
         view: View,
         parent: RecyclerView,
-        state: RecyclerView.State
+        state: RecyclerView.State,
     ) {
         val position = parent.getChildAdapterPosition(view)
         if (position == RecyclerView.NO_POSITION) return

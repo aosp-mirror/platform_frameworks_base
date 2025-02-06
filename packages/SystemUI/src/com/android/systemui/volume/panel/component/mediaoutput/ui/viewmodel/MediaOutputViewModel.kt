@@ -34,14 +34,12 @@ import com.android.systemui.volume.panel.shared.model.filterData
 import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Models the UI of the Media Output Volume Panel component. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @VolumePanelScope
 class MediaOutputViewModel
 @Inject

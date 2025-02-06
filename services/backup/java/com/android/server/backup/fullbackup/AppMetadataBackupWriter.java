@@ -1,6 +1,6 @@
 package com.android.server.backup.fullbackup;
 
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_MANIFEST_VERSION;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_METADATA_VERSION;
@@ -261,7 +261,7 @@ public class AppMetadataBackupWriter {
                 new Environment.UserEnvironment(userId);
         File obbDir = userEnv.buildExternalStorageAppObbDirs(packageInfo.packageName)[0];
         if (obbDir != null) {
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Log.i(TAG, "obb dir: " + obbDir.getAbsolutePath());
             }
             File[] obbFiles = obbDir.listFiles();

@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification.footer.ui.viewmodel
 import android.content.Intent
 import android.provider.Settings
 import com.android.internal.jank.InteractionJankMonitor
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor
@@ -27,16 +26,13 @@ import com.android.systemui.statusbar.notification.NotificationActivityStarter.S
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
-import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.ui.AnimatableEvent
 import com.android.systemui.util.ui.AnimatedValue
 import com.android.systemui.util.ui.toAnimatedValueFlow
-import dagger.Module
-import dagger.Provides
-import java.util.Optional
-import javax.inject.Provider
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -45,7 +41,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
 /** ViewModel for [FooterView]. */
-class FooterViewModel(
+class FooterViewModel
+@AssistedInject
+constructor(
     activeNotificationsInteractor: ActiveNotificationsInteractor,
     notificationSettingsInteractor: NotificationSettingsInteractor,
     seenNotificationsInteractor: SeenNotificationsInteractor,
@@ -142,29 +140,9 @@ class FooterViewModel(
                     AnimatedValue.NotAnimating(!messageVisible)
                 },
         )
-}
 
-@Module
-object FooterViewModelModule {
-    @Provides
-    @SysUISingleton
-    fun provideOptional(
-        activeNotificationsInteractor: Provider<ActiveNotificationsInteractor>,
-        notificationSettingsInteractor: Provider<NotificationSettingsInteractor>,
-        seenNotificationsInteractor: Provider<SeenNotificationsInteractor>,
-        shadeInteractor: Provider<ShadeInteractor>,
-    ): Optional<FooterViewModel> {
-        return if (FooterViewRefactor.isEnabled) {
-            Optional.of(
-                FooterViewModel(
-                    activeNotificationsInteractor.get(),
-                    notificationSettingsInteractor.get(),
-                    seenNotificationsInteractor.get(),
-                    shadeInteractor.get(),
-                )
-            )
-        } else {
-            Optional.empty()
-        }
+    @AssistedFactory
+    interface Factory {
+        fun create(): FooterViewModel
     }
 }

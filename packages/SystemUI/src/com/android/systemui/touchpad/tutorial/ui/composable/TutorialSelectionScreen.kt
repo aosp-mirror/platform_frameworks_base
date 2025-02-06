@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -49,8 +50,10 @@ import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.android.systemui.inputdevice.tutorial.ui.composable.DoneButton
+import com.android.systemui.keyboard.shortcut.ui.composable.hasCompactWindowSize
 import com.android.systemui.res.R
 import com.android.systemui.touchpad.tutorial.ui.gesture.isFourFingerTouchpadSwipe
 import com.android.systemui.touchpad.tutorial.ui.gesture.isThreeFingerTouchpadSwipe
@@ -61,6 +64,7 @@ fun TutorialSelectionScreen(
     onBackTutorialClicked: () -> Unit,
     onHomeTutorialClicked: () -> Unit,
     onRecentAppsTutorialClicked: () -> Unit,
+    onSwitchAppsTutorialClicked: () -> Unit,
     onDoneButtonClicked: () -> Unit,
     lastSelectedScreen: Screen,
 ) {
@@ -79,31 +83,45 @@ fun TutorialSelectionScreen(
                     }
                 ),
     ) {
+        val isCompactWindow = hasCompactWindowSize()
+        val padding = if (isCompactWindow) 24.dp else 60.dp
         val configuration = LocalConfiguration.current
         when (configuration.orientation) {
             Configuration.ORIENTATION_LANDSCAPE -> {
-                HorizontalSelectionButtons(
-                    onBackTutorialClicked = onBackTutorialClicked,
-                    onHomeTutorialClicked = onHomeTutorialClicked,
-                    onRecentAppsTutorialClicked = onRecentAppsTutorialClicked,
-                    modifier = Modifier.weight(1f).padding(60.dp),
-                    lastSelectedScreen,
-                )
+                if (isCompactWindow)
+                    HorizontalCompactSelectionButtons(
+                        onBackTutorialClicked = onBackTutorialClicked,
+                        onHomeTutorialClicked = onHomeTutorialClicked,
+                        onRecentAppsTutorialClicked = onRecentAppsTutorialClicked,
+                        onSwitchAppsTutorialClicked = onSwitchAppsTutorialClicked,
+                        lastSelectedScreen,
+                        modifier = Modifier.weight(1f).padding(padding),
+                    )
+                else
+                    HorizontalSelectionButtons(
+                        onBackTutorialClicked = onBackTutorialClicked,
+                        onHomeTutorialClicked = onHomeTutorialClicked,
+                        onRecentAppsTutorialClicked = onRecentAppsTutorialClicked,
+                        onSwitchAppsTutorialClicked = onSwitchAppsTutorialClicked,
+                        lastSelectedScreen,
+                        modifier = Modifier.weight(1f).padding(padding),
+                    )
             }
             else -> {
                 VerticalSelectionButtons(
                     onBackTutorialClicked = onBackTutorialClicked,
                     onHomeTutorialClicked = onHomeTutorialClicked,
                     onRecentAppsTutorialClicked = onRecentAppsTutorialClicked,
-                    modifier = Modifier.weight(1f).padding(60.dp),
+                    onSwitchAppsTutorialClicked = onSwitchAppsTutorialClicked,
                     lastSelectedScreen,
+                    modifier = Modifier.weight(1f).padding(padding),
                 )
             }
         }
         // because other composables have weight 1, Done button will be positioned first
         DoneButton(
             onDoneButtonClicked = onDoneButtonClicked,
-            modifier = Modifier.padding(horizontal = 60.dp),
+            modifier = Modifier.padding(horizontal = padding),
         )
     }
 }
@@ -113,20 +131,110 @@ private fun HorizontalSelectionButtons(
     onBackTutorialClicked: () -> Unit,
     onHomeTutorialClicked: () -> Unit,
     onRecentAppsTutorialClicked: () -> Unit,
-    modifier: Modifier = Modifier,
+    onSwitchAppsTutorialClicked: () -> Unit,
     lastSelectedScreen: Screen,
+    modifier: Modifier = Modifier,
 ) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(20.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier,
-    ) {
-        ThreeTutorialButtons(
+    Column(modifier = modifier) {
+        TwoByTwoTutorialButtons(
             onBackTutorialClicked,
             onHomeTutorialClicked,
             onRecentAppsTutorialClicked,
-            modifier = Modifier.weight(1f).fillMaxSize(),
+            onSwitchAppsTutorialClicked,
             lastSelectedScreen,
+            modifier = Modifier.weight(1f).fillMaxSize(),
+        )
+    }
+}
+
+@Composable
+private fun TwoByTwoTutorialButtons(
+    onBackTutorialClicked: () -> Unit,
+    onHomeTutorialClicked: () -> Unit,
+    onRecentAppsTutorialClicked: () -> Unit,
+    onSwitchAppsTutorialClicked: () -> Unit,
+    lastSelectedScreen: Screen,
+    modifier: Modifier = Modifier,
+) {
+    val homeFocusRequester = remember { FocusRequester() }
+    val backFocusRequester = remember { FocusRequester() }
+    val recentAppsFocusRequester = remember { FocusRequester() }
+    val switchAppsFocusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        when (lastSelectedScreen) {
+            Screen.HOME_GESTURE -> homeFocusRequester.requestFocus()
+            Screen.BACK_GESTURE -> backFocusRequester.requestFocus()
+            Screen.RECENT_APPS_GESTURE -> recentAppsFocusRequester.requestFocus()
+            Screen.SWITCH_APPS_GESTURE -> switchAppsFocusRequester.requestFocus()
+            else -> {} // No-Op.
+        }
+    }
+    Column {
+        Row(Modifier.weight(1f)) {
+            TutorialButton(
+                text = stringResource(R.string.touchpad_tutorial_home_gesture_button),
+                icon = ImageVector.vectorResource(id = R.drawable.touchpad_tutorial_home_icon),
+                iconColor = MaterialTheme.colorScheme.onPrimary,
+                onClick = onHomeTutorialClicked,
+                backgroundColor = MaterialTheme.colorScheme.primary,
+                modifier = modifier.focusRequester(homeFocusRequester).focusable().fillMaxSize(),
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            TutorialButton(
+                text = stringResource(R.string.touchpad_tutorial_back_gesture_button),
+                icon = Icons.AutoMirrored.Outlined.ArrowBack,
+                iconColor = MaterialTheme.colorScheme.onTertiary,
+                onClick = onBackTutorialClicked,
+                backgroundColor = MaterialTheme.colorScheme.tertiary,
+                modifier = modifier.focusRequester(backFocusRequester).focusable().fillMaxSize(),
+            )
+        }
+        Spacer(modifier = Modifier.size(16.dp))
+        Row(Modifier.weight(1f)) {
+            TutorialButton(
+                text = stringResource(R.string.touchpad_tutorial_recent_apps_gesture_button),
+                icon = ImageVector.vectorResource(id = R.drawable.touchpad_tutorial_recents_icon),
+                iconColor = MaterialTheme.colorScheme.onSecondary,
+                onClick = onRecentAppsTutorialClicked,
+                backgroundColor = MaterialTheme.colorScheme.secondary,
+                modifier =
+                    modifier.focusRequester(recentAppsFocusRequester).focusable().fillMaxSize(),
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            TutorialButton(
+                text = stringResource(R.string.touchpad_tutorial_switch_apps_gesture_button),
+                icon = ImageVector.vectorResource(id = R.drawable.touchpad_tutorial_apps_icon),
+                iconColor = MaterialTheme.colorScheme.primary,
+                onClick = onSwitchAppsTutorialClicked,
+                backgroundColor = MaterialTheme.colorScheme.onPrimary,
+                modifier =
+                    modifier.focusRequester(switchAppsFocusRequester).focusable().fillMaxSize(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun HorizontalCompactSelectionButtons(
+    onBackTutorialClicked: () -> Unit,
+    onHomeTutorialClicked: () -> Unit,
+    onRecentAppsTutorialClicked: () -> Unit,
+    onSwitchAppsTutorialClicked: () -> Unit,
+    lastSelectedScreen: Screen,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier,
+    ) {
+        FourTutorialButtons(
+            onBackTutorialClicked,
+            onHomeTutorialClicked,
+            onRecentAppsTutorialClicked,
+            onSwitchAppsTutorialClicked,
+            lastSelectedScreen,
+            modifier = Modifier.weight(1f).fillMaxSize(),
         )
     }
 }
@@ -136,40 +244,45 @@ private fun VerticalSelectionButtons(
     onBackTutorialClicked: () -> Unit,
     onHomeTutorialClicked: () -> Unit,
     onRecentAppsTutorialClicked: () -> Unit,
-    modifier: Modifier = Modifier,
+    onSwitchAppsTutorialClicked: () -> Unit,
     lastSelectedScreen: Screen,
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier,
     ) {
-        ThreeTutorialButtons(
+        FourTutorialButtons(
             onBackTutorialClicked,
             onHomeTutorialClicked,
             onRecentAppsTutorialClicked,
-            modifier = Modifier.weight(1f).fillMaxSize(),
+            onSwitchAppsTutorialClicked,
             lastSelectedScreen,
+            modifier = Modifier.weight(1f).fillMaxSize(),
         )
     }
 }
 
 @Composable
-private fun ThreeTutorialButtons(
+private fun FourTutorialButtons(
     onBackTutorialClicked: () -> Unit,
     onHomeTutorialClicked: () -> Unit,
     onRecentAppsTutorialClicked: () -> Unit,
-    modifier: Modifier = Modifier,
+    onSwitchAppsTutorialClicked: () -> Unit,
     lastSelectedScreen: Screen,
+    modifier: Modifier = Modifier,
 ) {
     val homeFocusRequester = remember { FocusRequester() }
     val backFocusRequester = remember { FocusRequester() }
     val recentAppsFocusRequester = remember { FocusRequester() }
+    val switchAppsFocusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         when (lastSelectedScreen) {
             Screen.HOME_GESTURE -> homeFocusRequester.requestFocus()
             Screen.BACK_GESTURE -> backFocusRequester.requestFocus()
             Screen.RECENT_APPS_GESTURE -> recentAppsFocusRequester.requestFocus()
+            Screen.SWITCH_APPS_GESTURE -> switchAppsFocusRequester.requestFocus()
             else -> {} // No-Op.
         }
     }
@@ -197,6 +310,14 @@ private fun ThreeTutorialButtons(
         backgroundColor = MaterialTheme.colorScheme.secondary,
         modifier = modifier.focusRequester(recentAppsFocusRequester).focusable(),
     )
+    TutorialButton(
+        text = stringResource(R.string.touchpad_tutorial_switch_apps_gesture_button),
+        icon = ImageVector.vectorResource(id = R.drawable.touchpad_tutorial_apps_icon),
+        iconColor = MaterialTheme.colorScheme.primary,
+        onClick = onSwitchAppsTutorialClicked,
+        backgroundColor = MaterialTheme.colorScheme.onPrimary,
+        modifier = modifier.focusRequester(switchAppsFocusRequester).focusable(),
+    )
 }
 
 @Composable
@@ -218,14 +339,21 @@ private fun TutorialButton(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            // contentDescription is set to null because the icon is decorative and we don't want to
+            // repeat the text twice
             Icon(
                 imageVector = icon,
-                contentDescription = text,
+                contentDescription = null,
                 modifier = Modifier.width(30.dp).height(30.dp),
                 tint = iconColor,
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = text, style = MaterialTheme.typography.headlineLarge)
+            if (!hasCompactWindowSize()) Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = text,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.headlineLarge,
+                color = iconColor,
+            )
         }
     }
 }

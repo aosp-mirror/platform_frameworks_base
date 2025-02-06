@@ -25,11 +25,13 @@ import android.annotation.NonNull;
 import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
+import android.window.DesktopModeFlags;
 import android.window.SystemPerformanceHinter;
 
 import com.android.internal.logging.UiEventLogger;
@@ -42,6 +44,8 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
+import com.android.wm.shell.appzoomout.AppZoomOut;
+import com.android.wm.shell.appzoomout.AppZoomOutController;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.back.BackAnimationBackground;
 import com.android.wm.shell.back.BackAnimationController;
@@ -91,6 +95,7 @@ import com.android.wm.shell.compatui.impl.DefaultComponentIdGenerator;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopUserRepositories;
+import com.android.wm.shell.desktopmode.desktopwallpaperactivity.DesktopWallpaperActivityTokenProvider;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelperController;
 import com.android.wm.shell.freeform.FreeformComponents;
@@ -108,9 +113,9 @@ import com.android.wm.shell.recents.TaskStackTransitionObserver;
 import com.android.wm.shell.shared.ShellTransitions;
 import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.shared.annotations.ShellAnimationThread;
-import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.annotations.ShellSplashscreenThread;
+import com.android.wm.shell.shared.desktopmode.DesktopModeCompatPolicy;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -173,8 +178,9 @@ public abstract class WMShellBaseModule {
     static DisplayController provideDisplayController(Context context,
             IWindowManager wmService,
             ShellInit shellInit,
-            @ShellMainThread ShellExecutor mainExecutor) {
-        return new DisplayController(context, wmService, shellInit, mainExecutor);
+            @ShellMainThread ShellExecutor mainExecutor,
+            DisplayManager displayManager) {
+        return new DisplayController(context, wmService, shellInit, mainExecutor, displayManager);
     }
 
     @WMSingleton
@@ -254,6 +260,12 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
+    static DesktopModeCompatPolicy provideDesktopModeCompatPolicy(Context context) {
+        return new DesktopModeCompatPolicy(context);
+    }
+
+    @WMSingleton
+    @Provides
     static Optional<CompatUIHandler> provideCompatUIController(
             Context context,
             ShellInit shellInit,
@@ -273,8 +285,7 @@ public abstract class WMShellBaseModule {
             @NonNull CompatUIState compatUIState,
             @NonNull CompatUIComponentIdGenerator componentIdGenerator,
             @NonNull CompatUIComponentFactory compatUIComponentFactory,
-            CompatUIStatusManager compatUIStatusManager,
-            @NonNull FocusTransitionObserver focusTransitionObserver) {
+            CompatUIStatusManager compatUIStatusManager) {
         if (!context.getResources().getBoolean(R.bool.config_enableCompatUIController)) {
             return Optional.empty();
         }
@@ -299,14 +310,13 @@ public abstract class WMShellBaseModule {
                         compatUIShellCommandHandler.get(),
                         accessibilityManager.get(),
                         compatUIStatusManager,
-                        desktopUserRepositories,
-                        focusTransitionObserver));
+                        desktopUserRepositories));
     }
 
     @WMSingleton
     @Provides
     static CompatUIStatusManager provideCompatUIStatusManager(@NonNull Context context) {
-        if (Flags.enableCompatUiVisibilityStatus()) {
+        if (DesktopModeFlags.ENABLE_DESKTOP_COMPAT_UI_VISIBILITY_STATUS.isTrue()) {
             return new CompatUIStatusManager(
                     newState -> Settings.Secure.putInt(context.getContentResolver(),
                             COMPAT_UI_EDUCATION_SHOWING, newState),
@@ -408,9 +418,13 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static MultiInstanceHelper provideMultiInstanceHelper(Context context) {
+    static MultiInstanceHelper provideMultiInstanceHelper(
+            Context context,
+            ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler
+    ) {
         return new MultiInstanceHelper(context, context.getPackageManager(),
-                Flags.supportsMultiInstanceSystemUi());
+                shellInit, shellCommandHandler, Flags.supportsMultiInstanceSystemUi());
     }
 
     //
@@ -438,29 +452,24 @@ public abstract class WMShellBaseModule {
             ShellInit shellInit,
             ShellController shellController,
             @ShellMainThread ShellExecutor shellExecutor,
-            @ShellBackgroundThread Handler backgroundHandler,
             BackAnimationBackground backAnimationBackground,
             Optional<ShellBackAnimationRegistry> shellBackAnimationRegistry,
             ShellCommandHandler shellCommandHandler,
             Transitions transitions,
             @ShellMainThread Handler handler
     ) {
-        if (BackAnimationController.IS_ENABLED) {
             return shellBackAnimationRegistry.map(
                     (animations) ->
                             new BackAnimationController(
                                     shellInit,
                                     shellController,
                                     shellExecutor,
-                                    backgroundHandler,
                                     context,
                                     backAnimationBackground,
                                     animations,
                                     shellCommandHandler,
                                     transitions,
                                     handler));
-        }
-        return Optional.empty();
     }
 
     @BindsOptionalOf
@@ -572,12 +581,15 @@ public abstract class WMShellBaseModule {
             ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue,
             Optional<RecentTasksController> recentTasksOptional,
-            Optional<WindowDecorViewModel> windowDecorViewModelOptional) {
+            Optional<WindowDecorViewModel> windowDecorViewModelOptional,
+            Optional<DesktopWallpaperActivityTokenProvider>
+                    desktopWallpaperActivityTokenProviderOptional) {
         if (fullscreenTaskListener.isPresent()) {
             return fullscreenTaskListener.get();
         } else {
             return new FullscreenTaskListener(shellInit, shellTaskOrganizer, syncQueue,
-                    recentTasksOptional, windowDecorViewModelOptional);
+                    recentTasksOptional, windowDecorViewModelOptional,
+                    desktopWallpaperActivityTokenProviderOptional);
         }
     }
 
@@ -774,8 +786,9 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static TaskViewTransitions provideTaskViewTransitions(Transitions transitions,
-            TaskViewRepository repository) {
-        return new TaskViewTransitions(transitions, repository);
+            TaskViewRepository repository, ShellTaskOrganizer organizer,
+            SyncTransactionQueue syncQueue) {
+        return new TaskViewTransitions(transitions, repository, organizer, syncQueue);
     }
 
     @WMSingleton
@@ -1039,6 +1052,38 @@ public abstract class WMShellBaseModule {
         });
     }
 
+    @WMSingleton
+    @Provides
+    static DesktopWallpaperActivityTokenProvider provideDesktopWallpaperActivityTokenProvider() {
+        return new DesktopWallpaperActivityTokenProvider();
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<DesktopWallpaperActivityTokenProvider>
+            provideOptionalDesktopWallpaperActivityTokenProvider(
+            Context context,
+            DesktopWallpaperActivityTokenProvider desktopWallpaperActivityTokenProvider) {
+        if (DesktopModeStatus.canEnterDesktopMode(context)) {
+            return Optional.of(desktopWallpaperActivityTokenProvider);
+        }
+        return Optional.empty();
+    }
+
+    //
+    // App zoom out (optional feature)
+    //
+
+    @WMSingleton
+    @Provides
+    static Optional<AppZoomOut> provideAppZoomOut(
+            Optional<AppZoomOutController> appZoomOutController) {
+        return appZoomOutController.map((controller) -> controller.asAppZoomOut());
+    }
+
+    @BindsOptionalOf
+    abstract AppZoomOutController optionalAppZoomOutController();
+
     //
     // Task Stack
     //
@@ -1083,6 +1128,7 @@ public abstract class WMShellBaseModule {
             Optional<RecentTasksController> recentTasksOptional,
             Optional<RecentsTransitionHandler> recentsTransitionHandlerOptional,
             Optional<OneHandedController> oneHandedControllerOptional,
+            Optional<AppZoomOutController> appZoomOutControllerOptional,
             Optional<HideDisplayCutoutController> hideDisplayCutoutControllerOptional,
             Optional<ActivityEmbeddingController> activityEmbeddingOptional,
             Optional<MixedTransitionHandler> mixedTransitionHandler,

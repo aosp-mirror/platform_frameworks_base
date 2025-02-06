@@ -17,12 +17,14 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.dagger.GlanceableHubBlurComponent
 import com.android.systemui.keyguard.domain.interactor.FromDozingTransitionInteractor.Companion.TO_GLANCEABLE_HUB_DURATION
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.keyguard.ui.transitions.GlanceableHubTransition
 import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -31,7 +33,10 @@ import kotlinx.coroutines.flow.flowOf
 @SysUISingleton
 class DozingToGlanceableHubTransitionViewModel
 @Inject
-constructor(animationFlow: KeyguardTransitionAnimationFlow) : DeviceEntryIconTransition {
+constructor(
+    animationFlow: KeyguardTransitionAnimationFlow,
+    private val blurFactory: GlanceableHubBlurComponent.Factory,
+) : DeviceEntryIconTransition, GlanceableHubTransition {
     private val transitionAnimation =
         animationFlow
             .setup(
@@ -48,4 +53,7 @@ constructor(animationFlow: KeyguardTransitionAnimationFlow) : DeviceEntryIconTra
      * power button when dozing and docked.
      */
     val notificationAlpha: Flow<Float> = flowOf(0f)
+
+    override val windowBlurRadius: Flow<Float> =
+        blurFactory.create(transitionAnimation).getBlurProvider().enterBlurRadius
 }

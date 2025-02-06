@@ -1,0 +1,9 @@
+# OWNERS of Catalyst libraries (DataStore, Metadata, etc.)
+
+# Main developers
+jiannan@google.com
+cechkahn@google.com
+sunnyshao@google.com
+
+# Emergency only
+cipson@google.com

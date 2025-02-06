@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 class TouchpadTutorialViewModel(
     private val gesturesInteractor: TouchpadGesturesInteractor,
-    private val logger: InputDeviceTutorialLogger
+    private val logger: InputDeviceTutorialLogger,
 ) : ViewModel() {
 
     private val _screen = MutableStateFlow(Screen.TUTORIAL_SELECTION)
@@ -50,7 +50,7 @@ class TouchpadTutorialViewModel(
     @Inject
     constructor(
         private val gesturesInteractor: TouchpadGesturesInteractor,
-        private val logger: InputDeviceTutorialLogger
+        private val logger: InputDeviceTutorialLogger,
     ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
@@ -65,4 +65,5 @@ enum class Screen {
     BACK_GESTURE,
     HOME_GESTURE,
     RECENT_APPS_GESTURE,
+    SWITCH_APPS_GESTURE,
 }

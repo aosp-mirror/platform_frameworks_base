@@ -41,7 +41,6 @@ import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -50,7 +49,6 @@ import org.junit.runner.RunWith
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
-@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 class UdfpsAccessibilityOverlayViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {

@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static android.os.PowerWhitelistManager.REASON_NOTIFICATION_SERVICE;
+import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
+import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED;
 import static android.os.Process.INVALID_UID;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -27,9 +30,12 @@ import static com.android.server.am.PendingIntentRecord.CANCEL_REASON_OWNER_CANC
 import static com.android.server.am.PendingIntentRecord.CANCEL_REASON_OWNER_FORCE_STOPPED;
 import static com.android.server.am.PendingIntentRecord.CANCEL_REASON_SUPERSEDED;
 import static com.android.server.am.PendingIntentRecord.CANCEL_REASON_USER_STOPPED;
+import static com.android.server.am.PendingIntentRecord.FLAG_ACTIVITY_SENDER;
 import static com.android.server.am.PendingIntentRecord.cancelReasonToString;
+import static com.android.window.flags.Flags.balClearAllowlistDuration;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,9 +45,11 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
+import android.app.BackgroundStartPrivileges;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
+import android.os.Binder;
 import android.os.Looper;
 import android.os.UserHandle;
 
@@ -177,6 +185,41 @@ public class PendingIntentControllerTest {
                     CANCEL_REASON_USER_STOPPED);
             assertCancelReason(CANCEL_REASON_USER_STOPPED, pir.cancelReason);
         }
+    }
+
+    @Test
+    public void testClearAllowBgActivityStartsClearsToken() {
+        final PendingIntentRecord pir = createPendingIntentRecord(0);
+        Binder token = new Binder();
+        pir.setAllowBgActivityStarts(token, FLAG_ACTIVITY_SENDER);
+        assertEquals(BackgroundStartPrivileges.allowBackgroundActivityStarts(token),
+                pir.getBackgroundStartPrivilegesForActivitySender(token));
+        pir.clearAllowBgActivityStarts(token);
+        assertEquals(BackgroundStartPrivileges.NONE,
+                pir.getBackgroundStartPrivilegesForActivitySender(token));
+    }
+
+    @Test
+    public void testClearAllowBgActivityStartsClearsDuration() {
+        final PendingIntentRecord pir = createPendingIntentRecord(0);
+        Binder token = new Binder();
+        pir.setAllowlistDurationLocked(token, 1000,
+                TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED, REASON_NOTIFICATION_SERVICE,
+                "NotificationManagerService");
+        PendingIntentRecord.TempAllowListDuration allowlistDurationLocked =
+                pir.getAllowlistDurationLocked(token);
+        assertEquals(1000, allowlistDurationLocked.duration);
+        assertEquals(TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                allowlistDurationLocked.type);
+        pir.clearAllowBgActivityStarts(token);
+        PendingIntentRecord.TempAllowListDuration allowlistDurationLockedAfterClear =
+                pir.getAllowlistDurationLocked(token);
+        assertNotNull(allowlistDurationLockedAfterClear);
+        assertEquals(1000, allowlistDurationLockedAfterClear.duration);
+        assertEquals(balClearAllowlistDuration()
+                        ? TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED
+                        : TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                allowlistDurationLocked.type);
     }
 
     private void assertCancelReason(int expectedReason, int actualReason) {

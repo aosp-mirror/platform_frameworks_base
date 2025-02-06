@@ -23,16 +23,21 @@ import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.SerializableToString;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.operations.layout.ActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.Serializable;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
 /** Capture a host action information. This can be triggered on eg. a click. */
-public class HostActionOperation extends Operation implements ActionOperation {
+public class HostActionOperation extends Operation
+        implements ActionOperation, SerializableToString, Serializable {
     private static final int OP_CODE = Operations.HOST_ACTION;
 
     int mActionId = -1;
@@ -51,6 +56,11 @@ public class HostActionOperation extends Operation implements ActionOperation {
         return mActionId;
     }
 
+    /**
+     * Returns the serialized name for this operation
+     *
+     * @return the serialized name
+     */
     @NonNull
     public String serializedName() {
         return "HOST_ACTION";
@@ -83,6 +93,12 @@ public class HostActionOperation extends Operation implements ActionOperation {
         context.runAction(mActionId, "");
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param actionId the action id
+     */
     public static void apply(@NonNull WireBuffer buffer, int actionId) {
         buffer.start(OP_CODE);
         buffer.writeInt(actionId);
@@ -108,5 +124,13 @@ public class HostActionOperation extends Operation implements ActionOperation {
         doc.operation("Layout Operations", OP_CODE, "HostAction")
                 .description("Host action. This operation represents a host action")
                 .field(INT, "ACTION_ID", "Host Action ID");
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER)
+                .add("type", "HostActionOperation")
+                .add("id", mActionId);
     }
 }

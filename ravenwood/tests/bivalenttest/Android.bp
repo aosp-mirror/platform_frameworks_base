@@ -40,6 +40,7 @@ java_defaults {
 
         "junit-params",
         "platform-parametric-runner-lib",
+        "platform-compat-test-rules",
 
         // To make sure it won't cause VerifyError (b/324063814)
         "platformprotosnano",

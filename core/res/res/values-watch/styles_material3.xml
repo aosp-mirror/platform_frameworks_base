@@ -1,0 +1,61 @@
+<!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources>
+    <style name="Widget.Material3" parent="Widget.DeviceDefault"/>
+
+    <!--  Wear Material3 Button Styles  -->
+    <style name="Widget.Material3.Button">
+        <item name="background">@drawable/btn_background_material_filled_tonal_watch</item>
+        <item name="textAppearance">@style/TextAppearance.Widget.Material3.Button</item>
+        <item name="minHeight">@dimen/btn_material_height</item>
+        <item name="maxWidth">@dimen/btn_material_width</item>
+        <item name="android:paddingStart">@dimen/btn_horizontal_edge_padding</item>
+        <item name="android:paddingEnd">@dimen/btn_horizontal_edge_padding</item>
+        <item name="android:drawablePadding">@dimen/btn_drawable_padding</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:breakStrategy">simple</item>
+        <item name="stateListAnimator">@anim/button_state_list_anim_material</item>
+        <item name="focusable">true</item>
+        <item name="clickable">true</item>
+        <item name="gravity">center_vertical</item>
+    </style>
+
+    <!-- Wear Material3 Button - Filled (primary colored) -->
+    <style name="Widget.Material3.Button.Filled">
+        <item name="android:background">@drawable/btn_background_material_filled_watch</item>
+        <item name="textAppearance">@style/TextAppearance.Widget.Material3.Button.Filled</item>
+    </style>
+
+    <!-- Wear Material3 Button - Filled Tonal (Override system default button styles) -->
+    <style name="Widget.Material3.Button.FilledTonal"/>
+
+    <!-- Wear Material3 Button - Outlined -->
+    <style name="Widget.Material3.Button.Outlined">
+        <item name="android:background">@drawable/btn_background_material_outlined_watch</item>
+    </style>
+
+    <!-- Wear Material3 Button - Text -->
+    <style name="Widget.Material3.Button.Text">
+        <item name="android:background">@drawable/btn_background_material_text_watch</item>
+    </style>
+
+    <!--  Wear Material3 AlertDialog Styles  -->
+    <style name="AlertDialog.Material3">
+        <item name="layout">@layout/alert_dialog_watch</item>
+    </style>
+</resources>

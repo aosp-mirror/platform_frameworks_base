@@ -15,6 +15,7 @@ android_app {
     export_package_resources: true,
     privileged: true,
     optimize: {
+        keep_runtime_invisible_annotations: true,
         proguard_flags_files: ["proguard.proguard"],
     },
 }

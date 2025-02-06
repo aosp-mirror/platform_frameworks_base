@@ -16,7 +16,6 @@
 
 package com.android.systemui.mediaprojection.permission
 
-import android.app.AlertDialog
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -37,8 +36,8 @@ open class BaseMediaProjectionPermissionViewBinder(
     private val hostUid: Int,
     private val mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
     @ScreenShareMode val defaultSelectedMode: Int = screenShareOptions.first().mode,
-    private val dialog: AlertDialog,
 ) : AdapterView.OnItemSelectedListener {
+    protected lateinit var containerView: View
     private lateinit var warning: TextView
     private lateinit var startButton: TextView
     private lateinit var screenShareModeSpinner: Spinner
@@ -54,9 +53,10 @@ open class BaseMediaProjectionPermissionViewBinder(
         }
     }
 
-    open fun bind() {
-        warning = dialog.requireViewById(R.id.text_warning)
-        startButton = dialog.requireViewById(android.R.id.button1)
+    open fun bind(view: View) {
+        containerView = view
+        warning = containerView.requireViewById(R.id.text_warning)
+        startButton = containerView.requireViewById(android.R.id.button1)
         initScreenShareOptions()
         createOptionsView(getOptionsViewLayoutId())
     }
@@ -67,15 +67,15 @@ open class BaseMediaProjectionPermissionViewBinder(
         initScreenShareSpinner()
     }
 
-    /** Sets fields on the dialog that change based on which option is selected. */
+    /** Sets fields on the views that change based on which option is selected. */
     private fun setOptionSpecificFields() {
         warning.text = warningText
         startButton.text = startButtonText
     }
 
     private fun initScreenShareSpinner() {
-        val adapter = OptionsAdapter(dialog.context.applicationContext, screenShareOptions)
-        screenShareModeSpinner = dialog.requireViewById(R.id.screen_share_mode_options)
+        val adapter = OptionsAdapter(containerView.context.applicationContext, screenShareOptions)
+        screenShareModeSpinner = containerView.requireViewById(R.id.screen_share_mode_options)
         screenShareModeSpinner.adapter = adapter
         screenShareModeSpinner.onItemSelectedListener = this
 
@@ -103,10 +103,10 @@ open class BaseMediaProjectionPermissionViewBinder(
     override fun onNothingSelected(parent: AdapterView<*>?) {}
 
     private val warningText: String
-        get() = dialog.context.getString(selectedScreenShareOption.warningText, appName)
+        get() = containerView.context.getString(selectedScreenShareOption.warningText, appName)
 
     private val startButtonText: String
-        get() = dialog.context.getString(selectedScreenShareOption.startButtonText)
+        get() = containerView.context.getString(selectedScreenShareOption.startButtonText)
 
     fun setStartButtonOnClickListener(listener: View.OnClickListener?) {
         startButton.setOnClickListener { view ->
@@ -121,7 +121,7 @@ open class BaseMediaProjectionPermissionViewBinder(
 
     private fun createOptionsView(@LayoutRes layoutId: Int?) {
         if (layoutId == null) return
-        val stub = dialog.requireViewById<View>(R.id.options_stub) as ViewStub
+        val stub = containerView.requireViewById<View>(R.id.options_stub) as ViewStub
         stub.layoutResource = layoutId
         stub.inflate()
     }

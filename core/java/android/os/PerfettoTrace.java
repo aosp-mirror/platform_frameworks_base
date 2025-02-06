@@ -16,13 +16,14 @@
 
 package android.os;
 
+import com.android.internal.ravenwood.RavenwoodEnvironment;
+
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 
 import libcore.util.NativeAllocationRegistry;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 /**
  * Writes trace events to the perfetto trace buffer. These trace events can be
@@ -33,6 +34,7 @@ import java.util.function.Consumer;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class PerfettoTrace {
     private static final String TAG = "PerfettoTrace";
 
@@ -49,11 +51,14 @@ public final class PerfettoTrace {
      */
     private static final AtomicInteger sFlowEventId = new AtomicInteger();
 
+    public static final PerfettoTrace.Category MQ_CATEGORY = new PerfettoTrace.Category("mq");
+
     /**
      * Perfetto category a trace event belongs to.
      * Registering a category is not sufficient to capture events within the category, it must
      * also be enabled in the trace config.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static final class Category implements PerfettoTrackEventExtra.PerfettoPointer {
         private static final NativeAllocationRegistry sRegistry =
                 NativeAllocationRegistry.createMalloced(
@@ -72,7 +77,7 @@ public final class PerfettoTrace {
          * @param name The category name.
          */
         public Category(String name) {
-            this(name, null, null);
+            this(name, "", "");
         }
 
         /**
@@ -82,7 +87,7 @@ public final class PerfettoTrace {
          * @param tag An atrace tag name that this category maps to.
          */
         public Category(String name, String tag) {
-            this(name, tag, null);
+            this(name, tag, "");
         }
 
         /**
@@ -98,12 +103,16 @@ public final class PerfettoTrace {
             mSeverity = severity;
             mPtr = native_init(name, tag, severity);
             mExtraPtr = native_get_extra_ptr(mPtr);
-            sRegistry.registerNativeAllocation(this, mPtr);
+            if (!RavenwoodEnvironment.getInstance().isRunningOnRavenwood()) {
+                sRegistry.registerNativeAllocation(this, mPtr);
+            }
         }
 
         @FastNative
+        @android.ravenwood.annotation.RavenwoodReplace
         private static native long native_init(String name, String tag, String severity);
         @CriticalNative
+        @android.ravenwood.annotation.RavenwoodReplace
         private static native long native_delete();
         @CriticalNative
         private static native void native_register(long ptr);
@@ -112,7 +121,23 @@ public final class PerfettoTrace {
         @CriticalNative
         private static native boolean native_is_enabled(long ptr);
         @CriticalNative
+        @android.ravenwood.annotation.RavenwoodReplace
         private static native long native_get_extra_ptr(long ptr);
+
+        private static long native_init$ravenwood(String name, String tag, String severity) {
+            // Tracing currently completely disabled under Ravenwood
+            return 0;
+        }
+
+        private static long native_delete$ravenwood() {
+            // Tracing currently completely disabled under Ravenwood
+            return 0;
+        }
+
+        private static long native_get_extra_ptr$ravenwood(long ptr) {
+            // Tracing currently completely disabled under Ravenwood
+            return 0;
+        }
 
         /**
          * Register the category.
@@ -135,8 +160,14 @@ public final class PerfettoTrace {
         /**
          * Whether the category is enabled or not.
          */
+        @android.ravenwood.annotation.RavenwoodReplace
         public boolean isEnabled() {
             return IS_FLAG_ENABLED && native_is_enabled(mPtr);
+        }
+
+        public boolean isEnabled$ravenwood() {
+            // Tracing currently completely disabled under Ravenwood
+            return false;
         }
 
         /**
@@ -155,47 +186,44 @@ public final class PerfettoTrace {
         }
     }
 
-    @FastNative
-    private static native void native_event(int type, long tag, String name, long ptr);
+    /**
+     * Manages a perfetto tracing session.
+     * Constructing this object with a config automatically starts a tracing session. Each session
+     * must be closed after use and then the resulting trace bytes can be read.
+     *
+     * The session could be in process or system wide, depending on {@code isBackendInProcess}.
+     * This functionality is intended for testing.
+     */
+    public static final class Session {
+        private final long mPtr;
+
+        /**
+         * Session ctor.
+         */
+        public Session(boolean isBackendInProcess, byte[] config) {
+            mPtr = native_start_session(isBackendInProcess, config);
+        }
+
+        /**
+         * Closes the session and returns the trace.
+         */
+        public byte[] close() {
+            return native_stop_session(mPtr);
+        }
+    }
 
     @CriticalNative
     private static native long native_get_process_track_uuid();
-
     @CriticalNative
     private static native long native_get_thread_track_uuid(long tid);
 
     @FastNative
     private static native void native_activate_trigger(String name, int ttlMs);
+    @FastNative
+    private static native void native_register(boolean isBackendInProcess);
 
-    /**
-     * Writes a trace message to indicate a given section of code was invoked.
-     *
-     * @param category The perfetto category pointer.
-     * @param eventName The event name to appear in the trace.
-     * @param extra The extra arguments.
-     */
-    public static void instant(Category category, String eventName, PerfettoTrackEventExtra extra) {
-        if (!category.isEnabled()) {
-            return;
-        }
-
-        native_event(PERFETTO_TE_TYPE_INSTANT, category.getPtr(), eventName, extra.getPtr());
-        extra.reset();
-    }
-
-    /**
-     * Writes a trace message to indicate a given section of code was invoked.
-     *
-     * @param category The perfetto category.
-     * @param eventName The event name to appear in the trace.
-     * @param extraConfig Consumer for the extra arguments.
-     */
-    public static void instant(Category category, String eventName,
-            Consumer<PerfettoTrackEventExtra.Builder> extraConfig) {
-        PerfettoTrackEventExtra.Builder extra = PerfettoTrackEventExtra.builder();
-        extraConfig.accept(extra);
-        instant(category, eventName, extra.build());
-    }
+    private static native long native_start_session(boolean isBackendInProcess, byte[] config);
+    private static native byte[] native_stop_session(long ptr);
 
     /**
      * Writes a trace message to indicate a given section of code was invoked.
@@ -203,143 +231,95 @@ public final class PerfettoTrace {
      * @param category The perfetto category.
      * @param eventName The event name to appear in the trace.
      */
-    public static void instant(Category category, String eventName) {
-        instant(category, eventName, PerfettoTrackEventExtra.builder().build());
+    public static PerfettoTrackEventExtra.Builder instant(Category category, String eventName) {
+        if (!category.isEnabled()) {
+            return PerfettoTrackEventExtra.noOpBuilder();
+        }
+
+        return PerfettoTrackEventExtra.builder().init(PERFETTO_TE_TYPE_INSTANT, category)
+            .setEventName(eventName);
     }
 
     /**
      * Writes a trace message to indicate the start of a given section of code.
      *
-     * @param category The perfetto category pointer.
+     * @param category The perfetto category.
      * @param eventName The event name to appear in the trace.
-     * @param extra The extra arguments.
      */
-    public static void begin(Category category, String eventName, PerfettoTrackEventExtra extra) {
+    public static PerfettoTrackEventExtra.Builder begin(Category category, String eventName) {
         if (!category.isEnabled()) {
-            return;
+            return PerfettoTrackEventExtra.noOpBuilder();
         }
 
-        native_event(PERFETTO_TE_TYPE_SLICE_BEGIN, category.getPtr(), eventName, extra.getPtr());
-        extra.reset();
-    }
-
-    /**
-     * Writes a trace message to indicate the start of a given section of code.
-     *
-     * @param category The perfetto category pointer.
-     * @param eventName The event name to appear in the trace.
-     * @param extraConfig Consumer for the extra arguments.
-     */
-    public static void begin(Category category, String eventName,
-            Consumer<PerfettoTrackEventExtra.Builder> extraConfig) {
-        PerfettoTrackEventExtra.Builder extra = PerfettoTrackEventExtra.builder();
-        extraConfig.accept(extra);
-        begin(category, eventName, extra.build());
-    }
-
-    /**
-     * Writes a trace message to indicate the start of a given section of code.
-     *
-     * @param category The perfetto category pointer.
-     * @param eventName The event name to appear in the trace.
-     */
-    public static void begin(Category category, String eventName) {
-        begin(category, eventName, PerfettoTrackEventExtra.builder().build());
+        return PerfettoTrackEventExtra.builder().init(PERFETTO_TE_TYPE_SLICE_BEGIN, category)
+            .setEventName(eventName);
     }
 
     /**
      * Writes a trace message to indicate the end of a given section of code.
      *
-     * @param category The perfetto category pointer.
-     * @param extra The extra arguments.
+     * @param category The perfetto category.
      */
-    public static void end(Category category, PerfettoTrackEventExtra extra) {
+    public static PerfettoTrackEventExtra.Builder end(Category category) {
         if (!category.isEnabled()) {
-            return;
+            return PerfettoTrackEventExtra.noOpBuilder();
         }
 
-        native_event(PERFETTO_TE_TYPE_SLICE_END, category.getPtr(), "", extra.getPtr());
-        extra.reset();
-    }
-
-    /**
-     * Writes a trace message to indicate the end of a given section of code.
-     *
-     * @param category The perfetto category pointer.
-     * @param extraConfig Consumer for the extra arguments.
-     */
-    public static void end(Category category,
-            Consumer<PerfettoTrackEventExtra.Builder> extraConfig) {
-        PerfettoTrackEventExtra.Builder extra = PerfettoTrackEventExtra.builder();
-        extraConfig.accept(extra);
-        end(category, extra.build());
-    }
-
-    /**
-     * Writes a trace message to indicate the end of a given section of code.
-     *
-     * @param category The perfetto category pointer.
-     */
-    public static void end(Category category) {
-        end(category, PerfettoTrackEventExtra.builder().build());
+        return PerfettoTrackEventExtra.builder().init(PERFETTO_TE_TYPE_SLICE_END, category);
     }
 
     /**
      * Writes a trace message to indicate the value of a given section of code.
      *
-     * @param category The perfetto category pointer.
-     * @param extra The extra arguments.
-     */
-    public static void counter(Category category, PerfettoTrackEventExtra extra) {
-        if (!category.isEnabled()) {
-            return;
-        }
-
-        native_event(PERFETTO_TE_TYPE_COUNTER, category.getPtr(), "", extra.getPtr());
-        extra.reset();
-    }
-
-    /**
-     * Writes a trace message to indicate the value of a given section of code.
-     *
-     * @param category The perfetto category pointer.
-     * @param extraConfig Consumer for the extra arguments.
-     */
-    public static void counter(Category category,
-            Consumer<PerfettoTrackEventExtra.Builder> extraConfig) {
-        PerfettoTrackEventExtra.Builder extra = PerfettoTrackEventExtra.builder();
-        extraConfig.accept(extra);
-        counter(category, extra.build());
-    }
-
-    /**
-     * Writes a trace message to indicate the value of a given section of code.
-     *
-     * @param category The perfetto category pointer.
-     * @param trackName The trackName for the event.
+     * @param category The perfetto category.
      * @param value The value of the counter.
      */
-    public static void counter(Category category, String trackName, long value) {
-        PerfettoTrackEventExtra extra = PerfettoTrackEventExtra.builder()
-                .usingCounterTrack(trackName, PerfettoTrace.getProcessTrackUuid())
-                .setCounter(value)
-                .build();
-        counter(category, extra);
+    public static PerfettoTrackEventExtra.Builder counter(Category category, long value) {
+        if (!category.isEnabled()) {
+            return PerfettoTrackEventExtra.noOpBuilder();
+        }
+
+        return PerfettoTrackEventExtra.builder().init(PERFETTO_TE_TYPE_COUNTER, category)
+            .setCounter(value);
     }
 
     /**
      * Writes a trace message to indicate the value of a given section of code.
      *
-     * @param category The perfetto category pointer.
+     * @param category The perfetto category.
+     * @param value The value of the counter.
      * @param trackName The trackName for the event.
+     */
+    public static PerfettoTrackEventExtra.Builder counter(
+            Category category, long value, String trackName) {
+        return counter(category, value).usingProcessCounterTrack(trackName);
+    }
+
+    /**
+     * Writes a trace message to indicate the value of a given section of code.
+     *
+     * @param category The perfetto category.
      * @param value The value of the counter.
      */
-    public static void counter(Category category, String trackName, double value) {
-        PerfettoTrackEventExtra extra = PerfettoTrackEventExtra.builder()
-                .usingCounterTrack(trackName, PerfettoTrace.getProcessTrackUuid())
-                .setCounter(value)
-                .build();
-        counter(category, extra);
+    public static PerfettoTrackEventExtra.Builder counter(Category category, double value) {
+        if (!category.isEnabled()) {
+            return PerfettoTrackEventExtra.noOpBuilder();
+        }
+
+        return PerfettoTrackEventExtra.builder().init(PERFETTO_TE_TYPE_COUNTER, category)
+            .setCounter(value);
+    }
+
+    /**
+     * Writes a trace message to indicate the value of a given section of code.
+     *
+     * @param category The perfetto category.
+     * @param value The value of the counter.
+     * @param trackName The trackName for the event.
+     */
+    public static PerfettoTrackEventExtra.Builder counter(
+            Category category, double value, String trackName) {
+        return counter(category, value).usingProcessCounterTrack(trackName);
     }
 
     /**
@@ -360,7 +340,7 @@ public final class PerfettoTrace {
      * Returns the process track uuid that can be used as a parent track uuid.
      */
     public static long getProcessTrackUuid() {
-        if (IS_FLAG_ENABLED) {
+        if (!IS_FLAG_ENABLED) {
             return 0;
         }
         return native_get_process_track_uuid();
@@ -370,7 +350,7 @@ public final class PerfettoTrace {
      * Given a thread tid, returns the thread track uuid that can be used as a parent track uuid.
      */
     public static long getThreadTrackUuid(long tid) {
-        if (IS_FLAG_ENABLED) {
+        if (!IS_FLAG_ENABLED) {
             return 0;
         }
         return native_get_thread_track_uuid(tid);
@@ -380,7 +360,7 @@ public final class PerfettoTrace {
      * Activates a trigger by name {@code triggerName} with expiry in {@code ttlMs}.
      */
     public static void activateTrigger(String triggerName, int ttlMs) {
-        if (IS_FLAG_ENABLED) {
+        if (!IS_FLAG_ENABLED) {
             return;
         }
         native_activate_trigger(triggerName, ttlMs);
@@ -389,7 +369,14 @@ public final class PerfettoTrace {
     /**
      * Registers the process with Perfetto.
      */
-    public static void register() {
-        Trace.registerWithPerfetto();
+    public static void register(boolean isBackendInProcess) {
+        native_register(isBackendInProcess);
+    }
+
+    /**
+     * Registers categories with Perfetto.
+     */
+    public static void registerCategories() {
+        MQ_CATEGORY.register();
     }
 }

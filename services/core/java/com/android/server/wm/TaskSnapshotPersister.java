@@ -26,6 +26,7 @@ import android.window.TaskSnapshot;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.UserManagerInternal;
+import com.android.window.flags.Flags;
 
 import java.io.File;
 import java.util.Arrays;
@@ -37,6 +38,8 @@ import java.util.Arrays;
  */
 class TaskSnapshotPersister extends BaseAppSnapshotPersister {
 
+    private final boolean mDisableSnapshots;
+
     /**
      * The list of ids of the tasks that have been persisted since {@link #removeObsoleteFiles} was
      * called.
@@ -45,8 +48,10 @@ class TaskSnapshotPersister extends BaseAppSnapshotPersister {
     private final ArraySet<Integer> mPersistedTaskIdsSinceLastRemoveObsolete = new ArraySet<>();
 
     TaskSnapshotPersister(SnapshotPersistQueue persistQueue,
-            PersistInfoProvider persistInfoProvider) {
+            PersistInfoProvider persistInfoProvider,
+            boolean disableSnapshots) {
         super(persistQueue, persistInfoProvider);
+        mDisableSnapshots = Flags.checkDisabledSnapshotsInTaskPersister() && disableSnapshots;
     }
 
     /**
@@ -57,6 +62,9 @@ class TaskSnapshotPersister extends BaseAppSnapshotPersister {
      * @param snapshot The snapshot to persist.
      */
     void persistSnapshot(int taskId, int userId, TaskSnapshot snapshot) {
+        if (mDisableSnapshots) {
+            return;
+        }
         synchronized (mLock) {
             mPersistedTaskIdsSinceLastRemoveObsolete.add(taskId);
             super.persistSnapshot(taskId, userId, snapshot);
@@ -71,6 +79,9 @@ class TaskSnapshotPersister extends BaseAppSnapshotPersister {
      */
     @Override
     void removeSnapshot(int taskId, int userId) {
+        if (mDisableSnapshots) {
+            return;
+        }
         synchronized (mLock) {
             mPersistedTaskIdsSinceLastRemoveObsolete.remove(taskId);
             super.removeSnapshot(taskId, userId);
@@ -86,7 +97,7 @@ class TaskSnapshotPersister extends BaseAppSnapshotPersister {
      *                       model.
      */
     void removeObsoleteFiles(ArraySet<Integer> persistentTaskIds, int[] runningUserIds) {
-        if (runningUserIds.length == 0) {
+        if (runningUserIds.length == 0 || mDisableSnapshots) {
             return;
         }
         synchronized (mLock) {

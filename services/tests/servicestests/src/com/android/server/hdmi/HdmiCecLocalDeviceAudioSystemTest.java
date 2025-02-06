@@ -15,6 +15,8 @@
  */
 package com.android.server.hdmi;
 
+import static android.content.pm.PackageManager.FEATURE_HDMI_CEC;
+
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
@@ -25,6 +27,8 @@ import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC
 import static com.android.server.hdmi.HdmiControlService.STANDBY_SCREEN_OFF;
 
 import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assume.assumeTrue;
 
 import android.annotation.RequiresPermission;
 import android.content.Context;
@@ -85,6 +89,9 @@ public class HdmiCecLocalDeviceAudioSystemTest {
 
     @Before
     public void setUp() {
+        assumeTrue("Test requires FEATURE_HDMI_CEC",
+                InstrumentationRegistry.getTargetContext().getPackageManager()
+                        .hasSystemFeature(FEATURE_HDMI_CEC));
         Context context = InstrumentationRegistry.getTargetContext();
         mMyLooper = mTestLooper.getLooper();
         mLocalDeviceTypes.add(HdmiDeviceInfo.DEVICE_PLAYBACK);
@@ -885,6 +892,21 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(activeSource_fromAudioSystem);
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(
                 systemAudioModeRequest_fromAudioSystem);
+    }
+
+    @Test
+    public void addAndStartAction_remove() throws Exception {
+        // utilize callback test to test if addAndStartAction(action, remove)
+        TestCallback callback = new TestCallback();
+
+        mHdmiCecLocalDeviceAudioSystem.setArcStatus(true);
+        mHdmiCecLocalDeviceAudioSystem.addAndStartAction(
+                new ArcTerminationActionFromAvr(mHdmiCecLocalDeviceAudioSystem, callback),
+                true);
+
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiCecLocalDeviceAudioSystem.getActions(
+                ArcTerminationActionFromAvr.class).size()).isEqualTo(1);
     }
 
     private static class TestCallback extends IHdmiControlCallback.Stub {

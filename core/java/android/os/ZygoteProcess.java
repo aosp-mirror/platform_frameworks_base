@@ -1319,6 +1319,6 @@ public class ZygoteProcess {
             throw new RuntimeException("Starting child-zygote through Zygote failed", ex);
         }
 
-        return new ChildZygoteProcess(serverAddress, result.pid);
+        return new ChildZygoteProcess(serverAddress, result.pid, uid);
     }
 }

@@ -34,8 +34,7 @@ import java.lang.annotation.RetentionPolicy;
  * This objects represents a value that can be used for a particular settings preference.
  * <p>The data type for the value will correspond to {@link #getType}. For possible types, see
  * constants below, such as {@link #TYPE_BOOLEAN} and {@link #TYPE_STRING}.
- * Depending on the type, the corresponding getter will contain its value. All other getters will
- * return default values (boolean returns false, String returns null) so they should not be used.
+ * Depending on the type, the corresponding getter will contain its value.
  * <p>See documentation on the constants for which getter method should be used.
  */
 @FlaggedApi(Flags.FLAG_SETTINGS_CATALYST)
@@ -43,12 +42,7 @@ public final class SettingsPreferenceValue implements Parcelable {
 
     @Type
     private final int mType;
-    private final boolean mBooleanValue;
-    private final int mIntValue;
-    private final long mLongValue;
-    private final double mDoubleValue;
-    @Nullable
-    private final String mStringValue;
+    private final @Nullable Object mValue;
 
     /**
      * Returns the type indicator for Preference value.
@@ -59,39 +53,39 @@ public final class SettingsPreferenceValue implements Parcelable {
     }
 
     /**
-     * Returns the boolean value for Preference if type is {@link #TYPE_BOOLEAN}.
+     * Returns the boolean value for Preference, the type must be {@link #TYPE_BOOLEAN}.
      */
     public boolean getBooleanValue() {
-        return mBooleanValue;
+        return (boolean) mValue;
     }
 
     /**
-     * Returns the int value for Preference if type is {@link #TYPE_INT}.
+     * Returns the int value for Preference, the type must be {@link #TYPE_INT}.
      */
     public int getIntValue() {
-        return mIntValue;
+        return (int) mValue;
     }
 
     /**
-     * Returns the long value for Preference if type is {@link #TYPE_LONG}.
+     * Returns the long value for Preference, the type must be {@link #TYPE_LONG}.
      */
     public long getLongValue() {
-        return mLongValue;
+        return (long) mValue;
     }
 
     /**
-     * Returns the double value for Preference if type is {@link #TYPE_DOUBLE}.
+     * Returns the double value for Preference, the type must be {@link #TYPE_DOUBLE}.
      */
     public double getDoubleValue() {
-        return mDoubleValue;
+        return (double) mValue;
     }
 
     /**
-     * Returns the string value for Preference if type is {@link #TYPE_STRING}.
+     * Returns the string value for Preference, the type must be {@link #TYPE_STRING}.
      */
     @Nullable
     public String getStringValue() {
-        return mStringValue;
+        return (String) mValue;
     }
 
     /** @hide */
@@ -115,34 +109,47 @@ public final class SettingsPreferenceValue implements Parcelable {
     public static final int TYPE_STRING = 3;
     /** Value is of type int. Access via {@link #getIntValue}. */
     public static final int TYPE_INT = 4;
+    /** Max type value. */
+    private static final int MAX_TYPE_VALUE = TYPE_INT;
 
     private SettingsPreferenceValue(@NonNull Builder builder) {
         mType = builder.mType;
-        mBooleanValue = builder.mBooleanValue;
-        mLongValue = builder.mLongValue;
-        mDoubleValue = builder.mDoubleValue;
-        mStringValue = builder.mStringValue;
-        mIntValue = builder.mIntValue;
+        mValue = builder.mValue;
     }
 
     private SettingsPreferenceValue(@NonNull Parcel in) {
         mType = in.readInt();
-        mBooleanValue = in.readBoolean();
-        mLongValue = in.readLong();
-        mDoubleValue = in.readDouble();
-        mStringValue = in.readString8();
-        mIntValue = in.readInt();
+        if (mType == TYPE_BOOLEAN) {
+            mValue = in.readBoolean();
+        } else if (mType == TYPE_LONG) {
+            mValue = in.readLong();
+        } else if (mType == TYPE_DOUBLE) {
+            mValue = in.readDouble();
+        } else if (mType == TYPE_STRING) {
+            mValue = in.readString();
+        } else if (mType == TYPE_INT) {
+            mValue = in.readInt();
+        } else {
+            // throw exception immediately, further read to Parcel may be invalid
+            throw new IllegalStateException("Unknown type: " + mType);
+        }
     }
 
     /** @hide */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mType);
-        dest.writeBoolean(mBooleanValue);
-        dest.writeLong(mLongValue);
-        dest.writeDouble(mDoubleValue);
-        dest.writeString8(mStringValue);
-        dest.writeInt(mIntValue);
+        if (mType == TYPE_BOOLEAN) {
+            dest.writeBoolean(getBooleanValue());
+        } else if (mType == TYPE_LONG) {
+            dest.writeLong(getLongValue());
+        } else if (mType == TYPE_DOUBLE) {
+            dest.writeDouble(getDoubleValue());
+        } else if (mType == TYPE_STRING) {
+            dest.writeString(getStringValue());
+        } else if (mType == TYPE_INT) {
+            dest.writeInt(getIntValue());
+        }
     }
 
     /** @hide */
@@ -174,17 +181,16 @@ public final class SettingsPreferenceValue implements Parcelable {
     public static final class Builder {
         @Type
         private final int mType;
-        private boolean mBooleanValue;
-        private long mLongValue;
-        private double mDoubleValue;
-        private String mStringValue;
-        private int mIntValue;
+        private @Nullable Object mValue;
 
         /**
          * Create Builder instance.
          * @param type type indicator for preference value
          */
         public Builder(@Type int type) {
+            if (type < 0 || type > MAX_TYPE_VALUE) {
+                throw new IllegalArgumentException("Unknown type: " + type);
+            }
             mType = type;
         }
 
@@ -194,7 +200,8 @@ public final class SettingsPreferenceValue implements Parcelable {
         @SuppressLint("MissingGetterMatchingBuilder")
         @NonNull
         public Builder setBooleanValue(boolean booleanValue) {
-            mBooleanValue = booleanValue;
+            checkType(TYPE_BOOLEAN);
+            mValue = booleanValue;
             return this;
         }
 
@@ -203,7 +210,8 @@ public final class SettingsPreferenceValue implements Parcelable {
          */
         @NonNull
         public Builder setIntValue(int intValue) {
-            mIntValue = intValue;
+            checkType(TYPE_INT);
+            mValue = intValue;
             return this;
         }
 
@@ -212,7 +220,8 @@ public final class SettingsPreferenceValue implements Parcelable {
          */
         @NonNull
         public Builder setLongValue(long longValue) {
-            mLongValue = longValue;
+            checkType(TYPE_LONG);
+            mValue = longValue;
             return this;
         }
 
@@ -221,7 +230,8 @@ public final class SettingsPreferenceValue implements Parcelable {
          */
         @NonNull
         public Builder setDoubleValue(double doubleValue) {
-            mDoubleValue = doubleValue;
+            checkType(TYPE_DOUBLE);
+            mValue = doubleValue;
             return this;
         }
 
@@ -230,8 +240,15 @@ public final class SettingsPreferenceValue implements Parcelable {
          */
         @NonNull
         public Builder setStringValue(@Nullable String stringValue) {
-            mStringValue = stringValue;
+            checkType(TYPE_STRING);
+            mValue = stringValue;
             return this;
+        }
+
+        private void checkType(int type) {
+            if (mType != type) {
+                throw new IllegalArgumentException("Type is: " + mType);
+            }
         }
 
         /**

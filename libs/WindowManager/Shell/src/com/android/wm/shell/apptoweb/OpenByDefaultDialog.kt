@@ -18,9 +18,11 @@ package com.android.wm.shell.apptoweb
 
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
+import android.content.pm.PackageManager.NameNotFoundException
 import android.content.pm.verify.domain.DomainVerificationManager
 import android.graphics.Bitmap
 import android.graphics.PixelFormat
+import android.util.Slog
 import android.view.LayoutInflater
 import android.view.SurfaceControl
 import android.view.SurfaceControlViewHost
@@ -160,8 +162,15 @@ internal class OpenByDefaultDialog(
     }
 
     private fun setDefaultLinkHandlingSetting() {
-        domainVerificationManager.setDomainVerificationLinkHandlingAllowed(
-            packageName, openInAppButton.isChecked)
+        try {
+            domainVerificationManager.setDomainVerificationLinkHandlingAllowed(
+                packageName, openInAppButton.isChecked)
+        } catch (e: NameNotFoundException) {
+            Slog.e(
+                TAG,
+                "Failed to change link handling policy due to the package name is not found: " + e
+            )
+        }
     }
 
     private fun closeMenu() {
@@ -202,5 +211,9 @@ internal class OpenByDefaultDialog(
 
         /** Called when open by default dialog view has been released. */
         fun onDialogDismissed()
+    }
+
+    companion object {
+        private const val TAG = "OpenByDefaultDialog"
     }
 }

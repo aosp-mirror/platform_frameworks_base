@@ -23,11 +23,9 @@ import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl
-import com.android.systemui.statusbar.notification.collection.render.NotifStackController
-import com.android.systemui.statusbar.notification.collection.render.NotifStats
+import com.android.systemui.statusbar.notification.data.model.NotifStats
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.RenderNotificationListInteractor
-import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
 import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController
 import javax.inject.Inject
@@ -43,7 +41,8 @@ internal constructor(
     private val groupExpansionManagerImpl: GroupExpansionManagerImpl,
     private val renderListInteractor: RenderNotificationListInteractor,
     private val activeNotificationsInteractor: ActiveNotificationsInteractor,
-    private val sensitiveNotificationProtectionController: SensitiveNotificationProtectionController,
+    private val sensitiveNotificationProtectionController:
+        SensitiveNotificationProtectionController,
 ) : Coordinator {
 
     override fun attach(pipeline: NotifPipeline) {
@@ -51,14 +50,10 @@ internal constructor(
         groupExpansionManagerImpl.attach(pipeline)
     }
 
-    private fun onAfterRenderList(entries: List<ListEntry>, controller: NotifStackController) =
+    private fun onAfterRenderList(entries: List<ListEntry>) =
         traceSection("StackCoordinator.onAfterRenderList") {
             val notifStats = calculateNotifStats(entries)
-            if (FooterViewRefactor.isEnabled) {
-                activeNotificationsInteractor.setNotifStats(notifStats)
-            } else {
-                controller.setNotifStats(notifStats)
-            }
+            activeNotificationsInteractor.setNotifStats(notifStats)
             renderListInteractor.setRenderedList(entries)
         }
 
@@ -87,7 +82,6 @@ internal constructor(
             }
         }
         return NotifStats(
-            numActiveNotifs = entries.size,
             hasNonClearableAlertingNotifs = hasNonClearableAlertingNotifs,
             hasClearableAlertingNotifs = hasClearableAlertingNotifs,
             hasNonClearableSilentNotifs = hasNonClearableSilentNotifs,

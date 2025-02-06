@@ -58,7 +58,7 @@ import com.android.systemui.res.R;
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays;
 import com.android.systemui.statusbar.core.StatusBarRootModernization;
 import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController;
-import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
+import com.android.systemui.statusbar.layout.StatusBarContentInsetsProvider;
 import com.android.systemui.statusbar.window.StatusBarWindowModule.InternalWindowViewInflater;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
 import com.android.systemui.unfold.util.JankMonitorTransitionProgressListener;
@@ -263,7 +263,6 @@ public class StatusBarWindowControllerImpl implements StatusBarWindowController 
                 height,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
                         | WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;

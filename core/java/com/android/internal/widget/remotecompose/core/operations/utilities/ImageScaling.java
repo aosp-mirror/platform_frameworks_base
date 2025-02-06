@@ -76,6 +76,20 @@ public class ImageScaling {
         adjustDrawToType();
     }
 
+    /**
+     * Setup the ImageScaling
+     *
+     * @param srcLeft src left
+     * @param srcTop src top
+     * @param srcRight src right
+     * @param srcBottom src bottom
+     * @param dstLeft destination left
+     * @param dstTop destination top
+     * @param dstRight destination right
+     * @param dstBottom destination bottom
+     * @param type type of scaling
+     * @param scale scale factor
+     */
     public void setup(
             float srcLeft,
             float srcTop,
@@ -215,6 +229,12 @@ public class ImageScaling {
         }
     }
 
+    /**
+     * Utility to map a string to the given type
+     *
+     * @param type
+     * @return
+     */
     @NonNull
     public static String typeToString(int type) {
         String[] typeString = {

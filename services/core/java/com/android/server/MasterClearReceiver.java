@@ -130,7 +130,7 @@ public class MasterClearReceiver extends BroadcastReceiver {
         if (mWipeExternalStorage) {
             // thr will be started at the end of this task.
             Slog.i(TAG, "Wiping external storage on async task");
-            new WipeDataTask(context, thr).execute();
+            new WipeDataTask(context, thr).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         } else {
             Slog.i(TAG, "NOT wiping external storage; starting thread " + thr.getName());
             thr.start();

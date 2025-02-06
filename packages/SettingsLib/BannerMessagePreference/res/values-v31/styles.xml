@@ -24,9 +24,7 @@
         <item name="android:paddingTop">20dp</item>
         <item name="android:paddingBottom">8dp</item>
         <item name="android:layout_marginTop">8dp</item>
-        <item name="android:layout_marginStart">16dp</item>
         <item name="android:layout_marginBottom">8dp</item>
-        <item name="android:layout_marginEnd">16dp</item>
         <item name="android:background">@drawable/settingslib_card_background</item>
     </style>
 

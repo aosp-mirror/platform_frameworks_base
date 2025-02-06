@@ -32,7 +32,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
@@ -64,7 +63,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -504,8 +502,8 @@ public class WindowContainerTests extends WindowTestsBase {
         assertTrue(child.isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION));
         assertFalse(child.isAnimating(PARENTS, ANIMATION_TYPE_SCREEN_ROTATION));
 
-        final WindowState windowState = createWindow(null /* parent */, TYPE_BASE_APPLICATION,
-                mDisplayContent, "TestWindowState");
+        final WindowState windowState = newWindowBuilder("TestWindowState",
+                TYPE_BASE_APPLICATION).setDisplay(mDisplayContent).build();
         WindowContainer parent = windowState.getParent();
         spyOn(windowState.mSurfaceAnimator);
         doReturn(true).when(windowState.mSurfaceAnimator).isAnimating();
@@ -1014,30 +1012,6 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testOnDisplayChanged_cleanupChanging() {
-        final Task task = createTask(mDisplayContent);
-        addLocalInsets(task);
-        spyOn(task.mSurfaceFreezer);
-        mDisplayContent.mChangingContainers.add(task);
-
-        // Don't remove the changing transition of this window when it is still the old display.
-        // This happens on display info changed.
-        task.onDisplayChanged(mDisplayContent);
-
-        assertTrue(task.mLocalInsetsSources.size() == 1);
-        assertTrue(mDisplayContent.mChangingContainers.contains(task));
-        verify(task.mSurfaceFreezer, never()).unfreeze(any());
-
-        // Remove the changing transition of this window when it is moved or reparented from the old
-        // display.
-        final DisplayContent newDc = createNewDisplay();
-        task.onDisplayChanged(newDc);
-
-        assertFalse(mDisplayContent.mChangingContainers.contains(task));
-        verify(task.mSurfaceFreezer).unfreeze(any());
-    }
-
-    @Test
     public void testHandleCompleteDeferredRemoval() {
         final DisplayContent displayContent = createNewDisplay();
         // Do not reparent activity to default display when removing the display.
@@ -1045,8 +1019,8 @@ public class WindowContainerTests extends WindowTestsBase {
 
         // An animating window with mRemoveOnExit can be removed by handleCompleteDeferredRemoval
         // once it no longer animates.
-        final WindowState exitingWindow = createWindow(null, TYPE_APPLICATION_OVERLAY,
-                displayContent, "exiting window");
+        final WindowState exitingWindow = newWindowBuilder("exiting window",
+                TYPE_APPLICATION_OVERLAY).setDisplay(displayContent).build();
         exitingWindow.startAnimation(exitingWindow.getPendingTransaction(),
                 mock(AnimationAdapter.class), false /* hidden */,
                 SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION);
@@ -1063,7 +1037,7 @@ public class WindowContainerTests extends WindowTestsBase {
         final ActivityRecord r = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setDisplay(displayContent).build().getTopMostActivity();
         // Add a window and make the activity animating so the removal of activity is deferred.
-        createWindow(null, TYPE_BASE_APPLICATION, r, "win");
+        newWindowBuilder("win", TYPE_BASE_APPLICATION).setWindowToken(r).build();
         doReturn(true).when(r).isAnimating(anyInt(), anyInt());
 
         displayContent.remove();
@@ -1216,7 +1190,8 @@ public class WindowContainerTests extends WindowTestsBase {
     public void testFreezeInsets() {
         final Task task = createTask(mDisplayContent);
         final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
-        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, activity, "win");
+        final WindowState win = newWindowBuilder("win", TYPE_BASE_APPLICATION).setWindowToken(
+                activity).build();
 
         // Set visibility to false, verify the main window of the task will be set the frozen
         // insets state immediately.
@@ -1233,7 +1208,8 @@ public class WindowContainerTests extends WindowTestsBase {
         final Task rootTask = createTask(mDisplayContent);
         final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
         final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
-        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, activity, "win");
+        final WindowState win = newWindowBuilder("win", TYPE_BASE_APPLICATION).setWindowToken(
+                activity).build();
         task.getDisplayContent().prepareAppTransition(TRANSIT_CLOSE);
         spyOn(win);
         doReturn(true).when(task).okToAnimate();
@@ -1267,6 +1243,7 @@ public class WindowContainerTests extends WindowTestsBase {
         final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
         spyOn(container);
         spyOn(surfaceAnimator);
+        doReturn(t).when(container).getSyncTransaction();
 
         // Trigger for first relative layer call.
         container.assignRelativeLayer(t, relativeParent, 1 /* layer */);
@@ -1287,156 +1264,17 @@ public class WindowContainerTests extends WindowTestsBase {
         final WindowContainer container = new WindowContainer(mWm);
         container.mSurfaceControl = mock(SurfaceControl.class);
         final SurfaceAnimator surfaceAnimator = container.mSurfaceAnimator;
-        final SurfaceFreezer surfaceFreezer = container.mSurfaceFreezer;
         final SurfaceControl relativeParent = mock(SurfaceControl.class);
         final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
         spyOn(container);
         spyOn(surfaceAnimator);
-        spyOn(surfaceFreezer);
+        doReturn(t).when(container).getSyncTransaction();
 
         container.setLayer(t, 1);
         container.setRelativeLayer(t, relativeParent, 2);
 
-        // Set through surfaceAnimator if surfaceFreezer doesn't have leash.
         verify(surfaceAnimator).setLayer(t, 1);
         verify(surfaceAnimator).setRelativeLayer(t, relativeParent, 2);
-        verify(surfaceFreezer, never()).setLayer(any(), anyInt());
-        verify(surfaceFreezer, never()).setRelativeLayer(any(), any(), anyInt());
-
-        clearInvocations(surfaceAnimator);
-        clearInvocations(surfaceFreezer);
-        doReturn(true).when(surfaceFreezer).hasLeash();
-
-        container.setLayer(t, 1);
-        container.setRelativeLayer(t, relativeParent, 2);
-
-        // Set through surfaceFreezer if surfaceFreezer has leash.
-        verify(surfaceFreezer).setLayer(t, 1);
-        verify(surfaceFreezer).setRelativeLayer(t, relativeParent, 2);
-        verify(surfaceAnimator, never()).setLayer(any(), anyInt());
-        verify(surfaceAnimator, never()).setRelativeLayer(any(), any(), anyInt());
-    }
-
-    @Test
-    public void testStartChangeTransitionWhenPreviousIsNotFinished() {
-        final WindowContainer container = createTaskFragmentWithActivity(
-                createTask(mDisplayContent));
-        container.mSurfaceControl = mock(SurfaceControl.class);
-        final SurfaceAnimator surfaceAnimator = container.mSurfaceAnimator;
-        final SurfaceFreezer surfaceFreezer = container.mSurfaceFreezer;
-        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
-        spyOn(container);
-        spyOn(surfaceAnimator);
-        mockSurfaceFreezerSnapshot(surfaceFreezer);
-        doReturn(t).when(container).getPendingTransaction();
-        doReturn(t).when(container).getSyncTransaction();
-
-        // Leash and snapshot created for change transition.
-        container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
-
-        assertNotNull(surfaceFreezer.mLeash);
-        assertNotNull(surfaceFreezer.mSnapshot);
-        assertEquals(surfaceFreezer.mLeash, container.getAnimationLeash());
-
-        // Start animation: surfaceAnimator take over the leash and snapshot from surfaceFreezer.
-        container.applyAnimationUnchecked(null /* lp */, true /* enter */,
-                TRANSIT_OLD_TASK_FRAGMENT_CHANGE, false /* isVoiceInteraction */,
-                null /* sources */);
-
-        assertNull(surfaceFreezer.mLeash);
-        assertNull(surfaceFreezer.mSnapshot);
-        assertNotNull(surfaceAnimator.mLeash);
-        assertNotNull(surfaceAnimator.mSnapshot);
-        final SurfaceControl prevLeash = surfaceAnimator.mLeash;
-        final SurfaceFreezer.Snapshot prevSnapshot = surfaceAnimator.mSnapshot;
-
-        // Prepare another change transition.
-        container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
-
-        assertNotNull(surfaceFreezer.mLeash);
-        assertNotNull(surfaceFreezer.mSnapshot);
-        assertEquals(surfaceFreezer.mLeash, container.getAnimationLeash());
-        assertNotEquals(prevLeash, container.getAnimationLeash());
-
-        // Start another animation before the previous one is finished, it should reset the previous
-        // one, but not change the current one.
-        container.applyAnimationUnchecked(null /* lp */, true /* enter */,
-                TRANSIT_OLD_TASK_FRAGMENT_CHANGE, false /* isVoiceInteraction */,
-                null /* sources */);
-
-        verify(container, never()).onAnimationLeashLost(any());
-        verify(surfaceFreezer, never()).unfreeze(any());
-        assertNotNull(surfaceAnimator.mLeash);
-        assertNotNull(surfaceAnimator.mSnapshot);
-        assertEquals(surfaceAnimator.mLeash, container.getAnimationLeash());
-        assertNotEquals(prevLeash, surfaceAnimator.mLeash);
-        assertNotEquals(prevSnapshot, surfaceAnimator.mSnapshot);
-
-        // Clean up after animation finished.
-        surfaceAnimator.mInnerAnimationFinishedCallback.onAnimationFinished(
-                ANIMATION_TYPE_APP_TRANSITION, surfaceAnimator.getAnimation());
-
-        verify(container).onAnimationLeashLost(any());
-        assertNull(surfaceAnimator.mLeash);
-        assertNull(surfaceAnimator.mSnapshot);
-    }
-
-    @Test
-    public void testUnfreezeWindow_removeWindowFromChanging() {
-        final WindowContainer container = createTaskFragmentWithActivity(
-                createTask(mDisplayContent));
-        mockSurfaceFreezerSnapshot(container.mSurfaceFreezer);
-        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
-
-        container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
-
-        assertTrue(mDisplayContent.mChangingContainers.contains(container));
-
-        container.mSurfaceFreezer.unfreeze(t);
-
-        assertFalse(mDisplayContent.mChangingContainers.contains(container));
-    }
-
-    @Test
-    public void testFailToTaskSnapshot_unfreezeWindow() {
-        final WindowContainer container = createTaskFragmentWithActivity(
-                createTask(mDisplayContent));
-        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
-        spyOn(container.mSurfaceFreezer);
-
-        container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
-
-        verify(container.mSurfaceFreezer).freeze(any(), any(), any(), any());
-        verify(container.mSurfaceFreezer).unfreeze(any());
-        assertTrue(mDisplayContent.mChangingContainers.isEmpty());
-    }
-
-    @Test
-    public void testRemoveUnstartedFreezeSurfaceWhenFreezeAgain() {
-        final WindowContainer container = createTaskFragmentWithActivity(
-                createTask(mDisplayContent));
-        container.mSurfaceControl = mock(SurfaceControl.class);
-        final SurfaceFreezer surfaceFreezer = container.mSurfaceFreezer;
-        mockSurfaceFreezerSnapshot(surfaceFreezer);
-        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
-        spyOn(container);
-        doReturn(t).when(container).getPendingTransaction();
-        doReturn(t).when(container).getSyncTransaction();
-
-        // Leash and snapshot created for change transition.
-        container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
-
-        assertNotNull(surfaceFreezer.mLeash);
-        assertNotNull(surfaceFreezer.mSnapshot);
-
-        final SurfaceControl prevLeash = surfaceFreezer.mLeash;
-        final SurfaceFreezer.Snapshot prevSnapshot = surfaceFreezer.mSnapshot;
-        spyOn(prevSnapshot);
-
-        container.initializeChangeTransition(new Rect(0, 0, 1500, 2500));
-
-        verify(t).remove(prevLeash);
-        verify(prevSnapshot).destroy(t);
     }
 
     @Test

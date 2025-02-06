@@ -53,10 +53,10 @@ import com.android.systemui.util.ui.AnimatableEvent
 import com.android.systemui.util.ui.AnimatedValue
 import com.android.systemui.util.ui.toAnimatedValueFlow
 import com.android.systemui.util.ui.zip
+import com.android.systemui.wallpapers.domain.interactor.WallpaperFocalAreaInteractor
 import javax.inject.Inject
 import kotlin.math.max
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -69,7 +69,6 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class KeyguardRootViewModel
 @Inject
@@ -96,9 +95,13 @@ constructor(
     private val aodToGoneTransitionViewModel: AodToGoneTransitionViewModel,
     private val aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
     private val aodToOccludedTransitionViewModel: AodToOccludedTransitionViewModel,
+    private val aodToPrimaryBouncerTransitionViewModel: AodToPrimaryBouncerTransitionViewModel,
+    private val dozingToDreamingTransitionViewModel: DozingToDreamingTransitionViewModel,
     private val dozingToGoneTransitionViewModel: DozingToGoneTransitionViewModel,
     private val dozingToLockscreenTransitionViewModel: DozingToLockscreenTransitionViewModel,
     private val dozingToOccludedTransitionViewModel: DozingToOccludedTransitionViewModel,
+    private val dozingToPrimaryBouncerTransitionViewModel:
+        DozingToPrimaryBouncerTransitionViewModel,
     private val dreamingToAodTransitionViewModel: DreamingToAodTransitionViewModel,
     private val dreamingToGoneTransitionViewModel: DreamingToGoneTransitionViewModel,
     private val dreamingToLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
@@ -130,6 +133,7 @@ constructor(
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val aodBurnInViewModel: AodBurnInViewModel,
     private val shadeInteractor: ShadeInteractor,
+    wallpaperFocalAreaInteractor: WallpaperFocalAreaInteractor,
 ) {
     val burnInLayerVisibility: Flow<Int> =
         keyguardTransitionInteractor.startedKeyguardTransitionStep
@@ -243,9 +247,12 @@ constructor(
                         aodToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         aodToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
                         aodToOccludedTransitionViewModel.lockscreenAlpha(viewState),
+                        aodToPrimaryBouncerTransitionViewModel.lockscreenAlpha,
+                        dozingToDreamingTransitionViewModel.lockscreenAlpha,
                         dozingToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         dozingToLockscreenTransitionViewModel.lockscreenAlpha,
                         dozingToOccludedTransitionViewModel.lockscreenAlpha(viewState),
+                        dozingToPrimaryBouncerTransitionViewModel.lockscreenAlpha,
                         dreamingToAodTransitionViewModel.lockscreenAlpha,
                         dreamingToGoneTransitionViewModel.lockscreenAlpha,
                         dreamingToLockscreenTransitionViewModel.lockscreenAlpha,
@@ -282,6 +289,9 @@ constructor(
             .distinctUntilChanged()
     }
 
+    val scaleFromZoomOut: Flow<Float> =
+        keyguardInteractor.zoomOut.map { 1 - it * PUSHBACK_SCALE_FOR_LOCKSCREEN }
+
     val translationY: Flow<Float> = aodBurnInViewModel.movement.map { it.translationY.toFloat() }
 
     val translationX: Flow<StateToValue> =
@@ -301,6 +311,16 @@ constructor(
         aodBurnInViewModel.movement.map {
             BurnInScaleViewModel(scale = it.scale, scaleClockOnly = it.scaleClockOnly)
         }
+
+    val isAodPromotedNotifVisible: StateFlow<Boolean> =
+        keyguardTransitionInteractor
+            .transitionValue(AOD)
+            .map { it == 1f }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
 
     /** Is the notification icon container visible? */
     val isNotifIconContainerVisible: StateFlow<AnimatedValue<Boolean>> =
@@ -401,5 +421,6 @@ constructor(
 
     companion object {
         private const val TAG = "KeyguardRootViewModel"
+        private const val PUSHBACK_SCALE_FOR_LOCKSCREEN = 0.05f
     }
 }

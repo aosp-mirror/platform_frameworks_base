@@ -18,7 +18,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="android.test.pagesizecompat">
     <application
-        android:extractNativeLibs="false"
         android:pageSizeCompat="enabled">
         <uses-library android:name="android.test.runner"/>
         <activity android:name=".MainActivity"

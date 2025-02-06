@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.RequiresFlagsDisabled
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
@@ -51,6 +52,7 @@ import org.junit.runners.Parameterized
  *        apps are running before setup
  * ```
  */
+@FlakyTest(bugId = 391734110)
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

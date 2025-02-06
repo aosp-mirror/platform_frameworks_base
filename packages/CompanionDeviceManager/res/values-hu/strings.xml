@@ -18,9 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Társeszközök kezelője"</string>
     <string name="confirmation_title" msgid="2244241995958340998">"Engedélyezi a(z) &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; alkalmazás számára, hogy hozzáférjen a következőhöz: &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="message_discovery_soft_timeout" msgid="473346859407859161">"Győződjön meg arról, hogy a <xliff:g id="DISCOVERY_METHOD">%2$s</xliff:g> be van kapcsolva ezen a(z) <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> eszközön, és hogy a(z) <xliff:g id="PROFILE_NAME">%3$s</xliff:g> eszköz a közelben van."</string>
+    <string name="message_discovery_hard_timeout" msgid="677514663495711424">"Nem található eszköz. Próbálja újra később."</string>
+    <string name="discovery_bluetooth" msgid="5693557668470016164">"Bluetooth"</string>
+    <string name="discovery_wifi" msgid="1551782459721758773">"Wi-Fi"</string>
+    <string name="discovery_mixed" msgid="7071466134150760127">"Bluetooth és Wi-Fi"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"óra"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"A(z) &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; alkalmazással kezelni kívánt eszköz kiválasztása"</string>
     <string name="chooser_title" msgid="2235819929238267637">"Válassza ki a beállítani kívánt <xliff:g id="PROFILE_NAME">%1$s</xliff:g> nevet."</string>
+    <string name="single_device_title" msgid="4199861437545438606">"Keresés – <xliff:g id="PROFILE_NAME">%1$s</xliff:g>"</string>
     <string name="summary_watch" msgid="8134580124808507407">"Ez az alkalmazás képes lesz szinkronizálni információkat (például a hívó fél nevét), és hozzáférhet majd ezekhez az engedélyekhez a következőn: <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Engedélyezi, hogy a(z) &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; kezelje a következő eszközt: &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"eszköz"</string>

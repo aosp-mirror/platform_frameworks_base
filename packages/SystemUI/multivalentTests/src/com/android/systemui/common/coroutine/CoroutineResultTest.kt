@@ -19,14 +19,12 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
 /** atest SystemUITests:CoroutineResultTest */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CoroutineResultTest : SysuiTestCase() {

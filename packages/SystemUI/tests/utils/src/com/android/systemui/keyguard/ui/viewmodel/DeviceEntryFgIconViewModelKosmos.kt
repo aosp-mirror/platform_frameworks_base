@@ -23,9 +23,7 @@ import com.android.systemui.deviceentry.domain.interactor.deviceEntryUdfpsIntera
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 val Kosmos.deviceEntryForegroundIconViewModel by Fixture {
     DeviceEntryForegroundViewModel(
         context = applicationContext,

@@ -28,9 +28,11 @@ import com.android.systemui.keyguard.ui.viewmodel.aodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.aodToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.aodToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.aodToOccludedTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.aodToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.dozingToGlanceableHubTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.dozingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.dozingToOccludedTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.dozingToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.dreamingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.glanceableHubToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.goneToAodTransitionViewModel
@@ -52,14 +54,14 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 import com.android.systemui.shade.largeScreenHeaderHelper
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.android.systemui.window.ui.viewmodel.fakeBouncerTransitions
 
-@OptIn(ExperimentalCoroutinesApi::class)
 val Kosmos.sharedNotificationContainerViewModel by Fixture {
     SharedNotificationContainerViewModel(
         interactor = sharedNotificationContainerInteractor,
@@ -70,6 +72,7 @@ val Kosmos.sharedNotificationContainerViewModel by Fixture {
         keyguardInteractor = keyguardInteractor,
         keyguardTransitionInteractor = keyguardTransitionInteractor,
         shadeInteractor = shadeInteractor,
+        shadeModeInteractor = shadeModeInteractor,
         notificationStackAppearanceInteractor = notificationStackAppearanceInteractor,
         alternateBouncerToGoneTransitionViewModel = alternateBouncerToGoneTransitionViewModel,
         alternateBouncerToPrimaryBouncerTransitionViewModel =
@@ -77,9 +80,11 @@ val Kosmos.sharedNotificationContainerViewModel by Fixture {
         aodToGoneTransitionViewModel = aodToGoneTransitionViewModel,
         aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
         aodToOccludedTransitionViewModel = aodToOccludedTransitionViewModel,
+        aodToPrimaryBouncerTransitionViewModel = aodToPrimaryBouncerTransitionViewModel,
         dozingToGlanceableHubTransitionViewModel = dozingToGlanceableHubTransitionViewModel,
         dozingToLockscreenTransitionViewModel = dozingToLockscreenTransitionViewModel,
         dozingToOccludedTransitionViewModel = dozingToOccludedTransitionViewModel,
+        dozingToPrimaryBouncerTransitionViewModel = dozingToPrimaryBouncerTransitionViewModel,
         dreamingToLockscreenTransitionViewModel = dreamingToLockscreenTransitionViewModel,
         goneToAodTransitionViewModel = goneToAodTransitionViewModel,
         goneToDozingTransitionViewModel = goneToDozingTransitionViewModel,
@@ -99,6 +104,7 @@ val Kosmos.sharedNotificationContainerViewModel by Fixture {
         primaryBouncerToGoneTransitionViewModel = primaryBouncerToGoneTransitionViewModel,
         primaryBouncerToLockscreenTransitionViewModel =
             primaryBouncerToLockscreenTransitionViewModel,
+        primaryBouncerTransitions = fakeBouncerTransitions,
         aodBurnInViewModel = aodBurnInViewModel,
         communalSceneInteractor = communalSceneInteractor,
         headsUpNotificationInteractor = { headsUpNotificationInteractor },

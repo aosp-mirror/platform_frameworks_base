@@ -43,6 +43,7 @@ fun Toolbar(toolbarViewModelFactory: ToolbarViewModel.Factory, modifier: Modifie
         )
 
         Spacer(modifier = Modifier.weight(1f))
-        IconButton(viewModel.powerButtonViewModel, Modifier.sysuiResTag("pm_lite"))
+
+        viewModel.powerButtonViewModel?.let { IconButton(it, Modifier.sysuiResTag("pm_lite")) }
     }
 }

@@ -26,9 +26,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.util.sensors.asyncSensorManager
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 val Kosmos.liftToRunFaceAuthBinder by
     Kosmos.Fixture {
         LiftToRunFaceAuthBinder(

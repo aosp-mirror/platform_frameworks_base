@@ -26,8 +26,8 @@ import android.provider.Settings.Secure.ZEN_DURATION_FOREVER
 import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
 import android.service.notification.ZenModeConfig
 import android.util.Log
-import com.android.settingslib.notification.modes.EnableZenModeDialog
-import com.android.settingslib.notification.modes.ZenModeDialogMetricsLogger
+import com.android.settingslib.notification.modes.EnableDndDialogFactory
+import com.android.settingslib.notification.modes.EnableDndDialogMetricsLogger
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -60,8 +60,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
 @SysUISingleton
-class DoNotDisturbQuickAffordanceConfig
-constructor(
+class DoNotDisturbQuickAffordanceConfig(
     private val context: Context,
     private val controller: ZenModeController,
     private val interactor: ZenModeInteractor,
@@ -70,7 +69,7 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     @Background private val backgroundScope: CoroutineScope,
     private val testConditionId: Uri?,
-    testDialog: EnableZenModeDialog?,
+    testDialogFactory: EnableDndDialogFactory?,
 ) : KeyguardQuickAffordanceConfig {
 
     @Inject
@@ -118,13 +117,13 @@ constructor(
                     )
                     .id
 
-    private val dialog: EnableZenModeDialog by lazy {
-        testDialog
-            ?: EnableZenModeDialog(
+    private val dialogFactory: EnableDndDialogFactory by lazy {
+        testDialogFactory
+            ?: EnableDndDialogFactory(
                 context,
                 R.style.Theme_SystemUI_Dialog,
                 true, /* cancelIsNeutral */
-                ZenModeDialogMetricsLogger(context),
+                EnableDndDialogMetricsLogger(context),
             )
     }
 
@@ -224,7 +223,7 @@ constructor(
                     if (interactor.shouldAskForZenDuration(dnd)) {
                         // NOTE: The dialog handles turning on the mode itself.
                         return KeyguardQuickAffordanceConfig.OnTriggeredResult.ShowDialog(
-                            dialog.createDialog(),
+                            dialogFactory.createDialog(),
                             expandable,
                         )
                     } else {
@@ -243,7 +242,7 @@ constructor(
 
                 settingsValue == ZEN_DURATION_PROMPT ->
                     KeyguardQuickAffordanceConfig.OnTriggeredResult.ShowDialog(
-                        dialog.createDialog(),
+                        dialogFactory.createDialog(),
                         expandable,
                     )
 

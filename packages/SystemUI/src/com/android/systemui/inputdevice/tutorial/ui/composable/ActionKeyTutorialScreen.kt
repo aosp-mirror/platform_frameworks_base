@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -45,7 +46,10 @@ import com.android.systemui.res.R
 fun ActionKeyTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
     BackHandler(onBack = onBack)
     val screenConfig = buildScreenConfig()
-    var actionState: TutorialActionState by remember { mutableStateOf(NotStarted) }
+    var actionState: TutorialActionState by
+        rememberSaveable(stateSaver = TutorialActionState.stateSaver()) {
+            mutableStateOf(NotStarted)
+        }
     val focusRequester = remember { FocusRequester() }
     Box(
         modifier =

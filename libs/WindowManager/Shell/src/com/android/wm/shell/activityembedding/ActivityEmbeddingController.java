@@ -168,7 +168,8 @@ public class ActivityEmbeddingController implements Transitions.TransitionHandle
 
     @Override
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+            @NonNull SurfaceControl.Transaction startT, @NonNull SurfaceControl.Transaction finishT,
+            @NonNull IBinder mergeTarget,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         mAnimationRunner.cancelAnimationFromMerge();
     }

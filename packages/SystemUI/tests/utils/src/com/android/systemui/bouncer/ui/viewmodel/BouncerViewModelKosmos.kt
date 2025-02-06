@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.bouncer.ui.viewmodel
 
 import android.app.admin.devicePolicyManager
@@ -34,7 +32,6 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.user.domain.interactor.selectedUserInteractor
 import com.android.systemui.user.ui.viewmodel.userSwitcherViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.StateFlow
 
 val Kosmos.bouncerUserActionsViewModel by Fixture {

@@ -31,7 +31,6 @@ import com.android.systemui.media.controls.domain.pipeline.mediaDataManager
 import com.android.systemui.qs.composefragment.dagger.usingMediaInComposeFragment
 import com.android.systemui.testKosmos
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestResult
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.resetMain
@@ -42,7 +41,6 @@ import org.junit.Before
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 abstract class AbstractQSFragmentComposeViewModelTest : SysuiTestCase() {
     protected val kosmos = testKosmos().apply { mediaDataManager = legacyMediaDataManagerImpl }
 

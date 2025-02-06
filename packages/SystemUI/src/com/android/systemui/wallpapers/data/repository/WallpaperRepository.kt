@@ -25,13 +25,19 @@ import android.os.Bundle
 import android.os.UserHandle
 import android.view.View
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.Flags
+import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.internal.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.keyguard.data.repository.KeyguardClockRepository
-import com.android.systemui.keyguard.data.repository.KeyguardRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.res.R as SysUIR
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shared.Flags.ambientAod
+import com.android.systemui.shared.Flags.extendedWallpaperEffects
 import com.android.systemui.user.data.model.SelectedUserModel
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
@@ -43,14 +49,15 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /** A repository storing information about the current wallpaper. */
@@ -59,10 +66,13 @@ interface WallpaperRepository {
     val wallpaperInfo: StateFlow<WallpaperInfo?>
 
     /** Emits true if the current user's current wallpaper supports ambient mode. */
-    val wallpaperSupportsAmbientMode: StateFlow<Boolean>
+    val wallpaperSupportsAmbientMode: Flow<Boolean>
 
     /** Set rootView to get its windowToken afterwards */
     var rootView: View?
+
+    /** some wallpapers require bounds to be sent from keyguard */
+    val shouldSendFocalArea: StateFlow<Boolean>
 }
 
 @SysUISingleton
@@ -73,14 +83,11 @@ constructor(
     @Background private val bgDispatcher: CoroutineDispatcher,
     broadcastDispatcher: BroadcastDispatcher,
     userRepository: UserRepository,
-    keyguardRepository: KeyguardRepository,
-    keyguardClockRepository: KeyguardClockRepository,
+    wallpaperFocalAreaRepository: WallpaperFocalAreaRepository,
     private val wallpaperManager: WallpaperManager,
-    context: Context,
+    private val context: Context,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) : WallpaperRepository {
-    private val deviceSupportsAodWallpaper =
-        context.resources.getBoolean(com.android.internal.R.bool.config_dozeSupportsAodWallpaper)
-
     private val wallpaperChanged: Flow<Unit> =
         broadcastDispatcher
             .broadcastFlow(IntentFilter(Intent.ACTION_WALLPAPER_CHANGED), user = UserHandle.ALL)
@@ -98,30 +105,11 @@ constructor(
             // Only update the wallpaper status once the user selection has finished.
             .filter { it.selectionStatus == SelectionStatus.SELECTION_COMPLETE }
 
-    /** The bottom of notification stack respect to the top of screen. */
-    private val notificationStackAbsoluteBottom: StateFlow<Float> =
-        keyguardRepository.notificationStackAbsoluteBottom
-
-    /** The top of shortcut respect to the top of screen. */
-    private val shortcutAbsoluteTop: StateFlow<Float> = keyguardRepository.shortcutAbsoluteTop
-
-    /**
-     * The top of notification stack to give a default state of lockscreen remaining space for
-     * states with notifications to compare with. It's the bottom of smartspace date and weather
-     * smartspace in small clock state, plus proper bottom margin.
-     */
-    private val notificationStackDefaultTop = keyguardClockRepository.notificationDefaultTop
     @VisibleForTesting var sendLockscreenLayoutJob: Job? = null
-    private val lockscreenRemainingSpaceWithNotification: Flow<Triple<Float, Float, Float>> =
-        combine(
-            notificationStackAbsoluteBottom,
-            notificationStackDefaultTop,
-            shortcutAbsoluteTop,
-            ::Triple,
-        )
+    @VisibleForTesting var sendTapInShapeEffectsJob: Job? = null
 
     override val wallpaperInfo: StateFlow<WallpaperInfo?> =
-        if (!wallpaperManager.isWallpaperSupported || !deviceSupportsAodWallpaper) {
+        if (!wallpaperManager.isWallpaperSupported) {
             MutableStateFlow(null).asStateFlow()
         } else {
             combine(wallpaperChanged, selectedUser, ::Pair)
@@ -136,86 +124,93 @@ constructor(
                 )
         }
 
-    override val wallpaperSupportsAmbientMode: StateFlow<Boolean> =
-        wallpaperInfo
-            .map {
-                if (ambientAod()) {
-                    // Force this mode for now, until ImageWallpaper supports it directly
-                    // TODO(b/371236225)
-                    true
-                } else {
-                    // If WallpaperInfo is null, it's ImageWallpaper which never supports ambient
-                    // mode.
-                    it?.supportsAmbientMode() == true
-                }
-            }
-            .stateIn(
-                scope,
-                // Always be listening for wallpaper changes.
-                SharingStarted.Eagerly,
-                initialValue = if (ambientAod()) true else false,
-            )
+    override val wallpaperSupportsAmbientMode: Flow<Boolean> =
+        flowOf(context.resources.getBoolean(R.bool.config_dozeSupportsAodWallpaper) && ambientAod())
 
     override var rootView: View? = null
 
-    val shouldSendNotificationLayout =
+    override val shouldSendFocalArea =
         wallpaperInfo
             .map {
-                val shouldSendNotificationLayout = shouldSendNotificationLayout(it)
+                val focalAreaTarget = context.resources.getString(SysUIR.string.focal_area_target)
+                val shouldSendNotificationLayout = it?.component?.className == focalAreaTarget
                 if (shouldSendNotificationLayout) {
                     sendLockscreenLayoutJob =
                         scope.launch {
-                            lockscreenRemainingSpaceWithNotification.collect {
-                                (notificationBottom, notificationDefaultTop, shortcutTop) ->
+                            combine(
+                                    wallpaperFocalAreaRepository.wallpaperFocalAreaBounds,
+                                    keyguardTransitionInteractor
+                                        .transition(
+                                            edge = Edge.create(to = Scenes.Lockscreen),
+                                            edgeWithoutSceneContainer =
+                                                Edge.create(to = KeyguardState.LOCKSCREEN),
+                                        )
+                                        .filter { transitionStep ->
+                                            transitionStep.transitionState ==
+                                                TransitionState.STARTED
+                                        },
+                                    ::Pair,
+                                )
+                                .map { (bounds, _) -> bounds }
+                                .collect { wallpaperFocalAreaBounds ->
+                                    wallpaperManager.sendWallpaperCommand(
+                                        /* windowToken = */ rootView?.windowToken,
+                                        /* action = */ WallpaperManager
+                                            .COMMAND_LOCKSCREEN_LAYOUT_CHANGED,
+                                        /* x = */ 0,
+                                        /* y = */ 0,
+                                        /* z = */ 0,
+                                        /* extras = */ Bundle().apply {
+                                            putFloat(
+                                                "wallpaperFocalAreaLeft",
+                                                wallpaperFocalAreaBounds.left,
+                                            )
+                                            putFloat(
+                                                "wallpaperFocalAreaRight",
+                                                wallpaperFocalAreaBounds.right,
+                                            )
+                                            putFloat(
+                                                "wallpaperFocalAreaTop",
+                                                wallpaperFocalAreaBounds.top,
+                                            )
+                                            putFloat(
+                                                "wallpaperFocalAreaBottom",
+                                                wallpaperFocalAreaBounds.bottom,
+                                            )
+                                        },
+                                    )
+                                }
+                        }
+
+                    sendTapInShapeEffectsJob =
+                        scope.launch {
+                            wallpaperFocalAreaRepository.wallpaperFocalAreaTapPosition.collect {
+                                wallpaperFocalAreaTapPosition ->
                                 wallpaperManager.sendWallpaperCommand(
                                     /* windowToken = */ rootView?.windowToken,
-                                    /* action = */ WallpaperManager
-                                        .COMMAND_LOCKSCREEN_LAYOUT_CHANGED,
-                                    /* x = */ 0,
-                                    /* y = */ 0,
+                                    /* action = */ WallpaperManager.COMMAND_LOCKSCREEN_TAP,
+                                    /* x = */ wallpaperFocalAreaTapPosition.x.toInt(),
+                                    /* y = */ wallpaperFocalAreaTapPosition.y.toInt(),
                                     /* z = */ 0,
-                                    /* extras = */ Bundle().apply {
-                                        putFloat("screenLeft", 0F)
-                                        putFloat("smartspaceBottom", notificationDefaultTop)
-                                        putFloat("notificationBottom", notificationBottom)
-                                        putFloat(
-                                            "screenRight",
-                                            context.resources.displayMetrics.widthPixels.toFloat(),
-                                        )
-                                        putFloat("shortCutTop", shortcutTop)
-                                    },
+                                    /* extras = */ null,
                                 )
                             }
                         }
                 } else {
                     sendLockscreenLayoutJob?.cancel()
+                    sendTapInShapeEffectsJob?.cancel()
                 }
                 shouldSendNotificationLayout
             }
             .stateIn(
                 scope,
-                // Always be listening for wallpaper changes.
-                if (Flags.magicPortraitWallpapers()) SharingStarted.Eagerly
-                else SharingStarted.Lazily,
-                initialValue = false,
+                if (extendedWallpaperEffects()) SharingStarted.Eagerly else WhileSubscribed(),
+                initialValue = extendedWallpaperEffects(),
             )
 
     private suspend fun getWallpaper(selectedUser: SelectedUserModel): WallpaperInfo? {
         return withContext(bgDispatcher) {
             wallpaperManager.getWallpaperInfoForUser(selectedUser.userInfo.id)
         }
-    }
-
-    private fun shouldSendNotificationLayout(wallpaperInfo: WallpaperInfo?): Boolean {
-        return if (wallpaperInfo != null && wallpaperInfo.component != null) {
-            wallpaperInfo.component!!.className == MAGIC_PORTRAIT_CLASSNAME
-        } else {
-            false
-        }
-    }
-
-    companion object {
-        const val MAGIC_PORTRAIT_CLASSNAME =
-            "com.google.android.apps.magicportrait.service.MagicPortraitWallpaperService"
     }
 }

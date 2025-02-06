@@ -33,7 +33,6 @@ import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class WalletContextualLocationsServiceTest : SysuiTestCase() {
     @Mock private lateinit var controller: WalletContextualSuggestionsController
     private var featureFlags = FakeFeatureFlags()
@@ -49,7 +48,6 @@ class WalletContextualLocationsServiceTest : SysuiTestCase() {
         }
 
     @Before
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         doReturn(fakeWalletCards).whenever(controller).allWalletCards
@@ -70,7 +68,6 @@ class WalletContextualLocationsServiceTest : SysuiTestCase() {
     }
 
     @Test
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun addListener() =
         testScope.runTest {
             underTest.addWalletCardsUpdatedListenerInternal(listener)
@@ -78,7 +75,6 @@ class WalletContextualLocationsServiceTest : SysuiTestCase() {
         }
 
     @Test
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun addStoreLocations() =
         testScope.runTest {
             underTest.onWalletContextualLocationsStateUpdatedInternal(ArrayList<String>())
@@ -86,7 +82,6 @@ class WalletContextualLocationsServiceTest : SysuiTestCase() {
         }
 
     @Test
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun updateListenerAndLocationsState() =
         testScope.runTest {
             // binds to the service and adds a listener

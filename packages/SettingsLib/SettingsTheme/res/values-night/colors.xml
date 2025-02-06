@@ -50,4 +50,9 @@
     <color name="settingslib_materialColorSurfaceContainerLow">#0E0E0E</color>
     <color name="settingslib_materialColorSurfaceContainerHigh">#2A2A2A</color>
     <color name="settingslib_materialColorSurfaceContainerHighest">#343434</color>
+
+    <color name="settingslib_colorBackgroundLevel_high">@color/m3_ref_palette_red60</color>
+    <color name="settingslib_colorContentLevel_high">@color/m3_ref_palette_red10</color>
+    <color name="settingslib_colorBackgroundLevel_low">@color/m3_ref_palette_green70</color>
+    <color name="settingslib_colorContentLevel_low">@color/m3_ref_palette_green10</color>
 </resources>

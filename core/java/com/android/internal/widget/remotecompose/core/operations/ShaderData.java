@@ -172,6 +172,9 @@ public class ShaderData extends Operation implements VariableSupport {
 
     @Override
     public void updateVariables(@NonNull RemoteContext context) {
+        if (mUniformRawFloatMap == null) {
+            return;
+        }
         for (String name : mUniformRawFloatMap.keySet()) { // TODO: potential npe
             float[] value = mUniformRawFloatMap.get(name);
             float[] out = null;
@@ -189,6 +192,9 @@ public class ShaderData extends Operation implements VariableSupport {
 
     @Override
     public void registerListening(@NonNull RemoteContext context) {
+        if (mUniformFloatMap == null) {
+            return;
+        }
         for (String name : mUniformRawFloatMap.keySet()) { // TODO: potential npe
             float[] value = mUniformRawFloatMap.get(name);
             for (float v : value) {

@@ -75,7 +75,7 @@ public class PerformClearTask implements Runnable {
             }
             mListener.onFinished(callerLogString);
             // Last but not least, release the cpu
-            mBackupManagerService.getWakelock().release();
+            mBackupManagerService.getWakeLock().release();
         }
     }
 }

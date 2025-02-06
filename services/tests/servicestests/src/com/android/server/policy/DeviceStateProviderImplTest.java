@@ -18,6 +18,7 @@ package com.android.server.policy;
 
 
 import static android.content.Context.SENSOR_SERVICE;
+import static android.hardware.devicestate.feature.flags.Flags.FLAG_DEVICE_STATE_CONFIGURATION_FLAG;
 
 import static com.android.server.devicestate.DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED;
 import static com.android.server.devicestate.DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_DISABLED;
@@ -42,6 +43,9 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.hardware.devicestate.DeviceState;
 import android.os.PowerManager;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 
 import androidx.annotation.NonNull;
 
@@ -51,6 +55,7 @@ import com.android.server.input.InputManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -83,6 +88,10 @@ public final class DeviceStateProviderImplTest {
 
     private Context mContext;
     private SensorManager mSensorManager;
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setup() {
@@ -603,6 +612,37 @@ public final class DeviceStateProviderImplTest {
                 }, mDeviceStateArrayCaptor.getValue());
         // onStateChanged() should not be called because the provider could not find the sensor.
         verify(listener, never()).onStateChanged(mIntegerCaptor.capture());
+    }
+
+    @RequiresFlagsEnabled(FLAG_DEVICE_STATE_CONFIGURATION_FLAG)
+    @Test
+    public void test_createConfigWithFlags() {
+        String configString = "<device-state-config>\n"
+                + "    <device-state>\n"
+                + "        <identifier>1</identifier>\n"
+                + "        <flags>\n"
+                + "            <flag>FLAG_CANCEL_OVERRIDE_REQUESTS</flag>\n"
+                + "        </flags>\n"
+                + "    </device-state>\n"
+                + "    <device-state>\n"
+                + "        <identifier>2</identifier>\n"
+                + "        <name>CLOSED</name>\n"
+                + "    </device-state>\n"
+                + "</device-state-config>\n";
+        DeviceStateProviderImpl.ReadableConfig config = new TestReadableConfig(configString);
+        DeviceStateProviderImpl provider = DeviceStateProviderImpl.createFromConfig(mContext,
+                config);
+
+        DeviceStateProvider.Listener listener = mock(DeviceStateProvider.Listener.class);
+        provider.setListener(listener);
+
+        verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture(),
+                eq(SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED));
+        final DeviceState[] expectedStates = new DeviceState[]{
+                createDeviceState(1, "",
+                        Set.of(DeviceState.PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS)),
+                createDeviceState(2, "CLOSED", EMPTY_PROPERTY_SET)};
+        assertArrayEquals(expectedStates, mDeviceStateArrayCaptor.getValue());
     }
 
     private DeviceState createDeviceState(int identifier, @NonNull String name,

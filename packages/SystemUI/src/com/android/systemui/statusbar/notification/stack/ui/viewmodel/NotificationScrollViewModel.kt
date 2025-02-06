@@ -31,6 +31,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
@@ -54,13 +55,16 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 
+private typealias ShadeScrimShapeConsumer = (ShadeScrimShape?) -> Unit
+
 /** ViewModel which represents the state of the NSSL/Controller in the world of flexiglass */
 class NotificationScrollViewModel
 @AssistedInject
 constructor(
     dumpManager: DumpManager,
-    stackAppearanceInteractor: NotificationStackAppearanceInteractor,
+    private val stackAppearanceInteractor: NotificationStackAppearanceInteractor,
     shadeInteractor: ShadeInteractor,
+    shadeModeInteractor: ShadeModeInteractor,
     private val remoteInputInteractor: RemoteInputInteractor,
     private val sceneInteractor: SceneInteractor,
     // TODO(b/336364825) Remove Lazy when SceneContainerFlag is released -
@@ -149,10 +153,10 @@ constructor(
     val expandFraction: Flow<Float> =
         combine(
                 shadeInteractor.shadeExpansion,
-                shadeInteractor.shadeMode,
                 shadeInteractor.qsExpansion,
+                shadeModeInteractor.shadeMode,
                 sceneInteractor.transitionState,
-            ) { shadeExpansion, _, qsExpansion, transitionState ->
+            ) { shadeExpansion, qsExpansion, _, transitionState ->
                 when (transitionState) {
                     is Idle ->
                         if (
@@ -208,7 +212,8 @@ constructor(
         sceneInteractor.isSceneInFamily(scene, this)
 
     private val qsAllowsClipping: Flow<Boolean> =
-        combine(shadeInteractor.shadeMode, shadeInteractor.qsExpansion) { shadeMode, qsExpansion ->
+        combine(shadeModeInteractor.shadeMode, shadeInteractor.qsExpansion) { shadeMode, qsExpansion
+                ->
                 when (shadeMode) {
                     is ShadeMode.Dual -> false
                     is ShadeMode.Split -> true
@@ -221,7 +226,7 @@ constructor(
     private val shadeScrimClipping: Flow<ShadeScrimClipping?> =
         combine(
                 qsAllowsClipping,
-                stackAppearanceInteractor.shadeScrimBounds,
+                stackAppearanceInteractor.notificationShadeScrimBounds,
                 stackAppearanceInteractor.shadeScrimRounding,
             ) { qsAllowsClipping, bounds, rounding ->
                 bounds?.takeIf { qsAllowsClipping }?.let { ShadeScrimClipping(it, rounding) }
@@ -229,7 +234,7 @@ constructor(
             .distinctUntilChanged()
             .dumpWhileCollecting("stackClipping")
 
-    fun shadeScrimShape(
+    fun notificationScrimShape(
         cornerRadius: Flow<Int>,
         viewLeftOffset: Flow<Int>,
     ): Flow<ShadeScrimShape?> =
@@ -242,6 +247,13 @@ constructor(
                 )
             }
             .dumpWhileCollecting("shadeScrimShape")
+
+    /**
+     * Sets a consumer to be notified when the QuickSettings Overlay panel changes size or position.
+     */
+    fun setQsScrimShapeConsumer(consumer: ShadeScrimShapeConsumer?) {
+        stackAppearanceInteractor.setQsPanelShapeConsumer(consumer)
+    }
 
     /**
      * Max alpha to apply directly to the view based on the compose placeholder.

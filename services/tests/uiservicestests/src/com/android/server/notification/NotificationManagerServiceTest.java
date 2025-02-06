@@ -50,6 +50,7 @@ import static android.app.NotificationChannel.RECS_ID;
 import static android.app.NotificationChannel.SOCIAL_MEDIA_ID;
 import static android.app.NotificationChannel.USER_LOCKED_ALLOW_BUBBLE;
 import static android.app.NotificationManager.ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED;
+import static android.app.NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED;
 import static android.app.NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ACTIVATED;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
@@ -122,7 +123,9 @@ import static android.service.notification.Flags.FLAG_REDACT_SENSITIVE_NOTIFICAT
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
+import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_CALL_EFFECTS;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
+import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_NOTIFICATION_EFFECTS;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_LOCKDOWN;
@@ -162,6 +165,7 @@ import static junit.framework.Assert.fail;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
@@ -255,6 +259,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Parcel;
@@ -357,7 +362,6 @@ import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -566,6 +570,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     NotificationAttentionHelper mAttentionHelper;
 
     private NotificationManagerService.WorkerHandler mWorkerHandler;
+    private Handler mBroadcastsHandler;
 
     private class TestableToastCallback extends ITransientNotification.Stub {
         @Override
@@ -782,6 +787,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         TestableResources tr = mContext.getOrCreateTestableResources();
         tr.addOverride(com.android.internal.R.string.config_defaultSearchSelectorPackageName,
                 SEARCH_SELECTOR_PKG);
+        tr.addOverride(R.array.config_notificationDefaultUnsupportedAdjustments,
+                new String[] {KEY_TYPE});
 
         doAnswer(invocation -> {
             mOnPermissionChangeListener = invocation.getArgument(2);
@@ -791,17 +798,25 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mUmInternal.isUserInitialized(anyInt())).thenReturn(true);
 
         mWorkerHandler = spy(mService.new WorkerHandler(mTestableLooper.getLooper()));
-        mService.init(mWorkerHandler, mRankingHandler, mPackageManager, mPackageManagerClient,
-                mLightsManager, mListeners, mAssistants, mConditionProviders, mCompanionMgr,
-                mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager, mGroupHelper, mAm, mAtm,
-                mAppUsageStats, mDevicePolicyManager, mUgm, mUgmInternal,
-                mAppOpsManager, mUm, mHistoryManager, mStatsManager,
-                mAmi, mToastRateLimiter, mPermissionHelper, mock(UsageStatsManagerInternal.class),
-                mTelecomManager, mLogger, mTestFlagResolver, mPermissionManager,
-                mPowerManager, mPostNotificationTrackerFactory);
+        mBroadcastsHandler = new Handler(mTestableLooper.getLooper());
+
+        mService.init(mWorkerHandler, mRankingHandler, mBroadcastsHandler, mPackageManager,
+                mPackageManagerClient, mLightsManager, mListeners, mAssistants, mConditionProviders,
+                mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
+                mGroupHelper, mAm, mAtm, mAppUsageStats, mDevicePolicyManager, mUgm, mUgmInternal,
+                mAppOpsManager, mUm, mHistoryManager, mStatsManager, mAmi, mToastRateLimiter,
+                mPermissionHelper, mock(UsageStatsManagerInternal.class), mTelecomManager, mLogger,
+                mTestFlagResolver, mPermissionManager, mPowerManager,
+                mPostNotificationTrackerFactory);
 
         mService.setAttentionHelper(mAttentionHelper);
         mService.setLockPatternUtils(mock(LockPatternUtils.class));
+
+        // make sure PreferencesHelper doesn't try to interact with any real caches
+        PreferencesHelper prefHelper = spy(mService.mPreferencesHelper);
+        doNothing().when(prefHelper).invalidateNotificationChannelCache();
+        doNothing().when(prefHelper).invalidateNotificationChannelGroupCache();
+        mService.setPreferencesHelper(prefHelper);
 
         // Return first true for RoleObserver main-thread check
         when(mMainLooper.isCurrentThread()).thenReturn(true).thenReturn(false);
@@ -974,6 +989,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             // could cause issues, for example, messages that remove/cancel shown toasts (this causes
             // problematic interactions with mocks when they're no longer working as expected).
             mWorkerHandler.removeCallbacksAndMessages(null);
+        }
+        if (mBroadcastsHandler != null) {
+            mBroadcastsHandler.removeCallbacksAndMessages(null);
         }
 
         if (mTestableLooper != null) {
@@ -2849,7 +2867,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
 
         verify(mGroupHelper, times(1)).onChannelUpdated(eq(Process.myUserHandle().getIdentifier()),
-                eq(mPkg), eq(mTestNotificationChannel), any());
+                eq(mPkg), eq(mTestNotificationChannel), any(), any());
     }
 
     @Test
@@ -5321,7 +5339,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.getNotificationChannelGroupsFromPrivilegedListener(
                 null, mPkg, Process.myUserHandle());
 
-        verify(mPreferencesHelper, times(1)).getNotificationChannelGroups(anyString(), anyInt());
+        verify(mPreferencesHelper, times(1)).getNotificationChannelGroupsWithoutChannels(
+                anyString(), anyInt());
     }
 
     @Test
@@ -5338,7 +5357,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             // pass
         }
 
-        verify(mPreferencesHelper, never()).getNotificationChannelGroups(anyString(), anyInt());
+        verify(mPreferencesHelper, never()).getNotificationChannelGroupsWithoutChannels(anyString(),
+                anyInt());
     }
 
     @Test
@@ -5358,7 +5378,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             // pass
         }
 
-        verify(mPreferencesHelper, never()).getNotificationChannelGroups(anyString(), anyInt());
+        verify(mPreferencesHelper, never()).getNotificationChannelGroupsWithoutChannels(anyString(),
+                anyInt());
     }
 
     @Test
@@ -6330,6 +6351,26 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 "testOnlyAutogroupIfNeeded_flagsChanged_ghUpdate", null, false);
         update.getNotification().flags = FLAG_AUTO_CANCEL;
         mService.addEnqueuedNotification(update);
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mService.new PostNotificationRunnable(update.getKey(),
+                        update.getSbn().getPackageName(), update.getUid(),
+                        mPostNotificationTrackerFactory.newTracker(null));
+        runnable.run();
+        waitForIdle();
+
+        verify(mGroupHelper, times(1)).onNotificationPosted(any(), anyBoolean());
+    }
+
+    @Test
+    public void testOnlyAutogroupIfNeeded_channelChanged_ghUpdate() {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0,
+                "testOnlyAutogroupIfNeeded_channelChanged_ghUpdate", null, false);
+        mService.addNotification(r);
+
+        NotificationRecord update = generateNotificationRecord(mSilentChannel, 0,
+                "testOnlyAutogroupIfNeeded_channelChanged_ghUpdate", null, false);
+        mService.addEnqueuedNotification(update);
+
         NotificationManagerService.PostNotificationRunnable runnable =
                 mService.new PostNotificationRunnable(update.getKey(),
                         update.getSbn().getPackageName(), update.getUid(),
@@ -7634,7 +7675,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
         when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
         when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
-        when(mAssistants.isTypeAdjustmentAllowedForPackage(anyString(), anyInt())).thenReturn(true);
+        when(mAssistants.isAdjustmentAllowedForPackage(anyString(), anyString())).thenReturn(true);
 
         // Set up notifications that will be adjusted
         final NotificationRecord r1 = spy(generateNotificationRecord(
@@ -10850,6 +10891,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Bundle signals = new Bundle();
         signals.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
         signals.putInt(KEY_USER_SENTIMENT, USER_SENTIMENT_NEGATIVE);
+        signals.putInt(KEY_TYPE, TYPE_PROMOTION);
         Adjustment adjustment = new Adjustment(r.getSbn().getPackageName(), r.getKey(), signals,
                "", r.getUser().getIdentifier());
 
@@ -11213,7 +11255,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Representative used to verify getCallingZenUser().
         mBinderService.getAutomaticZenRules();
 
-        verify(zenModeHelper).getAutomaticZenRules(eq(UserHandle.CURRENT));
+        verify(zenModeHelper).getAutomaticZenRules(eq(UserHandle.CURRENT), anyInt());
     }
 
     @Test
@@ -11225,7 +11267,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Representative used to verify getCallingZenUser().
         mBinderService.getAutomaticZenRules();
 
-        verify(zenModeHelper).getAutomaticZenRules(eq(Binder.getCallingUserHandle()));
+        verify(zenModeHelper).getAutomaticZenRules(eq(Binder.getCallingUserHandle()), anyInt());
     }
 
     /** Prepares for a zen-related test that uses a mocked {@link ZenModeHelper}. */
@@ -11374,8 +11416,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mContext).sendBroadcastAsUser(eqIntent(expected), eq(UserHandle.of(mUserId)));
     }
 
+    private static Intent isIntentWithAction(String wantedAction) {
+        return argThat(
+                intent -> intent != null && wantedAction.equals(intent.getAction())
+        );
+    }
+
     private static Intent eqIntent(Intent wanted) {
-        return ArgumentMatchers.argThat(
+        return argThat(
                 new ArgumentMatcher<Intent>() {
                     @Override
                     public boolean matches(Intent argument) {
@@ -11957,7 +12005,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     @DisableFlags(android.app.Flags.FLAG_REMOVE_REMOTE_VIEWS)
     public void testRemoveLargeRemoteViews() throws Exception {
-        int removeSize = mContext.getResources().getInteger(
+        // Cast to long to mock RemoteViews.estimateMemoryUsage which returns long.
+        long removeSize = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_notificationStripRemoteViewSizeBytes);
 
         RemoteViews rv = mock(RemoteViews.class);
@@ -14294,7 +14343,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addNotification(pkgB);
 
         mService.setIsVisibleToListenerReturnValue(true);
-        NotificationRankingUpdate nru = mService.makeRankingUpdateLocked(null);
+        ManagedServices.ManagedServiceInfo info = mock(ManagedServices.ManagedServiceInfo.class);
+        NotificationRankingUpdate nru = mService.makeRankingUpdateLocked(info);
         assertEquals(2, nru.getRankingMap().getOrderedKeys().length);
 
         // when only user 0 entering the lockdown mode, its notification will be suppressed.
@@ -14304,7 +14354,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertTrue(mStrongAuthTracker.isInLockDownMode(0));
         assertFalse(mStrongAuthTracker.isInLockDownMode(1));
 
-        nru = mService.makeRankingUpdateLocked(null);
+        nru = mService.makeRankingUpdateLocked(info);
         assertEquals(1, nru.getRankingMap().getOrderedKeys().length);
 
         // User 0 exits lockdown mode. Its notification will be resumed.
@@ -14313,7 +14363,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertFalse(mStrongAuthTracker.isInLockDownMode(0));
         assertFalse(mStrongAuthTracker.isInLockDownMode(1));
 
-        nru = mService.makeRankingUpdateLocked(null);
+        nru = mService.makeRankingUpdateLocked(info);
         assertEquals(2, nru.getRankingMap().getOrderedKeys().length);
     }
 
@@ -14345,13 +14395,23 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(0, ranking2.getSmartReplies().size());
     }
 
+    private NotificationRecord getSensitiveNotificationRecord() {
+        NotificationRecord record = new NotificationRecord(mContext,
+                generateSbn("a", 1000, 9, 0), mTestNotificationChannel);
+        Bundle signals = new Bundle();
+        signals.putBoolean(Adjustment.KEY_SENSITIVE_CONTENT, true);
+        Adjustment adjustment = new Adjustment("a", record.getKey(), signals, "", 0);
+        record.addAdjustment(adjustment);
+        record.applyAdjustments();
+        return record;
+    }
+
     @Test
     public void testMakeRankingUpdate_doestntRedactIfFlagDisabled() {
         mSetFlagsRule.disableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
         when(mListeners.isUidTrusted(anyInt())).thenReturn(false);
         when(mListeners.hasSensitiveContent(any())).thenReturn(true);
-        NotificationRecord pkgA = new NotificationRecord(mContext,
-                generateSbn("a", 1000, 9, 0), mTestNotificationChannel);
+        NotificationRecord pkgA = getSensitiveNotificationRecord();
         addSmartActionsAndReplies(pkgA);
 
         mService.addNotification(pkgA);
@@ -17369,6 +17429,66 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags({Flags.FLAG_NM_BINDER_PERF_THROTTLE_EFFECTS_SUPPRESSOR_BROADCAST,
+            Flags.FLAG_NM_BINDER_PERF_REDUCE_ZEN_BROADCASTS})
+    public void requestHintsFromListener_changingEffectsButNotSuppressor_noBroadcast()
+            throws Exception {
+        // Note that NM_BINDER_PERF_REDUCE_ZEN_BROADCASTS is not strictly necessary; however each
+        // path will do slightly different calls so we force one of them to simplify the test.
+        when(mUmInternal.getProfileIds(anyInt(), anyBoolean())).thenReturn(new int[]{mUserId});
+        when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
+        INotificationListener token = mock(INotificationListener.class);
+        mService.isSystemUid = true;
+
+        mBinderService.requestHintsFromListener(token, HINT_HOST_DISABLE_CALL_EFFECTS);
+        mTestableLooper.moveTimeForward(500); // more than ZEN_BROADCAST_DELAY
+        waitForIdle();
+
+        verify(mContext, times(1)).sendBroadcastMultiplePermissions(
+                isIntentWithAction(ACTION_EFFECTS_SUPPRESSOR_CHANGED), any(), any(), any());
+
+        // Same suppressor suppresses something else.
+        mBinderService.requestHintsFromListener(token, HINT_HOST_DISABLE_NOTIFICATION_EFFECTS);
+        mTestableLooper.moveTimeForward(500); // more than ZEN_BROADCAST_DELAY
+        waitForIdle();
+
+        // Still 1 total calls (the previous one).
+        verify(mContext, times(1)).sendBroadcastMultiplePermissions(
+                isIntentWithAction(ACTION_EFFECTS_SUPPRESSOR_CHANGED), any(), any(), any());
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_NM_BINDER_PERF_THROTTLE_EFFECTS_SUPPRESSOR_BROADCAST,
+            Flags.FLAG_NM_BINDER_PERF_REDUCE_ZEN_BROADCASTS})
+    public void requestHintsFromListener_changingSuppressor_throttlesBroadcast() throws Exception {
+        // Note that NM_BINDER_PERF_REDUCE_ZEN_BROADCASTS is not strictly necessary; however each
+        // path will do slightly different calls so we force one of them to simplify the test.
+        when(mUmInternal.getProfileIds(anyInt(), anyBoolean())).thenReturn(new int[]{mUserId});
+        when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
+        INotificationListener token = mock(INotificationListener.class);
+        mService.isSystemUid = true;
+
+        // Several updates in quick succession.
+        mBinderService.requestHintsFromListener(token, HINT_HOST_DISABLE_CALL_EFFECTS);
+        mBinderService.clearRequestedListenerHints(token);
+        mBinderService.requestHintsFromListener(token, HINT_HOST_DISABLE_NOTIFICATION_EFFECTS);
+        mBinderService.clearRequestedListenerHints(token);
+        mBinderService.requestHintsFromListener(token, HINT_HOST_DISABLE_CALL_EFFECTS);
+        mBinderService.clearRequestedListenerHints(token);
+        mBinderService.requestHintsFromListener(token, HINT_HOST_DISABLE_NOTIFICATION_EFFECTS);
+
+        // No broadcasts yet!
+        verify(mContext, never()).sendBroadcastMultiplePermissions(any(), any(), any(), any());
+
+        mTestableLooper.moveTimeForward(500); // more than ZEN_BROADCAST_DELAY
+        waitForIdle();
+
+        // Only one broadcast after idle time.
+        verify(mContext, times(1)).sendBroadcastMultiplePermissions(
+                isIntentWithAction(ACTION_EFFECTS_SUPPRESSOR_CHANGED), any(), any(), any());
+    }
+
+    @Test
     @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
     public void testApplyAdjustment_keyType_validType() throws Exception {
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
@@ -17377,7 +17497,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 NotificationManagerService.WorkerHandler.class);
         mService.setHandler(handler);
         when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
-        when(mAssistants.isTypeAdjustmentAllowedForPackage(anyString(), anyInt())).thenReturn(true);
+        when(mAssistants.isAdjustmentAllowedForPackage(anyString(), anyString())).thenReturn(true);
 
         Bundle signals = new Bundle();
         signals.putInt(KEY_TYPE, TYPE_NEWS);
@@ -17421,11 +17541,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 NotificationManagerService.WorkerHandler.class);
         mService.setHandler(handler);
         when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
-        when(mAssistants.isTypeAdjustmentAllowedForPackage(anyString(), eq(TYPE_NEWS)))
-                .thenReturn(true);
-        // Blocking adjustments for a different type does nothing
-        when(mAssistants.isTypeAdjustmentAllowedForPackage(anyString(), eq(TYPE_PROMOTION)))
-                .thenReturn(false);
+        when(mAssistants.isAdjustmentAllowedForPackage(anyString(), anyString())).thenReturn(true);
 
         Bundle signals = new Bundle();
         signals.putInt(KEY_TYPE, TYPE_NEWS);
@@ -17440,9 +17556,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         assertThat(r.getChannel().getId()).isEqualTo(NEWS_ID);
 
-        // When we block adjustments for this package/type
-        when(mAssistants.isTypeAdjustmentAllowedForPackage(anyString(), eq(TYPE_PROMOTION)))
-                .thenReturn(false);
+        // When we block adjustments for this package
+        when(mAssistants.isAdjustmentAllowedForPackage(anyString(), anyString())).thenReturn(false);
 
         signals.putInt(KEY_TYPE, TYPE_PROMOTION);
         mBinderService.applyAdjustmentFromAssistant(null, adjustment);
@@ -17453,8 +17568,19 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
-    public void testSetCanBePromoted_granted() throws Exception {
+    @EnableFlags({android.app.Flags.FLAG_API_RICH_ONGOING})
+    public void testSetCanBePromoted_granted_noui() throws Exception {
+        testSetCanBePromoted_granted();
+    }
+
+    @Test
+    @EnableFlags({android.app.Flags.FLAG_API_RICH_ONGOING,
+            android.app.Flags.FLAG_UI_RICH_ONGOING })
+    public void testSetCanBePromoted_granted_ui() throws Exception {
+        testSetCanBePromoted_granted();
+    }
+
+    private void testSetCanBePromoted_granted() throws Exception {
         // qualifying posted notification
         Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
@@ -17509,6 +17635,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addNotification(r);
         mService.addEnqueuedNotification(r1);
 
+        // GIVEN - make sure the promoted value does not depend on the default value.
+        mBinderService.setCanBePromoted(mPkg, mUid, false, true);
+        waitForIdle();
+        clearInvocations(mListeners);
+
         mBinderService.setCanBePromoted(mPkg, mUid, true, true);
 
         waitForIdle();
@@ -17531,7 +17662,18 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
-    public void testSetCanBePromoted_granted_onlyNotifiesOnce() throws Exception {
+    public void testSetCanBePromoted_granted_onlyNotifiesOnce_noui() throws Exception {
+        testSetCanBePromoted_granted_onlyNotifiesOnce();
+    }
+
+    @Test
+    @EnableFlags({android.app.Flags.FLAG_API_RICH_ONGOING,
+            android.app.Flags.FLAG_UI_RICH_ONGOING})
+    public void testSetCanBePromoted_granted_onlyNotifiesOnce_ui() throws Exception {
+        testSetCanBePromoted_granted_onlyNotifiesOnce();
+    }
+
+    private void testSetCanBePromoted_granted_onlyNotifiesOnce() throws Exception {
         // qualifying posted notification
         Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
@@ -17547,6 +17689,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         mService.addNotification(r);
+        // GIVEN - make sure the promoted value does not depend on the default value.
+        mBinderService.setCanBePromoted(mPkg, mUid, false, true);
+        waitForIdle();
+        clearInvocations(mListeners);
 
         mBinderService.setCanBePromoted(mPkg, mUid, true, true);
         waitForIdle();
@@ -17764,15 +17910,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     @EnableFlags({FLAG_NOTIFICATION_CLASSIFICATION,
             FLAG_NOTIFICATION_FORCE_GROUPING,
-            FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION})
-    public void testUnbundleNotification_ungrouped_restoresOriginalChannel() throws Exception {
+            FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION,
+            android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI})
+    public void testUnclassifyNotification_ungrouped_restoresOriginalChannel() throws Exception {
         NotificationManagerService.WorkerHandler handler = mock(
                 NotificationManagerService.WorkerHandler.class);
         mService.setHandler(handler);
         when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
         when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
         when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
-        when(mAssistants.isTypeAdjustmentAllowedForPackage(anyString(), anyInt())).thenReturn(true);
+        when(mAssistants.isAdjustmentAllowedForPackage(anyString(), anyString())).thenReturn(true);
 
         // Post a single notification
         final boolean hasOriginalSummary = false;
@@ -17792,9 +17939,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertThat(r.getChannel().getId()).isEqualTo(NEWS_ID);
         // Check that the Notification mChannelId is not updated
         assertThat(r.getNotification().getChannelId()).isEqualTo(TEST_CHANNEL_ID);
+        // Check that the bundleType is updated
+        assertThat(r.getBundleType()).isEqualTo(Adjustment.TYPE_NEWS);
 
-        // Unbundle the notification
-        mService.mNotificationDelegate.unbundleNotification(keyToUnbundle);
+        // Unclassify the notification
+        mService.unclassifyNotification(keyToUnbundle);
 
         // Check that the original channel was restored
         assertThat(r.getChannel().getId()).isEqualTo(TEST_CHANNEL_ID);
@@ -17804,15 +17953,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     @EnableFlags({FLAG_NOTIFICATION_CLASSIFICATION,
             FLAG_NOTIFICATION_FORCE_GROUPING,
-            FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION})
-    public void testUnbundleNotification_grouped_restoresOriginalChannel() throws Exception {
+            FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION,
+            android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI})
+    public void testUnclassifyNotification_grouped_restoresOriginalChannel() throws Exception {
         NotificationManagerService.WorkerHandler handler = mock(
                 NotificationManagerService.WorkerHandler.class);
         mService.setHandler(handler);
         when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
         when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
         when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
-        when(mAssistants.isTypeAdjustmentAllowedForPackage(anyString(), anyInt())).thenReturn(true);
+        when(mAssistants.isAdjustmentAllowedForPackage(anyString(), anyString())).thenReturn(true);
 
         // Post grouped notifications
         final String originalGroupName = "originalGroup";
@@ -17840,9 +17990,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
         r1.applyAdjustments();
         assertThat(r1.getChannel().getId()).isEqualTo(NEWS_ID);
+        assertThat(r1.getBundleType()).isEqualTo(Adjustment.TYPE_NEWS);
 
-        // Unbundle the notification
-        mService.mNotificationDelegate.unbundleNotification(keyToUnbundle);
+        // Unclassify the notification
+        mService.unclassifyNotification(keyToUnbundle);
 
         // Check that the original channel was restored
         assertThat(r1.getChannel().getId()).isEqualTo(TEST_CHANNEL_ID);
@@ -17851,9 +18002,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags({FLAG_NOTIFICATION_CLASSIFICATION,
-        FLAG_NOTIFICATION_FORCE_GROUPING,
-        FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION})
-    public void testUnbundleNotification_groupedSummaryCanceled_restoresOriginalChannel()
+            FLAG_NOTIFICATION_FORCE_GROUPING,
+            FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION,
+            android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI})
+    public void testUnclassifyNotification_groupedSummaryCanceled_restoresOriginalChannel()
             throws Exception {
         NotificationManagerService.WorkerHandler handler = mock(
                 NotificationManagerService.WorkerHandler.class);
@@ -17861,7 +18013,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
         when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
         when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
-        when(mAssistants.isTypeAdjustmentAllowedForPackage(anyString(), anyInt())).thenReturn(true);
+        when(mAssistants.isAdjustmentAllowedForPackage(anyString(), anyString())).thenReturn(true);
 
         // Post grouped notifications
         final String originalGroupName = "originalGroup";
@@ -17888,17 +18040,478 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
         r1.applyAdjustments();
         assertThat(r1.getChannel().getId()).isEqualTo(NEWS_ID);
+        assertThat(r1.getBundleType()).isEqualTo(Adjustment.TYPE_NEWS);
 
         // Cancel original summary
         final boolean hasOriginalSummary = false;
         mService.mSummaryByGroupKey.remove(summary.getGroupKey());
 
-        // Unbundle the notification
-        mService.mNotificationDelegate.unbundleNotification(keyToUnbundle);
+        // Unclassify the notification
+        mService.unclassifyNotification(keyToUnbundle);
 
         // Check that the original channel was restored
         assertThat(r1.getChannel().getId()).isEqualTo(TEST_CHANNEL_ID);
         verify(mGroupHelper, times(1)).onNotificationUnbundled(eq(r1), eq(hasOriginalSummary));
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_CLASSIFICATION,
+            FLAG_NOTIFICATION_FORCE_GROUPING,
+            FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION,
+            android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI})
+    public void testReclassifyNotification_restoresBundleChannel() throws Exception {
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+        when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
+        when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
+        when(mAssistants.isAdjustmentAllowedForPackage(anyString(), anyString())).thenReturn(true);
+
+        // Post a single notification
+        final boolean hasOriginalSummary = false;
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        final String keyToUnbundle = r.getKey();
+        mService.addNotification(r);
+
+        // Classify notification into the NEWS bundle
+        Bundle signals = new Bundle();
+        signals.putInt(Adjustment.KEY_TYPE, Adjustment.TYPE_NEWS);
+        Adjustment adjustment = new Adjustment(
+                r.getSbn().getPackageName(), r.getKey(), signals, "", r.getUser().getIdentifier());
+        mBinderService.applyAdjustmentFromAssistant(null, adjustment);
+        waitForIdle();
+        r.applyAdjustments();
+        // Check that the NotificationRecord channel is updated
+        assertThat(r.getChannel().getId()).isEqualTo(NEWS_ID);
+        assertThat(r.getBundleType()).isEqualTo(Adjustment.TYPE_NEWS);
+
+        // Unbundle the notification
+        mService.unclassifyNotification(keyToUnbundle);
+
+        // Check that the original channel was restored
+        assertThat(r.getChannel().getId()).isEqualTo(TEST_CHANNEL_ID);
+        verify(mGroupHelper, times(1)).onNotificationUnbundled(eq(r), eq(hasOriginalSummary));
+
+        Mockito.reset(mRankingHandler);
+        Mockito.reset(mGroupHelper);
+
+        // Rebundle the notification
+        mService.reclassifyNotification(keyToUnbundle);
+
+        // Actually apply the adjustments
+        doAnswer(invocationOnMock -> {
+            ((NotificationRecord) invocationOnMock.getArguments()[0]).applyAdjustments();
+            ((NotificationRecord) invocationOnMock.getArguments()[0]).calculateImportance();
+            return null;
+        }).when(mRankingHelper).extractSignals(any(NotificationRecord.class));
+        mService.handleRankingSort();
+        verify(handler, times(1)).scheduleSendRankingUpdate();
+
+        // Check that the bundle channel was restored
+        verify(mRankingHandler, times(1)).requestSort();
+        assertThat(r.getChannel().getId()).isEqualTo(NEWS_ID);
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_CLASSIFICATION,
+            FLAG_NOTIFICATION_FORCE_GROUPING,
+            FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION,
+            android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI})
+    public void testDisallowTypeAdj_unclassifiesAllNotifications() throws Exception {
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+        when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
+        when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
+        when(mAssistants.isAdjustmentAllowedForPackage(anyString(), anyString())).thenReturn(true);
+
+        // Post some notifications and classify in different bundles
+        final int numNotifications = NotificationChannel.SYSTEM_RESERVED_IDS.size();
+        for (int i = 0; i < numNotifications; i++) {
+            NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, i, mUserId);
+            mService.addNotification(r);
+            Bundle signals = new Bundle();
+            final int adjustmentType = i + 1;
+            signals.putInt(Adjustment.KEY_TYPE, adjustmentType);
+            Adjustment adjustment = new Adjustment(r.getSbn().getPackageName(), r.getKey(), signals,
+                    "", r.getUser().getIdentifier());
+            mBinderService.applyAdjustmentFromAssistant(null, adjustment);
+            waitForIdle();
+            r.applyAdjustments();
+            r.setBundleType(adjustmentType);
+            // Check that the NotificationRecord channel is updated
+            assertThat(r.getChannel().getId()).isIn(NotificationChannel.SYSTEM_RESERVED_IDS);
+            assertThat(r.getBundleType()).isEqualTo(adjustmentType);
+        }
+
+        // Disallow KEY_TYPE adjustment
+        mBinderService.disallowAssistantAdjustment(Adjustment.KEY_TYPE);
+        waitForIdle();
+
+        //Check that all notifications have been unbundled
+        for (NotificationRecord record : mService.mNotificationList) {
+            // Check that the original channel was restored
+            assertThat(record.getChannel().getId()).isEqualTo(TEST_CHANNEL_ID);
+            verify(mGroupHelper, times(1)).onNotificationUnbundled(eq(record), anyBoolean());
+        }
+
+        // Re-allow KEY_TYPE adjustment
+        Mockito.reset(mRankingHandler);
+        Mockito.reset(mGroupHelper);
+        mBinderService.allowAssistantAdjustment(Adjustment.KEY_TYPE);
+        waitForIdle();
+
+        // Actually apply the adjustments
+        doAnswer(invocationOnMock -> {
+            ((NotificationRecord) invocationOnMock.getArguments()[0]).applyAdjustments();
+            ((NotificationRecord) invocationOnMock.getArguments()[0]).calculateImportance();
+            return null;
+        }).when(mRankingHelper).extractSignals(any(NotificationRecord.class));
+        mService.handleRankingSort();
+
+        // Check that the bundle channel was restored for all notifications
+        verify(handler, times(numNotifications)).scheduleSendRankingUpdate();
+        verify(mRankingHandler, times(numNotifications)).requestSort();
+        for (NotificationRecord record : mService.mNotificationList) {
+            assertThat(record.getChannel().getId()).isIn(NotificationChannel.SYSTEM_RESERVED_IDS);
+        }
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_CLASSIFICATION,
+            FLAG_NOTIFICATION_FORCE_GROUPING,
+            FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION,
+            android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI})
+    public void testDisableBundleAdjustmentByType_unclassifiesNotifications() throws Exception {
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+        when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
+        when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
+        when(mAssistants.isAdjustmentAllowedForPackage(anyString(), anyString())).thenReturn(true);
+
+        // Post some notifications and classify in different bundles
+        final int numNotifications = NotificationChannel.SYSTEM_RESERVED_IDS.size();
+        final int numNewsNotifications = 1;
+        for (int i = 0; i < numNotifications; i++) {
+            NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, i, mUserId);
+            mService.addNotification(r);
+            Bundle signals = new Bundle();
+            final int adjustmentType = i + 1;
+            signals.putInt(Adjustment.KEY_TYPE, adjustmentType);
+            Adjustment adjustment = new Adjustment(r.getSbn().getPackageName(), r.getKey(), signals,
+                    "", r.getUser().getIdentifier());
+            mBinderService.applyAdjustmentFromAssistant(null, adjustment);
+            waitForIdle();
+            r.applyAdjustments();
+            r.setBundleType(adjustmentType);
+            // Check that the NotificationRecord channel is updated
+            assertThat(r.getChannel().getId()).isIn(NotificationChannel.SYSTEM_RESERVED_IDS);
+            assertThat(r.getBundleType()).isEqualTo(adjustmentType);
+        }
+
+        // Disable TYPE_NEWS bundle
+        mBinderService.setAssistantAdjustmentKeyTypeState(TYPE_NEWS, false);
+        waitForIdle();
+
+        //Check that all notifications classified as TYPE_NEWS have been unbundled
+        for (NotificationRecord record : mService.mNotificationList) {
+            // Check that the original channel was restored
+            // for notifications classified as TYPE_NEWS
+            if (record.getBundleType() == TYPE_NEWS) {
+                assertThat(record.getChannel().getId()).isEqualTo(TEST_CHANNEL_ID);
+                verify(mGroupHelper, times(1)).onNotificationUnbundled(eq(record), anyBoolean());
+            }
+        }
+
+        // Re-enable TYPE_NEWS bundle
+        Mockito.reset(mRankingHandler);
+        Mockito.reset(mGroupHelper);
+        mBinderService.setAssistantAdjustmentKeyTypeState(TYPE_NEWS, true);
+        waitForIdle();
+
+        // Actually apply the adjustments
+        doAnswer(invocationOnMock -> {
+            ((NotificationRecord) invocationOnMock.getArguments()[0]).applyAdjustments();
+            ((NotificationRecord) invocationOnMock.getArguments()[0]).calculateImportance();
+            return null;
+        }).when(mRankingHelper).extractSignals(any(NotificationRecord.class));
+        mService.handleRankingSort();
+
+        // Check that the bundle channel was restored
+        verify(mRankingHandler, times(numNewsNotifications)).requestSort();
+        for (NotificationRecord record : mService.mNotificationList) {
+            assertThat(record.getChannel().getId()).isIn(NotificationChannel.SYSTEM_RESERVED_IDS);
+        }
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_CLASSIFICATION,
+            FLAG_NOTIFICATION_FORCE_GROUPING,
+            FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION,
+            android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI})
+    public void testDisableBundleAdjustmentByPkg_unclassifiesNotifications() throws Exception {
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+        when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
+        when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
+        when(mAssistants.isAdjustmentAllowedForPackage(anyString(), anyString())).thenReturn(true);
+
+        // Post some notifications and classify in different bundles
+        final int numNotifications = NotificationChannel.SYSTEM_RESERVED_IDS.size();
+        for (int i = 0; i < numNotifications; i++) {
+            NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, i, mUserId);
+            mService.addNotification(r);
+            Bundle signals = new Bundle();
+            final int adjustmentType = i + 1;
+            signals.putInt(Adjustment.KEY_TYPE, adjustmentType);
+            Adjustment adjustment = new Adjustment(r.getSbn().getPackageName(), r.getKey(), signals,
+                    "", r.getUser().getIdentifier());
+            mBinderService.applyAdjustmentFromAssistant(null, adjustment);
+            waitForIdle();
+            r.applyAdjustments();
+            r.setBundleType(adjustmentType);
+            // Check that the NotificationRecord channel is updated
+            assertThat(r.getChannel().getId()).isIn(NotificationChannel.SYSTEM_RESERVED_IDS);
+            assertThat(r.getBundleType()).isEqualTo(adjustmentType);
+        }
+
+        // Disable TYPE_NEWS bundle
+        mBinderService.setAdjustmentSupportedForPackage(KEY_TYPE, mPkg, false);
+        waitForIdle();
+
+        //Check that all notifications were unbundled
+        for (NotificationRecord record : mService.mNotificationList) {
+            assertThat(record.getChannel().getId()).isEqualTo(TEST_CHANNEL_ID);
+            verify(mGroupHelper, times(1)).onNotificationUnbundled(eq(record), anyBoolean());
+        }
+
+        // Re-enable bundles for package
+        Mockito.reset(mRankingHandler);
+        Mockito.reset(mGroupHelper);
+        mBinderService.setAdjustmentSupportedForPackage(KEY_TYPE, mPkg, true);
+        waitForIdle();
+
+        // Actually apply the adjustments
+        doAnswer(invocationOnMock -> {
+            ((NotificationRecord) invocationOnMock.getArguments()[0]).applyAdjustments();
+            ((NotificationRecord) invocationOnMock.getArguments()[0]).calculateImportance();
+            return null;
+        }).when(mRankingHelper).extractSignals(any(NotificationRecord.class));
+        mService.handleRankingSort();
+
+        // Check that the bundle channel was restored
+        verify(mRankingHandler, times(numNotifications)).requestSort();
+        for (NotificationRecord record : mService.mNotificationList) {
+            assertThat(record.getChannel().getId()).isIn(NotificationChannel.SYSTEM_RESERVED_IDS);
+        }
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_CLASSIFICATION,
+            FLAG_NOTIFICATION_FORCE_GROUPING,
+            FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION,
+            android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI})
+    public void testDisableBundleAdjustmentByPkg_unclassifiesEnqueuedNotifications()
+            throws Exception {
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+        when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
+        when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
+        when(mAssistants.isAdjustmentAllowedForPackage(anyString(), anyString())).thenReturn(true);
+
+        // Enqueue some notifications and classify in different bundles
+        final int numNotifications = NotificationChannel.SYSTEM_RESERVED_IDS.size();
+        for (int i = 0; i < numNotifications; i++) {
+            NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, i, mUserId);
+            mService.addEnqueuedNotification(r);
+            Bundle signals = new Bundle();
+            final int adjustmentType = i + 1;
+            signals.putInt(Adjustment.KEY_TYPE, adjustmentType);
+            Adjustment adjustment = new Adjustment(r.getSbn().getPackageName(), r.getKey(), signals,
+                    "", r.getUser().getIdentifier());
+            mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment);
+            waitForIdle();
+            r.applyAdjustments();
+            r.setBundleType(adjustmentType);
+            // Check that the NotificationRecord channel is updated
+            assertThat(r.getChannel().getId()).isIn(NotificationChannel.SYSTEM_RESERVED_IDS);
+            assertThat(r.getBundleType()).isEqualTo(adjustmentType);
+        }
+
+        // Disable type adjustment for the package
+        mBinderService.setAdjustmentSupportedForPackage(KEY_TYPE, mPkg, false);
+        waitForIdle();
+
+        //Check that all notifications were unbundled
+        for (NotificationRecord record : mService.mEnqueuedNotifications) {
+            assertThat(record.getChannel().getId()).isEqualTo(TEST_CHANNEL_ID);
+            verify(mGroupHelper, times(1)).onNotificationUnbundled(eq(record), anyBoolean());
+        }
+
+        // Re-enable bundles for package
+        Mockito.reset(mRankingHandler);
+        Mockito.reset(mGroupHelper);
+        mBinderService.setAdjustmentSupportedForPackage(KEY_TYPE, mPkg, true);
+        waitForIdle();
+
+        // Actually apply the adjustments
+        doAnswer(invocationOnMock -> {
+            ((NotificationRecord) invocationOnMock.getArguments()[0]).applyAdjustments();
+            ((NotificationRecord) invocationOnMock.getArguments()[0]).calculateImportance();
+            return null;
+        }).when(mRankingHelper).extractSignals(any(NotificationRecord.class));
+        mService.handleRankingSort();
+
+        // Check that the bundle channel was restored
+        verify(mRankingHandler, times(numNotifications)).requestSort();
+        for (NotificationRecord record : mService.mEnqueuedNotifications) {
+            record.applyAdjustments();
+            assertThat(record.getChannel().getId()).isIn(NotificationChannel.SYSTEM_RESERVED_IDS);
+        }
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_CLASSIFICATION,
+            FLAG_NOTIFICATION_FORCE_GROUPING,
+            FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION,
+            android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI})
+    public void testDisableBundleAdjustmentByType_unclassifiesEnqueuedNotifications()
+            throws Exception {
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+        when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
+        when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
+        when(mAssistants.isAdjustmentAllowedForPackage(anyString(), anyString())).thenReturn(true);
+
+        // Enqueue some notifications and classify in different bundles
+        final int numNotifications = NotificationChannel.SYSTEM_RESERVED_IDS.size();
+        final int numNewsNotifications = 1;
+        for (int i = 0; i < numNotifications; i++) {
+            NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, i, mUserId);
+            mService.addEnqueuedNotification(r);
+            Bundle signals = new Bundle();
+            final int adjustmentType = i + 1;
+            signals.putInt(Adjustment.KEY_TYPE, adjustmentType);
+            Adjustment adjustment = new Adjustment(r.getSbn().getPackageName(), r.getKey(), signals,
+                    "", r.getUser().getIdentifier());
+            mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment);
+            waitForIdle();
+            r.applyAdjustments();
+            r.setBundleType(adjustmentType);
+            // Check that the NotificationRecord channel is updated
+            assertThat(r.getChannel().getId()).isIn(NotificationChannel.SYSTEM_RESERVED_IDS);
+            assertThat(r.getBundleType()).isEqualTo(adjustmentType);
+        }
+
+        // Disable TYPE_NEWS bundle
+        mBinderService.setAssistantAdjustmentKeyTypeState(TYPE_NEWS, false);
+        waitForIdle();
+
+        //Check that all notifications were unbundled
+        for (NotificationRecord record : mService.mEnqueuedNotifications) {
+            // Check that the original channel was restored
+            // for notifications classified as TYPE_NEWS
+            if (record.getBundleType() == TYPE_NEWS) {
+                assertThat(record.getChannel().getId()).isEqualTo(TEST_CHANNEL_ID);
+                verify(mGroupHelper, times(1)).onNotificationUnbundled(eq(record), anyBoolean());
+            }
+        }
+
+        // Re-enable bundles for package
+        Mockito.reset(mRankingHandler);
+        Mockito.reset(mGroupHelper);
+        mBinderService.setAssistantAdjustmentKeyTypeState(TYPE_NEWS, true);
+        waitForIdle();
+
+        // Actually apply the adjustments
+        doAnswer(invocationOnMock -> {
+            ((NotificationRecord) invocationOnMock.getArguments()[0]).applyAdjustments();
+            ((NotificationRecord) invocationOnMock.getArguments()[0]).calculateImportance();
+            return null;
+        }).when(mRankingHelper).extractSignals(any(NotificationRecord.class));
+        mService.handleRankingSort();
+
+        // Check that the bundle channel was restored
+        verify(mRankingHandler, times(numNewsNotifications)).requestSort();
+        for (NotificationRecord record : mService.mEnqueuedNotifications) {
+            record.applyAdjustments();
+            assertThat(record.getChannel().getId()).isIn(NotificationChannel.SYSTEM_RESERVED_IDS);
+        }
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_CLASSIFICATION,
+            FLAG_NOTIFICATION_FORCE_GROUPING,
+            FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION,
+            android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI})
+    public void testDisallowTypeAdj_unclassifiesAllEnqueuedNotifications() throws Exception {
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+        when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
+        when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
+        when(mAssistants.isAdjustmentAllowedForPackage(anyString(), anyString())).thenReturn(true);
+
+        // Enqueue some notifications and classify in different bundles
+        final int numNotifications = NotificationChannel.SYSTEM_RESERVED_IDS.size();
+        for (int i = 0; i < numNotifications; i++) {
+            NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, i, mUserId);
+            mService.addEnqueuedNotification(r);
+            Bundle signals = new Bundle();
+            final int adjustmentType = i + 1;
+            signals.putInt(Adjustment.KEY_TYPE, adjustmentType);
+            Adjustment adjustment = new Adjustment(r.getSbn().getPackageName(), r.getKey(), signals,
+                    "", r.getUser().getIdentifier());
+            mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment);
+            waitForIdle();
+            r.applyAdjustments();
+            r.setBundleType(adjustmentType);
+            // Check that the NotificationRecord channel is updated
+            assertThat(r.getChannel().getId()).isIn(NotificationChannel.SYSTEM_RESERVED_IDS);
+            assertThat(r.getBundleType()).isEqualTo(adjustmentType);
+        }
+
+        // Disable KEY_TYPE adjustment
+        mBinderService.disallowAssistantAdjustment(Adjustment.KEY_TYPE);
+        waitForIdle();
+
+        //Check that all notifications were unbundled
+        for (NotificationRecord record : mService.mEnqueuedNotifications) {
+            assertThat(record.getChannel().getId()).isEqualTo(TEST_CHANNEL_ID);
+            verify(mGroupHelper, times(1)).onNotificationUnbundled(eq(record), anyBoolean());
+        }
+
+        // Re-enable bundles
+        Mockito.reset(mRankingHandler);
+        Mockito.reset(mGroupHelper);
+        mBinderService.allowAssistantAdjustment(Adjustment.KEY_TYPE);
+        waitForIdle();
+
+        // Actually apply the adjustments
+        doAnswer(invocationOnMock -> {
+            ((NotificationRecord) invocationOnMock.getArguments()[0]).applyAdjustments();
+            ((NotificationRecord) invocationOnMock.getArguments()[0]).calculateImportance();
+            return null;
+        }).when(mRankingHelper).extractSignals(any(NotificationRecord.class));
+        mService.handleRankingSort();
+
+        // Check that the bundle channel was restored
+        verify(mRankingHandler, times(numNotifications)).requestSort();
+        for (NotificationRecord record : mService.mEnqueuedNotifications) {
+            record.applyAdjustments();
+            assertThat(record.getChannel().getId()).isIn(NotificationChannel.SYSTEM_RESERVED_IDS);
+        }
     }
 
 }

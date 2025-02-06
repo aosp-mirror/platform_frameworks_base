@@ -20,7 +20,9 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayTopology;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Size;
@@ -34,12 +36,16 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.BinderThread;
 
+import com.android.window.flags.Flags;
 import com.android.wm.shell.common.DisplayChangeController.OnDisplayChangingListener;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -54,17 +60,20 @@ public class DisplayController {
     private final ShellExecutor mMainExecutor;
     private final Context mContext;
     private final IWindowManager mWmService;
+    private final DisplayManager mDisplayManager;
     private final DisplayChangeController mChangeController;
     private final IDisplayWindowListener mDisplayContainerListener;
 
     private final SparseArray<DisplayRecord> mDisplays = new SparseArray<>();
     private final ArrayList<OnDisplaysChangedListener> mDisplayChangedListeners = new ArrayList<>();
+    private final Map<Integer, RectF> mUnpopulatedDisplayBounds = new HashMap<>();
 
     public DisplayController(Context context, IWindowManager wmService, ShellInit shellInit,
-            ShellExecutor mainExecutor) {
+            ShellExecutor mainExecutor, DisplayManager displayManager) {
         mMainExecutor = mainExecutor;
         mContext = context;
         mWmService = wmService;
+        mDisplayManager = displayManager;
         // TODO: Inject this instead
         mChangeController = new DisplayChangeController(mWmService, shellInit, mainExecutor);
         mDisplayContainerListener = new DisplayWindowListenerImpl();
@@ -74,13 +83,20 @@ public class DisplayController {
     }
 
     /**
-     * Initializes the window listener.
+     * Initializes the window listener and the topology listener.
      */
     public void onInit() {
         try {
             int[] displayIds = mWmService.registerDisplayWindowListener(mDisplayContainerListener);
             for (int i = 0; i < displayIds.length; i++) {
                 onDisplayAdded(displayIds[i]);
+            }
+
+            if (Flags.enableConnectedDisplaysWindowDrag()
+                    && DesktopModeStatus.canEnterDesktopMode(mContext)) {
+                mDisplayManager.registerTopologyListener(mMainExecutor,
+                        this::onDisplayTopologyChanged);
+                onDisplayTopologyChanged(mDisplayManager.getDisplayTopology());
             }
         } catch (RemoteException e) {
             throw new RuntimeException("Unable to register display controller");
@@ -91,8 +107,7 @@ public class DisplayController {
      * Gets a display by id from DisplayManager.
      */
     public Display getDisplay(int displayId) {
-        final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
-        return displayManager.getDisplay(displayId);
+        return mDisplayManager.getDisplay(displayId);
     }
 
     /**
@@ -184,7 +199,12 @@ public class DisplayController {
                     ? mContext
                     : mContext.createDisplayContext(display);
             final DisplayRecord record = new DisplayRecord(displayId);
-            record.setDisplayLayout(context, new DisplayLayout(context, display));
+            DisplayLayout displayLayout = new DisplayLayout(context, display);
+            if (Flags.enableConnectedDisplaysWindowDrag()
+                    && mUnpopulatedDisplayBounds.containsKey(displayId)) {
+                displayLayout.setGlobalBoundsDp(mUnpopulatedDisplayBounds.get(displayId));
+            }
+            record.setDisplayLayout(context, displayLayout);
             mDisplays.put(displayId, record);
             for (int i = 0; i < mDisplayChangedListeners.size(); ++i) {
                 mDisplayChangedListeners.get(i).onDisplayAdded(displayId);
@@ -218,6 +238,31 @@ public class DisplayController {
 
             mChangeController.dispatchOnDisplayChange(
                     wct, displayId, fromRotation, toRotation, null /* newDisplayAreaInfo */);
+        }
+    }
+
+    private void onDisplayTopologyChanged(DisplayTopology topology) {
+        if (topology == null) {
+            return;
+        }
+        SparseArray<RectF> absoluteBounds = topology.getAbsoluteBounds();
+        mUnpopulatedDisplayBounds.clear();
+        for (int i = 0; i < absoluteBounds.size(); ++i) {
+            int displayId = absoluteBounds.keyAt(i);
+            DisplayLayout displayLayout = getDisplayLayout(displayId);
+            if (displayLayout == null) {
+                // onDisplayTopologyChanged can arrive before onDisplayAdded.
+                // Store the bounds to be applied later in onDisplayAdded.
+                Slog.d(TAG, "Storing bounds for onDisplayTopologyChanged on unknown"
+                        + " display, displayId=" + displayId);
+                mUnpopulatedDisplayBounds.put(displayId, absoluteBounds.valueAt(i));
+            } else {
+                displayLayout.setGlobalBoundsDp(absoluteBounds.valueAt(i));
+            }
+        }
+
+        for (int i = 0; i < mDisplayChangedListeners.size(); ++i) {
+            mDisplayChangedListeners.get(i).onTopologyChanged(topology);
         }
     }
 
@@ -408,5 +453,10 @@ public class DisplayController {
          */
         default void onKeepClearAreasChanged(int displayId, Set<Rect> restricted,
                 Set<Rect> unrestricted) {}
+
+        /**
+         * Called when the display topology has changed.
+         */
+        default void onTopologyChanged(DisplayTopology topology) {}
     }
 }

@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
 import android.os.PersistableBundle
+import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrierConfig
 
 class FakeCarrierConfigRepository : CarrierConfigRepository {
@@ -24,8 +25,12 @@ class FakeCarrierConfigRepository : CarrierConfigRepository {
 
     val configsById = mutableMapOf<Int, SystemUiCarrierConfig>()
 
-    override fun getOrCreateConfigForSubId(subId: Int): SystemUiCarrierConfig =
-        configsById.getOrPut(subId) { SystemUiCarrierConfig(subId, createDefaultTestConfig()) }
+    override fun getOrCreateConfigForSubId(maybeSubId: Int?): SystemUiCarrierConfig {
+        val subId = maybeSubId ?: INVALID_SUBSCRIPTION_ID
+        return configsById.getOrPut(subId) {
+            SystemUiCarrierConfig(subId, createDefaultTestConfig())
+        }
+    }
 }
 
 val CarrierConfigRepository.fake

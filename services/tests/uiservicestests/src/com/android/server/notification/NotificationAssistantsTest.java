@@ -17,15 +17,14 @@ package com.android.server.notification;
 
 import static android.os.UserHandle.USER_ALL;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
+import static android.service.notification.Adjustment.KEY_SUMMARIZATION;
+import static android.service.notification.Adjustment.KEY_TYPE;
 import static android.service.notification.Adjustment.TYPE_CONTENT_RECOMMENDATION;
 import static android.service.notification.Adjustment.TYPE_NEWS;
-import static android.service.notification.Adjustment.TYPE_OTHER;
 import static android.service.notification.Adjustment.TYPE_PROMOTION;
 import static android.service.notification.Adjustment.TYPE_SOCIAL_MEDIA;
-import static android.service.notification.Flags.notificationClassification;
 
 import static com.android.server.notification.NotificationManagerService.DEFAULT_ALLOWED_ADJUSTMENTS;
-import static com.android.server.notification.NotificationManagerService.DEFAULT_ALLOWED_ADJUSTMENT_KEY_TYPES;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -48,6 +47,7 @@ import static org.mockito.Mockito.when;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.Flags;
 import android.app.INotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -64,6 +64,8 @@ import android.testing.TestableContext;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
+import android.util.StatsEvent;
+import android.util.StatsEventTestUtils;
 import android.util.Xml;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -71,8 +73,16 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.util.CollectionUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.os.AtomsProto;
+import com.android.os.notification.NotificationBundlePreferences;
+import com.android.os.notification.NotificationExtensionAtoms;
+import com.android.os.notification.NotificationProtoEnums;
 import com.android.server.UiServiceTestCase;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
+
+import com.google.protobuf.CodedInputStream;
+import com.google.protobuf.CodedOutputStream;
+import com.google.protobuf.ExtensionRegistryLite;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -120,6 +130,8 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
 
     ComponentName mCn = new ComponentName("a", "b");
 
+    private ExtensionRegistryLite mRegistry;
+
 
     // Helper function to hold mApproved lock, avoid GuardedBy lint errors
     private boolean isUserSetServicesEmpty(NotificationAssistants assistant, int userId) {
@@ -148,17 +160,6 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         mAssistants.readXml(parser, mNm::canUseManagedServices, false, USER_ALL);
     }
 
-    private void setDefaultAllowedAdjustmentKeyTypes(NotificationAssistants assistants) {
-        assistants.setAssistantAdjustmentKeyTypeState(TYPE_OTHER, false);
-        assistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, false);
-        assistants.setAssistantAdjustmentKeyTypeState(TYPE_SOCIAL_MEDIA, false);
-        assistants.setAssistantAdjustmentKeyTypeState(TYPE_NEWS, false);
-        assistants.setAssistantAdjustmentKeyTypeState(TYPE_CONTENT_RECOMMENDATION, false);
-
-        for (int type : DEFAULT_ALLOWED_ADJUSTMENT_KEY_TYPES) {
-            assistants.setAssistantAdjustmentKeyTypeState(type, true);
-        }
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -168,10 +169,8 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.string.config_defaultAssistantAccessComponent,
                 mCn.flattenToString());
+        mNm.mDefaultUnsupportedAdjustments = new String[] {};
         mAssistants = spy(mNm.new NotificationAssistants(mContext, mLock, mUserProfiles, miPm));
-        if (notificationClassification()) {
-            setDefaultAllowedAdjustmentKeyTypes(mAssistants);
-        }
         when(mNm.getBinderService()).thenReturn(mINm);
         mContext.ensureTestableResources();
 
@@ -204,6 +203,8 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
         when(mNm.isNASMigrationDone(anyInt())).thenReturn(true);
         when(mNm.canUseManagedServices(any(), anyInt(), any())).thenReturn(true);
+        mRegistry = ExtensionRegistryLite.newInstance();
+        NotificationExtensionAtoms.registerAllExtensions(mRegistry);
     }
 
     @Test
@@ -611,7 +612,8 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
 
         ManagedServices.ManagedServiceInfo info =
                 mAssistants.new ManagedServiceInfo(null, mCn, userId, false, null, 35, 2345256);
-        mAssistants.setAdjustmentTypeSupportedState(info, Adjustment.KEY_NOT_CONVERSATION, false);
+        mAssistants.setAdjustmentTypeSupportedState(
+                info.userid, Adjustment.KEY_NOT_CONVERSATION, false);
 
         assertThat(mAssistants.getUnsupportedAdjustments(userId)).contains(
                 Adjustment.KEY_NOT_CONVERSATION);
@@ -632,7 +634,8 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
 
         ManagedServices.ManagedServiceInfo info =
                 mAssistants.new ManagedServiceInfo(null, mCn, userId, false, null, 35, 2345256);
-        mAssistants.setAdjustmentTypeSupportedState(info, Adjustment.KEY_NOT_CONVERSATION, false);
+        mAssistants.setAdjustmentTypeSupportedState(
+                info.userid, Adjustment.KEY_NOT_CONVERSATION, false);
 
         writeXmlAndReload(USER_ALL);
 
@@ -654,7 +657,6 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         assertNotNull(current);
 
         writeXmlAndReload(USER_ALL);
-
         assertThat(mAssistants.getUnsupportedAdjustments(userId).size()).isEqualTo(0);
     }
 
@@ -664,7 +666,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         mAssistants.disallowAdjustmentType(Adjustment.KEY_RANKING_SCORE);
         assertThat(mAssistants.getAllowedAssistantAdjustments())
                 .doesNotContain(Adjustment.KEY_RANKING_SCORE);
-        assertThat(mAssistants.getAllowedAssistantAdjustments()).contains(Adjustment.KEY_TYPE);
+        assertThat(mAssistants.getAllowedAssistantAdjustments()).contains(KEY_TYPE);
     }
 
     @Test
@@ -679,7 +681,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    @EnableFlags(Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
     public void testDisallowAdjustmentType_readWriteXml_entries() throws Exception {
         int userId = ActivityManager.getCurrentUser();
 
@@ -707,34 +709,37 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     @Test
     @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
     public void testSetAssistantAdjustmentKeyTypeState_allow() {
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).asList()
-                .containsExactly(TYPE_PROMOTION);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_CONTENT_RECOMMENDATION, false);
+        assertThat(mAssistants.getAllowedClassificationTypes())
+                .asList().doesNotContain(TYPE_CONTENT_RECOMMENDATION);
 
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_CONTENT_RECOMMENDATION, true);
 
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).asList()
-                .containsExactly(TYPE_PROMOTION, TYPE_CONTENT_RECOMMENDATION);
+        assertThat(mAssistants.getAllowedClassificationTypes()).asList()
+                .contains(TYPE_CONTENT_RECOMMENDATION);
     }
 
     @Test
     @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
     public void testSetAssistantAdjustmentKeyTypeState_disallow() {
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, false);
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).isEmpty();
+        assertThat(mAssistants.getAllowedClassificationTypes())
+                .asList().doesNotContain(TYPE_PROMOTION);
     }
 
     @Test
-    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    @EnableFlags(Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
     public void testDisallowAdjustmentKeyType_readWriteXml() throws Exception {
         mAssistants.loadDefaultsFromConfig(true);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_SOCIAL_MEDIA, false);
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, false);
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_NEWS, true);
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_CONTENT_RECOMMENDATION, true);
 
         writeXmlAndReload(USER_ALL);
 
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).asList()
-                .containsExactly(TYPE_NEWS, TYPE_CONTENT_RECOMMENDATION);
+        assertThat(mAssistants.getAllowedClassificationTypes()).asList()
+                .containsExactlyElementsIn(List.of(TYPE_NEWS, TYPE_CONTENT_RECOMMENDATION));
     }
 
     @Test
@@ -744,152 +749,198 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
 
         writeXmlAndReload(USER_ALL);
 
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).asList()
-                .containsExactly(TYPE_PROMOTION);
+        assertThat(mAssistants.getAllowedClassificationTypes()).asList()
+                .containsExactlyElementsIn(List.of(TYPE_PROMOTION, TYPE_NEWS, TYPE_SOCIAL_MEDIA,
+                        TYPE_CONTENT_RECOMMENDATION));
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
-    public void testSetAssistantAdjustmentKeyTypeStateForPackage_usesGlobalDefault() {
-        String pkg = "my.package";
-        setDefaultAllowedAdjustmentKeyTypes(mAssistants);
-        assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(pkg, TYPE_PROMOTION)).isTrue();
-        assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(pkg, TYPE_NEWS)).isFalse();
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypesForPackage(pkg)).asList()
-                .containsExactlyElementsIn(DEFAULT_ALLOWED_ADJUSTMENT_KEY_TYPES);
-    }
+    @EnableFlags({Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI, Flags.FLAG_NM_SUMMARIZATION,
+            Flags.FLAG_NM_SUMMARIZATION_UI})
+    public void testSetAdjustmentSupportedForPackage_allowsAndDenies() {
+        // Given that a package is allowed to have summarization adjustments
+        String key = KEY_SUMMARIZATION;
+        String allowedPackage = "allowed.package";
 
-    @Test
-    @EnableFlags(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
-    public void testSetAssistantAdjustmentKeyTypeStateForPackage_allowsAndDenies() {
-        setDefaultAllowedAdjustmentKeyTypes(mAssistants);
-        // Given that a package is set to have a type adjustment allowed,
-        String pkg = "my.package";
-        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(pkg, TYPE_NEWS, true);
-
-        // The newly set state is the combination of the global default and the newly set type.
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypesForPackage(pkg)).asList()
-                .containsExactly(TYPE_NEWS, TYPE_PROMOTION);
-        assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(pkg, TYPE_NEWS)).isTrue();
+        assertThat(mAssistants.isAdjustmentAllowedForPackage(key, allowedPackage)).isTrue();
+        assertThat(mAssistants.getAdjustmentDeniedPackages(key)).isEmpty();
 
         // Set type adjustment disallowed for this package
-        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(pkg, TYPE_NEWS, false);
-        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(pkg, TYPE_PROMOTION, false);
+        mAssistants.setAdjustmentSupportedForPackage(key, allowedPackage, false);
 
         // Then the package is marked as denied
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypesForPackage(pkg)).isEmpty();
-        assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(pkg, TYPE_NEWS)).isFalse();
+        assertThat(mAssistants.isAdjustmentAllowedForPackage(key, allowedPackage)).isFalse();
+        assertThat(mAssistants.getAdjustmentDeniedPackages(key)).asList()
+                .containsExactly(allowedPackage);
 
         // Set type adjustment allowed again
-        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(pkg, TYPE_NEWS, true);
-        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(pkg, TYPE_PROMOTION, true);
+        mAssistants.setAdjustmentSupportedForPackage(key, allowedPackage, true);
 
         // Then the package is marked as allowed again
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypesForPackage(pkg)).asList()
-                .containsExactly(TYPE_NEWS, TYPE_PROMOTION);
-        assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(pkg, TYPE_NEWS)).isTrue();
-        assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(pkg, TYPE_PROMOTION)).isTrue();
-
-        // Set type adjustment promotions false,
-        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(pkg, TYPE_PROMOTION, false);
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypesForPackage(pkg)).asList()
-                .containsExactly(TYPE_NEWS);
-        assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(pkg, TYPE_NEWS)).isTrue();
-        assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(pkg, TYPE_PROMOTION)).isFalse();
+        assertThat(mAssistants.isAdjustmentAllowedForPackage(key, allowedPackage)).isTrue();
+        assertThat(mAssistants.getAdjustmentDeniedPackages(key)).isEmpty();
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
-    public void testSetAssistantAdjustmentKeyTypeStateForPackage_allowsMultiplePkgs() {
-        setDefaultAllowedAdjustmentKeyTypes(mAssistants);
-        // Given packages allowed to have their type adjusted to  TYPE_NEWS,
-        String allowedPkg1 = "allowed.Pkg1";
-        String allowedPkg2 = "allowed.Pkg2";
-        String allowedPkg3 = "allowed.Pkg3";
-        // Set type adjustment allowed for these packages
-        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(allowedPkg1, TYPE_NEWS, true);
-        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(allowedPkg2, TYPE_NEWS, true);
-        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(allowedPkg3, TYPE_NEWS, true);
+    @EnableFlags({Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI, Flags.FLAG_NM_SUMMARIZATION,
+            Flags.FLAG_NM_SUMMARIZATION_UI})
+    public void testSetAdjustmentSupportedForPackage_deniesMultiple() {
+        // Given packages not allowed to have summarizations applied
+        String key = KEY_SUMMARIZATION;
+        String deniedPkg1 = "denied.Pkg1";
+        String deniedPkg2 = "denied.Pkg2";
+        String deniedPkg3 = "denied.Pkg3";
+        // Set type adjustment disallowed for these packages
+        mAssistants.setAdjustmentSupportedForPackage(key, deniedPkg1, false);
+        mAssistants.setAdjustmentSupportedForPackage(key, deniedPkg2, false);
+        mAssistants.setAdjustmentSupportedForPackage(key, deniedPkg3, false);
 
-        // The newly set state is the combination of the global default and the newly set type.
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypesForPackage(allowedPkg1)).asList()
-                .containsExactly(TYPE_NEWS, TYPE_PROMOTION);
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypesForPackage(allowedPkg2)).asList()
-                .containsExactly(TYPE_NEWS, TYPE_PROMOTION);
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypesForPackage(allowedPkg3)).asList()
-                .containsExactly(TYPE_NEWS, TYPE_PROMOTION);
-        assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(allowedPkg1, TYPE_NEWS)).isTrue();
-        assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(allowedPkg2, TYPE_NEWS)).isTrue();
-        assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(allowedPkg3, TYPE_NEWS)).isTrue();
+        // Then the packages are marked as denied
+        assertThat(mAssistants.isAdjustmentAllowedForPackage(key, deniedPkg1)).isFalse();
+        assertThat(mAssistants.isAdjustmentAllowedForPackage(key, deniedPkg2)).isFalse();
+        assertThat(mAssistants.isAdjustmentAllowedForPackage(key, deniedPkg3)).isFalse();
+        assertThat(mAssistants.getAdjustmentDeniedPackages(key)).asList()
+                .containsExactlyElementsIn(List.of(deniedPkg1, deniedPkg2, deniedPkg3));
 
-        // And when we deny some of them,
-        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(allowedPkg2, TYPE_NEWS, false);
-        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(allowedPkg2, TYPE_PROMOTION,
-                false);
-        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(allowedPkg3, TYPE_PROMOTION,
-                false);
+        // And when we re-allow one of them,
+        mAssistants.setAdjustmentSupportedForPackage(key, deniedPkg2, true);
 
-        // Then the rest of the original packages are still marked as allowed.
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypesForPackage(allowedPkg1)).asList()
-                .containsExactly(TYPE_NEWS, TYPE_PROMOTION);
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypesForPackage(allowedPkg2)).isEmpty();
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypesForPackage(allowedPkg3)).asList()
-                .containsExactly(TYPE_NEWS);
-        assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(allowedPkg1, TYPE_NEWS)).isTrue();
-        assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(allowedPkg2, TYPE_NEWS)).isFalse();
-        assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(allowedPkg3, TYPE_NEWS)).isTrue();
+        // Then the rest of the original packages are still marked as denied.
+        assertThat(mAssistants.isAdjustmentAllowedForPackage(key, deniedPkg1)).isFalse();
+        assertThat(mAssistants.isAdjustmentAllowedForPackage(key, deniedPkg2)).isTrue();
+        assertThat(mAssistants.isAdjustmentAllowedForPackage(key, deniedPkg3)).isFalse();
+        assertThat(mAssistants.getAdjustmentDeniedPackages(key)).asList()
+                .containsExactlyElementsIn(List.of(deniedPkg1, deniedPkg3));
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
-    public void testSetAssistantAdjustmentKeyTypeStateForPackage_readWriteXml() throws Exception {
-        setDefaultAllowedAdjustmentKeyTypes(mAssistants);
+    @EnableFlags({Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI, Flags.FLAG_NM_SUMMARIZATION,
+            Flags.FLAG_NM_SUMMARIZATION_UI})
+    public void testSetAdjustmentSupportedForPackage_readWriteXml_singleAdjustment()
+            throws Exception {
         mAssistants.loadDefaultsFromConfig(true);
+        String key = KEY_SUMMARIZATION;
         String deniedPkg1 = "denied.Pkg1";
         String allowedPkg2 = "allowed.Pkg2";
-        String allowedPkg3 = "allowed.Pkg3";
-        // Set type adjustment disallowed or allowed for these packages
-        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(deniedPkg1, TYPE_PROMOTION, false);
-        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(allowedPkg2, TYPE_NEWS, true);
-        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(allowedPkg3, TYPE_NEWS, true);
-        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(allowedPkg3, TYPE_SOCIAL_MEDIA,
-                true);
+        String deniedPkg3 = "denied.Pkg3";
+        // Set summarization adjustment disallowed or allowed for these packages
+        mAssistants.setAdjustmentSupportedForPackage(key, deniedPkg1, false);
+        mAssistants.setAdjustmentSupportedForPackage(key, allowedPkg2, true);
+        mAssistants.setAdjustmentSupportedForPackage(key, deniedPkg3, false);
 
         writeXmlAndReload(USER_ALL);
 
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypesForPackage(deniedPkg1)).isEmpty();
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypesForPackage(allowedPkg2)).asList()
-                .containsExactly(TYPE_NEWS, TYPE_PROMOTION);
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypesForPackage(allowedPkg3)).asList()
-                .containsExactly(TYPE_NEWS, TYPE_SOCIAL_MEDIA, TYPE_PROMOTION);
+        assertThat(mAssistants.isAdjustmentAllowedForPackage(key, deniedPkg1)).isFalse();
+        assertThat(mAssistants.isAdjustmentAllowedForPackage(key, allowedPkg2)).isTrue();
+        assertThat(mAssistants.isAdjustmentAllowedForPackage(key, deniedPkg3)).isFalse();
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
-    public void testSetAssistantAdjustmentKeyTypeStateForPackage_noGlobalImpact() throws Exception {
-        setDefaultAllowedAdjustmentKeyTypes(mAssistants);
-        // When the global state is changed,
+    @EnableFlags({Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI, Flags.FLAG_NM_SUMMARIZATION,
+            Flags.FLAG_NM_SUMMARIZATION_UI})
+    public void testSetAdjustmentSupportedForPackage_readWriteXml_multipleAdjustments()
+            throws Exception {
+        mAssistants.loadDefaultsFromConfig(true);
+        String deniedPkg1 = "denied.Pkg1";
+        String deniedPkg2 = "denied.Pkg2";
+        String deniedPkg3 = "denied.Pkg3";
+        // Set summarization adjustment disallowed these packages
+        mAssistants.setAdjustmentSupportedForPackage(KEY_SUMMARIZATION, deniedPkg1, false);
+        mAssistants.setAdjustmentSupportedForPackage(KEY_SUMMARIZATION, deniedPkg3, false);
+        // Set classification adjustment disallowed for these packages
+        mAssistants.setAdjustmentSupportedForPackage(KEY_TYPE, deniedPkg2, false);
+
+        writeXmlAndReload(USER_ALL);
+
+        assertThat(mAssistants.isAdjustmentAllowedForPackage(KEY_SUMMARIZATION, deniedPkg1))
+                .isFalse();
+        assertThat(mAssistants.isAdjustmentAllowedForPackage(KEY_TYPE, deniedPkg2)).isFalse();
+        assertThat(mAssistants.isAdjustmentAllowedForPackage(KEY_SUMMARIZATION, deniedPkg3))
+                .isFalse();
+    }
+
+    @Test
+    @SuppressWarnings("GuardedBy")
+    @EnableFlags({android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION,
+            android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI})
+    public void testPullBundlePreferencesStats_fillsOutStatsEvent()
+            throws Exception {
+        // Create the current user and enable the package
+        int userId = ActivityManager.getCurrentUser();
+        mAssistants.loadDefaultsFromConfig(true);
+        mAssistants.setPackageOrComponentEnabled(mCn.flattenToString(), userId, true,
+                true, true);
+        ManagedServices.ManagedServiceInfo info =
+                mAssistants.new ManagedServiceInfo(null, mCn, userId, false, null, 35, 2345256);
+
+        // Ensure bundling is enabled
+        mAssistants.setAdjustmentTypeSupportedState(info.userid, KEY_TYPE, true);
+        // Enable these specific bundle types
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_SOCIAL_MEDIA, false);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, false);
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_NEWS, true);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_CONTENT_RECOMMENDATION, true);
 
-        // The package state reflects the global state.
-        String pkg = "my.package";
-        assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(pkg, TYPE_PROMOTION)).isTrue();
-        assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(pkg, TYPE_NEWS)).isTrue();
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypesForPackage(pkg)).asList()
-                .containsExactly(TYPE_NEWS, TYPE_PROMOTION);
+        // When pullBundlePreferencesStats is run with the given preferences
+        ArrayList<StatsEvent> events = new ArrayList<>();
+        mAssistants.pullBundlePreferencesStats(events);
 
-        // Once the package specific state is modified,
-        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(pkg, TYPE_SOCIAL_MEDIA, true);
+        // The StatsEvent is filled out with the expected NotificationBundlePreferences values.
+        assertThat(events.size()).isEqualTo(1);
+        AtomsProto.Atom atom = StatsEventTestUtils.convertToAtom(events.get(0));
 
-        // The package specific state combines the global state with those modifications
-        assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(pkg, TYPE_SOCIAL_MEDIA)).isTrue();
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypesForPackage(pkg)).asList()
-                .containsExactly(TYPE_NEWS, TYPE_PROMOTION, TYPE_SOCIAL_MEDIA);
+        // The returned atom does not have external extensions registered.
+        // So we serialize and then deserialize with extensions registered.
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        CodedOutputStream codedos = CodedOutputStream.newInstance(outputStream);
+        atom.writeTo(codedos);
+        codedos.flush();
 
-        // And further changes to the global state are ignored.
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+        CodedInputStream codedis = CodedInputStream.newInstance(inputStream);
+        atom = AtomsProto.Atom.parseFrom(codedis, mRegistry);
+        assertTrue(atom.hasExtension(NotificationExtensionAtoms.notificationBundlePreferences));
+        NotificationBundlePreferences p =
+                atom.getExtension(NotificationExtensionAtoms.notificationBundlePreferences);
+        assertThat(p.getBundlesAllowed()).isTrue();
+        assertThat(p.getAllowedBundleTypes(0).getNumber())
+                .isEqualTo(NotificationProtoEnums.TYPE_NEWS);
+        assertThat(p.getAllowedBundleTypes(1).getNumber())
+                .isEqualTo(NotificationProtoEnums.TYPE_CONTENT_RECOMMENDATION);
+
+        // Disable the top-level bundling setting
+        mAssistants.setAdjustmentTypeSupportedState(info.userid, KEY_TYPE, false);
+        // Enable these specific bundle types
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, true);
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_NEWS, false);
-        assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(pkg, TYPE_NEWS)).isTrue();
-        assertThat(mAssistants.getAllowedAdjustmentKeyTypesForPackage(pkg)).asList()
-                .containsExactly(TYPE_NEWS, TYPE_PROMOTION, TYPE_SOCIAL_MEDIA);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_CONTENT_RECOMMENDATION, true);
+
+        ArrayList<StatsEvent> eventsDisabled = new ArrayList<>();
+        mAssistants.pullBundlePreferencesStats(eventsDisabled);
+
+        // The StatsEvent is filled out with the expected NotificationBundlePreferences values.
+        assertThat(eventsDisabled.size()).isEqualTo(1);
+        AtomsProto.Atom atomDisabled = StatsEventTestUtils.convertToAtom(eventsDisabled.get(0));
+
+        // The returned atom does not have external extensions registered.
+        // So we serialize and then deserialize with extensions registered.
+        outputStream = new ByteArrayOutputStream();
+        codedos = CodedOutputStream.newInstance(outputStream);
+        atomDisabled.writeTo(codedos);
+        codedos.flush();
+
+        inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+        codedis = CodedInputStream.newInstance(inputStream);
+        atomDisabled = AtomsProto.Atom.parseFrom(codedis, mRegistry);
+        assertTrue(atomDisabled.hasExtension(NotificationExtensionAtoms
+                .notificationBundlePreferences));
+
+        NotificationBundlePreferences p2 =
+                atomDisabled.getExtension(NotificationExtensionAtoms.notificationBundlePreferences);
+        assertThat(p2.getBundlesAllowed()).isFalse();
+        assertThat(p2.getAllowedBundleTypes(0).getNumber())
+                .isEqualTo(NotificationProtoEnums.TYPE_PROMOTION);
+        assertThat(p2.getAllowedBundleTypes(1).getNumber())
+                .isEqualTo(NotificationProtoEnums.TYPE_CONTENT_RECOMMENDATION);
     }
 }

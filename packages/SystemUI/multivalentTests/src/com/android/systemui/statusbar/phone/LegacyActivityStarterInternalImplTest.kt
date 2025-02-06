@@ -42,6 +42,7 @@ import com.android.systemui.communal.domain.interactor.CommunalSettingsInteracto
 import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.ShadeController
@@ -58,12 +59,13 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
+import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
@@ -82,7 +84,6 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 
-@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
@@ -109,6 +110,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
     @Mock private lateinit var communalSceneInteractor: CommunalSceneInteractor
     @Mock private lateinit var communalSettingsInteractor: CommunalSettingsInteractor
     private lateinit var underTest: LegacyActivityStarterInternalImpl
+    private val kosmos = testKosmos()
     private val mainExecutor = FakeExecutor(FakeSystemClock())
     private val shadeAnimationInteractor =
         ShadeAnimationInteractorLegacyImpl(ShadeAnimationRepository(), FakeShadeRepository())
@@ -157,13 +159,18 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
     )
     @Test
     fun registerTransition_registers() {
-        val cookie = mock(ActivityTransitionAnimator.TransitionCookie::class.java)
-        val controllerFactory = mock(ActivityTransitionAnimator.ControllerFactory::class.java)
-        `when`(controllerFactory.cookie).thenReturn(cookie)
+        with(kosmos) {
+            testScope.runTest {
+                val cookie = mock(ActivityTransitionAnimator.TransitionCookie::class.java)
+                val controllerFactory =
+                    mock(ActivityTransitionAnimator.ControllerFactory::class.java)
+                `when`(controllerFactory.cookie).thenReturn(cookie)
 
-        underTest.registerTransition(cookie, controllerFactory)
+                underTest.registerTransition(cookie, controllerFactory, testScope)
 
-        verify(activityTransitionAnimator).register(eq(cookie), any())
+                verify(activityTransitionAnimator).register(eq(cookie), any(), eq(testScope))
+            }
+        }
     }
 
     @DisableFlags(
@@ -172,14 +179,19 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
     )
     @Test
     fun registerTransition_throws_whenFlagsAreDisabled() {
-        val cookie = mock(ActivityTransitionAnimator.TransitionCookie::class.java)
-        val controllerFactory = mock(ActivityTransitionAnimator.ControllerFactory::class.java)
+        with(kosmos) {
+            testScope.runTest {
+                val cookie = mock(ActivityTransitionAnimator.TransitionCookie::class.java)
+                val controllerFactory =
+                    mock(ActivityTransitionAnimator.ControllerFactory::class.java)
 
-        assertThrows(IllegalStateException::class.java) {
-            underTest.registerTransition(cookie, controllerFactory)
+                assertThrows(IllegalStateException::class.java) {
+                    underTest.registerTransition(cookie, controllerFactory, testScope)
+                }
+
+                verify(activityTransitionAnimator, never()).register(any(), any(), any())
+            }
         }
-
-        verify(activityTransitionAnimator, never()).register(any(), any())
     }
 
     @EnableFlags(

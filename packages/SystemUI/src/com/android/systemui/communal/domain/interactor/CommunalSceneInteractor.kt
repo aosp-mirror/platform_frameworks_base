@@ -36,7 +36,6 @@ import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.pairwiseBy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,7 +50,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class CommunalSceneInteractor
 @Inject
@@ -147,6 +145,29 @@ constructor(
             )
             notifyListeners(newScene, keyguardState)
             repository.snapToScene(newScene)
+        }
+    }
+
+    fun showHubFromPowerButton() {
+        val loggingReason = "showing hub from power button"
+        applicationScope.launch("$TAG#showHubFromPowerButton") {
+            if (SceneContainerFlag.isEnabled) {
+                sceneInteractor.changeScene(
+                    toScene = CommunalScenes.Communal.toSceneContainerSceneKey(),
+                    loggingReason = loggingReason,
+                )
+                return@launch
+            }
+
+            if (currentScene.value == CommunalScenes.Communal) return@launch
+            logger.logSceneChangeRequested(
+                from = currentScene.value,
+                to = CommunalScenes.Communal,
+                reason = loggingReason,
+                isInstant = true,
+            )
+            notifyListeners(CommunalScenes.Communal, null)
+            repository.showHubFromPowerButton()
         }
     }
 

@@ -77,8 +77,9 @@ class EmulatorDisplayOverlay {
         mOverlay = context.getDrawable(
                 com.android.internal.R.drawable.emulator_circular_window_overlay);
 
-        mBlastBufferQueue = new BLASTBufferQueue(TITLE, mSurfaceControl, mScreenSize.x,
-                mScreenSize.y, PixelFormat.RGBA_8888);
+        mBlastBufferQueue = new BLASTBufferQueue(TITLE, /* updateDestinationFrame */ true);
+        mBlastBufferQueue.update(mSurfaceControl, mScreenSize.x, mScreenSize.y,
+                PixelFormat.RGBA_8888);
         mSurface = mBlastBufferQueue.createSurface();
     }
 

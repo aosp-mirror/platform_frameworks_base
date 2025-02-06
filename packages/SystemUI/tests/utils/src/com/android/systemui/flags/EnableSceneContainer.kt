@@ -19,7 +19,6 @@ package com.android.systemui.flags
 import android.platform.test.annotations.EnableFlags
 import com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
 import com.android.systemui.Flags.FLAG_NOTIFICATION_AVALANCHE_THROTTLE_HUN
-import com.android.systemui.Flags.FLAG_PREDICTIVE_BACK_SYSUI
 import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 
 /**
@@ -29,7 +28,6 @@ import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 @EnableFlags(
     FLAG_KEYGUARD_WM_STATE_REFACTOR,
     FLAG_NOTIFICATION_AVALANCHE_THROTTLE_HUN,
-    FLAG_PREDICTIVE_BACK_SYSUI,
     FLAG_SCENE_CONTAINER,
 )
 @Retention(AnnotationRetention.RUNTIME)

@@ -63,8 +63,9 @@ class StrictModeFlash {
         mSurfaceControl = ctrl;
         mDrawNeeded = true;
 
-        mBlastBufferQueue = new BLASTBufferQueue(TITLE, mSurfaceControl, 1 /* width */,
-                1 /* height */, PixelFormat.RGBA_8888);
+        mBlastBufferQueue = new BLASTBufferQueue(TITLE, /* updateDestinationFrame */ true);
+        mBlastBufferQueue.update(mSurfaceControl, 1 /* width */, 1 /* height */,
+                PixelFormat.RGBA_8888);
         mSurface = mBlastBufferQueue.createSurface();
     }
 

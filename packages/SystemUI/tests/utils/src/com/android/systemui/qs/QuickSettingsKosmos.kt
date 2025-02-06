@@ -39,6 +39,7 @@ import com.android.systemui.qs.footer.foregroundServicesRepository
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.security.data.repository.securityRepository
 import com.android.systemui.settings.userTracker
+import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 import com.android.systemui.statusbar.policy.deviceProvisionedController
 import com.android.systemui.statusbar.policy.securityController
 import com.android.systemui.user.data.repository.userSwitcherRepository
@@ -94,6 +95,7 @@ val Kosmos.footerActionsViewModelFactory by Fixture {
         context = applicationContext,
         falsingManager = falsingManager,
         footerActionsInteractor = footerActionsInteractor,
+        shadeModeInteractor = shadeModeInteractor,
         globalActionsDialogLiteProvider = { mock() },
         activityStarter,
         showPowerButton = true,

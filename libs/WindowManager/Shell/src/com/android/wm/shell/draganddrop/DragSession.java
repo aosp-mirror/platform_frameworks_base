@@ -29,7 +29,6 @@ import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.os.PersistableBundle;
 
 import androidx.annotation.Nullable;
 
@@ -44,6 +43,7 @@ import java.util.List;
  */
 public class DragSession {
     private final ActivityTaskManager mActivityTaskManager;
+    @Nullable
     private final ClipData mInitialDragData;
     private final int mInitialDragFlags;
 
@@ -66,7 +66,7 @@ public class DragSession {
     @WindowConfiguration.ActivityType
     int runningTaskActType = ACTIVITY_TYPE_STANDARD;
     boolean dragItemSupportsSplitscreen;
-    int hideDragSourceTaskId = -1;
+    final int hideDragSourceTaskId;
 
     DragSession(ActivityTaskManager activityTaskManager,
             DisplayLayout dispLayout, ClipData data, int dragFlags) {
@@ -83,7 +83,6 @@ public class DragSession {
 
     /**
      * Returns the clip description associated with the drag.
-     * @return
      */
     ClipDescription getClipDescription() {
         return mInitialDragData.getDescription();
@@ -125,8 +124,10 @@ public class DragSession {
     /**
      * Updates the session data based on the current state of the system at the start of the drag.
      */
-    void initialize() {
-        updateRunningTask();
+    void initialize(boolean skipUpdateRunningTask) {
+        if (!skipUpdateRunningTask) {
+            updateRunningTask();
+        }
 
         activityInfo = mInitialDragData.getItemAt(0).getActivityInfo();
         // TODO: This should technically check & respect config_supportsNonResizableMultiWindow

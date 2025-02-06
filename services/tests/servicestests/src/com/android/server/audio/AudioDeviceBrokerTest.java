@@ -17,7 +17,6 @@ package com.android.server.audio;
 
 import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_DEFAULT;
 import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_HEADSET;
-import static android.media.audio.Flags.automaticBtDeviceType;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -251,11 +250,6 @@ public class AudioDeviceBrokerTest {
     public void testIsBluetoothAudioDeviceCategoryFixed() throws Exception {
         Log.i(TAG, "starting testIsBluetoothAudioDeviceCategoryFixed");
 
-        if (!automaticBtDeviceType()) {
-            Log.i(TAG, "Enable automaticBtDeviceType flag to run the test "
-                    + "testIsBluetoothAudioDeviceCategoryFixed");
-            return;
-        }
         assertNotNull("invalid null BT device", mFakeBtDevice);
 
         final AdiDeviceState devState = new AdiDeviceState(AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
@@ -292,11 +286,6 @@ public class AudioDeviceBrokerTest {
     public void testGetAndUpdateBtAdiDeviceStateCategoryForAddress() throws Exception {
         Log.i(TAG, "starting testGetAndUpdateBtAdiDeviceStateCategoryForAddress");
 
-        if (!automaticBtDeviceType()) {
-            Log.i(TAG, "Enable automaticBtDeviceType flag to run the test "
-                    + "testGetAndUpdateBtAdiDeviceStateCategoryForAddress");
-            return;
-        }
         assertNotNull("invalid null BT device", mFakeBtDevice);
 
         final AdiDeviceState devState = new AdiDeviceState(AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
@@ -342,11 +331,6 @@ public class AudioDeviceBrokerTest {
     public void testAddAudioDeviceWithCategoryInInventoryIfNeeded() throws Exception {
         Log.i(TAG, "starting testAddAudioDeviceWithCategoryInInventoryIfNeeded");
 
-        if (!automaticBtDeviceType()) {
-            Log.i(TAG, "Enable automaticBtDeviceType flag to run the test "
-                    + "testAddAudioDeviceWithCategoryInInventoryIfNeeded");
-            return;
-        }
         assertNotNull("invalid null BT device", mFakeBtDevice);
 
         mAudioDeviceBroker.addAudioDeviceWithCategoryInInventoryIfNeeded(

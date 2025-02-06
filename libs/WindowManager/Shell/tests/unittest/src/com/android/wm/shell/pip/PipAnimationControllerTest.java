@@ -87,7 +87,7 @@ public class PipAnimationControllerTest extends ShellTestCase {
                 .getAnimator(mTaskInfo, mLeash, new Rect(), 0f, 1f);
 
         assertEquals("Expect ANIM_TYPE_ALPHA animation",
-                animator.getAnimationType(), PipAnimationController.ANIM_TYPE_ALPHA);
+                animator.getAnimationType(), PipTransitionController.ANIM_TYPE_ALPHA);
     }
 
     @Test
@@ -101,7 +101,7 @@ public class PipAnimationControllerTest extends ShellTestCase {
                         false /* alwaysAnimateTaskBounds */);
 
         assertEquals("Expect ANIM_TYPE_BOUNDS animation",
-                animator.getAnimationType(), PipAnimationController.ANIM_TYPE_BOUNDS);
+                animator.getAnimationType(), PipTransitionController.ANIM_TYPE_BOUNDS);
     }
 
     @Test

@@ -193,16 +193,18 @@ class TaskStackTransitionObserver(
     override fun onTransitionMerged(merged: IBinder, playing: IBinder) {}
 
     override fun onTransitionFinished(transition: IBinder, aborted: Boolean) {
-        if (enableShellTopTaskTracking()) {
-            if (pendingCloseTasks.isNotEmpty()) {
-                // Update the visible task list based on the pending close tasks
-                for (change in pendingCloseTasks) {
-                    visibleTasks.removeIf {
-                        it.taskId == change.taskId
-                    }
+        if (!enableShellTopTaskTracking()) {
+            return
+        }
+
+        if (pendingCloseTasks.isNotEmpty()) {
+            // Update the visible task list based on the pending close tasks
+            for (change in pendingCloseTasks) {
+                visibleTasks.removeIf {
+                    it.taskId == change.taskId
                 }
-                updateVisibleTasksList("transition-finished")
             }
+            updateVisibleTasksList("transition-finished")
         }
     }
 

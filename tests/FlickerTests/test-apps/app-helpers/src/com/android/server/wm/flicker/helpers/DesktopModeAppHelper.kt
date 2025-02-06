@@ -87,14 +87,18 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         wmHelper: WindowManagerStateHelper,
         device: UiDevice,
         motionEventHelper: MotionEventHelper = MotionEventHelper(getInstrumentation(), TOUCH),
+        shouldUseDragToDesktop: Boolean = false,
     ) {
         innerHelper.launchViaIntent(wmHelper)
-        if (!isInDesktopWindowingMode(wmHelper)) {
+        if (isInDesktopWindowingMode(wmHelper)) return
+        if (shouldUseDragToDesktop) {
             enterDesktopModeWithDrag(
                 wmHelper = wmHelper,
                 device = device,
                 motionEventHelper = motionEventHelper
             )
+        } else {
+            enterDesktopModeFromAppHandleMenu(wmHelper, device)
         }
     }
 
@@ -280,11 +284,20 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
             .waitForAndVerify()
     }
 
-    /** Click close button on the app header for the given app. */
-    fun closeDesktopApp(wmHelper: WindowManagerStateHelper, device: UiDevice) {
-        val caption = getCaptionForTheApp(wmHelper, device)
-        val closeButton = caption?.children?.find { it.resourceName.endsWith(CLOSE_BUTTON) }
-        closeButton?.click()
+    /** Close a desktop app by clicking the close button on the app header for the given app or by
+     *  pressing back. */
+    fun closeDesktopApp(
+        wmHelper: WindowManagerStateHelper,
+        device: UiDevice,
+        usingBackNavigation: Boolean = false
+    ) {
+        if (usingBackNavigation) {
+            device.pressBack()
+        } else {
+            val caption = getCaptionForTheApp(wmHelper, device)
+            val closeButton = caption?.children?.find { it.resourceName.endsWith(CLOSE_BUTTON) }
+            closeButton?.click()
+        }
         wmHelper
             .StateSyncBuilder()
             .withAppTransitionIdle()

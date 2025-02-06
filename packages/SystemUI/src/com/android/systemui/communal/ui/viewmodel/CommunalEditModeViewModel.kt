@@ -241,8 +241,9 @@ constructor(
             )
             putExtra(
                 AppWidgetManager.EXTRA_CATEGORY_FILTER,
-                CommunalWidgetCategories.defaultCategories,
+                CommunalWidgetCategories.includedCategories,
             )
+            putExtra(EXTRA_CATEGORY_EXCLUSION_FILTER, CommunalWidgetCategories.excludedCategories)
 
             communalSettingsInteractor.workProfileUserDisallowedByDevicePolicy.value?.let {
                 putExtra(EXTRA_USER_ID_FILTER, arrayListOf(it.id))
@@ -281,6 +282,7 @@ constructor(
 
         private const val EXTRA_DESIRED_WIDGET_WIDTH = "desired_widget_width"
         private const val EXTRA_DESIRED_WIDGET_HEIGHT = "desired_widget_height"
+        private const val EXTRA_CATEGORY_EXCLUSION_FILTER = "category_exclusion_filter"
         private const val EXTRA_PICKER_TITLE = "picker_title"
         private const val EXTRA_PICKER_DESCRIPTION = "picker_description"
         private const val EXTRA_UI_SURFACE_KEY = "ui_surface"

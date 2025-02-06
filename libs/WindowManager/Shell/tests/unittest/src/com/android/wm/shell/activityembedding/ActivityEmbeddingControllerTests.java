@@ -34,7 +34,6 @@ import android.animation.ValueAnimator;
 import android.graphics.Rect;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 
@@ -46,7 +45,6 @@ import com.android.window.flags.Flags;
 import com.android.wm.shell.transition.TransitionInfoBuilder;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -63,9 +61,6 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
     private static final Rect TASK_BOUNDS = new Rect(0, 0, 1000, 500);
     private static final Rect EMBEDDED_LEFT_BOUNDS = new Rect(0, 0, 500, 500);
     private static final Rect EMBEDDED_RIGHT_BOUNDS = new Rect(500, 0, 1000, 500);
-
-    @Rule
-    public SetFlagsRule mRule = new SetFlagsRule();
 
     @Before
     public void setup() {
@@ -276,7 +271,9 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
         mController.startAnimation(mTransition, info, mStartTransaction,
                 mFinishTransaction, mFinishCallback);
         verify(mFinishCallback, never()).onTransitionFinished(any());
-        mController.mergeAnimation(mTransition, info, new SurfaceControl.Transaction(),
+        mController.mergeAnimation(mTransition, info,
+                new SurfaceControl.Transaction(),
+                new SurfaceControl.Transaction(),
                 mTransition, (wct) -> {});
         verify(mFinishCallback).onTransitionFinished(any());
     }

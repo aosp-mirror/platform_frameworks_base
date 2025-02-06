@@ -17,9 +17,9 @@
 package com.android.wm.shell;
 
 import com.android.internal.protolog.LegacyProtoLogImpl;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.protolog.common.ILogger;
 import com.android.internal.protolog.common.IProtoLog;
-import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellInit;
 
@@ -29,7 +29,7 @@ import java.util.Arrays;
 /**
  * Controls the {@link ProtoLog} in WMShell via adb shell commands.
  *
- * Use with {@code adb shell dumpsys activity service SystemUIService WMShell protolog ...}.
+ * Use with {@code adb shell wm shell protolog ...}.
  */
 public class ProtoLogController implements ShellCommandHandler.ShellCommandActionHandler {
     private final ShellCommandHandler mShellCommandHandler;

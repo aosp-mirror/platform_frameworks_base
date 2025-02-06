@@ -278,7 +278,8 @@ public class HdmiCecNetwork {
     }
 
     private void invokeDeviceEventListener(HdmiDeviceInfo info, int event) {
-        if (!hideDevicesBehindLegacySwitch(info)) {
+        if (event == HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE ||
+                    !hideDevicesBehindLegacySwitch(info)) {
             mHdmiControlService.invokeDeviceEventListeners(info, event);
         }
     }

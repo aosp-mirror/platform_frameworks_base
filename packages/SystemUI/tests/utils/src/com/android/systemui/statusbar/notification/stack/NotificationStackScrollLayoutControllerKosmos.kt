@@ -21,3 +21,6 @@ import com.android.systemui.util.mockito.mock
 
 val Kosmos.notificationStackScrollLayoutController by
     Kosmos.Fixture { mock<NotificationStackScrollLayoutController>() }
+
+val Kosmos.notificationStackRebindingHider by
+    Kosmos.Fixture { mock<NotificationStackRebindingHider>() }

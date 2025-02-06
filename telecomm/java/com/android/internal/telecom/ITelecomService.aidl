@@ -409,4 +409,16 @@ interface ITelecomService {
      */
     void addCall(in CallAttributes callAttributes, in ICallEventCallback callback, String callId,
         String callingPackage);
+
+    /**
+     * @see TelecomServiceImpl#hasForegroundServiceDelegation
+     */
+    boolean hasForegroundServiceDelegation(in PhoneAccountHandle phoneAccountHandle,
+                                                       String callingPackage);
+    void setMetricsTestMode(boolean enabled);
+
+    /**
+     * @see TelecomServiceImpl#waitForAudioToUpdate
+     */
+     void waitForAudioToUpdate(boolean expectActive);
 }

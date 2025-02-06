@@ -17,13 +17,14 @@
 package com.android.wm.shell.desktopmode.education
 
 import android.annotation.IntegerRes
+import android.app.ActivityManager.RunningTaskInfo
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.os.SystemClock
 import android.provider.Settings.Secure
 import com.android.wm.shell.R
 import com.android.wm.shell.desktopmode.CaptionState
-import com.android.wm.shell.desktopmode.education.AppHandleEducationController.Companion.SHOULD_OVERRIDE_EDUCATION_CONDITIONS
+import com.android.wm.shell.desktopmode.education.AppHandleEducationController.Companion.FORCE_SHOW_DESKTOP_MODE_EDUCATION
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository
 import com.android.wm.shell.desktopmode.education.data.WindowingEducationProto
 import java.time.Duration
@@ -37,26 +38,28 @@ class AppHandleEducationFilter(
     private val usageStatsManager =
         context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
-    /**
-     * Returns true if conditions to show app handle education are met, returns false otherwise.
-     *
-     * If [SHOULD_OVERRIDE_EDUCATION_CONDITIONS] is true, this method will always return
-     * ![captionState.isHandleMenuExpanded].
-     */
-    suspend fun shouldShowAppHandleEducation(captionState: CaptionState): Boolean {
-        if ((captionState as CaptionState.AppHandle).isHandleMenuExpanded) return false
-        if (SHOULD_OVERRIDE_EDUCATION_CONDITIONS) return true
+    suspend fun shouldShowDesktopModeEducation(captionState: CaptionState.AppHeader): Boolean =
+        shouldShowDesktopModeEducation(captionState.runningTaskInfo)
 
-        val focusAppPackageName =
-            captionState.runningTaskInfo.topActivityInfo?.packageName ?: return false
+    suspend fun shouldShowDesktopModeEducation(captionState: CaptionState.AppHandle): Boolean =
+        shouldShowDesktopModeEducation(captionState.runningTaskInfo)
+
+    /**
+     * Returns true if conditions to show app handle, enter desktop mode and exit desktop mode
+     * education are met based on the app info and usage, returns false otherwise.
+     *
+     * If [FORCE_SHOW_DESKTOP_MODE_EDUCATION] is true, this method will always return true.
+     */
+    private suspend fun shouldShowDesktopModeEducation(taskInfo: RunningTaskInfo): Boolean {
+        if (FORCE_SHOW_DESKTOP_MODE_EDUCATION) return true
+
+        val focusAppPackageName = taskInfo.topActivityInfo?.packageName ?: return false
         val windowingEducationProto =
             appHandleEducationDatastoreRepository.windowingEducationProto()
 
         return isFocusAppInAllowlist(focusAppPackageName) &&
             !isOtherEducationShowing() &&
             hasSufficientTimeSinceSetup() &&
-            !isAppHandleHintViewedBefore(windowingEducationProto) &&
-            !isAppHandleHintUsedBefore(windowingEducationProto) &&
             hasMinAppUsage(windowingEducationProto, focusAppPackageName)
     }
 
@@ -78,14 +81,6 @@ class AppHandleEducationFilter(
             convertIntegerResourceToDuration(
                 R.integer.desktop_windowing_education_required_time_since_setup_seconds
             )
-
-    private fun isAppHandleHintViewedBefore(
-        windowingEducationProto: WindowingEducationProto
-    ): Boolean = windowingEducationProto.hasAppHandleHintViewedTimestampMillis()
-
-    private fun isAppHandleHintUsedBefore(
-        windowingEducationProto: WindowingEducationProto
-    ): Boolean = windowingEducationProto.hasAppHandleHintUsedTimestampMillis()
 
     private suspend fun hasMinAppUsage(
         windowingEducationProto: WindowingEducationProto,

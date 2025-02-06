@@ -27,10 +27,13 @@ import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RoundRectShape
+import android.os.Bundle
 import android.view.View
 import android.view.View.OnLongClickListener
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -46,10 +49,10 @@ import com.android.internal.R.color.materialColorSecondaryContainer
 import com.android.internal.R.color.materialColorSurfaceContainerHigh
 import com.android.internal.R.color.materialColorSurfaceContainerLow
 import com.android.internal.R.color.materialColorSurfaceDim
-import com.android.window.flags.Flags
-import com.android.window.flags.Flags.enableMinimizeButton
 import com.android.wm.shell.R
 import android.window.DesktopModeFlags
+import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat
 import com.android.wm.shell.windowdecor.MaximizeButtonView
 import com.android.wm.shell.windowdecor.common.DecorThemeUtil
 import com.android.wm.shell.windowdecor.common.OPACITY_100
@@ -72,7 +75,10 @@ class AppHeaderViewHolder(
         onCaptionButtonClickListener: View.OnClickListener,
         private val onLongClickListener: OnLongClickListener,
         onCaptionGenericMotionListener: View.OnGenericMotionListener,
-        onMaximizeHoverAnimationFinishedListener: () -> Unit
+        mOnLeftSnapClickListener: () -> Unit,
+        mOnRightSnapClickListener: () -> Unit,
+        mOnMaximizeOrRestoreClickListener: () -> Unit,
+        onMaximizeHoverAnimationFinishedListener: () -> Unit,
 ) : WindowDecorationViewHolder<AppHeaderViewHolder.HeaderData>(rootView) {
 
     data class HeaderData(
@@ -154,6 +160,91 @@ class AppHeaderViewHolder(
         minimizeWindowButton.setOnTouchListener(onCaptionTouchListener)
         maximizeButtonView.onHoverAnimationFinishedListener =
                 onMaximizeHoverAnimationFinishedListener
+
+        val a11yActionSnapLeft = AccessibilityAction(
+            R.id.action_snap_left,
+            context.resources.getString(R.string.desktop_mode_a11y_action_snap_left)
+        )
+        val a11yActionSnapRight = AccessibilityAction(
+            R.id.action_snap_right,
+            context.resources.getString(R.string.desktop_mode_a11y_action_snap_right)
+        )
+        val a11yActionMaximizeRestore = AccessibilityAction(
+            R.id.action_maximize_restore,
+            context.resources.getString(R.string.desktop_mode_a11y_action_maximize_restore)
+        )
+
+        captionHandle.accessibilityDelegate = object : View.AccessibilityDelegate() {
+            override fun onInitializeAccessibilityNodeInfo(
+                host: View,
+                info: AccessibilityNodeInfo
+            ) {
+                super.onInitializeAccessibilityNodeInfo(host, info)
+                info.addAction(a11yActionSnapLeft)
+                info.addAction(a11yActionSnapRight)
+                info.addAction(a11yActionMaximizeRestore)
+            }
+
+            override fun performAccessibilityAction(
+                host: View,
+                action: Int,
+                args: Bundle?
+            ): Boolean {
+                when (action) {
+                    R.id.action_snap_left -> mOnLeftSnapClickListener.invoke()
+                    R.id.action_snap_right -> mOnRightSnapClickListener.invoke()
+                    R.id.action_maximize_restore -> mOnMaximizeOrRestoreClickListener.invoke()
+                }
+
+                return super.performAccessibilityAction(host, action, args)
+            }
+        }
+        maximizeWindowButton.accessibilityDelegate = object : View.AccessibilityDelegate() {
+            override fun onInitializeAccessibilityNodeInfo(
+                host: View,
+                info: AccessibilityNodeInfo
+            ) {
+                super.onInitializeAccessibilityNodeInfo(host, info)
+                info.addAction(AccessibilityAction.ACTION_CLICK)
+                info.addAction(a11yActionSnapLeft)
+                info.addAction(a11yActionSnapRight)
+                info.addAction(a11yActionMaximizeRestore)
+                host.isClickable = true
+            }
+
+            override fun performAccessibilityAction(
+                host: View,
+                action: Int,
+                args: Bundle?
+            ): Boolean {
+                when (action) {
+                    AccessibilityAction.ACTION_CLICK.id -> host.performClick()
+                    R.id.action_snap_left -> mOnLeftSnapClickListener.invoke()
+                    R.id.action_snap_right -> mOnRightSnapClickListener.invoke()
+                    R.id.action_maximize_restore -> mOnMaximizeOrRestoreClickListener.invoke()
+                }
+
+                return super.performAccessibilityAction(host, action, args)
+            }
+        }
+
+        with(context.resources) {
+            // Update a11y read out to say "double tap to maximize or restore window size"
+            ViewCompat.replaceAccessibilityAction(
+                maximizeWindowButton,
+                AccessibilityActionCompat.ACTION_CLICK,
+                getString(R.string.maximize_button_talkback_action_maximize_restore_text),
+                null
+            )
+
+            // Update a11y read out to say "double tap to minimize app window"
+            ViewCompat.replaceAccessibilityAction(
+                minimizeWindowButton,
+                AccessibilityActionCompat.ACTION_CLICK,
+                getString(R.string.minimize_button_talkback_action_maximize_restore_text),
+                null
+            )
+        }
     }
 
     override fun bindData(data: HeaderData) {
@@ -226,7 +317,7 @@ class AppHeaderViewHolder(
             minimizeWindowButton.background = getDrawable(1)
         }
         maximizeButtonView.setAnimationTints(isDarkMode())
-        minimizeWindowButton.isGone = !enableMinimizeButton()
+        minimizeWindowButton.isGone = !DesktopModeFlags.ENABLE_MINIMIZE_BUTTON.isTrue()
     }
 
     private fun bindDataWithThemedHeaders(
@@ -276,7 +367,7 @@ class AppHeaderViewHolder(
                 drawableInsets = minimizeDrawableInsets
             )
         }
-        minimizeWindowButton.isGone = !enableMinimizeButton()
+        minimizeWindowButton.isGone = !DesktopModeFlags.ENABLE_MINIMIZE_BUTTON.isTrue()
         // Maximize button.
         maximizeButtonView.apply {
             setAnimationTints(
@@ -329,11 +420,6 @@ class AppHeaderViewHolder(
     }
 
     fun runOnAppChipGlobalLayout(runnable: () -> Unit) {
-        if (openMenuButton.isAttachedToWindow) {
-            // App chip is already inflated.
-            runnable()
-            return
-        }
         // Wait for app chip to be inflated before notifying repository.
         openMenuButton.viewTreeObserver.addOnGlobalLayoutListener(object :
             OnGlobalLayoutListener {
@@ -376,7 +462,8 @@ class AppHeaderViewHolder(
     private fun shouldShowExitFullImmersiveOrMaximizeIcon(
         isTaskMaximized: Boolean,
         inFullImmersiveState: Boolean
-    ): Boolean = (Flags.enableFullyImmersiveInDesktop() && inFullImmersiveState) || isTaskMaximized
+    ): Boolean = (DesktopModeFlags.ENABLE_FULLY_IMMERSIVE_IN_DESKTOP.isTrue && inFullImmersiveState)
+            || isTaskMaximized
 
     private fun getHeaderStyle(header: Header): HeaderStyle {
         return HeaderStyle(
@@ -634,6 +721,9 @@ class AppHeaderViewHolder(
             onCaptionButtonClickListener: View.OnClickListener,
             onLongClickListener: OnLongClickListener,
             onCaptionGenericMotionListener: View.OnGenericMotionListener,
+            mOnLeftSnapClickListener: () -> Unit,
+            mOnRightSnapClickListener: () -> Unit,
+            mOnMaximizeOrRestoreClickListener: () -> Unit,
             onMaximizeHoverAnimationFinishedListener: () -> Unit,
         ): AppHeaderViewHolder = AppHeaderViewHolder(
             rootView,
@@ -641,6 +731,9 @@ class AppHeaderViewHolder(
             onCaptionButtonClickListener,
             onLongClickListener,
             onCaptionGenericMotionListener,
+            mOnLeftSnapClickListener,
+            mOnRightSnapClickListener,
+            mOnMaximizeOrRestoreClickListener,
             onMaximizeHoverAnimationFinishedListener,
         )
     }

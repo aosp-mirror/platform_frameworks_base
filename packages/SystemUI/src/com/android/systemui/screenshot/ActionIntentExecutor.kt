@@ -132,6 +132,7 @@ constructor(
         val connector = getCrossProfileConnector(user)
         val completion = CompletableDeferred<Unit>()
         connector.post {
+            intent.collectExtraIntentKeys()
             it.launchIntent(intent, bundle)
             completion.complete(Unit)
         }

@@ -80,13 +80,6 @@ interface CustomizationProviderClient {
     fun observeFlags(): Flow<List<Flag>>
 
     /**
-     * Returns [Flow] for observing the variables from the System UI.
-     *
-     * @see [queryRuntimeValues]
-     */
-    fun observeRuntimeValues(): Flow<Bundle>
-
-    /**
      * Returns all available affordances supported by the device, regardless of current slot
      * placement.
      */
@@ -291,6 +284,9 @@ class CustomizationProviderClientImpl(
                                     Contract.RuntimeValuesTable.KEY_IS_SHADE_LAYOUT_WIDE -> {
                                         putBoolean(name, cursor.getInt(valueColumnIndex) == 1)
                                     }
+                                    Contract.RuntimeValuesTable.KEY_UDFPS_LOCATION -> {
+                                        putString(name, cursor.getString(valueColumnIndex))
+                                    }
                                 }
                             }
                         }
@@ -305,10 +301,6 @@ class CustomizationProviderClientImpl(
 
     override fun observeFlags(): Flow<List<CustomizationProviderClient.Flag>> {
         return observeUri(Contract.FlagsTable.URI).map { queryFlags() }
-    }
-
-    override fun observeRuntimeValues(): Flow<Bundle> {
-        return observeUri(Contract.RuntimeValuesTable.URI).map { queryRuntimeValues() }
     }
 
     override suspend fun queryAffordances(): List<CustomizationProviderClient.Affordance> {

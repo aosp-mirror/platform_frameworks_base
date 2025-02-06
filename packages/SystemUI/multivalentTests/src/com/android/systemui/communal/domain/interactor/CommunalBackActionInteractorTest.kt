@@ -29,12 +29,10 @@ import com.android.systemui.kosmos.runCurrent
 import com.android.systemui.kosmos.runTest
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class CommunalBackActionInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()

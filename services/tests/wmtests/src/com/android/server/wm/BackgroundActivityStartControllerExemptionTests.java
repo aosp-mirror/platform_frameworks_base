@@ -907,7 +907,6 @@ public class BackgroundActivityStartControllerExemptionTests {
         int realCallingUid = REGULAR_UID_2;
         int realCallingPid = REGULAR_PID_2;
 
-        mDeviceConfig.set("system_exempt_from_activity_bg_start_restriction_enabled", "true");
         AppOpsManager appOpsManager = mock(AppOpsManager.class);
         when(mService.getAppOpsManager()).thenReturn(appOpsManager);
         when(appOpsManager.checkOpNoThrow(eq(

@@ -35,7 +35,6 @@ import android.util.Log
 import android.view.Display
 import android.view.ScrollCaptureResponse
 import android.view.ViewRootImpl.ActivityConfigCallback
-import android.view.WindowManager
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
 import android.widget.Toast
 import android.window.WindowContext
@@ -218,9 +217,7 @@ internal constructor(
         window.setFocusable(true)
         viewProxy.requestFocus()
 
-        if (screenshot.type != WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE) {
-            enqueueScrollCaptureRequest(requestId, screenshot.userHandle)
-        }
+        enqueueScrollCaptureRequest(requestId, screenshot.userHandle)
 
         window.attachWindow()
 

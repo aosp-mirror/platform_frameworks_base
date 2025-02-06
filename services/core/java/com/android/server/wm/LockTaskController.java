@@ -609,7 +609,6 @@ public class LockTaskController {
                     statusBarService.showPinningEnterExitToast(false /* entering */);
                 }
             }
-            mWindowManager.onLockTaskStateChanged(mLockTaskModeState);
         } catch (RemoteException ex) {
             throw new RuntimeException(ex);
         }
@@ -745,7 +744,6 @@ public class LockTaskController {
                     statusBarService.showPinningEnterExitToast(true /* entering */);
                 }
             }
-            mWindowManager.onLockTaskStateChanged(lockTaskModeState);
             mLockTaskModeState = lockTaskModeState;
             mTaskChangeNotificationController.notifyLockTaskModeChanged(mLockTaskModeState);
             setStatusBarState(lockTaskModeState, userId);

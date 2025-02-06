@@ -406,9 +406,6 @@ int OptimizeCommand::Action(const std::vector<std::string>& args) {
     return 1;
   }
 
-  if (options_.enable_sparse_encoding) {
-    options_.table_flattener_options.sparse_entries = SparseEntriesMode::Enabled;
-  }
   if (options_.force_sparse_encoding) {
     options_.table_flattener_options.sparse_entries = SparseEntriesMode::Forced;
   }

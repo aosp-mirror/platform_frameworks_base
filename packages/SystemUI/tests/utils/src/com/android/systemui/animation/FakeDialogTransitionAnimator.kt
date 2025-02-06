@@ -24,7 +24,6 @@ fun fakeDialogTransitionAnimator(
     @Main mainExecutor: Executor,
     isUnlocked: Boolean = true,
     isShowingAlternateAuthOnUnlock: Boolean = false,
-    isPredictiveBackQsDialogAnim: Boolean = false,
     interactionJankMonitor: InteractionJankMonitor,
 ): DialogTransitionAnimator {
     return DialogTransitionAnimator(
@@ -35,10 +34,6 @@ fun fakeDialogTransitionAnimator(
                 isShowingAlternateAuthOnUnlock = isShowingAlternateAuthOnUnlock,
             ),
         interactionJankMonitor = interactionJankMonitor,
-        featureFlags =
-            object : AnimationFeatureFlags {
-                override val isPredictiveBackQsDialogAnim = isPredictiveBackQsDialogAnim
-            },
         transitionAnimator = fakeTransitionAnimator(mainExecutor),
         isForTesting = true,
     )
@@ -50,6 +45,8 @@ private class FakeCallback(
     private val isShowingAlternateAuthOnUnlock: Boolean = false,
 ) : DialogTransitionAnimator.Callback {
     override fun isDreaming(): Boolean = isDreaming
+
     override fun isUnlocked(): Boolean = isUnlocked
+
     override fun isShowingAlternateAuthOnUnlock() = isShowingAlternateAuthOnUnlock
 }

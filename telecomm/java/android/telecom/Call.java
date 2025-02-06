@@ -52,6 +52,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Represents an ongoing phone call that the in-call app should present to the user.
  */
 public final class Call {
+    private static final String LOG_TAG = "TelecomCall";
+
     /**
      * The state of a {@code Call} when newly created.
      */
@@ -2912,6 +2914,11 @@ public final class Call {
                     }
                 } catch (BadParcelableException e) {
                     return false;
+                } catch (ClassCastException e) {
+                    Log.e(LOG_TAG, e, "areBundlesEqual: failure comparing bundle key %s", key);
+                    // until we know what is causing this, we should rethrow -- this is still not
+                    // expected.
+                    throw e;
                 }
             }
         }

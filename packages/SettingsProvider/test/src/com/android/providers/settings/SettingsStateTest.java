@@ -31,18 +31,19 @@ import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.Xml;
-import android.util.proto.ProtoOutputStream;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.modules.utils.TypedXmlSerializer;
 
-import android.platform.test.annotations.EnableFlags;
-import android.platform.test.annotations.DisableFlags;
-import android.platform.test.flag.junit.SetFlagsRule;
-
 import com.google.common.base.Strings;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -52,11 +53,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class SettingsStateTest {
@@ -1085,124 +1081,6 @@ public class SettingsStateTest {
         assertTrue(flag1.getHasLocalOverride());
     }
 
-    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
-
-    @Test
-    @EnableFlags(com.android.aconfig_new_storage.Flags.FLAG_ENABLE_ACONFIG_STORAGE_DAEMON)
-    public void testHandleBulkSyncWithAconfigdEnabled() {
-        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
-        Object lock = new Object();
-        SettingsState settingsState =
-                new SettingsState(
-                        InstrumentationRegistry.getContext(),
-                        lock,
-                        mSettingsFile,
-                        configKey,
-                        SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED,
-                        Looper.getMainLooper());
-
-        Map<String, AconfigdFlagInfo> flags = new HashMap<>();
-        flags.put(
-                "com.android.flags/flag1",
-                AconfigdFlagInfo.newBuilder()
-                        .setPackageName("com.android.flags")
-                        .setFlagName("flag1")
-                        .setBootFlagValue("true")
-                        .setIsReadWrite(true)
-                        .build());
-
-        flags.put(
-                "com.android.flags/flag2",
-                AconfigdFlagInfo.newBuilder()
-                        .setPackageName("com.android.flags")
-                        .setFlagName("flag2")
-                        .setBootFlagValue("true")
-                        .setIsReadWrite(false)
-                        .build());
-
-        String bulkSyncMarker = "aconfigd_marker/bulk_synced";
-        String bulkSyncCounter =
-                "core_experiments_team_internal/" +
-                "BulkSyncTriggerCounterFlag__bulk_sync_trigger_counter";
-
-        synchronized (lock) {
-            settingsState.insertSettingLocked(bulkSyncMarker, "0", null, false, "aconfig");
-            settingsState.insertSettingLocked(bulkSyncCounter, "1", null, false,
-                    "com.google.android.platform.core_experiments_team_internal");
-
-            // first bulk sync
-            ProtoOutputStream requests = settingsState.handleBulkSyncToNewStorage(flags);
-            assertTrue(requests != null);
-            String value = settingsState.getSettingLocked("aconfigd_marker/bulk_synced").getValue();
-            assertEquals("1", value);
-
-            // send time should no longer bulk sync
-            requests = settingsState.handleBulkSyncToNewStorage(flags);
-            assertNull(requests);
-            value = settingsState.getSettingLocked("aconfigd_marker/bulk_synced").getValue();
-            assertEquals("1", value);
-
-            // won't sync if the marker is string
-            settingsState.insertSettingLocked(bulkSyncMarker, "true", null, false, "aconfig");
-            settingsState.insertSettingLocked(bulkSyncCounter, "0", null, false,
-                    "com.google.android.platform.core_experiments_team_internal");
-            requests = settingsState.handleBulkSyncToNewStorage(flags);
-            assertNull(requests);
-            value = settingsState.getSettingLocked("aconfigd_marker/bulk_synced").getValue();
-            assertEquals("0", value);
-
-            // won't sync if the marker and counter value are the same
-            settingsState.insertSettingLocked(bulkSyncMarker, "1", null, false, "aconfig");
-            settingsState.insertSettingLocked(bulkSyncCounter, "1", null, false,
-                    "com.google.android.platform.core_experiments_team_internal");
-            requests = settingsState.handleBulkSyncToNewStorage(flags);
-            assertNull(requests);
-            value = settingsState.getSettingLocked("aconfigd_marker/bulk_synced").getValue();
-            assertEquals("1", value);
-        }
-    }
-
-    @Test
-    @DisableFlags(com.android.aconfig_new_storage.Flags.FLAG_ENABLE_ACONFIG_STORAGE_DAEMON)
-    public void testHandleBulkSyncWithAconfigdDisabled() {
-        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
-        Object lock = new Object();
-        SettingsState settingsState = new SettingsState(
-                InstrumentationRegistry.getContext(), lock, mSettingsFile, configKey,
-                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
-
-        Map<String, AconfigdFlagInfo> flags = new HashMap<>();
-        String bulkSyncMarker = "aconfigd_marker/bulk_synced";
-        String bulkSyncCounter =
-                "core_experiments_team_internal/" +
-                "BulkSyncTriggerCounterFlag__bulk_sync_trigger_counter";
-        synchronized (lock) {
-            settingsState.insertSettingLocked("aconfigd_marker/bulk_synced",
-                    "true", null, false, "aconfig");
-
-            // when aconfigd is off, should change the marker to false
-            ProtoOutputStream requests = settingsState.handleBulkSyncToNewStorage(flags);
-            assertNull(requests);
-            String value = settingsState.getSettingLocked("aconfigd_marker/bulk_synced").getValue();
-            assertEquals("0", value);
-
-            // marker started with false value, after call, it should remain false
-            requests = settingsState.handleBulkSyncToNewStorage(flags);
-            assertNull(requests);
-            value = settingsState.getSettingLocked("aconfigd_marker/bulk_synced").getValue();
-            assertEquals("0", value);
-
-            // won't sync
-            settingsState.insertSettingLocked(bulkSyncMarker, "0", null, false, "aconfig");
-            settingsState.insertSettingLocked(bulkSyncCounter, "1", null, false,
-                    "com.google.android.platform.core_experiments_team_internal");
-            requests = settingsState.handleBulkSyncToNewStorage(flags);
-            assertNull(requests);
-            value = settingsState.getSettingLocked("aconfigd_marker/bulk_synced").getValue();
-            assertEquals("0", value);
-        }
-    }
-
     @Test
     public void testGetAllAconfigFlagsFromSettings() throws Exception {
         final Object lock = new Object();
@@ -1302,86 +1180,5 @@ public class SettingsStateTest {
         assertNull(flag3.getServerFlagValue());
         assertFalse(flag3.getHasServerOverride());
         assertFalse(flag3.getHasLocalOverride());
-    }
-
-    @Test
-    @RequiresFlagsDisabled(Flags.FLAG_DISABLE_BULK_COMPARE)
-    public void testCompareFlagValueInNewStorage() {
-                int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
-        Object lock = new Object();
-        SettingsState settingsState =
-                new SettingsState(
-                        InstrumentationRegistry.getContext(),
-                        lock,
-                        mSettingsFile,
-                        configKey,
-                        SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED,
-                        Looper.getMainLooper());
-
-        AconfigdFlagInfo defaultFlag1 =
-                AconfigdFlagInfo.newBuilder()
-                        .setPackageName("com.android.flags")
-                        .setFlagName("flag1")
-                        .setDefaultFlagValue("false")
-                        .setServerFlagValue("true")
-                        .setHasServerOverride(true)
-                        .setIsReadWrite(true)
-                        .build();
-
-        AconfigdFlagInfo expectedFlag1 =
-                AconfigdFlagInfo.newBuilder()
-                        .setPackageName("com.android.flags")
-                        .setFlagName("flag1")
-                        .setServerFlagValue("true")
-                        .setDefaultFlagValue("false")
-                        .setHasServerOverride(true)
-                        .setIsReadWrite(true)
-                        .build();
-
-        Map<String, AconfigdFlagInfo> aconfigdMap = new HashMap<>();
-        Map<String, AconfigdFlagInfo> defaultMap = new HashMap<>();
-
-        defaultMap.put("com.android.flags.flag1", defaultFlag1);
-        aconfigdMap.put("com.android.flags.flag1", expectedFlag1);
-
-        int ret = settingsState.compareFlagValueInNewStorage(defaultMap, aconfigdMap);
-        assertEquals(0, ret);
-
-        String value =
-                settingsState.getSettingLocked("aconfigd_marker/compare_diff_num").getValue();
-        assertEquals("0", value);
-
-        AconfigdFlagInfo defaultFlag2 =
-                AconfigdFlagInfo.newBuilder()
-                        .setPackageName("com.android.flags")
-                        .setFlagName("flag2")
-                        .setDefaultFlagValue("false")
-                        .build();
-        defaultMap.put("com.android.flags.flag2", defaultFlag2);
-
-        ret = settingsState.compareFlagValueInNewStorage(defaultMap, aconfigdMap);
-        // missing from new storage
-        assertEquals(1, ret);
-        value =
-                settingsState.getSettingLocked("aconfigd_marker/compare_diff_num").getValue();
-        assertEquals("1", value);
-
-        AconfigdFlagInfo expectedFlag2 =
-        AconfigdFlagInfo.newBuilder()
-                .setPackageName("com.android.flags")
-                .setFlagName("flag2")
-                .setServerFlagValue("true")
-                .setLocalFlagValue("true")
-                .setDefaultFlagValue("false")
-                .setHasServerOverride(true)
-                .setHasLocalOverride(true)
-                .build();
-        aconfigdMap.put("com.android.flags.flag2", expectedFlag2);
-        ret = settingsState.compareFlagValueInNewStorage(defaultMap, aconfigdMap);
-        // skip the server and local value comparison when the flag is read_only
-        assertEquals(0, ret);
-        value =
-                settingsState.getSettingLocked("aconfigd_marker/compare_diff_num").getValue();
-        assertEquals("0", value);
     }
 }

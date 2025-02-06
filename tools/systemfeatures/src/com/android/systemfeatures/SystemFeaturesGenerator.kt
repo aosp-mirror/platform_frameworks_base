@@ -263,7 +263,7 @@ object SystemFeaturesGenerator {
                 .returns(Boolean::class.java)
                 .addParameter(CONTEXT_CLASS, "context")
                 .addParameter(String::class.java, "featureName")
-                .addStatement("return context.getPackageManager().hasSystemFeature(featureName, 0)")
+                .addStatement("return context.getPackageManager().hasSystemFeature(featureName)")
                 .build()
         )
     }

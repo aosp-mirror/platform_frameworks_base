@@ -34,6 +34,9 @@ interface CarrierConfigRepository {
      */
     suspend fun startObservingCarrierConfigUpdates()
 
-    /** Gets a cached [SystemUiCarrierConfig], or creates a new one which will track the defaults */
-    fun getOrCreateConfigForSubId(subId: Int): SystemUiCarrierConfig
+    /**
+     * Gets a cached [SystemUiCarrierConfig], or creates a new one which will track the defaults. A
+     * null [maybeSubId] will return the default carrier config.
+     */
+    fun getOrCreateConfigForSubId(maybeSubId: Int?): SystemUiCarrierConfig
 }

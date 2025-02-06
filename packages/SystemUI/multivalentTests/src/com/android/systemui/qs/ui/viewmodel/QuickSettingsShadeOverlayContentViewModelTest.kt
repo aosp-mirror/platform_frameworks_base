@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.ui.viewmodel
 
-import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -36,12 +35,13 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.domain.interactor.enableDualShade
 import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.shade.shared.flag.DualShade
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationScrollViewModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -49,12 +49,10 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @EnableSceneContainer
-@EnableFlags(DualShade.FLAG_NAME)
 class QuickSettingsShadeOverlayContentViewModelTest : SysuiTestCase() {
 
     private val kosmos =
@@ -69,6 +67,7 @@ class QuickSettingsShadeOverlayContentViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         kosmos.sceneContainerStartable.start()
+        kosmos.enableDualShade()
         underTest.activateIn(testScope)
     }
 
@@ -126,21 +125,21 @@ class QuickSettingsShadeOverlayContentViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun showHeader_showsOnNarrowScreen() =
+    fun onPanelShapeChanged() =
         testScope.runTest {
-            kosmos.shadeRepository.setShadeLayoutWide(false)
-            runCurrent()
+            var actual: ShadeScrimShape? = null
+            kosmos.notificationScrollViewModel.setQsScrimShapeConsumer { shape -> actual = shape }
 
-            assertThat(underTest.showHeader).isTrue()
-        }
+            val expected =
+                ShadeScrimShape(
+                    bounds = ShadeScrimBounds(left = 10f, top = 0f, right = 710f, bottom = 600f),
+                    topRadius = 0,
+                    bottomRadius = 100,
+                )
 
-    @Test
-    fun showHeader_hidesOnWideScreen() =
-        testScope.runTest {
-            kosmos.shadeRepository.setShadeLayoutWide(true)
-            runCurrent()
+            underTest.onPanelShapeChanged(expected)
 
-            assertThat(underTest.showHeader).isFalse()
+            assertThat(actual).isEqualTo(expected)
         }
 
     private fun TestScope.lockDevice() {

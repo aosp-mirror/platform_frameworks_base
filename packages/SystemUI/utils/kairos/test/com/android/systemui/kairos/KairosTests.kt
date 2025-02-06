@@ -1,14 +1,12 @@
 package com.android.systemui.kairos
 
 import com.android.systemui.kairos.util.Either
-import com.android.systemui.kairos.util.Either.Left
-import com.android.systemui.kairos.util.Either.Right
+import com.android.systemui.kairos.util.Either.First
+import com.android.systemui.kairos.util.Either.Second
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.Maybe.None
-import com.android.systemui.kairos.util.just
+import com.android.systemui.kairos.util.Maybe.Absent
 import com.android.systemui.kairos.util.map
 import com.android.systemui.kairos.util.maybe
-import com.android.systemui.kairos.util.none
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
@@ -142,7 +140,7 @@ class KairosTests {
 
                 // convert Eventss to States so that they can be combined
                 val combined =
-                    left.holdState("left" to 0).combineWith(right.holdState("right" to 0)) { l, r ->
+                    left.holdState("left" to 0).combine(right.holdState("right" to 0)) { l, r ->
                         l to r
                     }
                 combined.changes // get State changes
@@ -590,7 +588,7 @@ class KairosTests {
         intStopEmitter.emit(Unit) // intAH.complete()
         runCurrent()
 
-        // assertEquals(just(10), network.await())
+        // assertEquals(present(10), network.await())
     }
 
     @Test
@@ -692,12 +690,12 @@ class KairosTests {
             }
         runCurrent()
 
-        emitter.emit(Left(10))
+        emitter.emit(First(10))
         runCurrent()
 
         assertEquals(20, result.value)
 
-        emitter.emit(Right(30))
+        emitter.emit(Second(30))
         runCurrent()
 
         assertEquals(-30, result.value)
@@ -908,7 +906,7 @@ class KairosTests {
             activateSpecWithResult(network) {
                 val bA = updater.map { it * 2 }.holdState(0)
                 val bB = updater.holdState(0)
-                val combineD: State<Pair<Int, Int>> = bA.combineWith(bB) { a, b -> a to b }
+                val combineD: State<Pair<Int, Int>> = bA.combine(bB) { a, b -> a to b }
                 val sampleS = emitter.sample(combineD) { _, b -> b }
                 sampleS.nextDeferred()
             }
@@ -1142,16 +1140,13 @@ class KairosTests {
                                                     val eRemoved =
                                                         childChangeById
                                                             .eventsForKey(childId)
-                                                            .filter { it === None }
+                                                            .filter { it === Absent }
                                                             .onEach {
                                                                 println(
                                                                     "removing? (groupId=$groupId, childId=$childId)"
                                                                 )
                                                             }
-                                                            .nextOnly(
-                                                                name =
-                                                                    "eRemoved(groupId=$groupId, childId=$childId)"
-                                                            )
+                                                            .nextOnly()
 
                                                     val addChild: Events<Maybe<State<String>>> =
                                                         now.map { mChild }
@@ -1168,13 +1163,9 @@ class KairosTests {
                                                                     "removeChild (groupId=$groupId, childId=$childId)"
                                                                 )
                                                             }
-                                                            .map { none() }
+                                                            .map { Maybe.absent() }
 
-                                                    addChild.mergeWith(
-                                                        removeChild,
-                                                        name =
-                                                            "childUpdatesMerged(groupId=$groupId, childId=$childId)",
-                                                    ) { _, _ ->
+                                                    addChild.mergeWith(removeChild) { _, _ ->
                                                         error("unexpected coincidence")
                                                     }
                                                 }
@@ -1182,7 +1173,7 @@ class KairosTests {
                                         }
                                     val mergeIncrementally: Events<Map<Int, Maybe<State<String>>>> =
                                         map.onEach { println("merge patch: $it") }
-                                            .mergeIncrementallyPromptly(name = "mergeIncrementally")
+                                            .mergeEventsIncrementallyPromptly()
                                     mergeIncrementally
                                         .onEach { println("foldmap patch: $it") }
                                         .foldStateMapIncrementally()
@@ -1203,14 +1194,14 @@ class KairosTests {
         val emitter2 = network.mutableEvents<Map<Int, Maybe<StateFlow<String>>>>()
         println()
         println("init outer 0")
-        e.emit(mapOf(0 to just(emitter2.onEach { println("emitter2 emit: $it") })))
+        e.emit(mapOf(0 to Maybe.present(emitter2.onEach { println("emitter2 emit: $it") })))
         runCurrent()
 
         assertEquals(mapOf(0 to emptyMap()), state.value)
 
         println()
         println("init inner 10")
-        emitter2.emit(mapOf(10 to just(MutableStateFlow("(0, 10)"))))
+        emitter2.emit(mapOf(10 to Maybe.present(MutableStateFlow("(0, 10)"))))
         runCurrent()
 
         assertEquals(mapOf(0 to mapOf(10 to "(0, 10)")), state.value)
@@ -1218,19 +1209,19 @@ class KairosTests {
         // replace
         println()
         println("replace inner 10")
-        emitter2.emit(mapOf(10 to just(MutableStateFlow("(1, 10)"))))
+        emitter2.emit(mapOf(10 to Maybe.present(MutableStateFlow("(1, 10)"))))
         runCurrent()
 
         assertEquals(mapOf(0 to mapOf(10 to "(1, 10)")), state.value)
 
         // remove
-        emitter2.emit(mapOf(10 to none()))
+        emitter2.emit(mapOf(10 to Maybe.absent()))
         runCurrent()
 
         assertEquals(mapOf(0 to emptyMap()), state.value)
 
         // add again
-        emitter2.emit(mapOf(10 to just(MutableStateFlow("(2, 10)"))))
+        emitter2.emit(mapOf(10 to Maybe.present(MutableStateFlow("(2, 10)"))))
         runCurrent()
 
         assertEquals(mapOf(0 to mapOf(10 to "(2, 10)")), state.value)
@@ -1242,9 +1233,9 @@ class KairosTests {
         // batch update
         emitter2.emit(
             mapOf(
-                10 to none(),
-                11 to just(MutableStateFlow("(0, 11)")),
-                12 to just(MutableStateFlow("(0, 12)")),
+                10 to Maybe.absent(),
+                11 to Maybe.present(MutableStateFlow("(0, 11)")),
+                12 to Maybe.present(MutableStateFlow("(0, 12)")),
             )
         )
         runCurrent()
@@ -1278,7 +1269,7 @@ class KairosTests {
         }
 
         var outerCount = 0
-        val laseventss: StateFlow<Pair<StateFlow<Int?>, StateFlow<Int?>>> =
+        val lastEvent: StateFlow<Pair<StateFlow<Int?>, StateFlow<Int?>>> =
             flowOfFlows
                 .map { it.stateIn(backgroundScope, SharingStarted.Eagerly, null) }
                 .pairwise(MutableStateFlow(null))
@@ -1296,18 +1287,18 @@ class KairosTests {
 
         assertEquals(1, outerCount)
         //        assertEquals(1, incCount.subscriptionCount)
-        assertNull(laseventss.value.second.value)
+        assertNull(lastEvent.value.second.value)
 
         incCount.emit(Unit)
         runCurrent()
 
         println("checking")
-        assertEquals(1, laseventss.value.second.value)
+        assertEquals(1, lastEvent.value.second.value)
 
         incCount.emit(Unit)
         runCurrent()
 
-        assertEquals(2, laseventss.value.second.value)
+        assertEquals(2, lastEvent.value.second.value)
 
         newCount.emit(newFlow())
         runCurrent()
@@ -1315,9 +1306,9 @@ class KairosTests {
         runCurrent()
 
         // verify old flow is not getting updates
-        assertEquals(2, laseventss.value.first.value)
+        assertEquals(2, lastEvent.value.first.value)
         // but the new one is
-        assertEquals(1, laseventss.value.second.value)
+        assertEquals(1, lastEvent.value.second.value)
     }
 
     @Test
@@ -1326,7 +1317,7 @@ class KairosTests {
         var observedCount: Int? = null
         activateSpec(network) {
             val (c, j) = asyncScope { input.foldState(0) { _, x -> x + 1 } }
-            deferredBuildScopeAction { c.get().observe { observedCount = it } }
+            deferredBuildScopeAction { c.value.observe { observedCount = it } }
         }
         runCurrent()
         assertEquals(0, observedCount)
@@ -1385,7 +1376,7 @@ class KairosTests {
             activateSpec(network) {
                 val handle =
                     input.observe {
-                        effectCoroutineScope.launch {
+                        launch {
                             runningCount++
                             awaitClose { runningCount-- }
                         }
@@ -1420,7 +1411,7 @@ class KairosTests {
         val specJob =
             activateSpec(network) {
                 input.takeUntil(stopper).observe {
-                    effectCoroutineScope.launch {
+                    launch {
                         runningCount++
                         awaitClose { runningCount-- }
                     }

@@ -26,7 +26,6 @@ import static android.media.LoudnessCodecInfo.CodecMetadataType.CODEC_METADATA_T
 import static android.media.MediaFormat.KEY_AAC_DRC_EFFECT_TYPE;
 import static android.media.MediaFormat.KEY_AAC_DRC_HEAVY_COMPRESSION;
 import static android.media.MediaFormat.KEY_AAC_DRC_TARGET_REFERENCE_LEVEL;
-import static android.media.audio.Flags.automaticBtDeviceType;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -686,12 +685,7 @@ public class LoudnessCodecHelper {
     private int getDeviceSplRange(int internalDeviceType, String address) {
         @AudioDeviceCategory int deviceCategory;
         try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-            if (automaticBtDeviceType()) {
-                deviceCategory = mAudioService.getBluetoothAudioDeviceCategory(address);
-            } else {
-                deviceCategory = mAudioService.getBluetoothAudioDeviceCategory_legacy(
-                        address, AudioSystem.isBluetoothLeDevice(internalDeviceType));
-            }
+            deviceCategory = mAudioService.getBluetoothAudioDeviceCategory(address);
         }
         if (internalDeviceType == AudioSystem.DEVICE_OUT_SPEAKER) {
             final String splRange = SystemProperties.get(

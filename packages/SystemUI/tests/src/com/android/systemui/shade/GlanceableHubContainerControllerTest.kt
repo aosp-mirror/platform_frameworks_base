@@ -69,7 +69,6 @@ import com.android.systemui.statusbar.lockscreen.lockscreenSmartspaceController
 import com.android.systemui.statusbar.notification.stack.notificationStackScrollLayoutController
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -87,7 +86,6 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-@ExperimentalCoroutinesApi
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest

@@ -51,6 +51,14 @@ oneway interface IStatusBar
 
     void showWirelessChargingAnimation(int batteryLevel);
 
+    /**
+     * Sets the new IME window status.
+     *
+     * @param displayId The id of the display to which the IME is bound.
+     * @param vis The IME window visibility.
+     * @param backDisposition The IME back disposition mode.
+     * @param showImeSwitcher Whether the IME Switcher button should be shown.
+     */
     void setImeWindowStatus(int displayId, int vis, int backDisposition, boolean showImeSwitcher);
     void setWindowState(int display, int window, int state);
 
@@ -209,9 +217,14 @@ oneway interface IStatusBar
     void setUdfpsRefreshRateCallback(in IUdfpsRefreshRateRequestCallback callback);
 
     /**
-     * Notifies System UI that the display is ready to show system decorations.
+     * Notifies System UI that the system decorations should be added on the display.
      */
-    void onDisplayReady(int displayId);
+    void onDisplayAddSystemDecorations(int displayId);
+
+    /**
+     * Notifies System UI that the system decorations should be removed from the display.
+     */
+    void onDisplayRemoveSystemDecorations(int displayId);
 
     /**
      * Notifies System UI side of system bar attribute change on the specified display.

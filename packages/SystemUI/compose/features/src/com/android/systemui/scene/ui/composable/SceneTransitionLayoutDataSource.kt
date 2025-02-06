@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.scene.ui.composable
 
 import androidx.compose.runtime.snapshotFlow
@@ -26,7 +24,6 @@ import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.systemui.scene.shared.model.SceneDataSource
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest

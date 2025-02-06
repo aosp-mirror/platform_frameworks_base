@@ -24,14 +24,12 @@ import com.android.systemui.backup.BackupHelper
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
-import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -43,7 +41,6 @@ import kotlinx.coroutines.flow.onStart
  * the question "which affordances should the keyguard show?" for the user associated with the
  * System UI process.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class KeyguardQuickAffordanceLocalUserSelectionManager
 @Inject
@@ -51,7 +48,6 @@ constructor(
     @ShadeDisplayAware private val context: Context,
     private val userFileManager: UserFileManager,
     private val userTracker: UserTracker,
-    private val communalSettingsInteractor: CommunalSettingsInteractor,
     broadcastDispatcher: BroadcastDispatcher,
 ) : KeyguardQuickAffordanceSelectionManager {
 
@@ -129,11 +125,7 @@ constructor(
 
     override fun getSelections(): Map<String, List<String>> {
         // If the custom shortcuts feature is not enabled, ignore prior selections and use defaults
-        // TODO(b/383391342): remove isV2FlagEnabled check and just depend on the resource
-        if (
-            !(context.resources.getBoolean(R.bool.custom_lockscreen_shortcuts_enabled) ||
-                communalSettingsInteractor.isV2FlagEnabled())
-        ) {
+        if (!context.resources.getBoolean(R.bool.custom_lockscreen_shortcuts_enabled)) {
             return defaults
         }
 

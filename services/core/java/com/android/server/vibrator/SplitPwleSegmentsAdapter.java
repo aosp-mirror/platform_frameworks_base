@@ -18,6 +18,7 @@ package com.android.server.vibrator;
 
 import android.hardware.vibrator.IVibrator;
 import android.os.VibratorInfo;
+import android.os.vibrator.Flags;
 import android.os.vibrator.PwleSegment;
 import android.os.vibrator.VibrationEffectSegment;
 import android.util.MathUtils;
@@ -40,7 +41,8 @@ final class SplitPwleSegmentsAdapter implements VibrationSegmentsAdapter {
     @Override
     public int adaptToVibrator(VibratorInfo info, List<VibrationEffectSegment> segments,
             int repeatIndex) {
-        if (!info.hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2)) {
+        if (!Flags.normalizedPwleEffects()
+                || !info.hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2)) {
             // The vibrator does not have PWLE v2 capability, so keep the segments unchanged.
             return repeatIndex;
         }

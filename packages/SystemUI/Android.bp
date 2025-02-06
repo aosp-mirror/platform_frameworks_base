@@ -85,11 +85,13 @@ filegroup {
 filegroup {
     name: "SystemUI-tests-broken-robofiles-run",
     srcs: [
+        "tests/src/**/systemui/keyguard/data/repository/KeyguardTransitionRepositoryTest.kt",
+        "tests/src/**/systemui/power/PowerNotificationWarningsTest.java",
+        "tests/src/**/systemui/user/domain/interactor/RefreshUsersSchedulerTest.kt",
         "tests/src/**/systemui/dreams/touch/CommunalTouchHandlerTest.java",
         "tests/src/**/systemui/shade/NotificationShadeWindowViewControllerTest.kt",
         "tests/src/**/systemui/keyguard/domain/interactor/KeyguardQuickAffordanceInteractorSceneContainerTest.kt",
         "tests/src/**/systemui/statusbar/pipeline/mobile/ui/model/SignalIconModelParameterizedTest.kt",
-        "tests/src/**/systemui/education/domain/interactor/KeyboardTouchpadEduInteractorTest.kt",
         "tests/src/**/systemui/biometrics/udfps/SinglePointerTouchProcessorTest.kt",
         "tests/src/**/systemui/animation/back/FlingOnBackAnimationCallbackTest.kt",
         "tests/src/**/systemui/education/domain/ui/view/ContextualEduDialogTest.kt",
@@ -285,6 +287,7 @@ filegroup {
         "tests/src/**/systemui/statusbar/phone/KeyguardClockPositionAlgorithmTest.java",
         "tests/src/**/systemui/shared/system/RemoteTransitionTest.java",
         "tests/src/**/systemui/qs/tiles/dialog/InternetDetailsContentControllerTest.java",
+        "tests/src/**/systemui/qs/tiles/dialog/InternetDetailsContentManagerTest.kt",
         "tests/src/**/systemui/qs/external/TileLifecycleManagerTest.java",
         "tests/src/**/systemui/ScreenDecorationsTest.java",
         "tests/src/**/systemui/statusbar/policy/BatteryControllerStartableTest.java",
@@ -311,6 +314,7 @@ filegroup {
         "tests/src/**/systemui/statusbar/policy/WalletControllerImplTest.kt",
         "tests/src/**/keyguard/ClockEventControllerTest.kt",
         "tests/src/**/systemui/bluetooth/qsdialog/BluetoothStateInteractorTest.kt",
+        "tests/src/**/systemui/bluetooth/qsdialog/BluetoothDetailsContentManagerTest.kt",
         "tests/src/**/systemui/bluetooth/qsdialog/BluetoothTileDialogDelegateTest.kt",
         "tests/src/**/systemui/bluetooth/qsdialog/BluetoothTileDialogRepositoryTest.kt",
         "tests/src/**/systemui/bluetooth/qsdialog/BluetoothTileDialogViewModelTest.kt",
@@ -420,7 +424,7 @@ android_library {
     ],
     manifest: "AndroidManifest-res.xml",
     flags_packages: [
-        "com_android_systemui_flags",
+        "android.app.flags-aconfig",
     ],
 }
 
@@ -516,6 +520,8 @@ android_library {
         "androidx.activity_activity-compose",
         "androidx.compose.animation_animation-graphics",
         "androidx.lifecycle_lifecycle-viewmodel-compose",
+        "kairos",
+        "aconfig_settings_flags_lib",
     ],
     libs: [
         "keepanno-annotations",
@@ -526,9 +532,13 @@ android_library {
         "-Adagger.fastInit=enabled",
         "-Adagger.explicitBindingConflictsWithInject=ERROR",
         "-Adagger.strictMultibindingValidation=enabled",
+        "-Adagger.useBindingGraphFix=ENABLED",
         "-Aroom.schemaLocation=frameworks/base/packages/SystemUI/schemas",
     ],
-    kotlincflags: ["-Xjvm-default=all"],
+    kotlincflags: [
+        "-Xjvm-default=all",
+        "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+    ],
 
     plugins: [
         "androidx.room_room-compiler-plugin",
@@ -697,6 +707,7 @@ android_library {
         "androidx.lifecycle_lifecycle-viewmodel-compose",
         "TraceurCommon",
         "Traceur-res",
+        "aconfig_settings_flags_lib",
     ],
 }
 
@@ -705,6 +716,9 @@ android_library {
     use_resource_processor: true,
     manifest: "tests/AndroidManifest-base.xml",
     resource_dirs: [],
+
+    kotlin_lang_version: "1.9",
+
     additional_manifests: ["tests/AndroidManifest.xml"],
     srcs: [
         "tests/src/**/*.kt",
@@ -736,6 +750,7 @@ android_library {
         "PlatformMotionTesting",
         "SystemUICustomizationTestUtils",
         "androidx.compose.runtime_runtime",
+        "kairos",
         "kosmos",
         "testables",
         "androidx.test.rules",
@@ -750,7 +765,12 @@ android_library {
         "-Xjvm-default=all",
         // TODO(b/352363800): Why do we need this?
         "-J-Xmx8192M",
+        "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
     ],
+    javacflags: [
+        "-Adagger.useBindingGraphFix=ENABLED",
+    ],
+
     aaptflags: [
         "--extra-packages",
         "com.android.systemui",
@@ -841,8 +861,6 @@ android_robolectric_test {
         "androidx.test.ext.truth",
     ],
 
-    upstream: true,
-
     instrumentation_for: "SystemUIRobo-stub",
     java_resource_dirs: ["tests/robolectric/config"],
     plugins: [
@@ -879,8 +897,6 @@ android_robolectric_test {
         "androidx.test.ext.truth",
     ],
 
-    upstream: true,
-
     instrumentation_for: "SystemUIRobo-stub",
     java_resource_dirs: ["tests/robolectric/config"],
     plugins: [
@@ -916,6 +932,7 @@ android_ravenwood_test {
         "android.test.mock.impl",
     ],
     auto_gen_config: true,
+    team: "trendy_team_ravenwood",
     plugins: [
         "dagger2-compiler",
     ],

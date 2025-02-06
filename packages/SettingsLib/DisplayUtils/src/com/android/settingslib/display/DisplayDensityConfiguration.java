@@ -16,12 +16,19 @@
 
 package com.android.settingslib.display;
 
+import android.annotation.NonNull;
+import android.content.Context;
+import android.hardware.display.DisplayManager;
 import android.os.AsyncTask;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
+import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
+
+import java.util.function.Predicate;
 
 /** Utility methods for controlling the display density. */
 public class DisplayDensityConfiguration {
@@ -84,5 +91,43 @@ public class DisplayDensityConfiguration {
                         Log.w(LOG_TAG, "Unable to save forced display density setting");
                     }
                 });
+    }
+
+    /**
+     * Asynchronously applies display density changes to all displays that satisfy the predicate.
+     *
+     * <p>The change will be applied to the user specified by the value of
+     * {@link UserHandle#myUserId()} at the time the method is called.
+     *
+     * @param context The context
+     * @param predicate Determines which displays to set the density to
+     * @param density The density to force
+     */
+    public static void setForcedDisplayDensity(@NonNull Context context,
+            @NonNull Predicate<DisplayInfo> predicate, final int density) {
+        final int userId = UserHandle.myUserId();
+        DisplayManager dm = context.getSystemService(DisplayManager.class);
+        AsyncTask.execute(() -> {
+            try {
+                for (Display display : dm.getDisplays(
+                        DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)) {
+                    int displayId = display.getDisplayId();
+                    DisplayInfo info = new DisplayInfo();
+                    if (!display.getDisplayInfo(info)) {
+                        Log.w(LOG_TAG, "Unable to save forced display density setting "
+                                + "for display " + displayId);
+                        continue;
+                    }
+                    if (!predicate.test(info)) {
+                        continue;
+                    }
+
+                    final IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+                    wm.setForcedDisplayDensityForUser(displayId, density, userId);
+                }
+            } catch (RemoteException exc) {
+                Log.w(LOG_TAG, "Unable to save forced display density setting");
+            }
+        });
     }
 }

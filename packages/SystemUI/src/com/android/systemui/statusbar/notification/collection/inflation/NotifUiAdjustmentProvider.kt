@@ -152,5 +152,6 @@ constructor(
                 },
             isChildInGroup = entry.hasEverBeenGroupChild(),
             isGroupSummary = entry.hasEverBeenGroupSummary(),
+            summarization = entry.ranking.summarization
         )
 }

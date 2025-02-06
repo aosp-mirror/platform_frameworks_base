@@ -177,15 +177,16 @@ public class PersisterQueueTests {
         assertTrue("Target didn't call callback enough times.",
                 mListener.waitForAllExpectedCallbackDone(TIMEOUT_ALLOWANCE));
 
+        // Wait until writing thread is waiting, which indicates the thread is waiting for new tasks
+        // to appear.
+        assertTrue("Failed to wait until the writing thread is waiting.",
+                mTarget.waitUntilWritingThreadIsWaiting(TIMEOUT_ALLOWANCE));
+
         // Second item
         mFactory.setExpectedProcessedItemNumber(1);
         mListener.setExpectedOnPreProcessItemCallbackTimes(1);
         dispatchTime = SystemClock.uptimeMillis();
-        // Synchronize on the instance to make sure we schedule the item after it starts to wait for
-        // task indefinitely.
-        synchronized (mTarget) {
-            mTarget.addItem(mFactory.createItem(), false);
-        }
+        mTarget.addItem(mFactory.createItem(), false);
         assertTrue("Target didn't process item enough times.",
                 mFactory.waitForAllExpectedItemsProcessed(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE));
         assertEquals("Target didn't process all items.", 2, mFactory.getTotalProcessedItemCount());

@@ -44,6 +44,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneInteractor
@@ -53,13 +55,16 @@ import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
@@ -377,6 +382,27 @@ constructor(
             }
             .flowOn(mainDispatcher)
             .launchIn(applicationScope)
+    }
+
+    override suspend fun hydrateTableLogBuffer(tableLogBuffer: TableLogBuffer) {
+        conflatedCallbackFlow {
+                val listener =
+                    object : FaceAuthenticationListener {
+                        override fun onAuthEnrollmentStateChanged(enrolled: Boolean) {
+                            trySend(isFaceAuthEnabledAndEnrolled())
+                        }
+                    }
+
+                registerListener(listener)
+
+                awaitClose { unregisterListener(listener) }
+            }
+            .logDiffsForTable(
+                tableLogBuffer = tableLogBuffer,
+                columnName = "isFaceAuthEnabledAndEnrolled",
+                initialValue = isFaceAuthEnabledAndEnrolled(),
+            )
+            .collect()
     }
 
     companion object {

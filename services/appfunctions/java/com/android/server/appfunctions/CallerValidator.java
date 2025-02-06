@@ -60,9 +60,7 @@ public interface CallerValidator {
      * Validates that the caller can execute the specified app function.
      *
      * <p>The caller can execute if the app function's package name is the same as the caller's
-     * package or the caller has either {@link Manifest.permission#EXECUTE_APP_FUNCTIONS_TRUSTED} or
-     * {@link Manifest.permission#EXECUTE_APP_FUNCTIONS} granted. In some cases, app functions can
-     * still opt-out of caller having {@link Manifest.permission#EXECUTE_APP_FUNCTIONS}.
+     * package or the caller has the {@link Manifest.permission#EXECUTE_APP_FUNCTIONS} granted.
      *
      * @param callingUid The calling uid.
      * @param callingPid The calling pid.

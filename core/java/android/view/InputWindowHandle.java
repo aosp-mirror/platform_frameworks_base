@@ -57,7 +57,7 @@ public final class InputWindowHandle {
             InputConfig.NO_INPUT_CHANNEL,
             InputConfig.NOT_FOCUSABLE,
             InputConfig.NOT_TOUCHABLE,
-            InputConfig.PREVENT_SPLITTING,
+            InputConfig.DEPRECATED_PREVENT_SPLITTING,
             InputConfig.DUPLICATE_TOUCH_TO_WALLPAPER,
             InputConfig.IS_WALLPAPER,
             InputConfig.PAUSE_DISPATCHING,

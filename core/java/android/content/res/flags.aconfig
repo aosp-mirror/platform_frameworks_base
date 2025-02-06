@@ -122,3 +122,11 @@ flag {
     description: "Fixes bug in Launcher preview by enabling overlays targeting 'android'"
     bug: "377545987"
 }
+
+flag {
+    name: "always_false"
+    is_exported: true
+    namespace: "resource_manager"
+    description: "flag always meant to be false, for testing resource flagging within cts tests"
+    bug: "377974898"
+}

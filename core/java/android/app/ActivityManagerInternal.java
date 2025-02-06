@@ -142,6 +142,15 @@ public abstract class ActivityManagerInternal {
             String processName, String abiOverride, int uid, Runnable crashHandler);
 
     /**
+     * Called when a user is being deleted. This can happen during normal device usage
+     * or just at startup, when partially removed users are purged. Any state persisted by the
+     * ActivityManager should be purged now.
+     *
+     * @param userId The user being cleaned up.
+     */
+    public abstract void onUserRemoving(@UserIdInt int userId);
+
+    /**
      * Called when a user has been deleted. This can happen during normal device usage
      * or just at startup, when partially removed users are purged. Any state persisted by the
      * ActivityManager should be purged now.

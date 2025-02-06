@@ -221,6 +221,12 @@ public class ClipData implements Parcelable {
         // if the data is obtained from {@link #copyForTransferWithActivityInfo}
         private ActivityInfo mActivityInfo;
 
+        private boolean mTokenVerificationEnabled;
+
+        void setTokenVerificationEnabled() {
+            mTokenVerificationEnabled = true;
+        }
+
         /**
          * A builder for a ClipData Item.
          */
@@ -398,7 +404,9 @@ public class ClipData implements Parcelable {
          * Retrieve the raw Intent contained in this Item.
          */
         public Intent getIntent() {
-            Intent.maybeMarkAsMissingCreatorToken(mIntent);
+            if (mTokenVerificationEnabled) {
+                Intent.maybeMarkAsMissingCreatorToken(mIntent);
+            }
             return mIntent;
         }
 
@@ -1350,6 +1358,12 @@ public class ClipData implements Parcelable {
                     intent.getClipData().collectUris(out);
                 }
             }
+        }
+    }
+
+    void setTokenVerificationEnabled() {
+        for (int i = 0; i < mItems.size(); ++i) {
+            mItems.get(i).setTokenVerificationEnabled();
         }
     }
 

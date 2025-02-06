@@ -17,6 +17,7 @@
 package com.android.server.om;
 
 import static com.android.internal.content.om.OverlayConfig.PARTITION_ORDER_FILE_PATH;
+import static com.android.server.om.OverlayManagerService.handleIncomingUser;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -145,7 +146,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
         out.println("    Load a package and print the value of a given resource");
         out.println("    applying the current configuration and enabled overlays.");
         out.println("    For a more fine-grained alternative, use 'idmap2 lookup'.");
-        out.println("  fabricate [--user USER_ID] [--target-name OVERLAYABLE] --target PACKAGE");
+        out.println("  fabricate [--target-name OVERLAYABLE] --target PACKAGE");
         out.println("            --name NAME [--file FILE] ");
         out.println("            PACKAGE:TYPE/NAME ENCODED-TYPE-ID|TYPE-NAME ENCODED-VALUE");
         out.println("    Create an overlay from a single resource. Caller must be root. Example:");
@@ -160,7 +161,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
         final PrintWriter out = getOutPrintWriter();
         final PrintWriter err = getErrPrintWriter();
 
-        int userId = UserHandle.USER_SYSTEM;
+        int userId = UserHandle.USER_CURRENT;
         String opt;
         while ((opt = getNextOption()) != null) {
             switch (opt) {
@@ -234,7 +235,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
     private int runEnableDisable(final boolean enable) throws RemoteException {
         final PrintWriter err = getErrPrintWriter();
 
-        int userId = UserHandle.USER_SYSTEM;
+        int userId = UserHandle.USER_CURRENT;
         String opt;
         while ((opt = getNextOption()) != null) {
             switch (opt) {
@@ -269,7 +270,6 @@ final class OverlayManagerShellCommand extends ShellCommand {
             return 1;
         }
 
-        int userId = UserHandle.USER_SYSTEM;
         String targetPackage = "";
         String targetOverlayable = "";
         String name = "";
@@ -278,9 +278,6 @@ final class OverlayManagerShellCommand extends ShellCommand {
         String config = null;
         while ((opt = getNextOption()) != null) {
             switch (opt) {
-                case "--user":
-                    userId = UserHandle.parseUserArg(getNextArgRequired());
-                    break;
                 case "--target":
                     targetPackage = getNextArgRequired();
                     break;
@@ -442,7 +439,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
     private int runEnableExclusive() throws RemoteException {
         final PrintWriter err = getErrPrintWriter();
 
-        int userId = UserHandle.USER_SYSTEM;
+        int userId = UserHandle.USER_CURRENT;
         boolean inCategory = false;
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -469,7 +466,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
     private int runSetPriority() throws RemoteException {
         final PrintWriter err = getErrPrintWriter();
 
-        int userId = UserHandle.USER_SYSTEM;
+        int userId = UserHandle.USER_CURRENT;
         String opt;
         while ((opt = getNextOption()) != null) {
             switch (opt) {
@@ -498,7 +495,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
         final PrintWriter out = getOutPrintWriter();
         final PrintWriter err = getErrPrintWriter();
 
-        int userId = UserHandle.USER_SYSTEM;
+        int userId = UserHandle.USER_CURRENT;
         boolean verbose = false;
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -525,15 +522,16 @@ final class OverlayManagerShellCommand extends ShellCommand {
             return 1;
         }
 
+        final int realUserId = handleIncomingUser(userId, "runLookup");
         final Resources res;
         try {
             res = mContext
-                .createContextAsUser(UserHandle.of(userId), /* flags */ 0)
+                .createContextAsUser(UserHandle.of(realUserId), /* flags */ 0)
                 .getPackageManager()
                 .getResourcesForApplication(packageToLoad);
         } catch (PackageManager.NameNotFoundException e) {
             err.println(String.format("Error: failed to get resources for package %s for user %d",
-                    packageToLoad, userId));
+                    packageToLoad, realUserId));
             return 1;
         }
         final AssetManager assets = res.getAssets();

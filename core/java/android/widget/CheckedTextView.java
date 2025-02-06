@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import static android.view.accessibility.Flags.triStateChecked;
+
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -141,6 +143,10 @@ public class CheckedTextView extends TextView implements Checkable {
         if (mChecked != checked) {
             mChecked = checked;
             refreshDrawableState();
+            if (triStateChecked()) {
+                notifyViewAccessibilityStateChangedIfNeeded(
+                        AccessibilityEvent.CONTENT_CHANGE_TYPE_CHECKED);
+            }
             notifyViewAccessibilityStateChangedIfNeeded(
                     AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
         }
@@ -570,7 +576,12 @@ public class CheckedTextView extends TextView implements Checkable {
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
         info.setCheckable(true);
-        info.setChecked(mChecked);
+        if (triStateChecked()) {
+            info.setChecked(mChecked ? AccessibilityNodeInfo.CHECKED_STATE_TRUE :
+                    AccessibilityNodeInfo.CHECKED_STATE_FALSE);
+        } else {
+            info.setChecked(mChecked);
+        }
     }
 
     /** @hide */

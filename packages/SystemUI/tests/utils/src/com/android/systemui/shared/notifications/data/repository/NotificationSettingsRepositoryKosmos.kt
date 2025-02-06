@@ -22,7 +22,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.shared.settings.data.repository.secureSettingsRepository
 import com.android.systemui.shared.settings.data.repository.systemSettingsRepository
 
-val Kosmos.notificationSettingsRepository by
+var Kosmos.notificationSettingsRepository by
     Kosmos.Fixture {
         NotificationSettingsRepository(
             backgroundScope = testScope.backgroundScope,

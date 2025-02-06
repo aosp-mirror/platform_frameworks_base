@@ -41,6 +41,7 @@ import android.app.ambientcontext.AmbientContextManager;
 import android.app.job.JobScheduler;
 import android.app.role.RoleManager;
 import android.app.smartspace.SmartspaceManager;
+import android.app.supervision.SupervisionManager;
 import android.app.trust.TrustManager;
 import android.app.usage.UsageStatsManager;
 import android.appwidget.AppWidgetManager;
@@ -71,6 +72,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.input.InputManager;
+import android.hardware.location.ContextHubManager;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
@@ -233,6 +235,13 @@ public class FrameworkServicesModule {
     @Singleton
     static ContentResolver provideContentResolver(Context context) {
         return context.getContentResolver();
+    }
+
+    @Provides
+    @Singleton
+    @Nullable
+    static ContextHubManager provideContextHubManager(Context context) {
+        return context.getSystemService(ContextHubManager.class);
     }
 
     @Provides
@@ -835,5 +844,12 @@ public class FrameworkServicesModule {
     @Singleton
     static ViewCapture provideViewCapture(Context context) {
         return ViewCaptureFactory.getInstance(context);
+    }
+
+    @Provides
+    @Singleton
+    @Nullable
+    static SupervisionManager provideSupervisionManager(Context context) {
+        return (SupervisionManager) context.getSystemService(Context.SUPERVISION_SERVICE);
     }
 }

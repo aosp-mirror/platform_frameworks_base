@@ -15,8 +15,6 @@
  */
 package com.android.systemui.qs.customize;
 
-import static com.android.systemui.Flags.gsfQuickSettings;
-
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
@@ -83,9 +81,6 @@ public class QSCustomizer extends LinearLayout {
         mToolbar.getMenu().add(Menu.NONE, MENU_RESET, 0, com.android.internal.R.string.reset)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         mToolbar.setTitle(R.string.qs_edit);
-        if (gsfQuickSettings()) {
-            mToolbar.setTitleTextAppearance(context, R.style.TextAppearance_QSEditTitle);
-        }
 
         mRecyclerView = findViewById(android.R.id.list);
         mTransparentView = findViewById(R.id.customizer_transparent_view);

@@ -17,6 +17,7 @@
 package com.android.wm.shell.desktopmode.compatui
 
 import android.animation.ValueAnimator
+import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
 import android.os.IBinder
 import android.view.Display.DEFAULT_DISPLAY
@@ -28,13 +29,14 @@ import androidx.core.animation.addListener
 import com.android.app.animation.Interpolators
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.common.ShellExecutor
-import com.android.wm.shell.compatui.isTopActivityExemptFromDesktopWindowing
 import com.android.wm.shell.desktopmode.DesktopUserRepositories
+import com.android.wm.shell.desktopmode.DesktopWallpaperActivity
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.shared.TransitionUtil.isClosingMode
 import com.android.wm.shell.shared.TransitionUtil.isClosingType
 import com.android.wm.shell.shared.TransitionUtil.isOpeningMode
 import com.android.wm.shell.shared.TransitionUtil.isOpeningType
+import com.android.wm.shell.shared.desktopmode.DesktopModeCompatPolicy
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TransitionHandler
@@ -47,6 +49,7 @@ class SystemModalsTransitionHandler(
     private val shellInit: ShellInit,
     private val transitions: Transitions,
     private val desktopUserRepositories: DesktopUserRepositories,
+    private val desktopModeCompatPolicy: DesktopModeCompatPolicy,
 ) : TransitionHandler {
 
     private val showingSystemModalsIds = mutableSetOf<Int>()
@@ -128,7 +131,7 @@ class SystemModalsTransitionHandler(
                 return@find false
             }
             val taskInfo = change.taskInfo ?: return@find false
-            return@find isTopActivityExemptFromDesktopWindowing(context, taskInfo)
+            return@find isSystemModal(taskInfo)
         }
 
     private fun getClosingSystemModal(info: TransitionInfo): TransitionInfo.Change? =
@@ -137,9 +140,12 @@ class SystemModalsTransitionHandler(
                 return@find false
             }
             val taskInfo = change.taskInfo ?: return@find false
-            return@find isTopActivityExemptFromDesktopWindowing(context, taskInfo) ||
-                showingSystemModalsIds.contains(taskInfo.taskId)
+            return@find isSystemModal(taskInfo) || showingSystemModalsIds.contains(taskInfo.taskId)
         }
+
+    private fun isSystemModal(taskInfo: RunningTaskInfo): Boolean =
+        !DesktopWallpaperActivity.isWallpaperTask(taskInfo) &&
+            desktopModeCompatPolicy.isTopActivityExemptFromDesktopWindowing(taskInfo)
 
     private fun createAlphaAnimator(
         transaction: SurfaceControl.Transaction,

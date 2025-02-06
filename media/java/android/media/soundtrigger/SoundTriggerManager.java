@@ -27,6 +27,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.WorkerThread;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -475,6 +476,7 @@ public final class SoundTriggerManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     @UnsupportedAppUsage
     @FlaggedApi(Flags.FLAG_MANAGER_API)
+    @WorkerThread
     public int loadSoundModel(@NonNull SoundModel soundModel) {
         if (mSoundTriggerSession == null) {
             throw new IllegalStateException("No underlying SoundTriggerModule available");
@@ -518,6 +520,7 @@ public final class SoundTriggerManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     @UnsupportedAppUsage
     @FlaggedApi(Flags.FLAG_MANAGER_API)
+    @WorkerThread
     public int startRecognition(@NonNull UUID soundModelId, @Nullable Bundle params,
         @NonNull ComponentName detectionService, @NonNull RecognitionConfig config) {
         Objects.requireNonNull(soundModelId);
@@ -544,6 +547,7 @@ public final class SoundTriggerManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     @UnsupportedAppUsage
     @FlaggedApi(Flags.FLAG_MANAGER_API)
+    @WorkerThread
     public int stopRecognition(@NonNull UUID soundModelId) {
         if (mSoundTriggerSession == null) {
             throw new IllegalStateException("No underlying SoundTriggerModule available");
@@ -568,6 +572,7 @@ public final class SoundTriggerManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     @UnsupportedAppUsage
     @FlaggedApi(Flags.FLAG_MANAGER_API)
+    @WorkerThread
     public int unloadSoundModel(@NonNull UUID soundModelId) {
         if (mSoundTriggerSession == null) {
             throw new IllegalStateException("No underlying SoundTriggerModule available");
@@ -587,6 +592,7 @@ public final class SoundTriggerManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     @UnsupportedAppUsage
     @FlaggedApi(Flags.FLAG_MANAGER_API)
+    @WorkerThread
     public boolean isRecognitionActive(@NonNull UUID soundModelId) {
         if (soundModelId == null || mSoundTriggerSession == null) {
             return false;
@@ -624,6 +630,7 @@ public final class SoundTriggerManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     @UnsupportedAppUsage
     @FlaggedApi(Flags.FLAG_MANAGER_API)
+    @WorkerThread
     public int getModelState(@NonNull UUID soundModelId) {
         if (mSoundTriggerSession == null) {
             throw new IllegalStateException("No underlying SoundTriggerModule available");

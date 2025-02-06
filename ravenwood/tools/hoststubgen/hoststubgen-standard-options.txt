@@ -2,6 +2,8 @@
 
 --debug
 
+--delete-finals
+
 # Uncomment below lines to enable each feature.
 
 #--default-method-call-hook

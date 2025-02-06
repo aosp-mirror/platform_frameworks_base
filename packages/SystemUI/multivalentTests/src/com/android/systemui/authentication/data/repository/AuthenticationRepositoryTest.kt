@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.authentication.data.repository
 
 import android.app.admin.DevicePolicyManager
@@ -40,7 +38,6 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.function.Function
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest

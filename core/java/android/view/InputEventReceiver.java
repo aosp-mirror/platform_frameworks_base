@@ -177,7 +177,7 @@ public abstract class InputEventReceiver {
      *                 drag
      *                 if true, the window associated with this input channel has just lost drag
      */
-    public void onDragEvent(boolean isExiting, float x, float y) {
+    public void onDragEvent(boolean isExiting, float x, float y, int displayId) {
     }
 
     /**

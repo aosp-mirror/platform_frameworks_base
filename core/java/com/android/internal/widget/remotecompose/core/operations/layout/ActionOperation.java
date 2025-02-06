@@ -20,9 +20,10 @@ import android.annotation.NonNull;
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.Serializable;
 
 /** Operations representing actions on the document */
-public interface ActionOperation {
+public interface ActionOperation extends Serializable {
     /**
      * Serialize the string
      *

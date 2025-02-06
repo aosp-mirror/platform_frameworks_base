@@ -1,4 +1,5 @@
 # Debugging in the Shell
+[Back to home](README.md)
 
 ---
 
@@ -44,9 +45,16 @@ adb shell wm logging disable-text TAG
 
 And these commands to enable protologs (in logcat) for WM Shell ([list of all shell tags](/libs/WindowManager/Shell/src/com/android/wm/shell/protolog/ShellProtoLogGroup.java)):
 ```shell
-adb shell dumpsys activity service SystemUIService WMShell protolog enable-text TAG
-adb shell dumpsys activity service SystemUIService WMShell protolog enable-text TAG
+# Note: prior to 25Q2, you may need to use:
+#   adb shell dumpsys activity service SystemUIService WMShell protolog enable-text TAG
+adb shell wm shell protolog enable-text TAG
+adb shell wm shell protolog disable-text TAG
 ```
+
+### R8 optimizations & ProtoLog
+
+If the APK that the Shell library is included into has R8 optimizations enabled, then you may need
+to update the proguard flags to keep the generated protolog classes (ie. AOSP SystemUI's [proguard.flags](base/packages/SystemUI/proguard_common.flags)).
 
 ## Winscope Tracing
 
@@ -55,25 +63,42 @@ WindowManager and SurfaceFlinger.  Follow [go/winscope](http://go/winscope-help)
 use the tool.  This trace will contain all the information about the windows/activities/surfaces on
 screen.
 
-## WindowManager/SurfaceFlinger hierarchy dump
+## WindowManager/SurfaceFlinger/InputDispatcher information
 
 A quick way to view the WindowManager hierarchy without a winscope trace is via the wm dumps:
 ```shell
 adb shell dumpsys activity containers
+# The output lists the containers in the hierarchy from top -> bottom in z-order
+```
+
+To get more information about windows on the screen:
+```shell
+# All windows in WM
+adb shell dumpsys window -a
+# The windows are listed from top -> bottom in z-order
+
+# Visible windows only
+adb shell dumpsys window -a visible
 ```
 
 Likewise, the SurfaceFlinger hierarchy can be dumped for inspection by running:
 ```shell
 adb shell dumpsys SurfaceFlinger
-# Search output for "Layer Hierarchy"
+# Search output for "Layer Hierarchy", the surfaces in the table are listed bottom -> top in z-order
+```
+
+And the visible input windows can be dumped via:
+```shell
+adb shell dumpsys input
+# Search output for "Windows:", they are ordered top -> bottom in z-order
 ```
 
 ## Tracing global SurfaceControl transaction updates
 
 While Winscope traces are very useful, it sometimes doesn't give you enough information about which
 part of the code is initiating the transaction updates. In such cases, it can be helpful to get
-stack traces when specific surface transaction calls are made, which is possible by enabling the
-following system properties for example:
+stack traces when specific surface transaction calls are made (regardless of process), which is
+possible by enabling the following system properties for example:
 ```shell
 # Enabling
 adb shell setprop persist.wm.debug.sc.tx.log_match_call setAlpha,setPosition  # matches the name of the SurfaceControlTransaction methods
@@ -92,15 +117,27 @@ properties.
 It is not necessary to set both `log_match_call` and `log_match_name`, but note logs can be quite
 noisy if unfiltered.
 
-It can sometimes be useful to trace specific logs and when they are applied (sometimes we build
-transactions that can be applied later).  You can do this by adding the "merge" and "apply" calls to
-the set of requested calls:
+### Tracing transaction merge & apply
+
+Tracing the method calls on SurfaceControl.Transaction tells you where a change is requested, but
+the changes are not actually committed until the transaction itself is applied.  And because
+transactions can be passed across processes, or prepared in advance for later application (ie.
+when restoring state after a Transition), the ordering of the change logs is not always clear
+by itself.
+
+In such cases, you can also enable the "merge" and "apply" calls to get additional information
+about how/when transactions are respectively merged/applied:
 ```shell
 # Enabling
 adb shell setprop persist.wm.debug.sc.tx.log_match_call setAlpha,merge,apply  # apply will dump logs of each setAlpha or merge call on that tx
 adb reboot
 adb logcat -s "SurfaceControlRegistry"
 ```
+
+Using those logs, you can first look at where the desired change is called, note the transaction
+id, and then search the logs for where that transaction id is used.  If it is merged into another
+transaction, you can continue the search using the merged transaction until you find the final
+transaction which is applied.
 
 ## Tracing activity starts & finishes in the app process
 
@@ -138,7 +175,9 @@ part of dumping the SystemUI service.  Dumping the Shell specific data can be do
 WMShell SysUI service:
 
 ```shell
-adb shell dumpsys activity service SystemUIService WMShell
+# Note: prior to 25Q2, you may need to use:
+#   adb shell dumpsys activity service SystemUIService WMShell dump
+adb shell wm shell dump
 ```
 
 If information should be added to the dump, either:
@@ -154,10 +193,14 @@ shell command handler in your controller.
 
 ```shell
 # List all available commands
-adb shell dumpsys activity service SystemUIService WMShell help
+# Note: prior to 25Q2, you may need to use:
+#   adb shell dumpsys activity service SystemUIService WMShell help
+adb shell wm shell help
 
 # Run a specific command
-adb shell dumpsys activity service SystemUIService WMShell <cmd> <args> ...
+# Note: prior to 25Q2, you may need to use:
+#   adb shell dumpsys activity service SystemUIService WMShell <cmd> <args> ...
+adb shell wm shell <cmd> <args> ...
 ```
 
 ## Debugging in Android Studio

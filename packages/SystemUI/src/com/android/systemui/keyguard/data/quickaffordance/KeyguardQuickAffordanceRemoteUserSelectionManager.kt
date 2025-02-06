@@ -28,7 +28,6 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.customization.data.content.CustomizationProviderClient
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -44,7 +43,6 @@ import com.android.app.tracing.coroutines.launchTraced as launch
  * the question "which affordances should the keyguard show?" for users associated with other System
  * UI processes.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class KeyguardQuickAffordanceRemoteUserSelectionManager
 @Inject

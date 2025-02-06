@@ -21,6 +21,7 @@ import com.android.internal.logging.uiEventLogger
 import com.android.systemui.haptics.slider.sliderHapticsViewModelFactory
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
+import com.android.systemui.volume.domain.interactor.audioSharingInteractor
 import com.android.systemui.volume.domain.interactor.audioVolumeInteractor
 import com.android.systemui.volume.shared.volumePanelLogger
 import kotlinx.coroutines.CoroutineScope
@@ -39,6 +40,7 @@ val Kosmos.audioStreamSliderViewModelFactory by
                     applicationContext,
                     audioVolumeInteractor,
                     zenModeInteractor,
+                    audioSharingInteractor,
                     uiEventLogger,
                     volumePanelLogger,
                     sliderHapticsViewModelFactory,

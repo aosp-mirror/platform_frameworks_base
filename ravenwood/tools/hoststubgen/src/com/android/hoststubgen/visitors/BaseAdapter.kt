@@ -50,7 +50,13 @@ abstract class BaseAdapter(
         val errors: HostStubGenErrors,
         val stats: HostStubGenStats?,
         val enablePreTrace: Boolean,
-        val enablePostTrace: Boolean
+        val enablePostTrace: Boolean,
+        val deleteClassFinals: Boolean,
+        val deleteMethodFinals: Boolean,
+        // We don't remove finals from fields, because final fields have a stronger memory
+        // guarantee than non-final fields, see:
+        // https://docs.oracle.com/javase/specs/jls/se22/html/jls-17.html#jls-17.5
+        // i.e. changing a final field to non-final _could_ result in different behavior.
     )
 
     protected lateinit var currentPackageName: String
@@ -58,14 +64,33 @@ abstract class BaseAdapter(
     protected var redirectionClass: String? = null
     protected lateinit var classPolicy: FilterPolicyWithReason
 
+    private fun isEnum(access: Int): Boolean {
+        return (access and Opcodes.ACC_ENUM) != 0
+    }
+
+    protected fun modifyClassAccess(access: Int): Int {
+        if (options.deleteClassFinals && !isEnum(access)) {
+            return access and Opcodes.ACC_FINAL.inv()
+        }
+        return access
+    }
+
+    protected fun modifyMethodAccess(access: Int): Int {
+        if (options.deleteMethodFinals) {
+            return access and Opcodes.ACC_FINAL.inv()
+        }
+        return access
+    }
+
     override fun visit(
         version: Int,
-        access: Int,
+        origAccess: Int,
         name: String,
         signature: String?,
         superName: String?,
         interfaces: Array<String>,
     ) {
+        val access = modifyClassAccess(origAccess)
         super.visit(version, access, name, signature, superName, interfaces)
         currentClassName = name
         currentPackageName = getPackageNameFromFullClassName(name)
@@ -130,13 +155,14 @@ abstract class BaseAdapter(
         }
     }
 
-    override fun visitMethod(
-        access: Int,
+    final override fun visitMethod(
+        origAccess: Int,
         name: String,
         descriptor: String,
         signature: String?,
         exceptions: Array<String>?,
     ): MethodVisitor? {
+        val access = modifyMethodAccess(origAccess)
         if (skipMemberModificationNestCount > 0) {
             return super.visitMethod(access, name, descriptor, signature, exceptions)
         }
@@ -176,6 +202,7 @@ abstract class BaseAdapter(
                 if (newAccess == NOT_COMPATIBLE) {
                     return null
                 }
+                newAccess = modifyMethodAccess(newAccess)
 
                 log.v(
                     "Emitting %s.%s%s as %s %s", currentClassName, name, descriptor,

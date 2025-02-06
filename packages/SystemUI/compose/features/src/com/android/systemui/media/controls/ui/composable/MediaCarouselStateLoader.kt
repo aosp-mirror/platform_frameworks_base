@@ -17,8 +17,8 @@
 package com.android.systemui.media.controls.ui.composable
 
 import com.android.compose.animation.scene.ContentKey
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.SceneKey
-import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
@@ -50,6 +50,7 @@ object MediaCarouselStateLoader {
                 if (isSplitShade) MediaHierarchyManager.LOCATION_QS
                 else MediaHierarchyManager.LOCATION_QQS
             }
+
             Scenes.Lockscreen -> MediaHierarchyManager.LOCATION_LOCKSCREEN
             Scenes.Communal -> MediaHierarchyManager.LOCATION_COMMUNAL_HUB
             else -> MediaHierarchyManager.LOCATION_UNKNOWN
@@ -69,6 +70,7 @@ object MediaCarouselStateLoader {
     /** State for media carousel. */
     sealed interface State {
         val transitionProgress: Float
+
         // TODO b/368368388: implement media squishiness
         val squishFraction: () -> Float
         @MediaLocation val startLocation: Int
@@ -100,7 +102,7 @@ object MediaCarouselStateLoader {
     }
 
     /** Returns the state of media carousel */
-    fun SceneScope.stateForMediaCarouselContent(isInSplitShade: Boolean): State {
+    fun ContentScope.stateForMediaCarouselContent(isInSplitShade: Boolean): State {
         return when (val transitionState = layoutState.transitionState) {
             is TransitionState.Idle -> {
                 if (MediaContentPicker.contents.contains(transitionState.currentScene)) {
@@ -109,6 +111,7 @@ object MediaCarouselStateLoader {
                     State.Gone
                 }
             }
+
             is TransitionState.Transition.ChangeScene ->
                 with(transitionState) {
                     if (
@@ -130,6 +133,7 @@ object MediaCarouselStateLoader {
                         State.Gone
                     }
                 }
+
             is TransitionState.Transition.OverlayTransition ->
                 with(transitionState) {
                     if (

@@ -20,6 +20,7 @@ import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 
 val Kosmos.dreamUserActionsViewModel by
     Kosmos.Fixture {
@@ -27,5 +28,6 @@ val Kosmos.dreamUserActionsViewModel by
             communalInteractor = communalInteractor,
             deviceUnlockedInteractor = deviceUnlockedInteractor,
             shadeInteractor = shadeInteractor,
+            shadeModeInteractor = shadeModeInteractor,
         )
     }

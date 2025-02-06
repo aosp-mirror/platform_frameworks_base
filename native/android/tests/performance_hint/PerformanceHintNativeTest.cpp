@@ -161,6 +161,9 @@ public:
                          clientDataIn,
                  ::aidl::android::os::IHintManager::HintManagerClientData* _aidl_return),
                 (override));
+    MOCK_METHOD(ScopedAStatus, getClientData,
+                (::aidl::android::os::IHintManager::HintManagerClientData * _aidl_return),
+                (override));
     MOCK_METHOD(SpAIBinder, asBinder, (), (override));
     MOCK_METHOD(bool, isRemote, (), (override));
 };
@@ -600,6 +603,15 @@ TEST_F(PerformanceHintTest, TestASessionCreationConfig) {
 
     ASSERT_NE(session, nullptr);
     ASSERT_NE(config, nullptr);
+}
+
+TEST_F(PerformanceHintTest, TestSessionCreationWithNullLayers) {
+    EXPECT_CALL(*mMockIHintManager, createHintSessionWithConfig(_, _, _, _, _)).Times(1);
+    auto&& config = configFromCreator(
+            {.tids = mTids, .nativeWindows = {nullptr}, .surfaceControls = {nullptr}});
+    APerformanceHintManager* manager = createManager();
+    auto&& session = createSessionUsingConfig(manager, config);
+    ASSERT_TRUE(session);
 }
 
 TEST_F(PerformanceHintTest, TestSupportObject) {

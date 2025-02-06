@@ -23,7 +23,6 @@ import android.os.Binder
 import android.os.IBinder
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.Display.DEFAULT_DISPLAY
@@ -73,7 +72,6 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidTestingRunner::class)
 class DesktopImmersiveControllerTest : ShellTestCase() {
 
-    @JvmField @Rule val setFlagsRule = SetFlagsRule()
     @JvmField @Rule val animatorTestRule = AnimatorTestRule(this)
 
     @Mock private lateinit var mockTransitions: Transitions

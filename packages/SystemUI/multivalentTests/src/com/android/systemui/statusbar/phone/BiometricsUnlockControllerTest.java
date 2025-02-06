@@ -34,6 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.hardware.biometrics.BiometricSourceType;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.UserHandle;
@@ -431,9 +432,9 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onUdfpsConsecutivelyFailedThreeTimes_showPrimaryBouncer() {
-        // GIVEN UDFPS is supported
-        when(mUpdateMonitor.isUdfpsSupported()).thenReturn(true);
+    public void onOpticalUdfpsConsecutivelyFailedThreeTimes_showPrimaryBouncer() {
+        // GIVEN optical UDFPS is supported
+        when(mUpdateMonitor.isOpticalUdfpsSupported()).thenReturn(true);
 
         // WHEN udfps fails once - then don't show the bouncer yet
         mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
@@ -447,6 +448,25 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
 
         // THEN show the bouncer
+        verify(mStatusBarKeyguardViewManager).showPrimaryBouncer(true);
+    }
+
+    @Test
+    public void onUltrasonicUdfpsLockout_showPrimaryBouncer() {
+        // GIVEN ultrasonic UDFPS is supported
+        when(mUpdateMonitor.isOpticalUdfpsSupported()).thenReturn(false);
+
+        // WHEN udfps fails three times, don't show bouncer
+        mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
+        mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
+        mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
+        verify(mStatusBarKeyguardViewManager, never()).showPrimaryBouncer(anyBoolean());
+
+        // WHEN lockout is received
+        mBiometricUnlockController.onBiometricError(FingerprintManager.FINGERPRINT_ERROR_LOCKOUT,
+                "Lockout", BiometricSourceType.FINGERPRINT);
+
+        // THEN show bouncer
         verify(mStatusBarKeyguardViewManager).showPrimaryBouncer(true);
     }
 

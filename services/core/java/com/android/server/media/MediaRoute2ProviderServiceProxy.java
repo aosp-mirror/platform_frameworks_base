@@ -545,6 +545,16 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
             for (RoutingSessionInfo session : sessions) {
                 if (session == null) continue;
                 session = assignProviderIdForSession(session);
+
+                if (Flags.enableMirroringInMediaRouter2()) {
+                    var systemSessionCallback =
+                            mSystemSessionCallbacks.get(session.getOriginalId());
+                    if (systemSessionCallback != null) {
+                        systemSessionCallback.onSessionUpdate(session);
+                        continue;
+                    }
+                }
+
                 int sourceIndex = findSessionByIdLocked(session);
                 if (sourceIndex < 0) {
                     mSessionInfos.add(targetIndex++, session);

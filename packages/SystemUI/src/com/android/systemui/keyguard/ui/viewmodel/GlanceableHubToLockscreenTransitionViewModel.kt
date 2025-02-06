@@ -20,18 +20,19 @@ import android.util.LayoutDirection
 import com.android.app.animation.Interpolators.EMPHASIZED
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.dagger.GlanceableHubBlurComponent
 import com.android.systemui.keyguard.domain.interactor.FromGlanceableHubTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.StateToValue
+import com.android.systemui.keyguard.ui.transitions.GlanceableHubTransition
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -41,14 +42,14 @@ import kotlinx.coroutines.flow.map
  * Breaks down GLANCEABLE_HUB->LOCKSCREEN transition into discrete steps for corresponding views to
  * consume.
  */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class GlanceableHubToLockscreenTransitionViewModel
 @Inject
 constructor(
     @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
-) {
+    private val blurFactory: GlanceableHubBlurComponent.Factory,
+) : GlanceableHubTransition {
     private val transitionAnimation =
         animationFlow
             .setup(
@@ -56,6 +57,9 @@ constructor(
                 edge = Edge.create(from = Scenes.Communal, to = LOCKSCREEN),
             )
             .setupWithoutSceneContainer(edge = Edge.create(from = GLANCEABLE_HUB, to = LOCKSCREEN))
+
+    override val windowBlurRadius: Flow<Float> =
+        blurFactory.create(transitionAnimation).getBlurProvider().exitBlurRadius
 
     val keyguardAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(

@@ -53,4 +53,7 @@ constructor(private val customShortcutRepository: CustomShortcutCategoriesReposi
     suspend fun resetAllCustomShortcuts(): ShortcutCustomizationRequestResult {
         return customShortcutRepository.resetAllCustomShortcuts()
     }
+
+    suspend fun isSelectedKeyCombinationAvailable(): Boolean =
+        customShortcutRepository.isSelectedKeyCombinationAvailable()
 }

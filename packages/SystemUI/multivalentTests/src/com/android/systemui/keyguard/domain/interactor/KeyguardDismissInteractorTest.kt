@@ -34,7 +34,6 @@ import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -45,7 +44,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardDismissInteractorTest : SysuiTestCase() {

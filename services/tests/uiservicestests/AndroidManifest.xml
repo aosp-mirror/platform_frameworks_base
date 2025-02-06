@@ -45,6 +45,8 @@
         <provider android:name=".DummyProvider"
             android:authorities="com.android.services.uitests" />
 
+        <activity android:name="android.app.ExampleActivity" />
+
     </application>
 
     <instrumentation

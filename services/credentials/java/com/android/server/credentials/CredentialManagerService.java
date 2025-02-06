@@ -204,7 +204,7 @@ public final class CredentialManagerService
     @SuppressWarnings("GuardedBy") // ErrorProne requires service.mLock which is the same
     // this.mLock
     protected void handlePackageRemovedMultiModeLocked(String packageName, int userId) {
-        updateProvidersWhenPackageRemoved(new SettingsWrapper(mContext), packageName);
+        updateProvidersWhenPackageRemoved(new SettingsWrapper(mContext), packageName, userId);
 
         List<CredentialManagerServiceImpl> services = peekServiceListForUserLocked(userId);
         if (services == null) {
@@ -223,6 +223,47 @@ public final class CredentialManagerService
             }
         }
 
+        // Iterate over all the services to be removed, and remove them from the user configurable
+        // services cache, the system services cache as well as the setting key-value pair.
+        for (CredentialManagerServiceImpl serviceToBeRemoved : servicesToBeRemoved) {
+            removeServiceFromCache(serviceToBeRemoved, userId);
+            removeServiceFromSystemServicesCache(serviceToBeRemoved, userId);
+            CredentialDescriptionRegistry.forUser(userId)
+                    .evictProviderWithPackageName(serviceToBeRemoved.getServicePackageName());
+        }
+    }
+
+    @GuardedBy("mLock")
+    @SuppressWarnings("GuardedBy") // ErrorProne requires service.mLock which is the same
+    // this.mLock
+    protected void handleServiceRemovedMultiModeLocked(ComponentName componentName, int userId) {
+        updateProvidersWhenServiceRemoved(new SettingsWrapper(mContext), componentName, userId);
+
+        List<CredentialManagerServiceImpl> services = peekServiceListForUserLocked(userId);
+        if (services == null) {
+            return;
+        }
+
+        List<CredentialManagerServiceImpl> servicesToBeRemoved = new ArrayList<>();
+        for (CredentialManagerServiceImpl service : services) {
+            if (service != null) {
+                CredentialProviderInfo credentialProviderInfo = service.getCredentialProviderInfo();
+                ComponentName serviceComponentName =
+                        credentialProviderInfo.getServiceInfo().getComponentName();
+                if (serviceComponentName != null && serviceComponentName.equals(componentName)) {
+                    servicesToBeRemoved.add(service);
+                }
+            }
+        }
+
+        removeServicesLocked(servicesToBeRemoved, userId);
+    }
+
+    @GuardedBy("mLock")
+    @SuppressWarnings("GuardedBy") // ErrorProne requires service.mLock which is the same
+    // this.mLock
+    private void removeServicesLocked(
+            List<CredentialManagerServiceImpl> servicesToBeRemoved, int userId) {
         // Iterate over all the services to be removed, and remove them from the user configurable
         // services cache, the system services cache as well as the setting key-value pair.
         for (CredentialManagerServiceImpl serviceToBeRemoved : servicesToBeRemoved) {
@@ -1136,76 +1177,211 @@ public final class CredentialManagerService
         }
     }
 
-    /** Updates the list of providers when an app is uninstalled. */
-    public static void updateProvidersWhenPackageRemoved(
-            SettingsWrapper settingsWrapper, String packageName) {
-        Slog.i(TAG, "updateProvidersWhenPackageRemoved");
+    /** Updates the list of providers when a particular service within an app is to be removed. */
+    public static void updateProvidersWhenServiceRemoved(
+            SettingsWrapper settingsWrapper, ComponentName componentName, int userId) {
+        Slog.i(TAG, "updateProvidersWhenServiceRemoved for: "
+                + componentName.flattenToString());
 
-        // Get the current providers.
-        String rawProviders =
+        // Get the current primary providers.
+        String rawPrimaryProviders =
                 settingsWrapper.getStringForUser(
-                        Settings.Secure.CREDENTIAL_SERVICE_PRIMARY, UserHandle.myUserId());
-        if (rawProviders == null) {
-            Slog.w(TAG, "settings key is null");
-            return;
+                        Settings.Secure.CREDENTIAL_SERVICE_PRIMARY, userId);
+        if (TextUtils.isEmpty(rawPrimaryProviders)) {
+            Slog.w(TAG, "primary settings key is null");
+        } else {
+            // Remove any service from the primary setting that matches with the service
+            // being removed, and set the filtered list back to the settings key.
+            Set<String> filteredPrimaryProviders = getStoredProvidersExceptService(
+                    rawPrimaryProviders, componentName);
+
+            // If there are no more primary providers AND there is no autofill provider either,
+            // that means all providers must be cleared as that is what the Settings UI app
+            // displays to the user.If the autofill provider is present then UI shows that as the
+            // preferred service and other credential provider services can continue to work.
+            if (filteredPrimaryProviders.isEmpty()
+                    && !isAutofillProviderPresent(settingsWrapper, userId)) {
+                Slog.d(TAG, "Clearing all credential providers");
+                if (clearAllCredentialProviders(settingsWrapper, userId)) {
+                    return;
+                }
+                Slog.e(TAG, "Failed to clear all credential providers");
+            }
+
+            // Set the filtered primary providers to the settings key
+            if (!settingsWrapper.putStringForUser(
+                    Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
+                    String.join(":", filteredPrimaryProviders),
+                    UserHandle.myUserId(),
+                    /* overrideableByRestore= */ true)) {
+                Slog.e(TAG, "Failed to remove primary service: " + componentName);
+                return;
+            }
         }
 
-        // Remove any providers from the primary setting that contain the package name
-        // being removed.
-        Set<String> primaryProviders = getStoredProviders(rawProviders, packageName);
+        // Read the credential providers to remove any reference of the removed service.
+        String rawCredentialProviders =
+                settingsWrapper.getStringForUser(
+                        Settings.Secure.CREDENTIAL_SERVICE, UserHandle.myUserId());
+
+        // Remove any provider services that are same as the one being removed.
+        Set<String> filteredCredentialProviders = getStoredProvidersExceptService(
+                rawCredentialProviders, componentName);
         if (!settingsWrapper.putStringForUser(
-                Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
-                String.join(":", primaryProviders),
+                Settings.Secure.CREDENTIAL_SERVICE,
+                String.join(":", filteredCredentialProviders),
                 UserHandle.myUserId(),
                 /* overrideableByRestore= */ true)) {
-            Slog.e(TAG, "Failed to remove primary package: " + packageName);
-            return;
+            Slog.e(TAG, "Failed to remove secondary service: " + componentName);
         }
+    }
 
+    private static boolean isAutofillProviderPresent(SettingsWrapper settingsWrapper, int userId) {
         // Read the autofill provider so we don't accidentally erase it.
         String autofillProvider =
                 settingsWrapper.getStringForUser(
-                        Settings.Secure.AUTOFILL_SERVICE, UserHandle.myUserId());
+                        Settings.Secure.AUTOFILL_SERVICE, userId);
+
+        return autofillProvider != null && !autofillProvider.isEmpty()
+                && !isPlaceholderAutofillProvider(autofillProvider, settingsWrapper);
+    }
+
+    private static boolean isPlaceholderAutofillProvider(String autofillProvider,
+            SettingsWrapper settingsWrapper) {
 
         // If there is an autofill provider and it is the credential autofill service indicating
         // that the currently selected primary provider does not support autofill
         // then we should keep as is
         String credentialAutofillService = settingsWrapper.mContext.getResources().getString(
                 R.string.config_defaultCredentialManagerAutofillService);
-        if (autofillProvider != null && primaryProviders.isEmpty() && !TextUtils.equals(
-                autofillProvider, credentialAutofillService)) {
-            // If the existing autofill provider is from the app being removed
-            // then erase the autofill service setting.
-            ComponentName cn = ComponentName.unflattenFromString(autofillProvider);
-            if (cn != null && cn.getPackageName().equals(packageName)) {
-                if (!settingsWrapper.putStringForUser(
-                        Settings.Secure.AUTOFILL_SERVICE,
-                        "",
-                        UserHandle.myUserId(),
-                        /* overrideableByRestore= */ true)) {
-                    Slog.e(TAG, "Failed to remove autofill package: " + packageName);
+        return autofillProvider != null && TextUtils.equals(
+                autofillProvider, credentialAutofillService);
+    }
+
+    private static boolean clearAllCredentialProviders(SettingsWrapper settingsWrapper,
+            int userId) {
+        if (!settingsWrapper.putStringForUser(
+                Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
+                null,
+                userId,
+                /* overrideableByRestore= */ true)) {
+            return false;
+        }
+        return settingsWrapper.putStringForUser(
+                Settings.Secure.CREDENTIAL_SERVICE,
+                null,
+                userId,
+                /* overrideableByRestore= */ true);
+    }
+
+    /** Updates the list of providers when an app is uninstalled. */
+    public static void updateProvidersWhenPackageRemoved(
+            SettingsWrapper settingsWrapper, String packageName, int userId) {
+        Slog.i(TAG, "updateProvidersWhenPackageRemoved");
+
+        // Get the current providers.
+        String rawProviders =
+                settingsWrapper.getStringForUser(
+                        Settings.Secure.CREDENTIAL_SERVICE_PRIMARY, userId);
+        if (rawProviders == null) {
+            Slog.w(TAG, "settings key is null");
+        } else {
+            // Remove any providers from the primary setting that contain the package name
+            // being removed.
+            Set<String> primaryProviders = getStoredProvidersExceptPackage(rawProviders,
+                    packageName);
+            if (!settingsWrapper.putStringForUser(
+                    Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
+                    String.join(":", primaryProviders),
+                    userId,
+                    /* overrideableByRestore= */ true)) {
+                Slog.e(TAG, "Failed to remove primary package: " + packageName);
+                return;
+            }
+
+            // Read the autofill provider so we don't accidentally erase it.
+            String autofillProvider =
+                    settingsWrapper.getStringForUser(
+                            Settings.Secure.AUTOFILL_SERVICE, userId);
+
+            // If there is an autofill provider and it is the credential autofill service indicating
+            // that the currently selected primary provider does not support autofill
+            // then we should keep as is
+            String credentialAutofillService = settingsWrapper.mContext.getResources().getString(
+                    R.string.config_defaultCredentialManagerAutofillService);
+            if (autofillProvider != null && primaryProviders.isEmpty() && !TextUtils.equals(
+                    autofillProvider, credentialAutofillService)) {
+                // If the existing autofill provider is from the app being removed
+                // then erase the autofill service setting.
+                ComponentName cn = ComponentName.unflattenFromString(autofillProvider);
+                if (cn != null && cn.getPackageName().equals(packageName)) {
+                    if (!settingsWrapper.putStringForUser(
+                            Settings.Secure.AUTOFILL_SERVICE,
+                            "",
+                            userId,
+                            /* overrideableByRestore= */ true)) {
+                        Slog.e(TAG, "Failed to remove autofill package: " + packageName);
+                    }
                 }
+            }
+
+            // If there are no more primary providers AND there is no autofill provider either,
+            // that means all providers must be cleared as that is what the Settings UI app
+            // displays to the user.If the autofill provider is present then UI shows that as the
+            // preferred service and other credential provider services can continue to work.
+            if (primaryProviders.isEmpty() && !isAutofillProviderPresent(settingsWrapper, userId)) {
+                Slog.d(TAG, "Clearing all credential providers");
+                if (clearAllCredentialProviders(settingsWrapper, userId)) {
+                    return;
+                }
+                Slog.e(TAG, "Failed to clear all credential providers");
             }
         }
 
         // Read the credential providers to remove any reference of the removed app.
         String rawCredentialProviders =
                 settingsWrapper.getStringForUser(
-                        Settings.Secure.CREDENTIAL_SERVICE, UserHandle.myUserId());
+                        Settings.Secure.CREDENTIAL_SERVICE, userId);
 
         // Remove any providers that belong to the removed app.
-        Set<String> credentialProviders = getStoredProviders(rawCredentialProviders, packageName);
+        Set<String> credentialProviders = getStoredProvidersExceptPackage(
+                rawCredentialProviders, packageName);
         if (!settingsWrapper.putStringForUser(
                 Settings.Secure.CREDENTIAL_SERVICE,
                 String.join(":", credentialProviders),
-                UserHandle.myUserId(),
+                userId,
                 /* overrideableByRestore= */ true)) {
             Slog.e(TAG, "Failed to remove secondary package: " + packageName);
         }
     }
 
     /** Gets the list of stored providers from a string removing any mention of package name. */
-    public static Set<String> getStoredProviders(String rawProviders, String packageName) {
+    public static Set<String> getStoredProvidersExceptService(String rawProviders,
+            ComponentName componentName) {
+        // If the app being removed matches any of the package names from
+        // this list then don't add it in the output.
+        Set<String> providers = new HashSet<>();
+        if (rawProviders == null || componentName == null) {
+            return providers;
+        }
+        for (String rawComponentName : rawProviders.split(":")) {
+            if (TextUtils.isEmpty(rawComponentName) || rawComponentName.equals("null")) {
+                Slog.d(TAG, "provider component name is empty or null");
+                continue;
+            }
+
+            ComponentName cn = ComponentName.unflattenFromString(rawComponentName);
+            if (cn != null && !cn.equals(componentName)) {
+                providers.add(cn.flattenToString());
+            }
+        }
+
+        return providers;
+    }
+
+    /** Gets the list of stored providers from a string removing any mention of package name. */
+    public static Set<String> getStoredProvidersExceptPackage(
+            String rawProviders, String packageName) {
         // If the app being removed matches any of the package names from
         // this list then don't add it in the output.
         Set<String> providers = new HashSet<>();
@@ -1213,8 +1389,7 @@ public final class CredentialManagerService
             return providers;
         }
         for (String rawComponentName : rawProviders.split(":")) {
-            if (TextUtils.isEmpty(rawComponentName)
-                    || rawComponentName.equals("null")) {
+            if (TextUtils.isEmpty(rawComponentName) || rawComponentName.equals("null")) {
                 Slog.d(TAG, "provider component name is empty or null");
                 continue;
             }

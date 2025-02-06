@@ -296,7 +296,7 @@
   <string-array name="shade_display_awareness_summaries">
     <item msgid="2964753205732912921">"הצגת הצללה במסך המכשיר בלבד"</item>
     <item msgid="7795034287069726554">"הצגת המכשיר במסך חיצוני אחד"</item>
-    <item msgid="5280431949814340475">"הצגת המכשיר במסך האחרון שהתמקדת בו"</item>
+    <item msgid="5280431949814340475">"הצגת ההתראות במסך האחרון שהשתמשת בו"</item>
   </string-array>
   <string-array name="shade_display_awareness_values">
     <item msgid="3055776101992426514">"default_display"</item>

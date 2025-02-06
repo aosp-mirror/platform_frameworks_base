@@ -39,7 +39,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -48,7 +47,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class DeviceEntryIconViewModelTest : SysuiTestCase() {

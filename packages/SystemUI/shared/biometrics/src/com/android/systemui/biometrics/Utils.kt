@@ -17,13 +17,6 @@ package com.android.systemui.biometrics
 
 import android.Manifest
 import android.app.ActivityTaskManager
-import android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC
-import android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC
-import android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX
-import android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_MANAGED
-import android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
-import android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX
-import android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -44,6 +37,9 @@ import android.view.WindowMetrics
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
 import com.android.internal.widget.LockPatternUtils
+import com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD
+import com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN
+import com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN
 import com.android.systemui.biometrics.shared.model.PromptKind
 
 object Utils {
@@ -80,7 +76,7 @@ object Utils {
         view.notifySubtreeAccessibilityStateChanged(
             view,
             view,
-            AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE
+            AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE,
         )
     }
 
@@ -94,14 +90,10 @@ object Utils {
 
     @JvmStatic
     fun getCredentialType(utils: LockPatternUtils, userId: Int): PromptKind =
-        when (utils.getKeyguardStoredPasswordQuality(userId)) {
-            PASSWORD_QUALITY_SOMETHING -> PromptKind.Pattern
-            PASSWORD_QUALITY_NUMERIC,
-            PASSWORD_QUALITY_NUMERIC_COMPLEX -> PromptKind.Pin
-            PASSWORD_QUALITY_ALPHABETIC,
-            PASSWORD_QUALITY_ALPHANUMERIC,
-            PASSWORD_QUALITY_COMPLEX,
-            PASSWORD_QUALITY_MANAGED -> PromptKind.Password
+        when (utils.getCredentialTypeForUser(userId)) {
+            CREDENTIAL_TYPE_PATTERN -> PromptKind.Pattern
+            CREDENTIAL_TYPE_PIN -> PromptKind.Pin
+            CREDENTIAL_TYPE_PASSWORD -> PromptKind.Password
             else -> PromptKind.Password
         }
 
@@ -112,7 +104,7 @@ object Utils {
     @JvmStatic
     fun <T : SensorPropertiesInternal> findFirstSensorProperties(
         properties: List<T>?,
-        sensorIds: IntArray
+        sensorIds: IntArray,
     ): T? = properties?.firstOrNull { sensorIds.contains(it.sensorId) }
 
     @JvmStatic

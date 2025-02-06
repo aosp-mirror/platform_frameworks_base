@@ -323,7 +323,7 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
      * if the service is disabled.
      */
     @Nullable
-    public final ComponentName getServiceComponentName() {
+    public ComponentName getServiceComponentName() {
         synchronized (mLock) {
             return mServiceInfo == null ? null : mServiceInfo.getComponentName();
         }

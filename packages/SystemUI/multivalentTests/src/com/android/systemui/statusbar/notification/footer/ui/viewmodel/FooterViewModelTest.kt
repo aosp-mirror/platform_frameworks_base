@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.notification.footer.ui.viewmodel
 
 import android.platform.test.annotations.DisableFlags
@@ -37,16 +35,14 @@ import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.res.R
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.shared.settings.data.repository.fakeSecureSettingsRepository
-import com.android.systemui.statusbar.notification.collection.render.NotifStats
+import com.android.systemui.statusbar.notification.data.model.NotifStats
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
-import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.shared.NotifRedesignFooter
 import com.android.systemui.testKosmos
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.value
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -57,7 +53,6 @@ import platform.test.runner.parameterized.Parameters
 
 @RunWith(ParameterizedAndroidJunit4::class)
 @SmallTest
-@EnableFlags(FooterViewRefactor.FLAG_NAME)
 class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
@@ -117,7 +112,6 @@ class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
-                    numActiveNotifs = 2,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = true,
                     hasNonClearableSilentNotifs = false,
@@ -135,7 +129,6 @@ class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
-                    numActiveNotifs = 2,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = false,
                     hasNonClearableSilentNotifs = false,
@@ -153,7 +146,6 @@ class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
-                    numActiveNotifs = 2,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = true,
                     hasNonClearableSilentNotifs = false,
@@ -185,7 +177,6 @@ class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             // AND there are clearable notifications
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
-                    numActiveNotifs = 2,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = true,
                     hasNonClearableSilentNotifs = false,
@@ -219,7 +210,6 @@ class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             // AND there are clearable notifications
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
-                    numActiveNotifs = 2,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = true,
                     hasNonClearableSilentNotifs = false,

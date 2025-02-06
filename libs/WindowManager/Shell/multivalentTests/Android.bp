@@ -35,7 +35,6 @@ android_app {
 android_robolectric_test {
     name: "WMShellRobolectricTests",
     instrumentation_for: "WindowManagerShellRobolectric",
-    upstream: true,
     java_resource_dirs: [
         "robolectric/config",
     ],

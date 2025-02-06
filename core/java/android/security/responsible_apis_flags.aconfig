@@ -146,3 +146,10 @@ flag {
     description: "Android Advanced Protection Mode Feature: Disable Cellular 2G"
     bug: "377748286"
 }
+
+flag {
+    name: "aapm_feature_usb_data_protection"
+    namespace: "preload_safety"
+    description: "Android Advanced Protection Mode Feature: Usb Data Protection"
+    bug: "389958463"
+}

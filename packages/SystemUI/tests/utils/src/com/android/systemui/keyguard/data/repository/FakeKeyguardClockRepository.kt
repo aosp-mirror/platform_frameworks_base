@@ -47,10 +47,6 @@ class FakeKeyguardClockRepository() : KeyguardClockRepository {
     override val previewClock: Flow<ClockController>
         get() = _previewClock
 
-    private val _notificationDefaultTop = MutableStateFlow(0F)
-    override val notificationDefaultTop: StateFlow<Float>
-        get() = _notificationDefaultTop
-
     override val clockEventController: ClockEventController
         get() = mock()
 
@@ -61,10 +57,6 @@ class FakeKeyguardClockRepository() : KeyguardClockRepository {
 
     override fun setClockSize(size: ClockSize) {
         _clockSize.value = size
-    }
-
-    override fun setNotificationDefaultTop(top: Float) {
-        _notificationDefaultTop.value = top
     }
 
     fun setSelectedClockSize(size: ClockSizeSetting) {

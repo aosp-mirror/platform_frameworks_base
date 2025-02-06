@@ -37,14 +37,12 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 
-@ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class AlternateBouncerViewModelTest : SysuiTestCase() {

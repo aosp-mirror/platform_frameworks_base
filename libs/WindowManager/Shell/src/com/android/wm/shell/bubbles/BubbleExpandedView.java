@@ -71,6 +71,7 @@ import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.AlphaOptimizedButton;
 import com.android.wm.shell.shared.TriangleShape;
+import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
 import com.android.wm.shell.taskview.TaskView;
 
 import java.io.PrintWriter;
@@ -226,17 +227,18 @@ public class BubbleExpandedView extends LinearLayout {
                             MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
 
                     final boolean isShortcutBubble = (mBubble.hasMetadataShortcutId()
-                            || (mBubble.getShortcutInfo() != null && Flags.enableBubbleAnything()));
+                            || (mBubble.isShortcut()
+                            && BubbleAnythingFlagHelper.enableCreateAnyBubble()));
 
-                    if (mBubble.isAppBubble()) {
+                    // TODO - currently based on type, really it's what the "launch item" is.
+                    if (mBubble.isApp() || mBubble.isNote()) {
                         Context context =
                                 mContext.createContextAsUser(
                                         mBubble.getUser(), Context.CONTEXT_RESTRICTED);
                         PendingIntent pi = PendingIntent.getActivity(
                                 context,
                                 /* requestCode= */ 0,
-                                mBubble.getAppBubbleIntent()
-                                        .addFlags(FLAG_ACTIVITY_MULTIPLE_TASK),
+                                mBubble.getIntent().addFlags(FLAG_ACTIVITY_MULTIPLE_TASK),
                                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT,
                                 /* options= */ null);
                         mTaskView.startActivity(pi, /* fillInIntent= */ null, options,
@@ -250,7 +252,7 @@ public class BubbleExpandedView extends LinearLayout {
                     } else {
                         options.setLaunchedFromBubble(true);
                         if (mBubble != null) {
-                            mBubble.setIntentActive();
+                            mBubble.setPendingIntentActive();
                         }
                         final Intent fillInIntent = new Intent();
                         // Apply flags to make behaviour match documentLaunchMode=always.
@@ -283,9 +285,9 @@ public class BubbleExpandedView extends LinearLayout {
             // The taskId is saved to use for removeTask, preventing appearance in recent tasks.
             mTaskId = taskId;
 
-            if (mBubble != null && mBubble.isAppBubble()) {
+            if (mBubble != null && mBubble.isNote()) {
                 // Let the controller know sooner what the taskId is.
-                mManager.setAppBubbleTaskId(mBubble.getKey(), mTaskId);
+                mManager.setNoteBubbleTaskId(mBubble.getKey(), mTaskId);
             }
 
             // With the task org, the taskAppeared callback will only happen once the task has
@@ -687,11 +689,6 @@ public class BubbleExpandedView extends LinearLayout {
         }
     }
 
-    /** Sets the alpha for the pointer. */
-    public void setPointerAlpha(float alpha) {
-        mPointerView.setAlpha(alpha);
-    }
-
     /**
      * Get alpha from underlying {@code TaskView} if this view is for a bubble.
      * Or get alpha for the overflow view if this view is for overflow.
@@ -792,24 +789,6 @@ public class BubbleExpandedView extends LinearLayout {
     public void setBottomClip(int clip) {
         mBottomClip = clip;
         onContainerClipUpdate();
-    }
-
-    /**
-     * Sets the clipping for the view.
-     */
-    public void setTaskViewClip(Rect rect) {
-        mLeftClip = rect.left;
-        mTopClip = rect.top;
-        mRightClip = rect.right;
-        mBottomClip = rect.bottom;
-        onContainerClipUpdate();
-    }
-
-    /**
-     * Returns a rect representing the clipping for the view.
-     */
-    public Rect getTaskViewClip() {
-        return new Rect(mLeftClip, mTopClip, mRightClip, mBottom);
     }
 
     private void onContainerClipUpdate() {
@@ -941,7 +920,7 @@ public class BubbleExpandedView extends LinearLayout {
                     });
 
             if (isNew) {
-                mPendingIntent = mBubble.getBubbleIntent();
+                mPendingIntent = mBubble.getPendingIntent();
                 if ((mPendingIntent != null || mBubble.hasMetadataShortcutId())
                         && mTaskView != null) {
                     setContentVisibility(false);
@@ -968,7 +947,7 @@ public class BubbleExpandedView extends LinearLayout {
      */
     private boolean didBackingContentChange(Bubble newBubble) {
         boolean prevWasIntentBased = mBubble != null && mPendingIntent != null;
-        boolean newIsIntentBased = newBubble.getBubbleIntent() != null;
+        boolean newIsIntentBased = newBubble.getPendingIntent() != null;
         return prevWasIntentBased != newIsIntentBased;
     }
 
@@ -1119,13 +1098,6 @@ public class BubbleExpandedView extends LinearLayout {
      */
     public boolean isShowingRightPointer() {
         return mCurrentPointer == mRightPointer;
-    }
-
-    /**
-     * Return width of the current pointer
-     */
-    public int getPointerWidth() {
-        return mPointerWidth;
     }
 
     /**

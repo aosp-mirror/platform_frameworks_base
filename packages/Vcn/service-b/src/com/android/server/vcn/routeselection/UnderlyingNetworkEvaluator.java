@@ -52,8 +52,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @hide
  */
-// TODO(b/374174952): Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
-@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@TargetApi(Build.VERSION_CODES.BAKLAVA)
 public class UnderlyingNetworkEvaluator {
     private static final String TAG = UnderlyingNetworkEvaluator.class.getSimpleName();
 

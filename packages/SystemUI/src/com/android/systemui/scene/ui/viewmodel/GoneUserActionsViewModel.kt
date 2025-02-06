@@ -18,7 +18,7 @@ package com.android.systemui.scene.ui.viewmodel
 
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.viewmodel.dualShadeActions
 import com.android.systemui.shade.ui.viewmodel.singleShadeActions
@@ -28,10 +28,10 @@ import dagger.assisted.AssistedInject
 
 class GoneUserActionsViewModel
 @AssistedInject
-constructor(private val shadeInteractor: ShadeInteractor) : UserActionsViewModel() {
+constructor(private val shadeModeInteractor: ShadeModeInteractor) : UserActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
-        shadeInteractor.shadeMode.collect { shadeMode ->
+        shadeModeInteractor.shadeMode.collect { shadeMode ->
             setActions(
                 buildList {
                         addAll(

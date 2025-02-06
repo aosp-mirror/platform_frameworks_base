@@ -36,7 +36,7 @@
     <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"‫<xliff:g id="PERCENTAGE">%s</xliff:g> • الشحن معلّق لحماية البطارية"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"‫<xliff:g id="PERCENTAGE">%s</xliff:g> • يُرجى فحص ملحق الشحن."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"الشبكة مؤمّنة"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"‏لا تتوفر شريحة SIM."</string>
+    <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"‏لا تتوفر شريحة SIM"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"‏شريحة SIM غير قابلة للاستخدام."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"‏شريحة SIM مُقفَلة."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"‏شريحة SIM مُقفَلة برمز PUK."</string>

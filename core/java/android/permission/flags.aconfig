@@ -493,3 +493,9 @@ flag {
     bug: "341941666"
 }
 
+flag {
+    name: "sqlite_discrete_op_event_logging_enabled"
+    namespace: "permissions"
+    description: "Collect sqlite performance metrics for discrete ops."
+    bug: "377584611"
+}

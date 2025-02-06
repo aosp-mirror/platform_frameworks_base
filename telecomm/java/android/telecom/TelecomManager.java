@@ -29,6 +29,7 @@ import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -1883,6 +1884,34 @@ public class TelecomManager {
             }
         }
         return null;
+    }
+
+    /**
+     * This test API determines the foreground service delegation state for a VoIP app that adds
+     * calls via {@link TelecomManager#addCall(CallAttributes, Executor, OutcomeReceiver,
+     * CallControlCallback, CallEventCallback)}.  Foreground Service Delegation allows applications
+     * to operate in the background  starting in Android 14 and is granted by Telecom via a request
+     * to the ActivityManager.
+     *
+     * @param handle of the voip app that is being checked
+     * @return true if the app has foreground service delegation. Otherwise, false.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_VOIP_CALL_MONITOR_REFACTOR)
+    @TestApi
+    public boolean hasForegroundServiceDelegation(@Nullable PhoneAccountHandle handle) {
+        ITelecomService service = getTelecomService();
+        if (service != null) {
+            try {
+                return service.hasForegroundServiceDelegation(handle, mContext.getOpPackageName());
+            } catch (RemoteException e) {
+                Log.e(TAG,
+                        "RemoteException calling ITelecomService#hasForegroundServiceDelegation.",
+                        e);
+            }
+        }
+        return false;
     }
 
     /**

@@ -19,6 +19,8 @@ package android.timezone;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import com.android.icu.Flags;
+
 import java.util.Objects;
 
 /**
@@ -49,5 +51,20 @@ public final class TelephonyNetworkFinder {
                 mDelegate.findNetworkByMccMnc(mcc, mnc);
         return telephonyNetworkDelegate != null
                 ? new TelephonyNetwork(telephonyNetworkDelegate) : null;
+    }
+
+    /**
+     * Returns the countries where a given MCC is in use.
+     */
+    @Nullable
+    public MobileCountries findCountriesByMcc(@NonNull String mcc) {
+        if (!Flags.telephonyLookupMccExtension()) {
+            return null;
+        }
+        Objects.requireNonNull(mcc);
+
+        com.android.i18n.timezone.MobileCountries countriesByMcc =
+                mDelegate.findCountriesByMcc(mcc);
+        return countriesByMcc != null ? new MobileCountries(countriesByMcc) : null;
     }
 }

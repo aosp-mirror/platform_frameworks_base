@@ -115,3 +115,6 @@ class FakeDisplayRepository @Inject constructor() : DisplayRepository {
 interface FakeDisplayRepositoryModule {
     @Binds fun bindFake(fake: FakeDisplayRepository): DisplayRepository
 }
+
+val DisplayRepository.fake
+    get() = this as FakeDisplayRepository

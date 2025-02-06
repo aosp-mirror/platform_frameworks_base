@@ -311,7 +311,7 @@ final class AppCompatConfiguration {
 
     // Whether should ignore app requested orientation in response to an app
     // calling Activity#setRequestedOrientation. See
-    // LetterboxUiController#shouldIgnoreRequestedOrientation for details.
+    // AppCompatOrientationPolicy#shouldIgnoreRequestedOrientation for details.
     private final boolean mIsPolicyForIgnoringRequestedOrientationEnabled;
 
     // Flags dynamically updated with {@link android.provider.DeviceConfig}.
@@ -1259,7 +1259,7 @@ final class AppCompatConfiguration {
     /**
      * Whether should ignore app requested orientation in response to an app calling
      * {@link android.app.Activity#setRequestedOrientation}. See {@link
-     * LetterboxUiController#shouldIgnoreRequestedOrientation} for details.
+     * AppCompatOrientationPolicy#shouldIgnoreRequestedOrientation} for details.
      */
     boolean isPolicyForIgnoringRequestedOrientationEnabled() {
         return mIsPolicyForIgnoringRequestedOrientationEnabled;

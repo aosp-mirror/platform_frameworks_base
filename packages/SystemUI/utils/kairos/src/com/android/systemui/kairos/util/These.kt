@@ -16,28 +16,28 @@
 
 package com.android.systemui.kairos.util
 
-import com.android.systemui.kairos.util.Maybe.Just
+import com.android.systemui.kairos.util.Maybe.Present
 
 /** Contains at least one of two potential values. */
 sealed class These<out A, out B> {
-    /** Contains a single potential value. */
-    class This<A, B> internal constructor(val thiz: A) : These<A, B>()
+    /** A [These] that contains a [First] value. */
+    class First<A, B> internal constructor(val value: A) : These<A, B>()
 
-    /** Contains a single potential value. */
-    class That<A, B> internal constructor(val that: B) : These<A, B>()
+    /** A [These] that contains a [Second] value. */
+    class Second<A, B> internal constructor(val value: B) : These<A, B>()
 
-    /** Contains both potential values. */
-    class Both<A, B> internal constructor(val thiz: A, val that: B) : These<A, B>()
+    /** A [These] that contains [Both] a [first] and [second] value. */
+    class Both<A, B> internal constructor(val first: A, val second: B) : These<A, B>()
 
     companion object {
-        /** Constructs a [These] containing only [thiz]. */
-        fun <A> thiz(thiz: A): These<A, Nothing> = This(thiz)
+        /** Constructs a [These] containing the first possibility. */
+        fun <A> first(value: A): These<A, Nothing> = First(value)
 
-        /** Constructs a [These] containing only [that]. */
-        fun <B> that(that: B): These<Nothing, B> = That(that)
+        /** Constructs a [These] containing the second possibility. */
+        fun <B> second(value: B): These<Nothing, B> = Second(value)
 
-        /** Constructs a [These] containing both [thiz] and [that]. */
-        fun <A, B> both(thiz: A, that: B): These<A, B> = Both(thiz, that)
+        /** Constructs a [These] containing both possibilities. */
+        fun <A, B> both(first: A, second: B): These<A, B> = Both(first, second)
     }
 }
 
@@ -47,87 +47,88 @@ sealed class These<out A, out B> {
  */
 inline fun <A> These<A, A>.merge(f: (A, A) -> A): A =
     when (this) {
-        is These.This -> thiz
-        is These.That -> that
-        is These.Both -> f(thiz, that)
+        is These.First -> value
+        is These.Second -> value
+        is These.Both -> f(first, second)
     }
 
-/** Returns the [These.This] [value][These.This.thiz] present in this [These] as a [Maybe]. */
-fun <A> These<A, *>.maybeThis(): Maybe<A> =
+/** Returns the [These.First] [value][These.First.value] present in this [These] as a [Maybe]. */
+fun <A> These<A, *>.maybeFirst(): Maybe<A> =
     when (this) {
-        is These.Both -> just(thiz)
-        is These.That -> none
-        is These.This -> just(thiz)
-    }
-
-/**
- * Returns the [These.This] [value][These.This.thiz] present in this [These], or `null` if not
- * present.
- */
-fun <A : Any> These<A, *>.thisOrNull(): A? =
-    when (this) {
-        is These.Both -> thiz
-        is These.That -> null
-        is These.This -> thiz
-    }
-
-/** Returns the [These.That] [value][These.That.that] present in this [These] as a [Maybe]. */
-fun <A> These<*, A>.maybeThat(): Maybe<A> =
-    when (this) {
-        is These.Both -> just(that)
-        is These.That -> just(that)
-        is These.This -> none
+        is These.Both -> Maybe.present(first)
+        is These.Second -> Maybe.absent
+        is These.First -> Maybe.present(value)
     }
 
 /**
- * Returns the [These.That] [value][These.That.that] present in this [These], or `null` if not
+ * Returns the [These.First] [value][These.First.value] present in this [These], or `null` if not
  * present.
  */
-fun <A : Any> These<*, A>.thatOrNull(): A? =
+fun <A : Any> These<A, *>.firstOrNull(): A? =
     when (this) {
-        is These.Both -> that
-        is These.That -> that
-        is These.This -> null
+        is These.Both -> first
+        is These.Second -> null
+        is These.First -> value
+    }
+
+/** Returns the [These.Second] [value][These.Second.value] present in this [These] as a [Maybe]. */
+fun <A> These<*, A>.maybeSecond(): Maybe<A> =
+    when (this) {
+        is These.Both -> Maybe.present(second)
+        is These.Second -> Maybe.present(value)
+        is These.First -> Maybe.absent
+    }
+
+/**
+ * Returns the [These.Second] [value][These.Second.value] present in this [These], or `null` if not
+ * present.
+ */
+fun <A : Any> These<*, A>.secondOrNull(): A? =
+    when (this) {
+        is These.Both -> second
+        is These.Second -> value
+        is These.First -> null
     }
 
 /** Returns [These.Both] values present in this [These] as a [Maybe]. */
 fun <A, B> These<A, B>.maybeBoth(): Maybe<Pair<A, B>> =
     when (this) {
-        is These.Both -> just(thiz to that)
-        else -> none
+        is These.Both -> Maybe.present(first to second)
+        else -> Maybe.absent
     }
 
-/** Returns a [These] containing [thiz] and/or [that] if they are present. */
-fun <A, B> these(thiz: Maybe<A>, that: Maybe<B>): Maybe<These<A, B>> =
-    when (thiz) {
-        is Just ->
-            just(
-                when (that) {
-                    is Just -> These.both(thiz.value, that.value)
-                    else -> These.thiz(thiz.value)
+/** Returns a [These] containing [first] and/or [second] if they are present. */
+fun <A, B> these(first: Maybe<A>, second: Maybe<B>): Maybe<These<A, B>> =
+    when (first) {
+        is Present ->
+            Maybe.present(
+                when (second) {
+                    is Present -> These.both(first.value, second.value)
+                    else -> These.first(first.value)
                 }
             )
+
         else ->
-            when (that) {
-                is Just -> just(These.that(that.value))
-                else -> none
+            when (second) {
+                is Present -> Maybe.present(These.second(second.value))
+                else -> Maybe.absent
             }
     }
 
 /**
- * Returns a [These] containing [thiz] and/or [that] if they are non-null, or `null` if both are
+ * Returns a [These] containing [first] and/or [second] if they are non-null, or `null` if both are
  * `null`.
  */
-fun <A : Any, B : Any> theseNull(thiz: A?, that: B?): These<A, B>? =
-    thiz?.let { that?.let { These.both(thiz, that) } ?: These.thiz(thiz) }
-        ?: that?.let { These.that(that) }
+fun <A : Any, B : Any> theseNotNull(first: A?, second: B?): These<A, B>? =
+    first?.let { second?.let { These.both(first, second) } ?: These.first(first) }
+        ?: second?.let { These.second(second) }
 
 /**
- * Returns two maps, with [Pair.first] containing all [These.This] values and [Pair.second]
- * containing all [These.That] values.
+ * Returns two maps, with [Pair.first] containing all [These.First] values and [Pair.second]
+ * containing all [These.Second] values.
  *
  * If the value is [These.Both], then the associated key with appear in both output maps, bound to
- * [These.Both.thiz] and [These.Both.that] in each respective output.
+ * [These.Both.first] and [These.Both.second] in each respective output.
  */
 fun <K, A, B> Map<K, These<A, B>>.partitionThese(): Pair<Map<K, A>, Map<K, B>> {
     val a = mutableMapOf<K, A>()
@@ -135,14 +136,14 @@ fun <K, A, B> Map<K, These<A, B>>.partitionThese(): Pair<Map<K, A>, Map<K, B>> {
     for ((k, t) in this) {
         when (t) {
             is These.Both -> {
-                a[k] = t.thiz
-                b[k] = t.that
+                a[k] = t.first
+                b[k] = t.second
             }
-            is These.That -> {
-                b[k] = t.that
+            is These.Second -> {
+                b[k] = t.value
             }
-            is These.This -> {
-                a[k] = t.thiz
+            is These.First -> {
+                a[k] = t.value
             }
         }
     }

@@ -33,6 +33,7 @@ import android.util.Log
 import com.android.app.tracing.coroutines.runBlockingTraced as runBlocking
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SystemUIAppComponentFactoryBase.ContextAvailableCallback
+import com.android.systemui.biometrics.domain.interactor.FingerprintPropertyInteractor
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.ui.preview.KeyguardRemotePreviewManager
@@ -46,6 +47,7 @@ class CustomizationProvider :
 
     @Inject lateinit var interactor: KeyguardQuickAffordanceInteractor
     @Inject lateinit var shadeModeInteractor: ShadeModeInteractor
+    @Inject lateinit var fingerprintPropertyInteractor: FingerprintPropertyInteractor
     @Inject lateinit var previewManager: KeyguardRemotePreviewManager
     @Inject @Main lateinit var mainDispatcher: CoroutineDispatcher
 
@@ -345,6 +347,14 @@ class CustomizationProvider :
     }
 
     private fun queryRuntimeValues(): Cursor {
+        // If not UDFPS, the udfpsLocation will be null
+        val udfpsLocation =
+            if (fingerprintPropertyInteractor.isUdfps.value) {
+                fingerprintPropertyInteractor.sensorLocation.value
+            } else {
+                null
+            }
+
         return MatrixCursor(
                 arrayOf(
                     Contract.RuntimeValuesTable.Columns.NAME,
@@ -357,6 +367,9 @@ class CustomizationProvider :
                         Contract.RuntimeValuesTable.KEY_IS_SHADE_LAYOUT_WIDE,
                         if (shadeModeInteractor.isShadeLayoutWide.value) 1 else 0,
                     )
+                )
+                addRow(
+                    arrayOf(Contract.RuntimeValuesTable.KEY_UDFPS_LOCATION, udfpsLocation?.encode())
                 )
             }
     }

@@ -38,7 +38,6 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.takeWhile
@@ -51,7 +50,6 @@ import kotlinx.coroutines.withTimeout
  * widget interaction occurring. Used for detecting non-activity trampolines which otherwise would
  * not prompt the user for authentication.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class WidgetTrampolineInteractor
 @Inject

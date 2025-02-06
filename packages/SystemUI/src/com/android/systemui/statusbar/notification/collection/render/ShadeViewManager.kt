@@ -41,7 +41,6 @@ class ShadeViewManager
 constructor(
     @ShadeDisplayAware context: Context,
     @Assisted listContainer: NotificationListContainer,
-    @Assisted private val stackController: NotifStackController,
     mediaContainerController: MediaContainerController,
     featureManager: NotificationSectionsFeatureManager,
     sectionHeaderVisibilityProvider: SectionHeaderVisibilityProvider,
@@ -83,8 +82,6 @@ constructor(
                 }
             }
 
-            override fun getStackController(): NotifStackController = stackController
-
             override fun getGroupController(group: GroupEntry): NotifGroupController =
                 viewBarn.requireGroupController(group.requireSummary)
 
@@ -95,8 +92,5 @@ constructor(
 
 @AssistedFactory
 interface ShadeViewManagerFactory {
-    fun create(
-        listContainer: NotificationListContainer,
-        stackController: NotifStackController,
-    ): ShadeViewManager
+    fun create(listContainer: NotificationListContainer): ShadeViewManager
 }

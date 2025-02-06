@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityOptions;
-import android.app.LoadedApk;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -753,9 +752,6 @@ public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppW
      */
     protected Context getRemoteContextEnsuringCorrectCachedApkPath() {
         try {
-            ApplicationInfo expectedAppInfo = mInfo.providerInfo.applicationInfo;
-            LoadedApk.checkAndUpdateApkPaths(expectedAppInfo);
-            // Return if cloned successfully, otherwise default
             Context newContext = mContext.createApplicationContext(
                     mInfo.providerInfo.applicationInfo,
                     Context.CONTEXT_RESTRICTED);

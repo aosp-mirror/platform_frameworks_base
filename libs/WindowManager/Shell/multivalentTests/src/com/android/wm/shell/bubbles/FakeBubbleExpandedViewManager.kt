@@ -38,7 +38,7 @@ class FakeBubbleExpandedViewManager(var bubbleBar: Boolean = false, var expanded
 
     override fun dismissBubble(bubble: Bubble, reason: Int) {}
 
-    override fun setAppBubbleTaskId(key: String, taskId: Int) {}
+    override fun setNoteBubbleTaskId(key: String, taskId: Int) {}
 
     override fun isStackExpanded(): Boolean {
         return expanded

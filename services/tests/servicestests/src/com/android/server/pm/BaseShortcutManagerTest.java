@@ -112,6 +112,7 @@ import org.mockito.stubbing.Answer;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -553,6 +554,12 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         @Override
         ComponentName injectChooserActivity() {
             return mInjectedChooserActivity;
+        }
+
+        @Override
+        void injectFinishWrite(@NonNull ResilientAtomicFile file,
+                @NonNull FileOutputStream os) throws IOException {
+            file.finishWrite(os, false /* doFsVerity */);
         }
 
         @Override

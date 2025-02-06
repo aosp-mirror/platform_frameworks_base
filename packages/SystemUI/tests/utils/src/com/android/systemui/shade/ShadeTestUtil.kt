@@ -25,7 +25,6 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.shade.data.repository.ShadeRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
@@ -33,7 +32,7 @@ import kotlinx.coroutines.test.runCurrent
 import org.junit.Assert
 
 /** Sets up shade state for tests for either value of the scene container flag. */
-class ShadeTestUtil constructor(val delegate: ShadeTestUtilDelegate) {
+class ShadeTestUtil(val delegate: ShadeTestUtilDelegate) {
 
     /** Sets shade expansion to a value between 0-1. */
     fun setShadeExpansion(shadeExpansion: Float) {
@@ -193,7 +192,6 @@ class ShadeTestUtilLegacyImpl(
 }
 
 /** Sets up shade state for tests when the scene container flag is enabled. */
-@OptIn(ExperimentalCoroutinesApi::class)
 class ShadeTestUtilSceneImpl(
     val testScope: TestScope,
     val sceneInteractor: SceneInteractor,
@@ -203,6 +201,7 @@ class ShadeTestUtilSceneImpl(
     val isUserInputOngoing = MutableStateFlow(true)
 
     override fun setShadeAndQsExpansion(shadeExpansion: Float, qsExpansion: Float) {
+        shadeRepository.setLegacyIsQsExpanded(qsExpansion > 0f)
         if (shadeExpansion == 1f) {
             setIdleScene(Scenes.Shade)
         } else if (qsExpansion == 1f) {

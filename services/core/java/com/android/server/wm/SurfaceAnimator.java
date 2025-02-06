@@ -60,8 +60,6 @@ public class SurfaceAnimator {
     @VisibleForTesting
     SurfaceControl mLeash;
     @VisibleForTesting
-    SurfaceFreezer.Snapshot mSnapshot;
-    @VisibleForTesting
     final Animatable mAnimatable;
     @VisibleForTesting
     final OnAnimationFinishedCallback mInnerAnimationFinishedCallback;
@@ -165,7 +163,7 @@ public class SurfaceAnimator {
             @AnimationType int type,
             @Nullable OnAnimationFinishedCallback animationFinishedCallback,
             @Nullable Runnable animationCancelledCallback,
-            @Nullable AnimationAdapter snapshotAnim, @Nullable SurfaceFreezer freezer) {
+            @Nullable AnimationAdapter snapshotAnim) {
         cancelAnimation(t, true /* restarting */, true /* forwardCancel */);
         mAnimation = anim;
         mAnimationType = type;
@@ -177,7 +175,6 @@ public class SurfaceAnimator {
             cancelAnimation();
             return;
         }
-        mLeash = freezer != null ? freezer.takeLeashForAnimation() : null;
         if (mLeash == null) {
             mLeash = createAnimationLeash(mAnimatable, surface, t, type,
                     mAnimatable.getSurfaceWidth(), mAnimatable.getSurfaceHeight(), 0 /* x */,
@@ -192,21 +189,13 @@ public class SurfaceAnimator {
             mAnimation.dump(pw, "");
             ProtoLog.d(WM_DEBUG_ANIM, "Animation start for %s, anim=%s", mAnimatable, sw);
         }
-        if (snapshotAnim != null) {
-            mSnapshot = freezer.takeSnapshotForAnimation();
-            if (mSnapshot == null) {
-                Slog.e(TAG, "No snapshot target to start animation on for " + mAnimatable);
-                return;
-            }
-            mSnapshot.startAnimation(t, snapshotAnim, type);
-        }
         setAnimatorPendingState(t);
     }
 
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
             @AnimationType int type) {
         startAnimation(t, anim, hidden, type, null /* animationFinishedCallback */,
-                null /* animationCancelledCallback */, null /* snapshotAnim */, null /* freezer */);
+                null /* animationCancelledCallback */, null /* snapshotAnim */);
     }
 
     /** Indicates that there are surface operations in the pending transaction. */
@@ -317,7 +306,6 @@ public class SurfaceAnimator {
         final OnAnimationFinishedCallback animationFinishedCallback =
                 mSurfaceAnimationFinishedCallback;
         final Runnable animationCancelledCallback = mAnimationCancelledCallback;
-        final SurfaceFreezer.Snapshot snapshot = mSnapshot;
         reset(t, false);
         if (animation != null) {
             if (forwardCancel) {
@@ -337,9 +325,6 @@ public class SurfaceAnimator {
         }
 
         if (forwardCancel) {
-            if (snapshot != null) {
-                snapshot.cancelAnimation(t, false /* restarting */);
-            }
             if (leash != null) {
                 t.remove(leash);
                 mService.scheduleAnimationLocked();
@@ -352,12 +337,6 @@ public class SurfaceAnimator {
         mAnimation = null;
         mSurfaceAnimationFinishedCallback = null;
         mAnimationType = ANIMATION_TYPE_NONE;
-        final SurfaceFreezer.Snapshot snapshot = mSnapshot;
-        mSnapshot = null;
-        if (snapshot != null) {
-            // Reset the mSnapshot reference before calling the callback to prevent circular reset.
-            snapshot.cancelAnimation(t, !destroyLeash);
-        }
         if (mLeash == null) {
             return;
         }
@@ -597,8 +576,7 @@ public class SurfaceAnimator {
         void commitPendingTransaction();
 
         /**
-         * Called when the animation leash is created. Note that this is also called by
-         * {@link SurfaceFreezer}, so this doesn't mean we're about to start animating.
+         * Called when the animation leash is created.
          *
          * @param t The transaction to use to apply any necessary changes.
          * @param leash The leash that was created.

@@ -31,7 +31,6 @@ import com.android.systemui.user.data.repository.UserRepository
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -71,7 +70,6 @@ interface TrustRepository {
     suspend fun reportKeyguardShowingChanged()
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class TrustRepositoryImpl
 @Inject

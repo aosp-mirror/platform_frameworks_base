@@ -293,7 +293,7 @@ public class QuickAccessWalletController {
                         intent = getSysUiWalletIntent();
                     }
                     startQuickAccessViaIntent(intent, hasCard, activityStarter,
-                            animationController);
+                            animationController, mQuickAccessWalletClient.getUser());
 
                 });
     }
@@ -323,7 +323,8 @@ public class QuickAccessWalletController {
     private void startQuickAccessViaIntent(Intent intent,
             boolean hasCard,
             ActivityStarter activityStarter,
-            ActivityTransitionAnimator.Controller animationController) {
+            ActivityTransitionAnimator.Controller animationController,
+            UserHandle user) {
         if (hasCard) {
             activityStarter.startActivity(intent, true /* dismissShade */,
                     animationController, true /* showOverLockscreenWhenLocked */);
@@ -331,7 +332,9 @@ public class QuickAccessWalletController {
             activityStarter.postStartActivityDismissingKeyguard(
                     intent,
                     /* delay= */ 0,
-                    animationController);
+                    animationController,
+                    null,
+                    user);
         }
     }
 

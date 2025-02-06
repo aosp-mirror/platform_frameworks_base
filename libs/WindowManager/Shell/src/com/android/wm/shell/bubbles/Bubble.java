@@ -28,6 +28,7 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Person;
+import android.app.TaskInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.LocusId;
@@ -57,6 +58,7 @@ import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.bubbles.BubbleInfo;
 import com.android.wm.shell.shared.bubbles.ParcelableFlyoutMessage;
+import com.android.wm.shell.taskview.TaskView;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -69,11 +71,25 @@ import java.util.concurrent.Executor;
 public class Bubble implements BubbleViewProvider {
     private static final String TAG = "Bubble";
 
-    /** A string suffix used in app bubbles' {@link #mKey}. */
+    /** A string prefix used in app bubbles' {@link #mKey}. */
     public static final String KEY_APP_BUBBLE = "key_app_bubble";
 
-    /** Whether the bubble is an app bubble. */
-    private final boolean mIsAppBubble;
+    /** A string prefix used in note bubbles' {@link #mKey}. */
+    public static final String KEY_NOTE_BUBBLE = "key_note_bubble";
+
+    /** The possible types a bubble may be. */
+    public enum BubbleType {
+        /** Chat is from a notification. */
+        TYPE_CHAT,
+        /** Notes are from the note taking API. */
+        TYPE_NOTE,
+        /** Shortcuts from bubble anything, based on {@link ShortcutInfo}. */
+        TYPE_SHORTCUT,
+        /** Apps are from bubble anything. */
+        TYPE_APP,
+    }
+
+    private final BubbleType mType;
 
     private final String mKey;
     @Nullable
@@ -183,10 +199,10 @@ public class Bubble implements BubbleViewProvider {
      * that bubble being added back to the stack anyways.
      */
     @Nullable
-    private PendingIntent mIntent;
-    private boolean mIntentActive;
+    private PendingIntent mPendingIntent;
+    private boolean mPendingIntentActive;
     @Nullable
-    private PendingIntent.CancelListener mIntentCancelListener;
+    private PendingIntent.CancelListener mPendingIntentCancelListener;
 
     /**
      * Sent when the bubble & notification are no longer visible to the user (i.e. no
@@ -196,18 +212,22 @@ public class Bubble implements BubbleViewProvider {
     private PendingIntent mDeleteIntent;
 
     /**
-     * Used only for a special bubble in the stack that has {@link #mIsAppBubble} set to true.
-     * There can only be one of these bubbles in the stack and this intent will be populated for
-     * that bubble.
+     * Used for app & note bubbles.
      */
     @Nullable
-    private Intent mAppIntent;
+    private Intent mIntent;
+
+    /**
+     * Set while preparing a transition for animation. Several steps are needed before animation
+     * starts, so this is used to detect and route associated events to the coordinating transition.
+     */
+    @Nullable
+    private BubbleTransitions.BubbleTransition mPreparingTransition;
 
     /**
      * Create a bubble with limited information based on given {@link ShortcutInfo}.
      * Note: Currently this is only being used when the bubble is persisted to disk.
      */
-    @VisibleForTesting(visibility = PRIVATE)
     public Bubble(@NonNull final String key, @NonNull final ShortcutInfo shortcutInfo,
             final int desiredHeight, final int desiredHeightResId, @Nullable final String title,
             int taskId, @Nullable final String locus, boolean isDismissable,
@@ -234,14 +254,15 @@ public class Bubble implements BubbleViewProvider {
         mBgExecutor = bgExecutor;
         mTaskId = taskId;
         mBubbleMetadataFlagListener = listener;
-        mIsAppBubble = false;
+        // TODO (b/394085999) read/write type to xml
+        mType = BubbleType.TYPE_CHAT;
     }
 
     private Bubble(
             Intent intent,
             UserHandle user,
             @Nullable Icon icon,
-            boolean isAppBubble,
+            BubbleType type,
             String key,
             @ShellMainThread Executor mainExecutor,
             @ShellBackgroundThread Executor bgExecutor) {
@@ -250,13 +271,13 @@ public class Bubble implements BubbleViewProvider {
         mFlags = 0;
         mUser = user;
         mIcon = icon;
-        mIsAppBubble = isAppBubble;
+        mType = type;
         mKey = key;
         mShowBubbleUpdateDot = false;
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
         mTaskId = INVALID_TASK_ID;
-        mAppIntent = intent;
+        mIntent = intent;
         mDesiredHeight = Integer.MAX_VALUE;
         mPackageName = intent.getPackage();
     }
@@ -268,16 +289,50 @@ public class Bubble implements BubbleViewProvider {
         mFlags = 0;
         mUser = info.getUserHandle();
         mIcon = info.getIcon();
-        mIsAppBubble = false;
+        mType = BubbleType.TYPE_SHORTCUT;
         mKey = getBubbleKeyForShortcut(info);
         mShowBubbleUpdateDot = false;
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
         mTaskId = INVALID_TASK_ID;
-        mAppIntent = null;
+        mIntent = null;
         mDesiredHeight = Integer.MAX_VALUE;
         mPackageName = info.getPackage();
         mShortcutInfo = info;
+    }
+
+    private Bubble(
+            TaskInfo task,
+            UserHandle user,
+            @Nullable Icon icon,
+            String key,
+            @ShellMainThread Executor mainExecutor,
+            @ShellBackgroundThread Executor bgExecutor) {
+        mGroupKey = null;
+        mLocusId = null;
+        mFlags = 0;
+        mUser = user;
+        mIcon = icon;
+        mType = BubbleType.TYPE_APP;
+        mKey = key;
+        mShowBubbleUpdateDot = false;
+        mMainExecutor = mainExecutor;
+        mBgExecutor = bgExecutor;
+        mTaskId = task.taskId;
+        mIntent = null;
+        mDesiredHeight = Integer.MAX_VALUE;
+        mPackageName = task.baseActivity.getPackageName();
+    }
+
+    /** Creates a note taking bubble. */
+    public static Bubble createNotesBubble(Intent intent, UserHandle user, @Nullable Icon icon,
+            @ShellMainThread Executor mainExecutor, @ShellBackgroundThread Executor bgExecutor) {
+        return new Bubble(intent,
+                user,
+                icon,
+                BubbleType.TYPE_NOTE,
+                getNoteBubbleKeyForApp(intent.getPackage(), user),
+                mainExecutor, bgExecutor);
     }
 
     /** Creates an app bubble. */
@@ -286,8 +341,18 @@ public class Bubble implements BubbleViewProvider {
         return new Bubble(intent,
                 user,
                 icon,
-                /* isAppBubble= */ true,
-                /* key= */ getAppBubbleKeyForApp(intent.getPackage(), user),
+                BubbleType.TYPE_APP,
+                getAppBubbleKeyForApp(intent.getPackage(), user),
+                mainExecutor, bgExecutor);
+    }
+
+    /** Creates a task bubble. */
+    public static Bubble createTaskBubble(TaskInfo info, UserHandle user, @Nullable Icon icon,
+            @ShellMainThread Executor mainExecutor, @ShellBackgroundThread Executor bgExecutor) {
+        return new Bubble(info,
+                user,
+                icon,
+                getAppBubbleKeyForTask(info),
                 mainExecutor, bgExecutor);
     }
 
@@ -309,6 +374,16 @@ public class Bubble implements BubbleViewProvider {
     }
 
     /**
+     * Returns the key for a note bubble from an app with package name, {@code packageName} on an
+     * Android user, {@code user}.
+     */
+    public static String getNoteBubbleKeyForApp(String packageName, UserHandle user) {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(user);
+        return KEY_NOTE_BUBBLE + ":" + user.getIdentifier()  + ":" + packageName;
+    }
+
+    /**
      * Returns the key for a shortcut bubble using {@code packageName}, {@code user}, and the
      * {@code shortcutInfo} id.
      */
@@ -316,19 +391,31 @@ public class Bubble implements BubbleViewProvider {
         return info.getPackage() + ":" + info.getUserId() + ":" + info.getId();
     }
 
+    /**
+     * Returns the key for an app bubble from an app with package name, {@code packageName} on an
+     * Android user, {@code user}.
+     */
+    public static String getAppBubbleKeyForTask(TaskInfo taskInfo) {
+        Objects.requireNonNull(taskInfo);
+        return KEY_APP_BUBBLE + ":" + taskInfo.taskId;
+    }
+
+    /**
+     * Creates a chat bubble based on a notification (contents of {@link BubbleEntry}.
+     */
     @VisibleForTesting(visibility = PRIVATE)
     public Bubble(@NonNull final BubbleEntry entry,
             final Bubbles.BubbleMetadataFlagListener listener,
             final Bubbles.PendingIntentCanceledListener intentCancelListener,
             @ShellMainThread Executor mainExecutor, @ShellBackgroundThread Executor bgExecutor) {
-        mIsAppBubble = false;
+        mType = BubbleType.TYPE_CHAT;
         mKey = entry.getKey();
         mGroupKey = entry.getGroupKey();
         mLocusId = entry.getLocusId();
         mBubbleMetadataFlagListener = listener;
-        mIntentCancelListener = intent -> {
-            if (mIntent != null) {
-                mIntent.unregisterCancelListener(mIntentCancelListener);
+        mPendingIntentCancelListener = intent -> {
+            if (mPendingIntent != null) {
+                mPendingIntent.unregisterCancelListener(mPendingIntentCancelListener);
             }
             mainExecutor.execute(() -> {
                 intentCancelListener.onPendingIntentCanceled(this);
@@ -351,7 +438,7 @@ public class Bubble implements BubbleViewProvider {
                 getTitle(),
                 getAppName(),
                 isImportantConversation(),
-                !isAppLaunchIntent(),
+                showAppBadge(),
                 getParcelableFlyoutMessage());
     }
 
@@ -469,6 +556,10 @@ public class Bubble implements BubbleViewProvider {
         return mBubbleTaskView;
     }
 
+    public TaskView getTaskView() {
+        return mBubbleTaskView.getTaskView();
+    }
+
     /**
      * @return the ShortcutInfo id if it exists, or the metadata shortcut id otherwise.
      */
@@ -484,6 +575,10 @@ public class Bubble implements BubbleViewProvider {
 
     boolean hasMetadataShortcutId() {
         return (mMetadataShortcutId != null && !mMetadataShortcutId.isEmpty());
+    }
+
+    public BubbleTransitions.BubbleTransition getPreparingTransition() {
+        return mPreparingTransition;
     }
 
     /**
@@ -506,13 +601,14 @@ public class Bubble implements BubbleViewProvider {
         if (cleanupTaskView) {
             cleanupTaskView();
         }
-        if (mIntent != null) {
-            mIntent.unregisterCancelListener(mIntentCancelListener);
+        if (mPendingIntent != null) {
+            mPendingIntent.unregisterCancelListener(mPendingIntentCancelListener);
         }
-        mIntentActive = false;
+        mPendingIntentActive = false;
     }
 
-    private void cleanupTaskView() {
+    /** Cleans-up the taskview associated with this bubble (possibly removing the task from wm) */
+    public void cleanupTaskView() {
         if (mBubbleTaskView != null) {
             mBubbleTaskView.cleanup();
             mBubbleTaskView = null;
@@ -533,7 +629,7 @@ public class Bubble implements BubbleViewProvider {
      * <p>If we're switching between bar and floating modes, pass {@code false} on
      * {@code cleanupTaskView} to avoid recreating it in the new mode.
      */
-    void cleanupViews(boolean cleanupTaskView) {
+    public void cleanupViews(boolean cleanupTaskView) {
         cleanupExpandedView(cleanupTaskView);
         mIconView = null;
     }
@@ -556,6 +652,13 @@ public class Bubble implements BubbleViewProvider {
     }
 
     /**
+     * Sets the current bubble-transition that is coordinating a change in this bubble.
+     */
+    void setPreparingTransition(BubbleTransitions.BubbleTransition transit) {
+        mPreparingTransition = transit;
+    }
+
+    /**
      * Sets whether this bubble is considered text changed. This method is purely for
      * testing.
      */
@@ -572,7 +675,6 @@ public class Bubble implements BubbleViewProvider {
      * @param expandedViewManager the bubble expanded view manager.
      * @param taskViewFactory the task view factory used to create the task view for the bubble.
      * @param positioner the bubble positioner.
-     * @param bubbleLogger log bubble metrics.
      * @param stackView the view the bubble is added to, iff showing as floating.
      * @param layerView the layer the bubble is added to, iff showing in the bubble bar.
      * @param iconFactory the icon factory used to create images for the bubble.
@@ -582,7 +684,6 @@ public class Bubble implements BubbleViewProvider {
             BubbleExpandedViewManager expandedViewManager,
             BubbleTaskViewFactory taskViewFactory,
             BubblePositioner positioner,
-            BubbleLogger bubbleLogger,
             @Nullable BubbleStackView stackView,
             @Nullable BubbleBarLayerView layerView,
             BubbleIconFactory iconFactory,
@@ -597,7 +698,6 @@ public class Bubble implements BubbleViewProvider {
                     expandedViewManager,
                     taskViewFactory,
                     positioner,
-                    bubbleLogger,
                     stackView,
                     layerView,
                     iconFactory,
@@ -619,7 +719,6 @@ public class Bubble implements BubbleViewProvider {
                     expandedViewManager,
                     taskViewFactory,
                     positioner,
-                    bubbleLogger,
                     stackView,
                     layerView,
                     iconFactory,
@@ -771,19 +870,19 @@ public class Bubble implements BubbleViewProvider {
             mDesiredHeightResId = entry.getBubbleMetadata().getDesiredHeightResId();
             mIcon = entry.getBubbleMetadata().getIcon();
 
-            if (!mIntentActive || mIntent == null) {
-                if (mIntent != null) {
-                    mIntent.unregisterCancelListener(mIntentCancelListener);
+            if (!mPendingIntentActive || mPendingIntent == null) {
+                if (mPendingIntent != null) {
+                    mPendingIntent.unregisterCancelListener(mPendingIntentCancelListener);
                 }
-                mIntent = entry.getBubbleMetadata().getIntent();
-                if (mIntent != null) {
-                    mIntent.registerCancelListener(mIntentCancelListener);
+                mPendingIntent = entry.getBubbleMetadata().getIntent();
+                if (mPendingIntent != null) {
+                    mPendingIntent.registerCancelListener(mPendingIntentCancelListener);
                 }
-            } else if (mIntent != null && entry.getBubbleMetadata().getIntent() == null) {
+            } else if (mPendingIntent != null && entry.getBubbleMetadata().getIntent() == null) {
                 // Was an intent bubble now it's a shortcut bubble... still unregister the listener
-                mIntent.unregisterCancelListener(mIntentCancelListener);
-                mIntentActive = false;
-                mIntent = null;
+                mPendingIntent.unregisterCancelListener(mPendingIntentCancelListener);
+                mPendingIntentActive = false;
+                mPendingIntent = null;
             }
             mDeleteIntent = entry.getBubbleMetadata().getDeleteIntent();
         }
@@ -823,12 +922,15 @@ public class Bubble implements BubbleViewProvider {
      * Sets if the intent used for this bubble is currently active (i.e. populating an
      * expanded view, expanded or not).
      */
-    void setIntentActive() {
-        mIntentActive = true;
+    void setPendingIntentActive() {
+        mPendingIntentActive = true;
     }
 
-    boolean isIntentActive() {
-        return mIntentActive;
+    /**
+     * Whether the pending intent of this bubble is active (i.e. has been sent).
+     */
+    boolean isPendingIntentActive() {
+        return mPendingIntentActive;
     }
 
     public InstanceId getInstanceId() {
@@ -898,13 +1000,6 @@ public class Bubble implements BubbleViewProvider {
      */
     boolean isImportantConversation() {
         return mIsImportantConversation;
-    }
-
-    /**
-     * Whether this bubble is conversation
-     */
-    public boolean isConversation() {
-        return null != mShortcutInfo;
     }
 
     /**
@@ -1015,48 +1110,70 @@ public class Bubble implements BubbleViewProvider {
         }
     }
 
+    /**
+     * Returns the pending intent used to populate the bubble.
+     */
     @Nullable
-    PendingIntent getBubbleIntent() {
-        return mIntent;
+    PendingIntent getPendingIntent() {
+        return mPendingIntent;
     }
 
     /**
-     * Whether this bubble represents the full app, i.e. the intent used is the launch
-     * intent for an app. In this case we don't show a badge on the icon.
+     * Whether an app badge should be shown for this bubble.
      */
-    public boolean isAppLaunchIntent() {
-        if (Flags.enableBubbleAnything() && mAppIntent != null) {
-            return mAppIntent.hasCategory("android.intent.category.LAUNCHER");
-        }
-        return false;
+    public boolean showAppBadge() {
+        return isChat() || isShortcut() || isNote();
     }
 
+    /**
+     * Returns the pending intent to send when a bubble is dismissed (set via the notification API).
+     */
     @Nullable
     PendingIntent getDeleteIntent() {
         return mDeleteIntent;
     }
 
+    /**
+     * Returns the intent used to populate the bubble.
+     */
     @Nullable
-    @VisibleForTesting
-    public Intent getAppBubbleIntent() {
-        return mAppIntent;
+    public Intent getIntent() {
+        return mIntent;
     }
 
     /**
-     * Sets the intent for a bubble that is an app bubble (one for which {@link #mIsAppBubble} is
-     * true).
-     *
-     * @param appIntent The intent to set for the app bubble.
+     * Sets the intent used to populate the bubble.
      */
-    void setAppBubbleIntent(Intent appIntent) {
-        mAppIntent = appIntent;
+    void setIntent(Intent intent) {
+        mIntent = intent;
     }
 
     /**
-     * Returns whether this bubble is from an app versus a notification.
+     * Returns whether this bubble is a conversation from the notification API.
      */
-    public boolean isAppBubble() {
-        return mIsAppBubble;
+    public boolean isChat() {
+        return mType == BubbleType.TYPE_CHAT;
+    }
+
+    /**
+     * Returns whether this bubble is a note from the note taking API.
+     */
+    public boolean isNote() {
+        return mType == BubbleType.TYPE_NOTE;
+    }
+
+    /**
+     * Returns whether this bubble is a shortcut.
+     */
+    public boolean isShortcut() {
+        return mType == BubbleType.TYPE_SHORTCUT;
+    }
+
+    /**
+     * Returns whether this bubble is an app.
+     */
+    public boolean isApp() {
+        return mType == BubbleType.TYPE_APP;
     }
 
     /** Creates open app settings intent */

@@ -106,7 +106,6 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
@@ -127,7 +126,6 @@ private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
  * Class that is responsible for keeping the view carousel up to date. This also handles changes in
  * state and applies them to the media carousel like the expansion.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class MediaCarouselController
 @Inject
@@ -345,7 +343,7 @@ constructor(
             .stateIn(applicationScope, SharingStarted.Eagerly, true)
 
     init {
-        dumpManager.registerDumpable(TAG, this)
+        dumpManager.registerNormalDumpable(TAG, this)
         mediaFrame = inflateMediaCarousel()
         mediaCarousel = mediaFrame.requireViewById(R.id.media_carousel_scroller)
         pageIndicator = mediaFrame.requireViewById(R.id.media_page_indicator)
@@ -616,12 +614,8 @@ constructor(
                             logSmartspaceImpression(mediaCarouselScrollHandler.qsExpanded)
                         }
                     } else {
-                        if (!mediaFlags.isPersistentSsCardEnabled()) {
-                            // Handle update to inactive as a removal
-                            onSmartspaceMediaDataRemoved(data.targetId, immediately = true)
-                        } else {
-                            addSmartspaceMediaRecommendations(key, data, shouldPrioritize)
-                        }
+                        // Handle update to inactive as a removal
+                        onSmartspaceMediaDataRemoved(data.targetId, immediately = true)
                     }
                     MediaPlayerData.isSwipedAway = false
                 }
@@ -1127,18 +1121,6 @@ constructor(
         traceSection("MediaCarouselController#addSmartspaceMediaRecommendations") {
             if (DEBUG) Log.d(TAG, "Updating smartspace target in carousel")
             MediaPlayerData.getMediaPlayer(key)?.let {
-                if (mediaFlags.isPersistentSsCardEnabled()) {
-                    // The card exists, but could have changed active state, so update for sorting
-                    MediaPlayerData.addMediaRecommendation(
-                        key,
-                        data,
-                        it,
-                        shouldPrioritize,
-                        systemClock,
-                        debugLogger,
-                        update = true,
-                    )
-                }
                 Log.w(TAG, "Skip adding smartspace target in carousel")
                 return
             }
@@ -1490,6 +1472,7 @@ constructor(
                 }
 
                 // This is a hosting view, let's remeasure our players
+                val prevLocation = this.desiredLocation
                 this.desiredLocation = desiredLocation
                 this.desiredHostState = it
                 currentlyExpanded = it.expansion > 0
@@ -1522,7 +1505,11 @@ constructor(
                             mediaPlayer.closeGuts(!animate)
                         }
 
-                        mediaPlayer.mediaViewController.onLocationPreChange(desiredLocation)
+                        mediaPlayer.mediaViewController.onLocationPreChange(
+                            mediaPlayer.mediaViewHolder,
+                            desiredLocation,
+                            prevLocation,
+                        )
                     }
                 } else {
                     controllerById.values.forEach { controller ->
@@ -1533,7 +1520,11 @@ constructor(
                             controller.closeGuts(!animate)
                         }
 
-                        controller.onLocationPreChange(desiredLocation)
+                        controller.onLocationPreChange(
+                            controller.mediaViewHolder,
+                            desiredLocation,
+                            prevLocation,
+                        )
                     }
                 }
                 mediaCarouselScrollHandler.showsSettingsButton = !it.showsOnlyActiveMedia
@@ -1744,7 +1735,8 @@ constructor(
             println("location: $desiredLocation")
             println(
                 "state: ${desiredHostState?.expansion}, " +
-                    "only active ${desiredHostState?.showsOnlyActiveMedia}"
+                    "only active ${desiredHostState?.showsOnlyActiveMedia}, " +
+                    "visible ${desiredHostState?.visible}"
             )
             println("isSwipedAway: ${MediaPlayerData.isSwipedAway}")
             println("allowMediaPlayerOnLockScreen: $allowMediaPlayerOnLockScreen")

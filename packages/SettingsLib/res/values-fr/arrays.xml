@@ -296,7 +296,7 @@
   <string-array name="shade_display_awareness_summaries">
     <item msgid="2964753205732912921">"Afficher le volet sur l\'écran de l\'appareil uniquement"</item>
     <item msgid="7795034287069726554">"Afficher l\'appareil sur un seul écran externe"</item>
-    <item msgid="5280431949814340475">"Afficher l\'appareil sur le dernier écran sélectionné"</item>
+    <item msgid="5280431949814340475">"Afficher l\'appareil sur le dernier écran avec lequel l\'utilisateur a interagi"</item>
   </string-array>
   <string-array name="shade_display_awareness_values">
     <item msgid="3055776101992426514">"default_display"</item>

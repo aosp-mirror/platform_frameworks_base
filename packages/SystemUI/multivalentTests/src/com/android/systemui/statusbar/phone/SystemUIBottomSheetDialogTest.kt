@@ -30,7 +30,6 @@ import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.mock
 import kotlin.test.Test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -38,7 +37,6 @@ import org.junit.Before
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)

@@ -16,7 +16,6 @@
 
 package android.content;
 
-import static android.app.sdksandbox.SdkSandboxManager.ACTION_START_SANDBOXED_ACTIVITY;
 import static android.content.ContentProvider.maybeAddUserId;
 import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
 import static android.security.Flags.FLAG_FRP_ENFORCEMENT;
@@ -4215,6 +4214,17 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_USER_INFO_CHANGED =
             "android.intent.action.USER_INFO_CHANGED";
 
+
+    /**
+     * Broadcast sent to the system when a user's information changes. Carries an extra
+     * {@link #EXTRA_USER_HANDLE} to indicate which user's information changed.
+     * This is only sent to permission protected manifest receivers. It is sent to all users.
+     * @hide
+     */
+    @BroadcastBehavior(includeBackground = true)
+    public static final String ACTION_USER_INFO_CHANGED_BACKGROUND =
+            "android.intent.action.USER_INFO_CHANGED_BACKGROUND";
+
     /**
      * Broadcast sent to the primary user when an associated managed profile is added (the profile
      * was created and is ready to be used). Carries an extra {@link #EXTRA_USER} that specifies
@@ -5460,7 +5470,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Activities that can be safely invoked from a browser must support this
      * category.  For example, if the user is viewing a web page or an e-mail
-     * and clicks on a link in the text, the Intent generated execute that
+     * and clicks on a link in the text, the Intent generated to execute that
      * link will require the BROWSABLE category, so that only activities
      * supporting this category will be considered as possible actions.  By
      * supporting this category, you are promising that there is nothing
@@ -12394,35 +12404,57 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public void collectExtraIntentKeys() {
+        collectExtraIntentKeys(false);
+    }
+
+    /**
+     * Collects keys in the extra bundle whose value are intents.
+     * With these keys collected on the client side, the system server would only unparcel values
+     * of these keys and create IntentCreatorToken for them.
+     * This method could also be called from the system server side as a catch all safty net in case
+     * these keys are not collected on the client side. In that case, call it with forceUnparcel set
+     * to true since everything is parceled on the system server side.
+     *
+     * @param forceUnparcel if it is true, unparcel everything to determine if an object is an
+     *                      intent. Otherwise, do not unparcel anything.
+     * @hide
+     */
+    public void collectExtraIntentKeys(boolean forceUnparcel) {
         if (preventIntentRedirect()) {
-            collectNestedIntentKeysRecur(new ArraySet<>());
+            collectNestedIntentKeysRecur(new ArraySet<>(), forceUnparcel);
         }
     }
 
-    private void collectNestedIntentKeysRecur(Set<Intent> visited) {
-        addExtendedFlags(EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED);
-        if (mExtras != null && !mExtras.isEmpty()) {
+    private void collectNestedIntentKeysRecur(Set<Intent> visited, boolean forceUnparcel) {
+        if (mExtras != null && (forceUnparcel || !mExtras.isParcelled()) && !mExtras.isEmpty()) {
+            addExtendedFlags(EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED);
             for (String key : mExtras.keySet()) {
                 Object value;
                 try {
-                    value = mExtras.get(key);
+                    // Do not unparcel any Parcelable objects. It may cause issues for app who would
+                    // change class loader before it reads a parceled value. b/382633789.
+                    // It is okay to not collect a parceled intent since it would have been
+                    // coming from another process and collected by its containing intent already
+                    // in that process.
+                    if (forceUnparcel || !mExtras.isValueParceled(key)) {
+                        value = mExtras.get(key);
+                    } else {
+                        value = null;
+                    }
                 } catch (BadParcelableException e) {
-                    // This could happen when the key points to a LazyValue whose class cannot be
-                    // found by the classLoader - A nested object more than 1 level deeper who is
-                    // of type of a custom class could trigger this situation. In such case, we
-                    // ignore it since it is not an intent. However, it could be a custom type that
-                    // extends from Intent. If such an object is retrieved later in another
-                    // component, then trying to launch such a custom class object will fail unless
-                    // removeLaunchSecurityProtection() is called before it is launched.
+                    // This may still happen if the keys are collected on the system server side, in
+                    // which case, we will try to unparcel everything. If this happens, simply
+                    // ignore it since it is not an intent anyway.
                     value = null;
                 }
                 if (value instanceof Intent intent) {
                     handleNestedIntent(intent, visited, new NestedIntentKey(
-                            NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL, key, 0));
+                                    NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL, key, 0),
+                            forceUnparcel);
                 } else if (value instanceof Parcelable[] parcelables) {
-                    handleParcelableArray(parcelables, key, visited);
+                    handleParcelableArray(parcelables, key, visited, forceUnparcel);
                 } else if (value instanceof ArrayList<?> parcelables) {
-                    handleParcelableList(parcelables, key, visited);
+                    handleParcelableList(parcelables, key, visited, forceUnparcel);
                 }
             }
         }
@@ -12432,13 +12464,15 @@ public class Intent implements Parcelable, Cloneable {
                 Intent intent = mClipData.getItemAt(i).mIntent;
                 if (intent != null && !visited.contains(intent)) {
                     handleNestedIntent(intent, visited, new NestedIntentKey(
-                            NestedIntentKey.NESTED_INTENT_KEY_TYPE_CLIP_DATA, null, i));
+                                    NestedIntentKey.NESTED_INTENT_KEY_TYPE_CLIP_DATA, null, i),
+                            forceUnparcel);
                 }
             }
         }
     }
 
-    private void handleNestedIntent(Intent intent, Set<Intent> visited, NestedIntentKey key) {
+    private void handleNestedIntent(Intent intent, Set<Intent> visited, NestedIntentKey key,
+            boolean forceUnparcel) {
         if (mCreatorTokenInfo == null) {
             mCreatorTokenInfo = new CreatorTokenInfo();
         }
@@ -12448,24 +12482,28 @@ public class Intent implements Parcelable, Cloneable {
         mCreatorTokenInfo.mNestedIntentKeys.add(key);
         if (!visited.contains(intent)) {
             visited.add(intent);
-            intent.collectNestedIntentKeysRecur(visited);
+            intent.collectNestedIntentKeysRecur(visited, forceUnparcel);
         }
     }
 
-    private void handleParcelableArray(Parcelable[] parcelables, String key, Set<Intent> visited) {
+    private void handleParcelableArray(Parcelable[] parcelables, String key, Set<Intent> visited,
+            boolean forceUnparcel) {
         for (int i = 0; i < parcelables.length; i++) {
             if (parcelables[i] instanceof Intent intent && !visited.contains(intent)) {
                 handleNestedIntent(intent, visited, new NestedIntentKey(
-                        NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL_ARRAY, key, i));
+                                NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL_ARRAY, key, i),
+                        forceUnparcel);
             }
         }
     }
 
-    private void handleParcelableList(ArrayList<?> parcelables, String key, Set<Intent> visited) {
+    private void handleParcelableList(ArrayList<?> parcelables, String key, Set<Intent> visited,
+            boolean forceUnparcel) {
         for (int i = 0; i < parcelables.size(); i++) {
             if (parcelables.get(i) instanceof Intent intent && !visited.contains(intent)) {
                 handleNestedIntent(intent, visited, new NestedIntentKey(
-                        NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL_LIST, key, i));
+                                NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL_LIST, key, i),
+                        forceUnparcel);
             }
         }
     }
@@ -12478,6 +12516,9 @@ public class Intent implements Parcelable, Cloneable {
         if (intent.mExtras != null) {
             intent.mExtras.enableTokenVerification();
         }
+        if (intent.mClipData != null) {
+            intent.mClipData.setTokenVerificationEnabled();
+        }
     };
 
     /** @hide */
@@ -12488,6 +12529,9 @@ public class Intent implements Parcelable, Cloneable {
             // otherwise, the logic to mark missing token would run before
             // mark trusted creator token present.
             mExtras.enableTokenVerification();
+        }
+        if (mClipData != null) {
+            mClipData.setTokenVerificationEnabled();
         }
     }
 
@@ -13413,29 +13457,5 @@ public class Intent implements Parcelable, Cloneable {
     /** @hide */
     public boolean isDocument() {
         return (mFlags & FLAG_ACTIVITY_NEW_DOCUMENT) == FLAG_ACTIVITY_NEW_DOCUMENT;
-    }
-
-    /**
-     * @deprecated Use {@link SdkSandboxActivityAuthority#isSdkSandboxActivityIntent} instead.
-     * Once the other API is finalized this method will be removed.
-     *
-     * TODO(b/300059435): remove as part of the cleanup.
-     *
-     * @hide
-     */
-    @Deprecated
-    @android.ravenwood.annotation.RavenwoodThrow
-    public boolean isSandboxActivity(@NonNull Context context) {
-        if (mAction != null && mAction.equals(ACTION_START_SANDBOXED_ACTIVITY)) {
-            return true;
-        }
-        final String sandboxPackageName = context.getPackageManager().getSdkSandboxPackageName();
-        if (mPackage != null && mPackage.equals(sandboxPackageName)) {
-            return true;
-        }
-        if (mComponent != null && mComponent.getPackageName().equals(sandboxPackageName)) {
-            return true;
-        }
-        return false;
     }
 }

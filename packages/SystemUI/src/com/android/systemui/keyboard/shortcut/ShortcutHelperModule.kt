@@ -21,12 +21,14 @@ import com.android.systemui.Flags.keyboardShortcutHelperRewrite
 import com.android.systemui.keyboard.shortcut.data.repository.CustomShortcutCategoriesRepository
 import com.android.systemui.keyboard.shortcut.data.repository.DefaultShortcutCategoriesRepository
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutCategoriesRepository
+import com.android.systemui.keyboard.shortcut.data.source.AccessibilityShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.AppCategoriesShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.CurrentAppShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.InputShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.KeyboardShortcutGroupsSource
 import com.android.systemui.keyboard.shortcut.data.source.MultitaskingShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.SystemShortcutsSource
+import com.android.systemui.keyboard.shortcut.qualifiers.AccessibilityShortcuts
 import com.android.systemui.keyboard.shortcut.qualifiers.AppCategoriesShortcuts
 import com.android.systemui.keyboard.shortcut.qualifiers.CurrentAppShortcuts
 import com.android.systemui.keyboard.shortcut.qualifiers.CustomShortcutCategories
@@ -65,6 +67,12 @@ interface ShortcutHelperModule {
     @AppCategoriesShortcuts
     fun appCategoriesShortcutsSource(
         impl: AppCategoriesShortcutsSource
+    ): KeyboardShortcutGroupsSource
+
+    @Binds
+    @AccessibilityShortcuts
+    fun accessibilityShortcutsSource(
+        impl: AccessibilityShortcutsSource
     ): KeyboardShortcutGroupsSource
 
     @Binds

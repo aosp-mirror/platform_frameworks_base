@@ -47,7 +47,9 @@ class ObservableTransitionStateTest {
     @Test
     fun testObservableTransitionState() = runTest {
         val state =
-            rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA, EmptyTestTransitions) }
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutStateForTests(SceneA, EmptyTestTransitions)
+            }
 
         // Collect the current observable state into [observableState].
         // TODO(b/290184746): Use collectValues {} once it is extracted into a library that can be
@@ -106,7 +108,7 @@ class ObservableTransitionStateTest {
     @Test
     fun observableCurrentScene() = runTestWithSnapshots {
         val state =
-            MutableSceneTransitionLayoutStateImpl(
+            MutableSceneTransitionLayoutStateForTests(
                 initialScene = SceneA,
                 transitions = transitions {},
             )
@@ -150,7 +152,7 @@ class ObservableTransitionStateTest {
     fun testObservablePreviewTransitionState() = runTest {
         val layoutState =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     SceneA,
                     transitions = transitions { from(SceneA, to = SceneB, preview = {}) },
                 )

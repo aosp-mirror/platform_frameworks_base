@@ -22,6 +22,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -76,8 +77,10 @@ public class TestUtils {
      * Returns a mock secure settings configured to return information needed for tests.
      * Currently, this only includes button targets.
      */
-    public static SecureSettings mockSecureSettings() {
+    public static SecureSettings mockSecureSettings(Context context) {
         SecureSettings secureSettings = mock(SecureSettings.class);
+        when(secureSettings.getRealUserHandle(UserHandle.USER_CURRENT))
+                .thenReturn(context.getUserId());
 
         final String targets = getShortcutTargets(
                 Set.of(TEST_COMPONENT_A, TEST_COMPONENT_B));

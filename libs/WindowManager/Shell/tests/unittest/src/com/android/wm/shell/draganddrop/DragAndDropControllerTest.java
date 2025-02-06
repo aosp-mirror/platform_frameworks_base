@@ -47,6 +47,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.bubbles.bar.BubbleBarDragListener;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -59,6 +60,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import dagger.Lazy;
 
 /**
  * Tests for the drag and drop controller.
@@ -91,6 +94,8 @@ public class DragAndDropControllerTest extends ShellTestCase {
     private Transitions mTransitions;
     @Mock
     private GlobalDragListener mGlobalDragListener;
+    @Mock
+    private Lazy<BubbleBarDragListener> mBubbleBarDragControllerLazy;
 
     private DragAndDropController mController;
 
@@ -99,7 +104,8 @@ public class DragAndDropControllerTest extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mController = new DragAndDropController(mContext, mShellInit, mShellController,
                 mShellCommandHandler, mShellTaskOrganizer, mDisplayController, mUiEventLogger,
-                mIconProvider, mGlobalDragListener, mTransitions, mMainExecutor);
+                mIconProvider, mGlobalDragListener, mTransitions, mBubbleBarDragControllerLazy,
+                mMainExecutor);
         mController.onInit();
     }
 
@@ -149,5 +155,25 @@ public class DragAndDropControllerTest extends ShellTestCase {
         mController.removeListener(mDragAndDropListener);
         mController.onDrag(dragLayout, event);
         verify(mDragAndDropListener, never()).onDragStarted();
+    }
+
+    @Test
+    public void testOnDragStarted_withNoClipDataOrDescription() {
+        final View dragLayout = mock(View.class);
+        final Display display = mock(Display.class);
+        doReturn(display).when(dragLayout).getDisplay();
+        doReturn(DEFAULT_DISPLAY).when(display).getDisplayId();
+
+        final DragEvent event = mock(DragEvent.class);
+        doReturn(ACTION_DRAG_STARTED).when(event).getAction();
+        doReturn(null).when(event).getClipData();
+        doReturn(null).when(event).getClipDescription();
+
+        // Ensure there's a target so that onDrag will execute
+        mController.addDisplayDropTarget(0, mContext, mock(WindowManager.class),
+                mock(FrameLayout.class), mock(DragLayout.class));
+
+        // Verify the listener is called on a valid drag action.
+        mController.onDrag(dragLayout, event);
     }
 }

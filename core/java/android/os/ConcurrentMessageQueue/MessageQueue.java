@@ -16,7 +16,6 @@
 
 package android.os;
 
-import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -589,7 +588,7 @@ public final class MessageQueue {
     private static final AtomicLong mMessagesDelivered = new AtomicLong();
     private boolean mMessageDirectlyQueued;
 
-    private Message nextMessage(boolean peek) {
+    private Message nextMessage(boolean peek, boolean returnEarliest) {
         int i = 0;
 
         while (true) {
@@ -666,7 +665,7 @@ public final class MessageQueue {
              * If we have a barrier we should return the async node (if it exists and is ready)
              */
             if (msgNode != null && msgNode.isBarrier()) {
-                if (asyncMsgNode != null && now >= asyncMsgNode.getWhen()) {
+                if (asyncMsgNode != null && (returnEarliest || now >= asyncMsgNode.getWhen())) {
                     found = asyncMsgNode;
                 } else {
                     next = asyncMsgNode;
@@ -680,7 +679,7 @@ public final class MessageQueue {
                 earliest = pickEarliestNode(msgNode, asyncMsgNode);
 
                 if (earliest != null) {
-                    if (now >= earliest.getWhen()) {
+                    if (returnEarliest || now >= earliest.getWhen()) {
                         found = earliest;
                     } else {
                         next = earliest;
@@ -785,7 +784,7 @@ public final class MessageQueue {
             mMessageDirectlyQueued = false;
             nativePollOnce(ptr, mNextPollTimeoutMillis);
 
-            Message msg = nextMessage(false);
+            Message msg = nextMessage(false, false);
             if (msg != null) {
                 msg.markInUse();
                 return msg;
@@ -1090,7 +1089,7 @@ public final class MessageQueue {
      */
     Long peekWhenForTest() {
         throwIfNotTest();
-        Message ret = nextMessage(true);
+        Message ret = nextMessage(true, true);
         return ret != null ? ret.when : null;
     }
 
@@ -1103,7 +1102,7 @@ public final class MessageQueue {
     @Nullable
     Message pollForTest() {
         throwIfNotTest();
-        return nextMessage(false);
+        return nextMessage(false, true);
     }
 
     /**
@@ -1117,32 +1116,12 @@ public final class MessageQueue {
         throwIfNotTest();
 
         // Call nextMessage to get the stack drained into our priority queues
-        nextMessage(true);
+        nextMessage(true, false);
 
         Iterator<MessageNode> queueIter = mPriorityQueue.iterator();
         MessageNode queueNode = iterateNext(queueIter);
 
-        if (queueNode != null && queueNode.isBarrier()) {
-            long now = SystemClock.uptimeMillis();
-
-            /* Look for a deliverable async node. If one exists we are not blocked. */
-            Iterator<MessageNode> asyncQueueIter = mAsyncPriorityQueue.iterator();
-            MessageNode asyncNode = iterateNext(asyncQueueIter);
-            if (asyncNode != null && now >= asyncNode.getWhen()) {
-                return false;
-            }
-            /*
-             * Look for a deliverable sync node. In this case, if one exists we are blocked
-             * since the barrier prevents delivery of the Message.
-             */
-            while (queueNode != null && queueNode.isBarrier()) {
-                queueNode = iterateNext(queueIter);
-            }
-            if (queueNode != null && now >= queueNode.getWhen()) {
-                return true;
-            }
-        }
-        return false;
+        return queueNode != null && queueNode.isBarrier();
     }
 
     private StateNode getStateNode(StackNode node) {

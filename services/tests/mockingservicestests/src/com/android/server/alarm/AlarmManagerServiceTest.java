@@ -151,6 +151,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.platform.test.flag.util.FlagSetException;
@@ -192,7 +193,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
@@ -435,6 +438,7 @@ public final class AlarmManagerServiceTest {
     private void disableFlagsNotSetByAnnotation() {
         try {
             mSetFlagsRule.disableFlags(Flags.FLAG_START_USER_BEFORE_SCHEDULED_ALARMS);
+            mSetFlagsRule.disableFlags(Flags.FLAG_ACQUIRE_WAKELOCK_BEFORE_SEND);
         } catch (FlagSetException fse) {
             // Expected if the test about to be run requires this enabled.
         }
@@ -945,6 +949,28 @@ public final class AlarmManagerServiceTest {
         final long expectedTriggerTime = mNowElapsedTest + mService.mConstants.MIN_FUTURITY;
         setTestAlarm(ELAPSED_REALTIME_WAKEUP, triggerTime, getNewMockPendingIntent());
         assertEquals(expectedTriggerTime, mTestTimer.getElapsed());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ACQUIRE_WAKELOCK_BEFORE_SEND)
+    public void testWakelockOrdering() throws Exception {
+        final long triggerTime = mNowElapsedTest + 5000;
+        final PendingIntent alarmPi = getNewMockPendingIntent();
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, triggerTime, alarmPi);
+
+        mNowElapsedTest = mTestTimer.getElapsed();
+        mTestTimer.expire();
+
+        final InOrder inOrder = Mockito.inOrder(alarmPi, mWakeLock);
+        inOrder.verify(mWakeLock).acquire();
+
+        final ArgumentCaptor<PendingIntent.OnFinished> onFinishedCaptor =
+                ArgumentCaptor.forClass(PendingIntent.OnFinished.class);
+        inOrder.verify(alarmPi).send(eq(mMockContext), eq(0), any(Intent.class),
+                onFinishedCaptor.capture(), any(Handler.class), isNull(), any());
+        onFinishedCaptor.getValue().onSendFinished(alarmPi, null, 0, null, null);
+
+        inOrder.verify(mWakeLock).release();
     }
 
     @Test

@@ -29,7 +29,6 @@ import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
-import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.blueprint.rememberBurnIn
@@ -41,12 +40,10 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.ui.composable.Overlay
-import com.android.systemui.shade.ui.composable.CollapsedShadeHeader
 import com.android.systemui.shade.ui.composable.OverlayShade
+import com.android.systemui.shade.ui.composable.OverlayShadeHeader
 import com.android.systemui.shade.ui.composable.SingleShadeMeasurePolicy
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
-import com.android.systemui.statusbar.phone.ui.StatusBarIconController
-import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -57,9 +54,6 @@ class NotificationsShadeOverlay
 constructor(
     private val actionsViewModelFactory: NotificationsShadeOverlayActionsViewModel.Factory,
     private val contentViewModelFactory: NotificationsShadeOverlayContentViewModel.Factory,
-    private val tintedIconManagerFactory: TintedIconManager.Factory,
-    private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
-    private val statusBarIconController: StatusBarIconController,
     private val shadeSession: SaveableSession,
     private val stackScrollView: Lazy<NotificationScrollView>,
     private val clockSection: DefaultClockSection,
@@ -79,7 +73,6 @@ constructor(
 
     @Composable
     override fun ContentScope.Content(modifier: Modifier) {
-
         val notificationStackPadding = dimensionResource(id = R.dimen.notification_side_paddings)
 
         val viewModel =
@@ -92,25 +85,27 @@ constructor(
             }
 
         OverlayShade(
+            panelElement = NotificationsShade.Elements.Panel,
             panelAlignment = Alignment.TopStart,
             modifier = modifier,
             onScrimClicked = viewModel::onScrimClicked,
+            header = {
+                val headerViewModel =
+                    rememberViewModel("NotificationsShadeOverlayHeader") {
+                        viewModel.shadeHeaderViewModelFactory.create()
+                    }
+                OverlayShadeHeader(
+                    viewModel = headerViewModel,
+                    modifier =
+                        Modifier.element(NotificationsShade.Elements.StatusBar)
+                            .layoutId(SingleShadeMeasurePolicy.LayoutId.ShadeHeader),
+                )
+            },
         ) {
             Box {
                 Column {
-                    if (viewModel.showHeader) {
+                    if (viewModel.showClock) {
                         val burnIn = rememberBurnIn(clockInteractor)
-
-                        CollapsedShadeHeader(
-                            viewModelFactory = viewModel.shadeHeaderViewModelFactory,
-                            createTintedIconManager = tintedIconManagerFactory::create,
-                            createBatteryMeterViewController =
-                                batteryMeterViewControllerFactory::create,
-                            statusBarIconController = statusBarIconController,
-                            modifier =
-                                Modifier.element(NotificationsShade.Elements.StatusBar)
-                                    .layoutId(SingleShadeMeasurePolicy.LayoutId.ShadeHeader),
-                        )
 
                         with(clockSection) {
                             SmallClock(
@@ -126,9 +121,9 @@ constructor(
                         stackScrollView = stackScrollView.get(),
                         viewModel = placeholderViewModel,
                         maxScrimTop = { 0f },
+                        shouldPunchHoleBehindScrim = false,
                         stackTopPadding = notificationStackPadding,
                         stackBottomPadding = notificationStackPadding,
-                        shouldPunchHoleBehindScrim = false,
                         shouldFillMaxSize = false,
                         shouldShowScrim = false,
                         supportNestedScrolling = false,
@@ -150,6 +145,7 @@ constructor(
 
 object NotificationsShade {
     object Elements {
-        val StatusBar = ElementKey("NotificationsShadeStatusBar")
+        val Panel = ElementKey("NotificationsShadeOverlayPanel")
+        val StatusBar = ElementKey("NotificationsShadeOverlayStatusBar")
     }
 }

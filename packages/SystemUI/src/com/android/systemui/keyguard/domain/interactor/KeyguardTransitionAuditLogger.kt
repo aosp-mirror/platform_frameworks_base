@@ -30,6 +30,7 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 
 private val TAG = KeyguardTransitionAuditLogger::class.simpleName!!
@@ -52,6 +53,7 @@ constructor(
     private val deviceEntryInteractor: DeviceEntryInteractor,
 ) {
 
+    @OptIn(FlowPreview::class)
     fun start() {
         scope.launch {
             powerInteractor.detailedWakefulness.collect {

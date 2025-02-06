@@ -18,10 +18,8 @@ package com.android.systemui.biometrics
 
 import android.content.Context
 import android.util.AttributeSet
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** View corresponding with udfps_keyguard_view.xml */
-@ExperimentalCoroutinesApi
 class UdfpsKeyguardView(
     context: Context,
     attrs: AttributeSet?,

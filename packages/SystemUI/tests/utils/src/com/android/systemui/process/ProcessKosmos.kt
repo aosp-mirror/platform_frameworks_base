@@ -16,6 +16,9 @@
 
 package com.android.systemui.process
 
-import com.android.systemui.kosmos.Kosmos
+import android.app.ActivityManager
 
-val Kosmos.processWrapper: ProcessWrapperFake by Kosmos.Fixture { ProcessWrapperFake() }
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.util.mockito.mock
+
+val Kosmos.processWrapper: ProcessWrapperFake by Kosmos.Fixture { ProcessWrapperFake(mock<ActivityManager>()) }

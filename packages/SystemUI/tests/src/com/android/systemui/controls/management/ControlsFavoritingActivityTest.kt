@@ -2,6 +2,9 @@ package com.android.systemui.controls.management
 
 import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.ApplicationInfo
+import android.content.pm.ServiceInfo
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.service.controls.Control
 import android.testing.TestableLooper
@@ -13,19 +16,21 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.activity.SingleActivityFactory
 import com.android.systemui.controls.ControlStatus
+import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.createLoadDataObject
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.utils.SafeIconLoader
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors
 import java.util.concurrent.CountDownLatch
@@ -39,6 +44,7 @@ import org.mockito.Answers
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
@@ -57,6 +63,7 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
                 whenever(structure).thenReturn(TEST_STRUCTURE)
             }
         val TEST_APP: CharSequence = "TestApp"
+        val TEST_UID = 12345
 
         private fun View.waitForPost() {
             val latch = CountDownLatch(1)
@@ -71,6 +78,10 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
     @Mock lateinit var controller: ControlsControllerImpl
 
     @Mock lateinit var userTracker: UserTracker
+
+    @Mock lateinit var controlsListingController: ControlsListingController
+
+    @Mock(answer = Answers.RETURNS_MOCKS) lateinit var safeIconLoaderFactory: SafeIconLoader.Factory
 
     private var latch: CountDownLatch = CountDownLatch(1)
 
@@ -88,8 +99,10 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
                     executor,
                     controller,
                     userTracker,
+                    controlsListingController,
+                    safeIconLoaderFactory,
                     mockDispatcher,
-                    latch
+                    latch,
                 )
             },
             /* initialTouchMode= */ false,
@@ -99,6 +112,10 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+
+        val serviceInfo = ControlsServiceInfo(TEST_COMPONENT, "", TEST_UID)
+        Mockito.`when`(controlsListingController.getCurrentServices())
+            .thenReturn(listOf(serviceInfo))
     }
 
     // b/259549854 to root-cause and fix
@@ -110,7 +127,7 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
         verify(mockDispatcher)
             .registerOnBackInvokedCallback(
                 eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT),
-                captureCallback.capture()
+                captureCallback.capture(),
             )
         activityRule.finishActivity()
         latch.await() // ensure activity is finished
@@ -178,17 +195,38 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
             }
         )
 
+    private fun ControlsServiceInfo(
+        componentName: ComponentName,
+        label: CharSequence,
+        uid: Int,
+    ): ControlsServiceInfo {
+        val serviceInfo =
+            ServiceInfo().apply {
+                applicationInfo = ApplicationInfo().apply { this.uid = uid }
+                packageName = componentName.packageName
+                name = componentName.className
+            }
+        return Mockito.spy(ControlsServiceInfo(mContext, serviceInfo)).apply {
+            Mockito.doReturn(label).`when`(this).loadLabel()
+            Mockito.doReturn(mock(Drawable::class.java)).`when`(this).loadIcon()
+        }
+    }
+
     class TestableControlsFavoritingActivity(
         executor: Executor,
         controller: ControlsControllerImpl,
         userTracker: UserTracker,
+        controlsListingController: ControlsListingController,
+        safeIconLoaderFactory: SafeIconLoader.Factory,
         private val mockDispatcher: OnBackInvokedDispatcher,
-        private val latch: CountDownLatch
+        private val latch: CountDownLatch,
     ) :
         ControlsFavoritingActivity(
             executor,
             controller,
             userTracker,
+            safeIconLoaderFactory,
+            controlsListingController,
         ) {
 
         var triedToFinish = false

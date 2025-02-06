@@ -134,10 +134,11 @@ public class RestrictedSelectorWithWidgetPreference extends SelectorWithWidgetPr
      *
      * @param settingIdentifier The key identifying the setting
      * @param packageName the package to check the settingIdentifier for
+     * @param settingEnabled Whether the setting in question is enabled
      */
-    public void checkEcmRestrictionAndSetDisabled(
-            @NonNull String settingIdentifier, @NonNull String packageName) {
-        mHelper.checkEcmRestrictionAndSetDisabled(settingIdentifier, packageName);
+    public void checkEcmRestrictionAndSetDisabled(@NonNull String settingIdentifier,
+            @NonNull String packageName, boolean settingEnabled) {
+        mHelper.checkEcmRestrictionAndSetDisabled(settingIdentifier, packageName, settingEnabled);
     }
 
     @Override

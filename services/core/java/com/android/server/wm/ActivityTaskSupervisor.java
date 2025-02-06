@@ -145,6 +145,7 @@ import android.util.SparseIntArray;
 import android.view.Display;
 import android.webkit.URLUtil;
 import android.window.ActivityWindowInfo;
+import android.window.DesktopModeFlags;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -278,7 +279,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     /** Helper for {@link Task#fillTaskInfo}. */
     final TaskInfoHelper mTaskInfoHelper = new TaskInfoHelper();
 
-    final OpaqueActivityHelper mOpaqueActivityHelper = new OpaqueActivityHelper();
+    final OpaqueContainerHelper mOpaqueContainerHelper = new OpaqueContainerHelper();
 
     private final ActivityTaskSupervisorHandler mHandler;
     final Looper mLooper;
@@ -1664,6 +1665,12 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         activityIdleInternal(null /* idleActivity */, false /* fromTimeout */,
                 true /* processPausingActivities */, null /* configuration */);
 
+        if (rootTask.getParent() == null) {
+            // The activities in the task may already be finishing. Then the task could be removed
+            // when performing the idle check.
+            return;
+        }
+
         // Reparent all the tasks to the bottom of the display
         final DisplayContent toDisplay =
                 mRootWindowContainer.getDisplayContent(DEFAULT_DISPLAY);
@@ -2538,7 +2545,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
     void wakeUp(int displayId, String reason) {
         mPowerManager.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_APPLICATION,
-                "android.server.am:TURN_ON:" + reason, displayId);
+                "android.server.wm:TURN_ON:" + reason, displayId);
     }
 
     /** Starts a batch of visibility updates. */
@@ -2907,41 +2914,90 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         }
     }
 
-    /** The helper to get the top opaque activity of a container. */
-    static class OpaqueActivityHelper implements Predicate<ActivityRecord> {
+    /** The helper to calculate whether a container is opaque. */
+    static class OpaqueContainerHelper implements Predicate<ActivityRecord> {
         private ActivityRecord mStarting;
-        private boolean mIncludeInvisibleAndFinishing;
+        private boolean mIgnoringInvisibleActivity;
         private boolean mIgnoringKeyguard;
 
-        ActivityRecord getOpaqueActivity(@NonNull WindowContainer<?> container) {
-            mIncludeInvisibleAndFinishing = true;
-            mIgnoringKeyguard = true;
-            return container.getActivity(this,
-                    true /* traverseTopToBottom */, null /* boundary */);
+        /** Whether the container is opaque. */
+        boolean isOpaque(@NonNull WindowContainer<?> container) {
+            return isOpaque(container, null /* starting */, true /* ignoringKeyguard */,
+                    false /* ignoringInvisibleActivity */);
         }
 
-        ActivityRecord getVisibleOpaqueActivity(
+        /**
+         * Whether the container is opaque, but only including visible activities in its
+         * calculation.
+         */
+        boolean isOpaque(
                 @NonNull WindowContainer<?> container, @Nullable ActivityRecord starting,
-                boolean ignoringKeyguard) {
+                boolean ignoringKeyguard,  boolean ignoringInvisibleActivity) {
             mStarting = starting;
-            mIncludeInvisibleAndFinishing = false;
+            mIgnoringInvisibleActivity = ignoringInvisibleActivity;
             mIgnoringKeyguard = ignoringKeyguard;
-            final ActivityRecord opaque = container.getActivity(this,
-                    true /* traverseTopToBottom */, null /* boundary */);
+
+            final boolean isOpaque;
+            if (!Flags.enableMultipleDesktopsBackend()) {
+                isOpaque = container.getActivity(this,
+                        true /* traverseTopToBottom */, null /* boundary */) != null;
+            } else {
+                isOpaque = isOpaqueInner(container);
+            }
             mStarting = null;
-            return opaque;
+            return isOpaque;
+        }
+
+        private boolean isOpaqueInner(@NonNull WindowContainer<?> container) {
+            // If it's a leaf task fragment, then opacity is calculated based on its activities.
+            if (container.asTaskFragment() != null
+                    && ((TaskFragment) container).isLeafTaskFragment()) {
+                return container.getActivity(this,
+                        true /* traverseTopToBottom */, null /* boundary */) != null;
+            }
+            // When not a leaf, it's considered opaque if any of its opaque children fill this
+            // container, unless the children are adjacent fragments, in which case as long as they
+            // are all opaque then |container| is also considered opaque, even if the adjacent
+            // task fragment aren't filling.
+            for (int i = 0; i < container.getChildCount(); i++) {
+                final WindowContainer<?> child = container.getChildAt(i);
+                if (child.fillsParent() && isOpaque(child)) {
+                    return true;
+                }
+
+                if (child.asTaskFragment() != null
+                        && child.asTaskFragment().hasAdjacentTaskFragment()) {
+                    final boolean isAnyTranslucent;
+                    if (Flags.allowMultipleAdjacentTaskFragments()) {
+                        final TaskFragment.AdjacentSet set =
+                                child.asTaskFragment().getAdjacentTaskFragments();
+                        isAnyTranslucent = set.forAllTaskFragments(
+                                tf -> !isOpaque(tf), null);
+                    } else {
+                        final TaskFragment adjacent = child.asTaskFragment()
+                                .getAdjacentTaskFragment();
+                        isAnyTranslucent = !isOpaque(child) || !isOpaque(adjacent);
+                    }
+                    if (!isAnyTranslucent) {
+                        // This task fragment and all its adjacent task fragments are opaque,
+                        // consider it opaque even if it doesn't fill its parent.
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         @Override
         public boolean test(ActivityRecord r) {
-            if (!mIncludeInvisibleAndFinishing && r != mStarting
+            if (mIgnoringInvisibleActivity && r != mStarting
                     && ((mIgnoringKeyguard && !r.visibleIgnoringKeyguard)
                     || (!mIgnoringKeyguard && !r.isVisible()))) {
                 // Ignore invisible activities that are not the currently starting activity
                 // (about to be visible).
                 return false;
             }
-            return r.occludesParent(mIncludeInvisibleAndFinishing /* includingFinishing */);
+            return r.occludesParent(!mIgnoringInvisibleActivity /* includingFinishing */);
         }
     }
 
@@ -2968,7 +3024,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
         @Override
         public void accept(ActivityRecord r) {
-            if (Flags.enableDesktopWindowingAppToWeb() && mInfo.capturedLink == null) {
+            if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_APP_TO_WEB.isTrue()
+                    && mInfo.capturedLink == null) {
                 setCapturedLink(r);
             }
             if (r.mLaunchCookie != null) {

@@ -45,14 +45,14 @@ object ShadelessSceneContainerFrameworkModule {
     @Provides
     fun containerConfig(): SceneContainerConfig {
         return SceneContainerConfig(
-            // Note that this list is in z-order. The first one is the bottom-most and the
-            // last one is top-most.
+            // Note that this list is in z-order. The first one is the bottom-most and the last one
+            // is top-most.
             sceneKeys = listOf(Scenes.Gone, Scenes.Lockscreen, Scenes.Bouncer),
             initialSceneKey = Scenes.Lockscreen,
-            transitions = SceneContainerTransitions,
             overlayKeys = emptyList(),
             navigationDistances =
                 mapOf(Scenes.Gone to 0, Scenes.Lockscreen to 0, Scenes.Bouncer to 1),
+            transitionsBuilder = SceneContainerTransitions(),
         )
     }
 }

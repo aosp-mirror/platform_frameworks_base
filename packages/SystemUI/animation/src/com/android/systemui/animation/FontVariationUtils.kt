@@ -1,9 +1,12 @@
 package com.android.systemui.animation
 
-private const val TAG_WGHT = "wght"
-private const val TAG_WDTH = "wdth"
-private const val TAG_OPSZ = "opsz"
-private const val TAG_ROND = "ROND"
+object GSFAxes {
+    const val WEIGHT = "wght"
+    const val WIDTH = "wdth"
+    const val SLANT = "slnt"
+    const val ROUND = "ROND"
+    const val OPTICAL_SIZE = "opsz"
+}
 
 class FontVariationUtils {
     private var mWeight = -1
@@ -21,7 +24,7 @@ class FontVariationUtils {
         weight: Int = -1,
         width: Int = -1,
         opticalSize: Int = -1,
-        roundness: Int = -1
+        roundness: Int = -1,
     ): String {
         isUpdated = false
         if (weight >= 0 && mWeight != weight) {
@@ -43,16 +46,20 @@ class FontVariationUtils {
         }
         var resultString = ""
         if (mWeight >= 0) {
-            resultString += "'$TAG_WGHT' $mWeight"
+            resultString += "'${GSFAxes.WEIGHT}' $mWeight"
         }
         if (mWidth >= 0) {
-            resultString += (if (resultString.isBlank()) "" else ", ") + "'$TAG_WDTH' $mWidth"
+            resultString +=
+                (if (resultString.isBlank()) "" else ", ") + "'${GSFAxes.WIDTH}' $mWidth"
         }
         if (mOpticalSize >= 0) {
-            resultString += (if (resultString.isBlank()) "" else ", ") + "'$TAG_OPSZ' $mOpticalSize"
+            resultString +=
+                (if (resultString.isBlank()) "" else ", ") +
+                    "'${GSFAxes.OPTICAL_SIZE}' $mOpticalSize"
         }
         if (mRoundness >= 0) {
-            resultString += (if (resultString.isBlank()) "" else ", ") + "'$TAG_ROND' $mRoundness"
+            resultString +=
+                (if (resultString.isBlank()) "" else ", ") + "'${GSFAxes.ROUND}' $mRoundness"
         }
         return if (isUpdated) resultString else ""
     }

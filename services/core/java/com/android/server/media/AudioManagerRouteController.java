@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Maintains a list of all available routes and supports transfers to any of them.
@@ -90,7 +91,11 @@ import java.util.Objects;
     @NonNull private final Context mContext;
     @NonNull private final AudioManager mAudioManager;
     @NonNull private final Handler mHandler;
-    @NonNull private final OnDeviceRouteChangedListener mOnDeviceRouteChangedListener;
+
+    @NonNull
+    private final CopyOnWriteArrayList<OnDeviceRouteChangedListener>
+            mOnDeviceRouteChangedListeners = new CopyOnWriteArrayList<>();
+
     @NonNull private final BluetoothDeviceRoutesManager mBluetoothRouteController;
 
     @NonNull private final AudioProductStrategy mStrategyForMedia;
@@ -112,6 +117,35 @@ import java.util.Objects;
     @NonNull
     private MediaRoute2Info mSelectedRoute;
 
+    // A singleton AudioManagerRouteController.
+    private static AudioManagerRouteController mInstance;
+
+    // A flag indicating if the start function has been called.
+    private boolean mStarted = false;
+
+    // Get the singleton AudioManagerRouteController. Create a new one if it's not available yet.
+    public static AudioManagerRouteController getInstance(
+            @NonNull Context context,
+            @NonNull AudioManager audioManager,
+            @NonNull Looper looper,
+            @NonNull AudioProductStrategy strategyForMedia,
+            @NonNull BluetoothAdapter btAdapter) {
+        if (!com.android.media.flags.Flags.enableUseOfSingletonAudioManagerRouteController()) {
+            return new AudioManagerRouteController(
+                    context, audioManager, looper, strategyForMedia, btAdapter);
+        }
+
+        synchronized (AudioManagerRouteController.class) {
+            if (mInstance == null) {
+                mInstance =
+                        new AudioManagerRouteController(
+                                context, audioManager, looper, strategyForMedia, btAdapter);
+            }
+
+            return mInstance;
+        }
+    }
+
     // TODO: b/305199571 - Support nullable btAdapter and strategyForMedia which, when null, means
     // no support for transferring to inactive bluetooth routes and transferring to any routes
     // respectively.
@@ -125,13 +159,11 @@ import java.util.Objects;
             @NonNull AudioManager audioManager,
             @NonNull Looper looper,
             @NonNull AudioProductStrategy strategyForMedia,
-            @NonNull BluetoothAdapter btAdapter,
-            @NonNull OnDeviceRouteChangedListener onDeviceRouteChangedListener) {
+            @NonNull BluetoothAdapter btAdapter) {
         mContext = Objects.requireNonNull(context);
         mAudioManager = Objects.requireNonNull(audioManager);
         mHandler = new Handler(Objects.requireNonNull(looper));
         mStrategyForMedia = Objects.requireNonNull(strategyForMedia);
-        mOnDeviceRouteChangedListener = Objects.requireNonNull(onDeviceRouteChangedListener);
 
         mBuiltInSpeakerSuitabilityStatus =
                 DeviceRouteController.getBuiltInSpeakerSuitabilityStatus(mContext);
@@ -144,6 +176,16 @@ import java.util.Objects;
         rebuildAvailableRoutes();
     }
 
+    public void registerRouteChangeListener(
+            @NonNull OnDeviceRouteChangedListener onDeviceRouteChangedListener) {
+        mOnDeviceRouteChangedListeners.add(onDeviceRouteChangedListener);
+    }
+
+    public void unregisterRouteChangeListener(
+            @NonNull OnDeviceRouteChangedListener onDeviceRouteChangedListener) {
+        mOnDeviceRouteChangedListeners.remove(onDeviceRouteChangedListener);
+    }
+
     @RequiresPermission(
             anyOf = {
                 Manifest.permission.MODIFY_AUDIO_ROUTING,
@@ -151,7 +193,18 @@ import java.util.Objects;
             })
     @Override
     public void start(UserHandle mUser) {
-        mBluetoothRouteController.start(mUser);
+        // When AudioManagerRouteController is singleton, only need to call this function once.
+        if (com.android.media.flags.Flags.enableUseOfSingletonAudioManagerRouteController()) {
+            if (mStarted) {
+                return;
+            }
+            mStarted = true;
+        }
+
+        mBluetoothRouteController.start(
+                com.android.media.flags.Flags.enableUseOfSingletonAudioManagerRouteController()
+                        ? UserHandle.SYSTEM
+                        : mUser);
         mAudioManager.registerAudioDeviceCallback(mAudioDeviceCallback, mHandler);
         mAudioManager.addOnDevicesForAttributesChangedListener(
                 AudioRoutingUtils.ATTRIBUTES_MEDIA,
@@ -166,6 +219,11 @@ import java.util.Objects;
             })
     @Override
     public void stop() {
+        // Singleton AudioManagerRouteController doesn't need to call stop function.
+        if (com.android.media.flags.Flags.enableUseOfSingletonAudioManagerRouteController()) {
+            return;
+        }
+
         mAudioManager.removeOnDevicesForAttributesChangedListener(
                 mOnDevicesForAttributesChangedListener);
         mAudioManager.unregisterAudioDeviceCallback(mAudioDeviceCallback);
@@ -281,7 +339,9 @@ import java.util.Objects;
             })
     private void rebuildAvailableRoutesAndNotify() {
         rebuildAvailableRoutes();
-        mOnDeviceRouteChangedListener.onDeviceRouteChanged();
+        for (OnDeviceRouteChangedListener listener : mOnDeviceRouteChangedListeners) {
+            listener.onDeviceRouteChanged();
+        }
     }
 
     @RequiresPermission(

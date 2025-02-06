@@ -35,7 +35,6 @@ import com.android.systemui.qs.qsTileFactory
 import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.settings.userTracker
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -51,7 +50,6 @@ import org.junit.runner.RunWith
  */
 @MediumTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class WorkProfileAutoAddedAfterRestoreTest : SysuiTestCase() {
 
     private val kosmos by lazy { Kosmos().apply { fakeUserTracker.set(listOf(USER_0_INFO), 0) } }

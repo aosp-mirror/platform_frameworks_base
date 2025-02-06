@@ -24,7 +24,6 @@ import android.os.UserHandle
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.width
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -36,6 +35,7 @@ import com.android.systemui.keyboard.shortcut.ui.composable.ShortcutHelper
 import com.android.systemui.keyboard.shortcut.ui.composable.ShortcutHelperBottomSheet
 import com.android.systemui.keyboard.shortcut.ui.composable.getWidth
 import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutHelperViewModel
+import com.android.systemui.lifecycle.rememberActivated
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
@@ -51,14 +51,13 @@ class ShortcutHelperDialogStarter
 constructor(
     @Application private val applicationScope: CoroutineScope,
     private val shortcutHelperViewModel: ShortcutHelperViewModel,
-    shortcutCustomizationDialogStarterFactory: ShortcutCustomizationDialogStarter.Factory,
+    private val shortcutCustomizationDialogStarterFactory:
+        ShortcutCustomizationDialogStarter.Factory,
     private val dialogFactory: SystemUIDialogFactory,
     private val activityStarter: ActivityStarter,
 ) : CoreStartable {
 
     @VisibleForTesting var dialog: Dialog? = null
-    private val shortcutCustomizationDialogStarter =
-        shortcutCustomizationDialogStarterFactory.create()
 
     override fun start() {
         shortcutHelperViewModel.shouldShow
@@ -77,7 +76,10 @@ constructor(
             content = { dialog ->
                 val shortcutsUiState by
                     shortcutHelperViewModel.shortcutsUiState.collectAsStateWithLifecycle()
-                LaunchedEffect(Unit) { shortcutCustomizationDialogStarter.activate() }
+                val shortcutCustomizationDialogStarter =
+                    rememberActivated(traceName = "shortcutCustomizationDialogStarter") {
+                        shortcutCustomizationDialogStarterFactory.create()
+                    }
                 ShortcutHelper(
                     modifier = Modifier.width(getWidth()),
                     shortcutsUiState = shortcutsUiState,

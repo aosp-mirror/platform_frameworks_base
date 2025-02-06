@@ -176,7 +176,7 @@ public class VirtualDeviceManagerService extends SystemService {
     public VirtualDeviceManagerService(Context context) {
         super(context);
         mImpl = new VirtualDeviceManagerImpl();
-        mNativeImpl = Flags.enableNativeVdm() ? new VirtualDeviceManagerNativeImpl() : null;
+        mNativeImpl = new VirtualDeviceManagerNativeImpl();
         mLocalService = new LocalService();
     }
 
@@ -208,9 +208,7 @@ public class VirtualDeviceManagerService extends SystemService {
     @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
     public void onStart() {
         publishBinderService(Context.VIRTUAL_DEVICE_SERVICE, mImpl);
-        if (Flags.enableNativeVdm()) {
-            publishBinderService(VIRTUAL_DEVICE_NATIVE_SERVICE, mNativeImpl);
-        }
+        publishBinderService(VIRTUAL_DEVICE_NATIVE_SERVICE, mNativeImpl);
         publishLocalService(VirtualDeviceManagerInternal.class, mLocalService);
         ActivityTaskManagerInternal activityTaskManagerInternal = getLocalService(
                 ActivityTaskManagerInternal.class);
@@ -218,17 +216,14 @@ public class VirtualDeviceManagerService extends SystemService {
                 VIRTUAL_DEVICE_SERVICE_ORDERED_ID,
                 mActivityInterceptorCallback);
 
-        if (Flags.persistentDeviceIdApi()) {
-            CompanionDeviceManager cdm =
-                    getContext().getSystemService(CompanionDeviceManager.class);
-            if (cdm != null) {
-                onCdmAssociationsChanged(cdm.getAllAssociations(UserHandle.USER_ALL));
-                cdm.addOnAssociationsChangedListener(getContext().getMainExecutor(),
-                        this::onCdmAssociationsChanged, UserHandle.USER_ALL);
-            } else {
-                Slog.e(TAG, "Failed to find CompanionDeviceManager. No CDM association info "
-                        + " will be available.");
-            }
+        CompanionDeviceManager cdm = getContext().getSystemService(CompanionDeviceManager.class);
+        if (cdm != null) {
+            onCdmAssociationsChanged(cdm.getAllAssociations(UserHandle.USER_ALL));
+            cdm.addOnAssociationsChangedListener(getContext().getMainExecutor(),
+                    this::onCdmAssociationsChanged, UserHandle.USER_ALL);
+        } else {
+            Slog.e(TAG, "Failed to find CompanionDeviceManager. No CDM association info "
+                    + " will be available.");
         }
         if (android.companion.virtualdevice.flags.Flags.deviceAwareDisplayPower()) {
             mStrongAuthTracker = new StrongAuthTracker(getContext());
@@ -323,16 +318,14 @@ public class VirtualDeviceManagerService extends SystemService {
             mVirtualDevices.remove(deviceId);
         }
 
-        if (Flags.vdmPublicApis()) {
-            mVirtualDeviceListeners.broadcast(listener -> {
-                try {
-                    listener.onVirtualDeviceClosed(deviceId);
-                } catch (RemoteException e) {
-                    Slog.i(TAG, "Failed to invoke onVirtualDeviceClosed listener: "
-                            + e.getMessage());
-                }
-            });
-        }
+        mVirtualDeviceListeners.broadcast(listener -> {
+            try {
+                listener.onVirtualDeviceClosed(deviceId);
+            } catch (RemoteException e) {
+                Slog.i(TAG, "Failed to invoke onVirtualDeviceClosed listener: "
+                        + e.getMessage());
+            }
+        });
 
         Intent i = new Intent(VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED);
         i.putExtra(VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID, deviceId);
@@ -340,14 +333,6 @@ public class VirtualDeviceManagerService extends SystemService {
         final long identity = Binder.clearCallingIdentity();
         try {
             getContext().sendBroadcastAsUser(i, UserHandle.ALL);
-
-            if (!Flags.persistentDeviceIdApi()) {
-                synchronized (mVirtualDeviceManagerLock) {
-                    if (mVirtualDevices.size() == 0) {
-                        unregisterCdmAssociationListener();
-                    }
-                }
-            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -379,21 +364,6 @@ public class VirtualDeviceManagerService extends SystemService {
         for (VirtualDeviceImpl virtualDevice : virtualDevicesToRemove) {
             virtualDevice.close();
         }
-    }
-
-    @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
-    private void registerCdmAssociationListener() {
-        final CompanionDeviceManager cdm = getContext().getSystemService(
-                CompanionDeviceManager.class);
-        cdm.addOnAssociationsChangedListener(getContext().getMainExecutor(),
-                mCdmAssociationListener);
-    }
-
-    @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
-    private void unregisterCdmAssociationListener() {
-        final CompanionDeviceManager cdm = getContext().getSystemService(
-                CompanionDeviceManager.class);
-        cdm.removeOnAssociationsChangedListener(mCdmAssociationListener);
     }
 
     void onCdmAssociationsChanged(List<AssociationInfo> associations) {
@@ -441,6 +411,12 @@ public class VirtualDeviceManagerService extends SystemService {
         }
     }
 
+    private VirtualDeviceImpl getVirtualDeviceForId(int deviceId) {
+        synchronized (mVirtualDeviceManagerLock) {
+            return mVirtualDevices.get(deviceId);
+        }
+    }
+
     class VirtualDeviceManagerImpl extends IVirtualDeviceManager.Stub {
 
         private final VirtualDeviceImpl.PendingTrampolineCallback mPendingTrampolineCallback =
@@ -481,9 +457,8 @@ public class VirtualDeviceManagerService extends SystemService {
             AssociationInfo associationInfo = getAssociationInfo(packageName, associationId);
             if (associationInfo == null) {
                 throw new IllegalArgumentException("No association with ID " + associationId);
-            } else if (!VIRTUAL_DEVICE_COMPANION_DEVICE_PROFILES
-                    .contains(associationInfo.getDeviceProfile())
-                    && Flags.persistentDeviceIdApi()) {
+            } else if (!VIRTUAL_DEVICE_COMPANION_DEVICE_PROFILES.contains(
+                    associationInfo.getDeviceProfile())) {
                 throw new IllegalArgumentException("Unsupported CDM Association device profile "
                         + associationInfo.getDeviceProfile() + " for virtual device creation.");
             }
@@ -524,27 +499,17 @@ public class VirtualDeviceManagerService extends SystemService {
             Counter.logIncrement("virtual_devices.value_virtual_devices_created_count");
 
             synchronized (mVirtualDeviceManagerLock) {
-                if (!Flags.persistentDeviceIdApi() && mVirtualDevices.size() == 0) {
-                    final long callingId = Binder.clearCallingIdentity();
-                    try {
-                        registerCdmAssociationListener();
-                    } finally {
-                        Binder.restoreCallingIdentity(callingId);
-                    }
-                }
                 mVirtualDevices.put(deviceId, virtualDevice);
             }
 
-            if (Flags.vdmPublicApis()) {
-                mVirtualDeviceListeners.broadcast(listener -> {
-                    try {
-                        listener.onVirtualDeviceCreated(deviceId);
-                    } catch (RemoteException e) {
-                        Slog.i(TAG, "Failed to invoke onVirtualDeviceCreated listener: "
-                                + e.getMessage());
-                    }
-                });
-            }
+            mVirtualDeviceListeners.broadcast(listener -> {
+                try {
+                    listener.onVirtualDeviceCreated(deviceId);
+                } catch (RemoteException e) {
+                    Slog.i(TAG, "Failed to invoke onVirtualDeviceCreated listener: "
+                            + e.getMessage());
+                }
+            });
             Counter.logIncrementWithUid(
                     "virtual_devices.value_virtual_devices_created_with_uid_count",
                     attributionSource.getUid());
@@ -565,10 +530,7 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override // Binder call
         public VirtualDevice getVirtualDevice(int deviceId) {
-            VirtualDeviceImpl device;
-            synchronized (mVirtualDeviceManagerLock) {
-                device = mVirtualDevices.get(deviceId);
-            }
+            VirtualDeviceImpl device = getVirtualDeviceForId(deviceId);
             return device == null ? null : device.getPublicVirtualDeviceObject();
         }
 
@@ -585,11 +547,9 @@ public class VirtualDeviceManagerService extends SystemService {
         @Override // BinderCall
         @VirtualDeviceParams.DevicePolicy
         public int getDevicePolicy(int deviceId, @VirtualDeviceParams.PolicyType int policyType) {
-            synchronized (mVirtualDeviceManagerLock) {
-                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
-                return virtualDevice != null
-                        ? virtualDevice.getDevicePolicy(policyType) : DEVICE_POLICY_DEFAULT;
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
+            return virtualDevice != null
+                    ? virtualDevice.getDevicePolicy(policyType) : DEVICE_POLICY_DEFAULT;
         }
 
         @Override // Binder call
@@ -632,28 +592,21 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override // Binder call
         public int getAudioPlaybackSessionId(int deviceId) {
-            synchronized (mVirtualDeviceManagerLock) {
-                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
-                return virtualDevice != null
-                        ? virtualDevice.getAudioPlaybackSessionId() : AUDIO_SESSION_ID_GENERATE;
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
+            return virtualDevice != null
+                    ? virtualDevice.getAudioPlaybackSessionId() : AUDIO_SESSION_ID_GENERATE;
         }
 
         @Override // Binder call
         public int getAudioRecordingSessionId(int deviceId) {
-            synchronized (mVirtualDeviceManagerLock) {
-                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
-                return virtualDevice != null
-                        ? virtualDevice.getAudioRecordingSessionId() : AUDIO_SESSION_ID_GENERATE;
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
+            return virtualDevice != null
+                    ? virtualDevice.getAudioRecordingSessionId() : AUDIO_SESSION_ID_GENERATE;
         }
 
         @Override // Binder call
         public void playSoundEffect(int deviceId, int effectType) {
-            VirtualDeviceImpl virtualDevice;
-            synchronized (mVirtualDeviceManagerLock) {
-                virtualDevice = mVirtualDevices.get(deviceId);
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
 
             if (virtualDevice != null) {
                 virtualDevice.playSoundEffect(effectType);
@@ -769,24 +722,18 @@ public class VirtualDeviceManagerService extends SystemService {
                     params,
                     /* activityListener= */ null,
                     /* soundEffectListener= */ null);
-            return new VirtualDeviceManager.VirtualDevice(mImpl, getContext(), virtualDevice);
+            return new VirtualDeviceManager.VirtualDevice(getContext(), virtualDevice);
         }
 
         @Override
         public int getDeviceOwnerUid(int deviceId) {
-            VirtualDeviceImpl virtualDevice;
-            synchronized (mVirtualDeviceManagerLock) {
-                virtualDevice = mVirtualDevices.get(deviceId);
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
             return virtualDevice != null ? virtualDevice.getOwnerUid() : Process.INVALID_UID;
         }
 
         @Override
         public @Nullable VirtualSensor getVirtualSensor(int deviceId, int handle) {
-            VirtualDeviceImpl virtualDevice;
-            synchronized (mVirtualDeviceManagerLock) {
-                virtualDevice = mVirtualDevices.get(deviceId);
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
             return virtualDevice != null ? virtualDevice.getVirtualSensorByHandle(handle) : null;
         }
 
@@ -805,11 +752,8 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override
         public void onVirtualDisplayRemoved(IVirtualDevice virtualDevice, int displayId) {
-            VirtualDeviceImpl virtualDeviceImpl;
-            synchronized (mVirtualDeviceManagerLock) {
-                virtualDeviceImpl = mVirtualDevices.get(
-                        ((VirtualDeviceImpl) virtualDevice).getDeviceId());
-            }
+            VirtualDeviceImpl virtualDeviceImpl = getVirtualDeviceForId(
+                    ((VirtualDeviceImpl) virtualDevice).getDeviceId());
             if (virtualDeviceImpl != null) {
                 virtualDeviceImpl.onVirtualDisplayRemoved(displayId);
             }
@@ -861,13 +805,12 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override
         public void onAuthenticationPrompt(int uid) {
-            synchronized (mVirtualDeviceManagerLock) {
-                for (int i = 0; i < mVirtualDevices.size(); i++) {
-                    VirtualDeviceImpl device = mVirtualDevices.valueAt(i);
-                    device.showToastWhereUidIsRunning(uid,
-                            R.string.app_streaming_blocked_message_for_fingerprint_dialog,
-                            Toast.LENGTH_LONG, Looper.getMainLooper());
-                }
+            ArrayList<VirtualDeviceImpl> virtualDevicesSnapshot = getVirtualDevicesSnapshot();
+            for (int i = 0; i < virtualDevicesSnapshot.size(); i++) {
+                VirtualDeviceImpl device = virtualDevicesSnapshot.get(i);
+                device.showToastWhereUidIsRunning(uid,
+                        R.string.app_streaming_blocked_message_for_fingerprint_dialog,
+                        Toast.LENGTH_LONG, Looper.getMainLooper());
             }
         }
 
@@ -916,10 +859,7 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override
         public @NonNull ArraySet<Integer> getDisplayIdsForDevice(int deviceId) {
-            VirtualDeviceImpl virtualDevice;
-            synchronized (mVirtualDeviceManagerLock) {
-                virtualDevice = mVirtualDevices.get(deviceId);
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
             return virtualDevice == null ? new ArraySet<>()
                     : Arrays.stream(virtualDevice.getDisplayIds()).boxed()
                             .collect(Collectors.toCollection(ArraySet::new));
@@ -932,18 +872,14 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override
         public long getDimDurationMillisForDeviceId(int deviceId) {
-            synchronized (mVirtualDeviceManagerLock) {
-                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
-                return virtualDevice == null ? -1 : virtualDevice.getDimDurationMillis();
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
+            return virtualDevice == null ? -1 : virtualDevice.getDimDurationMillis();
         }
 
         @Override
         public long getScreenOffTimeoutMillisForDeviceId(int deviceId) {
-            synchronized (mVirtualDeviceManagerLock) {
-                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
-                return virtualDevice == null ? -1 : virtualDevice.getScreenOffTimeoutMillis();
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
+            return virtualDevice == null ? -1 : virtualDevice.getScreenOffTimeoutMillis();
         }
 
         @Override
@@ -957,10 +893,7 @@ public class VirtualDeviceManagerService extends SystemService {
                 return VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT;
             }
 
-            VirtualDeviceImpl virtualDevice;
-            synchronized (mVirtualDeviceManagerLock) {
-                virtualDevice = mVirtualDevices.get(deviceId);
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
             return virtualDevice == null ? null : virtualDevice.getPersistentDeviceId();
         }
 

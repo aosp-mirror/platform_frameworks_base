@@ -16,31 +16,104 @@
 
 package com.android.systemui.statusbar.notification.promoted.ui.viewmodel
 
-import com.android.systemui.dagger.SysUISingleton
+import androidx.compose.runtime.getValue
+import com.android.systemui.dump.DumpManager
+import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.statusbar.notification.promoted.domain.interactor.AODPromotedNotificationInteractor
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
-import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.Identity
-import javax.inject.Inject
+import com.android.systemui.util.kotlin.ActivatableFlowDumper
+import com.android.systemui.util.kotlin.ActivatableFlowDumperImpl
+import com.android.systemui.util.time.SystemClock
+import com.android.systemui.utils.coroutines.flow.transformLatestConflated
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
-@SysUISingleton
 class AODPromotedNotificationViewModel
-@Inject
-constructor(interactor: AODPromotedNotificationInteractor) {
-    private val content: Flow<PromotedNotificationContentModel?> = interactor.content
-    private val identity: Flow<Identity?> = content.mapNonNullsKeepingNulls { it.identity }
+@AssistedInject
+constructor(
+    interactor: AODPromotedNotificationInteractor,
+    systemClock: SystemClock,
+    dumpManager: DumpManager,
+) :
+    ExclusiveActivatable(),
+    ActivatableFlowDumper by ActivatableFlowDumperImpl(
+        dumpManager,
+        "AODPromotedNotificationViewModel",
+    ) {
+    private val hydrator = Hydrator("AODPromotedNotificationViewModel.hydrator")
 
-    val notification: Flow<PromotedNotificationViewModel?> =
-        identity.distinctUntilChanged().mapNonNullsKeepingNulls { identity ->
-            val updates = interactor.content.filterNotNull().filter { it.identity == identity }
-            PromotedNotificationViewModel(identity, updates)
+    private val contentFlow =
+        interactor.content.let {
+            if (DUMP_CONTENT) {
+                it.dumpWhileCollecting("content")
+            } else {
+                it
+            }
         }
-}
 
-private fun <T, R> Flow<T?>.mapNonNullsKeepingNulls(block: (T) -> R): Flow<R?> = map {
-    it?.let(block)
+    val content: PromotedNotificationContentModel? by
+        hydrator.hydratedStateOf(traceName = "content", initialValue = null, source = contentFlow)
+
+    private val audiblyAlertedIconVisibleUntil: Flow<Duration?> =
+        interactor.content
+            .map {
+                when (it) {
+                    null -> null
+                    else -> it.lastAudiblyAlertedMs.milliseconds + RECENTLY_ALERTED_THRESHOLD
+                }
+            }
+            .distinctUntilChanged()
+            .dumpWhileCollecting("audiblyAlertedIconVisibleUntil")
+
+    private val audiblyAlertedIconVisibleFlow: Flow<Boolean> =
+        audiblyAlertedIconVisibleUntil
+            .transformLatestConflated { until ->
+                val now = systemClock.currentTimeMillis().milliseconds
+
+                if (until != null && until > now) {
+                    emit(true)
+                    delay(until - now)
+                }
+                emit(false)
+            }
+            .distinctUntilChanged()
+            .dumpWhileCollecting("audiblyAlertedIconVisible")
+
+    val audiblyAlertedIconVisible: Boolean by
+        hydrator.hydratedStateOf(
+            traceName = "audiblyAlertedIconVisible",
+            initialValue = false,
+            source = audiblyAlertedIconVisibleFlow,
+        )
+
+    override suspend fun onActivated(): Nothing {
+        coroutineScope {
+            launch { activateFlowDumper() }
+            launch { hydrator.activate() }
+            awaitCancellation()
+        }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): AODPromotedNotificationViewModel
+    }
+
+    companion object {
+        private val RECENTLY_ALERTED_THRESHOLD = 30.seconds
+
+        // For local debugging only!
+        private const val DUMP_CONTENT = false
+    }
 }

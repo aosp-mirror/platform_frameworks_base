@@ -78,7 +78,6 @@ public class MetadataSyncAdapter {
     // Hidden constants in {@link SetSchemaRequest} that restricts runtime metadata visibility
     // by permissions.
     public static final int EXECUTE_APP_FUNCTIONS = 9;
-    public static final int EXECUTE_APP_FUNCTIONS_TRUSTED = 10;
 
     public MetadataSyncAdapter(
             @NonNull PackageManager packageManager, @NonNull AppSearchManager appSearchManager) {
@@ -281,8 +280,6 @@ public class MetadataSyncAdapter {
                     new PackageIdentifier(packageName, packageCert));
             setSchemaRequestBuilder.addRequiredPermissionsForSchemaTypeVisibility(
                     runtimeMetadataSchema.getSchemaType(), Set.of(EXECUTE_APP_FUNCTIONS));
-            setSchemaRequestBuilder.addRequiredPermissionsForSchemaTypeVisibility(
-                    runtimeMetadataSchema.getSchemaType(), Set.of(EXECUTE_APP_FUNCTIONS_TRUSTED));
         }
         return setSchemaRequestBuilder.build();
     }

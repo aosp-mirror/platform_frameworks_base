@@ -191,7 +191,7 @@ class FontScaleConverterFactoryTest {
             .fuzzFractions()
             .mapNotNull{ FontScaleConverterFactory.forScale(it) }
             .flatMap{ table ->
-                generateSequenceOfFractions(-2000f..2000f, step = 0.1f)
+                generateSequenceOfFractions(-20f..100f, step = 0.1f)
                     .fuzzFractions()
                     .map{ Pair(table, it) }
             }

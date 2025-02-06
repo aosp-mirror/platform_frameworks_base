@@ -155,11 +155,14 @@ public class AndroidPackageUtils {
 
     public static NativeLibraryHelper.Handle createNativeLibraryHandle(AndroidPackage pkg)
             throws IOException {
+        boolean pageSizeCompatDisabled = pkg.getPageSizeAppCompatFlags()
+                == ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_MANIFEST_OVERRIDE_DISABLED;
         return NativeLibraryHelper.Handle.create(
                 AndroidPackageUtils.getAllCodePaths(pkg),
                 pkg.isMultiArch(),
                 pkg.isExtractNativeLibrariesRequested(),
-                pkg.isDebuggable()
+                pkg.isDebuggable(),
+                pageSizeCompatDisabled
         );
     }
 

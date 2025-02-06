@@ -41,6 +41,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.settingslib.Utils;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.headsup.shared.StatusBarNoHunBehavior;
 import com.android.systemui.statusbar.notification.stack.AnimationFilter;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ViewState;
@@ -143,6 +144,7 @@ public class NotificationIconContainer extends ViewGroup {
 
     private int mMaxIcons = Integer.MAX_VALUE;
     private boolean mOverrideIconColor;
+    private boolean mUseInverseOverrideIconColor;
     private boolean mIsStaticLayout = true;
     private final HashMap<View, IconState> mIconStates = new HashMap<>();
     private int mDotPadding;
@@ -163,12 +165,13 @@ public class NotificationIconContainer extends ViewGroup {
     private IconState mFirstVisibleIconState;
     private float mVisualOverflowStart;
     private boolean mIsShowingOverflowDot;
-    private StatusBarIconView mIsolatedIcon;
-    private Rect mIsolatedIconLocation;
+    @Nullable private StatusBarIconView mIsolatedIcon;
+    @Nullable private Rect mIsolatedIconLocation;
     private final int[] mAbsolutePosition = new int[2];
-    private View mIsolatedIconForAnimation;
+    @Nullable private View mIsolatedIconForAnimation;
     private int mThemedTextColorPrimary;
-    private Runnable mIsolatedIconAnimationEndRunnable;
+    private int mThemedTextColorPrimaryInverse;
+    @Nullable private Runnable mIsolatedIconAnimationEndRunnable;
     private boolean mUseIncreasedIconScale;
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
@@ -190,6 +193,8 @@ public class NotificationIconContainer extends ViewGroup {
                 com.android.internal.R.style.Theme_DeviceDefault_DayNight);
         mThemedTextColorPrimary = Utils.getColorAttr(themedContext,
                 com.android.internal.R.attr.textColorPrimary).getDefaultColor();
+        mThemedTextColorPrimaryInverse = Utils.getColorAttr(themedContext,
+                com.android.internal.R.attr.textColorPrimaryInverse).getDefaultColor();
     }
 
     @Override
@@ -379,6 +384,9 @@ public class NotificationIconContainer extends ViewGroup {
                 if (areAnimationsEnabled(icon) && !isReplacingIcon) {
                     addTransientView(icon, 0);
                     boolean isIsolatedIcon = child == mIsolatedIcon;
+                    if (StatusBarNoHunBehavior.isEnabled()) {
+                        isIsolatedIcon = false;
+                    }
                     icon.setVisibleState(StatusBarIconView.STATE_HIDDEN, true /* animate */,
                             () -> removeTransientView(icon),
                             isIsolatedIcon ? CONTENT_FADE_DURATION : 0);
@@ -539,7 +547,7 @@ public class NotificationIconContainer extends ViewGroup {
                 iconState.setXTranslation(getRtlIconTranslationX(iconState, view));
             }
         }
-        if (mIsolatedIcon != null) {
+        if (!StatusBarNoHunBehavior.isEnabled() && mIsolatedIcon != null) {
             IconState iconState = mIconStates.get(mIsolatedIcon);
             if (iconState != null) {
                 // Most of the time the icon isn't yet added when this is called but only happening
@@ -685,17 +693,20 @@ public class NotificationIconContainer extends ViewGroup {
 
     public void showIconIsolatedAnimated(StatusBarIconView icon,
             @Nullable Runnable onAnimationEnd) {
+        StatusBarNoHunBehavior.assertInLegacyMode();
         mIsolatedIconForAnimation = icon != null ? icon : mIsolatedIcon;
         mIsolatedIconAnimationEndRunnable = onAnimationEnd;
         showIconIsolated(icon);
     }
 
     public void showIconIsolated(StatusBarIconView icon) {
+        StatusBarNoHunBehavior.assertInLegacyMode();
         mIsolatedIcon = icon;
         updateState();
     }
 
     public void setIsolatedIconLocation(Rect isolatedIconLocation, boolean requireUpdate) {
+        StatusBarNoHunBehavior.assertInLegacyMode();
         mIsolatedIconLocation = isolatedIconLocation;
         if (requireUpdate) {
             updateState();
@@ -704,6 +715,10 @@ public class NotificationIconContainer extends ViewGroup {
 
     public void setOverrideIconColor(boolean override) {
         mOverrideIconColor = override;
+    }
+
+    public void setUseInverseOverrideIconColor(boolean override) {
+        mUseInverseOverrideIconColor = override;
     }
 
     public class IconState extends ViewState {
@@ -794,7 +809,7 @@ public class NotificationIconContainer extends ViewGroup {
                         animationProperties.setDuration(CANNED_ANIMATION_DURATION);
                         animate = true;
                     }
-                    if (mIsolatedIconForAnimation != null) {
+                    if (!StatusBarNoHunBehavior.isEnabled() && mIsolatedIconForAnimation != null) {
                         if (view == mIsolatedIconForAnimation) {
                             animationProperties = UNISOLATION_PROPERTY;
                             animationProperties.setDelay(
@@ -814,7 +829,9 @@ public class NotificationIconContainer extends ViewGroup {
                 }
                 icon.setVisibleState(visibleState, animationsAllowed);
                 if (mOverrideIconColor) {
-                    icon.setIconColor(mThemedTextColorPrimary,
+                    int overrideIconColor = mUseInverseOverrideIconColor
+                            ? mThemedTextColorPrimaryInverse : mThemedTextColorPrimary;
+                    icon.setIconColor(overrideIconColor,
                             /* animate= */ needsCannedAnimation && animationsAllowed);
                 }
                 if (animate) {
@@ -843,6 +860,7 @@ public class NotificationIconContainer extends ViewGroup {
 
         @Nullable
         private Consumer<Property> getEndAction() {
+            if (StatusBarNoHunBehavior.isEnabled()) return null;
             if (mIsolatedIconAnimationEndRunnable == null) return null;
             final Runnable endRunnable = mIsolatedIconAnimationEndRunnable;
             return prop -> {

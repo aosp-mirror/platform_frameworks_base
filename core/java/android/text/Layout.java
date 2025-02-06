@@ -16,7 +16,6 @@
 
 package android.text;
 
-import static com.android.graphics.hwui.flags.Flags.highContrastTextLuminance;
 import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
 import static com.android.text.flags.Flags.FLAG_LETTER_SPACING_JUSTIFICATION;
 import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
@@ -77,7 +76,7 @@ public abstract class Layout {
     private static final float HIGH_CONTRAST_TEXT_BORDER_WIDTH_FACTOR = 0f;
     private static final float HIGH_CONTRAST_TEXT_BACKGROUND_CORNER_RADIUS_DP = 5f;
     // since we're not using soft light yet, this needs to be much lower than the spec'd 0.8
-    private static final float HIGH_CONTRAST_TEXT_BACKGROUND_ALPHA_PERCENTAGE = 0.5f;
+    private static final float HIGH_CONTRAST_TEXT_BACKGROUND_ALPHA_PERCENTAGE = 0.7f;
 
     /** @hide */
     @IntDef(prefix = { "BREAK_STRATEGY_" }, value = {
@@ -670,15 +669,11 @@ public abstract class Layout {
         // High-contrast text mode
         // Determine if the text is black-on-white or white-on-black, so we know what blendmode will
         // give the highest contrast and most realistic text color.
-        // This equation should match the one in libs/hwui/hwui/DrawTextFunctor.h
-        if (highContrastTextLuminance()) {
-            var lab = new double[3];
-            ColorUtils.colorToLAB(color, lab);
-            return lab[0] < 50.0;
-        } else {
-            int channelSum = Color.red(color) + Color.green(color) + Color.blue(color);
-            return channelSum < (128 * 3);
-        }
+        // LINT.IfChange(hct_darken)
+        var lab = new double[3];
+        ColorUtils.colorToLAB(color, lab);
+        return lab[0] < 50.0;
+        // LINT.ThenChange(/libs/hwui/hwui/DrawTextFunctor.h:hct_darken)
     }
 
     private boolean isJustificationRequired(int lineNum) {
@@ -1071,6 +1066,12 @@ public abstract class Layout {
                         var hasBgColorChanged = newBackground != bgPaint.getColor();
 
                         if (lineNum != mLastLineNum || hasBgColorChanged) {
+                            // Skip processing if the character is a space or a tap to avoid
+                            // rendering an abrupt, empty rectangle.
+                            if (Character.isWhitespace(mText.charAt(index))) {
+                                return;
+                            }
+
                             // Draw what we have so far, then reset the rect and update its color
                             drawRect();
                             mLineBackground.set(left, top, right, bottom);

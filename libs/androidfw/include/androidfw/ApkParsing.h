@@ -24,7 +24,7 @@ extern const size_t APK_LIB_LEN;
 namespace android::util {
 // Checks if filename is a valid library path and returns a pointer to the last slash in the path
 // if it is, nullptr otherwise
-const char* ValidLibraryPathLastSlash(const char* filename, bool suppress64Bit, bool debuggable);
+const char* ValidLibraryPathLastSlash(const char* filename, bool suppress64Bit);
 
 // Equivalent to android.os.FileUtils.isFilenameSafe
 bool isFilenameSafe(const char* filename);

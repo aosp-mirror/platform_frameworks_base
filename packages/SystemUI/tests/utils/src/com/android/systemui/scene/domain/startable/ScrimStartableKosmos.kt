@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.scene.domain.startable
 
 import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
@@ -31,7 +29,6 @@ import com.android.systemui.settings.brightness.domain.interactor.brightnessMirr
 import com.android.systemui.statusbar.phone.dozeServiceHost
 import com.android.systemui.statusbar.phone.scrimController
 import com.android.systemui.statusbar.phone.statusBarKeyguardViewManager
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.scrimStartable by Fixture {
     ScrimStartable(

@@ -20,7 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
@@ -55,7 +55,7 @@ constructor(
     }
 
     @Composable
-    override fun SceneScope.Content(modifier: Modifier) {
+    override fun ContentScope.Content(modifier: Modifier) {
         val backgroundType by
             contentViewModel.communalBackground.collectAsStateWithLifecycle(
                 initialValue = CommunalBackgroundType.ANIMATED

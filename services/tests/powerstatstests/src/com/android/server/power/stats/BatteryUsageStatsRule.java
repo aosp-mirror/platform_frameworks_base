@@ -86,6 +86,7 @@ public class BatteryUsageStatsRule implements TestRule {
     private String[] mCustomPowerComponentNames;
     private Throwable mThrowable;
     private final BatteryStatsImpl.BatteryStatsConfig.Builder mBatteryStatsConfigBuilder;
+    private BatteryStatsImpl.BatteryStatsConfig mBatteryStatsConfig;
 
     public BatteryUsageStatsRule() {
         this(0);
@@ -119,9 +120,8 @@ public class BatteryUsageStatsRule implements TestRule {
             }
             clearDirectory();
         }
-        mBatteryStats = new MockBatteryStatsImpl(mBatteryStatsConfigBuilder.build(),
-                mMockClock, mMonotonicClock, mHistoryDir, mHandler, new PowerStatsUidResolver());
-        mBatteryStats.setPowerProfile(mPowerProfile);
+        mBatteryStats = new MockBatteryStatsImpl(getBatteryStatsConfig(), mMockClock,
+                mMonotonicClock, mHistoryDir, mHandler, mPowerProfile, new PowerStatsUidResolver());
         mBatteryStats.setCpuScalingPolicies(new CpuScalingPolicies(mCpusByPolicy, mFreqsByPolicy));
         synchronized (mBatteryStats) {
             mBatteryStats.initEnergyConsumerStatsLocked(mSupportedStandardBuckets,
@@ -140,6 +140,17 @@ public class BatteryUsageStatsRule implements TestRule {
         if (mNetworkStats != null) {
             mBatteryStats.setNetworkStats(mNetworkStats);
         }
+    }
+
+    /**
+     * Returns the BatteryStatsConfig, which is wrapped into a Mockito.spy, so it can be
+     * observed and/or mocked.
+     */
+    public BatteryStatsImpl.BatteryStatsConfig getBatteryStatsConfig() {
+        if (mBatteryStatsConfig == null) {
+            mBatteryStatsConfig = spy(mBatteryStatsConfigBuilder.build());
+        }
+        return mBatteryStatsConfig;
     }
 
     public MockClock getMockClock() {

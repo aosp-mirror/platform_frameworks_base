@@ -16,7 +16,6 @@
 package com.android.systemui.shade
 
 import android.util.Log
-import android.view.Display
 import com.android.app.tracing.coroutines.TrackTracer
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
@@ -24,7 +23,6 @@ import com.android.systemui.common.ui.view.ChoreographerUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.scene.ui.view.WindowRootView
-import com.android.systemui.shade.ShadeDisplayChangeLatencyTracker.Companion.TIMEOUT
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.util.kotlin.getOrNull
 import java.util.Optional
@@ -33,12 +31,9 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 
@@ -75,12 +70,7 @@ constructor(
     /**
      * We need to keep this always up to date eagerly to avoid delays receiving the new display ID.
      */
-    private val onMovedToDisplayFlow: StateFlow<Int> =
-        configurationRepository.onMovedToDisplay.stateIn(
-            bgScope,
-            SharingStarted.Eagerly,
-            Display.DEFAULT_DISPLAY,
-        )
+    private val onMovedToDisplayFlow: StateFlow<Int> = configurationRepository.onMovedToDisplay
 
     private var previousJob: Job? = null
 
@@ -97,7 +87,7 @@ constructor(
      */
     @Synchronized
     fun onShadeDisplayChanging(displayId: Int) {
-        previousJob?.cancel(CancellationException("New shade move in progress"))
+        previousJob?.cancel(CancellationException("New shade move in progress to $displayId"))
         previousJob = bgScope.launch { onShadeDisplayChangingAsync(displayId) }
     }
 
@@ -111,8 +101,8 @@ constructor(
             val reason =
                 when (e) {
                     is CancellationException ->
-                        "Shade move cancelled as a new move is being done " +
-                            "before the previous one finished."
+                        "Shade move to $displayId cancelled as a new move is being done " +
+                            "before the previous one finished. Message: ${e.message}"
 
                     else -> "Shade move cancelled."
                 }
@@ -135,7 +125,7 @@ constructor(
 
     private companion object {
         const val TAG = "ShadeDisplayLatency"
-        val t = TrackTracer(trackName = TAG)
+        val t = TrackTracer(trackName = TAG, trackGroup = "shade")
         val TIMEOUT = 3.seconds
         const val SHADE_MOVE_ACTION = LatencyTracker.ACTION_SHADE_WINDOW_DISPLAY_CHANGE
     }

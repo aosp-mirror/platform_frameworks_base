@@ -49,6 +49,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.KeyguardManager;
+import android.app.PropertyInvalidatedCache;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
@@ -60,9 +61,12 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
+import android.telecom.TelecomManager;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -140,6 +144,7 @@ public final class UserManagerServiceTest {
             .spyStatic(ActivityManager.class)
             .mockStatic(Settings.Global.class)
             .mockStatic(Settings.Secure.class)
+            .mockStatic(Resources.class)
             .build();
 
     @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(
@@ -164,6 +169,7 @@ public final class UserManagerServiceTest {
     private @Mock PackageManagerInternal mPackageManagerInternal;
     private @Mock KeyguardManager mKeyguardManager;
     private @Mock PowerManager mPowerManager;
+    private @Mock TelecomManager mTelecomManager;
 
     /**
      * Reference to the {@link UserManagerService} being tested.
@@ -181,8 +187,8 @@ public final class UserManagerServiceTest {
         MockitoAnnotations.initMocks(this);
         mSpiedContext = spy(mRealContext);
 
-        // Called when WatchedUserStates is constructed
-        doNothing().when(() -> UserManager.invalidateIsUserUnlockedCache());
+        // Disable binder caches in this process.
+        PropertyInvalidatedCache.disableForTestMode();
 
         // Called when creating new users
         when(mDeviceStorageMonitorInternal.isMemoryLow()).thenReturn(false);
@@ -190,6 +196,7 @@ public final class UserManagerServiceTest {
         when(mSpiedContext.getSystemService(StorageManager.class)).thenReturn(mStorageManager);
         doReturn(mKeyguardManager).when(mSpiedContext).getSystemService(KeyguardManager.class);
         when(mSpiedContext.getSystemService(PowerManager.class)).thenReturn(mPowerManager);
+        when(mSpiedContext.getSystemService(TelecomManager.class)).thenReturn(mTelecomManager);
         mockGetLocalService(LockSettingsInternal.class, mLockSettingsInternal);
         mockGetLocalService(PackageManagerInternal.class, mPackageManagerInternal);
         doNothing().when(mSpiedContext).sendBroadcastAsUser(any(), any(), any());
@@ -201,6 +208,7 @@ public final class UserManagerServiceTest {
         doReturn(0)
                 .when(mSpyResources)
                 .getInteger(com.android.internal.R.integer.config_hsumBootStrategy);
+        doReturn(mSpyResources).when(() -> Resources.getSystem());
 
         // Must construct UserManagerService in the UiThread
         mTestDir = new File(mRealContext.getDataDir(), "umstest");
@@ -882,9 +890,7 @@ public final class UserManagerServiceTest {
                 .getInteger(com.android.internal.R.integer.config_hsumBootStrategy);
         // Even if the headless system user switchable flag is true, the boot user should be the
         // first switchable full user.
-        doReturn(true)
-                .when(mSpyResources)
-                .getBoolean(com.android.internal.R.bool.config_canSwitchToHeadlessSystemUser);
+        mockCanSwitchToHeadlessSystemUser(true);
 
         assertThat(mUms.getBootUser()).isEqualTo(USER_ID);
     }
@@ -901,6 +907,75 @@ public final class UserManagerServiceTest {
 
         assertThrows(ServiceSpecificException.class,
                 () -> mUms.getBootUser());
+    }
+
+    @Test
+    @EnableFlags(android.multiuser.Flags.FLAG_LOGOUT_USER_API)
+    public void testGetUserLogoutability_HsumAndInteractiveHeadlessSystem_UserCanLogout()
+            throws Exception {
+        setSystemUserHeadless(true);
+        addUser(USER_ID);
+        setLastForegroundTime(USER_ID, 1_000_000L);
+        mockCurrentUser(USER_ID);
+
+        mockCanSwitchToHeadlessSystemUser(true);
+        mockUserIsInCall(false);
+
+        assertThat(mUms.getUserLogoutability(USER_ID))
+                .isEqualTo(UserManager.LOGOUTABILITY_STATUS_OK);
+    }
+
+    @Test
+    @EnableFlags(android.multiuser.Flags.FLAG_LOGOUT_USER_API)
+    public void testGetUserLogoutability_HsumAndNonInteractiveHeadlessSystem_UserCannotLogout()
+            throws Exception {
+        setSystemUserHeadless(true);
+        mockCanSwitchToHeadlessSystemUser(false);
+        addUser(USER_ID);
+        setLastForegroundTime(USER_ID, 1_000_000L);
+        mockCurrentUser(USER_ID);
+        mockUserIsInCall(false);
+
+        assertThat(mUms.getUserLogoutability(USER_ID))
+                .isEqualTo(UserManager.LOGOUTABILITY_STATUS_NO_SUITABLE_USER_TO_LOGOUT_TO);
+    }
+
+    @Test
+    @EnableFlags(android.multiuser.Flags.FLAG_LOGOUT_USER_API)
+    public void testGetUserLogoutability_Hsum_SystemUserCannotLogout() throws Exception {
+        setSystemUserHeadless(true);
+        mockCurrentUser(UserHandle.USER_SYSTEM);
+        assertThat(mUms.getUserLogoutability(UserHandle.USER_SYSTEM))
+                .isEqualTo(UserManager.LOGOUTABILITY_STATUS_CANNOT_LOGOUT_SYSTEM_USER);
+    }
+
+    @Test
+    @EnableFlags(android.multiuser.Flags.FLAG_LOGOUT_USER_API)
+    public void testGetUserLogoutability_NonHsum_SystemUserCannotLogout() throws Exception {
+        setSystemUserHeadless(false);
+        mockCurrentUser(UserHandle.USER_SYSTEM);
+        assertThat(
+                mUms.getUserLogoutability(UserHandle.USER_SYSTEM)).isEqualTo(
+                UserManager.LOGOUTABILITY_STATUS_CANNOT_LOGOUT_SYSTEM_USER);
+    }
+
+    @Test
+    @EnableFlags(android.multiuser.Flags.FLAG_LOGOUT_USER_API)
+    public void testGetUserLogoutability_CannotSwitch_CannotLogout() throws Exception {
+        setSystemUserHeadless(true);
+        addUser(USER_ID);
+        addUser(OTHER_USER_ID);
+        setLastForegroundTime(OTHER_USER_ID, 1_000_000L);
+        mockCurrentUser(USER_ID);
+        mUms.setUserRestriction(DISALLOW_USER_SWITCH, true, USER_ID);
+        assertThat(mUms.getUserLogoutability(USER_ID))
+                .isEqualTo(UserManager.LOGOUTABILITY_STATUS_CANNOT_SWITCH);
+    }
+
+    @Test
+    @DisableFlags(android.multiuser.Flags.FLAG_LOGOUT_USER_API)
+    public void testGetUserLogoutability_LogoutDisabled() throws Exception {
+        assertThrows(UnsupportedOperationException.class, () -> mUms.getUserLogoutability(USER_ID));
     }
 
     /**
@@ -1018,6 +1093,16 @@ public final class UserManagerServiceTest {
         doReturn(service).when(() -> LocalServices.getService(serviceClass));
     }
 
+    private void mockCanSwitchToHeadlessSystemUser(boolean canSwitch) {
+        doReturn(canSwitch)
+                .when(mSpyResources)
+                .getBoolean(com.android.internal.R.bool.config_canSwitchToHeadlessSystemUser);
+    }
+
+    private void mockUserIsInCall(boolean isInCall) {
+        when(mTelecomManager.isInCall()).thenReturn(isInCall);
+    }
+
     private void addDefaultProfileAndParent() {
         addUser(PARENT_USER_ID);
         addProfile(PROFILE_USER_ID, PARENT_USER_ID);
@@ -1060,6 +1145,7 @@ public final class UserManagerServiceTest {
     private void addUserData(TestUserData userData) {
         Log.d(TAG, "Adding " + userData);
         mUsers.put(userData.info.id, userData);
+        mUms.putUserInfo(userData.info);
     }
 
     private void setSystemUserHeadless(boolean headless) {

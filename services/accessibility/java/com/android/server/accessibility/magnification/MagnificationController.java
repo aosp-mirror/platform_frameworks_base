@@ -23,6 +23,7 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
+import static android.util.MathUtils.sqrt;
 
 import static com.android.server.accessibility.AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID;
 
@@ -36,7 +37,8 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
-import android.os.SystemClock;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
@@ -48,11 +50,13 @@ import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.util.TypedValue;
 import android.view.Display;
+import android.view.ViewConfiguration;
 import android.view.accessibility.MagnificationAnimationCallback;
 
 import com.android.internal.accessibility.util.AccessibilityStatsLogUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.wm.WindowManagerInternal;
@@ -84,7 +88,7 @@ import java.util.concurrent.Executor;
  *  is done and before invoking {@link TransitionCallBack#onResult}.
  */
 public class MagnificationController implements MagnificationConnectionManager.Callback,
-        MagnificationGestureHandler.Callback,
+        MagnificationGestureHandler.Callback, MagnificationKeyHandler.Callback,
         FullScreenMagnificationController.MagnificationInfoChangedCallback,
         WindowManagerInternal.AccessibilityControllerInternal.UiChangesForAccessibilityCallbacks {
 
@@ -110,6 +114,25 @@ public class MagnificationController implements MagnificationConnectionManager.C
     private final MagnificationPanStepProvider mPanStepProvider;
 
     private final Executor mBackgroundExecutor;
+
+    private final Handler mHandler;
+    // Prefer this to SystemClock, because it allows for tests to influence behavior.
+    private SystemClock mSystemClock;
+    private boolean[] mActivePanDirections = {false, false, false, false};
+    private int mActivePanDisplay = Display.INVALID_DISPLAY;
+    // The time that panning by keyboard last took place. Since users can pan
+    // in multiple directions at once (for example, up + left), tracking last
+    // panned time ensures that panning doesn't occur too frequently.
+    private long mLastPannedTime = 0;
+    private boolean mRepeatKeysEnabled = true;
+
+    private @ZoomDirection int mActiveZoomDirection = ZOOM_DIRECTION_IN;
+    private int mActiveZoomDisplay = Display.INVALID_DISPLAY;
+
+    private int mInitialKeyboardRepeatIntervalMs =
+            ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT;
+    @VisibleForTesting
+    public static final int KEYBOARD_REPEAT_INTERVAL_MS = 60;
 
     @GuardedBy("mLock")
     private final SparseIntArray mCurrentMagnificationModeArray = new SparseIntArray();
@@ -167,6 +190,25 @@ public class MagnificationController implements MagnificationConnectionManager.C
          * @param success {@code true} if the transition success.
          */
         void onResult(int displayId, boolean success);
+    }
+
+    /**
+     * Functional interface for providing time. Tests may extend this interface to "control time".
+     */
+    @VisibleForTesting
+    interface SystemClock {
+        /**
+         * Returns current time in milliseconds since boot, not counting time spent in deep sleep.
+         */
+        long uptimeMillis();
+    }
+
+    /** The real system clock for use in production. */
+    private static class SystemClockImpl implements SystemClock {
+        @Override
+        public long uptimeMillis() {
+            return android.os.SystemClock.uptimeMillis();
+        }
     }
 
 
@@ -287,12 +329,14 @@ public class MagnificationController implements MagnificationConnectionManager.C
 
     public MagnificationController(AccessibilityManagerService ams, Object lock,
             Context context, MagnificationScaleProvider scaleProvider,
-            Executor backgroundExecutor) {
+            Executor backgroundExecutor, Looper looper) {
         mAms = ams;
         mLock = lock;
         mContext = context;
         mScaleProvider = scaleProvider;
         mBackgroundExecutor = backgroundExecutor;
+        mHandler = new Handler(looper);
+        mSystemClock = new SystemClockImpl();
         LocalServices.getService(WindowManagerInternal.class)
                 .getAccessibilityController().setUiChangesForAccessibilityCallbacks(this);
         mSupportWindowMagnification = context.getPackageManager().hasSystemFeature(
@@ -309,10 +353,12 @@ public class MagnificationController implements MagnificationConnectionManager.C
     public MagnificationController(AccessibilityManagerService ams, Object lock,
             Context context, FullScreenMagnificationController fullScreenMagnificationController,
             MagnificationConnectionManager magnificationConnectionManager,
-            MagnificationScaleProvider scaleProvider, Executor backgroundExecutor) {
-        this(ams, lock, context, scaleProvider, backgroundExecutor);
+            MagnificationScaleProvider scaleProvider, Executor backgroundExecutor, Looper looper,
+            SystemClock systemClock) {
+        this(ams, lock, context, scaleProvider, backgroundExecutor, looper);
         mFullScreenMagnificationController = fullScreenMagnificationController;
         mMagnificationConnectionManager = magnificationConnectionManager;
+        mSystemClock = systemClock;
     }
 
     @Override
@@ -345,6 +391,106 @@ public class MagnificationController implements MagnificationConnectionManager.C
     @Override
     public void onTouchInteractionEnd(int displayId, int mode) {
         handleUserInteractionChanged(displayId, mode);
+    }
+
+    @Override
+    public void onPanMagnificationStart(int displayId,
+            @MagnificationController.PanDirection int direction) {
+        // Update the current panning state for any callbacks.
+        boolean isAlreadyPanning = mActivePanDisplay != Display.INVALID_DISPLAY;
+        mActivePanDisplay = displayId;
+        mActivePanDirections[direction] = true;
+        // React immediately to any new key press by panning in the new composite direction.
+        panMagnificationByStep(mActivePanDisplay, mActivePanDirections);
+        if (!isAlreadyPanning && mRepeatKeysEnabled) {
+            mHandler.sendMessageDelayed(
+                    PooledLambda.obtainMessage(MagnificationController::maybeContinuePan, this),
+                    mInitialKeyboardRepeatIntervalMs);
+        }
+    }
+
+    @Override
+    public void onPanMagnificationStop(@MagnificationController.PanDirection int direction) {
+        // Stop panning in this direction.
+        mActivePanDirections[direction] = false;
+        if (!mActivePanDirections[PAN_DIRECTION_LEFT]
+                && !mActivePanDirections[PAN_DIRECTION_RIGHT]
+                && !mActivePanDirections[PAN_DIRECTION_UP]
+                && !mActivePanDirections[PAN_DIRECTION_DOWN]) {
+            // Stop all panning if no more pan directions were in started.
+            mActivePanDisplay = Display.INVALID_DISPLAY;
+        }
+    }
+
+    @Override
+    public void onScaleMagnificationStart(int displayId,
+            @MagnificationController.ZoomDirection int direction) {
+        if (mActiveZoomDisplay != Display.INVALID_DISPLAY) {
+            // Only allow one zoom direction at a time (even if the other keyboard
+            // shortcut has been pressed). Return early if we are already zooming.
+            return;
+        }
+        mActiveZoomDirection = direction;
+        mActiveZoomDisplay = displayId;
+        scaleMagnificationByStep(displayId, direction);
+        if (mRepeatKeysEnabled) {
+            mHandler.sendMessageDelayed(
+                    PooledLambda.obtainMessage(MagnificationController::maybeContinueZoom, this),
+                    mInitialKeyboardRepeatIntervalMs);
+        }
+    }
+
+    @Override
+    public void onScaleMagnificationStop(@MagnificationController.ZoomDirection int direction) {
+        if (direction == mActiveZoomDirection) {
+            mActiveZoomDisplay = Display.INVALID_DISPLAY;
+        }
+    }
+
+    @Override
+    public void onKeyboardInteractionStop() {
+        mActiveZoomDisplay = Display.INVALID_DISPLAY;
+        mActivePanDisplay = Display.INVALID_DISPLAY;
+        mActivePanDirections = new boolean[]{false, false, false, false};
+    }
+
+    private void maybeContinuePan() {
+        if (mActivePanDisplay == Display.INVALID_DISPLAY) {
+            return;
+        }
+        if (mSystemClock.uptimeMillis() - mLastPannedTime >= KEYBOARD_REPEAT_INTERVAL_MS) {
+            panMagnificationByStep(mActivePanDisplay, mActivePanDirections);
+        }
+        if (mRepeatKeysEnabled) {
+            mHandler.sendMessageDelayed(
+                    PooledLambda.obtainMessage(MagnificationController::maybeContinuePan, this),
+                    KEYBOARD_REPEAT_INTERVAL_MS);
+        }
+    }
+
+    private void maybeContinueZoom() {
+        if (mActiveZoomDisplay != Display.INVALID_DISPLAY) {
+            scaleMagnificationByStep(mActiveZoomDisplay, mActiveZoomDirection);
+            if (mRepeatKeysEnabled) {
+                mHandler.sendMessageDelayed(
+                        PooledLambda.obtainMessage(MagnificationController::maybeContinueZoom,
+                                this),
+                        KEYBOARD_REPEAT_INTERVAL_MS);
+            }
+        }
+    }
+
+    public void setRepeatKeysEnabled(boolean isRepeatKeysEnabled) {
+        mRepeatKeysEnabled = isRepeatKeysEnabled;
+    }
+
+    public void setRepeatKeysTimeoutMs(int repeatKeysTimeoutMs) {
+        mInitialKeyboardRepeatIntervalMs = repeatKeysTimeoutMs;
+    }
+
+    @VisibleForTesting
+    public int getInitialKeyboardRepeatIntervalMs() {
+        return mInitialKeyboardRepeatIntervalMs;
     }
 
     private void handleUserInteractionChanged(int displayId, int mode) {
@@ -625,7 +771,7 @@ public class MagnificationController implements MagnificationConnectionManager.C
     public void onWindowMagnificationActivationState(int displayId, boolean activated) {
         if (activated) {
             synchronized (mLock) {
-                mWindowModeEnabledTimeArray.put(displayId, SystemClock.uptimeMillis());
+                mWindowModeEnabledTimeArray.put(displayId, mSystemClock.uptimeMillis());
                 setCurrentMagnificationModeAndSwitchDelegate(displayId,
                         ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
                 mLastMagnificationActivatedModeArray.put(displayId,
@@ -639,7 +785,7 @@ public class MagnificationController implements MagnificationConnectionManager.C
             synchronized (mLock) {
                 setCurrentMagnificationModeAndSwitchDelegate(displayId,
                         ACCESSIBILITY_MAGNIFICATION_MODE_NONE);
-                duration = SystemClock.uptimeMillis() - mWindowModeEnabledTimeArray.get(displayId);
+                duration = mSystemClock.uptimeMillis() - mWindowModeEnabledTimeArray.get(displayId);
                 scale = mMagnificationConnectionManager.getLastActivatedScale(displayId);
             }
             logMagnificationUsageState(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW, duration, scale);
@@ -736,7 +882,7 @@ public class MagnificationController implements MagnificationConnectionManager.C
 
         if (activated) {
             synchronized (mLock) {
-                mFullScreenModeEnabledTimeArray.put(displayId, SystemClock.uptimeMillis());
+                mFullScreenModeEnabledTimeArray.put(displayId, mSystemClock.uptimeMillis());
                 setCurrentMagnificationModeAndSwitchDelegate(displayId,
                         ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
                 mLastMagnificationActivatedModeArray.put(displayId,
@@ -750,7 +896,7 @@ public class MagnificationController implements MagnificationConnectionManager.C
             synchronized (mLock) {
                 setCurrentMagnificationModeAndSwitchDelegate(displayId,
                         ACCESSIBILITY_MAGNIFICATION_MODE_NONE);
-                duration = SystemClock.uptimeMillis()
+                duration = mSystemClock.uptimeMillis()
                         - mFullScreenModeEnabledTimeArray.get(displayId);
                 scale = mFullScreenMagnificationController.getLastActivatedScale(displayId);
             }
@@ -1038,7 +1184,7 @@ public class MagnificationController implements MagnificationConnectionManager.C
      * @param displayId The logical display id.
      * @param direction Whether the scale should be zoomed in or out.
      */
-    public void scaleMagnificationByStep(int displayId, @ZoomDirection int direction) {
+    private void scaleMagnificationByStep(int displayId, @ZoomDirection int direction) {
         if (getFullScreenMagnificationController().isActivated(displayId)) {
             final float magnificationScale = getFullScreenMagnificationController().getScale(
                     displayId);
@@ -1063,9 +1209,14 @@ public class MagnificationController implements MagnificationConnectionManager.C
      * param.
      *
      * @param displayId The logical display id.
-     * @param direction Whether the direction should be left/right/up/down.
+     * @param directions The directions to pan, indexed by {@code PanDirection}. If two or more
+     *                   are active, panning may be diagonal.
      */
-    public void panMagnificationByStep(int displayId, @PanDirection int direction) {
+    private void panMagnificationByStep(int displayId, boolean[] directions) {
+        if (directions.length != 4) {
+            Slog.d(TAG, "Invalid number of panning directions");
+            return;
+        }
         final boolean fullscreenActivated =
                 getFullScreenMagnificationController().isActivated(displayId);
         final boolean windowActivated =
@@ -1074,21 +1225,43 @@ public class MagnificationController implements MagnificationConnectionManager.C
             return;
         }
 
+        int numDirections = (directions[PAN_DIRECTION_LEFT] ? 1 : 0)
+                + (directions[PAN_DIRECTION_RIGHT] ? 1 : 0)
+                + (directions[PAN_DIRECTION_UP] ? 1 : 0)
+                + (directions[PAN_DIRECTION_DOWN] ? 1 : 0);
+        if (numDirections == 0) {
+            return;
+        }
+
         final float scale = fullscreenActivated
                 ? getFullScreenMagnificationController().getScale(displayId)
                         : getMagnificationConnectionManager().getScale(displayId);
-        final float step = mPanStepProvider.nextPanStep(scale, displayId);
+        float step = mPanStepProvider.nextPanStep(scale, displayId);
 
+        // If the user is trying to pan diagonally (2 directions), divide by the sqrt(2)
+        // so that the apparent step length (the radius of the step) is the same as
+        // panning in just one direction.
+        // Note that if numDirections is 3 or 4, opposite directions will cancel and
+        // there's no need to rescale {@code step}.
+        if (numDirections == 2) {
+            step /= sqrt(2);
+        }
+
+        // If two directions cancel out, they will be added and subtracted below for net change 0.
+        // This makes the logic simpler than removing out opposite directions manually.
         float offsetX = 0;
         float offsetY = 0;
-        if (direction == PAN_DIRECTION_LEFT) {
-            offsetX = -step;
-        } else if (direction == PAN_DIRECTION_RIGHT) {
-            offsetX = step;
-        } else if (direction == PAN_DIRECTION_UP) {
-            offsetY = -step;
-        } else if (direction == PAN_DIRECTION_DOWN) {
-            offsetY = step;
+        if (directions[PAN_DIRECTION_LEFT]) {
+            offsetX -= step;
+        }
+        if (directions[PAN_DIRECTION_RIGHT]) {
+            offsetX += step;
+        }
+        if (directions[PAN_DIRECTION_UP]) {
+            offsetY -= step;
+        }
+        if (directions[PAN_DIRECTION_DOWN]) {
+            offsetY += step;
         }
 
         if (fullscreenActivated) {
@@ -1100,6 +1273,8 @@ public class MagnificationController implements MagnificationConnectionManager.C
             getMagnificationConnectionManager().moveWindowMagnification(displayId, offsetX,
                     offsetY);
         }
+
+        mLastPannedTime = mSystemClock.uptimeMillis();
     }
 
     private final class DisableMagnificationCallback implements

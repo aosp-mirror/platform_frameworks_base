@@ -27,15 +27,19 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor
+import com.android.systemui.log.table.Diffable
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.TableRowLogger
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.domain.resolver.SceneResolver
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.util.kotlin.pairwise
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -47,6 +51,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /**
  * Generic business logic and app state accessors for the scene framework.
@@ -55,7 +61,6 @@ import kotlinx.coroutines.flow.stateIn
  * other feature modules should depend on and call into this class when their parts of the
  * application state change.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class SceneInteractor
 @Inject
@@ -148,7 +153,6 @@ constructor(
      * their finger to transition between scenes, this value will be true while their finger is on
      * the screen, then false for the rest of the transition.
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
     val isTransitionUserInputOngoing: StateFlow<Boolean> =
         transitionState
             .flatMapLatest {
@@ -165,12 +169,15 @@ constructor(
 
     /** Whether the scene container is visible. */
     val isVisible: StateFlow<Boolean> =
-        combine(repository.isVisible, repository.isRemoteUserInputOngoing) {
-                isVisible,
-                isRemoteUserInteractionOngoing ->
+        combine(
+                repository.isVisible,
+                repository.isRemoteUserInputOngoing,
+                repository.activeTransitionAnimationCount,
+            ) { isVisible, isRemoteUserInteractionOngoing, activeTransitionAnimationCount ->
                 isVisibleInternal(
                     raw = isVisible,
                     isRemoteUserInputOngoing = isRemoteUserInteractionOngoing,
+                    activeTransitionAnimationCount = activeTransitionAnimationCount,
                 )
             }
             .stateIn(
@@ -436,8 +443,9 @@ constructor(
     private fun isVisibleInternal(
         raw: Boolean = repository.isVisible.value,
         isRemoteUserInputOngoing: Boolean = repository.isRemoteUserInputOngoing.value,
+        activeTransitionAnimationCount: Int = repository.activeTransitionAnimationCount.value,
     ): Boolean {
-        return raw || isRemoteUserInputOngoing
+        return raw || isRemoteUserInputOngoing || activeTransitionAnimationCount > 0
     }
 
     /**
@@ -524,5 +532,89 @@ constructor(
         unfiltered: Flow<Map<UserAction, UserActionResult>>
     ): Flow<Map<UserAction, UserActionResult>> {
         return disabledContentInteractor.filteredUserActions(unfiltered)
+    }
+
+    /**
+     * Notifies that a transition animation has started.
+     *
+     * The scene container will remain visible while any transition animation is running within it.
+     */
+    fun onTransitionAnimationStart() {
+        repository.activeTransitionAnimationCount.update { current ->
+            (current + 1).also {
+                check(it < 10) {
+                    "Number of active transition animations is too high. Something must be" +
+                        " calling onTransitionAnimationStart too many times!"
+                }
+            }
+        }
+    }
+
+    /**
+     * Notifies that a transition animation has ended.
+     *
+     * The scene container will remain visible while any transition animation is running within it.
+     */
+    fun onTransitionAnimationEnd() {
+        decrementActiveTransitionAnimationCount()
+    }
+
+    /**
+     * Notifies that a transition animation has been canceled.
+     *
+     * The scene container will remain visible while any transition animation is running within it.
+     */
+    fun onTransitionAnimationCancelled() {
+        decrementActiveTransitionAnimationCount()
+    }
+
+    suspend fun hydrateTableLogBuffer(tableLogBuffer: TableLogBuffer) {
+        coroutineScope {
+            launch {
+                currentScene
+                    .map { sceneKey -> DiffableSceneKey(key = sceneKey) }
+                    .pairwise()
+                    .collect { (prev, current) ->
+                        tableLogBuffer.logDiffs(prevVal = prev, newVal = current)
+                    }
+            }
+
+            launch {
+                currentOverlays
+                    .map { overlayKeys -> DiffableOverlayKeys(keys = overlayKeys) }
+                    .pairwise()
+                    .collect { (prev, current) ->
+                        tableLogBuffer.logDiffs(prevVal = prev, newVal = current)
+                    }
+            }
+        }
+    }
+
+    private fun decrementActiveTransitionAnimationCount() {
+        repository.activeTransitionAnimationCount.update { current ->
+            (current - 1).also {
+                check(it >= 0) {
+                    "Number of active transition animations is negative. Something must be" +
+                        " calling onTransitionAnimationEnd or onTransitionAnimationCancelled too" +
+                        " many times!"
+                }
+            }
+        }
+    }
+
+    private class DiffableSceneKey(private val key: SceneKey) : Diffable<DiffableSceneKey> {
+        override fun logDiffs(prevVal: DiffableSceneKey, row: TableRowLogger) {
+            row.logChange(columnName = "currentScene", value = key.debugName)
+        }
+    }
+
+    private class DiffableOverlayKeys(private val keys: Set<OverlayKey>) :
+        Diffable<DiffableOverlayKeys> {
+        override fun logDiffs(prevVal: DiffableOverlayKeys, row: TableRowLogger) {
+            row.logChange(
+                columnName = "currentOverlays",
+                value = keys.joinToString { key -> key.debugName },
+            )
+        }
     }
 }

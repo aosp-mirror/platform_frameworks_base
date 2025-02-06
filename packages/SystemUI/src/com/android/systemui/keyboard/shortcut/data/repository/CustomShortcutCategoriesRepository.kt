@@ -18,6 +18,7 @@ package com.android.systemui.keyboard.shortcut.data.repository
 
 import android.hardware.input.InputGestureData
 import android.hardware.input.InputGestureData.Builder
+import android.hardware.input.InputGestureData.Trigger
 import android.hardware.input.InputGestureData.createKeyTrigger
 import android.hardware.input.InputManager
 import android.hardware.input.KeyGestureEvent.KeyGestureType
@@ -175,6 +176,11 @@ constructor(
         return customInputGesturesRepository.resetAllCustomInputGestures()
     }
 
+    suspend fun isSelectedKeyCombinationAvailable(): Boolean {
+        val trigger = buildTriggerFromSelectedKeyCombination() ?: return false
+        return customInputGesturesRepository.getInputGestureByTrigger(trigger) == null
+    }
+
     private fun Builder.addKeyGestureTypeForShortcutBeingCustomized(): Builder {
         val keyGestureType = getKeyGestureTypeForShortcutBeingCustomized()
 
@@ -222,7 +228,10 @@ constructor(
         )
     }
 
-    private fun Builder.addTriggerFromSelectedKeyCombination(): Builder {
+    private fun Builder.addTriggerFromSelectedKeyCombination(): Builder =
+        setTrigger(buildTriggerFromSelectedKeyCombination())
+
+    private fun buildTriggerFromSelectedKeyCombination(): Trigger? {
         val selectedKeyCombination = _selectedKeyCombination.value
         if (selectedKeyCombination?.keyCode == null) {
             Log.w(
@@ -230,16 +239,14 @@ constructor(
                 "User requested to set shortcut but selected key combination is " +
                     "$selectedKeyCombination",
             )
-            return this
+            return null
         }
 
-        return setTrigger(
-            createKeyTrigger(
-                /* keycode = */ selectedKeyCombination.keyCode,
-                /* modifierState = */ shortcutCategoriesUtils.removeUnsupportedModifiers(
-                    selectedKeyCombination.modifiers
-                ),
-            )
+        return createKeyTrigger(
+            /* keycode= */ selectedKeyCombination.keyCode,
+            /* modifierState= */ shortcutCategoriesUtils.removeUnsupportedModifiers(
+                selectedKeyCombination.modifiers
+            ),
         )
     }
 

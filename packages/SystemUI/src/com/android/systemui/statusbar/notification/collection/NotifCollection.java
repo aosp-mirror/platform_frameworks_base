@@ -39,7 +39,6 @@ import static android.service.notification.NotificationListenerService.REASON_TI
 import static android.service.notification.NotificationListenerService.REASON_UNAUTOBUNDLED;
 import static android.service.notification.NotificationListenerService.REASON_USER_STOPPED;
 
-import static com.android.systemui.Flags.notificationsDismissPrunedSummaries;
 import static com.android.systemui.statusbar.notification.NotificationUtils.logKey;
 import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.DISMISSED;
 import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.NOT_DISMISSED;
@@ -278,9 +277,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
         Assert.isMainThread();
         checkForReentrantCall();
 
-        if (notificationsDismissPrunedSummaries()) {
-            entriesToDismiss = includeSummariesToDismiss(entriesToDismiss);
-        }
+        entriesToDismiss = includeSummariesToDismiss(entriesToDismiss);
 
         final int entryCount = entriesToDismiss.size();
         final List<NotificationEntry> entriesToLocallyDismiss = new ArrayList<>();

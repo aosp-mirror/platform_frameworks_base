@@ -36,6 +36,7 @@ import static com.android.server.wm.BackNavigationProto.SHOW_WALLPAPER;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_PREDICT_BACK;
 import static com.android.server.wm.WindowContainer.SYNC_STATE_NONE;
 
+import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -44,6 +45,7 @@ import android.content.res.ResourceId;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -302,8 +304,7 @@ class BackNavigationController {
                         }
                     }
                     infoBuilder.setLetterboxColor(currentActivity.mAppCompatController
-                            .getAppCompatLetterboxOverrides()
-                                .getLetterboxBackgroundColor().toArgb());
+                            .getLetterboxOverrides().getLetterboxBackgroundColor().toArgb());
                     removedWindowContainer = currentActivity;
                     prevTask = prevActivities.get(0).getTask();
                     backType = BackNavigationInfo.TYPE_CROSS_ACTIVITY;
@@ -705,12 +706,34 @@ class BackNavigationController {
         private WindowState mNavigatingWindow;
         private RemoteCallback mObserver;
 
+        private final IBinder.DeathRecipient mListenerDeathRecipient =
+                new IBinder.DeathRecipient() {
+                    @Override
+                    @BinderThread
+                    public void binderDied() {
+                        synchronized (mWindowManagerService.mGlobalLock) {
+                            stopMonitorForRemote();
+                            stopMonitorTransition();
+                        }
+                    }
+                };
+
         void startMonitor(@NonNull WindowState window, @NonNull RemoteCallback observer) {
             mNavigatingWindow = window;
             mObserver = observer;
+            try {
+                mObserver.getInterface().asBinder().linkToDeath(mListenerDeathRecipient,
+                        0 /* flags */);
+            } catch (RemoteException r) {
+                Slog.e(TAG, "Failed to link to death");
+            }
         }
 
         void stopMonitorForRemote() {
+            if (mObserver != null) {
+                mObserver.getInterface().asBinder().unlinkToDeath(mListenerDeathRecipient,
+                        0 /* flags */);
+            }
             mObserver = null;
         }
 

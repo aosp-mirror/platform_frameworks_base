@@ -467,11 +467,17 @@ class PermissionService(private val service: AccessCheckingService) :
     override fun getPermissionRequestState(
         packageName: String,
         permissionName: String,
-        deviceId: String
+        deviceId: Int,
+        persistentDeviceId: String
     ): Int {
         val pid = Binder.getCallingPid()
         val uid = Binder.getCallingUid()
-        val result = context.checkPermission(permissionName, pid, uid)
+        val deviceContext = if (deviceId == context.deviceId){
+            context
+        } else {
+            context.createDeviceContext(deviceId)
+        }
+        val result = deviceContext.checkPermission(permissionName, pid, uid)
         if (result == PackageManager.PERMISSION_GRANTED) {
             return Context.PERMISSION_REQUEST_STATE_GRANTED
         }
@@ -497,14 +503,14 @@ class PermissionService(private val service: AccessCheckingService) :
 
         val permissionFlags =
             service.getState {
-                getPermissionFlagsWithPolicy(appId, userId, permissionName, deviceId)
+                getPermissionFlagsWithPolicy(appId, userId, permissionName, persistentDeviceId)
             }
         val isUnreqestable = permissionFlags.hasAnyBit(UNREQUESTABLE_MASK)
         // Special case for READ_MEDIA_IMAGES due to photo picker
         if ((permissionName == Manifest.permission.READ_MEDIA_IMAGES ||
                 permissionName == Manifest.permission.READ_MEDIA_VIDEO) && isUnreqestable) {
             val isUserSelectedGranted =
-                context.checkPermission(
+                deviceContext.checkPermission(
                     Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED,
                     pid,
                     uid,
@@ -515,7 +521,7 @@ class PermissionService(private val service: AccessCheckingService) :
                         appId,
                         userId,
                         Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED,
-                        deviceId,
+                        persistentDeviceId,
                     )
                 }
             if (

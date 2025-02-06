@@ -23,9 +23,7 @@ import android.util.ArrayMap;
 import androidx.annotation.Nullable;
 import androidx.core.os.CancellationSignal;
 
-import com.android.internal.util.NotificationMessagingUtil;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.coordinator.HeadsUpCoordinator;
 import com.android.systemui.statusbar.notification.row.RowContentBindParams;
@@ -45,27 +43,15 @@ import javax.inject.Inject;
 @SysUISingleton
 public class HeadsUpViewBinder {
     private final RowContentBindStage mStage;
-    private final NotificationMessagingUtil mNotificationMessagingUtil;
     private final Map<NotificationEntry, CancellationSignal> mOngoingBindCallbacks =
             new ArrayMap<>();
     private final HeadsUpViewBinderLogger mLogger;
 
-    private NotificationPresenter mNotificationPresenter;
 
     @Inject
-    HeadsUpViewBinder(
-            NotificationMessagingUtil notificationMessagingUtil,
-            RowContentBindStage bindStage, HeadsUpViewBinderLogger logger) {
-        mNotificationMessagingUtil = notificationMessagingUtil;
+    HeadsUpViewBinder(RowContentBindStage bindStage, HeadsUpViewBinderLogger logger) {
         mStage = bindStage;
         mLogger = logger;
-    }
-
-    /**
-     * Set notification presenter to determine parameters for heads up view inflation.
-     */
-    public void setPresenter(NotificationPresenter presenter) {
-        mNotificationPresenter = presenter;
     }
 
     /**
@@ -77,15 +63,9 @@ public class HeadsUpViewBinder {
             boolean isPinnedByUser,
             @Nullable HeadsUpBindCallback callback) {
         RowContentBindParams params = mStage.getStageParams(entry);
-        final boolean isImportantMessage = mNotificationMessagingUtil.isImportantMessaging(
-                entry.getSbn(), entry.getImportance());
-        final boolean useIncreasedHeadsUp = isImportantMessage
-                && !mNotificationPresenter.isPresenterFullyCollapsed();
-        params.setUseIncreasedHeadsUpHeight(useIncreasedHeadsUp);
         params.requireContentViews(FLAG_CONTENT_VIEW_HEADS_UP);
         CancellationSignal signal = mStage.requestRebind(entry, en -> {
             mLogger.entryBoundSuccessfully(entry);
-            en.getRow().setUsesIncreasedHeadsUpHeight(params.useIncreasedHeadsUpHeight());
             // requestRebind promises that if we called cancel before this callback would be
             // invoked, then we will not enter this callback, and because we always cancel before
             // adding to this map, we know this will remove the correct signal.

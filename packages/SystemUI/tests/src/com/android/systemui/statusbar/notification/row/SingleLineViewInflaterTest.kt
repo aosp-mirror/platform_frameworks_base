@@ -272,6 +272,35 @@ class SingleLineViewInflaterTest : SysuiTestCase() {
         }
     }
 
+    @Test
+    fun createViewModelForSummarizedConversationNotification() {
+        // Given: a non-group conversation notification
+        val notificationType = OneToOneConversation()
+        val notification = getNotification(notificationType)
+
+        // When: inflate the SingleLineViewModel
+        val singleLineViewModel = notification.makeSingleLineViewModel(notificationType)
+
+        // Then: the inflated SingleLineViewModel should be as expected
+        // titleText: Notification.ConversationTitle
+        // contentText: the last message text
+        // conversationSenderName: null, because it's not a group conversation
+        // conversationData.avatar: a single icon of the last sender
+        // summarizedText: the summary text from the ranking
+        assertEquals(CONVERSATION_TITLE, singleLineViewModel.titleText)
+        assertEquals(LAST_MESSAGE, singleLineViewModel.contentText)
+        assertNull(
+            singleLineViewModel.conversationData?.conversationSenderName,
+            "Sender name should be null for one-on-one conversation"
+        )
+        assertTrue {
+            singleLineViewModel.conversationData
+                ?.avatar
+                ?.equalsTo(SingleIcon(firstSenderIcon.loadDrawable(context))) == true
+        }
+        assertEquals("summary", singleLineViewModel.conversationData?.summarization)
+    }
+
     sealed class NotificationType(val largeIcon: Icon? = null)
 
     class NonMessaging(largeIcon: Icon? = null) : NotificationType(largeIcon)
@@ -380,7 +409,8 @@ class SingleLineViewInflaterTest : SysuiTestCase() {
             if (isConversation) messagingStyle else null,
             builder,
             context,
-            false
+            false,
+            "summary"
         )
     }
 

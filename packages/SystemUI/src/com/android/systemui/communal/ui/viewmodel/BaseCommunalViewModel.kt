@@ -45,7 +45,7 @@ abstract class BaseCommunalViewModel(
     val mediaHost: MediaHost,
     val mediaCarouselController: MediaCarouselController,
 ) {
-    val currentScene: Flow<SceneKey> = communalSceneInteractor.currentScene
+    val currentScene: StateFlow<SceneKey> = communalSceneInteractor.currentScene
 
     /** Used to animate showing or hiding the communal content. */
     open val isCommunalContentVisible: Flow<Boolean> = MutableStateFlow(false)

@@ -18,8 +18,7 @@ package com.android.compose.animation.scene.content.state
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -32,6 +31,8 @@ import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.TransformationSpec
 import com.android.compose.animation.scene.TransformationSpecImpl
 import com.android.compose.animation.scene.TransitionKey
+import com.android.internal.jank.Cuj.CujType
+import com.android.mechanics.GestureContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -237,6 +238,14 @@ sealed interface TransitionState {
         /** Whether user input is currently driving the transition. */
         abstract val isUserInputOngoing: Boolean
 
+        /** Additional gesture context whenever the transition is driven by a user gesture. */
+        abstract val gestureContext: GestureContext?
+
+        /** The CUJ covered by this transition. */
+        @CujType
+        val cuj: Int?
+            get() = _cuj
+
         /**
          * The progress of the preview transition. This is usually in the `[0; 1]` range, but it can
          * also be less than `0` or greater than `1` when using transitions with a spring
@@ -251,13 +260,15 @@ sealed interface TransitionState {
         internal open val isInPreviewStage: Boolean = false
 
         /**
-         * The current [TransformationSpecImpl] associated to this transition.
+         * The current [TransformationSpecImpl] and other values associated to this transition from
+         * the spec.
          *
          * Important: These will be set exactly once, when this transition is
          * [started][MutableSceneTransitionLayoutStateImpl.startTransition].
          */
         internal var transformationSpec: TransformationSpecImpl = TransformationSpec.Empty
         internal var previewTransformationSpec: TransformationSpecImpl? = null
+        internal var _cuj: Int? = null
 
         /**
          * An animatable that animates from 1f to 0f. This will be used to nicely animate the sudden
@@ -365,15 +376,6 @@ sealed interface TransitionState {
             }
         }
 
-        /**
-         * Checks if the given [progress] value is within the valid range for this transition.
-         *
-         * The valid range is between 0f and 1f, inclusive.
-         */
-        internal fun isWithinProgressRange(progress: Float): Boolean {
-            return progress >= 0f && progress <= 1f
-        }
-
         internal open fun interruptionProgress(layoutImpl: SceneTransitionLayoutImpl): Float {
             if (replacedTransition != null) {
                 return replacedTransition.interruptionProgress(layoutImpl)
@@ -382,14 +384,13 @@ sealed interface TransitionState {
             fun create(): Animatable<Float, AnimationVector1D> {
                 val animatable = Animatable(1f, visibilityThreshold = ProgressVisibilityThreshold)
                 layoutImpl.animationScope.launch {
-                    val swipeSpec = layoutImpl.state.transitions.defaultSwipeSpec
-                    val progressSpec =
-                        spring(
-                            stiffness = swipeSpec.stiffness,
-                            dampingRatio = Spring.DampingRatioNoBouncy,
-                            visibilityThreshold = ProgressVisibilityThreshold,
-                        )
-                    animatable.animateTo(0f, progressSpec)
+                    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+                    animatable.animateTo(
+                        targetValue = 0f,
+                        // Quickly animate (use fast) the current transition and without bounces
+                        // (use effects). A new transition will start soon.
+                        animationSpec = layoutImpl.state.motionScheme.fastEffectsSpec(),
+                    )
                 }
 
                 return animatable

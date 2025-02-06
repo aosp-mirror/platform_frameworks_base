@@ -212,8 +212,8 @@ private fun shouldComposeMoveableElement(
         scenePicker.contentDuringTransition(
             element = elementKey,
             transition = transition,
-            fromContentZIndex = layoutImpl.content(transition.fromContent).zIndex,
-            toContentZIndex = layoutImpl.content(transition.toContent).zIndex,
+            fromContentZIndex = layoutImpl.content(transition.fromContent).globalZIndex,
+            toContentZIndex = layoutImpl.content(transition.toContent).globalZIndex,
         )
 
     return pickedScene == content

@@ -17,6 +17,7 @@
 package com.android.server.media;
 
 import static android.media.MediaRoute2Info.FEATURE_LIVE_AUDIO;
+import static android.media.MediaRoute2Info.FEATURE_LIVE_VIDEO;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -55,8 +56,10 @@ import java.util.stream.Stream;
  */
 /* package */ class SystemMediaRoute2Provider2 extends SystemMediaRoute2Provider {
 
-    private static final String ROUTE_ID_PREFIX_SYSTEM = "SYSTEM";
-    private static final String ROUTE_ID_SYSTEM_SEPARATOR = ".";
+    private static final String UNIQUE_SYSTEM_ID_PREFIX = "SYSTEM";
+    private static final String UNIQUE_SYSTEM_ID_SEPARATOR = "-";
+    private static final boolean FORCE_GLOBAL_ROUTING_SESSION = true;
+    private static final String PACKAGE_NAME_FOR_GLOBAL_SESSION = "";
 
     private final PackageManager mPackageManager;
 
@@ -65,6 +68,10 @@ import java.util.stream.Stream;
 
     @GuardedBy("mLock")
     private final Map<String, ProviderProxyRecord> mProxyRecords = new ArrayMap<>();
+
+    @GuardedBy("mLock")
+    private final Map<String, SystemMediaSessionRecord> mSessionOriginalIdToSessionRecord =
+            new ArrayMap<>();
 
     /**
      * Maps package names to corresponding sessions maintained by {@link MediaRoute2ProviderService
@@ -113,6 +120,9 @@ import java.util.stream.Stream;
             String routeOriginalId,
             int transferReason) {
         synchronized (mLock) {
+            if (FORCE_GLOBAL_ROUTING_SESSION) {
+                clientPackageName = PACKAGE_NAME_FOR_GLOBAL_SESSION;
+            }
             var targetProviderProxyId = mOriginalRouteIdToProviderId.get(routeOriginalId);
             var targetProviderProxyRecord = mProxyRecords.get(targetProviderProxyId);
             // Holds the target route, if it's managed by a provider service. Holds null otherwise.
@@ -120,7 +130,7 @@ import java.util.stream.Stream;
                     targetProviderProxyRecord != null
                             ? targetProviderProxyRecord.getRouteByOriginalId(routeOriginalId)
                             : null;
-            var existingSessionRecord = mPackageNameToSessionRecord.get(clientPackageName);
+            var existingSessionRecord = getSessionRecordByPackageName(clientPackageName);
             if (existingSessionRecord != null) {
                 var existingSession = existingSessionRecord.mSourceSessionInfo;
                 if (targetProviderProxyId != null
@@ -128,8 +138,20 @@ import java.util.stream.Stream;
                                 targetProviderProxyId, existingSession.getProviderId())) {
                     // The currently selected route and target route both belong to the same
                     // provider. We tell the provider to handle the transfer.
-                    targetProviderProxyRecord.requestTransfer(
-                            existingSession.getOriginalId(), serviceTargetRoute);
+                    if (serviceTargetRoute == null) {
+                        notifyRequestFailed(
+                                requestId, MediaRoute2ProviderService.REASON_ROUTE_NOT_AVAILABLE);
+                    } else {
+                        targetProviderProxyRecord.mProxy.transferToRoute(
+                                requestId,
+                                clientUserHandle,
+                                clientPackageName,
+                                existingSession.getOriginalId(),
+                                targetProviderProxyRecord.mNewOriginalIdToSourceOriginalIdMap.get(
+                                        routeOriginalId),
+                                transferReason);
+                    }
+                    return;
                 } else {
                     // The target route is handled by a provider other than the target one. We need
                     // to release the existing session.
@@ -137,7 +159,7 @@ import java.util.stream.Stream;
                     if (currentProxyRecord != null) {
                         currentProxyRecord.releaseSession(
                                 requestId, existingSession.getOriginalId());
-                        existingSessionRecord.removeSelfFromSessionMap();
+                        existingSessionRecord.removeSelfFromSessionMaps();
                     }
                 }
             }
@@ -189,7 +211,7 @@ import java.util.stream.Stream;
             if (systemSession == null) {
                 return null;
             }
-            var overridingSession = mPackageNameToSessionRecord.get(packageName);
+            var overridingSession = getSessionRecordByPackageName(packageName);
             if (overridingSession != null) {
                 var builder =
                         new RoutingSessionInfo.Builder(overridingSession.mTranslatedSessionInfo)
@@ -203,6 +225,63 @@ import java.util.stream.Stream;
                 return systemSession;
             }
         }
+    }
+
+    @Override
+    public void setRouteVolume(long requestId, String routeOriginalId, int volume) {
+        synchronized (mLock) {
+            var targetProviderProxyId = mOriginalRouteIdToProviderId.get(routeOriginalId);
+            var targetProviderProxyRecord = mProxyRecords.get(targetProviderProxyId);
+            // Holds the target route, if it's managed by a provider service. Holds null otherwise.
+            if (targetProviderProxyRecord != null) {
+                var serviceTargetRoute =
+                        targetProviderProxyRecord.mNewOriginalIdToSourceOriginalIdMap.get(
+                                routeOriginalId);
+                if (serviceTargetRoute != null) {
+                    targetProviderProxyRecord.mProxy.setRouteVolume(
+                            requestId, serviceTargetRoute, volume);
+                } else {
+                    notifyRequestFailed(
+                            requestId, MediaRoute2ProviderService.REASON_ROUTE_NOT_AVAILABLE);
+                }
+            }
+        }
+        super.setRouteVolume(requestId, routeOriginalId, volume);
+    }
+
+    @Override
+    public void setSessionVolume(long requestId, String sessionOriginalId, int volume) {
+        if (SYSTEM_SESSION_ID.equals(sessionOriginalId)) {
+            super.setSessionVolume(requestId, sessionOriginalId, volume);
+            return;
+        }
+        synchronized (mLock) {
+            var sessionRecord = getSessionRecordByOriginalId(sessionOriginalId);
+            var proxyRecord = sessionRecord != null ? sessionRecord.getProxyRecord() : null;
+            if (proxyRecord != null) {
+                proxyRecord.mProxy.setSessionVolume(
+                        requestId, sessionRecord.getServiceSessionId(), volume);
+                return;
+            }
+        }
+        notifyRequestFailed(requestId, MediaRoute2ProviderService.REASON_ROUTE_NOT_AVAILABLE);
+    }
+
+    @GuardedBy("mLock")
+    private SystemMediaSessionRecord getSessionRecordByOriginalId(String sessionOriginalId) {
+        if (FORCE_GLOBAL_ROUTING_SESSION) {
+            return getSessionRecordByPackageName(PACKAGE_NAME_FOR_GLOBAL_SESSION);
+        } else {
+            return mSessionOriginalIdToSessionRecord.get(sessionOriginalId);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private SystemMediaSessionRecord getSessionRecordByPackageName(String clientPackageName) {
+        if (FORCE_GLOBAL_ROUTING_SESSION) {
+            clientPackageName = PACKAGE_NAME_FOR_GLOBAL_SESSION;
+        }
+        return mPackageNameToSessionRecord.get(clientPackageName);
     }
 
     /**
@@ -262,16 +341,34 @@ import java.util.stream.Stream;
      */
     private void updateSessionInfo() {
         synchronized (mLock) {
-            var systemSessionInfo = mSystemSessionInfo;
-            if (systemSessionInfo == null) {
+            var globalSessionInfoRecord =
+                    getSessionRecordByPackageName(PACKAGE_NAME_FOR_GLOBAL_SESSION);
+            var globalSessionInfo =
+                    globalSessionInfoRecord != null
+                            ? globalSessionInfoRecord.mTranslatedSessionInfo
+                            : null;
+            if (globalSessionInfo == null) {
+                globalSessionInfo = mSystemSessionInfo;
+            }
+            if (globalSessionInfo == null) {
                 // The system session info hasn't been initialized yet. Do nothing.
                 return;
             }
-            var builder = new RoutingSessionInfo.Builder(systemSessionInfo);
-            mProxyRecords.values().stream()
-                    .flatMap(ProviderProxyRecord::getRoutesStream)
-                    .map(MediaRoute2Info::getOriginalId)
-                    .forEach(builder::addTransferableRoute);
+            var builder = new RoutingSessionInfo.Builder(globalSessionInfo);
+            if (globalSessionInfo == mSystemSessionInfo) {
+                // The session is the system one. So we make all the service-provided routes
+                // available for transfer. The system transferable routes are already there.
+                mProxyRecords.values().stream()
+                        .flatMap(ProviderProxyRecord::getRoutesStream)
+                        .map(MediaRoute2Info::getOriginalId)
+                        .forEach(builder::addTransferableRoute);
+            } else {
+                // The session is service-provided. So we add the system-provided routes as
+                // transferable.
+                mLastSystemProviderInfo.getRoutes().stream()
+                        .map(MediaRoute2Info::getOriginalId)
+                        .forEach(builder::addTransferableRoute);
+            }
             mSessionInfos.clear();
             mSessionInfos.add(builder.build());
             for (var sessionRecords : mPackageNameToSessionRecord.values()) {
@@ -341,16 +438,17 @@ import java.util.stream.Stream;
     }
 
     /**
-     * Equivalent to {@link #asSystemRouteId}, except it takes a unique route id instead of a
-     * original id.
+     * Equivalent to {@link #asUniqueSystemId}, except it takes a unique id instead of an original
+     * id.
      */
     private static String uniqueIdAsSystemRouteId(String providerId, String uniqueRouteId) {
-        return asSystemRouteId(providerId, MediaRouter2Utils.getOriginalId(uniqueRouteId));
+        return asUniqueSystemId(providerId, MediaRouter2Utils.getOriginalId(uniqueRouteId));
     }
 
     /**
      * Returns a unique {@link MediaRoute2Info#getOriginalId() original id} for this provider to
-     * publish system media routes from {@link MediaRoute2ProviderService provider services}.
+     * publish system media routes and sessions from {@link MediaRoute2ProviderService provider
+     * services}.
      *
      * <p>This provider will publish system media routes as part of the system routing session.
      * However, said routes may also support {@link MediaRoute2Info#FLAG_ROUTING_TYPE_REMOTE remote
@@ -358,12 +456,12 @@ import java.util.stream.Stream;
      * we derive a {@link MediaRoute2Info#getOriginalId original id} that is unique among all
      * original route ids used by this provider.
      */
-    private static String asSystemRouteId(String providerId, String originalRouteId) {
-        return ROUTE_ID_PREFIX_SYSTEM
-                + ROUTE_ID_SYSTEM_SEPARATOR
+    private static String asUniqueSystemId(String providerId, String originalId) {
+        return UNIQUE_SYSTEM_ID_PREFIX
+                + UNIQUE_SYSTEM_ID_SEPARATOR
                 + providerId
-                + ROUTE_ID_SYSTEM_SEPARATOR
-                + originalRouteId;
+                + UNIQUE_SYSTEM_ID_SEPARATOR
+                + originalId;
     }
 
     /**
@@ -429,11 +527,6 @@ import java.util.stream.Stream;
             }
         }
 
-        public void requestTransfer(String sessionId, MediaRoute2Info targetRoute) {
-            // TODO: Map the target route to the source route original id.
-            throw new UnsupportedOperationException("TODO Implement");
-        }
-
         public void releaseSession(long requestId, String originalSessionId) {
             mProxy.releaseSession(requestId, originalSessionId);
         }
@@ -455,12 +548,19 @@ import java.util.stream.Stream;
                     continue;
                 }
                 String id =
-                        asSystemRouteId(providerInfo.getUniqueId(), sourceRoute.getOriginalId());
-                var newRoute =
-                        new MediaRoute2Info.Builder(id, sourceRoute.getName())
-                                .addFeature(FEATURE_LIVE_AUDIO)
-                                .build();
-                routesMap.put(id, newRoute);
+                        asUniqueSystemId(providerInfo.getUniqueId(), sourceRoute.getOriginalId());
+                var newRouteBuilder = new MediaRoute2Info.Builder(id, sourceRoute);
+                if ((sourceRoute.getSupportedRoutingTypes()
+                                & MediaRoute2Info.FLAG_ROUTING_TYPE_SYSTEM_AUDIO)
+                        != 0) {
+                    newRouteBuilder.addFeature(FEATURE_LIVE_AUDIO);
+                }
+                if ((sourceRoute.getSupportedRoutingTypes()
+                                & MediaRoute2Info.FLAG_ROUTING_TYPE_SYSTEM_VIDEO)
+                        != 0) {
+                    newRouteBuilder.addFeature(FEATURE_LIVE_VIDEO);
+                }
+                routesMap.put(id, newRouteBuilder.build());
                 idMap.put(id, sourceRoute.getOriginalId());
             }
             return new ProviderProxyRecord(
@@ -491,18 +591,22 @@ import java.util.stream.Stream;
                     () -> {
                         if (mSessionRecord != null) {
                             mSessionRecord.onSessionUpdate(sessionInfo);
+                        } else {
+                            SystemMediaSessionRecord systemMediaSessionRecord =
+                                    new SystemMediaSessionRecord(mProviderId, sessionInfo);
+                            RoutingSessionInfo translatedSession;
+                            synchronized (mLock) {
+                                mSessionRecord = systemMediaSessionRecord;
+                                mSessionOriginalIdToSessionRecord.put(
+                                        systemMediaSessionRecord.mOriginalId,
+                                        systemMediaSessionRecord);
+                                mPackageNameToSessionRecord.put(
+                                        mClientPackageName, systemMediaSessionRecord);
+                                mPendingSessionCreations.remove(mRequestId);
+                                translatedSession = systemMediaSessionRecord.mTranslatedSessionInfo;
+                            }
+                            onSessionOverrideUpdated(translatedSession);
                         }
-                        SystemMediaSessionRecord systemMediaSessionRecord =
-                                new SystemMediaSessionRecord(mProviderId, sessionInfo);
-                        RoutingSessionInfo translatedSession;
-                        synchronized (mLock) {
-                            mSessionRecord = systemMediaSessionRecord;
-                            mPackageNameToSessionRecord.put(
-                                    mClientPackageName, systemMediaSessionRecord);
-                            mPendingSessionCreations.remove(mRequestId);
-                            translatedSession = systemMediaSessionRecord.mTranslatedSessionInfo;
-                        }
-                        onSessionOverrideUpdated(translatedSession);
                     });
         }
 
@@ -538,31 +642,44 @@ import java.util.stream.Stream;
 
         private final String mProviderId;
 
-        @GuardedBy("SystemMediaRoute2Provider2.this.mLock")
-        @NonNull
-        private RoutingSessionInfo mSourceSessionInfo;
+        /**
+         * The {@link RoutingSessionInfo#getOriginalId() original id} with which this session is
+         * published.
+         *
+         * <p>Derived from the service routing session, using {@link #asUniqueSystemId}.
+         */
+        private final String mOriginalId;
+
+        // @GuardedBy("SystemMediaRoute2Provider2.this.mLock")
+        @NonNull private RoutingSessionInfo mSourceSessionInfo;
 
         /**
-         * The same as {@link #mSourceSessionInfo}, except ids are {@link #asSystemRouteId system
+         * The same as {@link #mSourceSessionInfo}, except ids are {@link #asUniqueSystemId system
          * provider ids}.
          */
-        @GuardedBy("SystemMediaRoute2Provider2.this.mLock")
-        @NonNull
-        private RoutingSessionInfo mTranslatedSessionInfo;
+        // @GuardedBy("SystemMediaRoute2Provider2.this.mLock")
+        @NonNull private RoutingSessionInfo mTranslatedSessionInfo;
 
         SystemMediaSessionRecord(
                 @NonNull String providerId, @NonNull RoutingSessionInfo sessionInfo) {
             mProviderId = providerId;
             mSourceSessionInfo = sessionInfo;
+            mOriginalId =
+                    asUniqueSystemId(sessionInfo.getProviderId(), sessionInfo.getOriginalId());
             mTranslatedSessionInfo = asSystemProviderSession(sessionInfo);
+        }
+
+        // @GuardedBy("SystemMediaRoute2Provider2.this.mLock")
+        public String getServiceSessionId() {
+            return mSourceSessionInfo.getOriginalId();
         }
 
         @Override
         public void onSessionUpdate(@NonNull RoutingSessionInfo sessionInfo) {
-            RoutingSessionInfo translatedSessionInfo = mTranslatedSessionInfo;
+            RoutingSessionInfo translatedSessionInfo = asSystemProviderSession(sessionInfo);
             synchronized (mLock) {
                 mSourceSessionInfo = sessionInfo;
-                mTranslatedSessionInfo = asSystemProviderSession(sessionInfo);
+                mTranslatedSessionInfo = translatedSessionInfo;
             }
             onSessionOverrideUpdated(translatedSessionInfo);
         }
@@ -575,31 +692,32 @@ import java.util.stream.Stream;
         @Override
         public void onSessionReleased() {
             synchronized (mLock) {
-                removeSelfFromSessionMap();
+                removeSelfFromSessionMaps();
             }
             notifyGlobalSessionInfoUpdated();
         }
 
-        @GuardedBy("SystemMediaRoute2Provider2.this.mLock")
+        // @GuardedBy("SystemMediaRoute2Provider2.this.mLock")
         @Nullable
         public ProviderProxyRecord getProxyRecord() {
             ProviderProxyRecord provider = mProxyRecords.get(mProviderId);
             if (provider == null) {
                 // Unexpected condition where the proxy is no longer available while there's an
                 // ongoing session. Could happen due to a crash in the provider process.
-                removeSelfFromSessionMap();
+                removeSelfFromSessionMaps();
             }
             return provider;
         }
 
-        @GuardedBy("SystemMediaRoute2Provider2.this.mLock")
-        private void removeSelfFromSessionMap() {
+        // @GuardedBy("SystemMediaRoute2Provider2.this.mLock")
+        private void removeSelfFromSessionMaps() {
+            mSessionOriginalIdToSessionRecord.remove(mOriginalId);
             mPackageNameToSessionRecord.remove(mSourceSessionInfo.getClientPackageName());
         }
 
         private RoutingSessionInfo asSystemProviderSession(RoutingSessionInfo session) {
             var builder =
-                    new RoutingSessionInfo.Builder(session)
+                    new RoutingSessionInfo.Builder(session, mOriginalId)
                             .setProviderId(mUniqueId)
                             .setSystemSession(true)
                             .clearSelectedRoutes()

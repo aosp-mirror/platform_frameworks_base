@@ -113,13 +113,6 @@ flag {
 }
 
 flag {
-    name: "predictive_back_system_anims"
-    namespace: "systemui"
-    description: "Predictive back for system animations"
-    bug: "320510464"
-}
-
-flag {
     name: "remove_activity_starter_dream_callback"
     namespace: "windowing_frontend"
     description: "Avoid a race with DreamManagerService callbacks for isDreaming by checking Activity state directly"
@@ -184,6 +177,16 @@ flag {
   namespace: "windowing_frontend"
   description: "Show the app handle and the app menu also on large screens that don't enable desktop mode"
   bug: "377689543"
+}
+
+flag {
+  name: "app_handle_no_relayout_on_exclusion_change"
+  namespace: "windowing_frontend"
+  description: "Remove unnecessary relayouts for app handle when exclusion regions change"
+  bug: "383672263"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -261,14 +264,6 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
-}
-
-flag {
-  name: "system_ui_immersive_confirmation_dialog"
-  namespace: "windowing_frontend"
-  description: "Enable the implementation of the immersive confirmation dialog on system UI side by default"
-  bug: "359713629"
-  is_fixed_read_only: true
 }
 
 flag {
@@ -422,9 +417,58 @@ flag {
 }
 
 flag {
+    name: "keep_app_window_hide_while_locked"
+    namespace: "windowing_frontend"
+    description: "Do not let app window visible while device is locked"
+    is_fixed_read_only: true
+    bug: "378088391"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "use_rt_frame_callback_for_splash_screen_transfer"
+    namespace: "windowing_frontend"
+    description: "report SplashscreenView shown after RtFrame commit"
+    is_fixed_read_only: true
+    bug: "387231234"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "port_window_size_animation"
-    namespace: "systemui"
+    namespace: "windowing_frontend"
     description: "Port window-resize animation from legacy to shell"
     bug: "384976265"
 }
 
+flag {
+    name: "aod_transition"
+    namespace: "windowing_frontend"
+    description: "Support to show lock wallpaper in aod state"
+    bug: "361438779"
+}
+
+flag {
+    name: "check_disabled_snapshots_in_task_persister"
+    namespace: "windowing_frontend"
+    description: "Check for TaskSnapshots disabling in TaskSnapshotPersister."
+    bug: "387915176"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "clear_system_vibrator"
+    namespace: "windowing_frontend"
+    description: "Clears the system vibrator before attaching new window, to avoid leaks."
+    bug: "393190314"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

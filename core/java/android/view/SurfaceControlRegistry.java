@@ -334,13 +334,17 @@ public class SurfaceControlRegistry {
             if (call == APPLY) {
                 // Log the apply and dump the calls on that transaction
                 Log.e(TAG, msg, new Throwable());
-                for (int i = 0; i < tx.mCalls.size(); i++) {
-                    Log.d(TAG, "        " + tx.mCalls.get(i));
+                if (tx.mCalls != null) {
+                    for (int i = 0; i < tx.mCalls.size(); i++) {
+                        Log.d(TAG, "        " + tx.mCalls.get(i));
+                    }
                 }
             } else if (matchesForCallStackDebugging(sc != null ? sc.getName() : null, call)) {
                 // Otherwise log this call to the transaction if it matches the tracked calls
                 Log.e(TAG, msg, new Throwable());
-                tx.mCalls.add(msg);
+                if (tx.mCalls != null) {
+                    tx.mCalls.add(msg);
+                }
             }
         } else {
             // Log this call if it matches the tracked calls

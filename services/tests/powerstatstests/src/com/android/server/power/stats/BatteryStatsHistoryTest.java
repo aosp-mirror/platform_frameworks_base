@@ -17,6 +17,7 @@
 package com.android.server.power.stats;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -30,18 +31,20 @@ import android.os.BatteryConsumer;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.BatteryStats.HistoryItem;
+import android.os.ConditionVariable;
 import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.telephony.NetworkRegistrationInfo;
-import android.util.AtomicFile;
 import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.BatteryStatsHistoryIterator;
 import com.android.internal.os.MonotonicClock;
@@ -58,6 +61,8 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
@@ -85,6 +90,7 @@ public class BatteryStatsHistoryTest {
     private File mHistoryDir;
     private final MockClock mClock = new MockClock();
     private final MonotonicClock mMonotonicClock = new MonotonicClock(0, mClock);
+    private BatteryHistoryDirectory mDirectory;
     private BatteryStatsHistory mHistory;
     private BatteryStats.HistoryPrinter mHistoryPrinter;
     @Mock
@@ -108,11 +114,30 @@ public class BatteryStatsHistoryTest {
         }
         mHistoryDir.delete();
 
+
+        BatteryHistoryDirectory.Compressor compressor;
+        if (RavenwoodRule.isOnRavenwood()) {
+            compressor = new BatteryHistoryDirectory.Compressor() {
+                @Override
+                public void compress(OutputStream stream, byte[] data) throws IOException {
+                    stream.write(data);
+                }
+
+                @Override
+                public void uncompress(byte[] data, InputStream stream) throws IOException {
+                    readFully(data, stream);
+                }
+            };
+        } else {
+            compressor = BatteryHistoryDirectory.DEFAULT_COMPRESSOR;
+        }
+        mDirectory = new BatteryHistoryDirectory(mHistoryDir, 32768, compressor);
+
         mClock.realtime = 123;
         mClock.currentTime = 1743645660000L;    //  2025-04-03, 2:01:00 AM
 
-        mHistory = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 32768,
-                MAX_HISTORY_BUFFER_SIZE, mStepDetailsCalculator, mClock, mMonotonicClock, mTracer,
+        mHistory = new BatteryStatsHistory(mHistoryBuffer, MAX_HISTORY_BUFFER_SIZE, mDirectory,
+                mStepDetailsCalculator, mClock, mMonotonicClock, mTracer,
                 mEventLogger);
         mHistory.forceRecordAllHistory();
         mHistory.startRecordingHistory(mClock.realtime, mClock.uptime, false);
@@ -210,8 +235,9 @@ public class BatteryStatsHistoryTest {
     }
 
     @Test
-    public void testStartNextFile() throws Exception {
+    public void testStartNextFile() {
         mHistory.forceRecordAllHistory();
+        mDirectory.setFileCompressionEnabled(false);
 
         mClock.realtime = 123;
 
@@ -225,7 +251,7 @@ public class BatteryStatsHistoryTest {
             mClock.realtime = 1000 * i;
             fileList.add(mClock.realtime + ".bh");
 
-            mHistory.startNextFile(mClock.realtime);
+            mHistory.startNextFragment(mClock.realtime);
             createActiveFile(mHistory);
             fillActiveFile(mHistory);
 
@@ -235,8 +261,9 @@ public class BatteryStatsHistoryTest {
 
         // create file 32
         mClock.realtime = 1000 * 32;
-        mHistory.startNextFile(mClock.realtime);
+        mHistory.startNextFragment(mClock.realtime);
         createActiveFile(mHistory);
+        fillActiveFile(mHistory);
         fileList.add("32000.bh");
         fileList.remove(0);
         // verify file 0 is deleted.
@@ -244,21 +271,22 @@ public class BatteryStatsHistoryTest {
         verifyFileNames(mHistory, fileList);
         verifyActiveFile(mHistory, "32000.bh");
 
-        fillActiveFile(mHistory);
-
         // create file 33
         mClock.realtime = 1000 * 33;
-        mHistory.startNextFile(mClock.realtime);
+        mHistory.startNextFragment(mClock.realtime);
         createActiveFile(mHistory);
-        // verify file 1 is deleted
+        fillActiveFile(mHistory);
         fileList.add("33000.bh");
         fileList.remove(0);
+        mHistory.writeHistory();
+
+        // verify file 1 is deleted
         verifyFileDeleted("1000.bh");
         verifyFileNames(mHistory, fileList);
         verifyActiveFile(mHistory, "33000.bh");
 
         // create a new BatteryStatsHistory object, it will pick up existing history files.
-        BatteryStatsHistory history2 = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 32, 1024,
+        BatteryStatsHistory history2 = new BatteryStatsHistory(mHistoryBuffer, 1024, mDirectory,
                 null, mClock, mMonotonicClock, mTracer, mEventLogger);
         // verify constructor can pick up all files from file system.
         verifyFileNames(history2, fileList);
@@ -281,7 +309,7 @@ public class BatteryStatsHistoryTest {
         // create file 1.
         mClock.realtime = 2345678;
 
-        history2.startNextFile(mClock.realtime);
+        history2.startNextFragment(mClock.realtime);
         createActiveFile(history2);
         verifyFileNames(history2, Arrays.asList("1234567.bh", "2345678.bh"));
         verifyActiveFile(history2, "2345678.bh");
@@ -297,10 +325,10 @@ public class BatteryStatsHistoryTest {
         mHistory = spy(mHistory.copy());
 
         doAnswer(invocation -> {
-            AtomicFile file = invocation.getArgument(1);
-            mReadFiles.add(file.getBaseFile().getName());
+            BatteryHistoryDirectory.BatteryHistoryFile file = invocation.getArgument(1);
+            mReadFiles.add(file.atomicFile.getBaseFile().getName());
             return invocation.callRealMethod();
-        }).when(mHistory).readFileToParcel(any(), any());
+        }).when(mHistory).readFragmentToParcel(any(), any());
 
         // Prepare history for iteration
         mHistory.iterate(0, MonotonicClock.UNDEFINED);
@@ -339,10 +367,10 @@ public class BatteryStatsHistoryTest {
         mHistory = spy(mHistory.copy());
 
         doAnswer(invocation -> {
-            AtomicFile file = invocation.getArgument(1);
-            mReadFiles.add(file.getBaseFile().getName());
+            BatteryHistoryDirectory.BatteryHistoryFile file = invocation.getArgument(1);
+            mReadFiles.add(file.atomicFile.getBaseFile().getName());
             return invocation.callRealMethod();
-        }).when(mHistory).readFileToParcel(any(), any());
+        }).when(mHistory).readFragmentToParcel(any(), any());
 
         // Prepare history for iteration
         mHistory.iterate(1000, 3000);
@@ -371,14 +399,14 @@ public class BatteryStatsHistoryTest {
         mHistory.recordEvent(mClock.realtime, mClock.uptime,
                 BatteryStats.HistoryItem.EVENT_JOB_START, "job", 42);
 
-        mHistory.startNextFile(mClock.realtime);       // 1000.bh
+        mHistory.startNextFragment(mClock.realtime);       // 1000.bh
 
         mClock.realtime = 2000;
         mClock.uptime = 2000;
         mHistory.recordEvent(mClock.realtime, mClock.uptime,
                 BatteryStats.HistoryItem.EVENT_JOB_FINISH, "job", 42);
 
-        mHistory.startNextFile(mClock.realtime);       // 2000.bh
+        mHistory.startNextFragment(mClock.realtime);       // 2000.bh
 
         mClock.realtime = 3000;
         mClock.uptime = 3000;
@@ -386,30 +414,37 @@ public class BatteryStatsHistoryTest {
                 HistoryItem.EVENT_ALARM, "alarm", 42);
 
         // Flush accumulated history to disk
-        mHistory.startNextFile(mClock.realtime);
+        mHistory.startNextFragment(mClock.realtime);
     }
 
     private void verifyActiveFile(BatteryStatsHistory history, String file) {
         final File expectedFile = new File(mHistoryDir, file);
-        assertEquals(expectedFile.getPath(), history.getActiveFile().getBaseFile().getPath());
+        assertEquals(expectedFile.getPath(),
+                ((BatteryHistoryDirectory.BatteryHistoryFile) history.getActiveFragment())
+                        .atomicFile.getBaseFile().getPath());
         assertTrue(expectedFile.exists());
     }
 
     private void verifyFileNames(BatteryStatsHistory history, List<String> fileList) {
-        assertEquals(fileList.size(), history.getFilesNames().size());
+        awaitCompletion();
+        List<String> fileNames =
+                ((BatteryHistoryDirectory) history.getBatteryHistoryStore()).getFileNames();
+        assertThat(fileNames).isEqualTo(fileList);
         for (int i = 0; i < fileList.size(); i++) {
-            assertEquals(fileList.get(i), history.getFilesNames().get(i));
             final File expectedFile = new File(mHistoryDir, fileList.get(i));
-            assertTrue(expectedFile.exists());
+            assertWithMessage("File does not exist " + expectedFile)
+                    .that(expectedFile.exists()).isTrue();
         }
     }
 
     private void verifyFileDeleted(String file) {
+        awaitCompletion();
         assertFalse(new File(mHistoryDir, file).exists());
     }
 
     private void createActiveFile(BatteryStatsHistory history) {
-        final File file = history.getActiveFile().getBaseFile();
+        File file = ((BatteryHistoryDirectory.BatteryHistoryFile) history.getActiveFragment())
+                .atomicFile.getBaseFile();
         if (file.exists()) {
             return;
         }
@@ -561,7 +596,7 @@ public class BatteryStatsHistoryTest {
     public void largeTagPool() {
         // Keep the preserved part of history short - we only need to capture the very tail of
         // history.
-        mHistory = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 1, 6000,
+        mHistory = new BatteryStatsHistory(mHistoryBuffer, 6000, mDirectory,
                 mStepDetailsCalculator, mClock, mMonotonicClock, mTracer, mEventLogger);
 
         mHistory.forceRecordAllHistory();
@@ -699,7 +734,7 @@ public class BatteryStatsHistoryTest {
         assertThat(size).isGreaterThan(lastHistorySize);
         lastHistorySize = size;
 
-        mHistory.startNextFile(mClock.realtime);
+        mHistory.startNextFragment(mClock.realtime);
 
         size = mHistory.getMonotonicHistorySize();
         assertThat(size).isEqualTo(lastHistorySize);
@@ -713,7 +748,7 @@ public class BatteryStatsHistoryTest {
         assertThat(size).isGreaterThan(lastHistorySize);
         lastHistorySize = size;
 
-        mHistory.startNextFile(mClock.realtime);
+        mHistory.startNextFragment(mClock.realtime);
 
         mClock.realtime = 3000;
         mClock.uptime = 3000;
@@ -787,5 +822,59 @@ public class BatteryStatsHistoryTest {
         assertThat(parcel.readString()).isEqualTo("end");
 
         parcel.recycle();
+    }
+
+    @Test
+    public void compressHistoryFiles() {
+        // The first history file will be uncompressed
+        mDirectory.setFileCompressionEnabled(false);
+
+        mClock.realtime = 1000;
+        mClock.uptime = 1000;
+        mHistory.recordEvent(mClock.realtime, mClock.uptime,
+                BatteryStats.HistoryItem.EVENT_JOB_START, "job", 42);
+
+        mHistory.startNextFragment(mClock.realtime);
+
+        // The second file will be compressed
+        mDirectory.setFileCompressionEnabled(true);
+
+        mClock.realtime = 2000;
+        mClock.uptime = 2000;
+        mHistory.recordEvent(mClock.realtime, mClock.uptime,
+                BatteryStats.HistoryItem.EVENT_JOB_FINISH, "job", 42);
+
+        mHistory.startNextFragment(mClock.realtime);
+
+        awaitCompletion();
+
+        assertThat(historySummary(mHistory)).isEqualTo(List.of("+42:job", "-42:job"));
+
+        Parcel parcel = Parcel.obtain();
+        mHistory.writeToBatteryUsageStatsParcel(parcel, Long.MAX_VALUE);
+        parcel.setDataPosition(0);
+
+        BatteryStatsHistory actual = BatteryStatsHistory.createFromBatteryUsageStatsParcel(parcel);
+        assertThat(historySummary(actual)).isEqualTo(List.of("+42:job", "-42:job"));
+    }
+
+    private List<String> historySummary(BatteryStatsHistory history) {
+        List<String> events = new ArrayList<>();
+        try (BatteryStatsHistoryIterator it = history.iterate(0, Long.MAX_VALUE)) {
+            HistoryItem item;
+            while ((item = it.next()) != null) {
+                if ((item.eventCode & HistoryItem.EVENT_TYPE_MASK) == HistoryItem.EVENT_JOB) {
+                    events.add(((item.eventCode & HistoryItem.EVENT_FLAG_START) != 0 ? "+" : "-")
+                            + item.eventTag.uid + ":" + item.eventTag.string);
+                }
+            }
+        }
+        return events;
+    }
+
+    private static void awaitCompletion() {
+        ConditionVariable done = new ConditionVariable();
+        BackgroundThread.getHandler().post(done::open);
+        done.block();
     }
 }

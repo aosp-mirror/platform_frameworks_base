@@ -137,6 +137,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.pm.RoSystemFeatures;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
@@ -438,9 +439,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         LockscreenCredential credential =
                 LockscreenCredential.createUnifiedProfilePassword(newPassword);
-        Arrays.fill(newPasswordChars, '\u0000');
-        Arrays.fill(newPassword, (byte) 0);
-        Arrays.fill(randomLockSeed, (byte) 0);
+        LockPatternUtils.zeroize(newPasswordChars);
+        LockPatternUtils.zeroize(newPassword);
+        LockPatternUtils.zeroize(randomLockSeed);
         return credential;
     }
 
@@ -451,6 +452,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      * @param profileUserId  profile user Id
      * @param profileUserPassword  profile original password (when it has separated lock).
      */
+    @GuardedBy("mSpManager")
     private void tieProfileLockIfNecessary(int profileUserId,
             LockscreenCredential profileUserPassword) {
         // Only for profiles that shares credential with parent
@@ -909,14 +911,8 @@ public class LockSettingsService extends ILockSettings.Stub {
                 // Hide notification first, as tie profile lock takes time
                 hideEncryptionNotification(new UserHandle(userId));
 
-                if (android.app.admin.flags.Flags.fixRaceConditionInTieProfileLock()) {
-                    synchronized (mSpManager) {
-                        tieProfileLockIfNecessary(userId, LockscreenCredential.createNone());
-                    }
-                } else {
-                    if (isCredentialSharableWithParent(userId)) {
-                        tieProfileLockIfNecessary(userId, LockscreenCredential.createNone());
-                    }
+                synchronized (mSpManager) {
+                    tieProfileLockIfNecessary(userId, LockscreenCredential.createNone());
                 }
             }
         });
@@ -1330,7 +1326,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.MANAGE_WEAK_ESCROW_TOKEN,
                 "Requires MANAGE_WEAK_ESCROW_TOKEN permission.");
-        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+        if (!RoSystemFeatures.hasFeatureAutomotive(mContext)) {
             throw new IllegalArgumentException(
                     "Weak escrow token are only for automotive devices.");
         }
@@ -1380,11 +1376,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 mStorage.removeChildProfileLock(userId);
                 removeKeystoreProfileKey(userId);
             } else {
-                if (android.app.admin.flags.Flags.fixRaceConditionInTieProfileLock()) {
-                    synchronized (mSpManager) {
-                        tieProfileLockIfNecessary(userId, profileUserPassword);
-                    }
-                } else {
+                synchronized (mSpManager) {
                     tieProfileLockIfNecessary(userId, profileUserPassword);
                 }
             }
@@ -1546,7 +1538,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                         + userId);
             }
         } finally {
-            Arrays.fill(password, (byte) 0);
+            LockPatternUtils.zeroize(password);
         }
     }
 
@@ -1579,7 +1571,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         decryptionResult = cipher.doFinal(encryptedPassword);
         LockscreenCredential credential = LockscreenCredential.createUnifiedProfilePassword(
                 decryptionResult);
-        Arrays.fill(decryptionResult, (byte) 0);
+        LockPatternUtils.zeroize(decryptionResult);
         try {
             long parentSid = getGateKeeperService().getSecureUserId(
                     mUserManager.getProfileParent(userId).id);
@@ -2272,7 +2264,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         } catch (RemoteException e) {
             Slogf.wtf(TAG, e, "Failed to unlock CE storage for %s user %d", userType, userId);
         } finally {
-            Arrays.fill(secret, (byte) 0);
+            LockPatternUtils.zeroize(secret);
         }
     }
 
@@ -3622,7 +3614,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         // Escrow tokens are enabled on automotive builds.
-        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+        if (RoSystemFeatures.hasFeatureAutomotive(mContext)) {
             return;
         }
 

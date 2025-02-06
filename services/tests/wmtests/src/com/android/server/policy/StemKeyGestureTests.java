@@ -35,6 +35,7 @@ import android.app.ActivityTaskManager.RootTaskInfo;
 import android.content.ComponentName;
 import android.hardware.input.KeyGestureEvent;
 import android.os.RemoteException;
+import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import android.view.Display;
 
@@ -47,6 +48,7 @@ import org.junit.Test;
  * Build/Install/Run:
  * atest WmTests:StemKeyGestureTests
  */
+@Presubmit
 public class StemKeyGestureTests extends ShortcutKeyTestBase {
 
     private static final String TEST_TARGET_ACTIVITY = "com.android.server.policy/.TestActivity";

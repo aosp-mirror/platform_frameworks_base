@@ -28,7 +28,6 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -51,7 +50,6 @@ constructor(
      * Whether the lockscreen should be showing when the device starts up for the first time. If not
      * then we'll seed the repository with a transition from OFF -> GONE.
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val showLockscreenOnBoot: Flow<Boolean> by lazy {
         deviceProvisioningInteractor.isDeviceProvisioned.map { provisioned ->
             (provisioned || deviceEntryInteractor.isAuthenticationRequired()) &&

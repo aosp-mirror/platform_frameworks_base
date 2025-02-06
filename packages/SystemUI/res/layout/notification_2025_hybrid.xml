@@ -29,6 +29,7 @@
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
+        android:textSize="@*android:dimen/notification_2025_title_text_size"
         android:paddingEnd="4dp"
     />
     <TextView

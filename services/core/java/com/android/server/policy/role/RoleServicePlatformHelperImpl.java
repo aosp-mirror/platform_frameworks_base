@@ -28,7 +28,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
-import android.content.pm.Signature;
 import android.os.Environment;
 import android.permission.flags.Flags;
 import android.provider.Settings;
@@ -312,16 +311,9 @@ public class RoleServicePlatformHelperImpl implements RoleServicePlatformHelper 
         DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(mdos));
         packageManagerInternal.forEachInstalledPackage(pkg -> {
             try {
-                dataOutputStream.writeUTF(pkg.getPackageName());
-                dataOutputStream.writeLong(pkg.getLongVersionCode());
+                dataOutputStream.writeUTF(pkg.getPath());
                 dataOutputStream.writeInt(packageManagerInternal.getApplicationEnabledState(
                         pkg.getPackageName(), userId));
-
-                final Set<String> requestedPermissions = pkg.getRequestedPermissions();
-                dataOutputStream.writeInt(requestedPermissions.size());
-                for (String permissionName : requestedPermissions) {
-                    dataOutputStream.writeUTF(permissionName);
-                }
 
                 final ArraySet<String> enabledComponents =
                         packageManagerInternal.getEnabledComponents(pkg.getPackageName(), userId);
@@ -336,10 +328,6 @@ public class RoleServicePlatformHelperImpl implements RoleServicePlatformHelper 
                 final int disabledComponentsSize = CollectionUtils.size(disabledComponents);
                 for (int i = 0; i < disabledComponentsSize; i++) {
                     dataOutputStream.writeUTF(disabledComponents.valueAt(i));
-                }
-
-                for (final Signature signature : pkg.getSigningDetails().getSignatures()) {
-                    dataOutputStream.write(signature.toByteArray());
                 }
             } catch (IOException e) {
                 // Never happens for MessageDigestOutputStream and DataOutputStream.

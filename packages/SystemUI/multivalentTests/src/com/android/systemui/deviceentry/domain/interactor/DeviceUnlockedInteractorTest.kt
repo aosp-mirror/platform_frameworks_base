@@ -49,7 +49,6 @@ import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.user.domain.interactor.selectedUserInteractor
 import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -59,7 +58,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class DeviceUnlockedInteractorTest : SysuiTestCase() {
@@ -367,8 +365,6 @@ class DeviceUnlockedInteractorTest : SysuiTestCase() {
                     DeviceEntryRestrictionReason.DeviceNotUnlockedSinceReboot,
                 LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST to
                     DeviceEntryRestrictionReason.AdaptiveAuthRequest,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT to
-                    DeviceEntryRestrictionReason.BouncerLockedOut,
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT to
                     DeviceEntryRestrictionReason.SecurityTimeout,
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN to
@@ -403,8 +399,6 @@ class DeviceUnlockedInteractorTest : SysuiTestCase() {
                     DeviceEntryRestrictionReason.DeviceNotUnlockedSinceReboot,
                 LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST to
                     DeviceEntryRestrictionReason.AdaptiveAuthRequest,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT to
-                    DeviceEntryRestrictionReason.BouncerLockedOut,
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT to
                     DeviceEntryRestrictionReason.SecurityTimeout,
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN to
@@ -440,8 +434,6 @@ class DeviceUnlockedInteractorTest : SysuiTestCase() {
                     DeviceEntryRestrictionReason.DeviceNotUnlockedSinceReboot,
                 LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST to
                     DeviceEntryRestrictionReason.AdaptiveAuthRequest,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT to
-                    DeviceEntryRestrictionReason.BouncerLockedOut,
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT to
                     DeviceEntryRestrictionReason.SecurityTimeout,
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN to
@@ -576,7 +568,7 @@ class DeviceUnlockedInteractorTest : SysuiTestCase() {
             unlockDevice()
             assertThat(isUnlocked).isTrue()
 
-            underTest.lockNow()
+            underTest.lockNow("test")
             runCurrent()
 
             assertThat(isUnlocked).isFalse()
@@ -598,6 +590,62 @@ class DeviceUnlockedInteractorTest : SysuiTestCase() {
             kosmos.powerInteractor.setAsleepForTest(
                 sleepReason = PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON
             )
+            runCurrent()
+
+            assertThat(deviceUnlockStatus?.isUnlocked).isFalse()
+        }
+
+    @Test
+    fun deviceUnlockStatus_staysUnlocked_whenDeviceGoesToSleep_whileIsTrusted() =
+        testScope.runTest {
+            setLockAfterScreenTimeout(5000)
+            kosmos.fakeAuthenticationRepository.powerButtonInstantlyLocks = false
+            val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
+
+            kosmos.fakeTrustRepository.setCurrentUserTrusted(true)
+
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
+
+            kosmos.powerInteractor.setAsleepForTest(
+                sleepReason = PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON
+            )
+            runCurrent()
+
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
+        }
+
+    @Test
+    fun deviceUnlockStatus_staysUnlocked_whileIsTrusted() =
+        testScope.runTest {
+            val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
+            kosmos.fakeTrustRepository.setCurrentUserTrusted(true)
+            unlockDevice()
+
+            kosmos.powerInteractor.setAsleepForTest(
+                sleepReason = PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON
+            )
+            runCurrent()
+
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
+        }
+
+    @Test
+    fun deviceUnlockStatus_becomesLocked_whenNoLongerTrusted_whileAsleep() =
+        testScope.runTest {
+            val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
+            kosmos.fakeTrustRepository.setCurrentUserTrusted(true)
+            unlockDevice()
+            kosmos.powerInteractor.setAsleepForTest(
+                sleepReason = PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON
+            )
+            runCurrent()
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
+
+            kosmos.fakeTrustRepository.setCurrentUserTrusted(false)
             runCurrent()
 
             assertThat(deviceUnlockStatus?.isUnlocked).isFalse()

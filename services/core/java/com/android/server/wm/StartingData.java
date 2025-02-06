@@ -31,11 +31,18 @@ public abstract class StartingData {
     static final int AFTER_TRANSACTION_REMOVE_DIRECTLY = 1;
     /** Do copy splash screen to client after transaction done. */
     static final int AFTER_TRANSACTION_COPY_TO_CLIENT = 2;
+    /**
+     * Remove the starting window after transition finish.
+     * Used when activity doesn't request show when locked, so the app window should never show to
+     * the user if device is locked.
+     **/
+    static final int AFTER_TRANSITION_FINISH = 3;
 
     @IntDef(prefix = { "AFTER_TRANSACTION" }, value = {
             AFTER_TRANSACTION_IDLE,
             AFTER_TRANSACTION_REMOVE_DIRECTLY,
             AFTER_TRANSACTION_COPY_TO_CLIENT,
+            AFTER_TRANSITION_FINISH,
     })
     @interface AfterTransaction {}
 

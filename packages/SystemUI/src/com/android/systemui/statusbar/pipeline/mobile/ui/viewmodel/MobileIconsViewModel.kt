@@ -29,10 +29,10 @@ import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger
 import com.android.systemui.statusbar.pipeline.mobile.ui.VerboseMobileViewLogger
 import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMobileView
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.SharingStarted
@@ -48,7 +48,6 @@ import kotlinx.coroutines.flow.stateIn
  * of [MobileIconViewModel]s which describe the individual icons and can be bound to
  * [ModernStatusBarMobileView].
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class MobileIconsViewModel
 @Inject
@@ -62,7 +61,7 @@ constructor(
     @Background private val scope: CoroutineScope,
 ) {
     @VisibleForTesting
-    val reuseCache = mutableMapOf<Int, Pair<MobileIconViewModel, CoroutineScope>>()
+    val reuseCache = ConcurrentHashMap<Int, Pair<MobileIconViewModel, CoroutineScope>>()
 
     val subscriptionIdsFlow: StateFlow<List<Int>> =
         interactor.filteredSubscriptions

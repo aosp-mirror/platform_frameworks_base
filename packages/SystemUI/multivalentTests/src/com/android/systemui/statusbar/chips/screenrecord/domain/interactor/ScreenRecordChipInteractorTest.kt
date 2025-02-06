@@ -34,7 +34,6 @@ import com.android.systemui.statusbar.chips.screenrecord.domain.model.ScreenReco
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -42,7 +41,6 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class ScreenRecordChipInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val testScope = kosmos.testScope

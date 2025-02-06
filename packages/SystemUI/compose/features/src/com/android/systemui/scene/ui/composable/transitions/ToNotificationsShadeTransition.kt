@@ -16,39 +16,32 @@
 
 package com.android.systemui.scene.ui.composable.transitions
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.TransitionBuilder
+import com.android.compose.animation.scene.reveal.ContainerRevealHaptics
+import com.android.compose.animation.scene.reveal.verticalContainerReveal
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockElementKeys
-import com.android.systemui.notifications.ui.composable.Notifications
 import com.android.systemui.notifications.ui.composable.NotificationsShade
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.shade.ui.composable.OverlayShade
-import com.android.systemui.shade.ui.composable.Shade
 import kotlin.time.Duration.Companion.milliseconds
 
-fun TransitionBuilder.toNotificationsShadeTransition(durationScale: Double = 1.0) {
+fun TransitionBuilder.toNotificationsShadeTransition(
+    durationScale: Double = 1.0,
+    revealHaptics: ContainerRevealHaptics,
+) {
     spec = tween(durationMillis = (DefaultDuration * durationScale).inWholeMilliseconds.toInt())
-    swipeSpec =
-        spring(
-            stiffness = Spring.StiffnessMediumLow,
-            visibilityThreshold = Shade.Dimensions.ScrimVisibilityThreshold,
-        )
+
     // Ensure the clock isn't clipped by the shade outline during the transition from lockscreen.
     sharedElement(
         ClockElementKeys.smallClockElementKey,
         elevateInContent = Overlays.NotificationsShade,
     )
-    scaleSize(OverlayShade.Elements.Panel, height = 0f)
-    // Avoid translating the status bar with the shade panel.
-    translate(NotificationsShade.Elements.StatusBar)
-    // Slide in the shade panel from the top edge.
-    translate(OverlayShade.Elements.Panel, Edge.Top)
+
+    verticalContainerReveal(NotificationsShade.Elements.Panel, revealHaptics)
 
     fractionRange(end = .5f) { fade(OverlayShade.Elements.Scrim) }
-    fractionRange(start = .5f) { fade(Notifications.Elements.NotificationScrim) }
+    fractionRange(start = .5f) { fade(NotificationsShade.Elements.StatusBar) }
 }
 
 private val DefaultDuration = 300.milliseconds

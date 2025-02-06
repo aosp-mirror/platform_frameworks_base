@@ -38,7 +38,6 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.wifitrackerlib.WifiPickerTracker
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -52,7 +51,6 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @SmallTest
 @RunWith(AndroidJUnit4::class)

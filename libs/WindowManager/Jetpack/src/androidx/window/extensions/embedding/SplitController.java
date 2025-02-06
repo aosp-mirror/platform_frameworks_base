@@ -18,6 +18,7 @@ package androidx.window.extensions.embedding;
 
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -73,6 +74,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.OperationCanceledException;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
@@ -286,7 +288,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             mSplitRules.clear();
             mSplitRules.addAll(rules);
 
-            if (!Flags.aeBackStackRestore() || !mPresenter.isWaitingToRebuildTaskContainers()) {
+            if (!mPresenter.isWaitingToRebuildTaskContainers()) {
                 return;
             }
 
@@ -1106,7 +1108,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     void onTaskFragmentError(@NonNull WindowContainerTransaction wct,
             @Nullable IBinder errorCallbackToken, @Nullable TaskFragmentInfo taskFragmentInfo,
             @TaskFragmentOperation.OperationType int opType, @NonNull Throwable exception) {
-        Log.e(TAG, "onTaskFragmentError=" + exception.getMessage());
+        if (exception instanceof OperationCanceledException) {
+            // This is a non-fatal error and the operation just canceled.
+            Log.i(TAG, "operation canceled:" + exception.getMessage());
+        } else {
+            Log.e(TAG, "onTaskFragmentError=" + exception.getMessage(), exception);
+        }
         switch (opType) {
             case OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT:
             case OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT: {
@@ -2886,10 +2893,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     @Override
     public void setAutoSaveEmbeddingState(boolean saveEmbeddingState) {
-        if (!Flags.aeBackStackRestore()) {
-            return;
-        }
-
         synchronized (mLock) {
             mPresenter.setAutoSaveEmbeddingState(saveEmbeddingState);
         }
@@ -3148,15 +3151,22 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 final WindowContainerTransaction wct = transactionRecord.getTransaction();
                 final TaskFragmentContainer launchedInTaskFragment;
                 if (launchingActivity != null) {
-                    final int taskId = getTaskId(launchingActivity);
                     final String overlayTag = options.getString(KEY_OVERLAY_TAG);
                     if (Flags.activityEmbeddingOverlayPresentationFlag()
                             && overlayTag != null) {
                         launchedInTaskFragment = createOrUpdateOverlayTaskFragmentIfNeeded(wct,
                                 options, intent, launchingActivity);
                     } else {
-                        launchedInTaskFragment = resolveStartActivityIntent(wct, taskId, intent,
-                                launchingActivity);
+                        final int taskId = getTaskId(launchingActivity);
+                        if (taskId != INVALID_TASK_ID) {
+                            launchedInTaskFragment = resolveStartActivityIntent(wct, taskId, intent,
+                                    launchingActivity);
+                        } else {
+                            // We cannot get a valid task id of launchingActivity so we fall back to
+                            // treat it as a non-Activity context.
+                            launchedInTaskFragment =
+                                    resolveStartActivityIntentFromNonActivityContext(wct, intent);
+                        }
                     }
                 } else {
                     launchedInTaskFragment = resolveStartActivityIntentFromNonActivityContext(wct,

@@ -876,7 +876,28 @@ final class CompatConfig {
     }
 
     @Nullable
+    @android.ravenwood.annotation.RavenwoodReplace(
+            blockedBy = PackageManager.class,
+            reason = "PackageManager.getApplicationInfo() isn't supported yet")
     private Long getVersionCodeOrNull(String packageName) {
+        return getVersionCodeOrNullImpl(packageName);
+    }
+
+    @SuppressWarnings("unused")
+    @Nullable
+    private Long getVersionCodeOrNull$ravenwood(String packageName) {
+        try {
+            // It's possible that the context is mocked, try the real method first
+            return getVersionCodeOrNullImpl(packageName);
+        } catch (Throwable e) {
+            // For now, Ravenwood doesn't support the concept of "app updates", so let's
+            // just use a fixed version code for all packages.
+            return 1L;
+        }
+    }
+
+    @Nullable
+    private Long getVersionCodeOrNullImpl(String packageName) {
         try {
             ApplicationInfo applicationInfo = mContext.getPackageManager().getApplicationInfo(
                     packageName, MATCH_ANY_USER);

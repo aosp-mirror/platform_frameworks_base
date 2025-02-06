@@ -46,7 +46,6 @@ import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -56,7 +55,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.mockito.kotlin.whenever
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class HomeControlsRemoteServiceBinderTest : SysuiTestCase() {

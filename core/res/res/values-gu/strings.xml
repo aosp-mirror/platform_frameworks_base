@@ -67,10 +67,10 @@
     <string name="RuacMmi" msgid="1876047385848991110">"અનિચ્છિત પજવણીકારક કૉલ્સનો અસ્વીકાર"</string>
     <string name="CndMmi" msgid="185136449405618437">"કૉલિંગ નંબર વિતરણ"</string>
     <string name="DndMmi" msgid="8797375819689129800">"ખલેલ પાડશો નહીં"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"કૉલર ID પ્રતિબંધિત પર ડિફોલ્ટ છે. આગલો કૉલ: પ્રતિબંધિત છે"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"કૉલર ID પ્રતિબંધિત પર ડિફોલ્ટ છે. આગલો કૉલ: પ્રતિબંધિત નહીં"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"કૉલર ID પ્રતિબંધિત નહીં પર ડિફોલ્ટ છે. આગલો કૉલ: પ્રતિબંધિત"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"કૉલર ID પ્રતિબંધિત નહીં પર ડિફોલ્ટ છે. આગલો કૉલ: પ્રતિબંધિત નહીં"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"કૉલર ID ડિફૉલ્ટ તરીકે પ્રતિબંધિત છે. આગળનો કૉલ: પ્રતિબંધિત છે"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"કૉલર ID ડિફૉલ્ટ તરીકે પ્રતિબંધિત છે. આગળનો કૉલ: પ્રતિબંધિત નથી"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"કૉલર ID ડિફૉલ્ટ તરીકે પ્રતિબંધિત નથી. આગળનો કૉલ: પ્રતિબંધિત છે"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"કૉલર ID ડિફૉલ્ટ તરીકે પ્રતિબંધિત નથી. આગળનો કૉલ: પ્રતિબંધિત નથી"</string>
     <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"આ ઍપ 16 KB સુસંગત નથી. APK સંરેખણની તપાસ નિષ્ફળ રહી. આ ઍપ પેજના કદ સાથે સુસંગત મોડનો ઉપયોગ કરીને ચાલશે. શ્રેષ્ઠ સુસંગતતા માટે, કૃપા કરીને 16 KB સપોર્ટવાળી ઍપ્લિકેશન ફરીથી સંકલિત કરો. વધુ માહિતી માટે, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; જુઓ"</string>
     <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"આ ઍપ 16 KB સુસંગત નથી. ELF સંરેખણની તપાસ નિષ્ફળ રહી. આ ઍપ પેજના કદ સાથે સુસંગત મોડનો ઉપયોગ કરીને ચાલશે. શ્રેષ્ઠ સુસંગતતા માટે, કૃપા કરીને 16 KB સપોર્ટવાળી ઍપ્લિકેશન ફરીથી સંકલિત કરો. વધુ માહિતી માટે, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; જુઓ"</string>
     <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"આ ઍપ 16 KB સુસંગત નથી. APK અને ELF સંરેખણની તપાસ નિષ્ફળ રહી. આ ઍપ પેજના કદ સાથે સુસંગત મોડનો ઉપયોગ કરીને ચાલશે. શ્રેષ્ઠ સુસંગતતા માટે, કૃપા કરીને 16 KB સપોર્ટવાળી ઍપ્લિકેશન ફરીથી સંકલિત કરો. વધુ માહિતી માટે, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; જુઓ"</string>
@@ -87,8 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"મોબાઇલ નેટવર્ક સુધી પહોંચી શકાતું નથી"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"પસંદગીનું નેટવર્ક બદલવાનો પ્રયાસ કરો. બદલવા માટે ટૅપ કરો."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"કટોકટીની કૉલિંગ સેવા અનુપલબ્ધ"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"ફરી બતાવશો નહીં"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"ઇમર્જન્સી કૉલ માટે મોબાઇલ નેટવર્કની આવશ્યકતા છે"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"અલર્ટ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"કૉલ ફૉર્વર્ડિંગ"</string>
@@ -303,6 +302,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"નેટવર્ક ચેતવણીઓ"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"નેટવર્ક ઉપલબ્ધ છે"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN સ્થિતિ"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"સમય અને સમય ઝોન"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"તમારા IT વ્યવસ્થાપક તરફથી અલર્ટ"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"અલર્ટ"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"રિટેલ ડેમો"</string>
@@ -310,6 +310,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ઍપ ચાલી રહ્યું છે"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"ઍપ બૅટરીનો વપરાશ કરી રહ્યાં છે"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"મોટું કરવાની સુવિધા"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"સાંભળવામાં મદદ આપતા ડિવાઇસ"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"ઍક્સેસિબિલિટી વપરાશ"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"ડિસ્પ્લે"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> બૅટરીનો ઉપયોગ કરી રહ્યું છે"</string>
@@ -1038,12 +1039,12 @@
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"તમે <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે અનલૉક પૅટર્ન દોરી છે. વધુ <xliff:g id="NUMBER_1">%2$d</xliff:g> વખત અસફળ પ્રયાસ પછી, તમને તમારા Google સાઇન ઇનનો ઉપયોગ કરીને તમારા ટૅબ્લેટને અનલૉક કરવા માટે કહેવામાં આવશે.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> સેકન્ડમાં ફરી પ્રયાસ કરો."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"તમે <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે અનલૉક પૅટર્ન દોરી છે. વધુ <xliff:g id="NUMBER_1">%2$d</xliff:g> વખત અસફળ પ્રયાસ પછી, તમને તમારા Google સાઇન ઇનનો ઉપયોગ કરીને તમારા Android TV ડિવાઇસને અનલૉક કરવા માટે કહેવામાં આવશે.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> સેકન્ડમાં ફરી પ્રયાસ કરો."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"તમે <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે અનલૉક પૅટર્ન દોરી છે. વધુ <xliff:g id="NUMBER_1">%2$d</xliff:g> વખત અસફળ પ્રયાસ પછી, તમને તમારા Google સાઇન ઇનનો ઉપયોગ કરીને તમારા ફોનને અનલૉક કરવા માટે કહેવામાં આવશે.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> સેકન્ડમાં ફરી પ્રયાસ કરો."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"તમે ટેબ્લેટને અનલૉક કરવા માટે <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે પ્રયાસ કર્યો. <xliff:g id="NUMBER_1">%2$d</xliff:g> વધુ અસફળ પ્રયાસ પછી, ટેબ્લેટને ફેક્ટરી ડિફોલ્ટ પર ફરીથી સેટ કરવામાં આવશે અને તેનો તમામ ડેટા કાઢી નાખવામાં આવશે."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"તમે ટૅબ્લેટને અનલૉક કરવા માટે <xliff:g id="NUMBER_0">%1$d</xliff:g> વાર ખોટી રીતે પ્રયાસ કર્યો. <xliff:g id="NUMBER_1">%2$d</xliff:g> વધુ અસફળ પ્રયાસ પછી, ટૅબ્લેટને ફેક્ટરી ડિફૉલ્ટ પર રીસેટ કરવામાં આવશે અને તેનો તમામ ડેટા ગુમાવવામાં આવશે."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"તમે તમારા Android TV ડિવાઇસને <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે અનલૉક કરવાનો પ્રયાસ કર્યો છે. વધુ <xliff:g id="NUMBER_1">%2$d</xliff:g> અસફળ પ્રયાસ પછી, તમારા Android TV ડિવાઇસને ફેક્ટરી ડિફૉલ્ટ પર રીસેટ કરવામાં આવશે અને બધો વપરાશકર્તા ડેટા ગુમ થઈ જશે."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"તમે ફોનને અનલૉક કરવા માટે <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે પ્રયાસ કર્યો. <xliff:g id="NUMBER_1">%2$d</xliff:g> વધુ અસફળ પ્રયાસો પછી, ફોનને ફેક્ટરી ડિફોલ્ટ પર ફરીથી સેટ કરવામાં આવશે અને તેનો તમામ ડેટા કાઢી નાખવામાં આવશે."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"તમે <xliff:g id="NUMBER">%d</xliff:g> વખત ખોટી રીતે ટેબ્લેટને અનલૉક કરવાનો પ્રયાસ કર્યો. ટેબ્લેટ હવે ફેક્ટરી ડિફોલ્ટ પર ફરીથી સેટ કરવામાં આવશે."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"તમે ફોનને અનલૉક કરવા માટે <xliff:g id="NUMBER_0">%1$d</xliff:g> વાર ખોટી રીતે પ્રયાસ કર્યો. <xliff:g id="NUMBER_1">%2$d</xliff:g> વધુ અસફળ પ્રયાસો પછી, ફોનને ફેક્ટરી ડિફૉલ્ટ પર રીસેટ કરવામાં આવશે અને તેનો તમામ ડેટા ગુમાવવામાં આવશે."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"તમે <xliff:g id="NUMBER">%d</xliff:g> વાર ખોટી રીતે ટૅબ્લેટને અનલૉક કરવાનો પ્રયાસ કર્યો. ટૅબ્લેટ હવે ફેક્ટરી ડિફૉલ્ટ પર રીસેટ કરવામાં આવશે."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"તમે તમારા Android TV ડિવાઇસને <xliff:g id="NUMBER">%d</xliff:g> વખત ખોટી રીતે અનલૉક કરવાનો પ્રયાસ કર્યો છે. તમારા Android TV ડિવાઇસને હવે ફેક્ટરી ડિફૉલ્ટ પર રીસેટ કરવામાં આવશે."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"તમે <xliff:g id="NUMBER">%d</xliff:g> વખત ખોટી રીતે ફોનને અનલૉક કરવાનો પ્રયાસ કર્યો. ફોન હવે ફેક્ટરી ડિફોલ્ટ પર ફરીથી સેટ કરવામાં આવશે."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"તમે <xliff:g id="NUMBER">%d</xliff:g> વાર ખોટી રીતે ફોનને અનલૉક કરવાનો પ્રયાસ કર્યો. ફોન હવે ફેક્ટરી ડિફૉલ્ટ પર રીસેટ કરવામાં આવશે."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"<xliff:g id="NUMBER">%d</xliff:g> સેકંડમાં ફરી પ્રયાસ કરો."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"પૅટર્ન ભૂલી ગયા છો?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"એકાઉન્ટ અનલૉક કરો"</string>
@@ -1264,7 +1265,7 @@
     <string name="whichImageCaptureApplication" msgid="2737413019463215284">"આની સાથે છબી કૅપ્ચર કરો"</string>
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"%1$s સાથે છબી કૅપ્ચર કરો"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"છબી કૅપ્ચર કરો"</string>
-    <string name="alwaysUse" msgid="3153558199076112903">"આ ક્રિયા માટે ડિફોલ્ટ તરીકે ઉપયોગમાં લો."</string>
+    <string name="alwaysUse" msgid="3153558199076112903">"આ ઍક્શન માટે ડિફૉલ્ટ તરીકેનો ઉપયોગ કરો."</string>
     <string name="use_a_different_app" msgid="4987790276170972776">"અલગ એપ્લિકેશનનો ઉપયોગ કરો"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"સિસ્ટમ સેટિંગ &gt; ઍપ &gt; ડાઉનલોડ કરેલામાં ડિફૉલ્ટ સાફ કરો."</string>
     <string name="chooseActivity" msgid="8563390197659779956">"એક ક્રિયા પસંદ કરો"</string>
@@ -1350,7 +1351,7 @@
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"કૉલ વૉલ્યૂમ"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"મીડિયા વૉલ્યૂમ"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"સૂચના વૉલ્યૂમ"</string>
-    <string name="ringtone_default" msgid="9118299121288174597">"ડિફોલ્ટ રિંગટોન"</string>
+    <string name="ringtone_default" msgid="9118299121288174597">"ડિફૉલ્ટ રિંગટોન"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"ડિફૉલ્ટ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"કોઈ નહીં"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"રિંગટોન્સ"</string>
@@ -1407,6 +1408,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"ઍપ ડાઉનલોડ કરો"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"નવું સિમ દાખલ કર્યું"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"તેને સેટ કરવા માટે ટૅપ કરો"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"તમારો સમય ઝોન બદલાયો છે"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"તમે <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>)માં છો"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"સમય સેટ કરો"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"તારીખ સેટ કરો"</string>
     <string name="date_time_set" msgid="4603445265164486816">"સેટ કરો"</string>
@@ -1732,12 +1735,12 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"તમે <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે તમારો પિન લખ્યો છે. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> સેકન્ડમાં ફરીથી પ્રયાસ કરો."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"તમે <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે તમારો પાસવર્ડ લખ્યો છે. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> સેકંડમાં ફરીથી પ્રયાસ કરો."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"તમે <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે તમારી અનલૉક પૅટર્ન દોરી. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> સેકન્ડમાં ફરીથી પ્રયાસ કરો."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"તમે ટેબ્લેટને અનલૉક કરવા માટે <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે પ્રયાસ કર્યો. <xliff:g id="NUMBER_1">%2$d</xliff:g> વધુ અસફળ પ્રયાસ પછી, ટેબ્લેટને ફેક્ટરી ડિફોલ્ટ પર ફરીથી સેટ કરવામાં આવશે અને તેનો તમામ ડેટા કાઢી નાખવામાં આવશે."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"તમે ટૅબ્લેટને અનલૉક કરવા માટે <xliff:g id="NUMBER_0">%1$d</xliff:g> વાર ખોટી રીતે પ્રયાસ કર્યો. <xliff:g id="NUMBER_1">%2$d</xliff:g> વધુ અસફળ પ્રયાસ પછી, ટૅબ્લેટને ફેક્ટરી ડિફૉલ્ટ પર રીસેટ કરવામાં આવશે અને તેનો તમામ ડેટા ગુમાવવામાં આવશે."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="9064457748587850217">"તમે તમારા Android TV ડિવાઇસને <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે અનલૉક કરવાનો પ્રયાસ કર્યો છે. વધુ <xliff:g id="NUMBER_1">%2$d</xliff:g> અસફળ પ્રયાસ પછી, તમારા Android TV ડિવાઇસને ફેક્ટરી ડિફૉલ્ટ પર રીસેટ કરવામાં આવશે અને બધો વપરાશકર્તા ડેટા ગુમ થઈ જશે."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"તમે ફોનને અનલૉક કરવા માટે <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે પ્રયાસ કર્યો. <xliff:g id="NUMBER_1">%2$d</xliff:g> વધુ અસફળ પ્રયાસો પછી, ફોનને ફેક્ટરી ડિફોલ્ટ પર ફરીથી સેટ કરવામાં આવશે અને તેનો તમામ ડેટા કાઢી નાખવામાં આવશે."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"તમે <xliff:g id="NUMBER">%d</xliff:g> વખત ખોટી રીતે ટેબ્લેટને અનલૉક કરવાનો પ્રયાસ કર્યો. ટેબ્લેટ હવે ફેક્ટરી ડિફોલ્ટ પર ફરીથી સેટ કરવામાં આવશે."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"તમે ફોનને અનલૉક કરવા માટે <xliff:g id="NUMBER_0">%1$d</xliff:g> વાર ખોટી રીતે પ્રયાસ કર્યો. <xliff:g id="NUMBER_1">%2$d</xliff:g> વધુ અસફળ પ્રયાસો પછી, ફોનને ફેક્ટરી ડિફૉલ્ટ પર રીસેટ કરવામાં આવશે અને તેનો તમામ ડેટા ગુમાવવામાં આવશે."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"તમે <xliff:g id="NUMBER">%d</xliff:g> વાર ખોટી રીતે ટૅબ્લેટને અનલૉક કરવાનો પ્રયાસ કર્યો. ટૅબ્લેટ હવે ફેક્ટરી ડિફૉલ્ટ પર રીસેટ કરવામાં આવશે."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"તમે તમારા Android TV ડિવાઇસને <xliff:g id="NUMBER">%d</xliff:g> વખત ખોટી રીતે અનલૉક કરવાનો પ્રયાસ કર્યો છે. તમારા Android TV ડિવાઇસને હવે ફેક્ટરી ડિફૉલ્ટ પર રીસેટ કરવામાં આવશે."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"તમે <xliff:g id="NUMBER">%d</xliff:g> વખત ખોટી રીતે ફોનને અનલૉક કરવાનો પ્રયાસ કર્યો. ફોન હવે ફેક્ટરી ડિફોલ્ટ પર ફરીથી સેટ કરવામાં આવશે."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"તમે <xliff:g id="NUMBER">%d</xliff:g> વાર ખોટી રીતે ફોનને અનલૉક કરવાનો પ્રયાસ કર્યો. ફોન હવે ફેક્ટરી ડિફૉલ્ટ પર રીસેટ કરવામાં આવશે."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"તમે <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે અનલૉક પૅટર્ન દોરી છે. વધુ <xliff:g id="NUMBER_1">%2$d</xliff:g> વખત અસફળ પ્રયાસો પછી, તમને એક ઇમેઇલ એકાઉન્ટનો ઉપયોગ કરીને તમારા ટૅબ્લેટને અનલૉક કરવા માટે પૂછવામાં આવશે.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> સેકન્ડમાં ફરી પ્રયાસ કરો."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"તમે તમારી અનલૉક પૅટર્ન <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે દોરી છે. વધુ <xliff:g id="NUMBER_1">%2$d</xliff:g> અસફળ પ્રયાસ પછી, તમને ઇમેઇલ એકાઉન્ટનો ઉપયોગ કરીને તમારા Android TV ડિવાઇસને અનલૉક કરવાનું કહેવામાં આવશે.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> સેકન્ડમાં ફરીથી પ્રયાસ કરો."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"તમે તમારી અનલૉક પૅટર્ન <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે દોરી. હજી <xliff:g id="NUMBER_1">%2$d</xliff:g> અસફળ પ્રયાસ પછી, તમને ઇમેઇલ એકાઉન્ટનો ઉપયોગ કરીને ફોનને અનલૉક કરવાનું કહેવામાં આવશે.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> સેકન્ડમાં ફરીથી પ્રયાસ કરો."</string>
@@ -1780,14 +1783,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"એક-હાથે વાપરો મોડ"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"એક્સ્ટ્રા ડિમ"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"સાંભળવામાં સહાય કરતા ડિવાઇસ"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"ડિસ્કનેક્ટેડ છે"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"કનેક્ટેડ છે"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"સક્રિય"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"લોડ કરી રહ્યાં છીએ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"વૉલ્યૂમ કી દબાવી રાખો. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ચાલુ કરી."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"વૉલ્યૂમ કી દબાવી રાખો. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> બંધ કરી."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"વૉલ્યૂમ કી છોડી દો. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ને ચાલુ કરવા માટે, 3 સેકન્ડ માટે બન્ને વૉલ્યૂમ કીને ફરીથી દબાવી રાખો."</string>
@@ -1798,6 +1797,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"તમે આગલી વાર જ્યારે આ શૉર્ટકટનો ઉપયોગ કરશો, ત્યારે આ સુવિધા ચાલુ થશે. તમારી સ્ક્રીનની સૌથી નીચેથી 2 આંગળી વડે ઉપરની દિશાએ સ્વાઇપ કરો અને ઝડપથી છોડી દો."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"તમે આગલી વાર જ્યારે આ શૉર્ટકટનો ઉપયોગ કરશો, ત્યારે આ સુવિધા ચાલુ થશે. તમારી સ્ક્રીનની સૌથી નીચેથી 3 આંગળી વડે ઉપરની દિશાએ સ્વાઇપ કરો અને ઝડપથી છોડી દો."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"મોટું કરવું"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"ફોનના માઇક પર સ્વિચ કરીએ?"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"સાંભળવામાં મદદ આપતા યંત્રના માઇક પર સ્વિચ કરીએ?"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"બહેતર સાઉન્ડ માટે અથવા જો સાંભળવામાં મદદ આપતા તમારા યંત્રની બૅટરી ઓછી હોય. કૉલ દરમિયાન આ ફક્ત તમારા માઇકને સ્વિચ કરે છે."</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"તમે હાથના ઉપયોગ વિના કૉલ કરવા માટે સાંભળવામાં મદદ આપતા તમારા યંત્રના માઇક્રોફોનનો ઉપયોગ કરી શકો છો. કૉલ દરમિયાન આ ફક્ત તમારા માઇકને સ્વિચ કરે છે."</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"સ્વિચ કરો"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"સેટિંગ"</string>
     <string name="user_switched" msgid="7249833311585228097">"વર્તમાન વપરાશકર્તા <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> પર સ્વિચ કરી રહ્યાં છે…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> લોગ આઉટ થઈ રહ્યાં છે…"</string>
@@ -2083,6 +2088,12 @@
     <string name="unpin_target" msgid="3963318576590204447">"અનપિન કરો"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"<xliff:g id="LABEL">%1$s</xliff:g>ને અનપિન કરો"</string>
     <string name="app_info" msgid="6113278084877079851">"ઍપની માહિતી"</string>
+    <!-- no translation found for shortcut_group_a11y_title (2992150163811583865) -->
+    <skip />
+    <!-- no translation found for suggested_apps_group_a11y_title (2804876567839501831) -->
+    <skip />
+    <!-- no translation found for all_apps_group_a11y_title (7020352520224108745) -->
+    <skip />
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"ડેમો પ્રારંભ કરી રહ્યાં છે…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"ઉપકરણ ફરીથી સેટ કરી રહ્યાં છે…"</string>
@@ -2237,6 +2248,14 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"ડી-પૅડ ડાબે"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"ડી-પૅડ જમણે"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"ડી-પૅડ મધ્યમાં"</string>
+    <!-- no translation found for accessibility_autoclick_type_settings_panel_title (7354373370578758696) -->
+    <skip />
+    <!-- no translation found for accessibility_autoclick_left_click (2301793352260551080) -->
+    <skip />
+    <!-- no translation found for accessibility_autoclick_pause (3272200156172573568) -->
+    <skip />
+    <!-- no translation found for accessibility_autoclick_position (2933660969907663545) -->
+    <skip />
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>ને પ્રતિબંધિત સમૂહમાં મૂકવામાં આવ્યું છે"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"છબી મોકલી"</string>
@@ -2454,6 +2473,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"સુરક્ષા માટે સ્ક્રીન શેર કરતી વખતે ઍપનું કન્ટેન્ટ છુપાવેલું છે"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"સેટેલાઇટ સાથે ઑટોમૅટિક રીતે કનેક્ટેડ"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"તમે મોબાઇલ અથવા વાઇ-ફાઇ નેટવર્ક વિના મેસેજ મોકલી અને પ્રાપ્ત કરી શકો છો"</string>
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"તમે મેસેજ મોકલી અને પ્રાપ્ત કરી શકો છો અને સૅટલાઇટ દ્વારા મર્યાદિત ડેટાનો ઉપયોગ કરી શકો છો"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"શું સૅટલાઇટ મેસેજિંગનો ઉપયોગ કરીએ?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"મોબાઇલ કે વાઇ-ફાઇ નેટવર્ક વિના મેસેજ મોકલો અને મેળવો"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ખોલો"</string>
@@ -2510,4 +2530,12 @@
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"ઍપ્લિકેશનો"</string>
     <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"તમારી ફિંગરપ્રિન્ટને હવેથી ઓળખી શકાશે નહીં. ફિંગરપ્રિન્ટ અનલૉક સુવિધાનું ફરી સેટઅપ કરો."</string>
+    <!-- no translation found for usb_apm_usb_plugged_in_when_locked_notification_title (468577168569874967) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_plugged_in_when_locked_notification_text (6695268246267993166) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_suspicious_activity_notification_title (3461195995882871461) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_suspicious_activity_notification_text (6537085605929303187) -->
+    <skip />
 </resources>

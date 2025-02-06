@@ -100,6 +100,36 @@ public class ProtoLogViewerConfigReader {
         }
     }
 
+    /**
+     * Return whether or not the viewer config file contains a message with the specified hash.
+     * @param messageHash The hash message we are looking for in the viewer config file
+     * @return True iff the message with message hash is contained in the viewer config.
+     * @throws IOException if there was an issue reading the viewer config file.
+     */
+    public boolean messageHashIsAvailableInFile(long messageHash)
+            throws IOException {
+        try (var pisWrapper = mViewerConfigInputStreamProvider.getInputStream()) {
+            final var pis = pisWrapper.get();
+            while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+                if (pis.getFieldNumber() == (int) MESSAGES) {
+                    final long inMessageToken = pis.start(MESSAGES);
+
+                    while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+                        if (pis.getFieldNumber() == (int) MESSAGE_ID) {
+                            if (pis.readLong(MESSAGE_ID) == messageHash) {
+                                return true;
+                            }
+                        }
+                    }
+
+                    pis.end(inMessageToken);
+                }
+            }
+        }
+
+        return false;
+    }
+
     @NonNull
     private Map<Long, String> loadViewerConfigMappingForGroup(@NonNull String group)
             throws IOException {

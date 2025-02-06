@@ -35,6 +35,7 @@ import static android.content.Intent.EXTRA_TASK_ID;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_IME;
@@ -765,7 +766,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     void onWindowSurfaceVisibilityChanged(WindowState window, boolean visible) {
         final int type = window.mAttrs.type;
-        if (!isSystemAlertWindowType(type)) {
+        if (!isSystemAlertWindowType(type) && type != TYPE_SYSTEM_DIALOG) {
             return;
         }
 

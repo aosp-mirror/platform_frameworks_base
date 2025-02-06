@@ -34,7 +34,6 @@ import com.android.systemui.volume.panel.data.repository.volumePanelGlobalStateR
 import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import com.android.systemui.volume.panel.ui.viewmodel.volumePanelViewModel
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -45,7 +44,6 @@ import org.mockito.Captor
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class BottomBarViewModelTest : SysuiTestCase() {

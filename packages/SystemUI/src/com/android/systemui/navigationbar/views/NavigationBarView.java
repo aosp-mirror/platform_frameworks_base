@@ -16,6 +16,9 @@
 
 package com.android.systemui.navigationbar.views;
 
+import static android.app.StatusBarManager.NAVBAR_BACK_DISMISS_IME;
+import static android.app.StatusBarManager.NAVBAR_IME_SWITCHER_BUTTON_VISIBLE;
+import static android.app.StatusBarManager.NAVBAR_IME_VISIBLE;
 import static android.inputmethodservice.InputMethodService.canImeRenderGesturalNavButtons;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
@@ -31,7 +34,7 @@ import android.animation.PropertyValuesHolder;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.annotation.DrawableRes;
-import android.app.StatusBarManager;
+import android.app.StatusBarManager.NavbarFlags;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
@@ -113,7 +116,8 @@ public class NavigationBarView extends FrameLayout {
 
     boolean mLongClickableAccessibilityButton;
     int mDisabledFlags = 0;
-    int mNavigationIconHints = 0;
+    @NavbarFlags
+    private int mNavbarFlags;
     private int mNavBarMode;
     private boolean mImeDrawsImeNavBar;
 
@@ -176,7 +180,7 @@ public class NavigationBarView extends FrameLayout {
      */
     private final boolean mImeCanRenderGesturalNavButtons = canImeRenderGesturalNavButtons();
     private Gefingerpoken mTouchHandler;
-    private boolean mOverviewProxyEnabled;
+    private boolean mLauncherProxyEnabled;
     private boolean mShowSwipeUpUi;
     private UpdateActiveTouchRegionsCallback mUpdateActiveTouchRegionsCallback;
 
@@ -210,7 +214,11 @@ public class NavigationBarView extends FrameLayout {
             }
         }
 
-        public void onBackAltCleared() {
+        /**
+         * Called when the back button is no longer visually adjusted to indicate that it will
+         * dismiss the IME when pressed.
+         */
+        public void onBackDismissImeCleared() {
             ButtonDispatcher backButton = getBackButton();
 
             // When dismissing ime during unlock, force the back button to run the same appearance
@@ -499,10 +507,9 @@ public class NavigationBarView extends FrameLayout {
     }
 
     private void orientBackButton(KeyButtonDrawable drawable) {
-        final boolean useAltBack =
-                (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
+        final boolean isBackDismissIme = (mNavbarFlags & NAVBAR_BACK_DISMISS_IME) != 0;
         final boolean isRtl = mConfiguration.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
-        float degrees = useAltBack ? (isRtl ? 90 : -90) : 0;
+        float degrees = isBackDismissIme ? (isRtl ? 90 : -90) : 0;
         if (drawable.getRotation() == degrees) {
             return;
         }
@@ -514,7 +521,7 @@ public class NavigationBarView extends FrameLayout {
 
         // Animate the back button's rotation to the new degrees and only in portrait move up the
         // back button to line up with the other buttons
-        float targetY = !mShowSwipeUpUi && !mIsVertical && useAltBack
+        float targetY = !mShowSwipeUpUi && !mIsVertical && isBackDismissIme
                 ? - getResources().getDimension(R.dimen.navbar_back_button_ime_offset)
                 : 0;
         ObjectAnimator navBarAnimator = ObjectAnimator.ofPropertyValuesHolder(drawable,
@@ -555,15 +562,25 @@ public class NavigationBarView extends FrameLayout {
         super.setLayoutDirection(layoutDirection);
     }
 
-    void setNavigationIconHints(int hints) {
-        if (hints == mNavigationIconHints) return;
-        mNavigationIconHints = hints;
+    void setNavbarFlags(@NavbarFlags int flags) {
+        if (flags == mNavbarFlags) {
+            return;
+        }
+        mNavbarFlags = flags;
         updateNavButtonIcons();
     }
 
-    void onImeVisibilityChanged(boolean visible) {
-        if (!visible) {
-            mTransitionListener.onBackAltCleared();
+    /**
+     * Called when the state of the back button being visually adjusted to indicate that it will
+     * dismiss the IME when pressed has changed.
+     *
+     * @param isBackDismissIme whether the back button is adjusted for IME dismissal.
+     *
+     * @see android.inputmethodservice.InputMethodService.BackDispositionMode
+     */
+    void onBackDismissImeChanged(boolean isBackDismissIme) {
+        if (!isBackDismissIme) {
+            mTransitionListener.onBackDismissImeCleared();
         }
     }
 
@@ -587,8 +604,7 @@ public class NavigationBarView extends FrameLayout {
         // We have to replace or restore the back and home button icons when exiting or entering
         // carmode, respectively. Recents are not available in CarMode in nav bar so change
         // to recent icon is not required.
-        final boolean useAltBack =
-                (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
+        final boolean isBackDismissIme = (mNavbarFlags & NAVBAR_BACK_DISMISS_IME) != 0;
         KeyButtonDrawable backIcon = mBackIcon;
         orientBackButton(backIcon);
         KeyButtonDrawable homeIcon = mHomeDefaultIcon;
@@ -600,11 +616,12 @@ public class NavigationBarView extends FrameLayout {
 
         updateRecentsIcon();
 
-        // Update IME button visibility, a11y and rotate button always overrides the appearance
-        boolean disableImeSwitcher =
-                (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN) == 0
-                || isImeRenderingNavButtons();
-        mContextualButtonGroup.setButtonVisibility(R.id.ime_switcher, !disableImeSwitcher);
+        // Update IME switcher button visibility, a11y and rotate button always overrides
+        // the appearance.
+        final boolean isImeSwitcherButtonVisible =
+                (mNavbarFlags & NAVBAR_IME_SWITCHER_BUTTON_VISIBLE) != 0
+                        && !isImeRenderingNavButtons();
+        mContextualButtonGroup.setButtonVisibility(R.id.ime_switcher, isImeSwitcherButtonVisible);
 
         mBarTransitions.reapplyDarkIntensity();
 
@@ -618,14 +635,14 @@ public class NavigationBarView extends FrameLayout {
         boolean disableHomeHandle = disableRecent
                 && ((mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
 
-        boolean disableBack = !useAltBack && (mEdgeBackGestureHandler.isHandlingGestures()
+        boolean disableBack = !isBackDismissIme && (mEdgeBackGestureHandler.isHandlingGestures()
                 || ((mDisabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0))
                 || isImeRenderingNavButtons();
 
         // When screen pinning, don't hide back and home when connected service or back and
         // recents buttons when disconnected from launcher service in screen pinning mode,
         // as they are used for exiting.
-        if (mOverviewProxyEnabled) {
+        if (mLauncherProxyEnabled) {
             // Force disable recents when not in legacy mode
             disableRecent |= !QuickStepContract.isLegacyMode(mNavBarMode);
             if (mScreenPinningActive && !QuickStepContract.isGesturalMode(mNavBarMode)) {
@@ -656,9 +673,8 @@ public class NavigationBarView extends FrameLayout {
      * Returns whether the IME is currently visible and drawing the nav buttons.
      */
     boolean isImeRenderingNavButtons() {
-        return mImeDrawsImeNavBar
-                && mImeCanRenderGesturalNavButtons
-                && (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0;
+        return mImeDrawsImeNavBar && mImeCanRenderGesturalNavButtons
+                && (mNavbarFlags & NAVBAR_IME_VISIBLE) != 0;
     }
 
     @VisibleForTesting
@@ -748,8 +764,8 @@ public class NavigationBarView extends FrameLayout {
         }
     }
 
-    void onOverviewProxyConnectionChange(boolean enabled) {
-        mOverviewProxyEnabled = enabled;
+    void onLauncherProxyConnectionChange(boolean enabled) {
+        mLauncherProxyEnabled = enabled;
     }
 
     void setShouldShowSwipeUpUi(boolean showSwipeUpUi) {

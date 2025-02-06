@@ -113,9 +113,10 @@ public class KeyguardServiceWrapper implements IKeyguardService {
 
     @Override
     public void onFinishedGoingToSleep(
-            @PowerManager.GoToSleepReason int pmSleepReason, boolean cameraGestureTriggered) {
+            @PowerManager.GoToSleepReason int pmSleepReason,
+            boolean powerButtonLaunchGestureTriggered) {
         try {
-            mService.onFinishedGoingToSleep(pmSleepReason, cameraGestureTriggered);
+            mService.onFinishedGoingToSleep(pmSleepReason, powerButtonLaunchGestureTriggered);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }
@@ -123,9 +124,9 @@ public class KeyguardServiceWrapper implements IKeyguardService {
 
     @Override
     public void onStartedWakingUp(
-            @PowerManager.WakeReason int pmWakeReason, boolean cameraGestureTriggered) {
+            @PowerManager.WakeReason int pmWakeReason, boolean powerButtonLaunchGestureTriggered) {
         try {
-            mService.onStartedWakingUp(pmWakeReason, cameraGestureTriggered);
+            mService.onStartedWakingUp(pmWakeReason, powerButtonLaunchGestureTriggered);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }

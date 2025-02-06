@@ -25,7 +25,6 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,7 +41,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.android.compose.modifiers.thenIf
 import com.android.systemui.common.ui.compose.Icon
+import com.android.systemui.statusbar.featurepods.popups.shared.model.HoverBehavior
 import com.android.systemui.statusbar.featurepods.popups.shared.model.PopupChipModel
 
 /**
@@ -52,52 +53,59 @@ import com.android.systemui.statusbar.featurepods.popups.shared.model.PopupChipM
  */
 @Composable
 fun StatusBarPopupChip(model: PopupChipModel.Shown, modifier: Modifier = Modifier) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isHovered by interactionSource.collectIsHoveredAsState()
+    val hasHoverBehavior = model.hoverBehavior !is HoverBehavior.None
+    val hoverInteractionSource = remember { MutableInteractionSource() }
+    val isHovered by hoverInteractionSource.collectIsHoveredAsState()
     val isToggled = model.isToggled
 
+    val chipBackgroundColor =
+        if (isToggled) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerHighest
+        }
     Surface(
         shape = RoundedCornerShape(16.dp),
         modifier =
             modifier
-                .hoverable(interactionSource = interactionSource)
-                .padding(vertical = 4.dp)
                 .widthIn(max = 120.dp)
+                .padding(vertical = 4.dp)
                 .animateContentSize()
-                .clickable(onClick = { model.onToggle() }),
-        color =
-            if (isToggled) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerHighest
-            },
+                .thenIf(hasHoverBehavior) { Modifier.hoverable(hoverInteractionSource) }
+                .clickable { model.onToggle() },
+        color = chipBackgroundColor,
     ) {
         Row(
             modifier = Modifier.padding(start = 4.dp, end = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            val currentIcon = if (isHovered) model.hoverIcon else model.icon
-            val backgroundColor =
-                if (isToggled) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.primaryContainer
-                }
-
+            val iconColor =
+                if (isHovered) chipBackgroundColor else contentColorFor(chipBackgroundColor)
+            val hoverBehavior = model.hoverBehavior
+            val iconBackgroundColor = contentColorFor(chipBackgroundColor)
+            val iconInteractionSource = remember { MutableInteractionSource() }
             Icon(
-                icon = currentIcon,
+                icon =
+                    when {
+                        isHovered && hoverBehavior is HoverBehavior.Button -> hoverBehavior.icon
+                        else -> model.icon
+                    },
                 modifier =
-                    Modifier.background(color = backgroundColor, shape = CircleShape)
-                        .clickable(
-                            role = Role.Button,
-                            onClick = model.onIconPressed,
-                            indication = ripple(),
-                            interactionSource = remember { MutableInteractionSource() },
-                        )
-                        .padding(2.dp)
-                        .size(18.dp),
-                tint = contentColorFor(backgroundColor),
+                    Modifier.thenIf(isHovered) {
+                            Modifier.padding(3.dp)
+                                .background(color = iconBackgroundColor, shape = CircleShape)
+                        }
+                        .thenIf(hoverBehavior is HoverBehavior.Button) {
+                            Modifier.clickable(
+                                role = Role.Button,
+                                onClick = (hoverBehavior as HoverBehavior.Button).onIconPressed,
+                                indication = ripple(),
+                                interactionSource = iconInteractionSource,
+                            )
+                        }
+                        .padding(3.dp),
+                tint = iconColor,
             )
 
             Text(

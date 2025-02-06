@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.stack.data.repository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.stack.shared.model.AccessibilityScrollEvent
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrollState
 import java.util.function.Consumer
 import javax.inject.Inject
@@ -42,7 +43,7 @@ class NotificationPlaceholderRepository @Inject constructor() {
      *
      * When `null`, clipping should not be applied to notifications.
      */
-    val shadeScrimBounds = MutableStateFlow<ShadeScrimBounds?>(null)
+    val notificationShadeScrimBounds = MutableStateFlow<ShadeScrimBounds?>(null)
 
     /** height made available to the notifications in the size-constrained mode of lock screen. */
     val constrainedAvailableSpace = MutableStateFlow(0)
@@ -52,4 +53,10 @@ class NotificationPlaceholderRepository @Inject constructor() {
 
     /** A consumer of [AccessibilityScrollEvent]s. */
     var accessibilityScrollEventConsumer: Consumer<AccessibilityScrollEvent>? = null
+
+    /**
+     * A consumer of [ShadeScrimShape], to be updated when the bounds of the QuickSettings Overlay
+     * panel changes.
+     */
+    var qsPanelShapeConsumer: ((ShadeScrimShape?) -> Unit)? = null
 }

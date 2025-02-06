@@ -29,6 +29,7 @@ public class JankUtils {
         AppJankStats jankStats = new AppJankStats(
                 /*App Uid*/APP_ID,
                 /*Widget Id*/"test widget id",
+                /*navigationComponent*/null,
                 /*Widget Category*/AppJankStats.WIDGET_CATEGORY_SCROLL,
                 /*Widget State*/AppJankStats.WIDGET_STATE_SCROLLING,
                 /*Total Frames*/100,

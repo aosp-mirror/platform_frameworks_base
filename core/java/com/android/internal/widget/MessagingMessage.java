@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 /**
- * A message of a {@link MessagingLayout}.
+ * A message or summary of a {@link MessagingLayout}.
  */
 public interface MessagingMessage extends MessagingLinearLayout.MessagingChild {
 

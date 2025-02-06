@@ -18,16 +18,24 @@ package com.android.settingslib.graph
 
 import android.app.Application
 import android.os.Bundle
+import android.os.Parcelable
+import android.os.SystemClock
 import com.android.settingslib.graph.proto.PreferenceGraphProto
 import com.android.settingslib.ipc.ApiHandler
+import com.android.settingslib.ipc.ApiPermissionChecker
 import com.android.settingslib.ipc.MessageCodec
+import com.android.settingslib.metadata.PreferenceRemoteOpMetricsLogger
+import com.android.settingslib.metadata.PreferenceScreenCoordinate
 import com.android.settingslib.metadata.PreferenceScreenRegistry
 import com.android.settingslib.preference.PreferenceScreenProvider
 import java.util.Locale
 
 /** API to get preference graph. */
-abstract class GetPreferenceGraphApiHandler(
-    private val preferenceScreenProviders: Set<Class<out PreferenceScreenProvider>>
+class GetPreferenceGraphApiHandler(
+    override val id: Int,
+    private val permissionChecker: ApiPermissionChecker<GetPreferenceGraphRequest>,
+    private val metricsLogger: PreferenceRemoteOpMetricsLogger? = null,
+    private val preferenceScreenProviders: Set<Class<out PreferenceScreenProvider>> = emptySet(),
 ) : ApiHandler<GetPreferenceGraphRequest, PreferenceGraphProto> {
 
     override val requestCodec: MessageCodec<GetPreferenceGraphRequest>
@@ -36,66 +44,90 @@ abstract class GetPreferenceGraphApiHandler(
     override val responseCodec: MessageCodec<PreferenceGraphProto>
         get() = PreferenceGraphProtoCodec
 
+    override fun hasPermission(
+        application: Application,
+        callingPid: Int,
+        callingUid: Int,
+        request: GetPreferenceGraphRequest,
+    ) = permissionChecker.hasPermission(application, callingPid, callingUid, request)
+
     override suspend fun invoke(
         application: Application,
         callingPid: Int,
         callingUid: Int,
         request: GetPreferenceGraphRequest,
     ): PreferenceGraphProto {
-        val builder = PreferenceGraphBuilder.of(application, callingPid, callingUid, request)
-        if (request.screenKeys.isEmpty()) {
-            PreferenceScreenRegistry.preferenceScreenMetadataFactories.forEachKeyAsync {
-                builder.addPreferenceScreenFromRegistry(it)
+        val elapsedRealtime = SystemClock.elapsedRealtime()
+        var success = false
+        try {
+            val builder = PreferenceGraphBuilder.of(application, callingPid, callingUid, request)
+            if (request.screens.isEmpty()) {
+                val factories = PreferenceScreenRegistry.preferenceScreenMetadataFactories
+                factories.forEachAsync { _, factory -> builder.addPreferenceScreen(factory) }
+                for (provider in preferenceScreenProviders) {
+                    builder.addPreferenceScreenProvider(provider)
+                }
             }
-            for (provider in preferenceScreenProviders) {
-                builder.addPreferenceScreenProvider(provider)
-            }
+            val result = builder.build()
+            success = true
+            return result
+        } finally {
+            metricsLogger?.logGraphApi(
+                application,
+                callingUid,
+                success,
+                SystemClock.elapsedRealtime() - elapsedRealtime,
+            )
         }
-        return builder.build()
     }
 }
 
 /**
  * Request of [GetPreferenceGraphApiHandler].
  *
- * @param screenKeys screen keys of the preference graph
- * @param visitedScreens keys of the visited preference screen
+ * @param screens screens of the preference graph
+ * @param visitedScreens visited preference screens
  * @param locale locale of the preference graph
  */
 data class GetPreferenceGraphRequest
 @JvmOverloads
 constructor(
-    val screenKeys: Set<String> = setOf(),
-    val visitedScreens: Set<String> = setOf(),
+    val screens: Set<PreferenceScreenCoordinate> = setOf(),
+    val visitedScreens: Set<PreferenceScreenCoordinate> = setOf(),
     val locale: Locale? = null,
     val flags: Int = PreferenceGetterFlags.ALL,
-    val includeValue: Boolean = true, // TODO: clean up
     val includeValueDescriptor: Boolean = true,
 )
 
 object GetPreferenceGraphRequestCodec : MessageCodec<GetPreferenceGraphRequest> {
     override fun encode(data: GetPreferenceGraphRequest): Bundle =
         Bundle(4).apply {
-            putStringArray(KEY_SCREEN_KEYS, data.screenKeys.toTypedArray())
-            putStringArray(KEY_VISITED_KEYS, data.visitedScreens.toTypedArray())
+            putParcelableArray(KEY_SCREENS, data.screens.toTypedArray())
+            putParcelableArray(KEY_VISITED_SCREENS, data.visitedScreens.toTypedArray())
             putString(KEY_LOCALE, data.locale?.toLanguageTag())
             putInt(KEY_FLAGS, data.flags)
         }
 
+    @Suppress("DEPRECATION")
     override fun decode(data: Bundle): GetPreferenceGraphRequest {
-        val screenKeys = data.getStringArray(KEY_SCREEN_KEYS) ?: arrayOf()
-        val visitedScreens = data.getStringArray(KEY_VISITED_KEYS) ?: arrayOf()
+        data.classLoader = PreferenceScreenCoordinate::class.java.classLoader
+        val screens = data.getParcelableArray(KEY_SCREENS) ?: arrayOf()
+        val visitedScreens = data.getParcelableArray(KEY_VISITED_SCREENS) ?: arrayOf()
         fun String?.toLocale() = if (this != null) Locale.forLanguageTag(this) else null
+        fun Array<Parcelable>.toScreenCoordinates() =
+            buildSet(size) {
+                for (element in this@toScreenCoordinates) add(element as PreferenceScreenCoordinate)
+            }
         return GetPreferenceGraphRequest(
-            screenKeys.toSet(),
-            visitedScreens.toSet(),
+            screens.toScreenCoordinates(),
+            visitedScreens.toScreenCoordinates(),
             data.getString(KEY_LOCALE).toLocale(),
             data.getInt(KEY_FLAGS),
         )
     }
 
-    private const val KEY_SCREEN_KEYS = "k"
-    private const val KEY_VISITED_KEYS = "v"
+    private const val KEY_SCREENS = "s"
+    private const val KEY_VISITED_SCREENS = "v"
     private const val KEY_LOCALE = "l"
     private const val KEY_FLAGS = "f"
 }

@@ -28,6 +28,8 @@ import android.hardware.input.InputManager
 import android.hardware.input.InputManagerGlobal
 import android.hardware.input.KeyboardLayout
 import android.hardware.input.KeyboardLayoutSelectionResult
+import android.hardware.input.KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_DEVICE
+import android.hardware.input.KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_USER
 import android.icu.util.ULocale
 import android.os.Bundle
 import android.os.test.TestLooper
@@ -275,6 +277,41 @@ class KeyboardLayoutManagerTests {
             )
         assertEquals(
             "getKeyboardLayoutForInputDevice API should return the last set layout",
+            ENGLISH_US_LAYOUT_DESCRIPTOR,
+            result.layoutDescriptor
+        )
+    }
+
+    @Test
+    fun testGetSetKeyboardLayoutOverrideForInputDevice() {
+        val imeSubtype = createImeSubtype()
+
+        keyboardLayoutManager.setKeyboardLayoutOverrideForInputDevice(
+            keyboardDevice.identifier,
+            ENGLISH_UK_LAYOUT_DESCRIPTOR
+        )
+        var result =
+            keyboardLayoutManager.getKeyboardLayoutForInputDevice(
+                keyboardDevice.identifier, USER_ID, imeInfo, imeSubtype
+            )
+        assertEquals(LAYOUT_SELECTION_CRITERIA_DEVICE, result.selectionCriteria)
+        assertEquals(
+            "getKeyboardLayoutForInputDevice API should return the set layout",
+            ENGLISH_UK_LAYOUT_DESCRIPTOR,
+            result.layoutDescriptor
+        )
+
+        // This should replace the overriding layout set above
+        keyboardLayoutManager.setKeyboardLayoutForInputDevice(
+            keyboardDevice.identifier, USER_ID, imeInfo, imeSubtype,
+            ENGLISH_US_LAYOUT_DESCRIPTOR
+        )
+        result = keyboardLayoutManager.getKeyboardLayoutForInputDevice(
+            keyboardDevice.identifier, USER_ID, imeInfo, imeSubtype
+        )
+        assertEquals(LAYOUT_SELECTION_CRITERIA_USER, result.selectionCriteria)
+        assertEquals(
+            "getKeyboardLayoutForInputDevice API should return the user set layout",
             ENGLISH_US_LAYOUT_DESCRIPTOR,
             result.layoutDescriptor
         )

@@ -287,8 +287,8 @@ public final class AssociationInfo implements Parcelable {
     /**
      * Get the device icon of the associated device. The device icon represents the device type.
      *
-     * @return the device icon, or {@code null} if no device icon has been set for the
-     * associated device.
+     * @return the device icon with size 24dp x 24dp.
+     * If the associated device has no icon set, it returns {@code null}.
      *
      * @see AssociationRequest.Builder#setDeviceIcon(Icon)
      */
@@ -377,6 +377,7 @@ public final class AssociationInfo implements Parcelable {
         if (this == o) return true;
         if (!(o instanceof AssociationInfo)) return false;
         final AssociationInfo that = (AssociationInfo) o;
+
         return mId == that.mId
                 && mUserId == that.mUserId
                 && mSelfManaged == that.mSelfManaged
@@ -391,9 +392,15 @@ public final class AssociationInfo implements Parcelable {
                 && Objects.equals(mDeviceProfile, that.mDeviceProfile)
                 && Objects.equals(mAssociatedDevice, that.mAssociatedDevice)
                 && mSystemDataSyncFlags == that.mSystemDataSyncFlags
-                && (mDeviceIcon == null ? that.mDeviceIcon == null
-                : mDeviceIcon.sameAs(that.mDeviceIcon))
+                && isSameIcon(mDeviceIcon, that.mDeviceIcon)
                 && Objects.equals(mDeviceId, that.mDeviceId);
+    }
+
+    private boolean isSameIcon(Icon iconA, Icon iconB) {
+        // Because we've already rescaled and converted both icons to bitmaps,
+        // we can now directly compare them by bitmap.
+        return (iconA == null && iconB == null)
+                || (iconA != null && iconB != null && iconA.getBitmap().sameAs(iconB.getBitmap()));
     }
 
     @Override
@@ -425,7 +432,7 @@ public final class AssociationInfo implements Parcelable {
         dest.writeLong(mTimeApprovedMs);
         dest.writeLong(mLastTimeConnectedMs);
         dest.writeInt(mSystemDataSyncFlags);
-        if (mDeviceIcon != null) {
+        if (Flags.associationDeviceIcon() && mDeviceIcon != null) {
             dest.writeInt(1);
             mDeviceIcon.writeToParcel(dest, flags);
         } else {
@@ -455,7 +462,8 @@ public final class AssociationInfo implements Parcelable {
         mTimeApprovedMs = in.readLong();
         mLastTimeConnectedMs = in.readLong();
         mSystemDataSyncFlags = in.readInt();
-        if (in.readInt() == 1) {
+        int deviceIcon = in.readInt();
+        if (Flags.associationDeviceIcon() && deviceIcon == 1) {
             mDeviceIcon = Icon.CREATOR.createFromParcel(in);
         } else {
             mDeviceIcon = null;

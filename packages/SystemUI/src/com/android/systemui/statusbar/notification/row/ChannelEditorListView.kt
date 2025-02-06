@@ -25,7 +25,7 @@ import android.app.NotificationManager.IMPORTANCE_NONE
 import android.app.NotificationManager.IMPORTANCE_UNSPECIFIED
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.text.TextUtils
+import android.text.TextUtils.isEmpty
 import android.transition.AutoTransition
 import android.transition.Transition
 import android.transition.TransitionManager
@@ -37,13 +37,10 @@ import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
 import com.android.settingslib.Utils
-
 import com.android.systemui.res.R
 import com.android.systemui.util.Assert
 
-/**
- * Half-shelf for notification channel controls
- */
+/** Half-shelf for notification channel controls */
 class ChannelEditorListView(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
     lateinit var controller: ChannelEditorDialogController
     var appIcon: Drawable? = null
@@ -84,23 +81,21 @@ class ChannelEditorListView(c: Context, attrs: AttributeSet) : LinearLayout(c, a
 
         val transition = AutoTransition()
         transition.duration = 200
-        transition.addListener(object : Transition.TransitionListener {
-            override fun onTransitionEnd(p0: Transition?) {
-                notifySubtreeAccessibilityStateChangedIfNeeded()
-            }
+        transition.addListener(
+            object : Transition.TransitionListener {
+                override fun onTransitionEnd(p0: Transition?) {
+                    notifySubtreeAccessibilityStateChangedIfNeeded()
+                }
 
-            override fun onTransitionResume(p0: Transition?) {
-            }
+                override fun onTransitionResume(p0: Transition?) {}
 
-            override fun onTransitionPause(p0: Transition?) {
-            }
+                override fun onTransitionPause(p0: Transition?) {}
 
-            override fun onTransitionCancel(p0: Transition?) {
-            }
+                override fun onTransitionCancel(p0: Transition?) {}
 
-            override fun onTransitionStart(p0: Transition?) {
+                override fun onTransitionStart(p0: Transition?) {}
             }
-        })
+        )
         TransitionManager.beginDelayedTransition(this, transition)
 
         // Remove any rows
@@ -130,8 +125,9 @@ class ChannelEditorListView(c: Context, attrs: AttributeSet) : LinearLayout(c, a
 
     private fun updateAppControlRow(enabled: Boolean) {
         appControlRow.iconView.setImageDrawable(appIcon)
-        appControlRow.channelName.text = context.resources
-                .getString(R.string.notification_channel_dialog_title, appName)
+        val title = context.resources.getString(R.string.notification_channel_dialog_title, appName)
+        appControlRow.channelName.text = title
+        appControlRow.switch.contentDescription = title
         appControlRow.switch.isChecked = enabled
         appControlRow.switch.setOnCheckedChangeListener { _, b ->
             controller.proposeSetAppNotificationsEnabled(b)
@@ -164,8 +160,8 @@ class ChannelRow(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
     var gentle = false
 
     init {
-        highlightColor = Utils.getColorAttrDefaultColor(
-                context, android.R.attr.colorControlHighlight)
+        highlightColor =
+            Utils.getColorAttrDefaultColor(context, android.R.attr.colorControlHighlight)
     }
 
     var channel: NotificationChannel? = null
@@ -182,17 +178,16 @@ class ChannelRow(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
         switch = requireViewById(R.id.toggle)
         switch.setOnCheckedChangeListener { _, b ->
             channel?.let {
-                controller.proposeEditForChannel(it,
-                        if (b) it.originalImportance.coerceAtLeast(IMPORTANCE_LOW)
-                        else IMPORTANCE_NONE)
+                controller.proposeEditForChannel(
+                    it,
+                    if (b) it.originalImportance.coerceAtLeast(IMPORTANCE_LOW) else IMPORTANCE_NONE,
+                )
             }
         }
         setOnClickListener { switch.toggle() }
     }
 
-    /**
-     * Play an animation that highlights this row
-     */
+    /** Play an animation that highlights this row */
     fun playHighlight() {
         // Use 0 for the start value because our background is given to us by our parent
         val fadeInLoop = ValueAnimator.ofObject(ArgbEvaluator(), 0, highlightColor)
@@ -211,17 +206,21 @@ class ChannelRow(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
 
         channelName.text = nc.name ?: ""
 
-        nc.group?.let { groupId ->
-            channelDescription.text = controller.groupNameForId(groupId)
-        }
+        nc.group?.let { groupId -> channelDescription.text = controller.groupNameForId(groupId) }
 
-        if (nc.group == null || TextUtils.isEmpty(channelDescription.text)) {
+        if (nc.group == null || isEmpty(channelDescription.text)) {
             channelDescription.visibility = View.GONE
         } else {
             channelDescription.visibility = View.VISIBLE
         }
 
         switch.isChecked = nc.importance != IMPORTANCE_NONE
+        switch.contentDescription =
+            if (isEmpty(channelDescription.text)) {
+                channelName.text
+            } else {
+                "${channelName.text} ${channelDescription.text}"
+            }
     }
 
     private fun updateImportance() {

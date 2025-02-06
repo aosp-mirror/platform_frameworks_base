@@ -247,7 +247,8 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                     getRankingAdjustment(i),
                     isBubble(i),
                     getProposedImportance(i),
-                    hasSensitiveContent(i)
+                    hasSensitiveContent(i),
+                    getSummarization(i)
             );
             rankings[i] = ranking;
         }
@@ -381,6 +382,13 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
 
     private boolean hasSensitiveContent(int index) {
         return index % 3 == 0;
+    }
+
+    public static String getSummarization(int index) {
+        if ((android.app.Flags.nmSummarizationUi() || android.app.Flags.nmSummarization())) {
+            return "summary " + index;
+        }
+        return null;
     }
 
     private boolean isBubble(int index) {

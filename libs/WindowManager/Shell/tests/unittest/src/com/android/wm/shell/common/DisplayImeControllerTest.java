@@ -39,8 +39,6 @@ import android.graphics.Point;
 import android.os.Looper;
 import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.view.IWindowManager;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
@@ -55,7 +53,6 @@ import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -70,9 +67,6 @@ import java.util.concurrent.Executor;
  */
 @SmallTest
 public class DisplayImeControllerTest extends ShellTestCase {
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
-
     @Mock
     private SurfaceControl.Transaction mT;
     @Mock

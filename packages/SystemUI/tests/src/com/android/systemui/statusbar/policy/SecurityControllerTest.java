@@ -25,12 +25,12 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.admin.DevicePolicyManager;
+import android.app.supervision.SupervisionManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -42,6 +42,10 @@ import android.net.ConnectivityManager.NetworkCallback;
 import android.net.NetworkRequest;
 import android.os.Handler;
 import android.os.UserManager;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.security.IKeyChainService;
 
 import androidx.test.filters.SmallTest;
@@ -55,10 +59,14 @@ import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,17 +76,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class SecurityControllerTest extends SysuiTestCase {
+    @Rule public final MockitoRule mockito = MockitoJUnit.rule();
+    @Rule public final CheckFlagsRule checkFlags = DeviceFlagsValueProvider.createCheckFlagsRule();
+
     private static final ComponentName DEVICE_OWNER_COMPONENT =
             new ComponentName("com.android.foo", "bar");
 
-    private final DevicePolicyManager mDevicePolicyManager = mock(DevicePolicyManager.class);
-    private final IKeyChainService.Stub mKeyChainService = mock(IKeyChainService.Stub.class);
-    private final UserManager mUserManager = mock(UserManager.class);
-    private final UserTracker mUserTracker = mock(UserTracker.class);
-    private final BroadcastDispatcher mBroadcastDispatcher = mock(BroadcastDispatcher.class);
-    private final Handler mHandler = mock(Handler.class);
+    @Mock private DevicePolicyManager mDevicePolicyManager;
+    @Mock private IKeyChainService.Stub mKeyChainService;
+    @Mock private UserManager mUserManager;
+    @Mock private UserTracker mUserTracker;
+    @Mock private BroadcastDispatcher mBroadcastDispatcher;
+    @Mock private Handler mHandler;
+    @Mock private ConnectivityManager mConnectivityManager;
+    @Mock private SupervisionManager mSupervisionManager;
+
     private SecurityControllerImpl mSecurityController;
-    private ConnectivityManager mConnectivityManager = mock(ConnectivityManager.class);
     private FakeExecutor mMainExecutor;
     private FakeExecutor mBgExecutor;
     private BroadcastReceiver mBroadcastReceiver;
@@ -115,7 +128,8 @@ public class SecurityControllerTest extends SysuiTestCase {
                 mBroadcastDispatcher,
                 mMainExecutor,
                 mBgExecutor,
-                Mockito.mock(DumpManager.class));
+                Mockito.mock(DumpManager.class),
+                () -> mSupervisionManager);
 
         verify(mBroadcastDispatcher).registerReceiverWithHandler(
                 brCaptor.capture(),
@@ -239,6 +253,42 @@ public class SecurityControllerTest extends SysuiTestCase {
 
         mSecurityController.onUserSwitched(10);
         mBgExecutor.runAllReady();
+    }
+
+    @Test
+    @RequiresFlagsDisabled(android.app.supervision.flags.Flags.FLAG_DEPRECATE_DPM_SUPERVISION_APIS)
+    public void isParentalControlsEnabled_usingDpm_supervisionIsProfileOwner() {
+        when(mDevicePolicyManager.getProfileOwnerOrDeviceOwnerSupervisionComponent(any()))
+                .thenReturn(DEVICE_OWNER_COMPONENT);
+
+        assertTrue(mSecurityController.isParentalControlsEnabled());
+    }
+
+    @Test
+    @RequiresFlagsDisabled(android.app.supervision.flags.Flags.FLAG_DEPRECATE_DPM_SUPERVISION_APIS)
+    public void isParentalControlsEnabled_usingDpm_supervisionIsNotProfileOwner() {
+        when(mDevicePolicyManager.getProfileOwnerOrDeviceOwnerSupervisionComponent(any()))
+                .thenReturn(null);
+
+        assertFalse(mSecurityController.isParentalControlsEnabled());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.app.supervision.flags.Flags.FLAG_DEPRECATE_DPM_SUPERVISION_APIS)
+    public void isParentalControlsEnabled_usingSupervisionManager_supervisionIsEnabled() {
+        when(mSupervisionManager.isSupervisionEnabledForUser(anyInt()))
+                .thenReturn(true);
+
+        assertTrue(mSecurityController.isParentalControlsEnabled());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.app.supervision.flags.Flags.FLAG_DEPRECATE_DPM_SUPERVISION_APIS)
+    public void isParentalControlsEnabled_usingSupervisionManager_supervisionIsNotEnabled() {
+        when(mSupervisionManager.isSupervisionEnabledForUser(anyInt()))
+                .thenReturn(false);
+
+        assertFalse(mSecurityController.isParentalControlsEnabled());
     }
 
     /**

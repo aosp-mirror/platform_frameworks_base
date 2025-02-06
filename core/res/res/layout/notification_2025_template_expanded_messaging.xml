@@ -36,14 +36,13 @@
             android:clipChildren="false"
             android:orientation="vertical">
 
-        <!-- Note: the top margin is being set in code based on the estimated space needed for
-        the header text. -->
         <com.android.internal.widget.RemeasuringLinearLayout
             android:id="@+id/notification_main_column"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
             android:layout_weight="1"
+            android:layout_marginTop="@dimen/notification_2025_header_height"
             android:layout_marginEnd="@dimen/notification_content_margin_end"
             android:orientation="vertical"
             android:clipChildren="false"

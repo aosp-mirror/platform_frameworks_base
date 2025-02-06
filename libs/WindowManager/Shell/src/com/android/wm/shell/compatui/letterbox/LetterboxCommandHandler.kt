@@ -31,8 +31,7 @@ import javax.inject.Inject
 /**
  * Handles the shell commands for the CompatUI.
  *
- * <p> Use with [adb shell dumpsys activity service SystemUIService WMShell letterbox
- * &lt;command&gt;].
+ * <p> Use with [adb shell wm shell letterbox &lt;command&gt;].
  */
 @WMSingleton
 class LetterboxCommandHandler @Inject constructor(

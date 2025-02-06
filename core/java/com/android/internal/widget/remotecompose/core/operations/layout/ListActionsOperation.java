@@ -25,8 +25,10 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.operations.TextData;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
 
 import java.util.ArrayList;
+import java.util.Vector;
 
 public abstract class ListActionsOperation extends PaintOperation
         implements Container, ModifierOperation, DecoratorComponent {
@@ -122,5 +124,11 @@ public abstract class ListActionsOperation extends PaintOperation
             }
         }
         return true;
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        // TODO: Pass in the list once all operations implement Serializable
+        serializer.add("actions", new Vector<>());
     }
 }

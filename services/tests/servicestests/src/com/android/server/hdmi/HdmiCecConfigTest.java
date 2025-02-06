@@ -15,10 +15,13 @@
  */
 package com.android.server.hdmi;
 
+import static android.content.pm.PackageManager.FEATURE_HDMI_CEC;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertTrue;
 
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -65,6 +68,9 @@ public final class HdmiCecConfigTest {
 
     @Before
     public void setUp() throws Exception {
+        assumeTrue("Test requires FEATURE_HDMI_CEC",
+                InstrumentationRegistry.getTargetContext().getPackageManager()
+                        .hasSystemFeature(FEATURE_HDMI_CEC));
         MockitoAnnotations.initMocks(this);
         mContext = FakeHdmiCecConfig.buildContext(InstrumentationRegistry.getTargetContext());
     }

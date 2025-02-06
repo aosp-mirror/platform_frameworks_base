@@ -21,7 +21,7 @@ import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.plugins.volumeDialogController
 import com.android.systemui.volume.data.repository.audioSystemRepository
 import com.android.systemui.volume.dialog.domain.interactor.volumeDialogStateInteractor
-import com.android.systemui.volume.dialog.ringer.data.repository.fakeVolumeDialogRingerFeedbackRepository
+import com.android.systemui.volume.dialog.ringer.data.repository.volumeDialogRingerFeedbackRepository
 
 val Kosmos.volumeDialogRingerInteractor by
     Kosmos.Fixture {
@@ -30,6 +30,6 @@ val Kosmos.volumeDialogRingerInteractor by
             volumeDialogStateInteractor = volumeDialogStateInteractor,
             controller = volumeDialogController,
             audioSystemRepository = audioSystemRepository,
-            ringerFeedbackRepository = fakeVolumeDialogRingerFeedbackRepository,
+            ringerFeedbackRepository = volumeDialogRingerFeedbackRepository,
         )
     }

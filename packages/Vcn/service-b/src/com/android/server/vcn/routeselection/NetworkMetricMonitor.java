@@ -44,8 +44,7 @@ import java.util.concurrent.Executor;
  *
  * <p>This class is flag gated by "network_metric_monitor"
  */
-// TODO(b/374174952): Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
-@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@TargetApi(Build.VERSION_CODES.BAKLAVA)
 public abstract class NetworkMetricMonitor implements AutoCloseable {
     private static final String TAG = NetworkMetricMonitor.class.getSimpleName();
 
@@ -165,7 +164,7 @@ public abstract class NetworkMetricMonitor implements AutoCloseable {
         }
     }
 
-    /** Set the IpSecTransform that applied to the Network being monitored */
+    /** Set the IpSecTransform that is applied to the Network being monitored */
     public void setInboundTransform(@NonNull IpSecTransform inTransform) {
         setInboundTransformInternal(new IpSecTransformWrapper(inTransform));
     }

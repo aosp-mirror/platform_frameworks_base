@@ -189,7 +189,7 @@ public class DesktopAppCompatAspectRatioPolicy {
 
         final ActivityInfo info = mActivityRecord.info;
         final AppCompatAspectRatioOverrides aspectRatioOverrides =
-                mAppCompatOverrides.getAppCompatAspectRatioOverrides();
+                mAppCompatOverrides.getAspectRatioOverrides();
         if (shouldApplyUserMinAspectRatioOverride(task)) {
             return aspectRatioOverrides.getUserMinAspectRatio();
         }
@@ -266,7 +266,7 @@ public class DesktopAppCompatAspectRatioPolicy {
             return false;
         }
 
-        final int userAspectRatioCode = mAppCompatOverrides.getAppCompatAspectRatioOverrides()
+        final int userAspectRatioCode = mAppCompatOverrides.getAspectRatioOverrides()
                 .getUserMinAspectRatioOverrideCode();
 
         return userAspectRatioCode != USER_MIN_ASPECT_RATIO_UNSET
@@ -281,7 +281,7 @@ public class DesktopAppCompatAspectRatioPolicy {
         // We use mBooleanPropertyAllowUserAspectRatioOverride to allow apps to opt-out which has
         // effect only if explicitly false. If mBooleanPropertyAllowUserAspectRatioOverride is null,
         // the current app doesn't opt-out so the first part of the predicate is true.
-        return mAppCompatOverrides.getAppCompatAspectRatioOverrides()
+        return mAppCompatOverrides.getAspectRatioOverrides()
                     .getAllowUserAspectRatioOverridePropertyValue()
                 && mAppCompatConfiguration.isUserAppAspectRatioSettingsEnabled()
                 && task.mDisplayContent.getIgnoreOrientationRequest();

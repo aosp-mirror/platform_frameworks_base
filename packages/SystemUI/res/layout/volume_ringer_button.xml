@@ -20,10 +20,9 @@
 
     <ImageButton
         android:id="@+id/volume_drawer_button"
-        android:layout_width="@dimen/volume_dialog_ringer_drawer_button_size"
-        android:layout_height="@dimen/volume_dialog_ringer_drawer_button_size"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:padding="@dimen/volume_dialog_ringer_drawer_button_icon_radius"
-        android:layout_marginBottom="@dimen/volume_dialog_components_spacing"
         android:contentDescription="@string/volume_ringer_mode"
         android:gravity="center"
         android:tint="@androidprv:color/materialColorOnSurface"

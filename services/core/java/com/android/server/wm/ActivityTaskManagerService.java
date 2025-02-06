@@ -77,7 +77,6 @@ import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_FOCUS;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_IMMERSIVE;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_LOCKTASK;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_TASKS;
-import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
 import static com.android.server.am.ActivityManagerService.STOCK_PM_FLAGS;
 import static com.android.server.am.ActivityManagerServiceDumpActivitiesProto.ROOT_WINDOW_CONTAINER;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.CONFIG_WILL_CHANGE;
@@ -510,7 +509,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         int changes;
         // If the activity was relaunched to match the new configuration.
         boolean activityRelaunched;
-        boolean mIsUpdating;
     }
 
     /** Current sequencing integer of the configuration, for skipping old configurations. */
@@ -1269,10 +1267,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     static boolean isSdkSandboxActivityIntent(Context context, Intent intent) {
-        return intent != null
-                && (sandboxActivitySdkBasedContext()
-                        ? SdkSandboxActivityAuthority.isSdkSandboxActivityIntent(context, intent)
-                        : intent.isSandboxActivity(context));
+        return SdkSandboxActivityAuthority.isSdkSandboxActivityIntent(context, intent);
     }
 
     private int startActivityAsUser(IApplicationThread caller, String callingPackage,
@@ -2159,6 +2154,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    /**
+     * @return ehether the application could be universal resizeable on a large screen,
+     * ignoring any overrides
+     */
+    @Override
+    public boolean canBeUniversalResizeable(@NonNull ApplicationInfo appInfo) {
+        return ActivityRecord.canBeUniversalResizeable(appInfo, mWindowManager,
+                /* isLargeScreen */ true, /* forActivity */ false);
+    }
+
     @Override
     public void removeAllVisibleRecentTasks() {
         mAmInternal.enforceCallingPermission(REMOVE_TASKS, "removeAllVisibleRecentTasks()");
@@ -2983,37 +2988,44 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             throw new SecurityException("Requires permission "
                     + android.Manifest.permission.DEVICE_POWER);
         }
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                setLockScreenShownLocked(keyguardShowing, aodShowing);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
 
-        synchronized (mGlobalLock) {
-            final long ident = Binder.clearCallingIdentity();
-            if (mKeyguardShown != keyguardShowing) {
-                mKeyguardShown = keyguardShowing;
-                final Message msg = PooledLambda.obtainMessage(
-                        ActivityManagerInternal::reportCurKeyguardUsageEvent, mAmInternal,
-                        keyguardShowing);
-                mH.sendMessage(msg);
+    @GuardedBy("mGlobalLock")
+    void setLockScreenShownLocked(boolean keyguardShowing, boolean aodShowing) {
+        if (mKeyguardShown != keyguardShowing) {
+            mKeyguardShown = keyguardShowing;
+            final Message msg = PooledLambda.obtainMessage(
+                    ActivityManagerInternal::reportCurKeyguardUsageEvent, mAmInternal,
+                    keyguardShowing);
+            mH.sendMessage(msg);
+        }
+        // Always reset the state regardless of keyguard-showing change, because that means the
+        // unlock is either completed or canceled.
+        if ((mDemoteTopAppReasons & DEMOTE_TOP_REASON_DURING_UNLOCKING) != 0) {
+            mDemoteTopAppReasons &= ~DEMOTE_TOP_REASON_DURING_UNLOCKING;
+            // The scheduling group of top process was demoted by unlocking, so recompute
+            // to restore its real top priority if possible.
+            if (mTopApp != null) {
+                mTopApp.scheduleUpdateOomAdj();
             }
-            // Always reset the state regardless of keyguard-showing change, because that means the
-            // unlock is either completed or canceled.
-            if ((mDemoteTopAppReasons & DEMOTE_TOP_REASON_DURING_UNLOCKING) != 0) {
-                mDemoteTopAppReasons &= ~DEMOTE_TOP_REASON_DURING_UNLOCKING;
-                // The scheduling group of top process was demoted by unlocking, so recompute
-                // to restore its real top priority if possible.
-                if (mTopApp != null) {
-                    mTopApp.scheduleUpdateOomAdj();
-                }
-            }
-            try {
-                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "setLockScreenShown");
-                mRootWindowContainer.forAllDisplays(displayContent -> {
-                    mKeyguardController.setKeyguardShown(displayContent.getDisplayId(),
-                            keyguardShowing, aodShowing);
-                });
-                maybeHideLockedProfileActivityLocked();
-            } finally {
-                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-                Binder.restoreCallingIdentity(ident);
-            }
+        }
+        try {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "setLockScreenShown");
+            mRootWindowContainer.forAllDisplays(displayContent -> {
+                mKeyguardController.setKeyguardShown(displayContent.getDisplayId(),
+                        keyguardShowing, aodShowing);
+            });
+            maybeHideLockedProfileActivityLocked();
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
         mH.post(() -> {
@@ -4698,14 +4710,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (values != null) {
                 changes = updateGlobalConfigurationLocked(values, initLocale, persistent, userId);
                 mTmpUpdateConfigurationResult.changes = changes;
-                mTmpUpdateConfigurationResult.mIsUpdating = true;
             }
 
             if (!deferResume) {
                 kept = ensureConfigAndVisibilityAfterUpdate(starting, changes);
             }
         } finally {
-            mTmpUpdateConfigurationResult.mIsUpdating = false;
             continueWindowLayout();
         }
         mTmpUpdateConfigurationResult.activityRelaunched = !kept;

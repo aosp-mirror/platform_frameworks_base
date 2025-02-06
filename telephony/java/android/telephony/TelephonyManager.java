@@ -180,7 +180,7 @@ import java.util.stream.IntStream;
  * permission-protected. Your application cannot access the protected
  * information unless it has the appropriate permissions declared in
  * its manifest file. Where permissions apply, they are noted in the
- * the methods through which you access the protected information.
+ * methods through which you access the protected information.
  *
  * <p>TelephonyManager is intended for use on devices that implement
  * {@link android.content.pm.PackageManager#FEATURE_TELEPHONY FEATURE_TELEPHONY}. On devices
@@ -633,11 +633,14 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the multi SIM variant
-     * Returns DSDS for Dual SIM Dual Standby
-     * Returns DSDA for Dual SIM Dual Active
-     * Returns TSTS for Triple SIM Triple Standby
-     * Returns UNKNOWN for others
+     * Returns the multi SIM variant.
+     *
+     * <ul>
+     *   <li>Returns DSDS for Dual SIM Dual Standby.</li>
+     *   <li>Returns DSDA for Dual SIM Dual Active.</li>
+     *   <li>Returns TSTS for Triple SIM Triple Standby.</li>
+     *   <li>Returns UNKNOWN for others.</li>
+     * </ul>
      */
     /** {@hide} */
     @UnsupportedAppUsage
@@ -657,10 +660,14 @@ public class TelephonyManager {
 
     /**
      * Returns the number of phones available.
-     * Returns 0 if none of voice, sms, data is not supported
-     * Returns 1 for Single standby mode (Single SIM functionality).
-     * Returns 2 for Dual standby mode (Dual SIM functionality).
-     * Returns 3 for Tri standby mode (Tri SIM functionality).
+     *
+     * <ul>
+     *   <li>Returns 0 if none of voice, sms, data is supported.</li>
+     *   <li>Returns 1 for Single standby mode (Single SIM functionality).</li>
+     *   <li>Returns 2 for Dual standby mode (Dual SIM functionality).</li>
+     *   <li>Returns 3 for Tri standby mode (Tri SIM functionality).</li>
+     * </ul>
+     *
      * @deprecated Use {@link #getActiveModemCount} instead.
      */
     @Deprecated
@@ -671,10 +678,12 @@ public class TelephonyManager {
     /**
      * Returns the number of logical modems currently configured to be activated.
      *
-     * Returns 0 if none of voice, sms, data is not supported
-     * Returns 1 for Single standby mode (Single SIM functionality).
-     * Returns 2 for Dual standby mode (Dual SIM functionality).
-     * Returns 3 for Tri standby mode (Tri SIM functionality).
+     * <ul>
+     *   <li>Returns 0 if none of voice, sms, data is supported.</li>
+     *   <li>Returns 1 for Single standby mode (Single SIM functionality).</li>
+     *   <li>Returns 2 for Dual standby mode (Dual SIM functionality).</li>
+     *   <li>Returns 3 for Tri standby mode (Tri SIM functionality).</li>
+     * </ul>
      */
     public int getActiveModemCount() {
         int modemCount = 1;
@@ -2438,6 +2447,7 @@ public class TelephonyManager {
      * as follows:
      *
      * <ul>
+     *     <li>If the device is running Android 25Q2 or later, then null is returned.</li>
      *     <li>If the calling app's target SDK is API level 28 or lower and the app has the
      *     READ_PHONE_STATE permission then null is returned.</li>
      *     <li>If the calling app's target SDK is API level 28 or lower and the app does not have
@@ -2446,7 +2456,8 @@ public class TelephonyManager {
      * </ul>
      *
      * @deprecated Legacy CDMA is unsupported.
-     * @throws UnsupportedOperationException If the device does not have
+     * @throws UnsupportedOperationException If the device is running
+     *          Android 25Q1 or earlier and does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_CDMA}.
      */
     @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
@@ -19369,7 +19380,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_IDENTIFIER_DISCLOSURE_TRANSPARENCY)
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
     public void setEnableCellularIdentifierDisclosureNotifications(boolean enable) {
@@ -19395,7 +19405,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_IDENTIFIER_DISCLOSURE_TRANSPARENCY)
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @SystemApi
     public boolean isCellularIdentifierDisclosureNotificationsEnabled() {
@@ -19423,7 +19432,6 @@ public class TelephonyManager {
      * and integrity algorithms in use
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_MODEM_CIPHER_TRANSPARENCY)
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
     public void setNullCipherNotificationsEnabled(boolean enable) {
@@ -19450,7 +19458,6 @@ public class TelephonyManager {
      * and integrity algorithms in use
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_MODEM_CIPHER_TRANSPARENCY)
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @SystemApi
     public boolean isNullCipherNotificationsEnabled() {

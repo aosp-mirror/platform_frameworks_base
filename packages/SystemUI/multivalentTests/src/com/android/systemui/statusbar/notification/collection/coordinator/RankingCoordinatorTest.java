@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.platform.test.annotations.EnableFlags;
 
 import androidx.annotation.Nullable;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -61,6 +62,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -83,6 +85,7 @@ public class RankingCoordinatorTest extends SysuiTestCase {
 
     private NotificationEntry mEntry;
     private NotifFilter mCapturedSuspendedFilter;
+    private NotifFilter mCapturedDndStatelessFilter;
     private NotifFilter mCapturedDozingFilter;
     private StatusBarStateController.StateListener mStatusBarStateCallback;
     private RankingCoordinator mRankingCoordinator;
@@ -107,6 +110,15 @@ public class RankingCoordinatorTest extends SysuiTestCase {
         mRankingCoordinator.attach(mNotifPipeline);
         verify(mNotifPipeline, times(2)).addPreGroupFilter(mNotifFilterCaptor.capture());
         mCapturedSuspendedFilter = mNotifFilterCaptor.getAllValues().get(0);
+        if (com.android.systemui.Flags.notificationAmbientSuppressionAfterInflation()) {
+            verify(mNotifPipeline).addFinalizeFilter(mNotifFilterCaptor.capture());
+            mCapturedDndStatelessFilter = mNotifFilterCaptor.getAllValues().get(1);
+            mCapturedDozingFilter = mNotifFilterCaptor.getAllValues().get(2);
+        } else {
+            verify(mNotifPipeline, never()).addFinalizeFilter(any());
+            mCapturedDndStatelessFilter = null;
+            mCapturedDozingFilter = mNotifFilterCaptor.getAllValues().get(1);
+        }
         mCapturedDozingFilter = mNotifFilterCaptor.getAllValues().get(1);
         mCapturedDozingFilter.setInvalidationListener(mInvalidationListener);
 
@@ -159,6 +171,40 @@ public class RankingCoordinatorTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_NOTIFICATION_AMBIENT_SUPPRESSION_AFTER_INFLATION)
+    public void filterStatelessVisualEffectsSuppression() {
+        Mockito.clearInvocations(mStatusBarStateController);
+
+        // WHEN should suppress ambient
+        mEntry.setRanking(getRankingForUnfilteredNotif()
+                .setSuppressedVisualEffects(SUPPRESSED_EFFECT_AMBIENT)
+                .build());
+
+        // THEN do not filter out the notification
+        assertFalse(mCapturedDozingFilter.shouldFilterOut(mEntry, 0));
+
+        // WHEN should suppress list
+        mEntry.setRanking(getRankingForUnfilteredNotif()
+                .setSuppressedVisualEffects(SUPPRESSED_EFFECT_NOTIFICATION_LIST)
+                .build());
+
+        // THEN do not filter out the notification
+        assertFalse(mCapturedDozingFilter.shouldFilterOut(mEntry, 0));
+
+        // WHEN should suppress both ambient and list
+        mEntry.setRanking(getRankingForUnfilteredNotif()
+                .setSuppressedVisualEffects(
+                    SUPPRESSED_EFFECT_AMBIENT | SUPPRESSED_EFFECT_NOTIFICATION_LIST)
+                .build());
+
+        // THEN we should filter out the notification!
+        assertTrue(mCapturedDozingFilter.shouldFilterOut(mEntry, 0));
+
+        // VERIFY that we don't check the dozing state
+        verify(mStatusBarStateController, never()).isDozing();
+    }
+
+    @Test
     public void filterDozingSuppressAmbient() {
         // GIVEN should suppress ambient
         mEntry.setRanking(getRankingForUnfilteredNotif()
@@ -200,7 +246,7 @@ public class RankingCoordinatorTest extends SysuiTestCase {
 
         // WHEN it's not dozing (showing the notification list)
         when(mStatusBarStateController.isDozing()).thenReturn(false);
-        
+
         // THEN filter out the notification
         assertTrue(mCapturedDozingFilter.shouldFilterOut(mEntry, 0));
     }

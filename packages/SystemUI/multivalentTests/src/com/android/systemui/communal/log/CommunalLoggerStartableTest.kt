@@ -31,7 +31,6 @@ import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
@@ -48,7 +47,6 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class CommunalLoggerStartableTest : SysuiTestCase() {
     @Mock private lateinit var uiEventLogger: UiEventLogger

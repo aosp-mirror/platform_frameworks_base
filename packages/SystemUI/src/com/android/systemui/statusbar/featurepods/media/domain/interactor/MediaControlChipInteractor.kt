@@ -21,6 +21,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.media.controls.data.repository.MediaFilterRepository
 import com.android.systemui.media.controls.shared.model.MediaCommonModel
 import com.android.systemui.media.controls.shared.model.MediaData
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.featurepods.media.shared.model.MediaControlChipModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -71,5 +72,10 @@ constructor(
 }
 
 private fun MediaData.toMediaControlChipModel(): MediaControlChipModel {
-    return MediaControlChipModel(appIcon = this.appIcon, appName = this.app, songName = this.song)
+    return MediaControlChipModel(
+        appIcon = this.appIcon,
+        appName = this.app,
+        songName = this.song,
+        playOrPause = this.semanticActions?.getActionById(R.id.actionPlayPause),
+    )
 }

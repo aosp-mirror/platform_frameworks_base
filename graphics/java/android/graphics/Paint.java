@@ -16,9 +16,10 @@
 
 package android.graphics;
 
+import static com.android.text.flags.Flags.FLAG_DEPRECATE_ELEGANT_TEXT_HEIGHT_API;
 import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
 import static com.android.text.flags.Flags.FLAG_LETTER_SPACING_JUSTIFICATION;
-import static com.android.text.flags.Flags.FLAG_DEPRECATE_ELEGANT_TEXT_HEIGHT_API;
+import static com.android.text.flags.Flags.FLAG_TYPEFACE_REDESIGN_READONLY;
 import static com.android.text.flags.Flags.FLAG_VERTICAL_TEXT_LAYOUT;
 
 import android.annotation.ColorInt;
@@ -34,7 +35,6 @@ import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontVariationAxis;
 import android.graphics.text.TextRunShaper;
 import android.os.Build;
@@ -58,6 +58,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -97,6 +98,7 @@ public class Paint {
     private LocaleList      mLocales;
     private String          mFontFeatureSettings;
     private String          mFontVariationSettings;
+    private String          mFontVariationOverride;
 
     private float           mShadowLayerRadius;
     private float           mShadowLayerDx;
@@ -2100,14 +2102,6 @@ public class Paint {
     }
 
     /**
-     * A change ID for new font variation settings management.
-     * @hide
-     */
-    @ChangeId
-    @EnabledSince(targetSdkVersion = 36)
-    public static final long NEW_FONT_VARIATION_MANAGEMENT = 361260253L;
-
-    /**
      * Sets TrueType or OpenType font variation settings. The settings string is constructed from
      * multiple pairs of axis tag and style values. The axis tag must contain four ASCII characters
      * and must be wrapped with single quotes (U+0027) or double quotes (U+0022). Axis strings that
@@ -2136,16 +2130,12 @@ public class Paint {
      * </li>
      * </ul>
      *
-     * <p>Note: If the application that targets API 35 or before, this function mutates the
-     * underlying typeface instance.
-     *
      * @param fontVariationSettings font variation settings. You can pass null or empty string as
      *                              no variation settings.
      *
-     * @return If the application that targets API 36 or later and is running on devices API 36 or
-     *         later, this function always returns true. Otherwise, this function returns true if
-     *         the given settings is effective to at least one font file underlying this typeface.
-     *         This function also returns true for empty settings string. Otherwise returns false.
+     * @return true if the given settings is effective to at least one font file underlying this
+     *         typeface. This function also returns true for empty settings string. Otherwise
+     *         returns false
      *
      * @throws IllegalArgumentException If given string is not a valid font variation settings
      *                                  format
@@ -2153,40 +2143,13 @@ public class Paint {
      * @see #getFontVariationSettings()
      * @see FontVariationAxis
      */
+    // Add following API description once the setFontVariationOverride becomes public.
+    // This method generates new variation instance of the {@link Typeface} instance and set it to
+    // this object. Therefore, subsequent {@link #setTypeface(Typeface)} call will clear the font
+    // variation settings. Also, creating variation instance of the Typeface requires non trivial
+    // amount of time and memories, therefore consider using
+    // {@link #setFontVariationOverride(String, int)} for better performance.
     public boolean setFontVariationSettings(String fontVariationSettings) {
-        return setFontVariationSettings(fontVariationSettings, 0 /* wght adjust */);
-    }
-
-    /**
-     * Set font variation settings with weight adjustment
-     * @hide
-     */
-    public boolean setFontVariationSettings(String fontVariationSettings, int wghtAdjust) {
-        final boolean useFontVariationStore = Flags.typefaceRedesignReadonly()
-                && CompatChanges.isChangeEnabled(NEW_FONT_VARIATION_MANAGEMENT);
-        if (useFontVariationStore) {
-            FontVariationAxis[] axes =
-                    FontVariationAxis.fromFontVariationSettings(fontVariationSettings);
-            if (axes == null) {
-                nSetFontVariationOverride(mNativePaint, 0);
-                mFontVariationSettings = null;
-                return true;
-            }
-
-            long builderPtr = nCreateFontVariationBuilder(axes.length);
-            for (int i = 0; i < axes.length; ++i) {
-                int tag = axes[i].getOpenTypeTagValue();
-                float value = axes[i].getStyleValue();
-                if (tag == 0x77676874 /* wght */) {
-                    value = Math.clamp(value + wghtAdjust,
-                            FontStyle.FONT_WEIGHT_MIN, FontStyle.FONT_WEIGHT_MAX);
-                }
-                nAddFontVariationToBuilder(builderPtr, tag, value);
-            }
-            nSetFontVariationOverride(mNativePaint, builderPtr);
-            mFontVariationSettings = fontVariationSettings;
-            return true;
-        }
         final String settings = TextUtils.nullIfEmpty(fontVariationSettings);
         if (settings == mFontVariationSettings
                 || (settings != null && settings.equals(mFontVariationSettings))) {
@@ -2217,6 +2180,70 @@ public class Paint {
         setTypefaceWithoutWarning(
                 Typeface.createFromTypefaceWithVariation(targetTypeface, filteredAxes));
         return true;
+    }
+
+    /**
+     * Sets TrueType or OpenType font variation settings for overriding.
+     *
+     * The settings string is constructed from multiple pairs of axis tag and style values. The axis
+     * tag must contain four ASCII characters and must be wrapped with single quotes (U+0027) or
+     * double quotes (U+0022). Axis strings that are longer or shorter than four characters, or
+     * contain characters outside of U+0020..U+007E are invalid.
+     *
+     * If invalid font variation settings is provided, this method does nothing and returning false
+     * with printing error message to the logcat.
+     *
+     * Different from {@link #setFontVariationSettings(String)}, this overrides the font variation
+     * settings which is already assigned to the font instance. For example, if the underlying font
+     * is configured as {@code 'wght' 500, 'ital' 1}, and if the override is specified as
+     * {@code 'wght' 700, `wdth` 150}, then the effective font variation setting is
+     * {@code `wght' 700, 'ital' 1, 'wdth' 150}. The `wght` value is updated by override, 'ital'
+     * value is preserved because no overrides, and `wdth` value is added by override. If the font
+     * variation override is empty or null, nothing overrides and original font variation settings
+     * assigned to the font instance is used as it is.
+     *
+     * @param fontVariationOverride font variation override. You can pass null or empty string for
+     *                              clearing font variation override.
+     *
+     * @return true if the provided font variation settings is valid. Otherwise returns false.
+     *
+     * @see #getFontVariationSettings()
+     * @see #setFontVariationSettings(String)
+     * @see #getFontVariationOverride()
+     * @see FontVariationAxis
+     */
+    @FlaggedApi(FLAG_TYPEFACE_REDESIGN_READONLY)
+    public boolean setFontVariationOverride(@Nullable String fontVariationOverride) {
+        if (Objects.equals(fontVariationOverride, mFontVariationOverride)) {
+            return true;
+        }
+
+        List<FontVariationAxis> axes;
+        try {
+            axes = FontVariationAxis.fromFontVariationSettingsForList(fontVariationOverride);
+        } catch (IllegalArgumentException e) {
+            Log.i(TAG, "failed to parse font variation settings.", e);
+            return false;
+        }
+        long builderPtr = nCreateFontVariationBuilder(axes.size());
+        for (int i = 0; i < axes.size(); ++i) {
+            FontVariationAxis axis = axes.get(i);
+            nAddFontVariationToBuilder(
+                    builderPtr, axis.getOpenTypeTagValue(), axis.getStyleValue());
+        }
+        nSetFontVariationOverride(mNativePaint, builderPtr);
+        mFontVariationOverride = fontVariationOverride;
+        return true;
+    }
+
+    /**
+     * Gets the current font variation override value.
+     *
+     * @return a current font variation override value.
+     */
+    @FlaggedApi(FLAG_TYPEFACE_REDESIGN_READONLY)
+    public @Nullable String getFontVariationOverride() {
+        return mFontVariationOverride;
     }
 
     /**

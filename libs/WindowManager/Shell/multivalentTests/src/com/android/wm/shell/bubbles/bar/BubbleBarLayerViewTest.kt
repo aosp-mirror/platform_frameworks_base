@@ -36,7 +36,6 @@ import com.android.internal.protolog.ProtoLog
 import com.android.internal.statusbar.IStatusBarService
 import com.android.wm.shell.R
 import com.android.wm.shell.ShellTaskOrganizer
-import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.BubbleController
 import com.android.wm.shell.bubbles.BubbleData
@@ -44,13 +43,13 @@ import com.android.wm.shell.bubbles.BubbleDataRepository
 import com.android.wm.shell.bubbles.BubbleExpandedViewManager
 import com.android.wm.shell.bubbles.BubbleLogger
 import com.android.wm.shell.bubbles.BubblePositioner
+import com.android.wm.shell.bubbles.BubbleResizabilityChecker
 import com.android.wm.shell.bubbles.Bubbles.SysuiProxy
 import com.android.wm.shell.bubbles.FakeBubbleExpandedViewManager
 import com.android.wm.shell.bubbles.FakeBubbleFactory
 import com.android.wm.shell.bubbles.FakeBubbleTaskViewFactory
 import com.android.wm.shell.bubbles.UiEventSubject.Companion.assertThat
 import com.android.wm.shell.bubbles.animation.AnimatableScaleMatrix
-import com.android.wm.shell.bubbles.properties.BubbleProperties
 import com.android.wm.shell.bubbles.storage.BubblePersistentRepository
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayImeController
@@ -58,12 +57,14 @@ import com.android.wm.shell.common.DisplayInsetsController
 import com.android.wm.shell.common.FloatingContentCoordinator
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.common.TaskStackListenerImpl
+import com.android.wm.shell.common.TestShellExecutor
 import com.android.wm.shell.shared.TransactionPool
 import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
+import com.android.wm.shell.taskview.TaskViewRepository
 import com.android.wm.shell.taskview.TaskViewTransitions
 import com.android.wm.shell.transition.Transitions
 import com.google.common.truth.Truth.assertThat
@@ -194,11 +195,12 @@ class BubbleBarLayerViewTest {
             mainExecutor,
             mock<Handler>(),
             bgExecutor,
+            mock<TaskViewRepository>(),
             mock<TaskViewTransitions>(),
             mock<Transitions>(),
             SyncTransactionQueue(TransactionPool(), mainExecutor),
             mock<IWindowManager>(),
-            mock<BubbleProperties>(),
+            BubbleResizabilityChecker()
         )
     }
 

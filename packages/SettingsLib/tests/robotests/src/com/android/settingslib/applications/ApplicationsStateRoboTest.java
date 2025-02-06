@@ -16,6 +16,7 @@
 
 package com.android.settingslib.applications;
 
+import static android.content.pm.Flags.FLAG_REMOVE_HIDDEN_MODULE_USAGE;
 import static android.content.pm.Flags.FLAG_PROVIDE_INFO_OF_APK_IN_APEX;
 import static android.os.UserHandle.MU_ENABLED;
 import static android.os.UserHandle.USER_SYSTEM;
@@ -59,6 +60,8 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.text.TextUtils;
 import android.util.IconDrawableFactory;
@@ -204,6 +207,7 @@ public class ApplicationsStateRoboTest {
             info.setPackageName(packageName);
             info.setApkInApexPackageNames(Collections.singletonList(apexPackageName));
             // will treat any app with package name that contains "hidden" as hidden module
+            // TODO(b/382016780): to be removed after flag cleanup.
             info.setHidden(!TextUtils.isEmpty(packageName) && packageName.contains("hidden"));
             return info;
         }
@@ -414,6 +418,7 @@ public class ApplicationsStateRoboTest {
     }
 
     @Test
+    @DisableFlags({FLAG_REMOVE_HIDDEN_MODULE_USAGE})
     public void onResume_shouldNotIncludeSystemHiddenModule() {
         mSession.onResume();
 
@@ -421,6 +426,18 @@ public class ApplicationsStateRoboTest {
         assertThat(mApplications).hasSize(2);
         assertThat(mApplications.get(0).packageName).isEqualTo("test.package.1");
         assertThat(mApplications.get(1).packageName).isEqualTo("test.package.3");
+    }
+
+    @Test
+    @EnableFlags({FLAG_REMOVE_HIDDEN_MODULE_USAGE})
+    public void onResume_shouldIncludeSystemModule() {
+        mSession.onResume();
+
+        final List<ApplicationInfo> mApplications = mApplicationsState.mApplications;
+        assertThat(mApplications).hasSize(3);
+        assertThat(mApplications.get(0).packageName).isEqualTo("test.package.1");
+        assertThat(mApplications.get(1).packageName).isEqualTo("test.hidden.module.2");
+        assertThat(mApplications.get(2).packageName).isEqualTo("test.package.3");
     }
 
     @Test
@@ -832,6 +849,7 @@ public class ApplicationsStateRoboTest {
         mApplicationsState.mEntriesMap.clear();
         ApplicationInfo appInfo = createApplicationInfo(PKG_1, /* uid= */ 0);
         mApplicationsState.mApplications.add(appInfo);
+        // TODO(b/382016780): to be removed after flag cleanup.
         mApplicationsState.mSystemModules.put(PKG_1, /* value= */ false);
 
         assertThat(mApplicationsState.getEntry(PKG_1, /* userId= */ 0).info.packageName)
@@ -839,6 +857,7 @@ public class ApplicationsStateRoboTest {
     }
 
     @Test
+    @DisableFlags({FLAG_REMOVE_HIDDEN_MODULE_USAGE})
     public void isHiddenModule_hasApkInApexInfo_shouldSupportHiddenApexPackage() {
         mSetFlagsRule.enableFlags(FLAG_PROVIDE_INFO_OF_APK_IN_APEX);
         ApplicationsState.sInstance = null;
@@ -853,6 +872,7 @@ public class ApplicationsStateRoboTest {
     }
 
     @Test
+    @DisableFlags({FLAG_REMOVE_HIDDEN_MODULE_USAGE})
     public void isHiddenModule_noApkInApexInfo_onlySupportHiddenModule() {
         mSetFlagsRule.disableFlags(FLAG_PROVIDE_INFO_OF_APK_IN_APEX);
         ApplicationsState.sInstance = null;

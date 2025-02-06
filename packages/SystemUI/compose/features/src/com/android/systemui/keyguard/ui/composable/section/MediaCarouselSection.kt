@@ -19,12 +19,11 @@ package com.android.systemui.keyguard.ui.composable.section
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardMediaViewModel
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
@@ -38,15 +37,18 @@ class MediaCarouselSection
 constructor(
     private val mediaCarouselController: MediaCarouselController,
     @param:Named(MediaModule.KEYGUARD) private val mediaHost: MediaHost,
-    private val keyguardMediaViewModel: KeyguardMediaViewModel,
+    private val keyguardMediaViewModelFactory: KeyguardMediaViewModel.Factory,
 ) {
 
     @Composable
-    fun SceneScope.KeyguardMediaCarousel(
+    fun ContentScope.KeyguardMediaCarousel(
         isShadeLayoutWide: Boolean,
         modifier: Modifier = Modifier,
     ) {
-        val isMediaVisible by keyguardMediaViewModel.isMediaVisible.collectAsStateWithLifecycle()
+        val viewModel =
+            rememberViewModel(traceName = "KeyguardMediaCarousel") {
+                keyguardMediaViewModelFactory.create()
+            }
         val horizontalPadding =
             if (isShadeLayoutWide) {
                 dimensionResource(id = R.dimen.notification_side_paddings)
@@ -55,7 +57,7 @@ constructor(
                     dimensionResource(id = R.dimen.notification_panel_margin_horizontal)
             }
         MediaCarousel(
-            isVisible = isMediaVisible,
+            isVisible = viewModel.isMediaVisible,
             mediaHost = mediaHost,
             modifier = modifier.fillMaxWidth().padding(horizontal = horizontalPadding),
             carouselController = mediaCarouselController,

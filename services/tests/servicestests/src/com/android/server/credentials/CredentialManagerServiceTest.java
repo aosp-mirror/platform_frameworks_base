@@ -51,20 +51,22 @@ public final class CredentialManagerServiceTest {
 
     @Test
     public void getStoredProviders_emptyValue_success() {
-        Set<String> providers = CredentialManagerService.getStoredProviders("", "");
+        Set<String> providers = CredentialManagerService.getStoredProvidersExceptPackage(
+                "", "");
         assertThat(providers.size()).isEqualTo(0);
     }
 
     @Test
     public void getStoredProviders_nullValue_success() {
-        Set<String> providers = CredentialManagerService.getStoredProviders(null, null);
+        Set<String> providers = CredentialManagerService.getStoredProvidersExceptPackage(
+                null, null);
         assertThat(providers.size()).isEqualTo(0);
     }
 
     @Test
     public void getStoredProviders_success() {
         Set<String> providers =
-                CredentialManagerService.getStoredProviders(
+                CredentialManagerService.getStoredProvidersExceptPackage(
                         "com.example.test/.TestActivity:com.example.test/.TestActivity2:"
                                 + "com.example.test2/.TestActivity:blank",
                         "com.example.test");
@@ -74,6 +76,7 @@ public final class CredentialManagerServiceTest {
 
     @Test
     public void onProviderRemoved_success() {
+        int userId = UserHandle.myUserId();
         setSettingsKey(
                 Settings.Secure.AUTOFILL_SERVICE,
                 CredentialManagerService.AUTOFILL_PLACEHOLDER_VALUE);
@@ -85,7 +88,7 @@ public final class CredentialManagerServiceTest {
                 "com.example.test/com.example.test.TestActivity");
 
         CredentialManagerService.updateProvidersWhenPackageRemoved(
-                mSettingsWrapper, "com.example.test");
+                mSettingsWrapper, "com.example.test", userId);
 
         assertThat(getSettingsKey(Settings.Secure.AUTOFILL_SERVICE)).isEqualTo("");
         assertThat(getSettingsKey(Settings.Secure.CREDENTIAL_SERVICE))
@@ -95,6 +98,7 @@ public final class CredentialManagerServiceTest {
 
     @Test
     public void onProviderRemoved_notPrimaryRemoved_success() {
+        int userId = UserHandle.myUserId();
         final String testCredentialPrimaryValue = "com.example.test/com.example.test.TestActivity";
         final String testCredentialValue =
                 "com.example.test/com.example.test.TestActivity:com.example.test2/com.example.test2.TestActivity";
@@ -106,7 +110,7 @@ public final class CredentialManagerServiceTest {
         setSettingsKey(Settings.Secure.CREDENTIAL_SERVICE_PRIMARY, testCredentialPrimaryValue);
 
         CredentialManagerService.updateProvidersWhenPackageRemoved(
-                mSettingsWrapper, "com.example.test3");
+                mSettingsWrapper, "com.example.test3", userId);
 
         // Since the provider removed was not a primary provider then we should do nothing.
         assertThat(getSettingsKey(Settings.Secure.AUTOFILL_SERVICE))
@@ -120,6 +124,7 @@ public final class CredentialManagerServiceTest {
 
     @Test
     public void onProviderRemoved_isAlsoAutofillProvider_success() {
+        int userId = UserHandle.myUserId();
         setSettingsKey(
                 Settings.Secure.AUTOFILL_SERVICE,
                 "com.example.test/com.example.test.AutofillProvider");
@@ -131,7 +136,7 @@ public final class CredentialManagerServiceTest {
                 "com.example.test/com.example.test.TestActivity");
 
         CredentialManagerService.updateProvidersWhenPackageRemoved(
-                mSettingsWrapper, "com.example.test");
+                mSettingsWrapper, "com.example.test", userId);
 
         assertThat(getSettingsKey(Settings.Secure.AUTOFILL_SERVICE)).isEqualTo("");
         assertThat(getSettingsKey(Settings.Secure.CREDENTIAL_SERVICE))
@@ -141,6 +146,7 @@ public final class CredentialManagerServiceTest {
 
     @Test
     public void onProviderRemoved_notPrimaryRemoved_isAlsoAutofillProvider_success() {
+        int userId = UserHandle.myUserId();
         final String testCredentialPrimaryValue = "com.example.test/com.example.test.TestActivity";
         final String testCredentialValue =
                 "com.example.test/com.example.test.TestActivity:com.example.test2/com.example.test2.TestActivity";
@@ -151,7 +157,7 @@ public final class CredentialManagerServiceTest {
         setSettingsKey(Settings.Secure.CREDENTIAL_SERVICE_PRIMARY, testCredentialPrimaryValue);
 
         CredentialManagerService.updateProvidersWhenPackageRemoved(
-                mSettingsWrapper, "com.example.test3");
+                mSettingsWrapper, "com.example.test3", userId);
 
         // Since the provider removed was not a primary provider then we should do nothing.
         assertCredentialPropertyEquals(

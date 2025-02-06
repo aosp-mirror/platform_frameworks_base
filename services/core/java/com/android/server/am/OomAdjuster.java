@@ -156,7 +156,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -440,6 +439,12 @@ public class OomAdjuster {
     private static final long NO_FOLLOW_UP_TIME = Long.MAX_VALUE;
     @GuardedBy("mService")
     private long mNextFollowUpUpdateUptimeMs = NO_FOLLOW_UP_TIME;
+
+    /**
+     * The oom score a client needs to be to raise a service with UI out of cache.
+     */
+    private static final int CACHING_UI_SERVICE_CLIENT_ADJ_THRESHOLD =
+            Flags.raiseBoundUiServiceThreshold() ? SERVICE_ADJ : PERCEPTIBLE_APP_ADJ;
 
     @VisibleForTesting
     public static class Injector {
@@ -1676,8 +1681,11 @@ public class OomAdjuster {
                     }
                     if ((uidChange & UidRecord.CHANGE_PROCSTATE) != 0
                             || (uidChange & UidRecord.CHANGE_CAPABILITY) != 0) {
-                        mService.noteUidProcessState(uidRec.getUid(), uidRec.getCurProcState(),
-                                uidRec.getCurCapability());
+                        mService.noteUidProcessStateAndCapability(uidRec.getUid(),
+                                uidRec.getCurProcState(), uidRec.getCurCapability());
+                    }
+                    if ((uidChange & UidRecord.CHANGE_PROCSTATE) != 0) {
+                        mService.noteUidProcessState(uidRec.getUid(), uidRec.getCurProcState());
                     }
                     if (uidRec.hasForegroundServices()) {
                         mService.mServices.foregroundServiceProcStateChangedLocked(uidRec);
@@ -2879,15 +2887,12 @@ public class OomAdjuster {
                 }
             }
             if (adj > clientAdj) {
-                // If this process has recently shown UI, and
-                // the process that is binding to it is less
-                // important than being visible, then we don't
-                // care about the binding as much as we care
-                // about letting this process get into the LRU
-                // list to be killed and restarted if needed for
-                // memory.
+                // If this process has recently shown UI, and the process that is binding to it
+                // is less important than a state that can be actively running, then we don't
+                // care about the binding as much as we care about letting this process get into
+                // the LRU list to be killed and restarted if needed for memory.
                 if (state.hasShownUi() && !state.getCachedIsHomeProcess()
-                        && clientAdj > PERCEPTIBLE_APP_ADJ) {
+                        && clientAdj > CACHING_UI_SERVICE_CLIENT_ADJ_THRESHOLD) {
                     if (adj >= CACHED_APP_MIN_ADJ) {
                         adjType = "cch-bound-ui-services";
                     }
@@ -3401,13 +3406,10 @@ public class OomAdjuster {
     }
 
     private static int getCpuCapability(ProcessRecord app, long nowUptime) {
+        // Note: persistent processes get all capabilities, including CPU_TIME.
         final UidRecord uidRec = app.getUidRecord();
         if (uidRec != null && uidRec.isCurAllowListed()) {
-            // Process has user visible activities.
-            return PROCESS_CAPABILITY_CPU_TIME;
-        }
-        if (UserHandle.isCore(app.uid)) {
-            // Make sure all system components are not frozen.
+            // Process is in the power allowlist.
             return PROCESS_CAPABILITY_CPU_TIME;
         }
         if (app.mState.getCachedHasVisibleActivities()) {
@@ -3416,6 +3418,12 @@ public class OomAdjuster {
         }
         if (app.mServices.hasUndemotedShortForegroundService(nowUptime)) {
             // It running a short fgs, just give it cpu time.
+            return PROCESS_CAPABILITY_CPU_TIME;
+        }
+        if (app.mReceivers.numberOfCurReceivers() > 0) {
+            return PROCESS_CAPABILITY_CPU_TIME;
+        }
+        if (app.hasActiveInstrumentation()) {
             return PROCESS_CAPABILITY_CPU_TIME;
         }
         // TODO(b/370817323): Populate this method with all of the reasons to keep a process
@@ -4049,7 +4057,6 @@ public class OomAdjuster {
                 + " mNewNumServiceProcs=" + mNewNumServiceProcs);
     }
 
-    @GuardedBy("mProcLock")
     void dumpCachedAppOptimizerSettings(PrintWriter pw) {
         mCachedAppOptimizer.dump(pw);
     }
@@ -4099,6 +4106,7 @@ public class OomAdjuster {
             return;
         }
 
+        final boolean freezePolicy = getFreezePolicy(app);
         final ProcessCachedOptimizerRecord opt = app.mOptRecord;
         final ProcessStateRecord state = app.mState;
         if (Flags.traceUpdateAppFreezeStateLsp()) {
@@ -4115,6 +4123,21 @@ public class OomAdjuster {
             if ((oomAdjChanged || shouldNotFreezeChanged || cpuCapabilityChanged)
                     && Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
                 Trace.instantForTrack(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        "FreezeLite",
+                        (opt.isFrozen() ? "F" : "-")
+                        + (opt.isPendingFreeze() ? "P" : "-")
+                        + (opt.isFreezeExempt() ? "E" : "-")
+                        + (opt.shouldNotFreeze() ? "N" : "-")
+                        + (hasCpuCapability ? "T" : "-")
+                        + (immediate ? "I" : "-")
+                        + (freezePolicy ? "Z" : "-")
+                        + (Flags.useCpuTimeCapability() ? "t" : "-")
+                        + (Flags.prototypeAggressiveFreezing() ? "a" : "-")
+                        + "/" + app.getPid()
+                        + "/" + state.getCurAdj()
+                        + "/" + oldOomAdj
+                        + "/" + opt.shouldNotFreezeReason());
+                Trace.instantForTrack(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                         CachedAppOptimizer.ATRACE_FREEZER_TRACK,
                         "updateAppFreezeStateLSP " + app.processName
                         + " pid: " + app.getPid()
@@ -4129,7 +4152,7 @@ public class OomAdjuster {
             }
         }
 
-        if (getFreezePolicy(app)) {
+        if (freezePolicy) {
             // This process should be frozen.
             if (immediate && !opt.isFrozen()) {
                 // And it will be frozen immediately.

@@ -50,7 +50,10 @@ import android.app.appsearch.observer.ObserverSpec;
 import android.app.appsearch.observer.SchemaChangeInfo;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.SigningInfo;
 import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.IBinder;
@@ -292,7 +295,8 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                     safeExecuteAppFunctionCallback,
                                     /* bindFlags= */ Context.BIND_AUTO_CREATE
                                             | Context.BIND_FOREGROUND_SERVICE,
-                                    callerBinder);
+                                    callerBinder,
+                                    callingUid);
                         })
                 .exceptionally(
                         ex -> {
@@ -444,7 +448,8 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             @NonNull ICancellationSignal cancellationSignalTransport,
             @NonNull SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback,
             int bindFlags,
-            @NonNull IBinder callerBinder) {
+            @NonNull IBinder callerBinder,
+            int callingUid) {
         CancellationSignal cancellationSignal =
                 CancellationSignal.fromTransport(cancellationSignalTransport);
         ICancellationCallback cancellationCallback =
@@ -465,7 +470,11 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                         new RunAppFunctionServiceCallback(
                                 requestInternal,
                                 cancellationCallback,
-                                safeExecuteAppFunctionCallback),
+                                safeExecuteAppFunctionCallback,
+                                getPackageSigningInfo(
+                                        targetUser,
+                                        requestInternal.getCallingPackage(),
+                                        callingUid)),
                         callerBinder);
 
         if (!bindServiceResult) {
@@ -475,6 +484,23 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                             AppFunctionException.ERROR_SYSTEM_ERROR,
                             "Failed to bind the AppFunctionService."));
         }
+    }
+
+    @NonNull
+    private SigningInfo getPackageSigningInfo(
+            @NonNull UserHandle targetUser, @NonNull String packageName, int uid) {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(targetUser);
+
+        PackageInfo packageInfo;
+        packageInfo =
+                Objects.requireNonNull(
+                        mPackageManagerInternal.getPackageInfo(
+                                packageName,
+                                PackageManager.GET_SIGNING_CERTIFICATES,
+                                uid,
+                                targetUser.getIdentifier()));
+        return Objects.requireNonNull(packageInfo.signingInfo);
     }
 
     private AppSearchManager getAppSearchManagerAsUser(@NonNull UserHandle userHandle) {

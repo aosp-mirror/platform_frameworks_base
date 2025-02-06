@@ -486,11 +486,6 @@ public final class KeyboardShortcuts {
                         R.string.keyboard_shortcut_group_system_shortcuts_helper),
                 KeyEvent.KEYCODE_SLASH,
                 KeyEvent.META_META_ON));
-        systemGroup.addItem(new KeyboardShortcutInfo(
-                mContext.getString(
-                        R.string.keyboard_shortcut_group_system_switch_input),
-                KeyEvent.KEYCODE_SPACE,
-                KeyEvent.META_META_ON));
         return systemGroup;
     }
 

@@ -25,7 +25,6 @@ import com.android.systemui.deviceentry.shared.model.AcquiredFaceAuthenticationS
 import com.android.systemui.deviceentry.shared.model.HelpFaceAuthenticationStatus
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterIsInstance
@@ -37,7 +36,6 @@ import com.android.app.tracing.coroutines.launchTraced as launch
  * events to determine whether a face auth event should be displayed to the user immediately or when
  * a [FaceManager.FACE_ERROR_TIMEOUT] is received.
  */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class FaceHelpMessageDeferralInteractor
 @Inject

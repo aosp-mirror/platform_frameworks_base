@@ -1,0 +1,27 @@
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <target android:name="time_group">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator android:duration="500" android:propertyName="translateX"
+                    android:startOffset="0" android:valueFrom="0" android:valueTo="1"
+                    android:valueType="floatType" />
+            </set>
+        </aapt:attr>
+    </target>
+    <aapt:attr name="android:drawable">
+        <vector android:width="36dp" android:height="36dp" android:viewportHeight="36"
+            android:viewportWidth="36">
+            <group android:name="_R_G">
+                <group android:name="_R_G_L_0_G" android:translateX="31.237000000000002"
+                    android:translateY="26.112000000000002">
+                    <path android:name="_R_G_L_0_G_D_0_P_0" android:pathData=" M-13.24 -13.11 C-10.48,-13.11 -8.24,-10.87 -8.24,-8.11 C-8.24,-5.35 -10.48,-3.11 -13.24,-3.11 C-16,-3.11 -18.24,-5.35 -18.24,-8.11 C-18.24,-10.87 -16,-13.11 -13.24,-13.11c "
+                        android:strokeAlpha="1" android:strokeColor="#ffffff"
+                        android:strokeLineCap="round" android:strokeLineJoin="round"
+                        android:strokeWidth="3" />
+                </group>
+            </group>
+            <group android:name="time_group" />
+        </vector>
+    </aapt:attr>
+</animated-vector>

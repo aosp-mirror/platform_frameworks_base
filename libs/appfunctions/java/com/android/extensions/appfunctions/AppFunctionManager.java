@@ -104,12 +104,7 @@ public final class AppFunctionManager {
      * <p>See {@link android.app.appfunctions.AppFunctionManager#executeAppFunction} for the
      * documented behaviour of this method.
      */
-    @RequiresPermission(
-            anyOf = {
-                Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
-                Manifest.permission.EXECUTE_APP_FUNCTIONS
-            },
-            conditional = true)
+    @RequiresPermission(Manifest.permission.EXECUTE_APP_FUNCTIONS)
     public void executeAppFunction(
             @NonNull ExecuteAppFunctionRequest sidecarRequest,
             @NonNull @CallbackExecutor Executor executor,
@@ -150,12 +145,7 @@ public final class AppFunctionManager {
      * <p>See {@link android.app.appfunctions.AppFunctionManager#isAppFunctionEnabled} for the
      * documented behaviour of this method.
      */
-    @RequiresPermission(
-            anyOf = {
-                Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
-                Manifest.permission.EXECUTE_APP_FUNCTIONS
-            },
-            conditional = true)
+    @RequiresPermission(Manifest.permission.EXECUTE_APP_FUNCTIONS)
     public void isAppFunctionEnabled(
             @NonNull String functionIdentifier,
             @NonNull String targetPackage,

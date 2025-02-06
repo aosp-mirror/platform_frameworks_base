@@ -26,13 +26,13 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.tiles.base.actions.FakeQSTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandlerSubject
 import com.android.systemui.qs.tiles.base.interactor.QSTileInputTestKtx
+import com.android.systemui.qs.tiles.dialog.InternetDetailsContentManager
+import com.android.systemui.qs.tiles.dialog.InternetDetailsViewModel
 import com.android.systemui.qs.tiles.dialog.InternetDialogManager
 import com.android.systemui.qs.tiles.dialog.WifiStateWorker
 import com.android.systemui.qs.tiles.impl.internet.domain.model.InternetTileModel
 import com.android.systemui.statusbar.connectivity.AccessPointController
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
-import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -40,9 +40,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.eq
-import org.mockito.Mock
-import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @SmallTest
@@ -54,15 +55,27 @@ class InternetTileUserActionInteractorTest : SysuiTestCase() {
 
     private lateinit var underTest: InternetTileUserActionInteractor
 
-    @Mock private lateinit var internetDialogManager: InternetDialogManager
-    @Mock private lateinit var wifiStateWorker: WifiStateWorker
-    @Mock private lateinit var controller: AccessPointController
+    private lateinit var internetDialogManager: InternetDialogManager
+    private lateinit var wifiStateWorker: WifiStateWorker
+    private lateinit var controller: AccessPointController
+    private lateinit var internetDetailsViewModelFactory: InternetDetailsViewModel.Factory
+    private lateinit var internetDetailsContentManagerFactory: InternetDetailsContentManager.Factory
+    private lateinit var internetDetailsViewModel: InternetDetailsViewModel
 
     @Before
     fun setup() {
         internetDialogManager = mock<InternetDialogManager>()
         wifiStateWorker = mock<WifiStateWorker>()
         controller = mock<AccessPointController>()
+        internetDetailsViewModelFactory = mock<InternetDetailsViewModel.Factory>()
+        internetDetailsContentManagerFactory = mock<InternetDetailsContentManager.Factory>()
+        internetDetailsViewModel =
+            InternetDetailsViewModel(
+                onLongClick = {},
+                accessPointController = mock<AccessPointController>(),
+                contentManagerFactory = internetDetailsContentManagerFactory,
+            )
+        whenever(internetDetailsViewModelFactory.create(any())).thenReturn(internetDetailsViewModel)
 
         underTest =
             InternetTileUserActionInteractor(
@@ -71,6 +84,7 @@ class InternetTileUserActionInteractorTest : SysuiTestCase() {
                 wifiStateWorker,
                 controller,
                 inputHandler,
+                internetDetailsViewModelFactory,
             )
     }
 
@@ -102,7 +116,7 @@ class InternetTileUserActionInteractorTest : SysuiTestCase() {
             underTest.handleInput(QSTileInputTestKtx.longClick(input))
 
             QSTileIntentUserInputHandlerSubject.assertThat(inputHandler).handledOneIntentInput {
-                Truth.assertThat(it.intent.action).isEqualTo(Settings.ACTION_WIFI_SETTINGS)
+                assertThat(it.intent.action).isEqualTo(Settings.ACTION_WIFI_SETTINGS)
             }
         }
 
@@ -114,7 +128,7 @@ class InternetTileUserActionInteractorTest : SysuiTestCase() {
             underTest.handleInput(QSTileInputTestKtx.longClick(input))
 
             QSTileIntentUserInputHandlerSubject.assertThat(inputHandler).handledOneIntentInput {
-                Truth.assertThat(it.intent.action).isEqualTo(Settings.ACTION_WIFI_SETTINGS)
+                assertThat(it.intent.action).isEqualTo(Settings.ACTION_WIFI_SETTINGS)
             }
         }
 
@@ -141,8 +155,7 @@ class InternetTileUserActionInteractorTest : SysuiTestCase() {
     @Test
     fun detailsViewModel() =
         kosmos.testScope.runTest {
-            assertThat(underTest.detailsViewModel.getTitle())
-                .isEqualTo("Internet")
+            assertThat(underTest.detailsViewModel.getTitle()).isEqualTo("Internet")
             assertThat(underTest.detailsViewModel.getSubTitle())
                 .isEqualTo("Tab a network to connect")
         }

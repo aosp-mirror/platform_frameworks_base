@@ -18,9 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"கம்பேனியன் சாதன நிர்வாகி"</string>
     <string name="confirmation_title" msgid="2244241995958340998">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; சாதனத்தை அணுக &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
+    <string name="message_discovery_soft_timeout" msgid="473346859407859161">"இந்த <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> சாதனத்தின் <xliff:g id="DISCOVERY_METHOD">%2$s</xliff:g> ஆன் செய்யப்பட்டு, அதன் அருகில் உங்கள் <xliff:g id="PROFILE_NAME">%3$s</xliff:g> இருப்பதை உறுதிசெய்துகொள்ளவும்."</string>
+    <string name="message_discovery_hard_timeout" msgid="677514663495711424">"சாதனங்கள் எதுவும் கண்டறியப்படவில்லை. பிறகு முயலவும்."</string>
+    <string name="discovery_bluetooth" msgid="5693557668470016164">"புளூடூத்"</string>
+    <string name="discovery_wifi" msgid="1551782459721758773">"வைஃபை"</string>
+    <string name="discovery_mixed" msgid="7071466134150760127">"புளூடூத் மற்றும் வைஃபை"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"வாட்ச்"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ஆப்ஸால் நிர்வகிக்கப்பட வேண்டிய சாதனத்தைத் தேர்வுசெய்யுங்கள்"</string>
     <string name="chooser_title" msgid="2235819929238267637">"அமைக்க <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ஐத் தேர்வுசெய்யவும்"</string>
+    <string name="single_device_title" msgid="4199861437545438606">"<xliff:g id="PROFILE_NAME">%1$s</xliff:g> ஐத் தேடுகிறது"</string>
     <string name="summary_watch" msgid="8134580124808507407">"அழைப்பவரின் பெயர் போன்ற தகவல்களை ஒத்திசைக்கவும் உங்கள் <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> சாதனத்தில் இந்த அனுமதிகளை அணுகவும் இந்த ஆப்ஸ் அனுமதிக்கப்படும்"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&amp;gt சாதனத்தை நிர்வகிக்க &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"சாதனம்"</string>

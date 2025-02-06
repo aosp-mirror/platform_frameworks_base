@@ -35,6 +35,8 @@ import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorLega
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorSceneContainerImpl
 import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
 import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractorImpl
+import com.android.systemui.shade.domain.interactor.ShadeExpandedStateInteractor
+import com.android.systemui.shade.domain.interactor.ShadeExpandedStateInteractorImpl
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl
 import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl
@@ -176,4 +178,10 @@ abstract class ShadeModule {
     @Binds
     @SysUISingleton
     abstract fun bindShadeModeInteractor(impl: ShadeModeInteractorImpl): ShadeModeInteractor
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindShadeExpandedStateInteractor(
+        impl: ShadeExpandedStateInteractorImpl
+    ): ShadeExpandedStateInteractor
 }

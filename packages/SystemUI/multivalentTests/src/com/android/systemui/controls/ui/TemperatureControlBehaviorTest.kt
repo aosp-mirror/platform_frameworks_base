@@ -12,13 +12,14 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.controls.controller.ControlsController
+import com.android.systemui.res.R
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
+import com.android.systemui.utils.SafeIconLoader
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,6 +33,7 @@ class TemperatureControlBehaviorTest : SysuiTestCase() {
     @Mock lateinit var controlsMetricsLogger: ControlsMetricsLogger
     @Mock lateinit var controlActionCoordinator: ControlActionCoordinator
     @Mock lateinit var controlsController: ControlsController
+    @Mock lateinit var safeIconLoader: SafeIconLoader
 
     private val fakeSystemClock = FakeSystemClock()
     private val underTest = TemperatureControlBehavior()
@@ -53,6 +55,7 @@ class TemperatureControlBehaviorTest : SysuiTestCase() {
                 controlsMetricsLogger,
                 0,
                 0,
+                safeIconLoader,
             )
     }
 
@@ -61,12 +64,7 @@ class TemperatureControlBehaviorTest : SysuiTestCase() {
         val controlWithState =
             ControlWithState(
                 ComponentName("test.pkg", "TestClass"),
-                ControlInfo(
-                    "test_id",
-                    "test title",
-                    "test subtitle",
-                    DeviceTypes.TYPE_AC_UNIT,
-                ),
+                ControlInfo("test_id", "test title", "test subtitle", DeviceTypes.TYPE_AC_UNIT),
                 Control.StatefulBuilder(
                         "",
                         PendingIntent.getActivity(
@@ -87,11 +85,11 @@ class TemperatureControlBehaviorTest : SysuiTestCase() {
                             ),
                             0,
                             0,
-                            0
+                            0,
                         )
                     )
                     .setStatus(Control.STATUS_OK)
-                    .build()
+                    .build(),
             )
         viewHolder.bindData(controlWithState, false)
         underTest.initialize(viewHolder)

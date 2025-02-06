@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.notification
 
-import android.platform.test.annotations.Presubmit
 import android.platform.test.rule.SettingOverrideRule
 import android.provider.Settings
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
@@ -46,6 +45,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@FlakyTest(bugId = 384046002)
 class OpenAppFromLockscreenNotificationWarmTest(flicker: LegacyFlickerTest) :
     OpenAppFromNotificationWarmTest(flicker) {
 
@@ -72,7 +72,6 @@ class OpenAppFromLockscreenNotificationWarmTest(flicker: LegacyFlickerTest) :
      * window of the transition, with snapshot or splash screen windows optionally showing first.
      */
     @Test
-    @Presubmit
     fun appWindowBecomesFirstAndOnlyTopWindow() {
         flicker.assertWm {
             this.hasNoVisibleAppWindow()
@@ -87,7 +86,6 @@ class OpenAppFromLockscreenNotificationWarmTest(flicker: LegacyFlickerTest) :
 
     /** Checks that the screen is locked at the start of the transition */
     @Test
-    @Presubmit
     fun screenLockedStart() {
         flicker.assertWmStart { isKeyguardShowing() }
     }
@@ -117,7 +115,7 @@ class OpenAppFromLockscreenNotificationWarmTest(flicker: LegacyFlickerTest) :
      * Checks the position of the [ComponentNameMatcher.STATUS_BAR] at the start and end of the
      * transition
      */
-    @Presubmit @Test fun statusBarLayerPositionAtEnd() = flicker.statusBarLayerPositionAtEnd()
+    @Test fun statusBarLayerPositionAtEnd() = flicker.statusBarLayerPositionAtEnd()
 
     /** {@inheritDoc} */
     @Test
@@ -140,7 +138,6 @@ class OpenAppFromLockscreenNotificationWarmTest(flicker: LegacyFlickerTest) :
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
-    @Presubmit
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
         flicker.assertWm {

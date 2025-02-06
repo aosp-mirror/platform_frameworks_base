@@ -284,7 +284,8 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
                     /* rankingAdjustment= */ 0,
                     /* isBubble= */ false,
                     /* proposedImportance= */ 0,
-                    /* sensitiveContent= */ false
+                    /* sensitiveContent= */ false,
+                    /* summarization = */ null
             );
         }
         return ranking;

@@ -57,6 +57,7 @@ constructor(
             // activity and a null second task, so the foreground task will be index 1, but when
             // opening the app selector in split screen mode, the foreground task will be the second
             // task in index 0.
+            // TODO(346588978): This needs to be updated for mixed groups
             val foregroundGroup =
                 if (groupedTasks.firstOrNull()?.splitBounds != null) groupedTasks.first()
                 else groupedTasks.elementAtOrNull(1)
@@ -69,7 +70,7 @@ constructor(
                         it.taskInfo1,
                         it.taskInfo1.taskId in foregroundTaskIds && it.taskInfo1.isVisible,
                         userManager.getUserInfo(it.taskInfo1.userId).toUserType(),
-                        it.splitBounds
+                        it.splitBounds,
                     )
 
                 val task2 =
@@ -78,7 +79,7 @@ constructor(
                             it.taskInfo2!!,
                             it.taskInfo2!!.taskId in foregroundTaskIds && it.taskInfo2!!.isVisible,
                             userManager.getUserInfo(it.taskInfo2!!.userId).toUserType(),
-                            it.splitBounds
+                            it.splitBounds,
                         )
                     } else null
 
@@ -92,7 +93,7 @@ constructor(
                 Integer.MAX_VALUE,
                 RECENT_IGNORE_UNAVAILABLE,
                 userTracker.userId,
-                backgroundExecutor
+                backgroundExecutor,
             ) { tasks ->
                 continuation.resume(tasks)
             }

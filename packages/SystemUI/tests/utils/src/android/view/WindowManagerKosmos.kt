@@ -24,4 +24,6 @@ val Kosmos.fakeWindowManager by Kosmos.Fixture { FakeWindowManager(applicationCo
 
 val Kosmos.mockWindowManager: WindowManager by Kosmos.Fixture { mock(WindowManager::class.java) }
 
+val Kosmos.mockIWindowManager: IWindowManager by Kosmos.Fixture { mock(IWindowManager::class.java) }
+
 var Kosmos.windowManager: WindowManager by Kosmos.Fixture { mockWindowManager }

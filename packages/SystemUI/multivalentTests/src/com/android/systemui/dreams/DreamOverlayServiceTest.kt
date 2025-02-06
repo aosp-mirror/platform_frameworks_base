@@ -58,6 +58,7 @@ import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.domain.interactor.setCommunalV2ConfigEnabled
+import com.android.systemui.communal.domain.interactor.setCommunalV2Enabled
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.complication.ComplicationHostViewController
@@ -82,7 +83,6 @@ import com.android.systemui.touch.TouchInsetManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -106,7 +106,6 @@ import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(ParameterizedAndroidJunit4::class)
@@ -747,7 +746,7 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT, FLAG_COMMUNAL_HUB)
-    @DisableFlags(FLAG_SCENE_CONTAINER)
+    @DisableFlags(FLAG_SCENE_CONTAINER, FLAG_GLANCEABLE_HUB_V2)
     @kotlin.Throws(RemoteException::class)
     fun testTransitionToGlanceableHub() =
         testScope.runTest {
@@ -774,6 +773,7 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT, FLAG_SCENE_CONTAINER, FLAG_COMMUNAL_HUB)
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     @kotlin.Throws(RemoteException::class)
     fun testTransitionToGlanceableHub_sceneContainer() =
         testScope.runTest {
@@ -802,7 +802,29 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT, FLAG_COMMUNAL_HUB, FLAG_GLANCEABLE_HUB_V2)
+    @Throws(RemoteException::class)
+    fun testRedirect_v2Enabled_notTriggered() =
+        testScope.runTest {
+            kosmos.setCommunalV2Enabled(true)
+            // Inform the overlay service of dream starting. Do not show dream complications.
+            client.startDream(
+                mWindowParams,
+                mDreamOverlayCallback,
+                DREAM_COMPONENT,
+                false /*isPreview*/,
+                false, /*shouldShowComplication*/
+            )
+            // Set communal available, verify that onRedirectWake is never called.
+            kosmos.setCommunalAvailable(true)
+            mMainExecutor.runAllReady()
+            runCurrent()
+            verify(mDreamOverlayCallback, never()).onRedirectWake(any())
+        }
+
+    @Test
     @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT, FLAG_COMMUNAL_HUB)
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     @Throws(RemoteException::class)
     fun testRedirectExit() =
         testScope.runTest {
@@ -1347,7 +1369,11 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
         @JvmStatic
         @Parameters(name = "{0}")
         fun getParams(): List<FlagsParameterization> {
-            return FlagsParameterization.allCombinationsOf(FLAG_COMMUNAL_HUB).andSceneContainer()
+            return FlagsParameterization.allCombinationsOf(
+                    FLAG_COMMUNAL_HUB,
+                    FLAG_GLANCEABLE_HUB_V2,
+                )
+                .andSceneContainer()
         }
     }
 }

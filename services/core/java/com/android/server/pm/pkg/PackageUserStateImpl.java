@@ -293,8 +293,8 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
         if (mOverlayPaths == null && mSharedLibraryOverlayPaths == null) {
             return null;
         }
-        final OverlayPaths.Builder newPaths = new OverlayPaths.Builder();
-        newPaths.addAll(mOverlayPaths);
+        final OverlayPaths.Builder newPaths = mOverlayPaths == null
+                ? new OverlayPaths.Builder() : new OverlayPaths.Builder(mOverlayPaths);
         if (mSharedLibraryOverlayPaths != null) {
             for (final OverlayPaths libOverlayPaths : mSharedLibraryOverlayPaths.values()) {
                 newPaths.addAll(libOverlayPaths);

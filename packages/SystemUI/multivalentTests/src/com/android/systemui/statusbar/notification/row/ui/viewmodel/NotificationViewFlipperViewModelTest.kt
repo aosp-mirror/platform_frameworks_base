@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.notification.row.ui.viewmodel
 
 import android.platform.test.annotations.EnableFlags
@@ -31,7 +29,6 @@ import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.statusbar.notification.shared.NotificationViewFlipperPausing
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test

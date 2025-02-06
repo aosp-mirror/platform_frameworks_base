@@ -35,7 +35,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.modifiers.padding
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockElementKeys
@@ -57,7 +57,7 @@ constructor(
     private val aodBurnInViewModel: AodBurnInViewModel,
 ) {
     @Composable
-    fun SceneScope.SmartSpace(
+    fun ContentScope.SmartSpace(
         burnInParams: BurnInParameters,
         onTopChanged: (top: Float?) -> Unit,
         smartSpacePaddingTop: (Resources) -> Int,

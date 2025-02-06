@@ -309,7 +309,8 @@ public class UserRestrictionsUtils {
      * in settings. So it is handled separately.
      */
     private static final Set<String> DEFAULT_ENABLED_FOR_MANAGED_PROFILES = Sets.newArraySet(
-            UserManager.DISALLOW_BLUETOOTH_SHARING
+            UserManager.DISALLOW_BLUETOOTH_SHARING,
+            UserManager.DISALLOW_DEBUGGING_FEATURES
     );
 
     /**

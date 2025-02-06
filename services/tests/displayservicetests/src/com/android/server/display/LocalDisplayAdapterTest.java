@@ -455,8 +455,9 @@ public class LocalDisplayAdapterTest {
      * Confirm that external display uses physical density.
      */
     @Test
-    public void testDpiValues() throws Exception {
+    public void testDpiValues_baseDensityForExternalDisplaysDisabled() throws Exception {
         // needs default one always
+        doReturn(false).when(mFlags).isBaseDensityForExternalDisplaysEnabled();
         setUpDisplay(new FakeDisplay(PORT_A));
         setUpDisplay(new FakeDisplay(PORT_B));
         updateAvailableDisplays();
@@ -470,6 +471,25 @@ public class LocalDisplayAdapterTest {
         assertDisplayDpi(
                 mListener.addedDisplays.get(1).getDisplayDeviceInfoLocked(), PORT_B, 100, 100,
                 16000);
+    }
+
+    @Test
+    public void testDpiValues_baseDensityForExternalDisplaysEnabled() throws Exception {
+        // needs default one always
+        doReturn(true).when(mFlags).isBaseDensityForExternalDisplaysEnabled();
+        setUpDisplay(new FakeDisplay(PORT_A));
+        setUpDisplay(new FakeDisplay(PORT_B));
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        assertDisplayDpi(
+                mListener.addedDisplays.get(0).getDisplayDeviceInfoLocked(), PORT_A, 100, 100,
+                100);
+        assertDisplayDpi(
+                mListener.addedDisplays.get(1).getDisplayDeviceInfoLocked(), PORT_B, 100, 100,
+                100);
     }
 
     private static class DisplayModeWrapper {

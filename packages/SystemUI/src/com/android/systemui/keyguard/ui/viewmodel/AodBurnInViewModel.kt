@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.util.Log
@@ -37,7 +35,6 @@ import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlin.math.max
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

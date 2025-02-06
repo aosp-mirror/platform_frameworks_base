@@ -43,6 +43,18 @@ public abstract class LayoutManager extends LayoutComponent implements Measurabl
         super(parent, componentId, animationId, x, y, width, height);
     }
 
+    /**
+     * Allows layout managers to override elements visibility
+     *
+     * @param selfWidth intrinsic width of the layout manager content
+     * @param selfHeight intrinsic height of the layout manager content
+     * @param measure measure pass
+     */
+    public boolean applyVisibility(
+            float selfWidth, float selfHeight, @NonNull MeasurePass measure) {
+        return false;
+    }
+
     /** Implemented by subclasses to provide a layout/measure pass */
     public void internalLayoutMeasure(@NonNull PaintContext context, @NonNull MeasurePass measure) {
         // nothing here
@@ -197,7 +209,7 @@ public abstract class LayoutManager extends LayoutComponent implements Measurabl
         }
 
         if (!hasWrap) {
-            if (hasHorizontalScroll()) {
+            if (hasHorizontalIntrinsicDimension()) {
                 mCachedWrapSize.setWidth(0f);
                 mCachedWrapSize.setHeight(0f);
                 computeWrapSize(
@@ -210,15 +222,19 @@ public abstract class LayoutManager extends LayoutComponent implements Measurabl
                         mCachedWrapSize);
                 float w = mCachedWrapSize.getWidth();
                 computeSize(context, 0f, w, 0, measuredHeight, measure);
-                mComponentModifiers.setHorizontalScrollDimension(measuredWidth, w);
-            } else if (hasVerticalScroll()) {
+                if (hasHorizontalScroll()) {
+                    mComponentModifiers.setHorizontalScrollDimension(measuredWidth, w);
+                }
+            } else if (hasVerticalIntrinsicDimension()) {
                 mCachedWrapSize.setWidth(0f);
                 mCachedWrapSize.setHeight(0f);
                 computeWrapSize(
                         context, maxWidth, Float.MAX_VALUE, false, false, measure, mCachedWrapSize);
                 float h = mCachedWrapSize.getHeight();
                 computeSize(context, 0f, measuredWidth, 0, h, measure);
-                mComponentModifiers.setVerticalScrollDimension(measuredHeight, h);
+                if (hasVerticalScroll()) {
+                    mComponentModifiers.setVerticalScrollDimension(measuredHeight, h);
+                }
             } else {
                 float maxChildWidth = measuredWidth - mPaddingLeft - mPaddingRight;
                 float maxChildHeight = measuredHeight - mPaddingTop - mPaddingBottom;
@@ -244,6 +260,14 @@ public abstract class LayoutManager extends LayoutComponent implements Measurabl
 
     private boolean hasHorizontalScroll() {
         return mComponentModifiers.hasHorizontalScroll();
+    }
+
+    protected boolean hasHorizontalIntrinsicDimension() {
+        return hasHorizontalScroll();
+    }
+
+    protected boolean hasVerticalIntrinsicDimension() {
+        return hasVerticalScroll();
     }
 
     private boolean hasVerticalScroll() {

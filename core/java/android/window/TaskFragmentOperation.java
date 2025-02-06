@@ -161,6 +161,16 @@ public final class TaskFragmentOperation implements Parcelable {
      */
     public static final int OP_TYPE_SET_PINNED = 19;
 
+    /**
+     * Sets whether this TaskFragment can affect system UI flags such as the status bar. Default
+     * is {@code true}.
+     *
+     * This operation is only allowed for system organizers. See
+     * {@link com.android.server.wm.TaskFragmentOrganizerController#registerOrganizer(
+     * ITaskFragmentOrganizer, boolean)}
+     */
+    public static final int OP_TYPE_SET_CAN_AFFECT_SYSTEM_UI_FLAGS = 20;
+
     @IntDef(prefix = { "OP_TYPE_" }, value = {
             OP_TYPE_UNKNOWN,
             OP_TYPE_CREATE_TASK_FRAGMENT,
@@ -183,6 +193,7 @@ public final class TaskFragmentOperation implements Parcelable {
             OP_TYPE_SET_MOVE_TO_BOTTOM_IF_CLEAR_WHEN_LAUNCH,
             OP_TYPE_SET_DECOR_SURFACE_BOOSTED,
             OP_TYPE_SET_PINNED,
+            OP_TYPE_SET_CAN_AFFECT_SYSTEM_UI_FLAGS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface OperationType {}

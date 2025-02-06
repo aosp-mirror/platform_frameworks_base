@@ -40,6 +40,8 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.testing.TestableLooper;
@@ -659,6 +661,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(android.app.supervision.flags.Flags.FLAG_DEPRECATE_DPM_SUPERVISION_APIS)
     public void testParentalControls() {
         // Make sure the security footer is visible, so that the images are updated.
         when(mSecurityController.isProfileOwnerOfOrganizationOwnedDevice()).thenReturn(true);
@@ -673,7 +676,6 @@ public class QSSecurityFooterTest extends SysuiTestCase {
 
         Drawable testDrawable = new VectorDrawable();
         when(mSecurityController.getIcon(any())).thenReturn(testDrawable);
-        assertNotNull(mSecurityController.getIcon(null));
 
         buttonConfig = getButtonConfig();
         assertNotNull(buttonConfig);
@@ -689,13 +691,55 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(android.app.supervision.flags.Flags.FLAG_DEPRECATE_DPM_SUPERVISION_APIS)
+    public void testParentalControls_newSupervisionApis() {
+        // Make sure the security footer is visible, so that the images are updated.
+        when(mSecurityController.isProfileOwnerOfOrganizationOwnedDevice()).thenReturn(true);
+        when(mSecurityController.isParentalControlsEnabled()).thenReturn(true);
+
+        // We use the default icon when there is no admin icon.
+        when(mSecurityController.getIcon()).thenReturn(null);
+        SecurityButtonConfig buttonConfig = getButtonConfig();
+        assertEquals(mContext.getString(R.string.quick_settings_disclosure_parental_controls),
+                buttonConfig.getText());
+        assertIsDefaultIcon(buttonConfig.getIcon());
+
+        Drawable testDrawable = new VectorDrawable();
+        when(mSecurityController.getIcon()).thenReturn(testDrawable);
+
+        buttonConfig = getButtonConfig();
+        assertNotNull(buttonConfig);
+        assertEquals(mContext.getString(R.string.quick_settings_disclosure_parental_controls),
+                buttonConfig.getText());
+        assertIsIconDrawable(buttonConfig.getIcon(), testDrawable);
+
+        // Ensure the primary icon is back to default after parental controls are gone
+        when(mSecurityController.isParentalControlsEnabled()).thenReturn(false);
+        buttonConfig = getButtonConfig();
+        assertNotNull(buttonConfig);
+        assertIsDefaultIcon(buttonConfig.getIcon());
+    }
+
+    @Test
+    @DisableFlags(android.app.supervision.flags.Flags.FLAG_DEPRECATE_DPM_SUPERVISION_APIS)
     public void testParentalControlsDialog() {
         when(mSecurityController.isParentalControlsEnabled()).thenReturn(true);
         when(mSecurityController.getLabel(any())).thenReturn(PARENTAL_CONTROLS_LABEL);
 
         View view = mFooterUtils.createDialogView(getContext());
         TextView textView = (TextView) view.findViewById(R.id.parental_controls_title);
-        assertEquals(PARENTAL_CONTROLS_LABEL, textView.getText());
+        assertEquals(PARENTAL_CONTROLS_LABEL, textView.getText().toString());
+    }
+
+    @Test
+    @EnableFlags(android.app.supervision.flags.Flags.FLAG_DEPRECATE_DPM_SUPERVISION_APIS)
+    public void testParentalControlsDialog_newSupervisionApis() {
+        when(mSecurityController.isParentalControlsEnabled()).thenReturn(true);
+        when(mSecurityController.getLabel()).thenReturn(PARENTAL_CONTROLS_LABEL);
+
+        View view = mFooterUtils.createDialogView(getContext());
+        TextView textView = (TextView) view.findViewById(R.id.parental_controls_title);
+        assertEquals(PARENTAL_CONTROLS_LABEL, textView.getText().toString());
     }
 
     @Test

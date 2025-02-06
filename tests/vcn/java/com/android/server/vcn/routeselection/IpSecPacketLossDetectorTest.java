@@ -284,8 +284,11 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
 
         // Stop the monitor
         mIpSecPacketLossDetector.close();
+        mIpSecPacketLossDetector.close();
         verifyStopped();
-        verify(mIpSecTransform).close();
+
+        verify(mIpSecTransform, never()).close();
+        verify(mContext).unregisterReceiver(any());
     }
 
     @Test

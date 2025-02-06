@@ -82,7 +82,7 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 stubWindowManager);
-        final SecureSettings secureSettings = TestUtils.mockSecureSettings();
+        final SecureSettings secureSettings = TestUtils.mockSecureSettings(mContext);
         final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
                 secureSettings, mHearingAidDeviceManager);
 
@@ -194,7 +194,7 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
         final Runnable onSpringAnimationsEndCallback = mock(Runnable.class);
         mMenuAnimationController.setSpringAnimationsEndAction(onSpringAnimationsEndCallback);
 
-        mMenuAnimationController.flingMenuThenSpringToEdge(/* x= */ 0, /* velocityX= */
+        mMenuAnimationController.flingMenuThenSpringToEdge(new PointF(), /* velocityX= */
                 100, /* velocityY= */ 100);
         mMenuAnimationController.mPositionAnimations.values()
                 .forEach(animation -> verify((FlingAnimation) animation).addEndListener(
@@ -212,7 +212,7 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
         final Runnable onSpringAnimationsEndCallback = mock(Runnable.class);
         mMenuAnimationController.setSpringAnimationsEndAction(onSpringAnimationsEndCallback);
 
-        mMenuAnimationController.flingMenuThenSpringToEdge(/* x= */ 0, /* velocityX= */
+        mMenuAnimationController.flingMenuThenSpringToEdge(new PointF(), /* velocityX= */
                 200, /* velocityY= */ 200);
         mMenuAnimationController.mPositionAnimations.values()
                 .forEach(animation -> verify((FlingAnimation) animation).addEndListener(

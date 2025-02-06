@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.activityembedding.open
 
 import android.graphics.Rect
-import android.platform.test.annotations.Presubmit
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
@@ -68,13 +67,21 @@ class MainActivityStartsSecondaryWithAlwaysExpandTest(flicker: LegacyFlickerTest
         }
     }
 
-    @Ignore("Not applicable to this CUJ.") override fun navBarWindowIsVisibleAtStartAndEnd() {}
+    @Ignore("Not applicable to this CUJ.")
+    @Test
+    override fun navBarWindowIsVisibleAtStartAndEnd() {}
 
-    @FlakyTest(bugId = 291575593) override fun entireScreenCovered() {}
+    @FlakyTest(bugId = 291575593)
+    @Test
+    override fun entireScreenCovered() {}
 
-    @Ignore("Not applicable to this CUJ.") override fun statusBarWindowIsAlwaysVisible() {}
+    @Ignore("Not applicable to this CUJ.")
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() {}
 
-    @Ignore("Not applicable to this CUJ.") override fun statusBarLayerPositionAtStartAndEnd() {}
+    @Ignore("Not applicable to this CUJ.")
+    @Test
+    override fun statusBarLayerPositionAtStartAndEnd() {}
 
     /** Transition begins with a split. */
     @FlakyTest(bugId = 286952194)
@@ -122,7 +129,6 @@ class MainActivityStartsSecondaryWithAlwaysExpandTest(flicker: LegacyFlickerTest
 
     /** Always expand activity is on top of the split. */
     @FlakyTest(bugId = 286952194)
-    @Presubmit
     @Test
     fun endsWithAlwaysExpandActivityOnTop() {
         flicker.assertWmEnd {

@@ -24,6 +24,8 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.kotlin.sample
@@ -32,6 +34,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -165,5 +168,15 @@ constructor(
         return withContext(backgroundDispatcher) {
             isKeyguardEnabled.value && lockPatternUtils.isLockScreenDisabled(userId)
         }
+    }
+
+    suspend fun hydrateTableLogBuffer(tableLogBuffer: TableLogBuffer) {
+        isKeyguardEnabled
+            .logDiffsForTable(
+                tableLogBuffer = tableLogBuffer,
+                columnName = "isKeyguardEnabled",
+                initialValue = isKeyguardEnabled.value,
+            )
+            .collect()
     }
 }

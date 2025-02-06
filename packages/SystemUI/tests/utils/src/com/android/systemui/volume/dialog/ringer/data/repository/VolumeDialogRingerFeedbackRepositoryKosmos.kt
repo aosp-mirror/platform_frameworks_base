@@ -20,5 +20,5 @@ import com.android.systemui.kosmos.Kosmos
 
 val Kosmos.fakeVolumeDialogRingerFeedbackRepository by
     Kosmos.Fixture { FakeVolumeDialogRingerFeedbackRepository() }
-val Kosmos.volumeDialogRingerFeedbackRepository by
+var Kosmos.volumeDialogRingerFeedbackRepository: VolumeDialogRingerFeedbackRepository by
     Kosmos.Fixture { fakeVolumeDialogRingerFeedbackRepository }

@@ -7,25 +7,66 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-cc_binary {
-    name: "screencap",
-
-    srcs: ["screencap.cpp"],
-
-    shared_libs: [
-        "libcutils",
-        "libutils",
-        "libbinder",
-        "libjnigraphics",
-        "libhwui",
-        "libui",
-        "libgui",
-    ],
+cc_defaults {
+    name: "screencap_defaults",
 
     cflags: [
         "-Wall",
         "-Werror",
-        "-Wunused",
         "-Wunreachable-code",
+        "-Wunused",
+    ],
+
+    shared_libs: [
+        "libbinder",
+        "libcutils",
+        "libgui",
+        "libhwui",
+        "libjnigraphics",
+        "libui",
+        "libutils",
+    ],
+}
+
+cc_library {
+    name: "libscreencap",
+
+    defaults: [
+        "screencap_defaults",
+    ],
+
+    srcs: ["screencap_utils.cpp"],
+}
+
+cc_binary {
+    name: "screencap",
+
+    defaults: [
+        "screencap_defaults",
+    ],
+
+    srcs: ["screencap.cpp"],
+
+    static_libs: [
+        "libscreencap",
+    ],
+}
+
+cc_test {
+    name: "libscreencap_test",
+
+    defaults: [
+        "screencap_defaults",
+    ],
+
+    test_suites: ["device-tests"],
+
+    srcs: [
+        "tests/screencap_test.cpp",
+    ],
+
+    static_libs: [
+        "libgmock",
+        "libscreencap",
     ],
 }

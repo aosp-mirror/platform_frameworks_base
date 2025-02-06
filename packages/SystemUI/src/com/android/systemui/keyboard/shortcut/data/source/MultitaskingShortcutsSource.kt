@@ -29,12 +29,12 @@ import android.view.KeyEvent.KEYCODE_RIGHT_BRACKET
 import android.view.KeyEvent.META_CTRL_ON
 import android.view.KeyEvent.META_META_ON
 import android.view.KeyboardShortcutGroup
+import android.window.DesktopModeFlags
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyboard.shortcut.data.model.shortcutInfo
 import com.android.systemui.res.R
 import com.android.window.flags.Flags.enableMoveToNextDisplayShortcut
-import com.android.window.flags.Flags.enableTaskResizingKeyboardShortcuts
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import javax.inject.Inject
 
@@ -85,7 +85,8 @@ constructor(@Main private val resources: Resources, @Application private val con
             )
         }
         if (
-            DesktopModeStatus.canEnterDesktopMode(context) && enableTaskResizingKeyboardShortcuts()
+            DesktopModeStatus.canEnterDesktopMode(context) &&
+                DesktopModeFlags.ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS.isTrue
         ) {
             // Snap a freeform window to the left
             //  - Meta + Left bracket

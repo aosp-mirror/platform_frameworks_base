@@ -16,8 +16,6 @@
 
 package com.android.server.wm.flicker.notification
 
-import android.platform.test.annotations.Postsubmit
-import android.platform.test.annotations.Presubmit
 import android.platform.test.rule.SettingOverrideRule
 import android.provider.Settings
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
@@ -26,6 +24,7 @@ import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.helpers.wakeUpAndGoToHomeScreen
 import android.tools.traces.component.ComponentNameMatcher
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
@@ -46,7 +45,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Postsubmit
+@FlakyTest(bugId = 384046002)
 open class OpenAppFromLockscreenNotificationColdTest(flicker: LegacyFlickerTest) :
     OpenAppFromNotificationColdTest(flicker) {
 
@@ -107,12 +106,10 @@ open class OpenAppFromLockscreenNotificationColdTest(flicker: LegacyFlickerTest)
     override fun navBarWindowIsAlwaysVisible() {}
 
     /** {@inheritDoc} */
-    @Postsubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
-    @Presubmit
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
         flicker.assertWm {

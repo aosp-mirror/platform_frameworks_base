@@ -19,6 +19,7 @@ package com.android.settingslib.graph
 import com.android.settingslib.graph.proto.BundleProto
 import com.android.settingslib.graph.proto.BundleProto.BundleValue
 import com.android.settingslib.graph.proto.IntentProto
+import com.android.settingslib.graph.proto.ParameterizedPreferenceScreenProto
 import com.android.settingslib.graph.proto.PreferenceGroupProto
 import com.android.settingslib.graph.proto.PreferenceOrGroupProto
 import com.android.settingslib.graph.proto.PreferenceProto
@@ -38,6 +39,12 @@ val PreferenceScreenProto.rootOrNull
 inline fun preferenceScreenProto(
     init: PreferenceScreenProto.Builder.() -> Unit
 ): PreferenceScreenProto = PreferenceScreenProto.newBuilder().also(init).build()
+
+/** Kotlin DSL-style builder for [PreferenceScreenProto]. */
+inline fun parameterizedPreferenceScreenProto(
+    init: ParameterizedPreferenceScreenProto.Builder.() -> Unit
+): ParameterizedPreferenceScreenProto =
+    ParameterizedPreferenceScreenProto.newBuilder().also(init).build()
 
 /** Returns preference or null. */
 val PreferenceOrGroupProto.preferenceOrNull

@@ -37,7 +37,6 @@ import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -49,7 +48,6 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
-@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @EnableSceneContainer

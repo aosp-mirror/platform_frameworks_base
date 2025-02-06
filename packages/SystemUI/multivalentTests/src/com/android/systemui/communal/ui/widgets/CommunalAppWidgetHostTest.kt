@@ -32,7 +32,6 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -42,7 +41,6 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidJUnit4::class)

@@ -35,7 +35,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.touchpad.data.repository.FakeTouchpadRepository
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.hours
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -51,7 +50,6 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class TutorialNotificationCoordinatorTest : SysuiTestCase() {

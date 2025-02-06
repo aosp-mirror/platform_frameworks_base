@@ -27,9 +27,7 @@ import com.android.systemui.statusbar.notificationLockscreenUserManager
 import com.android.systemui.statusbar.policy.keyguardStateController
 import com.android.systemui.statusbar.policy.sensitiveNotificationProtectionController
 import com.android.systemui.user.domain.interactor.selectedUserInteractor
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@OptIn(ExperimentalCoroutinesApi::class)
 var Kosmos.sensitiveContentCoordinator: SensitiveContentCoordinator by
     Kosmos.Fixture {
         SensitiveContentCoordinatorImpl(

@@ -175,7 +175,9 @@ public class FreeformTaskTransitionHandler
 
     @Override
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+            @NonNull SurfaceControl.Transaction startT,
+            @NonNull SurfaceControl.Transaction finishT,
+            @NonNull IBinder mergeTarget,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         ArrayList<Animator> animations = mAnimations.get(mergeTarget);
         if (animations == null) return;

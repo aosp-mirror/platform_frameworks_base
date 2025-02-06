@@ -25,6 +25,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.UserInfo;
+import android.credentials.flags.Flags;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
@@ -1173,8 +1174,19 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                     final String[] serviceNames = mServiceNameResolver.getDefaultServiceNameList(
                             userId);
                     if (serviceNames != null) {
+                        if (Flags.packageUpdateFixEnabled()) {
+                            if (mServiceNameResolver.isConfiguredInMultipleMode()) {
+                                // Remove any service that is in the cache but is no longer valid
+                                // after this modification for this particular package
+                                removeInvalidCachedServicesLocked(serviceNames, packageName,
+                                        userId);
+                            }
+                        }
+
+                        // Update services that are still valid
                         for (int i = 0; i < serviceNames.length; i++) {
-                            peekAndUpdateCachedServiceLocked(packageName, userId, serviceNames[i]);
+                            peekAndUpdateCachedServiceLocked(packageName, userId,
+                                    serviceNames[i]);
                         }
                     }
                 }
@@ -1231,6 +1243,36 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     }
 
     @GuardedBy("mLock")
+    @SuppressWarnings("GuardedBy") // ErrorProne requires this.mLock for
+    // handleServiceRemovedMultiModeLocked which is the same
+    private void removeInvalidCachedServicesLocked(String[] validServices,
+            String packageName, int userId) {
+        visitServicesLocked((s) -> {
+            ComponentName serviceComponentName = s
+                    .getServiceComponentName();
+            if (serviceComponentName != null && serviceComponentName
+                    .getPackageName().equals(packageName)) {
+                if (!serviceInValidServiceList(serviceComponentName,
+                        validServices)) {
+                    handleServiceRemovedMultiModeLocked(
+                            serviceComponentName, userId);
+                }
+            }
+        });
+    }
+
+    private boolean serviceInValidServiceList(ComponentName serviceComponentName,
+            String[] serviceNames) {
+        for (String service: serviceNames) {
+            ComponentName componentName = ComponentName.unflattenFromString(service);
+            if (componentName != null && componentName.equals(serviceComponentName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @GuardedBy("mLock")
     @SuppressWarnings("unused")
     protected void onServicePackageDataClearedMultiModeLocked(String packageName, int userId) {
         if (verbose) {
@@ -1243,6 +1285,12 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     @SuppressWarnings("unused")
     protected void handlePackageRemovedMultiModeLocked(String packageName, int userId) {
         if (verbose) Slog.v(mTag, "handlePackageRemovedMultiModeLocked(" + userId + ")");
+    }
+
+    @GuardedBy("mLock")
+    protected void handleServiceRemovedMultiModeLocked(ComponentName serviceComponentName,
+            int userId) {
+        if (verbose) Slog.v(mTag, "handleServiceRemovedMultiModeLocked(" + userId + ")");
     }
 
     @GuardedBy("mLock")

@@ -2,6 +2,16 @@ package: "android.service.chooser"
 container: "system"
 
 flag {
+  name: "announce_shortcuts_and_suggested_apps_legacy"
+  namespace: "intentresolver"
+  description: "Enable talkback announcement for the app shortcuts and the suggested apps target groups in the legacy sharesheet codebase."
+  bug: "380211084"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "chooser_album_text"
   is_exported: true
   namespace: "intentresolver"

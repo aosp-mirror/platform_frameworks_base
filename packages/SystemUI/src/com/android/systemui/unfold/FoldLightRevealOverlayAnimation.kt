@@ -58,7 +58,6 @@ import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 
-@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class FoldLightRevealOverlayAnimation
 @Inject
 constructor(

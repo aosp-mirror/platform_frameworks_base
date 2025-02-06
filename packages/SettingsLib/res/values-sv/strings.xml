@@ -288,9 +288,9 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Tillåt att bootloadern låses upp"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Vill du tillåta OEM-upplåsning?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"Varning! Funktionerna för enhetsskydd fungerar inte på enheten när den här inställningen är aktiverad."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Välj app för påhittad plats"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ingen app för påhittad plats har angetts"</string>
-    <string name="mock_location_app_set" msgid="4706722469342913843">"App för påhittad plats: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Välj app för simulerad plats"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ingen app för simulerad plats har angetts"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"App för simulerad plats: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Nätverk"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certifiering för wifi-skärmdelning"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktivera utförlig loggning för wifi"</string>
@@ -424,8 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Skala – övergångsanimering"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Längdskala för Animator"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simulera sekundär skärm"</string>
-    <!-- no translation found for shade_display_awareness_title (8000009404669495876) -->
-    <skip />
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Panelens placering på skärmen"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Appar"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Behåll inte aktiviteter"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Förstör aktiviteter så fort användaren lämnar dem"</string>
@@ -507,7 +506,7 @@
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – laddas"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATUS">%2$s</xliff:g> – fulladdad till <xliff:g id="TIME">%3$s</xliff:g>"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> – fulladdad till <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"Fulladdad till <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"Fulladdad kl. <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"Fulladdad till <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Okänd"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Laddar"</string>
@@ -524,6 +523,8 @@
     <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"Snabbladdning"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Strys av administratören"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Styrs av spärrad inställning"</string>
+    <!-- no translation found for disabled_in_phone_call_text (6568931334337318320) -->
+    <skip />
     <string name="disabled" msgid="8017887509554714950">"Inaktiverad"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Tillåts"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Tillåts inte"</string>

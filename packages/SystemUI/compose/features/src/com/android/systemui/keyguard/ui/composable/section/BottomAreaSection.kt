@@ -30,8 +30,8 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.res.ResourcesCompat
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
@@ -61,7 +61,7 @@ constructor(
      *   shortcut is placed along the edges of the display.
      */
     @Composable
-    fun SceneScope.Shortcut(
+    fun ContentScope.Shortcut(
         isStart: Boolean,
         applyPadding: Boolean,
         modifier: Modifier = Modifier,
@@ -89,7 +89,7 @@ constructor(
     }
 
     @Composable
-    fun SceneScope.IndicationArea(modifier: Modifier = Modifier) {
+    fun ContentScope.IndicationArea(modifier: Modifier = Modifier) {
         Element(key = IndicationAreaElementKey, modifier = modifier.indicationAreaPadding()) {
             content {
                 IndicationArea(

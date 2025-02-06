@@ -39,7 +39,6 @@ import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.testKosmos
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -54,7 +53,6 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidJUnit4::class)

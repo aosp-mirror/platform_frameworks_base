@@ -49,7 +49,6 @@ import com.google.common.truth.Truth.assertThat
 import kotlin.random.Random
 import kotlin.random.nextInt
 import kotlin.test.assertTrue
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.TestScope
@@ -59,7 +58,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class PinBouncerViewModelTest : SysuiTestCase() {

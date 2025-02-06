@@ -26,9 +26,7 @@ import com.android.systemui.keyguard.ui.viewmodel.glanceableHubToLockscreenTrans
 import com.android.systemui.keyguard.ui.viewmodel.lockscreenToGlanceableHubTransitionViewModel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@OptIn(ExperimentalCoroutinesApi::class)
 val Kosmos.communalTransitionViewModel by
     Kosmos.Fixture {
         CommunalTransitionViewModel(

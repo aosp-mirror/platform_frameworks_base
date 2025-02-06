@@ -151,7 +151,7 @@ internal constructor(
 
         registerUserSwitchObserver()
 
-        dumpManager.registerDumpable(TAG, this)
+        dumpManager.registerNormalDumpable(TAG, this)
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -196,8 +196,9 @@ internal constructor(
     private fun registerUserSwitchObserver() {
         iActivityManager.registerUserSwitchObserver(
             object : UserSwitchObserver() {
-                override fun onBeforeUserSwitching(newUserId: Int) {
+                override fun onBeforeUserSwitching(newUserId: Int, reply: IRemoteCallback?) {
                     handleBeforeUserSwitching(newUserId)
+                    reply?.sendResult(null)
                 }
 
                 override fun onUserSwitching(newUserId: Int, reply: IRemoteCallback?) {
@@ -236,8 +237,7 @@ internal constructor(
         setUserIdInternal(newUserId)
 
         notifySubscribers { callback, resultCallback ->
-                callback.onBeforeUserSwitching(newUserId)
-                resultCallback.run()
+                callback.onBeforeUserSwitching(newUserId, resultCallback)
             }
             .await()
     }
@@ -316,7 +316,7 @@ internal constructor(
             val callback = it.callback.get()
             if (callback != null) {
                 it.executor.execute {
-                    traceSection({ "$callback" }) { action(callback) { latch.countDown() } }
+                    traceSection({ "UserTrackerImpl::$callback" }) { action(callback) { latch.countDown() } }
                 }
             } else {
                 latch.countDown()

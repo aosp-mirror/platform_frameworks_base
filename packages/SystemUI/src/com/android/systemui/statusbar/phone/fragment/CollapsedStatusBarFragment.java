@@ -42,7 +42,6 @@ import com.android.app.animation.Interpolators;
 import com.android.app.animation.InterpolatorsAndroidX;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
-import com.android.systemui.Flags;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
@@ -66,6 +65,7 @@ import com.android.systemui.statusbar.data.repository.StatusBarConfigurationCont
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
+import com.android.systemui.statusbar.headsup.shared.StatusBarNoHunBehavior;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
@@ -81,6 +81,7 @@ import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinder;
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.StatusBarVisibilityChangeListener;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel;
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.HomeStatusBarViewModelFactory;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
@@ -142,6 +143,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private StatusBarVisibilityModel mLastModifiedVisibility =
             StatusBarVisibilityModel.createDefaultModel();
     private DarkIconManager mDarkIconManager;
+    private HomeStatusBarViewModel mHomeStatusBarViewModel;
+
     private final HomeStatusBarComponent.Factory mHomeStatusBarComponentFactory;
     private final CommandQueue mCommandQueue;
     private final CollapsedStatusBarFragmentLogger mCollapsedStatusBarFragmentLogger;
@@ -151,8 +154,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final ShadeExpansionStateManager mShadeExpansionStateManager;
     private final StatusBarIconController mStatusBarIconController;
     private final CarrierConfigTracker mCarrierConfigTracker;
-    private final HomeStatusBarViewModel mHomeStatusBarViewModel;
     private final HomeStatusBarViewBinder mHomeStatusBarViewBinder;
+    private final HomeStatusBarViewModelFactory mHomeStatusBarViewModelFactory;
     private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     private final DarkIconManager.Factory mDarkIconManagerFactory;
     private final SecureSettings mSecureSettings;
@@ -256,7 +259,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             ShadeExpansionStateManager shadeExpansionStateManager,
             StatusBarIconController statusBarIconController,
             DarkIconManager.Factory darkIconManagerFactory,
-            HomeStatusBarViewModel homeStatusBarViewModel,
+            HomeStatusBarViewModelFactory homeStatusBarViewModelFactory,
             HomeStatusBarViewBinder homeStatusBarViewBinder,
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             KeyguardStateController keyguardStateController,
@@ -281,7 +284,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mAnimationScheduler = animationScheduler;
         mShadeExpansionStateManager = shadeExpansionStateManager;
         mStatusBarIconController = statusBarIconController;
-        mHomeStatusBarViewModel = homeStatusBarViewModel;
+        mHomeStatusBarViewModelFactory = homeStatusBarViewModelFactory;
         mHomeStatusBarViewBinder = homeStatusBarViewBinder;
         mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
         mDarkIconManagerFactory = darkIconManagerFactory;
@@ -410,6 +413,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mCarrierConfigTracker.addCallback(mCarrierConfigCallback);
         mCarrierConfigTracker.addDefaultDataSubscriptionChangedListener(mDefaultDataListener);
 
+        mHomeStatusBarViewModel = mHomeStatusBarViewModelFactory.create(displayId);
         mHomeStatusBarViewBinder.bind(
                 view.getContext().getDisplayId(),
                 mStatusBar,
@@ -673,6 +677,11 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         boolean headsUpVisible = mHomeStatusBarComponent
                 .getHeadsUpAppearanceController()
                 .shouldHeadsUpStatusBarBeVisible();
+        if (StatusBarNoHunBehavior.isEnabled()) {
+            // With this flag enabled, we have no custom HUN behavior, so just always consider it
+            // to be not visible.
+            headsUpVisible = false;
+        }
 
         if (SceneContainerFlag.isEnabled()) {
             // With the scene container, only use the value calculated by the view model to
@@ -694,20 +703,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
         boolean showClock = externalModel.getShowClock() && !headsUpVisible;
 
-        boolean showPrimaryOngoingActivityChip;
-        if (Flags.statusBarScreenSharingChips()) {
-            // If this flag is on, the ongoing activity status comes from
-            // CollapsedStatusBarViewBinder, which updates the mHasPrimaryOngoingActivity variable.
-            showPrimaryOngoingActivityChip = mHasPrimaryOngoingActivity;
-        } else {
-            // If this flag is off, the only ongoing activity is the ongoing call, and we pull it
-            // from the controller directly.
-            showPrimaryOngoingActivityChip = mOngoingCallController.hasOngoingCall();
-        }
+        boolean showPrimaryOngoingActivityChip = mHasPrimaryOngoingActivity;
         boolean showSecondaryOngoingActivityChip =
-                Flags.statusBarScreenSharingChips()
-                        && StatusBarNotifChips.isEnabled()
-                        && mHasSecondaryOngoingActivity;
+                StatusBarNotifChips.isEnabled() && mHasSecondaryOngoingActivity;
 
         return new StatusBarVisibilityModel(
                 showClock,
@@ -865,10 +863,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     /**
      * Displays the primary ongoing activity chip.
-     *
-     * If Flags.statusBarScreenSharingChips is disabled, this chip will only ever contain the
-     * ongoing call information, If that flag is enabled, it will support different kinds of ongoing
-     * activities. See b/332662551.
      */
     private void showPrimaryOngoingActivityChip(boolean animate) {
         StatusBarRootModernization.assertInLegacyMode();

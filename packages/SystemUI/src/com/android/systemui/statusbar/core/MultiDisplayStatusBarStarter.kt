@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.core
 
 import android.view.Display
+import android.view.IWindowManager
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
@@ -54,6 +55,7 @@ constructor(
     private val autoHideControllerStore: AutoHideControllerStore,
     private val privacyDotWindowControllerStore: PrivacyDotWindowControllerStore,
     private val lightBarControllerStore: LightBarControllerStore,
+    private val windowManager: IWindowManager,
 ) : CoreStartable {
 
     init {
@@ -68,7 +70,13 @@ constructor(
                 }
                 .onStart { emit(displayRepository.displays.value) }
                 .collect { newDisplays ->
-                    newDisplays.forEach { createAndStartComponentsForDisplay(it) }
+                    newDisplays.forEach {
+                        // TODO(b/393191204): Split navbar, status bar, etc. functionality
+                        // from WindowManager#shouldShowSystemDecors.
+                        if (windowManager.shouldShowSystemDecors(it.displayId)) {
+                            createAndStartComponentsForDisplay(it)
+                        }
+                    }
                 }
         }
     }

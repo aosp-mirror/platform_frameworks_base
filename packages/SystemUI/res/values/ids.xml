@@ -218,6 +218,7 @@
     <item type="id" name="accessibility_actions_view" />
     <item type="id" name="ambient_indication_container" />
     <item type="id" name="aod_notification_icon_container" />
+    <item type="id" name="aod_promoted_notification_frame" />
     <item type="id" name="burn_in_layer" />
     <item type="id" name="burn_in_layer_empty_view" />
     <item type="id" name="communal_tutorial_indicator" />
@@ -233,6 +234,7 @@
     <item type="id" name="nssl_placeholder" />
     <item type="id" name="nssl_placeholder_barrier_bottom" />
     <item type="id" name="small_clock_guideline_top" />
+    <item type="id" name="smart_space_barrier_top" />
     <item type="id" name="smart_space_barrier_bottom" />
     <item type="id" name="split_shade_guideline" />
     <item type="id" name="start_button" />
@@ -291,4 +293,5 @@
 
     <item type="id" name="brightness_dialog_slider" />
 
+    <item type="id" name="aod_promoted_notification_view_updater_tag" />
 </resources>

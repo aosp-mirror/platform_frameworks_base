@@ -30,6 +30,14 @@ xsd_config {
 }
 
 xsd_config {
+    name: "display-topology",
+    srcs: ["display-topology/display-topology.xsd"],
+    api_dir: "display-topology/schema",
+    package_name: "com.android.server.display.topology",
+    gen_writer: true,
+}
+
+xsd_config {
     name: "display-device-config",
     srcs: ["display-device-config/display-device-config.xsd"],
     api_dir: "display-device-config/schema",

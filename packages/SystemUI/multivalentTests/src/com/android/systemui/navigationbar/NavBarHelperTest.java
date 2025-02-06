@@ -57,7 +57,7 @@ import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
-import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.recents.LauncherProxyService;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
@@ -104,7 +104,7 @@ public class NavBarHelperTest extends SysuiTestCase {
     @Mock
     SystemActions mSystemActions;
     @Mock
-    OverviewProxyService mOverviewProxyService;
+    LauncherProxyService mLauncherProxyService;
     @Mock
     Lazy<AssistManager> mAssistManagerLazy;
     @Mock
@@ -161,7 +161,7 @@ public class NavBarHelperTest extends SysuiTestCase {
         mNavBarHelper = new NavBarHelper(mContext, mAccessibilityManager,
                 mAccessibilityButtonModeObserver, mAccessibilityButtonTargetObserver,
                 mAccessibilityGestureTargetObserver,
-                mSystemActions, mOverviewProxyService, mAssistManagerLazy,
+                mSystemActions, mLauncherProxyService, mAssistManagerLazy,
                 () -> Optional.of(mock(CentralSurfaces.class)), mock(KeyguardStateController.class),
                 mNavigationModeController, mEdgeBackGestureHandlerFactory, mWm, mUserTracker,
                 mDisplayTracker, mNotificationShadeWindowController, mConfigurationController,
@@ -171,7 +171,7 @@ public class NavBarHelperTest extends SysuiTestCase {
     @Test
     public void registerListenersInCtor() {
         verify(mNavigationModeController, times(1)).addListener(mNavBarHelper);
-        verify(mOverviewProxyService, times(1)).addCallback(mNavBarHelper);
+        verify(mLauncherProxyService, times(1)).addCallback(mNavBarHelper);
         verify(mCommandQueue, times(1)).addCallback(any());
     }
 

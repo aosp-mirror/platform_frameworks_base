@@ -59,7 +59,6 @@ constructor(
             .distinctUntilChanged()
             .logDiffsForTable(
                 logger,
-                columnPrefix = "",
                 columnName = "isAirplaneModeIconVisible",
                 initialValue = false,
             )

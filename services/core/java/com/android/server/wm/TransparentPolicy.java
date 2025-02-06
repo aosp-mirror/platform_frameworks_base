@@ -204,7 +204,7 @@ class TransparentPolicy {
             return true;
         }
         final AppCompatSizeCompatModePolicy scmPolicy = mActivityRecord.mAppCompatController
-                .getAppCompatSizeCompatModePolicy();
+                .getSizeCompatModePolicy();
         if (mActivityRecord.getTask() == null || mActivityRecord.fillsParent()
                 || scmPolicy.hasAppCompatDisplayInsetsWithoutInheritance()) {
             return true;

@@ -23,7 +23,9 @@ import android.content.Context;
 import android.content.pm.LauncherUserInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.UserProperties;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.multiuser.Flags;
 import android.os.Bundle;
 import android.os.UserManager;
 import android.util.DebugUtils;
@@ -351,8 +353,10 @@ public abstract class UserManagerInternal {
             boolean excludePreCreated);
 
     /**
-     * Returns an array of ids for profiles associated with the specified user including the user
-     * itself.
+     * Returns a list of the users that are associated with the specified user, including the user
+     * itself. This includes the user, its profiles, its parent, and its parent's other profiles,
+     * as applicable.
+     *
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * @param userId      id of the user to return profiles for
@@ -584,6 +588,12 @@ public abstract class UserManagerInternal {
      * Returns the user id of the main user, or {@link android.os.UserHandle#USER_NULL} if there is
      * no main user.
      *
+     * <p>NB: Features should ideally not limit functionality to the main user. Ideally, they
+     * should either work for all users or for all admin users. If a feature should only work for
+     * select users, its determination of which user should be done intelligently or be
+     * customizable. Not all devices support a main user, and the idea of singling out one user as
+     * special is contrary to overall multiuser goals.
+     *
      * @see UserManager#isMainUser()
      */
     public abstract @UserIdInt int getMainUserId();
@@ -611,4 +621,14 @@ public abstract class UserManagerInternal {
      * if there is no such user.
      */
     public abstract @UserIdInt int getCommunalProfileId();
+
+    /**
+     * Checks whether to show a notification for sounds (e.g., alarms, timers, etc.) from
+     * background users.
+     */
+    public static boolean shouldShowNotificationForBackgroundUserSounds() {
+        return Flags.addUiForSoundsFromBackgroundUsers() && Resources.getSystem().getBoolean(
+                com.android.internal.R.bool.config_showNotificationForBackgroundUserAlarms)
+                && UserManager.supportsMultipleUsers();
+    }
 }

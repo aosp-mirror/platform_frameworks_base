@@ -246,12 +246,11 @@ public class ProcessStateController {
     }
 
     /**
-     * Set what sched group to grant a process due to running a broadcast.
-     * {@link ProcessList.SCHED_GROUP_UNDEFINED} means the process is not running a broadcast.
+     * Sets an active instrumentation running within the given process.
      */
-    public void setBroadcastSchedGroup(@NonNull ProcessRecord proc, int schedGroup) {
-        // TODO(b/302575389): Migrate state pulled from BroadcastQueue to a pushed model
-        throw new UnsupportedOperationException("Not implemented yet");
+    public void setActiveInstrumentation(@NonNull ProcessRecord proc,
+            ActiveInstrumentation activeInstrumentation) {
+        proc.setActiveInstrumentation(activeInstrumentation);
     }
 
     /********************* Process Visibility State Events *********************/
@@ -585,6 +584,34 @@ public class ProcessStateController {
      */
     public void updateHasTopStartedAlmostPerceptibleServices(@NonNull ProcessServiceRecord psr) {
         psr.updateHasTopStartedAlmostPerceptibleServices();
+    }
+
+    /************************ Broadcast Receiver State Events **************************/
+    /**
+     * Set what sched group to grant a process due to running a broadcast.
+     * {@link ProcessList.SCHED_GROUP_UNDEFINED} means the process is not running a broadcast.
+     */
+    public void setBroadcastSchedGroup(@NonNull ProcessRecord proc, int schedGroup) {
+        // TODO(b/302575389): Migrate state pulled from BroadcastQueue to a pushed model
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    /**
+     * Note that the process has started processing a broadcast receiver.
+     */
+    public boolean incrementCurReceivers(@NonNull ProcessRecord app) {
+        // TODO(b/302575389): Migrate state pulled from ATMS to a pushed model
+        // maybe used ActivityStateFlags instead.
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    /**
+     * Note that the process has finished processing a broadcast receiver.
+     */
+    public boolean decrementCurReceivers(@NonNull ProcessRecord app) {
+        // TODO(b/302575389): Migrate state pulled from ATMS to a pushed model
+        // maybe used ActivityStateFlags instead.
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     /**

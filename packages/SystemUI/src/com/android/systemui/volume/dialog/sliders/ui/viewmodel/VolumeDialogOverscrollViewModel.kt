@@ -26,7 +26,6 @@ import com.android.systemui.volume.dialog.sliders.shared.model.SliderInputEvent
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.sign
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -38,7 +37,6 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.transform
 
 @VolumeDialogSliderScope
-@OptIn(ExperimentalCoroutinesApi::class)
 class VolumeDialogOverscrollViewModel
 @Inject
 constructor(
@@ -95,18 +93,17 @@ constructor(
     private fun overscrollEvents(direction: Float): Flow<OverscrollEventModel> {
         var startPosition: Float? = null
         return inputEventsInteractor.event
-            .mapNotNull { (it as? SliderInputEvent.Touch)?.event }
+            .mapNotNull { it as? SliderInputEvent.Touch }
             .transform { touchEvent ->
                 // Skip events from inside the slider bounds for the case when the user adjusts
-                // slider
-                // towards max when the slider is already on max value.
-                if (touchEvent.isFinalEvent()) {
+                // slider towards max when the slider is already on max value.
+                if (touchEvent is SliderInputEvent.Touch.End) {
                     startPosition = null
                     emit(OverscrollEventModel.Animate(0f))
                     return@transform
                 }
                 val currentStartPosition = startPosition
-                val newPosition: Float = touchEvent.rawY
+                val newPosition: Float = touchEvent.y
                 if (currentStartPosition == null) {
                     startPosition = newPosition
                 } else {
@@ -124,11 +121,6 @@ constructor(
                     emit(OverscrollEventModel.Move(interpolatedOffset))
                 }
             }
-    }
-
-    /** @return true when the [MotionEvent] indicates the end of the gesture. */
-    private fun MotionEvent.isFinalEvent(): Boolean {
-        return actionMasked == MotionEvent.ACTION_UP || actionMasked == MotionEvent.ACTION_CANCEL
     }
 
     /** Models overscroll event */

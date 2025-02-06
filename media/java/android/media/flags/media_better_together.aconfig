@@ -11,6 +11,26 @@ flag {
 }
 
 flag {
+    name: "disable_set_bluetooth_ad2p_on_calls"
+    namespace: "media_better_together"
+    description: "Prevents calls to AudioService.setBluetoothA2dpOn(), known to cause incorrect audio routing to the built-in speakers."
+    bug: "294968421"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "disable_transfer_when_apps_do_not_support"
+    namespace: "media_better_together"
+    description: "Fixes a bug causing output switcher routes to be incorrectly enabled for media transfer."
+    bug: "373404114"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_audio_input_device_routing_and_volume_control"
     namespace: "media_better_together"
     description: "Allows audio input devices routing and volume control via system settings."
@@ -115,6 +135,16 @@ flag {
 }
 
 flag {
+    name: "enable_output_switcher_session_grouping"
+    namespace: "media_better_together"
+    description: "Enables selected items in Output Switcher to be grouped together."
+    bug: "388347018"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_prevention_of_keep_alive_route_providers"
     namespace: "media_solutions"
     description: "Enables mechanisms to prevent route providers from keeping malicious apps alive."
@@ -161,6 +191,17 @@ flag {
     namespace: "media_solutions"
     description: "Enable new MediaRouter2 API to enable watch companion apps to scan while the phone screen is off."
     bug: "281072508"
+}
+
+flag {
+    name: "enable_use_of_singleton_audio_manager_route_controller"
+    is_exported: true
+    namespace: "media_better_together"
+    description: "Use singleton AudioManagerRouteController shared across all users."
+    bug: "372868909"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {

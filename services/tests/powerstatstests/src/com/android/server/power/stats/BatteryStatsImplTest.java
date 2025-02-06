@@ -141,8 +141,7 @@ public class BatteryStatsImplTest {
         HandlerThread bgThread = new HandlerThread("bg thread");
         bgThread.start();
         mHandler = new Handler(bgThread.getLooper());
-        mBatteryStatsImpl = new MockBatteryStatsImpl(mMockClock, null, mHandler)
-                .setPowerProfile(mPowerProfile)
+        mBatteryStatsImpl = new MockBatteryStatsImpl(mMockClock, null, mHandler, mPowerProfile)
                 .setCpuScalingPolicies(mCpuScalingPolicies)
                 .setKernelCpuUidFreqTimeReader(mKernelUidCpuFreqTimeReader)
                 .setKernelSingleUidTimeReader(mKernelSingleUidTimeReader)
@@ -919,11 +918,11 @@ public class BatteryStatsImplTest {
         synchronized (mBatteryStatsImpl) {
             mBatteryStatsImpl.setOnBatteryLocked(mMockClock.realtime, mMockClock.uptime, true,
                     BatteryManager.BATTERY_STATUS_DISCHARGING, 50, 0);
-            // Will not save to PowerStatsStore because "saveBatteryUsageStatsOnReset" has not
-            // been called yet.
-            mBatteryStatsImpl.resetAllStatsAndHistoryLocked(
-                    BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
         }
+        // Will not save to PowerStatsStore because "saveBatteryUsageStatsOnReset" has not
+        // been called yet.
+        mBatteryStatsImpl.startNewSession(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
+        awaitCompletion();
 
         assertThat(mPowerStatsStore.getTableOfContents()).isEmpty();
 
@@ -945,15 +944,8 @@ public class BatteryStatsImplTest {
         mMockClock.currentTime += 60000;
 
         // Battery stats reset should have the side-effect of saving accumulated battery usage stats
-        synchronized (mBatteryStatsImpl) {
-            mBatteryStatsImpl.resetAllStatsAndHistoryLocked(
-                    BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
-        }
-
-        // Await completion
-        ConditionVariable done = new ConditionVariable();
-        mHandler.post(done::open);
-        done.block();
+        mBatteryStatsImpl.startNewSession(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
+        awaitCompletion();
 
         List<PowerStatsSpan.Metadata> contents = mPowerStatsStore.getTableOfContents();
         assertThat(contents).hasSize(1);
@@ -981,5 +973,12 @@ public class BatteryStatsImplTest {
                 .isEqualTo(60000);
 
         span.close();
+    }
+
+    private void awaitCompletion() {
+        // Await completion
+        ConditionVariable done = new ConditionVariable();
+        mHandler.post(done::open);
+        done.block();
     }
 }

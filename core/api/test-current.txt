@@ -2,7 +2,7 @@
 package android {
 
   public static final class Manifest.permission {
-    field @FlaggedApi("com.android.server.accessibility.motion_event_observing") public static final String ACCESSIBILITY_MOTION_EVENT_OBSERVING = "android.permission.ACCESSIBILITY_MOTION_EVENT_OBSERVING";
+    field public static final String ACCESSIBILITY_MOTION_EVENT_OBSERVING = "android.permission.ACCESSIBILITY_MOTION_EVENT_OBSERVING";
     field public static final String ACCESS_NOTIFICATIONS = "android.permission.ACCESS_NOTIFICATIONS";
     field public static final String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
     field public static final String ADJUST_RUNTIME_PERMISSIONS_POLICY = "android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY";
@@ -436,34 +436,6 @@ package android.app {
     ctor public PictureInPictureUiState(boolean);
   }
 
-  public class PropertyInvalidatedCache<Query, Result> {
-    ctor public PropertyInvalidatedCache(int, @NonNull String, @NonNull String, @NonNull String, @NonNull android.app.PropertyInvalidatedCache.QueryHandler<Query,Result>);
-    method @NonNull public static String createPropertyName(@NonNull String, @NonNull String);
-    method public void disableForCurrentProcess();
-    method public static void disableForCurrentProcess(@NonNull String);
-    method public static void disableForTestMode();
-    method public final void disableInstance();
-    method public final void disableSystemWide();
-    method public final void forgetDisableLocal();
-    method public boolean getDisabledState();
-    method public void invalidateCache();
-    method public static void invalidateCache(@NonNull String, @NonNull String);
-    method public final boolean isDisabled();
-    method @Nullable public Result query(@NonNull Query);
-    method public static void setTestMode(boolean);
-    method public void testPropertyName();
-    field public static final String MODULE_BLUETOOTH = "bluetooth";
-    field public static final String MODULE_SYSTEM = "system_server";
-    field public static final String MODULE_TELEPHONY = "telephony";
-    field public static final String MODULE_TEST = "test";
-  }
-
-  public abstract static class PropertyInvalidatedCache.QueryHandler<Q, R> {
-    ctor public PropertyInvalidatedCache.QueryHandler();
-    method @Nullable public abstract R apply(@NonNull Q);
-    method public boolean shouldBypassCache(@NonNull Q);
-  }
-
   public class StatusBarManager {
     method public void cancelRequestAddTile(@NonNull String);
     method public void clickNotification(@Nullable String, int, int, boolean);
@@ -837,7 +809,7 @@ package android.app.contentsuggestions {
 
 package android.app.contextualsearch {
 
-  @FlaggedApi("android.app.contextualsearch.flags.enable_service") public final class CallbackToken implements android.os.Parcelable {
+  public final class CallbackToken implements android.os.Parcelable {
     method @NonNull public android.os.IBinder getToken();
   }
 
@@ -909,15 +881,6 @@ package android.app.usage {
 
 }
 
-package android.app.wallpaper {
-
-  public static final class WallpaperDescription.Builder {
-    method @NonNull public android.app.wallpaper.WallpaperDescription.Builder setCropHints(@NonNull java.util.Map<android.graphics.Point,android.graphics.Rect>);
-    method @NonNull public android.app.wallpaper.WallpaperDescription.Builder setCropHints(@NonNull android.util.SparseArray<android.graphics.Rect>);
-  }
-
-}
-
 package android.appwidget {
 
   public class AppWidgetManager {
@@ -944,6 +907,14 @@ package android.companion {
     method @NonNull public android.companion.AssociationInfo.Builder setSelfManaged(boolean);
     method @NonNull public android.companion.AssociationInfo.Builder setSystemDataSyncFlags(int);
     method @NonNull public android.companion.AssociationInfo.Builder setTimeApproved(long);
+  }
+
+  public final class AssociationRequest implements android.os.Parcelable {
+    method public boolean isSkipRoleGrant();
+  }
+
+  public static final class AssociationRequest.Builder {
+    method @NonNull @RequiresPermission(android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES) public android.companion.AssociationRequest.Builder setSkipRoleGrant(boolean);
   }
 
   public final class CompanionDeviceManager {
@@ -1671,6 +1642,10 @@ package android.hardware.camera2.params {
     method public void setColorSpace(@NonNull android.graphics.ColorSpace.Named);
   }
 
+  @FlaggedApi("com.android.internal.camera.flags.camera_multi_client") public final class SharedSessionConfiguration {
+    ctor public SharedSessionConfiguration(int, @NonNull long[]);
+  }
+
 }
 
 package android.hardware.devicestate {
@@ -1747,6 +1722,7 @@ package android.hardware.display {
   public final class DisplayManager {
     method public boolean areUserDisabledHdrTypesAllowed();
     method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void clearGlobalUserPreferredDisplayMode();
+    method @FlaggedApi("com.android.server.display.feature.flags.display_topology") @Nullable @RequiresPermission("android.permission.MANAGE_DISPLAYS") public android.hardware.display.DisplayTopology getDisplayTopology();
     method @Nullable public android.view.Display.Mode getGlobalUserPreferredDisplayMode();
     method @NonNull public android.hardware.display.HdrConversionMode getHdrConversionModeSetting();
     method @NonNull public int[] getSupportedHdrOutputTypes();
@@ -1760,6 +1736,7 @@ package android.hardware.display {
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS) public void setShouldAlwaysRespectAppRequestedMode(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setUserDisabledHdrTypes(@NonNull int[]);
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS) public boolean shouldAlwaysRespectAppRequestedMode();
+    field public static final String DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED = "android.hardware.display.category.ALL_INCLUDING_DISABLED";
     field public static final String DISPLAY_CATEGORY_REAR = "android.hardware.display.category.REAR";
     field public static final String HDR_OUTPUT_CONTROL_FLAG = "enable_hdr_output_control";
     field public static final int SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS = 2; // 0x2
@@ -1769,6 +1746,13 @@ package android.hardware.display {
     field public static final int VIRTUAL_DISPLAY_FLAG_OWN_FOCUS = 16384; // 0x4000
     field public static final int VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 512; // 0x200
     field public static final int VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH = 64; // 0x40
+  }
+
+  @FlaggedApi("com.android.server.display.feature.flags.display_topology") public final class DisplayTopology implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.util.SparseArray<android.graphics.RectF> getAbsoluteBounds();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.display.DisplayTopology> CREATOR;
   }
 
 }
@@ -2113,6 +2097,11 @@ package android.media {
     method public boolean isAidlHal();
   }
 
+  public static final class MediaMuxer.OutputFormat {
+    field public static final int MUXER_OUTPUT_FIRST = 0; // 0x0
+    field public static final int MUXER_OUTPUT_LAST = 4; // 0x4
+  }
+
   public final class MediaRoute2Info implements android.os.Parcelable {
     method @NonNull public String getOriginalId();
   }
@@ -2168,6 +2157,7 @@ package android.media.audiofx {
     method public void setParameterListener(android.media.audiofx.AudioEffect.OnParameterChangeListener);
     method public static byte[] shortToByteArray(short);
     field public static final java.util.UUID EFFECT_TYPE_NULL;
+    field @NonNull public static final java.util.UUID EFFECT_TYPE_SPATIALIZER;
   }
 
   public static class AudioEffect.Descriptor {
@@ -2438,17 +2428,28 @@ package android.os {
     method @FlaggedApi("android.os.mainline_vcn_platform_api") public final void removeEqualMessages(int, @Nullable Object);
   }
 
-  public class IpcDataCache<Query, Result> extends android.app.PropertyInvalidatedCache<Query,Result> {
+  public class IpcDataCache<Query, Result> {
     ctor public IpcDataCache(int, @NonNull String, @NonNull String, @NonNull String, @NonNull android.os.IpcDataCache.QueryHandler<Query,Result>);
+    method public void disableForCurrentProcess();
     method public static void disableForCurrentProcess(@NonNull String);
+    method public final void disableInstance();
+    method public final void disableSystemWide();
+    method public final void forgetDisableLocal();
+    method public boolean getDisabledState();
+    method public void invalidateCache();
     method public static void invalidateCache(@NonNull String, @NonNull String);
+    method public final boolean isDisabled();
+    method @Nullable public Result query(@NonNull Query);
+    method public static void setTestMode(boolean);
     field public static final String MODULE_BLUETOOTH = "bluetooth";
     field public static final String MODULE_SYSTEM = "system_server";
     field public static final String MODULE_TEST = "test";
   }
 
-  public abstract static class IpcDataCache.QueryHandler<Q, R> extends android.app.PropertyInvalidatedCache.QueryHandler<Q,R> {
+  public abstract static class IpcDataCache.QueryHandler<Q, R> {
     ctor public IpcDataCache.QueryHandler();
+    method @Nullable public abstract R apply(@NonNull Q);
+    method public boolean shouldBypassCache(@NonNull Q);
   }
 
   public final class MessageQueue {
@@ -3407,6 +3408,10 @@ package android.telecom {
 
   public abstract class ConnectionService extends android.app.Service {
     method public void onBindClient(@Nullable android.content.Intent);
+  }
+
+  public class TelecomManager {
+    method @FlaggedApi("com.android.server.telecom.flags.voip_call_monitor_refactor") public boolean hasForegroundServiceDelegation(@Nullable android.telecom.PhoneAccountHandle);
   }
 
 }
@@ -4532,7 +4537,6 @@ package android.window {
     field public final int displayId;
     field public final boolean isDuplicateTouchToWallpaper;
     field public final boolean isFocusable;
-    field public final boolean isPreventSplitting;
     field public final boolean isTouchable;
     field public final boolean isTrustedOverlay;
     field public final boolean isVisible;

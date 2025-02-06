@@ -1480,6 +1480,30 @@ public final class InputManager {
         mGlobal.unregisterKeyGestureEventHandler(handler);
     }
 
+    /**
+     * Find an input gesture mapped to a particular trigger.
+     *
+     * @param trigger to find the input gesture for
+     * @return input gesture mapped to the provided trigger, {@code null} if none found
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    @UserHandleAware
+    @Nullable
+    public InputGestureData getInputGesture(@NonNull InputGestureData.Trigger trigger) {
+        try {
+            AidlInputGestureData result = mIm.getInputGesture(mContext.getUserId(),
+                    trigger.getAidlTrigger());
+            if (result == null) {
+                return null;
+            }
+            return new InputGestureData(result);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** Adds a new custom input gesture
      *
      * @param inputGestureData gesture data to add as custom gesture

@@ -21,6 +21,8 @@ import android.platform.test.annotations.RequiresFlagsDisabled
 import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.CheckFlagsRule
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
+import android.view.IRemoteAnimationFinishedCallback
+import android.view.RemoteAnimationTarget
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -42,10 +44,12 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
 
     @get:Rule val checkFlagsRule: CheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
@@ -221,5 +225,26 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
         underTest.setSurfaceBehindVisibility(true)
         underTest.setSurfaceBehindVisibility(false)
         verify(keyguardTransitions).startKeyguardTransition(eq(true), any())
+    }
+
+    @Test
+    fun remoteAnimationInstantlyFinished_ifDismissTransitionNotStarted() {
+        val mockedCallback = mock<IRemoteAnimationFinishedCallback>()
+
+        // Call the onAlreadyGone callback immediately.
+        doAnswer { invocation -> (invocation.getArgument(1) as (() -> Unit)).invoke() }
+            .whenever(keyguardDismissTransitionInteractor)
+            .startDismissKeyguardTransition(any(), any())
+
+        underTest.onKeyguardGoingAwayRemoteAnimationStart(
+            transit = 0,
+            apps = arrayOf(mock<RemoteAnimationTarget>()),
+            wallpapers = emptyArray(),
+            nonApps = emptyArray(),
+            finishedCallback = mockedCallback,
+        )
+
+        verify(mockedCallback).onAnimationFinished()
+        verifyNoMoreInteractions(mockedCallback)
     }
 }

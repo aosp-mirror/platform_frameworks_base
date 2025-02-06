@@ -20,6 +20,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener
@@ -64,13 +65,14 @@ class ViewConfigCoordinatorTest : SysuiTestCase() {
     fun setUp() {
         whenever(pipeline.allNotifs).thenReturn(listOf(entry))
         whenever(entry.row).thenReturn(row)
-        coordinator = ViewConfigCoordinator(
-            configurationController,
-            lockscreenUserManager,
-            gutsManager,
-            keyguardUpdateMonitor,
-            colorUpdateLogger,
-        )
+        coordinator =
+            ViewConfigCoordinator(
+                configurationController,
+                lockscreenUserManager,
+                gutsManager,
+                keyguardUpdateMonitor,
+                colorUpdateLogger,
+            )
         coordinator.attach(pipeline)
         userChangedListener = withArgCaptor {
             verify(lockscreenUserManager).addUserChangedListener(capture())
@@ -95,7 +97,7 @@ class ViewConfigCoordinatorTest : SysuiTestCase() {
     fun themeChangePropagatesToEntry() {
         configurationListener.onThemeChanged()
         verify(entry).onDensityOrFontScaleChanged()
-        verify(entry).areGutsExposed()
+        checkGutsExposedCalled()
         verifyNoMoreInteractions(entry, row)
     }
 
@@ -103,7 +105,7 @@ class ViewConfigCoordinatorTest : SysuiTestCase() {
     fun densityChangePropagatesToEntry() {
         configurationListener.onDensityOrFontScaleChanged()
         verify(entry).onDensityOrFontScaleChanged()
-        verify(entry).areGutsExposed()
+        checkGutsExposedCalled()
         verifyNoMoreInteractions(entry, row)
     }
 
@@ -127,7 +129,7 @@ class ViewConfigCoordinatorTest : SysuiTestCase() {
         verify(entry).row
         verify(row).onUiModeChanged()
         verify(entry).onDensityOrFontScaleChanged()
-        verify(entry).areGutsExposed()
+        checkGutsExposedCalled()
         verifyNoMoreInteractions(entry, row)
         clearInvocations(entry, row)
 
@@ -158,7 +160,7 @@ class ViewConfigCoordinatorTest : SysuiTestCase() {
         verify(entry).row
         verify(row).onUiModeChanged()
         verify(entry).onDensityOrFontScaleChanged()
-        verify(entry).areGutsExposed()
+        checkGutsExposedCalled()
         verifyNoMoreInteractions(entry, row)
         clearInvocations(entry, row)
 
@@ -194,8 +196,14 @@ class ViewConfigCoordinatorTest : SysuiTestCase() {
         verify(entry).row
         verify(row).onUiModeChanged()
         verify(entry).onDensityOrFontScaleChanged()
-        verify(entry).areGutsExposed()
+        checkGutsExposedCalled()
         verifyNoMoreInteractions(entry, row)
         clearInvocations(entry, row)
+    }
+
+    private fun checkGutsExposedCalled() {
+        if (!Flags.notificationUndoGutsOnConfigChanged()) {
+            verify(entry).areGutsExposed()
+        }
     }
 }

@@ -58,10 +58,10 @@ import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import java.io.PrintWriter
 import java.lang.ref.WeakReference
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -80,7 +80,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class MobileConnectionsRepositoryImpl
 @Inject
@@ -108,9 +107,8 @@ constructor(
 ) : MobileConnectionsRepository, Dumpable {
 
     // TODO(b/333912012): for now, we are never invalidating the cache. We can do better though
-    private var subIdRepositoryCache:
-        MutableMap<Int, WeakReference<FullMobileConnectionRepository>> =
-        mutableMapOf()
+    private var subIdRepositoryCache =
+        ConcurrentHashMap<Int, WeakReference<FullMobileConnectionRepository>>()
 
     private val defaultNetworkName =
         NetworkNameModel.Default(
@@ -249,7 +247,7 @@ constructor(
                 tableLogger,
                 LOGGING_PREFIX,
                 columnName = "activeSubId",
-                initialValue = INVALID_SUBSCRIPTION_ID,
+                initialValue = null,
             )
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), null)
 
@@ -264,22 +262,31 @@ constructor(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), null)
 
-    override val defaultDataSubId: StateFlow<Int> =
+    override val defaultDataSubId: StateFlow<Int?> =
         broadcastDispatcher
             .broadcastFlow(
                 IntentFilter(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
             ) { intent, _ ->
-                intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY, INVALID_SUBSCRIPTION_ID)
+                val subId =
+                    intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY, INVALID_SUBSCRIPTION_ID)
+                if (subId == INVALID_SUBSCRIPTION_ID) {
+                    null
+                } else {
+                    subId
+                }
             }
             .distinctUntilChanged()
             .logDiffsForTable(
                 tableLogger,
                 LOGGING_PREFIX,
                 columnName = "defaultSubId",
-                initialValue = INVALID_SUBSCRIPTION_ID,
+                initialValue = null,
             )
-            .onStart { emit(subscriptionManagerProxy.getDefaultDataSubscriptionId()) }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), INVALID_SUBSCRIPTION_ID)
+            .onStart {
+                val subId = subscriptionManagerProxy.getDefaultDataSubscriptionId()
+                emit(if (subId == INVALID_SUBSCRIPTION_ID) null else subId)
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), null)
 
     private val carrierConfigChangedEvent =
         broadcastDispatcher
@@ -373,7 +380,6 @@ constructor(
             .distinctUntilChanged()
             .logDiffsForTable(
                 tableLogger,
-                columnPrefix = "",
                 columnName = "defaultConnectionIsValidated",
                 initialValue = false,
             )

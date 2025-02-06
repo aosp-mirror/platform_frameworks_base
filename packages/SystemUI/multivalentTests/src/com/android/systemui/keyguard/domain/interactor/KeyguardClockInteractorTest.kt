@@ -25,13 +25,14 @@ import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardClockRepository
 import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.keyguard.shared.model.ClockSize
+import com.android.systemui.keyguard.shared.model.DozeStateModel
+import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.TransitionState
-import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
@@ -75,25 +76,16 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableSceneContainer
-    fun clockShouldBeCentered_sceneContainerFlagOff_basedOnRepository() =
-        testScope.runTest {
-            val value by collectLastValue(underTest.clockShouldBeCentered)
-            kosmos.keyguardInteractor.setClockShouldBeCentered(true)
-            assertThat(value).isTrue()
-
-            kosmos.keyguardInteractor.setClockShouldBeCentered(false)
-            assertThat(value).isFalse()
-        }
-
-    @Test
     @EnableSceneContainer
     fun clockSize_forceSmallClock_SMALL() =
         testScope.runTest {
             val value by collectLastValue(underTest.clockSize)
             kosmos.fakeKeyguardClockRepository.setShouldForceSmallClock(true)
             kosmos.fakeFeatureFlagsClassic.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, true)
-            transitionTo(KeyguardState.AOD, KeyguardState.LOCKSCREEN)
+            kosmos.fakeKeyguardTransitionRepository.transitionTo(
+                KeyguardState.AOD,
+                KeyguardState.LOCKSCREEN,
+            )
             assertThat(value).isEqualTo(ClockSize.SMALL)
         }
 
@@ -190,7 +182,10 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
             val value by collectLastValue(underTest.clockShouldBeCentered)
             kosmos.shadeRepository.setShadeLayoutWide(true)
             kosmos.activeNotificationListRepository.setActiveNotifs(1)
-            transitionTo(KeyguardState.LOCKSCREEN, KeyguardState.AOD)
+            kosmos.fakeKeyguardTransitionRepository.transitionTo(
+                KeyguardState.LOCKSCREEN,
+                KeyguardState.AOD,
+            )
             assertThat(value).isTrue()
         }
 
@@ -201,15 +196,187 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
             val value by collectLastValue(underTest.clockShouldBeCentered)
             kosmos.shadeRepository.setShadeLayoutWide(true)
             kosmos.activeNotificationListRepository.setActiveNotifs(1)
-            transitionTo(KeyguardState.AOD, KeyguardState.LOCKSCREEN)
+            kosmos.fakeKeyguardTransitionRepository.transitionTo(
+                KeyguardState.AOD,
+                KeyguardState.LOCKSCREEN,
+            )
             assertThat(value).isFalse()
         }
 
-    private suspend fun transitionTo(from: KeyguardState, to: KeyguardState) {
-        with(kosmos.fakeKeyguardTransitionRepository) {
-            sendTransitionStep(TransitionStep(from, to, 0f, TransitionState.STARTED))
-            sendTransitionStep(TransitionStep(from, to, 0.5f, TransitionState.RUNNING))
-            sendTransitionStep(TransitionStep(from, to, 1f, TransitionState.FINISHED))
+    @Test
+    @DisableSceneContainer
+    fun clockShouldBeCentered_sceneContainerFlagOff_notSplitMode_true() =
+        testScope.runTest {
+            val value by collectLastValue(underTest.clockShouldBeCentered)
+            kosmos.shadeRepository.setShadeLayoutWide(false)
+            assertThat(value).isTrue()
         }
-    }
+
+    @Test
+    @DisableSceneContainer
+    fun clockShouldBeCentered_sceneContainerFlagOff_splitMode_lockscreen_withNotifs_false() =
+        testScope.runTest {
+            val value by collectLastValue(underTest.clockShouldBeCentered)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
+            kosmos.activeNotificationListRepository.setActiveNotifs(1)
+            kosmos.fakeKeyguardTransitionRepository.transitionTo(
+                KeyguardState.AOD,
+                KeyguardState.LOCKSCREEN,
+            )
+            assertThat(value).isFalse()
+        }
+
+    @Test
+    @DisableSceneContainer
+    fun clockShouldBeCentered_sceneContainerFlagOff_splitMode_lockscreen_withoutNotifs_true() =
+        testScope.runTest {
+            val value by collectLastValue(underTest.clockShouldBeCentered)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
+            kosmos.activeNotificationListRepository.setActiveNotifs(0)
+            kosmos.fakeKeyguardTransitionRepository.transitionTo(
+                KeyguardState.AOD,
+                KeyguardState.LOCKSCREEN,
+            )
+            assertThat(value).isTrue()
+        }
+
+    @Test
+    @DisableSceneContainer
+    fun clockShouldBeCentered_sceneContainerFlagOff_splitMode_LsToAod_withNotifs_true() =
+        testScope.runTest {
+            val value by collectLastValue(underTest.clockShouldBeCentered)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
+            kosmos.activeNotificationListRepository.setActiveNotifs(1)
+            kosmos.fakeKeyguardTransitionRepository.transitionTo(
+                KeyguardState.OFF,
+                KeyguardState.LOCKSCREEN,
+            )
+            assertThat(value).isFalse()
+            kosmos.fakeKeyguardTransitionRepository.transitionTo(
+                KeyguardState.LOCKSCREEN,
+                KeyguardState.AOD,
+            )
+            assertThat(value).isTrue()
+        }
+
+    @Test
+    @DisableSceneContainer
+    fun clockShouldBeCentered_sceneContainerFlagOff_splitMode_AodToLs_withNotifs_false() =
+        testScope.runTest {
+            val value by collectLastValue(underTest.clockShouldBeCentered)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
+            kosmos.activeNotificationListRepository.setActiveNotifs(1)
+            kosmos.fakeKeyguardTransitionRepository.transitionTo(
+                KeyguardState.LOCKSCREEN,
+                KeyguardState.AOD,
+            )
+            assertThat(value).isTrue()
+            kosmos.fakeKeyguardTransitionRepository.transitionTo(
+                KeyguardState.AOD,
+                KeyguardState.LOCKSCREEN,
+            )
+            assertThat(value).isFalse()
+        }
+
+    @Test
+    @DisableSceneContainer
+    fun clockShouldBeCentered_sceneContainerFlagOff_splitMode_Aod_withPulsingNotifs_false() =
+        testScope.runTest {
+            val value by collectLastValue(underTest.clockShouldBeCentered)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
+            kosmos.fakeKeyguardTransitionRepository.transitionTo(
+                KeyguardState.LOCKSCREEN,
+                KeyguardState.AOD,
+            )
+            assertThat(value).isTrue()
+            kosmos.fakeKeyguardRepository.setDozeTransitionModel(
+                DozeTransitionModel(
+                    from = DozeStateModel.DOZE_AOD,
+                    to = DozeStateModel.DOZE_PULSING,
+                )
+            )
+            assertThat(value).isFalse()
+        }
+
+    @Test
+    @DisableSceneContainer
+    fun clockShouldBeCentered_sceneContainerFlagOff_splitMode_LStoGone_withoutNotifs_true() =
+        testScope.runTest {
+            val value by collectLastValue(underTest.clockShouldBeCentered)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
+            kosmos.activeNotificationListRepository.setActiveNotifs(0)
+            kosmos.fakeKeyguardTransitionRepository.transitionTo(
+                KeyguardState.OFF,
+                KeyguardState.LOCKSCREEN,
+            )
+            assertThat(value).isTrue()
+            kosmos.fakeKeyguardTransitionRepository.transitionTo(
+                KeyguardState.LOCKSCREEN,
+                KeyguardState.GONE,
+            )
+            kosmos.activeNotificationListRepository.setActiveNotifs(1)
+            assertThat(value).isTrue()
+        }
+
+    @Test
+    @DisableSceneContainer
+    fun clockShouldBeCentered_sceneContainerFlagOff_splitMode_AodOn_GoneToAOD() =
+        testScope.runTest {
+            val value by collectLastValue(underTest.clockShouldBeCentered)
+            kosmos.fakeKeyguardTransitionRepository.transitionTo(
+                KeyguardState.AOD,
+                KeyguardState.LOCKSCREEN,
+            )
+            kosmos.shadeRepository.setShadeLayoutWide(true)
+            kosmos.activeNotificationListRepository.setActiveNotifs(0)
+            assertThat(value).isTrue()
+
+            kosmos.fakeKeyguardTransitionRepository.transitionTo(
+                KeyguardState.LOCKSCREEN,
+                KeyguardState.GONE,
+            )
+            kosmos.activeNotificationListRepository.setActiveNotifs(1)
+            assertThat(value).isTrue()
+
+            kosmos.fakeKeyguardTransitionRepository.transitionTo(
+                KeyguardState.GONE,
+                KeyguardState.AOD,
+            )
+            assertThat(value).isTrue()
+        }
+
+    @Test
+    @DisableSceneContainer
+    fun clockShouldBeCentered_sceneContainerFlagOff_splitMode_AodOff_GoneToDoze() =
+        testScope.runTest {
+            val value by collectLastValue(underTest.clockShouldBeCentered)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
+            kosmos.fakeKeyguardTransitionRepository.transitionTo(
+                KeyguardState.DOZING,
+                KeyguardState.LOCKSCREEN,
+            )
+            kosmos.activeNotificationListRepository.setActiveNotifs(0)
+            assertThat(value).isTrue()
+
+            kosmos.fakeKeyguardTransitionRepository.transitionTo(
+                KeyguardState.LOCKSCREEN,
+                KeyguardState.GONE,
+            )
+            kosmos.activeNotificationListRepository.setActiveNotifs(1)
+            assertThat(value).isTrue()
+
+            kosmos.fakeKeyguardTransitionRepository.transitionTo(
+                KeyguardState.GONE,
+                KeyguardState.DOZING,
+            )
+            kosmos.activeNotificationListRepository.setActiveNotifs(1)
+            assertThat(value).isTrue()
+
+            kosmos.fakeKeyguardTransitionRepository.transitionTo(
+                KeyguardState.DOZING,
+                KeyguardState.LOCKSCREEN,
+            )
+            kosmos.activeNotificationListRepository.setActiveNotifs(0)
+            assertThat(value).isTrue()
+        }
 }

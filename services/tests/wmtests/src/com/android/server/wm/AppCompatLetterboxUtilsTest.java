@@ -185,13 +185,13 @@ public class AppCompatLetterboxUtilsTest extends WindowTestsBase {
         @Override
         void onPostActivityCreation(@NonNull ActivityRecord activity) {
             super.onPostActivityCreation(activity);
-            spyOn(activity.mAppCompatController.getAppCompatLetterboxPolicy());
+            spyOn(activity.mAppCompatController.getLetterboxPolicy());
             spyOn(activity.mAppCompatController.getTransparentPolicy());
         }
 
         void setTopActivityLetterboxPolicyRunning(boolean running) {
             doReturn(running).when(activity().top().mAppCompatController
-                    .getAppCompatLetterboxPolicy()).isRunning();
+                    .getLetterboxPolicy()).isRunning();
         }
 
         void setTopActivityTransparentPolicyRunning(boolean running) {

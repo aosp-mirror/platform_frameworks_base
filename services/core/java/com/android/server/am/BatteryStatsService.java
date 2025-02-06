@@ -526,8 +526,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     public void systemServicesReady() {
+        mStats.setBatteryHistoryCompressionEnabled(
+                Flags.extendedBatteryHistoryCompressionEnabled());
         mStats.saveBatteryUsageStatsOnReset(mBatteryUsageStatsProvider, mPowerStatsStore,
                 isBatteryUsageStatsAccumulationSupported());
+        mStats.resetBatteryHistoryOnNewSession(
+                !Flags.extendedBatteryHistoryContinuousCollectionEnabled());
 
         MultiStatePowerAttributor attributor = (MultiStatePowerAttributor) mPowerAttributor;
         mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_CPU,

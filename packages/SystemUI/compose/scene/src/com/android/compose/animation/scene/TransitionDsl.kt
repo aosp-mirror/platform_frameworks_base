@@ -19,12 +19,12 @@ package com.android.compose.animation.scene
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.SpringSpec
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transformation.Transformation
+import com.android.internal.jank.Cuj.CujType
 
 /** Define the [transitions][SceneTransitions] to be used with a [SceneTransitionLayout]. */
 fun transitions(builder: SceneTransitionsBuilder.() -> Unit): SceneTransitions {
@@ -35,12 +35,6 @@ fun transitions(builder: SceneTransitionsBuilder.() -> Unit): SceneTransitions {
 
 @TransitionDsl
 interface SceneTransitionsBuilder {
-    /**
-     * The default [AnimationSpec] used when after the user lifts their finger after starting a
-     * swipe to transition, to animate back into one of the 2 scenes we are transitioning to.
-     */
-    var defaultSwipeSpec: SpringSpec<Float>
-
     /**
      * The [InterruptionHandler] used when transitions are interrupted. Defaults to
      * [DefaultInterruptionHandler].
@@ -64,6 +58,7 @@ interface SceneTransitionsBuilder {
     fun to(
         to: ContentKey,
         key: TransitionKey? = null,
+        @CujType cuj: Int? = null,
         preview: (TransitionBuilder.() -> Unit)? = null,
         reversePreview: (TransitionBuilder.() -> Unit)? = null,
         builder: TransitionBuilder.() -> Unit = {},
@@ -90,6 +85,7 @@ interface SceneTransitionsBuilder {
         from: ContentKey,
         to: ContentKey? = null,
         key: TransitionKey? = null,
+        @CujType cuj: Int? = null,
         preview: (TransitionBuilder.() -> Unit)? = null,
         reversePreview: (TransitionBuilder.() -> Unit)? = null,
         builder: TransitionBuilder.() -> Unit = {},
@@ -136,15 +132,10 @@ interface TransitionBuilder : BaseTransitionBuilder {
      * The [AnimationSpec] used to animate the associated transition progress from `0` to `1` when
      * the transition is triggered (i.e. it is not gesture-based).
      */
-    var spec: AnimationSpec<Float>
+    var spec: AnimationSpec<Float>?
 
-    /**
-     * The [SpringSpec] used to animate the associated transition progress when the transition was
-     * started by a swipe and is now animating back to a scene because the user lifted their finger.
-     *
-     * If `null`, then the [SceneTransitionsBuilder.defaultSwipeSpec] will be used.
-     */
-    var swipeSpec: SpringSpec<Float>?
+    /** The CUJ associated to this transitions. */
+    @CujType var cuj: Int?
 
     /**
      * Define a timestamp-based range for the transformations inside [builder].
@@ -219,8 +210,8 @@ interface ElementContentPicker {
     fun contentDuringTransition(
         element: ElementKey,
         transition: TransitionState.Transition,
-        fromContentZIndex: Float,
-        toContentZIndex: Float,
+        fromContentZIndex: Long,
+        toContentZIndex: Long,
     ): ContentKey
 
     /**
@@ -288,8 +279,8 @@ object HighestZIndexContentPicker : ElementContentPicker {
     override fun contentDuringTransition(
         element: ElementKey,
         transition: TransitionState.Transition,
-        fromContentZIndex: Float,
-        toContentZIndex: Float,
+        fromContentZIndex: Long,
+        toContentZIndex: Long,
     ): ContentKey {
         return if (fromContentZIndex > toContentZIndex) {
             transition.fromContent
@@ -309,8 +300,8 @@ object HighestZIndexContentPicker : ElementContentPicker {
             override fun contentDuringTransition(
                 element: ElementKey,
                 transition: TransitionState.Transition,
-                fromContentZIndex: Float,
-                toContentZIndex: Float,
+                fromContentZIndex: Long,
+                toContentZIndex: Long,
             ): ContentKey {
                 return HighestZIndexContentPicker.contentDuringTransition(
                     element,
@@ -330,8 +321,8 @@ object LowestZIndexContentPicker : ElementContentPicker {
     override fun contentDuringTransition(
         element: ElementKey,
         transition: TransitionState.Transition,
-        fromContentZIndex: Float,
-        toContentZIndex: Float,
+        fromContentZIndex: Long,
+        toContentZIndex: Long,
     ): ContentKey {
         return if (fromContentZIndex < toContentZIndex) {
             transition.fromContent
@@ -351,8 +342,8 @@ object LowestZIndexContentPicker : ElementContentPicker {
             override fun contentDuringTransition(
                 element: ElementKey,
                 transition: TransitionState.Transition,
-                fromContentZIndex: Float,
-                toContentZIndex: Float,
+                fromContentZIndex: Long,
+                toContentZIndex: Long,
             ): ContentKey {
                 return LowestZIndexContentPicker.contentDuringTransition(
                     element,
@@ -384,8 +375,8 @@ class MovableElementContentPicker(override val contents: Set<ContentKey>) :
     override fun contentDuringTransition(
         element: ElementKey,
         transition: TransitionState.Transition,
-        fromContentZIndex: Float,
-        toContentZIndex: Float,
+        fromContentZIndex: Long,
+        toContentZIndex: Long,
     ): ContentKey {
         return when {
             transition.toContent in contents -> transition.toContent

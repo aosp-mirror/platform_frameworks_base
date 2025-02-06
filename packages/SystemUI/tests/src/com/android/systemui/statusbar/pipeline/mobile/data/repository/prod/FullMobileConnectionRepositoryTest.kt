@@ -50,7 +50,6 @@ import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -69,7 +68,6 @@ import org.mockito.Mockito.verify
  * properly switches over when the value of `isCarrierMerged` changes.
  */
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class FullMobileConnectionRepositoryTest : SysuiTestCase() {

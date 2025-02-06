@@ -26,14 +26,12 @@ import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.hideAffordancesRequest
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
 /** Encapsulates business logic for transitions between UDFPS states on the keyguard. */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class UdfpsKeyguardInteractor
 @Inject

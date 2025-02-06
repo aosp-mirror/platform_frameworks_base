@@ -22,8 +22,12 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.testing.TestableLooper;
+import android.testing.ViewUtils;
 import android.view.View;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -35,6 +39,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -52,8 +57,8 @@ import java.util.HashSet;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class ComplicationHostViewControllerTest extends SysuiTestCase {
-    @Mock
     ConstraintLayout mComplicationHostView;
 
     @Mock
@@ -99,6 +104,10 @@ public class ComplicationHostViewControllerTest extends SysuiTestCase {
 
     private SecureSettings mSecureSettings;
 
+    private KosmosJavaAdapter mKosmos;
+
+    private TestableLooper mLooper;
+
     private static final int CURRENT_USER_ID = UserHandle.USER_SYSTEM;
 
     @Before
@@ -113,9 +122,12 @@ public class ComplicationHostViewControllerTest extends SysuiTestCase {
         when(mViewHolder.getLayoutParams()).thenReturn(mComplicationLayoutParams);
         when(mComplicationView.getParent()).thenReturn(mComplicationHostView);
 
+        mLooper = TestableLooper.get(this);
+        mKosmos = new KosmosJavaAdapter(this);
         mSecureSettings = new FakeSettings();
+        mComplicationHostView = new ConstraintLayout(getContext());
         mSecureSettings.putFloatForUser(
-                        Settings.Global.ANIMATOR_DURATION_SCALE, 1.0f, CURRENT_USER_ID);
+                Settings.Global.ANIMATOR_DURATION_SCALE, 1.0f, CURRENT_USER_ID);
 
         mController = new ComplicationHostViewController(
                 mComplicationHostView,
@@ -123,9 +135,32 @@ public class ComplicationHostViewControllerTest extends SysuiTestCase {
                 mDreamOverlayStateController,
                 mLifecycleOwner,
                 mViewModel,
-                mSecureSettings);
+                mSecureSettings,
+                mKosmos.getConfigurationInteractor(),
+                mKosmos.getTestDispatcher()
+        );
 
         mController.init();
+    }
+
+    /**
+     * Ensures layout engine update is called on configuration change.
+     */
+    @Test
+    public void testUpdateLayoutEngineOnConfigurationChange() {
+        mController.onViewAttached();
+        // Attach the complication host view so flows collecting on it start running.
+        ViewUtils.attachView(mComplicationHostView);
+        mLooper.processAllMessages();
+
+        // emit configuration change
+        Rect bounds = new Rect(0, 0, 2000, 2000);
+        Configuration config = new Configuration();
+        config.windowConfiguration.setMaxBounds(bounds);
+        mKosmos.getConfigurationRepository().onConfigurationChange(config);
+        mKosmos.getTestScope().getTestScheduler().runCurrent();
+
+        verify(mLayoutEngine).updateLayoutEngine(bounds);
     }
 
     /**

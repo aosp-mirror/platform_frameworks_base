@@ -17,8 +17,6 @@
 package com.android.systemui.kairos.internal
 
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.just
-import com.android.systemui.kairos.util.none
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Performs actions once, when the reactive component is first connected to the network. */
@@ -44,9 +42,9 @@ internal class Init<out A>(val name: String?, private val block: InitScope.() ->
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getUnsafe(): Maybe<A> =
         if (cache.isInitialized()) {
-            just(cache.value.second)
+            Maybe.present(cache.value.second)
         } else {
-            none
+            Maybe.absent
         }
 }
 

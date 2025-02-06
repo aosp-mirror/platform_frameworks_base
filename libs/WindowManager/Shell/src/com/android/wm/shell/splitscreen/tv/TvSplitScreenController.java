@@ -62,6 +62,7 @@ public class TvSplitScreenController extends SplitScreenController {
     private final Optional<RecentTasksController> mRecentTasksOptional;
     private final LaunchAdjacentController mLaunchAdjacentController;
     private final SplitState mSplitState;
+    private final RootTaskDisplayAreaOrganizer mRootTDAOrganizer;
 
     private final Handler mMainHandler;
     private final SystemWindows mSystemWindows;
@@ -109,6 +110,7 @@ public class TvSplitScreenController extends SplitScreenController {
 
         mMainHandler = mainHandler;
         mSystemWindows = systemWindows;
+        mRootTDAOrganizer = rootTDAOrganizer;
     }
 
     /**
@@ -121,7 +123,8 @@ public class TvSplitScreenController extends SplitScreenController {
                 mTaskOrganizer, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mTransitions, mTransactionPool,
                 mIconProvider, mMainExecutor, mMainHandler,
-                mRecentTasksOptional, mLaunchAdjacentController, mSplitState, mSystemWindows);
+                mRecentTasksOptional, mLaunchAdjacentController, mSplitState, mSystemWindows,
+                mRootTDAOrganizer);
     }
 
 }

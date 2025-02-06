@@ -139,8 +139,8 @@ public class AudioManagerRouteControllerTest {
                         mMockAudioManager,
                         Looper.getMainLooper(),
                         mMediaAudioProductStrategy,
-                        btAdapter,
-                        mOnDeviceRouteChangedListener);
+                        btAdapter);
+        mControllerUnderTest.registerRouteChangeListener(mOnDeviceRouteChangedListener);
         mControllerUnderTest.start(UserHandle.CURRENT_OR_SELF);
 
         ArgumentCaptor<AudioDeviceCallback> deviceCallbackCaptor =

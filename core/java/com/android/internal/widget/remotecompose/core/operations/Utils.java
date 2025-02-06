@@ -289,4 +289,21 @@ public class Utils {
         }
         return 0;
     }
+
+    /**
+     * Convert float alpha, red,g reen, blue to ARGB int
+     *
+     * @param alpha alpha value
+     * @param red red value
+     * @param green green value
+     * @param blue blue value
+     * @return ARGB int
+     */
+    public static int toARGB(float alpha, float red, float green, float blue) {
+        int a = (int) (alpha * 255.0f + 0.5f);
+        int r = (int) (red * 255.0f + 0.5f);
+        int g = (int) (green * 255.0f + 0.5f);
+        int b = (int) (blue * 255.0f + 0.5f);
+        return (a << 24 | r << 16 | g << 8 | b);
+    }
 }

@@ -22,8 +22,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.android.systemui.Flags;
-
 import javax.inject.Inject;
 
 /**
@@ -43,10 +41,6 @@ public class HearingDevicesDialogReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (!Flags.hearingAidsQsTileDialog()) {
-            return;
-        }
-
         if (ACTION.equals(intent.getAction())) {
             mDialogManager.showDialog(/* expandable= */ null, LAUNCH_SOURCE_A11Y);
         }

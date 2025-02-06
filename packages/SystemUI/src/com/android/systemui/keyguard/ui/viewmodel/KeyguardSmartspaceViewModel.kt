@@ -77,7 +77,7 @@ constructor(
                     isWeatherVisible(
                         clockIncludesCustomWeatherDisplay =
                             keyguardClockViewModel.hasCustomWeatherDataDisplay.value,
-                        isWeatherEnabled = smartspaceInteractor.isWeatherEnabled.value,
+                        isWeatherEnabled = isWeatherEnabled.value,
                     ),
             )
 

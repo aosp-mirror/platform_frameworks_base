@@ -51,7 +51,6 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Looper;
 import android.platform.test.flag.junit.FlagsParameterization;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.TestableLooper;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
@@ -72,7 +71,6 @@ import com.android.wm.shell.transition.Transitions;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -95,9 +93,6 @@ public class TaskViewTest extends ShellTestCase {
     public static List<FlagsParameterization> getParams() {
         return FlagsParameterization.allCombinationsOf(Flags.FLAG_TASK_VIEW_REPOSITORY);
     }
-
-    @Rule
-    public final SetFlagsRule mSetFlagsRule;
 
     @Mock
     TaskView.Listener mViewListener;
@@ -127,9 +122,7 @@ public class TaskViewTest extends ShellTestCase {
     TaskViewTransitions mTaskViewTransitions;
     TaskViewTaskController mTaskViewTaskController;
 
-    public TaskViewTest(FlagsParameterization flags) {
-        mSetFlagsRule = new SetFlagsRule(flags);
-    }
+    public TaskViewTest(FlagsParameterization flags) {}
 
     @Before
     public void setUp() {
@@ -165,10 +158,11 @@ public class TaskViewTest extends ShellTestCase {
             doReturn(true).when(mTransitions).isRegistered();
         }
         mTaskViewRepository = new TaskViewRepository();
-        mTaskViewTransitions = spy(new TaskViewTransitions(mTransitions, mTaskViewRepository));
+        mTaskViewTransitions = spy(new TaskViewTransitions(mTransitions, mTaskViewRepository,
+                mOrganizer, mSyncQueue));
         mTaskViewTaskController = new TaskViewTaskController(mContext, mOrganizer,
                 mTaskViewTransitions, mSyncQueue);
-        mTaskView = new TaskView(mContext, mTaskViewTaskController);
+        mTaskView = new TaskView(mContext, mTaskViewTransitions, mTaskViewTaskController);
         mTaskView.setHandler(mViewHandler);
         mTaskView.setListener(mExecutor, mViewListener);
     }
@@ -182,7 +176,7 @@ public class TaskViewTest extends ShellTestCase {
 
     @Test
     public void testSetPendingListener_throwsException() {
-        TaskView taskView = new TaskView(mContext,
+        TaskView taskView = new TaskView(mContext, mTaskViewTransitions,
                 new TaskViewTaskController(mContext, mOrganizer, mTaskViewTransitions, mSyncQueue));
         taskView.setListener(mExecutor, mViewListener);
         try {
@@ -326,7 +320,7 @@ public class TaskViewTest extends ShellTestCase {
     public void testOnNewTask_noSurface() {
         assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+        mTaskViewTransitions.prepareOpenAnimation(mTaskViewTaskController, true /* newTask */,
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
 
@@ -354,7 +348,7 @@ public class TaskViewTest extends ShellTestCase {
         assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
         mTaskView.surfaceCreated(mock(SurfaceHolder.class));
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+        mTaskViewTransitions.prepareOpenAnimation(mTaskViewTaskController, true /* newTask */,
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
 
@@ -366,7 +360,7 @@ public class TaskViewTest extends ShellTestCase {
     public void testSurfaceCreated_withTask() {
         assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+        mTaskViewTransitions.prepareOpenAnimation(mTaskViewTaskController, true /* newTask */,
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
         mTaskView.surfaceCreated(mock(SurfaceHolder.class));
@@ -374,7 +368,7 @@ public class TaskViewTest extends ShellTestCase {
         verify(mViewListener).onInitialized();
         verify(mTaskViewTransitions).setTaskViewVisible(eq(mTaskViewTaskController), eq(true));
 
-        mTaskViewTaskController.prepareOpenAnimation(false /* newTask */,
+        mTaskViewTransitions.prepareOpenAnimation(mTaskViewTaskController, false /* newTask */,
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
 
@@ -396,7 +390,7 @@ public class TaskViewTest extends ShellTestCase {
         assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
         SurfaceHolder sh = mock(SurfaceHolder.class);
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+        mTaskViewTransitions.prepareOpenAnimation(mTaskViewTaskController, true /* newTask */,
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
         mTaskView.surfaceCreated(sh);
@@ -414,7 +408,7 @@ public class TaskViewTest extends ShellTestCase {
     public void testOnReleased() {
         assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+        mTaskViewTransitions.prepareOpenAnimation(mTaskViewTaskController, true /* newTask */,
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
         mTaskView.surfaceCreated(mock(SurfaceHolder.class));
@@ -423,14 +417,14 @@ public class TaskViewTest extends ShellTestCase {
         verify(mOrganizer).removeListener(eq(mTaskViewTaskController));
         verify(mViewListener).onReleased();
         assertThat(mTaskView.isInitialized()).isFalse();
-        verify(mTaskViewTransitions).removeTaskView(eq(mTaskViewTaskController));
+        verify(mTaskViewTransitions).unregisterTaskView(eq(mTaskViewTaskController));
     }
 
     @Test
     public void testOnTaskVanished() {
         assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+        mTaskViewTransitions.prepareOpenAnimation(mTaskViewTaskController, true /* newTask */,
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
         mTaskView.surfaceCreated(mock(SurfaceHolder.class));
@@ -443,7 +437,7 @@ public class TaskViewTest extends ShellTestCase {
     public void testOnBackPressedOnTaskRoot() {
         assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+        mTaskViewTransitions.prepareOpenAnimation(mTaskViewTaskController, true /* newTask */,
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
         mTaskViewTaskController.onBackPressedOnTaskRoot(mTaskInfo);
@@ -455,7 +449,7 @@ public class TaskViewTest extends ShellTestCase {
     public void testSetOnBackPressedOnTaskRoot() {
         assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+        mTaskViewTransitions.prepareOpenAnimation(mTaskViewTaskController, true /* newTask */,
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
         verify(mOrganizer).setInterceptBackPressedOnTaskRoot(eq(mTaskInfo.token), eq(true));
@@ -524,7 +518,7 @@ public class TaskViewTest extends ShellTestCase {
 
         // Make the task available
         WindowContainerTransaction wct = mock(WindowContainerTransaction.class);
-        mTaskViewTaskController.startRootTask(mTaskInfo, mLeash, wct);
+        mTaskViewTransitions.startRootTask(mTaskViewTaskController, mTaskInfo, mLeash, wct);
 
         // Bounds got set
         verify(wct).setBounds(any(WindowContainerToken.class), eq(bounds));
@@ -564,7 +558,7 @@ public class TaskViewTest extends ShellTestCase {
 
         // Make the task available / start prepareOpen
         WindowContainerTransaction wct = mock(WindowContainerTransaction.class);
-        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+        mTaskViewTransitions.prepareOpenAnimation(mTaskViewTaskController, true /* newTask */,
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
 
@@ -594,7 +588,7 @@ public class TaskViewTest extends ShellTestCase {
 
         // Task is available, but the surface was never created
         WindowContainerTransaction wct = mock(WindowContainerTransaction.class);
-        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+        mTaskViewTransitions.prepareOpenAnimation(mTaskViewTaskController, true /* newTask */,
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
 
@@ -619,7 +613,7 @@ public class TaskViewTest extends ShellTestCase {
         assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
 
         mTaskView.removeTask();
-        verify(mTaskViewTransitions, never()).closeTaskView(any(), any());
+        assertFalse(mTaskViewTransitions.hasPending());
     }
 
     @Test
@@ -628,14 +622,14 @@ public class TaskViewTest extends ShellTestCase {
 
         mTaskView.surfaceCreated(mock(SurfaceHolder.class));
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+        mTaskViewTransitions.prepareOpenAnimation(mTaskViewTaskController, true /* newTask */,
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
 
         verify(mViewListener).onTaskCreated(eq(mTaskInfo.taskId), any());
 
         mTaskView.removeTask();
-        verify(mTaskViewTransitions).closeTaskView(any(), eq(mTaskViewTaskController));
+        verify(mTaskViewTransitions).removeTaskView(eq(mTaskViewTaskController), any());
     }
 
     @Test
@@ -646,7 +640,7 @@ public class TaskViewTest extends ShellTestCase {
         mTaskViewTaskController.onTaskAppeared(mTaskInfo, mLeash);
 
         assertNull(mTaskViewTaskController.getTaskInfo());
-        verify(mTaskViewTransitions).closeTaskView(any(), eq(mTaskViewTaskController));
+        verify(mTaskViewTransitions).removeTaskView(eq(mTaskViewTaskController), any());
     }
 
     @Test
@@ -655,7 +649,7 @@ public class TaskViewTest extends ShellTestCase {
 
         mTaskViewTaskController.onTaskAppeared(mTaskInfo, mLeash);
         assertEquals(mTaskInfo, mTaskViewTaskController.getPendingInfo());
-        verify(mTaskViewTransitions, never()).closeTaskView(any(), any());
+        verify(mTaskViewTransitions, never()).removeTaskView(any(), any());
     }
 
     @Test
@@ -671,7 +665,7 @@ public class TaskViewTest extends ShellTestCase {
         mTaskView.surfaceCreated(mock(SurfaceHolder.class));
         reset(mOrganizer);
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+        mTaskViewTransitions.prepareOpenAnimation(mTaskViewTaskController, true /* newTask */,
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
         mTaskView.onComputeInternalInsets(new ViewTreeObserver.InternalInsetsInfo());
@@ -688,7 +682,7 @@ public class TaskViewTest extends ShellTestCase {
 
         mTaskView.surfaceCreated(mock(SurfaceHolder.class));
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+        mTaskViewTransitions.prepareOpenAnimation(mTaskViewTaskController, true /* newTask */,
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
         reset(mOrganizer);
@@ -706,7 +700,7 @@ public class TaskViewTest extends ShellTestCase {
     public void testReleaseInOnTaskRemoval_noNPE() {
         mTaskViewTaskController = spy(new TaskViewTaskController(mContext, mOrganizer,
                 mTaskViewTransitions, mSyncQueue));
-        mTaskView = new TaskView(mContext, mTaskViewTaskController);
+        mTaskView = new TaskView(mContext, mTaskViewTransitions, mTaskViewTaskController);
         mTaskView.setListener(mExecutor, new TaskView.Listener() {
             @Override
             public void onTaskRemovalStarted(int taskId) {
@@ -715,7 +709,7 @@ public class TaskViewTest extends ShellTestCase {
         });
 
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+        mTaskViewTransitions.prepareOpenAnimation(mTaskViewTaskController, true /* newTask */,
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
         mTaskView.surfaceCreated(mock(SurfaceHolder.class));
@@ -763,7 +757,7 @@ public class TaskViewTest extends ShellTestCase {
     @Test
     public void testOnAppeared_setsTrimmableTask() {
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+        mTaskViewTransitions.prepareOpenAnimation(mTaskViewTaskController, true /* newTask */,
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
 
@@ -773,11 +767,11 @@ public class TaskViewTest extends ShellTestCase {
     @Test
     public void testMoveToFullscreen_callsTaskRemovalStarted() {
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+        mTaskViewTransitions.prepareOpenAnimation(mTaskViewTaskController, true /* newTask */,
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
         mTaskView.surfaceCreated(mock(SurfaceHolder.class));
-        mTaskViewTaskController.moveToFullscreen();
+        mTaskViewTransitions.moveTaskViewToFullscreen(mTaskViewTaskController);
 
         verify(mViewListener).onTaskRemovalStarted(eq(mTaskInfo.taskId));
     }

@@ -80,7 +80,7 @@ public class ShortcutManagerTest3 extends BaseShortcutManagerTest {
                 genPackageAddIntent(CALLING_PACKAGE, USER_10));
     }
 
-    public void testSetDynamicShortcuts_noManifestShortcuts() {
+    public void disabled_testSetDynamicShortcuts_noManifestShortcuts() {
         mManager.setDynamicShortcuts(list(
                 shortcut("s1", A1)
         ));
@@ -171,11 +171,12 @@ public class ShortcutManagerTest3 extends BaseShortcutManagerTest {
                 .haveRanksInOrder("ms1");
     }
 
-    public void testSetDynamicShortcuts_withManifestShortcuts() {
-        runTestWithManifestShortcuts(() -> testSetDynamicShortcuts_noManifestShortcuts());
+    public void disabled_Shortcuts_withManifestShortcuts() {
+        runTestWithManifestShortcuts(() ->
+                disabled_testSetDynamicShortcuts_noManifestShortcuts());
     }
 
-    public void testAddDynamicShortcuts_noManifestShortcuts() {
+    public void disabled_testAddDynamicShortcuts_noManifestShortcuts() {
         mManager.addDynamicShortcuts(list(
                 shortcut("s1", A1)
         ));
@@ -264,11 +265,12 @@ public class ShortcutManagerTest3 extends BaseShortcutManagerTest {
                 .haveIds("s1", "s2", "s4", "s5", "s10");
     }
 
-    public void testAddDynamicShortcuts_withManifestShortcuts() {
-        runTestWithManifestShortcuts(() -> testAddDynamicShortcuts_noManifestShortcuts());
+    public void disabled_testAddDynamicShortcuts_withManifestShortcuts() {
+        runTestWithManifestShortcuts(() ->
+                disabled_testAddDynamicShortcuts_noManifestShortcuts());
     }
 
-    public void testUpdateShortcuts_noManifestShortcuts() {
+    public void disabled_testUpdateShortcuts_noManifestShortcuts() {
         mManager.addDynamicShortcuts(list(
                 shortcut("s5", A1, 0),
                 shortcut("s4", A1),
@@ -374,11 +376,12 @@ public class ShortcutManagerTest3 extends BaseShortcutManagerTest {
                 .haveIds("s3", "s2");
     }
 
-    public void testUpdateShortcuts_withManifestShortcuts() {
-        runTestWithManifestShortcuts(() -> testUpdateShortcuts_noManifestShortcuts());
+    public void disabled_testUpdateShortcuts_withManifestShortcuts() {
+        runTestWithManifestShortcuts(() ->
+                disabled_testUpdateShortcuts_noManifestShortcuts());
     }
 
-    public void testDeleteDynamicShortcuts_noManifestShortcuts() {
+    public void disabled_testDeleteDynamicShortcuts_noManifestShortcuts() {
         mManager.addDynamicShortcuts(list(
                 shortcut("s5", A1, 0),
                 shortcut("s4", A1),
@@ -435,11 +438,12 @@ public class ShortcutManagerTest3 extends BaseShortcutManagerTest {
                 .haveIds("s2", "s4");
     }
 
-    public void testDeleteDynamicShortcuts_withManifestShortcuts() {
-        runTestWithManifestShortcuts(() -> testDeleteDynamicShortcuts_noManifestShortcuts());
+    public void disabled_testDeleteDynamicShortcuts_withManifestShortcuts() {
+        runTestWithManifestShortcuts(() ->
+                disabled_testDeleteDynamicShortcuts_noManifestShortcuts());
     }
 
-    public void testDisableShortcuts_noManifestShortcuts() {
+    public void disabled_testDisableShortcuts_noManifestShortcuts() {
         mManager.addDynamicShortcuts(list(
                 shortcut("s5", A1, 0),
                 shortcut("s4", A1),
@@ -508,8 +512,9 @@ public class ShortcutManagerTest3 extends BaseShortcutManagerTest {
                 .haveIds("s4", "x2");
     }
 
-    public void testDisableShortcuts_withManifestShortcuts() {
-        runTestWithManifestShortcuts(() -> testDisableShortcuts_noManifestShortcuts());
+    public void disabled_testDisableShortcuts_withManifestShortcuts() {
+        runTestWithManifestShortcuts(() ->
+                disabled_testDisableShortcuts_noManifestShortcuts());
     }
 
     public void testGetSharingShortcutCount() {

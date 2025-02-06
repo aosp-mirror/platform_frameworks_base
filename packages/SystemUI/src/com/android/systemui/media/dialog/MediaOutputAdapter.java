@@ -21,6 +21,7 @@ import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECT
 import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER;
 
 import android.annotation.DrawableRes;
+import android.annotation.StringRes;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.AnimatedVectorDrawable;
@@ -28,17 +29,18 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.DoNotInline;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.widget.CompoundButtonCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.media.flags.Flags;
 import com.android.settingslib.media.LocalMediaManager.MediaDeviceState;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.res.R;
@@ -53,9 +55,10 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
 
     private static final String TAG = "MediaOutputAdapter";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final float DEVICE_DISCONNECTED_ALPHA = 0.5f;
-    private static final float DEVICE_CONNECTED_ALPHA = 1f;
+    private static final float DEVICE_DISABLED_ALPHA = 0.5f;
+    private static final float DEVICE_ACTIVE_ALPHA = 1f;
     protected List<MediaItem> mMediaItemList = new CopyOnWriteArrayList<>();
+    private boolean mShouldGroupSelectedMediaItems = Flags.enableOutputSwitcherSessionGrouping();
 
     public MediaOutputAdapter(MediaSwitchingController controller) {
         super(controller);
@@ -66,6 +69,12 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     public void updateItems() {
         mMediaItemList.clear();
         mMediaItemList.addAll(mController.getMediaItemList());
+        if (mShouldGroupSelectedMediaItems) {
+            if (mController.getSelectedMediaDevice().size() == 1) {
+                // Don't group devices if initially there isn't more than one selected.
+                mShouldGroupSelectedMediaItems = false;
+            }
+        }
         notifyDataSetChanged();
     }
 
@@ -102,7 +111,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 break;
             case MediaItem.MediaItemType.TYPE_DEVICE:
                 ((MediaDeviceViewHolder) viewHolder).onBind(
-                        currentMediaItem.getMediaDevice().get(),
+                        currentMediaItem,
                         position);
                 break;
             default:
@@ -142,184 +151,197 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             super(view);
         }
 
-        @Override
-        void onBind(MediaDevice device, int position) {
+        void onBind(MediaItem mediaItem, int position) {
+            MediaDevice device = mediaItem.getMediaDevice().get();
             super.onBind(device, position);
             boolean isMutingExpectedDeviceExist = mController.hasMutingExpectedDevice();
             final boolean currentlyConnected = isCurrentlyConnected(device);
-            boolean isCurrentSeekbarInvisible = mSeekBar.getVisibility() == View.GONE;
+            boolean isSelected = isDeviceIncluded(mController.getSelectedMediaDevice(), device);
+            boolean isDeselectable =
+                    isDeviceIncluded(mController.getDeselectableMediaDevice(), device);
+            boolean isSelectable = isDeviceIncluded(mController.getSelectableMediaDevice(), device);
+            boolean isTransferable =
+                    isDeviceIncluded(mController.getTransferableMediaDevices(), device);
+            boolean hasRouteListingPreferenceItem = device.hasRouteListingPreferenceItem();
+
+            if (DEBUG) {
+                Log.d(
+                        TAG,
+                        "["
+                                + position
+                                + "] "
+                                + device.getName()
+                                + " ["
+                                + (isDeselectable ? "deselectable" : "")
+                                + "] ["
+                                + (isSelected ? "selected" : "")
+                                + "] ["
+                                + (isSelectable ? "selectable" : "")
+                                + "] ["
+                                + (isTransferable ? "transferable" : "")
+                                + "] ["
+                                + (hasRouteListingPreferenceItem ? "hasListingPreference" : "")
+                                + "]");
+            }
+
+            boolean isDeviceGroup = false;
+            GroupStatus groupStatus = null;
+            OngoingSessionStatus ongoingSessionStatus = null;
+            ConnectionState connectionState = ConnectionState.DISCONNECTED;
+            boolean restrictVolumeAdjustment = mController.hasAdjustVolumeUserRestriction();
+            String subtitle = null;
+            Drawable deviceStatusIcon = null;
+            boolean deviceDisabled = false;
+            View.OnClickListener clickListener = null;
+
             if (mCurrentActivePosition == position) {
                 mCurrentActivePosition = -1;
             }
-            mStatusIcon.setVisibility(View.GONE);
-            enableFocusPropertyForView(mContainerLayout);
+            mItemLayout.setVisibility(View.VISIBLE);
 
             if (mController.isAnyDeviceTransferring()) {
-                if (device.getState() == MediaDeviceState.STATE_CONNECTING
-                        && !mController.hasAdjustVolumeUserRestriction()) {
-                    setUpDeviceIcon(device);
-                    updateProgressBarColor();
-                    setSingleLineLayout(getItemTitle(device), false /* showSeekBar*/,
-                            true /* showProgressBar */, false /* showCheckBox */,
-                            false /* showEndTouchArea */);
-                } else {
-                    setUpDeviceIcon(device);
-                    setSingleLineLayout(getItemTitle(device));
+                if (device.getState() == MediaDeviceState.STATE_CONNECTING) {
+                    connectionState = ConnectionState.CONNECTING;
                 }
             } else {
                 // Set different layout for each device
                 if (device.isMutingExpectedDevice()
                         && !mController.isCurrentConnectedDeviceRemote()) {
-                    updateUnmutedVolumeIcon(device);
+                    connectionState = ConnectionState.CONNECTED;
+                    restrictVolumeAdjustment = true;
                     mCurrentActivePosition = position;
-                    updateFullItemClickListener(v -> onItemClick(v, device));
-                    setSingleLineLayout(getItemTitle(device));
-                    initFakeActiveDevice(device);
+                    clickListener = v -> onItemClick(v, device);
+                } else if (mShouldGroupSelectedMediaItems
+                        && mController.getSelectedMediaDevice().size() > 1
+                        && isDeviceIncluded(mController.getSelectedMediaDevice(), device)) {
+                    if (!mediaItem.isFirstDeviceInGroup()) {
+                        mItemLayout.setVisibility(View.GONE);
+                        return;
+                    } else {
+                        isDeviceGroup = true;
+                    }
                 } else if (device.hasSubtext()) {
+                    subtitle = device.getSubtextString();
                     boolean isActiveWithOngoingSession =
-                            (device.hasOngoingSession() && (currentlyConnected || isDeviceIncluded(
-                                    mController.getSelectedMediaDevice(), device)));
-                    boolean isHost = device.isHostForOngoingSession()
-                            && isActiveWithOngoingSession;
+                            device.hasOngoingSession() && (currentlyConnected || isSelected);
                     if (isActiveWithOngoingSession) {
                         mCurrentActivePosition = position;
-                        updateUnmutedVolumeIcon(device);
-                        mSubTitleText.setText(device.getSubtextString());
-                        updateTwoLineLayoutContentAlpha(DEVICE_CONNECTED_ALPHA);
-                        updateEndClickAreaAsSessionEditing(device,
-                                isHost ? R.drawable.media_output_status_edit_session
-                                        : R.drawable.ic_sound_bars_anim);
-                        setTwoLineLayout(device, null /* title */, true /* bFocused */,
-                                true /* showSeekBar */, false /* showProgressBar */,
-                                true /* showSubtitle */, false /* showStatus */,
-                                true /* showEndTouchArea */, false /* isFakeActive */);
-                        initSeekbar(device, isCurrentSeekbarInvisible);
+                        ongoingSessionStatus = new OngoingSessionStatus(
+                                device.isHostForOngoingSession());
+                        connectionState = ConnectionState.CONNECTED;
                     } else {
                         if (currentlyConnected) {
                             mCurrentActivePosition = position;
-                            updateUnmutedVolumeIcon(device);
-                        } else {
-                            setUpDeviceIcon(device);
+                            connectionState = ConnectionState.CONNECTED;
                         }
-                        mSubTitleText.setText(device.getSubtextString());
-                        Drawable deviceStatusIcon =
-                                device.hasOngoingSession() ? mContext.getDrawable(
-                                        R.drawable.ic_sound_bars_anim)
-                                        : Api34Impl.getDeviceStatusIconBasedOnSelectionBehavior(
-                                                device,
-                                                mContext);
-                        if (deviceStatusIcon != null) {
-                            updateDeviceStatusIcon(deviceStatusIcon);
-                        }
-                        updateTwoLineLayoutContentAlpha(
-                                updateClickActionBasedOnSelectionBehavior(device)
-                                        ? DEVICE_CONNECTED_ALPHA : DEVICE_DISCONNECTED_ALPHA);
-                        setTwoLineLayout(device, currentlyConnected /* bFocused */,
-                                currentlyConnected  /* showSeekBar */,
-                                false /* showProgressBar */, true /* showSubtitle */,
-                                deviceStatusIcon != null /* showStatus */,
-                                false /* isFakeActive */);
+                        clickListener = getClickListenerBasedOnSelectionBehavior(device);
+                        deviceDisabled = clickListener == null;
+                        deviceStatusIcon = getDeviceStatusIcon(device, device.hasOngoingSession());
                     }
                 } else if (device.getState() == MediaDeviceState.STATE_CONNECTING_FAILED) {
-                    setUpDeviceIcon(device);
-                    updateConnectionFailedStatusIcon();
-                    mSubTitleText.setText(R.string.media_output_dialog_connect_failed);
-                    updateFullItemClickListener(v -> onItemClick(v, device));
-                    setTwoLineLayout(device, false /* bFocused */, false /* showSeekBar */,
-                            false /* showProgressBar */, true /* showSubtitle */,
-                            true /* showStatus */, false /*isFakeActive*/);
+                    deviceStatusIcon = mContext.getDrawable(R.drawable.media_output_status_failed);
+                    subtitle = mContext.getString(R.string.media_output_dialog_connect_failed);
+                    clickListener = v -> onItemClick(v, device);
                 } else if (device.getState() == MediaDeviceState.STATE_GROUPING) {
-                    setUpDeviceIcon(device);
-                    updateProgressBarColor();
-                    setSingleLineLayout(getItemTitle(device), false /* showSeekBar*/,
-                            true /* showProgressBar */, false /* showCheckBox */,
-                            false /* showEndTouchArea */);
-                } else if (mController.getSelectedMediaDevice().size() > 1
-                        && isDeviceIncluded(mController.getSelectedMediaDevice(), device)) {
+                    connectionState = ConnectionState.CONNECTING;
+                } else if (mController.getSelectedMediaDevice().size() > 1 && isSelected) {
                     // selected device in group
-                    boolean isDeviceDeselectable = isDeviceIncluded(
-                            mController.getDeselectableMediaDevice(), device);
-                    updateUnmutedVolumeIcon(device);
-                    updateGroupableCheckBox(true, isDeviceDeselectable, device);
-                    updateEndClickArea(device, isDeviceDeselectable);
-                    disableFocusPropertyForView(mContainerLayout);
-                    setUpContentDescriptionForView(mSeekBar, device);
-                    setSingleLineLayout(getItemTitle(device), true /* showSeekBar */,
-                            false /* showProgressBar */, true /* showCheckBox */,
-                            true /* showEndTouchArea */);
-                    initSeekbar(device, isCurrentSeekbarInvisible);
-                } else if (!mController.hasAdjustVolumeUserRestriction()
-                        && currentlyConnected) {
+                    groupStatus = new GroupStatus(
+                            true /* selected */,
+                            isDeselectable /* deselectable */);
+                    connectionState = ConnectionState.CONNECTED;
+                } else if (currentlyConnected) {
                     // single selected device
                     if (isMutingExpectedDeviceExist
                             && !mController.isCurrentConnectedDeviceRemote()) {
                         // mark as disconnected and set special click listener
-                        setUpDeviceIcon(device);
-                        updateFullItemClickListener(v -> cancelMuteAwaitConnection());
-                        setSingleLineLayout(getItemTitle(device));
+                        clickListener = v -> cancelMuteAwaitConnection();
                     } else if (device.hasOngoingSession()) {
                         mCurrentActivePosition = position;
-                        updateUnmutedVolumeIcon(device);
-                        updateEndClickAreaAsSessionEditing(device, device.isHostForOngoingSession()
-                                ? R.drawable.media_output_status_edit_session
-                                : R.drawable.ic_sound_bars_anim);
-                        mEndClickIcon.setVisibility(View.VISIBLE);
-                        setSingleLineLayout(getItemTitle(device), true /* showSeekBar */,
-                                false /* showProgressBar */, false /* showCheckBox */,
-                                true /* showEndTouchArea */);
-                        initSeekbar(device, isCurrentSeekbarInvisible);
+                        ongoingSessionStatus = new OngoingSessionStatus(
+                                device.isHostForOngoingSession());
+                        connectionState = ConnectionState.CONNECTED;
                     } else if (mController.isCurrentConnectedDeviceRemote()
                             && !mController.getSelectableMediaDevice().isEmpty()) {
                         //If device is connected and there's other selectable devices, layout as
                         // one of selected devices.
-                        updateUnmutedVolumeIcon(device);
-                        boolean isDeviceDeselectable = isDeviceIncluded(
-                                mController.getDeselectableMediaDevice(), device);
-                        updateGroupableCheckBox(true, isDeviceDeselectable, device);
-                        updateEndClickArea(device, isDeviceDeselectable);
-                        disableFocusPropertyForView(mContainerLayout);
-                        setUpContentDescriptionForView(mSeekBar, device);
-                        setSingleLineLayout(getItemTitle(device), true /* showSeekBar */,
-                                false /* showProgressBar */, true /* showCheckBox */,
-                                true /* showEndTouchArea */);
-                        initSeekbar(device, isCurrentSeekbarInvisible);
+                        groupStatus = new GroupStatus(
+                                true /* selected */,
+                                isDeselectable /* isDeselectable */);
+                        connectionState = ConnectionState.CONNECTED;
                     } else {
-                        updateUnmutedVolumeIcon(device);
-                        disableFocusPropertyForView(mContainerLayout);
-                        setUpContentDescriptionForView(mSeekBar, device);
                         mCurrentActivePosition = position;
-                        setSingleLineLayout(getItemTitle(device), true /* showSeekBar */,
-                                false /* showProgressBar */, false /* showCheckBox */,
-                                false /* showEndTouchArea */);
-                        initSeekbar(device, isCurrentSeekbarInvisible);
+                        connectionState = ConnectionState.CONNECTED;
                     }
-                } else if (isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
+                } else if (isSelectable) {
                     //groupable device
-                    setUpDeviceIcon(device);
-                    updateGroupableCheckBox(false, true, device);
-                    updateEndClickArea(device, true);
-                    updateFullItemClickListener(v -> onItemClick(v, device));
-                    setSingleLineLayout(getItemTitle(device), false /* showSeekBar */,
-                            false /* showProgressBar */, true /* showCheckBox */,
-                            true /* showEndTouchArea */);
-                } else {
-                    setUpDeviceIcon(device);
-                    setSingleLineLayout(getItemTitle(device));
-                    Drawable deviceStatusIcon =
-                            device.hasOngoingSession() ? mContext.getDrawable(
-                                    R.drawable.ic_sound_bars_anim)
-                                    : Api34Impl.getDeviceStatusIconBasedOnSelectionBehavior(
-                                            device,
-                                            mContext);
-                    if (deviceStatusIcon != null) {
-                        updateDeviceStatusIcon(deviceStatusIcon);
-                        mStatusIcon.setVisibility(View.VISIBLE);
+                    groupStatus = new GroupStatus(false /* selected */, true /* deselectable */);
+                    if (!Flags.disableTransferWhenAppsDoNotSupport()
+                            || isTransferable
+                            || hasRouteListingPreferenceItem) {
+                        clickListener = v -> onItemClick(v, device);
                     }
-                    updateSingleLineLayoutContentAlpha(
-                            updateClickActionBasedOnSelectionBehavior(device)
-                                    ? DEVICE_CONNECTED_ALPHA : DEVICE_DISCONNECTED_ALPHA);
+                    deviceDisabled = clickListener == null;
+                } else {
+                    deviceStatusIcon = getDeviceStatusIcon(device, device.hasOngoingSession());
+                    clickListener = getClickListenerBasedOnSelectionBehavior(device);
+                    deviceDisabled = clickListener == null;
                 }
             }
+
+            if (isDeviceGroup) {
+                String sessionName = mController.getSessionName() == null ? ""
+                        : mController.getSessionName().toString();
+                updateTitle(sessionName);
+                updateUnmutedVolumeIcon(null /* device */);
+                updateGroupSeekBar(getGroupItemContentDescription(sessionName));
+                updateEndAreaForDeviceGroup();
+                updateItemBackground(ConnectionState.CONNECTED);
+            } else {
+                updateTitle(device.getName());
+                updateTitleIcon(device, connectionState, restrictVolumeAdjustment);
+                updateSeekBar(device, connectionState, restrictVolumeAdjustment,
+                        getDeviceItemContentDescription(device));
+                updateEndArea(device, connectionState, groupStatus, ongoingSessionStatus);
+                updateLoadingIndicator(connectionState);
+                updateFullItemClickListener(clickListener);
+                updateContentAlpha(deviceDisabled);
+                updateSubtitle(subtitle);
+                updateDeviceStatusIcon(deviceStatusIcon);
+                updateItemBackground(connectionState);
+            }
+        }
+
+        /** Renders the right side round pill button / checkbox. */
+        private void updateEndArea(@NonNull MediaDevice device, ConnectionState connectionState,
+                @Nullable GroupStatus groupStatus,
+                @Nullable OngoingSessionStatus ongoingSessionStatus) {
+            boolean showEndArea = false;
+            boolean isCheckbox = false;
+            // If both group status and the ongoing session status are present, only the ongoing
+            // session controls are displayed. The current layout design doesn't allow both group
+            // and ongoing session controls to be rendered simultaneously.
+            if (ongoingSessionStatus != null && connectionState == ConnectionState.CONNECTED) {
+                showEndArea = true;
+                updateEndAreaForOngoingSession(device, ongoingSessionStatus.host());
+            } else if (groupStatus != null && shouldShowGroupCheckbox(groupStatus)) {
+                showEndArea = true;
+                isCheckbox = true;
+                updateEndAreaForGroupCheckBox(device, groupStatus);
+            }
+            updateEndAreaVisibility(showEndArea, isCheckbox);
+        }
+
+        private boolean shouldShowGroupCheckbox(@NonNull GroupStatus groupStatus) {
+            if (Flags.enableOutputSwitcherSessionGrouping()) {
+                return isGroupCheckboxEnabled(groupStatus);
+            }
+            return true;
+        }
+
+        private boolean isGroupCheckboxEnabled(@NonNull GroupStatus groupStatus) {
+            boolean disabled = groupStatus.selected() && !groupStatus.deselectable();
+            return !disabled;
         }
 
         public void setCheckBoxColor(CheckBox checkBox, int color) {
@@ -329,91 +351,104 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     ColorStateList(states, colors));
         }
 
-        private void updateTwoLineLayoutContentAlpha(float alphaValue) {
-            mSubTitleText.setAlpha(alphaValue);
-            mTitleIcon.setAlpha(alphaValue);
-            mTwoLineTitleText.setAlpha(alphaValue);
-            mStatusIcon.setAlpha(alphaValue);
-        }
-
-        private void updateSingleLineLayoutContentAlpha(float alphaValue) {
+        private void updateContentAlpha(boolean deviceDisabled) {
+            float alphaValue = deviceDisabled ? DEVICE_DISABLED_ALPHA : DEVICE_ACTIVE_ALPHA;
             mTitleIcon.setAlpha(alphaValue);
             mTitleText.setAlpha(alphaValue);
+            mSubTitleText.setAlpha(alphaValue);
             mStatusIcon.setAlpha(alphaValue);
         }
 
-        private void updateEndClickAreaAsSessionEditing(MediaDevice device, @DrawableRes int id) {
-            mEndClickIcon.setOnClickListener(null);
-            mEndTouchArea.setOnClickListener(null);
-            updateEndClickAreaColor(mController.getColorSeekbarProgress());
+        private void updateEndAreaForDeviceGroup() {
+            updateEndAreaWithIcon(
+                    v -> {
+                        mShouldGroupSelectedMediaItems = false;
+                        notifyDataSetChanged();
+                    },
+                    R.drawable.media_output_item_expand_group,
+                    R.string.accessibility_expand_group);
+            updateEndAreaVisibility(true /* showEndArea */, false /* isCheckbox */);
+        }
+
+        private void updateEndAreaForOngoingSession(@NonNull MediaDevice device, boolean isHost) {
+            updateEndAreaWithIcon(
+                    v -> mController.tryToLaunchInAppRoutingIntent(device.getId(), v),
+                    isHost ? R.drawable.media_output_status_edit_session
+                            : R.drawable.ic_sound_bars_anim,
+                    R.string.accessibility_open_application);
+        }
+
+        private void updateEndAreaWithIcon(View.OnClickListener clickListener,
+                @DrawableRes int iconDrawableId,
+                @StringRes int accessibilityStringId) {
+            updateEndAreaColor(mController.getColorSeekbarProgress());
             mEndClickIcon.setImageTintList(
                     ColorStateList.valueOf(mController.getColorItemContent()));
-            mEndClickIcon.setOnClickListener(
-                    v -> mController.tryToLaunchInAppRoutingIntent(device.getId(), v));
+            mEndClickIcon.setOnClickListener(clickListener);
             mEndTouchArea.setOnClickListener(v -> mEndClickIcon.performClick());
-            Drawable drawable = mContext.getDrawable(id);
+            Drawable drawable = mContext.getDrawable(iconDrawableId);
             mEndClickIcon.setImageDrawable(drawable);
             if (drawable instanceof AnimatedVectorDrawable) {
                 ((AnimatedVectorDrawable) drawable).start();
             }
+            if (Flags.enableOutputSwitcherSessionGrouping()) {
+                mEndClickIcon.setContentDescription(mContext.getString(accessibilityStringId));
+            }
         }
 
-        public void updateEndClickAreaColor(int color) {
+        public void updateEndAreaColor(int color) {
             mEndTouchArea.setBackgroundTintList(
                     ColorStateList.valueOf(color));
         }
 
-        private boolean updateClickActionBasedOnSelectionBehavior(MediaDevice device) {
-            View.OnClickListener clickListener = Api34Impl.getClickListenerBasedOnSelectionBehavior(
+        @Nullable
+        private View.OnClickListener getClickListenerBasedOnSelectionBehavior(
+                @NonNull MediaDevice device) {
+            return Api34Impl.getClickListenerBasedOnSelectionBehavior(
                     device, mController, v -> onItemClick(v, device));
-            updateFullItemClickListener(clickListener);
-            return clickListener != null;
         }
 
-        private void updateConnectionFailedStatusIcon() {
-            mStatusIcon.setImageDrawable(
-                    mContext.getDrawable(R.drawable.media_output_status_failed));
-            mStatusIcon.setImageTintList(
-                    ColorStateList.valueOf(mController.getColorItemContent()));
-        }
-
-        private void updateDeviceStatusIcon(Drawable drawable) {
-            mStatusIcon.setImageDrawable(drawable);
-            mStatusIcon.setImageTintList(
-                    ColorStateList.valueOf(mController.getColorItemContent()));
-            if (drawable instanceof AnimatedVectorDrawable) {
-                ((AnimatedVectorDrawable) drawable).start();
+        @Nullable
+        private Drawable getDeviceStatusIcon(MediaDevice device, boolean hasOngoingSession) {
+            if (hasOngoingSession) {
+                return mContext.getDrawable(R.drawable.ic_sound_bars_anim);
+            } else {
+                return Api34Impl.getDeviceStatusIconBasedOnSelectionBehavior(device, mContext);
             }
         }
 
-        private void updateProgressBarColor() {
-            mProgressBar.getIndeterminateDrawable().setTintList(
-                    ColorStateList.valueOf(mController.getColorItemContent()));
+        void updateDeviceStatusIcon(@Nullable Drawable deviceStatusIcon) {
+            if (deviceStatusIcon == null) {
+                mStatusIcon.setVisibility(View.GONE);
+            } else {
+                mStatusIcon.setImageDrawable(deviceStatusIcon);
+                mStatusIcon.setImageTintList(
+                        ColorStateList.valueOf(mController.getColorItemContent()));
+                if (deviceStatusIcon instanceof AnimatedVectorDrawable) {
+                    ((AnimatedVectorDrawable) deviceStatusIcon).start();
+                }
+                mStatusIcon.setVisibility(View.VISIBLE);
+            }
         }
 
-        public void updateEndClickArea(MediaDevice device, boolean isDeviceDeselectable) {
-            mEndTouchArea.setOnClickListener(null);
+        public void updateEndAreaForGroupCheckBox(@NonNull MediaDevice device,
+                @NonNull GroupStatus groupStatus) {
+            boolean isEnabled = isGroupCheckboxEnabled(groupStatus);
             mEndTouchArea.setOnClickListener(
-                    isDeviceDeselectable ? (v) -> mCheckBox.performClick() : null);
-            mEndTouchArea.setImportantForAccessibility(
-                    View.IMPORTANT_FOR_ACCESSIBILITY_YES);
-            mEndTouchArea.setBackgroundTintList(
-                    ColorStateList.valueOf(mController.getColorItemBackground()));
-            setUpContentDescriptionForView(mEndTouchArea, device);
-        }
-
-        private void updateGroupableCheckBox(boolean isSelected, boolean isGroupable,
-                MediaDevice device) {
-            mCheckBox.setOnCheckedChangeListener(null);
-            mCheckBox.setChecked(isSelected);
+                    isEnabled ? (v) -> mCheckBox.performClick() : null);
+            mEndTouchArea.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+            updateEndAreaColor(groupStatus.selected() ? mController.getColorSeekbarProgress()
+                    : mController.getColorItemBackground());
+            mEndTouchArea.setContentDescription(getDeviceItemContentDescription(device));
+            mCheckBox.setChecked(groupStatus.selected());
             mCheckBox.setOnCheckedChangeListener(
-                    isGroupable ? (buttonView, isChecked) -> onGroupActionTriggered(!isSelected,
-                            device) : null);
-            mCheckBox.setEnabled(isGroupable);
+                    isEnabled ? (buttonView, isChecked) -> onGroupActionTriggered(
+                            !groupStatus.selected(), device) : null);
+            mCheckBox.setEnabled(isEnabled);
             setCheckBoxColor(mCheckBox, mController.getColorItemContent());
         }
 
-        private void updateFullItemClickListener(View.OnClickListener listener) {
+        private void updateFullItemClickListener(@Nullable View.OnClickListener listener) {
             mContainerLayout.setOnClickListener(listener);
             updateIconAreaClickListener(listener);
         }
@@ -422,13 +457,12 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         void onBindPairNewDevice() {
             mTitleText.setTextColor(mController.getColorItemContent());
             mCheckBox.setVisibility(View.GONE);
-            setSingleLineLayout(mContext.getText(R.string.media_output_dialog_pairing_new));
+            updateTitle(mContext.getText(R.string.media_output_dialog_pairing_new));
+            updateItemBackground(ConnectionState.DISCONNECTED);
             final Drawable addDrawable = mContext.getDrawable(R.drawable.ic_add);
             mTitleIcon.setImageDrawable(addDrawable);
             mTitleIcon.setImageTintList(
                     ColorStateList.valueOf(mController.getColorItemContent()));
-            mIconAreaLayout.setBackgroundTintList(
-                    ColorStateList.valueOf(mController.getColorItemBackground()));
             mContainerLayout.setOnClickListener(mController::launchBluetoothPairing);
         }
 
@@ -478,29 +512,15 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             notifyDataSetChanged();
         }
 
-        private void disableFocusPropertyForView(View view) {
-            view.setFocusable(false);
-            view.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        }
-
-        private void enableFocusPropertyForView(View view) {
-            view.setFocusable(true);
-            view.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
-        }
-
-        private void setUpContentDescriptionForView(View view, MediaDevice device) {
-            view.setContentDescription(
-                    mContext.getString(device.getDeviceType()
-                            == MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE
+        private String getDeviceItemContentDescription(@NonNull MediaDevice device) {
+            return mContext.getString(
+                    device.getDeviceType() == MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE
                             ? R.string.accessibility_bluetooth_name
-                            : R.string.accessibility_cast_name, device.getName()));
-            view.setAccessibilityDelegate(new View.AccessibilityDelegate() {
-                public void onInitializeAccessibilityNodeInfo(View host,
-                        AccessibilityNodeInfo info) {
-                    super.onInitializeAccessibilityNodeInfo(host, info);
-                    host.setOnClickListener(null);
-                }
-            });
+                            : R.string.accessibility_cast_name, device.getName());
+        }
+
+        private String getGroupItemContentDescription(String sessionName) {
+            return mContext.getString(R.string.accessibility_cast_name, sessionName);
         }
     }
 
@@ -537,6 +557,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         }
 
         @DoNotInline
+        @Nullable
         static Drawable getDeviceStatusIconBasedOnSelectionBehavior(MediaDevice device,
                 Context context) {
             switch (device.getSelectionBehavior()) {

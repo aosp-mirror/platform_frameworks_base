@@ -43,6 +43,7 @@
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Vinstri 50%"</string>
     <string name="accessibility_action_divider_left_30" msgid="6023611335723838727">"Vinstri 30%"</string>
     <string name="accessibility_action_divider_right_full" msgid="3408505054325944903">"Hægri á öllum skjánum"</string>
+    <string name="accessibility_action_divider_swap" msgid="7026003137401725787">"Skipta á milli forrita"</string>
     <string name="accessibility_action_divider_top_full" msgid="3495871951082107594">"Efri á öllum skjánum"</string>
     <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"Efri 70%"</string>
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Efri 50%"</string>
@@ -141,6 +142,16 @@
     <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"Endurheimta"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"Smella til vinstri"</string>
     <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"Smella til hægri"</string>
+    <string name="desktop_mode_a11y_action_snap_left" msgid="2932955411661734668">"Breyta stærð forritsglugga til vinstri"</string>
+    <string name="desktop_mode_a11y_action_snap_right" msgid="4577032451624261787">"Breyta stærð forritsglugga til hægri"</string>
+    <string name="desktop_mode_a11y_action_maximize_restore" msgid="8026037983417986686">"Hámarka eða endurheimta stærð glugga"</string>
+    <string name="app_handle_menu_talkback_split_screen_mode_button_text" msgid="7182959681057464802">"Skipta skjánum"</string>
+    <string name="app_handle_menu_talkback_desktop_mode_button_text" msgid="1230110046930843630">"Opna gluggastillingu í tölvu"</string>
+    <string name="maximize_menu_talkback_action_snap_left_text" msgid="500309467459084564">"Breyta stærð glugga til vinstri"</string>
+    <string name="maximize_menu_talkback_action_snap_right_text" msgid="7010831426654467163">"Breyta stærð glugga til hægri"</string>
+    <string name="maximize_menu_talkback_action_maximize_restore_text" msgid="4942610897847934859">"Hámarka eða endurheimta stærð glugga"</string>
+    <string name="maximize_button_talkback_action_maximize_restore_text" msgid="4122441323153198455">"Hámarka eða endurheimta stærð glugga"</string>
+    <string name="minimize_button_talkback_action_maximize_restore_text" msgid="8890767445425625935">"Lágmarka stærð forritsglugga"</string>
     <string name="open_by_default_settings_text" msgid="2526548548598185500">"Stillingar sjálfvirkrar opnunar"</string>
     <string name="open_by_default_dialog_subheader_text" msgid="1729599730664063881">"Veldu hvernig veftenglar opnast í forritinu"</string>
     <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"Í forritinu"</string>

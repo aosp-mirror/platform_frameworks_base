@@ -32,6 +32,7 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioSystem;
+import android.os.IpcDataCache;
 import android.os.Looper;
 import android.os.PermissionEnforcer;
 import android.os.UserHandle;
@@ -87,6 +88,8 @@ public class AudioServiceTest {
 
     @Before
     public void setUp() throws Exception {
+        IpcDataCache.disableForTestMode();
+
         if (!sLooperPrepared) {
             Looper.prepare();
             sLooperPrepared = true;

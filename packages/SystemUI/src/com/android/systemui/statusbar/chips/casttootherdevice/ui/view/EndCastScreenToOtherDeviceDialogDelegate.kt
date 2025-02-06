@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.chips.casttootherdevice.ui.view
 
 import android.content.Context
 import android.os.Bundle
+import android.view.View
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel.CastToOtherDeviceChipViewModel.Companion.CAST_TO_OTHER_DEVICE_ICON
@@ -48,6 +49,11 @@ class EndCastScreenToOtherDeviceDialogDelegate(
                 R.string.cast_to_other_device_stop_dialog_button,
                 endMediaProjectionDialogHelper.wrapStopAction(stopAction),
             )
+            if (com.android.media.projection.flags.Flags.showStopDialogPostCallEnd()) {
+                window
+                    ?.decorView
+                    ?.setAccessibilityDataSensitive(View.ACCESSIBILITY_DATA_SENSITIVE_YES)
+            }
         }
     }
 
@@ -82,9 +88,7 @@ class EndCastScreenToOtherDeviceDialogDelegate(
                     hostDeviceName,
                 )
             } else {
-                context.getString(
-                    R.string.cast_to_other_device_stop_dialog_message_entire_screen,
-                )
+                context.getString(R.string.cast_to_other_device_stop_dialog_message_entire_screen)
             }
         }
     }

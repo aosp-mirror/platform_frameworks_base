@@ -19,7 +19,6 @@ package com.android.wm.shell.desktopmode.education
 import android.os.SystemProperties
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.testing.TestableContext
 import androidx.test.filters.SmallTest
@@ -29,7 +28,7 @@ import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.desktopmode.CaptionState
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository
 import com.android.wm.shell.desktopmode.education.AppHandleEducationController.Companion.APP_HANDLE_EDUCATION_DELAY_MILLIS
-import com.android.wm.shell.desktopmode.education.AppHandleEducationController.Companion.APP_HANDLE_EDUCATION_TIMEOUT_MILLIS
+import com.android.wm.shell.desktopmode.education.AppHandleEducationController.Companion.TOOLTIP_VISIBLE_DURATION_MILLIS
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
@@ -47,7 +46,6 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -76,7 +74,6 @@ class AppHandleEducationControllerTest : ShellTestCase() {
             .mockStatic(DesktopModeStatus::class.java)
             .mockStatic(SystemProperties::class.java)
             .build()!!
-    @JvmField @Rule val setFlagsRule = SetFlagsRule()
 
     private lateinit var educationController: AppHandleEducationController
     private lateinit var testableContext: TestableContext
@@ -113,10 +110,10 @@ class AppHandleEducationControllerTest : ShellTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
-    fun init_appHandleVisible_shouldCallShowEducationTooltip() =
+    fun init_appHandleVisible_shouldCallShowEducationTooltipAndMarkAsViewed() =
         testScope.runTest {
             // App handle is visible. Should show education tooltip.
-            setShouldShowAppHandleEducation(true)
+            setShouldShowDesktopModeEducation(true)
 
             // Simulate app handle visible.
             testCaptionStateFlow.value = createAppHandleState()
@@ -124,6 +121,113 @@ class AppHandleEducationControllerTest : ShellTestCase() {
             waitForBufferDelay()
 
             verify(mockTooltipController, times(1)).showEducationTooltip(any(), any())
+            verify(mockDataStoreRepository, times(1))
+                .updateAppHandleHintViewedTimestampMillis(eq(true))
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    fun init_appHandleEducationVisible_afterDelayTooltipShouldBeDismissed() =
+        testScope.runTest {
+            // App handle is visible. Should show education tooltip.
+            setShouldShowDesktopModeEducation(true)
+            // Simulate app handle visible.
+            testCaptionStateFlow.value = createAppHandleState()
+            // Wait for first tooltip to showup.
+            waitForBufferDelay()
+
+            // Wait until tooltip gets dismissed
+            waitForBufferDelay(TOOLTIP_VISIBLE_DURATION_MILLIS + 1000L)
+
+            verify(mockTooltipController, times(1)).hideEducationTooltip()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    fun init_appHandleVisibleAndMenuExpanded_shouldCallShowEducationTooltipAndMarkAsViewed() =
+        testScope.runTest {
+            setShouldShowDesktopModeEducation(true)
+
+            // Simulate app handle visible and handle menu is expanded.
+            testCaptionStateFlow.value = createAppHandleState(isHandleMenuExpanded = true)
+            waitForBufferDelay()
+
+            verify(mockTooltipController, times(1)).showEducationTooltip(any(), any())
+            verify(mockDataStoreRepository, times(1))
+                .updateEnterDesktopModeHintViewedTimestampMillis(eq(true))
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    fun init_appHeaderVisible_shouldCallShowEducationTooltipAndMarkAsViewed() =
+        testScope.runTest {
+            setShouldShowDesktopModeEducation(true)
+
+            // Simulate app header visible.
+            testCaptionStateFlow.value = createAppHeaderState()
+            waitForBufferDelay()
+
+            verify(mockTooltipController, times(1)).showEducationTooltip(any(), any())
+            verify(mockDataStoreRepository, times(1))
+                .updateExitDesktopModeHintViewedTimestampMillis(eq(true))
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    fun init_noCaptionStateNotified_shouldHideAllTooltips() =
+        testScope.runTest {
+            setShouldShowDesktopModeEducation(true)
+
+            // Simulate no caption state notification
+            testCaptionStateFlow.value = CaptionState.NoCaption
+            waitForBufferDelay()
+
+            verify(mockTooltipController, times(1)).hideEducationTooltip()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    fun init_appHandleHintViewed_shouldNotListenToNoCaptionNotification() =
+        testScope.runTest {
+            testDataStoreFlow.value =
+                createWindowingEducationProto(appHandleHintViewedTimestampMillis = 123L)
+            setShouldShowDesktopModeEducation(true)
+
+            // Simulate no caption state notification
+            testCaptionStateFlow.value = CaptionState.NoCaption
+            waitForBufferDelay()
+
+            verify(mockTooltipController, never()).hideEducationTooltip()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    fun init_enterDesktopModeHintViewed_shouldNotListenToNoCaptionNotification() =
+        testScope.runTest {
+            testDataStoreFlow.value =
+                createWindowingEducationProto(enterDesktopModeHintViewedTimestampMillis = 123L)
+            setShouldShowDesktopModeEducation(true)
+
+            // Simulate no caption state notification
+            testCaptionStateFlow.value = CaptionState.NoCaption
+            waitForBufferDelay()
+
+            verify(mockTooltipController, never()).hideEducationTooltip()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    fun init_exitDesktopModeHintViewed_shouldNotListenToNoCaptionNotification() =
+        testScope.runTest {
+            testDataStoreFlow.value =
+                createWindowingEducationProto(exitDesktopModeHintViewedTimestampMillis = 123L)
+            setShouldShowDesktopModeEducation(true)
+
+            // Simulate no caption state notification
+            testCaptionStateFlow.value = CaptionState.NoCaption
+            waitForBufferDelay()
+
+            verify(mockTooltipController, never()).hideEducationTooltip()
         }
 
     @Test
@@ -133,7 +237,7 @@ class AppHandleEducationControllerTest : ShellTestCase() {
             // App handle visible but education aconfig flag disabled, should not show education
             // tooltip.
             whenever(DesktopModeStatus.canEnterDesktopMode(any())).thenReturn(false)
-            setShouldShowAppHandleEducation(true)
+            setShouldShowDesktopModeEducation(true)
 
             // Simulate app handle visible.
             testCaptionStateFlow.value = createAppHandleState()
@@ -145,12 +249,11 @@ class AppHandleEducationControllerTest : ShellTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
-    fun init_shouldShowAppHandleEducationReturnsFalse_shouldNotCallShowEducationTooltip() =
+    fun init_shouldShowDesktopModeEducationReturnsFalse_shouldNotCallShowEducationTooltip() =
         testScope.runTest {
-            // App handle is visible but [shouldShowAppHandleEducation] api returns false, should
-            // not
-            // show education tooltip.
-            setShouldShowAppHandleEducation(false)
+            // App handle is visible but [shouldShowDesktopModeEducation] api returns false, should
+            // not show education tooltip.
+            setShouldShowDesktopModeEducation(false)
 
             // Simulate app handle visible.
             testCaptionStateFlow.value = createAppHandleState()
@@ -165,7 +268,7 @@ class AppHandleEducationControllerTest : ShellTestCase() {
     fun init_appHandleNotVisible_shouldNotCallShowEducationTooltip() =
         testScope.runTest {
             // App handle is not visible, should not show education tooltip.
-            setShouldShowAppHandleEducation(true)
+            setShouldShowDesktopModeEducation(true)
 
             // Simulate app handle is not visible.
             testCaptionStateFlow.value = CaptionState.NoCaption
@@ -184,10 +287,48 @@ class AppHandleEducationControllerTest : ShellTestCase() {
             // Mark app handle hint viewed.
             testDataStoreFlow.value =
                 createWindowingEducationProto(appHandleHintViewedTimestampMillis = 123L)
-            setShouldShowAppHandleEducation(true)
+            setShouldShowDesktopModeEducation(true)
 
             // Simulate app handle visible.
             testCaptionStateFlow.value = createAppHandleState(isHandleMenuExpanded = false)
+            // Wait for first tooltip to showup.
+            waitForBufferDelay()
+
+            verify(mockTooltipController, never()).showEducationTooltip(any(), any())
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    fun init_enterDesktopModeHintViewedAlready_shouldNotCallShowEducationTooltip() =
+        testScope.runTest {
+            // App handle is visible but app handle hint has been viewed before,
+            // should not show education tooltip.
+            // Mark app handle hint viewed.
+            testDataStoreFlow.value =
+                createWindowingEducationProto(enterDesktopModeHintViewedTimestampMillis = 123L)
+            setShouldShowDesktopModeEducation(true)
+
+            // Simulate app handle visible.
+            testCaptionStateFlow.value = createAppHandleState(isHandleMenuExpanded = true)
+            // Wait for first tooltip to showup.
+            waitForBufferDelay()
+
+            verify(mockTooltipController, never()).showEducationTooltip(any(), any())
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    fun init_exitDesktopModeHintViewedAlready_shouldNotCallShowEducationTooltip() =
+        testScope.runTest {
+            // App handle is visible but app handle hint has been viewed before,
+            // should not show education tooltip.
+            // Mark app handle hint viewed.
+            testDataStoreFlow.value =
+                createWindowingEducationProto(exitDesktopModeHintViewedTimestampMillis = 123L)
+            setShouldShowDesktopModeEducation(true)
+
+            // Simulate app handle visible.
+            testCaptionStateFlow.value = createAppHeaderState()
             // Wait for first tooltip to showup.
             waitForBufferDelay()
 
@@ -204,11 +345,9 @@ class AppHandleEducationControllerTest : ShellTestCase() {
             // Mark app handle hint viewed.
             testDataStoreFlow.value =
                 createWindowingEducationProto(appHandleHintViewedTimestampMillis = 123L)
-            val systemPropertiesKey =
-                "persist.desktop_windowing_app_handle_education_override_conditions"
-            whenever(SystemProperties.getBoolean(eq(systemPropertiesKey), anyBoolean()))
+            whenever(SystemProperties.getBoolean(eq(FORCE_SHOW_EDUCATION_SYSPROP), anyBoolean()))
                 .thenReturn(true)
-            setShouldShowAppHandleEducation(true)
+            setShouldShowDesktopModeEducation(true)
 
             // Simulate app handle visible.
             testCaptionStateFlow.value = createAppHandleState(isHandleMenuExpanded = false)
@@ -220,207 +359,10 @@ class AppHandleEducationControllerTest : ShellTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
-    fun init_appHandleExpanded_shouldMarkAppHandleHintUsed() =
-        testScope.runTest {
-            setShouldShowAppHandleEducation(false)
-
-            // Simulate app handle visible and expanded.
-            testCaptionStateFlow.value = createAppHandleState(isHandleMenuExpanded = true)
-            // Wait for some time before verifying
-            waitForBufferDelay()
-
-            verify(mockDataStoreRepository, times(1))
-                .updateAppHandleHintUsedTimestampMillis(eq(true))
-        }
-
-    @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
-    fun init_showFirstTooltip_shouldMarkAppHandleHintViewed() =
+    fun clickAppHandleHint_openHandleMenuCallbackInvoked() =
         testScope.runTest {
             // App handle is visible. Should show education tooltip.
-            setShouldShowAppHandleEducation(true)
-
-            // Simulate app handle visible.
-            testCaptionStateFlow.value = createAppHandleState()
-            // Wait for first tooltip to showup.
-            waitForBufferDelay()
-
-            verify(mockDataStoreRepository, times(1))
-                .updateAppHandleHintViewedTimestampMillis(eq(true))
-        }
-
-    @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
-    @Ignore("b/371527084: revisit testcase after refactoring original logic")
-    fun showWindowingImageButtonTooltip_appHandleExpanded_shouldCallShowEducationTooltipTwice() =
-        testScope.runTest {
-            // After first tooltip is dismissed, app handle is expanded. Should show second
-            // education
-            // tooltip.
-            showAndDismissFirstTooltip()
-
-            // Simulate app handle expanded.
-            testCaptionStateFlow.value = createAppHandleState(isHandleMenuExpanded = true)
-            // Wait for next tooltip to showup.
-            waitForBufferDelay()
-
-            // [showEducationTooltip] should be called twice, once for each tooltip.
-            verify(mockTooltipController, times(2)).showEducationTooltip(any(), any())
-        }
-
-    @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
-    @Ignore("b/371527084: revisit testcase after refactoring original logic")
-    fun showWindowingImageButtonTooltip_appHandleExpandedAfterTimeout_shouldCallShowEducationTooltipOnce() =
-        testScope.runTest {
-            // After first tooltip is dismissed, app handle is expanded after timeout. Should not
-            // show
-            // second education tooltip.
-            showAndDismissFirstTooltip()
-
-            // Wait for timeout to occur, after this timeout we should not listen for further
-            // triggers
-            // anymore.
-            advanceTimeBy(APP_HANDLE_EDUCATION_TIMEOUT_BUFFER_MILLIS)
-            runCurrent()
-            // Simulate app handle expanded.
-            testCaptionStateFlow.value = createAppHandleState(isHandleMenuExpanded = true)
-            // Wait for next tooltip to showup.
-            waitForBufferDelay()
-
-            // [showEducationTooltip] should be called once, just for the first tooltip.
-            verify(mockTooltipController, times(1)).showEducationTooltip(any(), any())
-        }
-
-    @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
-    @Ignore("b/371527084: revisit testcase after refactoring original logic")
-    fun showWindowingImageButtonTooltip_appHandleExpandedTwice_shouldCallShowEducationTooltipTwice() =
-        testScope.runTest {
-            // After first tooltip is dismissed, app handle is expanded twice. Should show second
-            // education tooltip only once.
-            showAndDismissFirstTooltip()
-
-            // Simulate app handle expanded.
-            testCaptionStateFlow.value = createAppHandleState(isHandleMenuExpanded = true)
-            // Wait for next tooltip to showup.
-            waitForBufferDelay()
-            // Simulate app handle being expanded twice.
-            testCaptionStateFlow.value = createAppHandleState(isHandleMenuExpanded = true)
-            waitForBufferDelay()
-
-            // [showEducationTooltip] should not be called thrice, even if app handle was expanded
-            // twice. Should be called twice, once for each tooltip.
-            verify(mockTooltipController, times(2)).showEducationTooltip(any(), any())
-        }
-
-    @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
-    @Ignore("b/371527084: revisit testcase after refactoring original logic")
-    fun showWindowingImageButtonTooltip_appHandleNotExpanded_shouldCallShowEducationTooltipOnce() =
-        testScope.runTest {
-            // After first tooltip is dismissed, app handle is not expanded. Should not show second
-            // education tooltip.
-            showAndDismissFirstTooltip()
-
-            // Simulate app handle visible but not expanded.
-            testCaptionStateFlow.value = createAppHandleState(isHandleMenuExpanded = false)
-            // Wait for next tooltip to showup.
-            waitForBufferDelay()
-
-            // [showEducationTooltip] should be called once, just for the first tooltip.
-            verify(mockTooltipController, times(1)).showEducationTooltip(any(), any())
-        }
-
-    @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
-    @Ignore("b/371527084: revisit testcase after refactoring original logic")
-    fun showExitWindowingButtonTooltip_appHeaderVisible_shouldCallShowEducationTooltipThrice() =
-        testScope.runTest {
-            // After first two tooltips are dismissed, app header is visible. Should show third
-            // education tooltip.
-            showAndDismissFirstTooltip()
-            showAndDismissSecondTooltip()
-
-            // Simulate app header visible.
-            testCaptionStateFlow.value = createAppHeaderState()
-            // Wait for next tooltip to showup.
-            waitForBufferDelay()
-
-            verify(mockTooltipController, times(3)).showEducationTooltip(any(), any())
-        }
-
-    @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
-    @Ignore("b/371527084: revisit testcase after refactoring original logic")
-    fun showExitWindowingButtonTooltip_appHeaderVisibleAfterTimeout_shouldCallShowEducationTooltipTwice() =
-        testScope.runTest {
-            // After first two tooltips are dismissed, app header is visible after timeout. Should
-            // not
-            // show third education tooltip.
-            showAndDismissFirstTooltip()
-            showAndDismissSecondTooltip()
-
-            // Wait for timeout to occur, after this timeout we should not listen for further
-            // triggers
-            // anymore.
-            advanceTimeBy(APP_HANDLE_EDUCATION_TIMEOUT_BUFFER_MILLIS)
-            runCurrent()
-            // Simulate app header visible.
-            testCaptionStateFlow.value = createAppHeaderState()
-            // Wait for next tooltip to showup.
-            waitForBufferDelay()
-
-            verify(mockTooltipController, times(2)).showEducationTooltip(any(), any())
-        }
-
-    @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
-    @Ignore("b/371527084: revisit testcase after refactoring original logic")
-    fun showExitWindowingButtonTooltip_appHeaderVisibleTwice_shouldCallShowEducationTooltipThrice() =
-        testScope.runTest {
-            // After first two tooltips are dismissed, app header is visible twice. Should show
-            // third
-            // education tooltip only once.
-            showAndDismissFirstTooltip()
-            showAndDismissSecondTooltip()
-
-            // Simulate app header visible.
-            testCaptionStateFlow.value = createAppHeaderState()
-            // Wait for next tooltip to showup.
-            waitForBufferDelay()
-            testCaptionStateFlow.value = createAppHeaderState()
-            // Wait for next tooltip to showup.
-            waitForBufferDelay()
-
-            verify(mockTooltipController, times(3)).showEducationTooltip(any(), any())
-        }
-
-    @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
-    @Ignore("b/371527084: revisit testcase after refactoring original logic")
-    fun showExitWindowingButtonTooltip_appHeaderExpanded_shouldCallShowEducationTooltipTwice() =
-        testScope.runTest {
-            // After first two tooltips are dismissed, app header is visible but expanded. Should
-            // not
-            // show third education tooltip.
-            showAndDismissFirstTooltip()
-            showAndDismissSecondTooltip()
-
-            // Simulate app header visible.
-            testCaptionStateFlow.value = createAppHeaderState(isHeaderMenuExpanded = true)
-            // Wait for next tooltip to showup.
-            waitForBufferDelay()
-
-            verify(mockTooltipController, times(2)).showEducationTooltip(any(), any())
-        }
-
-    @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
-    fun setAppHandleEducationTooltipCallbacks_onAppHandleTooltipClicked_callbackInvoked() =
-        testScope.runTest {
-            // App handle is visible. Should show education tooltip.
-            setShouldShowAppHandleEducation(true)
+            setShouldShowDesktopModeEducation(true)
             val mockOpenHandleMenuCallback: (Int) -> Unit = mock()
             val mockToDesktopModeCallback: (Int, DesktopModeTransitionSource) -> Unit = mock()
             educationController.setAppHandleEducationTooltipCallbacks(
@@ -441,76 +383,75 @@ class AppHandleEducationControllerTest : ShellTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
-    @Ignore("b/371527084: revisit testcase after refactoring original logic")
-    fun setAppHandleEducationTooltipCallbacks_onWindowingImageButtonTooltipClicked_callbackInvoked() =
+    fun clickEnterDesktopModeHint_toDesktopModeCallbackInvoked() =
         testScope.runTest {
-            // After first tooltip is dismissed, app handle is expanded. Should show second
-            // education
-            // tooltip.
-            showAndDismissFirstTooltip()
+            // App handle is visible. Should show education tooltip.
+            setShouldShowDesktopModeEducation(true)
             val mockOpenHandleMenuCallback: (Int) -> Unit = mock()
             val mockToDesktopModeCallback: (Int, DesktopModeTransitionSource) -> Unit = mock()
             educationController.setAppHandleEducationTooltipCallbacks(
                 mockOpenHandleMenuCallback,
                 mockToDesktopModeCallback,
             )
-            // Simulate app handle expanded.
+            // Simulate app handle visible.
             testCaptionStateFlow.value = createAppHandleState(isHandleMenuExpanded = true)
-            // Wait for next tooltip to showup.
+            // Wait for first tooltip to showup.
             waitForBufferDelay()
 
             verify(mockTooltipController, atLeastOnce())
                 .showEducationTooltip(educationConfigCaptor.capture(), any())
             educationConfigCaptor.lastValue.onEducationClickAction.invoke()
 
-            verify(mockToDesktopModeCallback, times(1)).invoke(any(), any())
+            verify(mockToDesktopModeCallback, times(1))
+                .invoke(any(), eq(DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON))
         }
 
-    private suspend fun TestScope.showAndDismissFirstTooltip() {
-        setShouldShowAppHandleEducation(true)
-        // Simulate app handle visible.
-        testCaptionStateFlow.value = createAppHandleState(isHandleMenuExpanded = false)
-        // Wait for first tooltip to showup.
-        waitForBufferDelay()
-        // [shouldShowAppHandleEducation] should return false as education has been viewed
-        // before.
-        setShouldShowAppHandleEducation(false)
-        // Dismiss previous tooltip, after this we should listen for next tooltip's trigger.
-        captureAndInvokeOnDismissAction()
-    }
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    fun clickExitDesktopModeHint_openHandleMenuCallbackInvoked() =
+        testScope.runTest {
+            // App handle is visible. Should show education tooltip.
+            setShouldShowDesktopModeEducation(true)
+            val mockOpenHandleMenuCallback: (Int) -> Unit = mock()
+            val mockToDesktopModeCallback: (Int, DesktopModeTransitionSource) -> Unit = mock()
+            educationController.setAppHandleEducationTooltipCallbacks(
+                mockOpenHandleMenuCallback,
+                mockToDesktopModeCallback,
+            )
+            // Simulate app handle visible.
+            testCaptionStateFlow.value = createAppHeaderState()
+            // Wait for first tooltip to showup.
+            waitForBufferDelay()
 
-    private fun TestScope.showAndDismissSecondTooltip() {
-        // Simulate app handle expanded.
-        testCaptionStateFlow.value = createAppHandleState(isHandleMenuExpanded = true)
-        // Wait for next tooltip to showup.
-        waitForBufferDelay()
-        // Dismiss previous tooltip, after this we should listen for next tooltip's trigger.
-        captureAndInvokeOnDismissAction()
-    }
+            verify(mockTooltipController, atLeastOnce())
+                .showEducationTooltip(educationConfigCaptor.capture(), any())
+            educationConfigCaptor.lastValue.onEducationClickAction.invoke()
 
-    private fun captureAndInvokeOnDismissAction() {
-        verify(mockTooltipController, atLeastOnce())
-            .showEducationTooltip(educationConfigCaptor.capture(), any())
-        educationConfigCaptor.lastValue.onDismissAction.invoke()
-    }
+            verify(mockOpenHandleMenuCallback, times(1)).invoke(any())
+        }
 
-    private suspend fun setShouldShowAppHandleEducation(shouldShowAppHandleEducation: Boolean) =
-        whenever(mockEducationFilter.shouldShowAppHandleEducation(any()))
-            .thenReturn(shouldShowAppHandleEducation)
+    private suspend fun setShouldShowDesktopModeEducation(shouldShowDesktopModeEducation: Boolean) {
+        whenever(mockEducationFilter.shouldShowDesktopModeEducation(any<CaptionState.AppHandle>()))
+            .thenReturn(shouldShowDesktopModeEducation)
+        whenever(mockEducationFilter.shouldShowDesktopModeEducation(any<CaptionState.AppHeader>()))
+            .thenReturn(shouldShowDesktopModeEducation)
+    }
 
     /**
      * Class under test waits for some time before showing education, simulate advance time before
      * verifying or moving forward
      */
-    private fun TestScope.waitForBufferDelay() {
-        advanceTimeBy(APP_HANDLE_EDUCATION_DELAY_BUFFER_MILLIS)
+    private fun TestScope.waitForBufferDelay(
+        delay: Long = APP_HANDLE_EDUCATION_DELAY_BUFFER_MILLIS
+    ) {
+        advanceTimeBy(delay)
         runCurrent()
     }
 
     private companion object {
         val APP_HANDLE_EDUCATION_DELAY_BUFFER_MILLIS: Long =
             APP_HANDLE_EDUCATION_DELAY_MILLIS + 1000L
-        val APP_HANDLE_EDUCATION_TIMEOUT_BUFFER_MILLIS: Long =
-            APP_HANDLE_EDUCATION_TIMEOUT_MILLIS + 1000L
+
+        val FORCE_SHOW_EDUCATION_SYSPROP = "persist.windowing_force_show_desktop_mode_education"
     }
 }

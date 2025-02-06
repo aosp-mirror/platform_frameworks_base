@@ -49,6 +49,7 @@ data class KeyguardFingerprintListenModel(
     var systemUser: Boolean = false,
     var udfps: Boolean = false,
     var userDoesNotHaveTrust: Boolean = false,
+    var communalShowing: Boolean = false,
 ) : KeyguardListenModel() {
 
     /** List of [String] to be used as a [Row] with [DumpsysTableLogger]. */
@@ -81,6 +82,7 @@ data class KeyguardFingerprintListenModel(
             systemUser.toString(),
             udfps.toString(),
             userDoesNotHaveTrust.toString(),
+            communalShowing.toString(),
         )
     }
 
@@ -122,6 +124,7 @@ data class KeyguardFingerprintListenModel(
                 systemUser = model.systemUser
                 udfps = model.udfps
                 userDoesNotHaveTrust = model.userDoesNotHaveTrust
+                communalShowing = model.communalShowing
             }
         }
 
@@ -170,6 +173,7 @@ data class KeyguardFingerprintListenModel(
                 "systemUser",
                 "underDisplayFingerprint",
                 "userDoesNotHaveTrust",
+                "communalShowing",
             )
     }
 }

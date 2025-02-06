@@ -37,8 +37,8 @@ import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.KEYBOARD
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.TOUCHPAD
 import com.android.systemui.inputdevice.tutorial.data.repository.TutorialSchedulerRepository
-import com.android.systemui.recents.OverviewProxyService
-import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener
+import com.android.systemui.recents.LauncherProxyService
+import com.android.systemui.recents.LauncherProxyService.LauncherProxyListener
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import java.time.Clock
 import java.time.Instant
@@ -48,7 +48,6 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,7 +66,7 @@ constructor(
     private val contextualEducationInteractor: ContextualEducationInteractor,
     private val userInputDeviceRepository: UserInputDeviceRepository,
     private val tutorialRepository: TutorialSchedulerRepository,
-    private val overviewProxyService: OverviewProxyService,
+    private val launcherProxyService: LauncherProxyService,
     private val metricsLogger: ContextualEducationMetricsLogger,
     @EduClock private val clock: Clock,
 ) : CoreStartable {
@@ -100,8 +99,8 @@ constructor(
     val educationTriggered = _educationTriggered.asStateFlow()
 
     private val statsUpdateRequests: Flow<StatsUpdateRequest> = conflatedCallbackFlow {
-        val listener: OverviewProxyListener =
-            object : OverviewProxyListener {
+        val listener: LauncherProxyListener =
+            object : LauncherProxyListener {
                 override fun updateContextualEduStats(
                     isTrackpadGesture: Boolean,
                     gestureType: GestureType,
@@ -113,8 +112,8 @@ constructor(
                 }
             }
 
-        overviewProxyService.addCallback(listener)
-        awaitClose { overviewProxyService.removeCallback(listener) }
+        launcherProxyService.addCallback(listener)
+        awaitClose { launcherProxyService.removeCallback(listener) }
     }
 
     private val gestureModelMap: Flow<Map<GestureType, GestureEduModel>> =
@@ -127,7 +126,6 @@ constructor(
             mapOf(BACK to back, HOME to home, OVERVIEW to overview, ALL_APPS to allApps)
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun start() {
         backgroundScope.launch {
             contextualEducationInteractor.eduDeviceConnectionTimeFlow
@@ -278,11 +276,11 @@ constructor(
         }
 
     private suspend fun hasInitialDelayElapsed(deviceType: DeviceType): Boolean {
-        val oobeLaunchTime =
-            tutorialRepository.getScheduledTutorialLaunchTime(deviceType) ?: return false
-        return clock
-            .instant()
-            .isAfter(oobeLaunchTime.plusSeconds(initialDelayDuration.inWholeSeconds))
+        val oobeTime =
+            tutorialRepository.getScheduledTutorialLaunchTime(deviceType)
+                ?: tutorialRepository.getNotifiedTime(deviceType)
+                ?: return false
+        return clock.instant().isAfter(oobeTime.plusSeconds(initialDelayDuration.inWholeSeconds))
     }
 
     private data class StatsUpdateRequest(

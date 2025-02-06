@@ -33,4 +33,16 @@ oneway interface IBubblesListener {
      * Does not result in a state change.
      */
     void animateBubbleBarLocation(in BubbleBarLocation location);
+
+    /**
+     * Called when an application icon is being dragged over the Bubble Bar drop zone.
+     * The location of the Bubble Bar is provided as an argument.
+     */
+    void onDragItemOverBubbleBarDragZone(in BubbleBarLocation location);
+
+    /**
+     * Called when an application icon is being dragged outside the Bubble Bar drop zone.
+     * Always called after {@link #onDragItemOverBubbleBarDragZone(BubbleBarLocation)}
+     */
+    void onItemDraggedOutsideBubbleBarDropZone();
 }

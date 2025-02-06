@@ -20,21 +20,32 @@ import com.android.systemui.biometrics.authController
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.transition.KeyguardTransitionAnimationCallback
+import com.android.systemui.keyguard.shared.transition.keyguardTransitionAnimationCallbackDelegator
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
+import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
 
-val Kosmos.lockscreenContentViewModel by
-    Kosmos.Fixture {
-        LockscreenContentViewModel(
-            clockInteractor = keyguardClockInteractor,
-            interactor = keyguardBlueprintInteractor,
-            authController = authController,
-            touchHandling = keyguardTouchHandlingViewModel,
-            shadeInteractor = shadeInteractor,
-            unfoldTransitionInteractor = unfoldTransitionInteractor,
-            occlusionInteractor = sceneContainerOcclusionInteractor,
-            deviceEntryInteractor = deviceEntryInteractor,
-        )
+val Kosmos.lockscreenContentViewModelFactory by Fixture {
+    object : LockscreenContentViewModel.Factory {
+        override fun create(
+            keyguardTransitionAnimationCallback: KeyguardTransitionAnimationCallback
+        ): LockscreenContentViewModel {
+            return LockscreenContentViewModel(
+                clockInteractor = keyguardClockInteractor,
+                interactor = keyguardBlueprintInteractor,
+                authController = authController,
+                touchHandling = keyguardTouchHandlingViewModel,
+                shadeInteractor = shadeInteractor,
+                unfoldTransitionInteractor = unfoldTransitionInteractor,
+                deviceEntryInteractor = deviceEntryInteractor,
+                transitionInteractor = keyguardTransitionInteractor,
+                keyguardTransitionAnimationCallbackDelegator =
+                    keyguardTransitionAnimationCallbackDelegator,
+                keyguardTransitionAnimationCallback = keyguardTransitionAnimationCallback,
+            )
+        }
     }
+}

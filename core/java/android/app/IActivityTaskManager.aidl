@@ -158,6 +158,12 @@ interface IActivityTaskManager {
     void reportAssistContextExtras(in IBinder assistToken, in Bundle extras,
             in AssistStructure structure, in AssistContent content, in Uri referrer);
 
+    /**
+     * @return whether the app could be universal resizeable (assuming it's on a large screen and
+     * ignoring possible overrides)
+     */
+    boolean canBeUniversalResizeable(in ApplicationInfo appInfo);
+
     void setFocusedRootTask(int taskId);
     ActivityTaskManager.RootTaskInfo getFocusedRootTaskInfo();
     Rect getTaskBounds(int taskId);

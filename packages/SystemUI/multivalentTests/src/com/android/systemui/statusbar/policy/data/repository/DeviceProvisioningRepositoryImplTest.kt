@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.policy.data.repository
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -25,7 +23,6 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before

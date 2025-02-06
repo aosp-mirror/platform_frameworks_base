@@ -18,8 +18,21 @@ java_library_static {
     name: "services.print",
     defaults: ["platform_service_defaults"],
     srcs: [":services.print-sources"],
+    static_libs: ["print_flags_lib"],
     libs: ["services.core"],
     lint: {
         baseline_filename: "lint-baseline.xml",
     },
+}
+
+aconfig_declarations {
+    name: "print_flags",
+    package: "com.android.server.print",
+    container: "system",
+    srcs: ["**/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "print_flags_lib",
+    aconfig_declarations: "print_flags",
 }

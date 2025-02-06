@@ -3,7 +3,6 @@ package com.android.compose.test
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.TestMonotonicFrameClock
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -18,7 +17,7 @@ import kotlinx.coroutines.withContext
  * Note: Please refer to the documentation for [runTest], as this feature utilizes it. This will
  * provide a comprehensive understanding of all its behaviors.
  */
-@OptIn(ExperimentalTestApi::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalTestApi::class)
 fun runMonotonicClockTest(block: suspend MonotonicClockTestScope.() -> Unit) = runTest {
     val testScope: TestScope = this
 

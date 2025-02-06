@@ -15,8 +15,6 @@
  *
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.app.tracing.coroutines.launchTraced as launch
@@ -37,7 +35,6 @@ import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map

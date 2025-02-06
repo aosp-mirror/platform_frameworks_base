@@ -18,6 +18,7 @@ package com.android.systemui.scene.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.shared.logger.sceneLogger
 
@@ -25,5 +26,6 @@ val Kosmos.sceneBackInteractor by Fixture {
     SceneBackInteractor(
         logger = sceneLogger,
         sceneContainerConfig = sceneContainerConfig,
+        tableLogBuffer = logcatTableLogBuffer(this, "sceneFrameworkTableLogBuffer"),
     )
 }

@@ -154,7 +154,17 @@ public class FakeSecurityController extends BaseLeakChecker<SecurityControllerCa
     }
 
     @Override
+    public Drawable getIcon() {
+        return null;
+    }
+
+    @Override
     public CharSequence getLabel(DeviceAdminInfo info) {
+        return null;
+    }
+
+    @Override
+    public CharSequence getLabel() {
         return null;
     }
 }

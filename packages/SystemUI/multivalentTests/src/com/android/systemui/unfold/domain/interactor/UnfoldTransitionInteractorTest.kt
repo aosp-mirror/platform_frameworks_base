@@ -26,7 +26,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.unfold.fakeUnfoldTransitionProgressProvider
 import com.google.common.truth.Truth.assertThat
 import java.util.Locale
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.test.runCurrent
@@ -34,7 +33,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class UnfoldTransitionInteractorTest : SysuiTestCase() {

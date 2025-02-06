@@ -20,6 +20,7 @@
 #include <log/log.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/scoped_utf_chars.h>
+#include <nativehelper/utils.h>
 #include <tracing_sdk.h>
 
 static constexpr ssize_t kMaxStrLen = 4096;
@@ -34,32 +35,24 @@ inline static jlong toJLong(T* ptr) {
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(ptr));
 }
 
-static const char* fromJavaString(JNIEnv* env, jstring jstr) {
-    if (!jstr) return "";
-    ScopedUtfChars chars(env, jstr);
-
-    if (!chars.c_str()) {
-        ALOGE("Failed extracting string");
-        return "";
-    }
-
-    return chars.c_str();
-}
-
 static jlong android_os_PerfettoTrackEventExtraArgInt64_init(JNIEnv* env, jclass, jstring name) {
-    return toJLong(new tracing_perfetto::DebugArg<int64_t>(fromJavaString(env, name)));
+    ScopedUtfChars name_chars = GET_UTF_OR_RETURN(env, name);
+    return toJLong(new tracing_perfetto::DebugArg<int64_t>(name_chars.c_str()));
 }
 
 static jlong android_os_PerfettoTrackEventExtraArgBool_init(JNIEnv* env, jclass, jstring name) {
-    return toJLong(new tracing_perfetto::DebugArg<bool>(fromJavaString(env, name)));
+    ScopedUtfChars name_chars = GET_UTF_OR_RETURN(env, name);
+    return toJLong(new tracing_perfetto::DebugArg<bool>(name_chars.c_str()));
 }
 
 static jlong android_os_PerfettoTrackEventExtraArgDouble_init(JNIEnv* env, jclass, jstring name) {
-    return toJLong(new tracing_perfetto::DebugArg<double>(fromJavaString(env, name)));
+    ScopedUtfChars name_chars = GET_UTF_OR_RETURN(env, name);
+    return toJLong(new tracing_perfetto::DebugArg<double>(name_chars.c_str()));
 }
 
 static jlong android_os_PerfettoTrackEventExtraArgString_init(JNIEnv* env, jclass, jstring name) {
-    return toJLong(new tracing_perfetto::DebugArg<const char*>(fromJavaString(env, name)));
+    ScopedUtfChars name_chars = GET_UTF_OR_RETURN(env, name);
+    return toJLong(new tracing_perfetto::DebugArg<const char*>(name_chars.c_str()));
 }
 
 static jlong android_os_PerfettoTrackEventExtraArgInt64_delete() {
@@ -116,9 +109,11 @@ static void android_os_PerfettoTrackEventExtraArgDouble_set_value(jlong ptr, jdo
 
 static void android_os_PerfettoTrackEventExtraArgString_set_value(JNIEnv* env, jclass, jlong ptr,
                                                                   jstring val) {
+    ScopedUtfChars val_chars = GET_UTF_OR_RETURN_VOID(env, val);
+
     tracing_perfetto::DebugArg<const char*>* arg =
             toPointer<tracing_perfetto::DebugArg<const char*>>(ptr);
-    arg->set_value(strdup(fromJavaString(env, val)));
+    arg->set_value(strdup(val_chars.c_str()));
 }
 
 static jlong android_os_PerfettoTrackEventExtraFieldInt64_init() {
@@ -191,9 +186,11 @@ static void android_os_PerfettoTrackEventExtraFieldDouble_set_value(jlong ptr, j
 
 static void android_os_PerfettoTrackEventExtraFieldString_set_value(JNIEnv* env, jclass, jlong ptr,
                                                                     jlong id, jstring val) {
+    ScopedUtfChars val_chars = GET_UTF_OR_RETURN_VOID(env, val);
+
     tracing_perfetto::ProtoField<const char*>* field =
             toPointer<tracing_perfetto::ProtoField<const char*>>(ptr);
-    field->set_value(id, strdup(fromJavaString(env, val)));
+    field->set_value(id, strdup(val_chars.c_str()));
 }
 
 static void android_os_PerfettoTrackEventExtraFieldNested_add_field(jlong field_ptr,
@@ -234,7 +231,8 @@ static jlong android_os_PerfettoTrackEventExtraFlow_get_extra_ptr(jlong ptr) {
 
 static jlong android_os_PerfettoTrackEventExtraNamedTrack_init(JNIEnv* env, jclass, jlong id,
                                                                jstring name, jlong parent_uuid) {
-    return toJLong(new tracing_perfetto::NamedTrack(id, parent_uuid, fromJavaString(env, name)));
+    ScopedUtfChars name_chars = GET_UTF_OR_RETURN(env, name);
+    return toJLong(new tracing_perfetto::NamedTrack(id, parent_uuid, name_chars.c_str()));
 }
 
 static jlong android_os_PerfettoTrackEventExtraNamedTrack_delete() {
@@ -248,8 +246,9 @@ static jlong android_os_PerfettoTrackEventExtraNamedTrack_get_extra_ptr(jlong pt
 
 static jlong android_os_PerfettoTrackEventExtraCounterTrack_init(JNIEnv* env, jclass, jstring name,
                                                                  jlong parent_uuid) {
-    return toJLong(
-            new tracing_perfetto::RegisteredTrack(1, parent_uuid, fromJavaString(env, name), true));
+    ScopedUtfChars name_chars = GET_UTF_OR_RETURN(env, name);
+
+    return toJLong(new tracing_perfetto::RegisteredTrack(1, parent_uuid, name_chars.c_str(), true));
 }
 
 static jlong android_os_PerfettoTrackEventExtraCounterTrack_delete() {
@@ -317,6 +316,15 @@ static void android_os_PerfettoTrackEventExtra_clear_args(jlong ptr) {
     extra->clear_extras();
 }
 
+static void android_os_PerfettoTrackEventExtra_emit(JNIEnv* env, jclass, jint type, jlong cat_ptr,
+                                                    jstring name, jlong extra_ptr) {
+    ScopedUtfChars name_chars = GET_UTF_OR_RETURN_VOID(env, name);
+
+    tracing_perfetto::Category* category = toPointer<tracing_perfetto::Category>(cat_ptr);
+    tracing_perfetto::trace_event(type, category->get(), name_chars.c_str(),
+                                  toPointer<tracing_perfetto::Extra>(extra_ptr));
+}
+
 static jlong android_os_PerfettoTrackEventExtraProto_init() {
     return toJLong(new tracing_perfetto::Proto());
 }
@@ -344,7 +352,9 @@ static const JNINativeMethod gExtraMethods[] =
         {{"native_init", "()J", (void*)android_os_PerfettoTrackEventExtra_init},
          {"native_delete", "()J", (void*)android_os_PerfettoTrackEventExtra_delete},
          {"native_add_arg", "(JJ)V", (void*)android_os_PerfettoTrackEventExtra_add_arg},
-         {"native_clear_args", "(J)V", (void*)android_os_PerfettoTrackEventExtra_clear_args}};
+         {"native_clear_args", "(J)V", (void*)android_os_PerfettoTrackEventExtra_clear_args},
+         {"native_emit", "(IJLjava/lang/String;J)V",
+          (void*)android_os_PerfettoTrackEventExtra_emit}};
 
 static const JNINativeMethod gProtoMethods[] =
         {{"native_init", "()J", (void*)android_os_PerfettoTrackEventExtraProto_init},

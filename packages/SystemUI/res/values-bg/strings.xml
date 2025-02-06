@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Процентът на батерията е неизвестен."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Има връзка с <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Установена е връзка с/ъс <xliff:g id="CAST">%s</xliff:g>."</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Няма връзка."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Роуминг"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Изключени"</string>
@@ -535,10 +539,12 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Приспособления за заключения екран"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"За да отворите дадено приложение посредством приспособление, ще трябва да потвърдите, че това сте вие. Също така имайте предвид, че всеки ще вижда приспособленията дори когато таблетът ви е заключен. Възможно е някои от тях да не са предназначени за заключения екран и добавянето им на него може да е опасно."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Разбрах"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Приспособления"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"За да добавите пряк път към „Приспособления“, уверете се, че опцията „Показване на приспособленията на заключения екран“ е активирана в настройките."</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Настройки"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Бутон за показване на скрийнсейвъра"</string>
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"Разглеждане на режима „Контролен център“"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"Използвайте любимите си приспособления и скрийнсейвъри по време на зареждане."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Начало"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Превключване между потребителите"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"падащо меню"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Всички приложения и данни в тази сесия ще бъдат изтрити."</string>
@@ -750,6 +756,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Актуализира се"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Потребителски профил в Work"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Самолетен режим"</string>
+    <string name="status_bar_supervision" msgid="6735015942701134125">"Родителски контроли"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Няма да чуете следващия си будилник в <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"в <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"в/ъв <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -759,7 +766,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Сателит, добра връзка"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Сателит, налице е връзка"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS чрез сателит"</string>
-    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Спешни обаждания или SOS"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="9103913890116841786">"Само спешни обаждания или SOS"</string>
     <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
     <string name="accessibility_no_signal" msgid="7052827511409250167">"няма сигнал"</string>
     <string name="accessibility_one_bar" msgid="5342012847647834506">"една чертичка"</string>
@@ -800,6 +807,10 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Показва се в горната част на известията за разговори и като снимка на потребителския профил на заключения екран, изглежда като балонче, прекъсва режима „Не безпокойте“"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не поддържа функциите за разговор"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"Отхвърляне"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"Да не се показва отново"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Тези известия не могат да бъдат променяни."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Известията за обаждания не могат да бъдат променяни."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Тази група от известия не може да бъде конфигурирана тук"</string>
@@ -856,7 +867,6 @@
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Назад"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Известия"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Клавишни комбинации"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Превкл. на клавиат. подредба"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"или"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Изчистване на заявката за търсене"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Клавишни комбинации"</string>
@@ -911,6 +921,14 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Календар"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Калкулатор"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Карти"</string>
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"Превключване на функцията за игнориране на многократното натискане"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"Превключване на функцията за клавиши за мишката"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"Превключване на функцията за фиксирани клавиши"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"Превключване на функцията за забавяне на сигнала от клавишите"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Превключване на Voice Access"</string>
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"Превключване на TalkBack"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"Превключване на функцията за увеличение"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"Активиране на „Прочитане на глас“"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Не безпокойте"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Пряк път към бутоните за силата на звука"</string>
     <string name="battery" msgid="769686279459897127">"Батерия"</string>
@@ -1289,7 +1307,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"вход в устройството"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Използвайте отпечатък за отваряне"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Изисква се удостоверяване на самоличността. За целта докоснете сензора за отпечатъци."</string>
-    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <string name="ongoing_call_content_description" msgid="6394763878322348560">"Текущо обаждане"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
     <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Мобилни данни"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Свързано"</string>
@@ -1432,17 +1451,18 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Системни приложения"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Няколко задачи едновременно"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Разделен екран"</string>
+    <string name="shortcutHelper_category_accessibility" msgid="8068337792277570938">"Достъпност"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Въвеждане"</string>
-    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Преки пътища към приложения"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Клавишни комбинации за приложения"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Текущо приложение"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Достъпност"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Клавишни комбинации"</string>
-    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Персонализиране на клавишните комбинации"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"Персонализиране на клавишните комбинации"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Да се премахне ли клавишната комбинация?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Да се възстановят ли стандартните настройки?"</string>
-    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Натиснете клавиш, за да зададете клавишна комбинация"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="7636040209946696120">"За да създадете тази клавишна комбинация, натиснете клавиша за действия заедно с един или повече други клавиши"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Това ще изтрие персонализираната клавишна комбинация за постоянно."</string>
-    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Това ще изтрие всичките ви персонализирани преки пътища за постоянно."</string>
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Това ще изтрие всичките ви персонализирани клавишни комбинации за постоянно."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Търсете клавишни комбинации"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Няма резултати от търсенето"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Икона за свиване"</string>
@@ -1457,14 +1477,16 @@
     <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"наклонена черта"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Манипулатор за преместване с плъзгане"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Настройки на клавиатурата"</string>
-    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Задаване на клавишна комбинация"</string>
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Клавишна комбинация"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Премахване"</string>
     <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Да, нулиране"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Отказ"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Натиснете клавиш"</string>
-    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Клавишната комбинация вече се използва. Опитайте с друг клавиш."</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="3325858369539848162">"Клавишната комбинация вече се използва. Опитайте с друга."</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Прекият път не може да се зададе."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
+    <string name="shortcut_helper_add_shortcut_button_label" msgid="7655779534665954910">"Добавяне на пряк път"</string>
+    <string name="shortcut_helper_delete_shortcut_button_label" msgid="3148773472696137052">"Изтриване на прекия път"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Навигирайте посредством клавиатурата си"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Научете за клавишните комбинации"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Навигирайте посредством сензорния панел"</string>
@@ -1474,6 +1496,7 @@
     <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"Назад"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Към началния екран"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Преглед на скорошните приложения"</string>
+    <string name="touchpad_tutorial_switch_apps_gesture_button" msgid="7768255095423767779">"Превключване на приложенията"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Готово"</string>
     <string name="gesture_error_title" msgid="469064941635578511">"Опитайте отново!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Назад"</string>
@@ -1491,6 +1514,11 @@
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Отлично!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Изпълнихте жеста за преглед на скорошните приложения."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"За да прегледате скорошните приложения, плъзнете три пръста нагоре по сензорния панел и задръжте"</string>
+    <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"Превключване на приложенията"</string>
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"Прекарайте четири пръста надясно по сензорния панел"</string>
+    <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"Отлично!"</string>
+    <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"Изпълнихте жеста за превключване между приложения."</string>
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"Прекарайте четири пръста надясно по сензорния панел, за да превключите приложенията"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Преглед на всички приложения"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Натиснете клавиша за действия на клавиатурата си"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Браво!"</string>

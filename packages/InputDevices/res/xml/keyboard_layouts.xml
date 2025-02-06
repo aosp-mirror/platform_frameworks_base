@@ -360,4 +360,11 @@
         android:keyboardLayout="@raw/keyboard_layout_serbian_and_montenegrin_cyrillic"
         android:keyboardLocale="cnr-Cyrl-ME"
         android:keyboardLayoutType="extended" />
+
+    <keyboard-layout
+        android:name="keyboard_layout_romanian"
+        android:label="@string/keyboard_layout_romanian"
+        android:keyboardLayout="@raw/keyboard_layout_romanian"
+        android:keyboardLocale="ro-Latn-RO"
+        android:keyboardLayoutType="qwerty" />
 </keyboard-layouts>

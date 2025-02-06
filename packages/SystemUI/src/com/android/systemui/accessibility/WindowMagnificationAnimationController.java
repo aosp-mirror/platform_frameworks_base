@@ -203,8 +203,8 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
             return;
         }
         final float currentScale = mController.getScale();
-        final float currentCenterX = mController.getCenterX();
-        final float currentCenterY = mController.getCenterY();
+        final float currentCenterX = mController.getMagnificationFrameCenterX();
+        final float currentCenterY = mController.getMagnificationFrameCenterY();
 
         if (mState == STATE_DISABLED) {
             // We don't need to offset the center during the animation.

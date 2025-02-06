@@ -32,6 +32,7 @@ object SingleLineViewBinder {
                 viewModel?.titleText,
                 viewModel?.contentText,
                 viewModel?.conversationData?.conversationSenderName,
+                viewModel?.conversationData?.summarization
             )
         } else {
             // bind the title and content text views

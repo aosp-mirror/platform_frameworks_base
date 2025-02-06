@@ -51,7 +51,6 @@ import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.testKosmos
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -60,7 +59,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
 
-@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {

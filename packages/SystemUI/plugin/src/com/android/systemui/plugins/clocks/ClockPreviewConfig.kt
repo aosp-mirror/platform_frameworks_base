@@ -25,6 +25,7 @@ data class ClockPreviewConfig(
     val isShadeLayoutWide: Boolean,
     val isSceneContainerFlagEnabled: Boolean = false,
     val lockId: Int? = null,
+    val udfpsTop: Float? = null,
 ) {
     fun getSmallClockTopPadding(
         statusBarHeight: Int = SystemBarUtils.getStatusBarHeight(context)

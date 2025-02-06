@@ -109,6 +109,7 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
     private val statusBarService: IStatusBarService = mock()
     private val uiEventLogger: UiEventLogger = mock()
     private val msdlPlayer: MSDLPlayer = mock()
+    private val rebindingTracker: NotificationRebindingTracker = mock()
     private lateinit var controller: ExpandableNotificationRowController
 
     @Before
@@ -150,6 +151,7 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
                 statusBarService,
                 uiEventLogger,
                 msdlPlayer,
+                rebindingTracker,
             )
         whenever(view.childrenContainer).thenReturn(childrenContainer)
 

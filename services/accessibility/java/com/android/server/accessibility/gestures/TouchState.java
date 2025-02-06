@@ -38,7 +38,7 @@ public class TouchState {
     // Pointer-related constants
     // This constant captures the current implementation detail that
     // pointer IDs are between 0 and 31 inclusive (subject to change).
-    // (See MAX_POINTER_ID in frameworks/base/include/ui/Input.h)
+    // (See MAX_POINTER_ID in frameworks/native/include/input/Input.h)
     public static final int MAX_POINTER_COUNT = 32;
     // Constant referring to the ids bits of all pointers.
     public static final int ALL_POINTER_ID_BITS = 0xFFFFFFFF;

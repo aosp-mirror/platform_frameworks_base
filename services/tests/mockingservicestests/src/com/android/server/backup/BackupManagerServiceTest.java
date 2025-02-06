@@ -39,6 +39,7 @@ import static org.mockito.Mockito.when;
 
 import android.Manifest;
 import android.app.backup.BackupManager;
+import android.app.backup.BackupManagerInternal;
 import android.app.backup.ISelectBackupTransportCallback;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
@@ -59,6 +60,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.util.DumpUtils;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.backup.utils.RandomAccessFileUtils;
 
@@ -716,7 +718,7 @@ public class BackupManagerServiceTest {
         // Create BMS *before* setting a main user to simulate the main user being created after
         // BMS, which can happen for the first ever boot of a new device.
         mService = new BackupManagerServiceTestable(mContextMock);
-        mServiceLifecycle = new BackupManagerService.Lifecycle(mContextMock, mService);
+        createBackupServiceLifecycle(mContextMock, mService);
         when(mUserManagerMock.getMainUser()).thenReturn(UserHandle.of(NON_SYSTEM_USER));
         assertFalse(mService.isBackupServiceActive(NON_SYSTEM_USER));
 
@@ -730,7 +732,7 @@ public class BackupManagerServiceTest {
         // Create BMS *before* setting a main user to simulate the main user being created after
         // BMS, which can happen for the first ever boot of a new device.
         mService = new BackupManagerServiceTestable(mContextMock);
-        mServiceLifecycle = new BackupManagerService.Lifecycle(mContextMock, mService);
+        createBackupServiceLifecycle(mContextMock, mService);
         when(mUserManagerMock.getMainUser()).thenReturn(UserHandle.of(NON_SYSTEM_USER));
         assertFalse(mService.isBackupServiceActive(NON_SYSTEM_USER));
 
@@ -754,7 +756,7 @@ public class BackupManagerServiceTest {
 
     private void createBackupManagerServiceAndUnlockSystemUser() {
         mService = new BackupManagerServiceTestable(mContextMock);
-        mServiceLifecycle = new BackupManagerService.Lifecycle(mContextMock, mService);
+        createBackupServiceLifecycle(mContextMock, mService);
         simulateUserUnlocked(UserHandle.USER_SYSTEM);
     }
 
@@ -765,7 +767,15 @@ public class BackupManagerServiceTest {
     private void setMockMainUserAndCreateBackupManagerService(int userId) {
         when(mUserManagerMock.getMainUser()).thenReturn(UserHandle.of(userId));
         mService = new BackupManagerServiceTestable(mContextMock);
-        mServiceLifecycle = new BackupManagerService.Lifecycle(mContextMock, mService);
+        createBackupServiceLifecycle(mContextMock, mService);
+    }
+
+    private void createBackupServiceLifecycle(Context context, BackupManagerService service) {
+        // Anytime we manually create the Lifecycle, we need to remove the internal BMS because
+        // it would've been added already at boot time and LocalServices does not allow
+        // overriding an existing service.
+        LocalServices.removeServiceForTest(BackupManagerInternal.class);
+        mServiceLifecycle = new BackupManagerService.Lifecycle(context, service);
     }
 
     private void simulateUserUnlocked(int userId) {

@@ -32,4 +32,10 @@ interface MediaProjectionRepository {
 
     /** Represents the current [MediaProjectionState]. */
     val mediaProjectionState: Flow<MediaProjectionState>
+
+    /**
+     * Emits each time a call ends but media projection is still active and media projection was
+     * starting during the call.
+     */
+    val projectionStartedDuringCallAndActivePostCallEvent: Flow<Unit>
 }

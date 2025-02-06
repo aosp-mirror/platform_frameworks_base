@@ -20,10 +20,8 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.currentTime
 
-@OptIn(ExperimentalCoroutinesApi::class)
 val Kosmos.systemClock by
     Kosmos.Fixture<SystemClock> {
         mock {

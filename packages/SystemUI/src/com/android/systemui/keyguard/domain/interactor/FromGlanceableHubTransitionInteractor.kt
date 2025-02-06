@@ -48,7 +48,6 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 @OptIn(FlowPreview::class)
@@ -92,6 +91,7 @@ constructor(
         listenForHubToAlternateBouncer()
         listenForHubToOccluded()
         listenForHubToGone()
+        listenForHubToDreaming()
     }
 
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
@@ -173,6 +173,24 @@ constructor(
                             modeOnCanceled = TransitionModeOnCanceled.LAST_VALUE,
                         )
                     }
+                }
+        }
+    }
+
+    private fun listenForHubToDreaming() {
+        if (!communalSettingsInteractor.isV2FlagEnabled()) {
+            return
+        }
+
+        scope.launch {
+            keyguardInteractor.isAbleToDream
+                .filterRelevantKeyguardStateAnd { isAbleToDream -> isAbleToDream }
+                .collect {
+                    communalSceneInteractor.changeScene(
+                        newScene = CommunalScenes.Blank,
+                        loggingReason = "hub to dreaming",
+                        keyguardState = KeyguardState.DREAMING,
+                    )
                 }
         }
     }

@@ -16,8 +16,7 @@
 
 package com.android.systemui.keyguard;
 
-import android.os.Trace;
-
+import com.android.app.tracing.coroutines.TrackTracer;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
@@ -80,7 +79,7 @@ public class ScreenLifecycle extends Lifecycle<ScreenLifecycle.Observer> impleme
 
     private void setScreenState(int screenState) {
         mScreenState = screenState;
-        Trace.traceCounter(Trace.TRACE_TAG_APP, "screenState", screenState);
+        TrackTracer.instantForGroup("screen", "screenState", screenState);
     }
 
     public interface Observer {

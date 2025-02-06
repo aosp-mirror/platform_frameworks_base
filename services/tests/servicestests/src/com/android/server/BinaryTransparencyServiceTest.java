@@ -46,17 +46,14 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemProperties;
 import android.provider.DeviceConfig;
-import android.util.Log;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.os.IBinaryTransparencyService;
-import com.android.server.pm.BackgroundInstallControlService;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.pm.BackgroundInstallControlCallbackHelper;
-import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.AndroidPackageSplit;
+import com.android.server.pm.BackgroundInstallControlService;
 import com.android.server.pm.pkg.PackageStateInternal;
 
 import org.junit.After;
@@ -82,7 +79,7 @@ public class BinaryTransparencyServiceTest {
     private Context mContext;
     private BinaryTransparencyService mBinaryTransparencyService;
     private BinaryTransparencyService.BinaryTransparencyServiceImpl mTestInterface;
-    private DeviceConfig.Properties mOriginalBiometricsFlags;
+    private String mOriginalBiometricsFlag;
 
     @Mock
     private BinaryTransparencyService.BiometricLogger mBiometricLogger;
@@ -117,17 +114,15 @@ public class BinaryTransparencyServiceTest {
 
         mBinaryTransparencyService = new BinaryTransparencyService(mContext, mBiometricLogger);
         mTestInterface = mBinaryTransparencyService.new BinaryTransparencyServiceImpl();
-        mOriginalBiometricsFlags = DeviceConfig.getProperties(DeviceConfig.NAMESPACE_BIOMETRICS);
+        mOriginalBiometricsFlag = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_BIOMETRICS,
+                BinaryTransparencyService.KEY_ENABLE_BIOMETRIC_PROPERTY_VERIFICATION);
     }
 
     @After
-    public void tearDown() throws Exception {
-        try {
-            DeviceConfig.setProperties(mOriginalBiometricsFlags);
-        } catch (DeviceConfig.BadConfigException e) {
-            Log.e(TAG, "Failed to reset biometrics flags to the original values before test. "
-                    + e);
-        }
+    public void tearDown() {
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_BIOMETRICS,
+                BinaryTransparencyService.KEY_ENABLE_BIOMETRIC_PROPERTY_VERIFICATION,
+                mOriginalBiometricsFlag, false /* makeDefault */);
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
     }
 

@@ -18,6 +18,7 @@ package com.android.systemui.shade.display
 
 import android.view.Display
 import android.view.Display.TYPE_EXTERNAL
+import android.view.MotionEvent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -25,49 +26,47 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.display.data.repository.display
 import com.android.systemui.display.data.repository.displayRepository
-import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
+import com.android.systemui.shade.data.repository.statusBarTouchShadeDisplayPolicy
+import com.android.systemui.shade.domain.interactor.notificationElement
+import com.android.systemui.shade.domain.interactor.qsElement
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class StatusBarTouchShadeDisplayPolicyTest : SysuiTestCase() {
     private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val testScope = kosmos.testScope
-    private val keyguardRepository = kosmos.fakeKeyguardRepository
     private val displayRepository = kosmos.displayRepository
 
-    private fun createUnderTest(
-        shadeOnDefaultDisplayWhenLocked: Boolean = false
-    ): StatusBarTouchShadeDisplayPolicy {
-        return StatusBarTouchShadeDisplayPolicy(
-            displayRepository,
-            keyguardRepository,
-            testScope.backgroundScope,
-            shadeOnDefaultDisplayWhenLocked = shadeOnDefaultDisplayWhenLocked,
-        )
+    private val underTest = kosmos.statusBarTouchShadeDisplayPolicy
+
+    private fun createMotionEventForDisplay(displayId: Int, xCoordinate: Float = 0f): MotionEvent {
+        return mock<MotionEvent> {
+            on { getX() } doReturn xCoordinate
+            on { getDisplayId() } doReturn displayId
+        }
     }
 
     @Test
     fun displayId_defaultToDefaultDisplay() {
-        val underTest = createUnderTest()
-
         assertThat(underTest.displayId.value).isEqualTo(Display.DEFAULT_DISPLAY)
     }
 
     @Test
     fun onStatusBarTouched_called_updatesDisplayId() =
         testScope.runTest {
-            val underTest = createUnderTest()
             val displayId by collectLastValue(underTest.displayId)
 
             displayRepository.addDisplays(display(id = 2, type = TYPE_EXTERNAL))
-            underTest.onStatusBarTouched(2)
+            underTest.onStatusBarTouched(createMotionEventForDisplay(2), STATUS_BAR_WIDTH)
 
             assertThat(displayId).isEqualTo(2)
         }
@@ -75,11 +74,10 @@ class StatusBarTouchShadeDisplayPolicyTest : SysuiTestCase() {
     @Test
     fun onStatusBarTouched_notExistentDisplay_displayIdNotUpdated() =
         testScope.runTest {
-            val underTest = createUnderTest()
             val displayIds by collectValues(underTest.displayId)
             assertThat(displayIds).isEqualTo(listOf(Display.DEFAULT_DISPLAY))
 
-            underTest.onStatusBarTouched(2)
+            underTest.onStatusBarTouched(createMotionEventForDisplay(2), STATUS_BAR_WIDTH)
 
             // Never set, as 2 was not a display according to the repository.
             assertThat(displayIds).isEqualTo(listOf(Display.DEFAULT_DISPLAY))
@@ -88,11 +86,10 @@ class StatusBarTouchShadeDisplayPolicyTest : SysuiTestCase() {
     @Test
     fun onStatusBarTouched_afterDisplayRemoved_goesBackToDefaultDisplay() =
         testScope.runTest {
-            val underTest = createUnderTest()
             val displayId by collectLastValue(underTest.displayId)
 
             displayRepository.addDisplays(display(id = 2, type = TYPE_EXTERNAL))
-            underTest.onStatusBarTouched(2)
+            underTest.onStatusBarTouched(createMotionEventForDisplay(2), STATUS_BAR_WIDTH)
 
             assertThat(displayId).isEqualTo(2)
 
@@ -102,38 +99,40 @@ class StatusBarTouchShadeDisplayPolicyTest : SysuiTestCase() {
         }
 
     @Test
-    fun onStatusBarTouched_afterKeyguardVisible_goesBackToDefaultDisplay() =
+    fun onStatusBarTouched_leftSide_intentSetToNotifications() =
         testScope.runTest {
-            val underTest = createUnderTest(shadeOnDefaultDisplayWhenLocked = true)
-            val displayId by collectLastValue(underTest.displayId)
+            underTest.onStatusBarTouched(
+                createMotionEventForDisplay(2, STATUS_BAR_WIDTH * 0.1f),
+                STATUS_BAR_WIDTH,
+            )
 
-            displayRepository.addDisplays(display(id = 2, type = TYPE_EXTERNAL))
-            underTest.onStatusBarTouched(2)
-
-            assertThat(displayId).isEqualTo(2)
-
-            keyguardRepository.setKeyguardShowing(true)
-
-            assertThat(displayId).isEqualTo(Display.DEFAULT_DISPLAY)
+            assertThat(underTest.consumeExpansionIntent()).isEqualTo(kosmos.notificationElement)
         }
 
     @Test
-    fun onStatusBarTouched_afterKeyguardHides_goesBackToPreviousDisplay() =
+    fun onStatusBarTouched_rightSide_intentSetToQs() =
         testScope.runTest {
-            val underTest = createUnderTest(shadeOnDefaultDisplayWhenLocked = true)
-            val displayId by collectLastValue(underTest.displayId)
+            underTest.onStatusBarTouched(
+                createMotionEventForDisplay(2, STATUS_BAR_WIDTH * 0.95f),
+                STATUS_BAR_WIDTH,
+            )
 
-            displayRepository.addDisplays(display(id = 2, type = TYPE_EXTERNAL))
-            underTest.onStatusBarTouched(2)
-
-            assertThat(displayId).isEqualTo(2)
-
-            keyguardRepository.setKeyguardShowing(true)
-
-            assertThat(displayId).isEqualTo(Display.DEFAULT_DISPLAY)
-
-            keyguardRepository.setKeyguardShowing(false)
-
-            assertThat(displayId).isEqualTo(2)
+            assertThat(underTest.consumeExpansionIntent()).isEqualTo(kosmos.qsElement)
         }
+
+    @Test
+    fun onStatusBarTouched_nullAfterConsumed() =
+        testScope.runTest {
+            underTest.onStatusBarTouched(
+                createMotionEventForDisplay(2, STATUS_BAR_WIDTH * 0.1f),
+                STATUS_BAR_WIDTH,
+            )
+            assertThat(underTest.consumeExpansionIntent()).isEqualTo(kosmos.notificationElement)
+
+            assertThat(underTest.consumeExpansionIntent()).isNull()
+        }
+
+    companion object {
+        private const val STATUS_BAR_WIDTH = 100
+    }
 }

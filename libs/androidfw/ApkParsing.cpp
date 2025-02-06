@@ -33,7 +33,7 @@ const size_t LIB_SUFFIX_LEN = LIB_SUFFIX.size();
 static const std::array<std::string_view, 2> abis = {"arm64-v8a", "x86_64"};
 
 namespace android::util {
-const char* ValidLibraryPathLastSlash(const char* fileName, bool suppress64Bit, bool debuggable) {
+const char* ValidLibraryPathLastSlash(const char* fileName, bool suppress64Bit) {
     // Make sure the filename is at least to the minimum library name size.
     const size_t fileNameLen = strlen(fileName);
     static const size_t minLength = APK_LIB_LEN + 2 + LIB_PREFIX_LEN + 1 + LIB_SUFFIX_LEN;
@@ -64,14 +64,6 @@ const char* ValidLibraryPathLastSlash(const char* fileName, bool suppress64Bit, 
     // Make sure there aren't subdirectories by checking if the next / after lib/ is the last slash
     if (memchr(fileName + APK_LIB_LEN, '/', fileNameLen - APK_LIB_LEN) != lastSlash) {
         return nullptr;
-    }
-
-    if (!debuggable) {
-        // Make sure the filename starts with lib and ends with ".so".
-        if (strncmp(fileName + fileNameLen - LIB_SUFFIX_LEN, LIB_SUFFIX.data(), LIB_SUFFIX_LEN) != 0
-            || strncmp(lastSlash, LIB_PREFIX.data(), LIB_PREFIX_LEN) != 0) {
-            return nullptr;
-        }
     }
 
     // Don't include 64 bit versions if they are suppressed

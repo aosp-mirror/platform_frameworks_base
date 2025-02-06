@@ -38,7 +38,6 @@ import androidx.annotation.NonNull;
  *
  * @hide
  */
-@FlaggedApi(Flags.FLAG_ENABLE_SERVICE)
 @SystemApi
 public final class ContextualSearchState implements Parcelable {
     private final @NonNull Bundle mExtras;

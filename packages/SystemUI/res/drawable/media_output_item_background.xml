@@ -17,6 +17,6 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
        android:shape="rectangle">
     <corners
-        android:radius="16dp"/>
+        android:radius="@dimen/media_output_dialog_background_radius"/>
     <solid android:color="@color/media_dialog_item_background" />
 </shape>

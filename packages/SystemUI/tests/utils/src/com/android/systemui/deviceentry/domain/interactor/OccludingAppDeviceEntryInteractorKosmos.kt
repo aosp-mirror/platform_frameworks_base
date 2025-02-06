@@ -27,9 +27,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.power.domain.interactor.powerInteractor
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 val Kosmos.occludingAppDeviceEntryInteractor by
     Kosmos.Fixture {
         OccludingAppDeviceEntryInteractor(

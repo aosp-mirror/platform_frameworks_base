@@ -49,6 +49,7 @@ public class SystemNotificationChannels {
     public static final String NETWORK_ALERTS = "NETWORK_ALERTS";
     public static final String NETWORK_AVAILABLE = "NETWORK_AVAILABLE";
     public static final String VPN = "VPN";
+    public static final String TIME = "TIME";
     /**
      * @deprecated Legacy device admin channel with low importance which is no longer used,
      *  Use the high importance {@link #DEVICE_ADMIN} channel instead.
@@ -67,6 +68,7 @@ public class SystemNotificationChannels {
     @Deprecated public static final String SYSTEM_CHANGES_DEPRECATED = "SYSTEM_CHANGES";
     public static final String SYSTEM_CHANGES = "SYSTEM_CHANGES_ALERTS";
     public static final String ACCESSIBILITY_MAGNIFICATION = "ACCESSIBILITY_MAGNIFICATION";
+    public static final String ACCESSIBILITY_HEARING_DEVICE = "ACCESSIBILITY_HEARING_DEVICE";
     public static final String ACCESSIBILITY_SECURITY_POLICY = "ACCESSIBILITY_SECURITY_POLICY";
     public static final String ABUSIVE_BACKGROUND_APPS = "ABUSIVE_BACKGROUND_APPS";
 
@@ -145,6 +147,12 @@ public class SystemNotificationChannels {
                 NotificationManager.IMPORTANCE_LOW);
         channelsList.add(vpn);
 
+        final NotificationChannel time = new NotificationChannel(
+                TIME,
+                context.getString(R.string.notification_channel_system_time),
+                NotificationManager.IMPORTANCE_DEFAULT);
+        channelsList.add(time);
+
         final NotificationChannel deviceAdmin = new NotificationChannel(
                 DEVICE_ADMIN,
                 getDeviceAdminNotificationChannelName(context),
@@ -202,6 +210,13 @@ public class SystemNotificationChannels {
                 NotificationManager.IMPORTANCE_HIGH);
         newFeaturePrompt.setBlockable(true);
         channelsList.add(newFeaturePrompt);
+
+        final NotificationChannel accessibilityHearingDeviceChannel = new NotificationChannel(
+                ACCESSIBILITY_HEARING_DEVICE,
+                context.getString(R.string.notification_channel_accessibility_hearing_device),
+                NotificationManager.IMPORTANCE_HIGH);
+        accessibilityHearingDeviceChannel.setBlockable(true);
+        channelsList.add(accessibilityHearingDeviceChannel);
 
         final NotificationChannel accessibilitySecurityPolicyChannel = new NotificationChannel(
                 ACCESSIBILITY_SECURITY_POLICY,

@@ -16,14 +16,13 @@
 
 package com.android.server.wm.flicker.notification
 
-import android.platform.test.annotations.Postsubmit
-import android.platform.test.annotations.Presubmit
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.helpers.wakeUpAndGoToHomeScreen
 import android.tools.traces.component.ComponentNameMatcher
+import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
 import org.junit.FixMethodOrder
@@ -41,7 +40,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Postsubmit
+@FlakyTest(bugId = 384046002)
 open class OpenAppFromNotificationColdTest(flicker: LegacyFlickerTest) :
     OpenAppFromNotificationWarmTest(flicker) {
     /** {@inheritDoc} */
@@ -59,9 +58,9 @@ open class OpenAppFromNotificationColdTest(flicker: LegacyFlickerTest) :
             teardown { testApp.exit(wmHelper) }
         }
 
-    @Presubmit @Test override fun appWindowBecomesVisible() = appWindowBecomesVisible_coldStart()
+    @Test override fun appWindowBecomesVisible() = appWindowBecomesVisible_coldStart()
 
-    @Presubmit @Test override fun appLayerBecomesVisible() = appLayerBecomesVisible_coldStart()
+    @Test override fun appLayerBecomesVisible() = appLayerBecomesVisible_coldStart()
 
     /** {@inheritDoc} */
     @Test
@@ -83,7 +82,7 @@ open class OpenAppFromNotificationColdTest(flicker: LegacyFlickerTest) :
      * Checks the position of the [ComponentNameMatcher.STATUS_BAR] at the start and end of the
      * transition
      */
-    @Presubmit @Test open fun statusBarLayerPositionAtEnd() = flicker.statusBarLayerPositionAtEnd()
+    @Test open fun statusBarLayerPositionAtEnd() = flicker.statusBarLayerPositionAtEnd()
 
     /** {@inheritDoc} */
     @Test

@@ -52,3 +52,10 @@ flag {
      bug: "340929737"
      is_fixed_read_only: true
 }
+
+flag {
+     name: "remove_app_integrity_manager_service"
+     namespace: "package_manager_service"
+     description: "Remove AppIntegrityManagerService"
+     bug: "364200023"
+}

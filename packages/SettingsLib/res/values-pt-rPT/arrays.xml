@@ -296,7 +296,7 @@
   <string-array name="shade_display_awareness_summaries">
     <item msgid="2964753205732912921">"Mostrar a sombra apenas no ecrã do dispositivo"</item>
     <item msgid="7795034287069726554">"Mostrar o dispositivo num único ecrã externo"</item>
-    <item msgid="5280431949814340475">"Mostrar o dispositivo no último ecrã focado"</item>
+    <item msgid="5280431949814340475">"Apresente o dispositivo no último ecrã focado"</item>
   </string-array>
   <string-array name="shade_display_awareness_values">
     <item msgid="3055776101992426514">"default_display"</item>

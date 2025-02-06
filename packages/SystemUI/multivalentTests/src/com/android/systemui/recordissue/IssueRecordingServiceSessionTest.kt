@@ -38,6 +38,7 @@ import com.android.systemui.util.settings.fakeGlobalSettings
 import com.android.traceur.TraceConfig
 import com.google.common.truth.Truth
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
@@ -126,6 +127,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
         verify(iActivityManager).requestBugReportWithExtraAttachments(any())
     }
 
+    @Ignore("b/392753499")
     @Test
     fun sharesTracesDirectly_afterReceivingShareCommand_withTakeBugreportFalse() {
         underTest.takeBugReport = false

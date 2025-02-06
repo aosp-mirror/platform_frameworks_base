@@ -30,4 +30,33 @@
         <item name="android:textColor">@color/settingslib_btn_colored_text_material</item>
         <item name="android:background">@drawable/settingslib_btn_colored_material</item>
     </style>
+
+    <style name="SettingsLibSectionButtonStyle.Expressive"
+        parent="@style/SettingsLibButtonStyle.Expressive.Filled.Large">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="backgroundTint">@color/settingslib_section_button_background</item>
+        <item name="iconTint">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="SettingsLibNumberButtonStyle.Number"
+        parent="">
+        <item name="android:minWidth">@dimen/settingslib_expressive_space_small4</item>
+        <item name="android:minHeight">@dimen/settingslib_expressive_space_small4</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/settingslib_number_count_background</item>
+        <item name="android:paddingStart">@dimen/settingslib_expressive_radius_extrasmall2</item>
+        <item name="android:paddingEnd">@dimen/settingslib_expressive_radius_extrasmall2</item>
+        <item name="android:layout_marginEnd">@dimen/settingslib_expressive_space_extrasmall4</item>
+        <item name="android:textAppearance">@style/TextAppearance.SettingsLib.TitleMedium</item>
+        <item name="android:textColor">@color/settingslib_materialColorOnSecondaryContainer</item>
+        <item name="android:importantForAccessibility">no</item>
+    </style>
+
+    <style name="SettingsLibNumberButtonStyle.Title"
+        parent="">
+        <item name="android:gravity">center</item>
+        <item name="android:textAppearance">@style/TextAppearance.SettingsLib.LabelLarge</item>
+        <item name="android:textColor">@color/settingslib_materialColorOnSurface</item>
+        <item name="android:importantForAccessibility">no</item>
+    </style>
 </resources>

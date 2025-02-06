@@ -26,7 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="36dp"
         android:layout_gravity="center_vertical|start"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="@dimen/media_output_dialog_margin_horizontal"
         android:layout_marginEnd="56dp"
         android:ellipsize="end"
         android:maxLines="1"

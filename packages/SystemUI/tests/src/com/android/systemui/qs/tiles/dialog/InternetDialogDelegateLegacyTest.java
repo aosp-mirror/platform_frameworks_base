@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Intent;
 import android.os.Handler;
+import android.platform.test.annotations.DisableFlags;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.testing.TestableLooper;
@@ -32,8 +33,10 @@ import androidx.test.filters.SmallTest;
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.wifi.WifiEnterpriseRestrictionUtils;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogTransitionAnimator;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.domain.interactor.FakeShadeDialogContextInteractor;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -57,6 +60,7 @@ import kotlinx.coroutines.CoroutineScope;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
+@DisableFlags(Flags.FLAG_QS_TILE_DETAILED_VIEW)
 @UiThreadTest
 public class InternetDialogDelegateLegacyTest extends SysuiTestCase {
 
@@ -107,6 +111,7 @@ public class InternetDialogDelegateLegacyTest extends SysuiTestCase {
     private TextView mAirplaneModeSummaryText;
 
     private MockitoSession mMockitoSession;
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
 
     @Before
     public void setUp() {
@@ -151,7 +156,8 @@ public class InternetDialogDelegateLegacyTest extends SysuiTestCase {
                 mBgExecutor,
                 mKeyguard,
                 mSystemUIDialogFactory,
-                new FakeShadeDialogContextInteractor(mContext));
+                new FakeShadeDialogContextInteractor(mContext),
+                mKosmos.getShadeModeInteractor());
         mInternetDialogDelegateLegacy.createDialog();
         mInternetDialogDelegateLegacy.onCreate(mSystemUIDialog, null);
         mInternetDialogDelegateLegacy.mAdapter = mInternetAdapter;

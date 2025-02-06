@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.Velocity
 
 class TestOverscrollEffect(
     override val orientation: Orientation,
+    private val onPreScroll: (Float) -> Float = { 0f },
+    private val onPreFling: suspend (Float) -> Float = { 0f },
     private val onPostFling: suspend (Float) -> Float = { it },
     private val onPostScroll: (Float) -> Float,
 ) : OverscrollEffect, OrientationAware {
@@ -36,19 +38,23 @@ class TestOverscrollEffect(
         source: NestedScrollSource,
         performScroll: (Offset) -> Offset,
     ): Offset {
-        val consumedByScroll = performScroll(delta)
-        val available = delta - consumedByScroll
-        val consumedByEffect = onPostScroll(available.toFloat()).toOffset()
-        return consumedByScroll + consumedByEffect
+        val consumedByPreScroll = onPreScroll(delta.toFloat()).toOffset()
+        val availableToScroll = delta - consumedByPreScroll
+        val consumedByScroll = performScroll(availableToScroll)
+        val availableToPostScroll = availableToScroll - consumedByScroll
+        val consumedByPostScroll = onPostScroll(availableToPostScroll.toFloat()).toOffset()
+        return consumedByPreScroll + consumedByScroll + consumedByPostScroll
     }
 
     override suspend fun applyToFling(
         velocity: Velocity,
         performFling: suspend (Velocity) -> Velocity,
     ) {
-        val consumedByFling = performFling(velocity)
-        val available = velocity - consumedByFling
-        onPostFling(available.toFloat())
+        val consumedByPreFling = onPreFling(velocity.toFloat()).toVelocity()
+        val availableToFling = velocity - consumedByPreFling
+        val consumedByFling = performFling(availableToFling)
+        val availableToPostFling = availableToFling - consumedByFling
+        onPostFling(availableToPostFling.toFloat())
         applyToFlingDone = true
     }
 }

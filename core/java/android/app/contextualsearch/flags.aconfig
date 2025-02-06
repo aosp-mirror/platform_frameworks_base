@@ -27,7 +27,10 @@ flag {
     name: "contextual_search_window_layer"
     namespace: "sysui_integrations"
     description: "Identify live contextual search UI to exclude from contextual search screenshot."
-    bug: "372510690"
+    bug: "390176823"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {

@@ -26,15 +26,13 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.CollectionUtils;
 import com.android.server.SystemConfig;
 import com.android.server.pm.pkg.AndroidPackage;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -121,20 +119,16 @@ public class OverlayReferenceMapper {
                 return actorPair.first;
             }
 
-            @NonNull
+            @Nullable
             @Override
-            public Map<String, Set<String>> getTargetToOverlayables(@NonNull AndroidPackage pkg) {
+            public Pair<String, String> getTargetToOverlayables(@NonNull AndroidPackage pkg) {
                 String target = pkg.getOverlayTarget();
                 if (TextUtils.isEmpty(target)) {
-                    return Collections.emptyMap();
+                    return null;
                 }
 
                 String overlayable = pkg.getOverlayTargetOverlayableName();
-                Map<String, Set<String>> targetToOverlayables = new HashMap<>();
-                Set<String> overlayables = new HashSet<>();
-                overlayables.add(overlayable);
-                targetToOverlayables.put(target, overlayables);
-                return targetToOverlayables;
+                return Pair.create(target, overlayable);
             }
         };
     }
@@ -174,7 +168,7 @@ public class OverlayReferenceMapper {
             }
 
             // TODO(b/135203078): Replace with isOverlay boolean flag check; fix test mocks
-            if (!mProvider.getTargetToOverlayables(pkg).isEmpty()) {
+            if (mProvider.getTargetToOverlayables(pkg) != null) {
                 addOverlay(pkg, otherPkgs, changed);
             }
 
@@ -245,20 +239,17 @@ public class OverlayReferenceMapper {
             String target = targetPkg.getPackageName();
             removeTarget(target, changedPackages);
 
-            Map<String, String> overlayablesToActors = targetPkg.getOverlayables();
-            for (String overlayable : overlayablesToActors.keySet()) {
-                String actor = overlayablesToActors.get(overlayable);
+            final Map<String, String> overlayablesToActors = targetPkg.getOverlayables();
+            for (final var entry : overlayablesToActors.entrySet()) {
+                final String overlayable = entry.getKey();
+                final String actor = entry.getValue();
                 addTargetToMap(actor, target, changedPackages);
 
                 for (AndroidPackage overlayPkg : otherPkgs.values()) {
-                    Map<String, Set<String>> targetToOverlayables =
+                    var targetToOverlayables =
                             mProvider.getTargetToOverlayables(overlayPkg);
-                    Set<String> overlayables = targetToOverlayables.get(target);
-                    if (CollectionUtils.isEmpty(overlayables)) {
-                        continue;
-                    }
-
-                    if (overlayables.contains(overlayable)) {
+                    if (targetToOverlayables != null && targetToOverlayables.first.equals(target)
+                            && Objects.equals(targetToOverlayables.second, overlayable)) {
                         String overlay = overlayPkg.getPackageName();
                         addOverlayToMap(actor, target, overlay, changedPackages);
                     }
@@ -310,25 +301,22 @@ public class OverlayReferenceMapper {
             String overlay = overlayPkg.getPackageName();
             removeOverlay(overlay, changedPackages);
 
-            Map<String, Set<String>> targetToOverlayables =
+            Pair<String, String> targetToOverlayables =
                     mProvider.getTargetToOverlayables(overlayPkg);
-            for (Map.Entry<String, Set<String>> entry : targetToOverlayables.entrySet()) {
-                String target = entry.getKey();
-                Set<String> overlayables = entry.getValue();
+            if (targetToOverlayables != null) {
+                String target = targetToOverlayables.first;
                 AndroidPackage targetPkg = otherPkgs.get(target);
                 if (targetPkg == null) {
-                    continue;
+                    return;
                 }
-
                 String targetPkgName = targetPkg.getPackageName();
                 Map<String, String> overlayableToActor = targetPkg.getOverlayables();
-                for (String overlayable : overlayables) {
-                    String actor = overlayableToActor.get(overlayable);
-                    if (TextUtils.isEmpty(actor)) {
-                        continue;
-                    }
-                    addOverlayToMap(actor, targetPkgName, overlay, changedPackages);
+                String overlayable = targetToOverlayables.second;
+                String actor = overlayableToActor.get(overlayable);
+                if (TextUtils.isEmpty(actor)) {
+                    return;
                 }
+                addOverlayToMap(actor, targetPkgName, overlay, changedPackages);
             }
         }
     }
@@ -430,11 +418,11 @@ public class OverlayReferenceMapper {
         String getActorPkg(@NonNull String actor);
 
         /**
-         * Mock response of multiple overlay tags.
+         * Mock response of overlay tags.
          *
          * TODO(b/119899133): Replace with actual implementation; fix OverlayReferenceMapperTests
          */
-        @NonNull
-        Map<String, Set<String>> getTargetToOverlayables(@NonNull AndroidPackage pkg);
+        @Nullable
+        Pair<String, String> getTargetToOverlayables(@NonNull AndroidPackage pkg);
     }
 }

@@ -30,6 +30,8 @@ private val backgroundOff = R.drawable.bluetooth_tile_dialog_bg_off
 private val backgroundOffBusy = R.drawable.bluetooth_tile_dialog_bg_off_busy
 private val connected = R.string.quick_settings_bluetooth_device_connected
 private val audioSharing = R.string.quick_settings_bluetooth_device_audio_sharing
+private val audioSharingAddIcon = R.drawable.ic_add
+private val audioSharingOnGoingIcon = R.drawable.ic_check
 private val saved = R.string.quick_settings_bluetooth_device_saved
 private val actionAccessibilityLabelActivate =
     R.string.accessibility_quick_settings_bluetooth_device_tap_to_activate
@@ -63,6 +65,7 @@ abstract class DeviceItemFactory {
             background: Int,
             actionAccessibilityLabel: String,
             isActive: Boolean,
+            actionIconRes: Int = R.drawable.ic_settings_24dp,
         ): DeviceItem {
             return DeviceItem(
                 type = type,
@@ -75,6 +78,7 @@ abstract class DeviceItemFactory {
                 isEnabled = !cachedDevice.isBusy,
                 actionAccessibilityLabel = actionAccessibilityLabel,
                 isActive = isActive,
+                actionIconRes = actionIconRes,
             )
         }
     }
@@ -125,6 +129,7 @@ internal class AudioSharingMediaDeviceItemFactory(
             if (cachedDevice.isBusy) backgroundOffBusy else backgroundOn,
             "",
             isActive = !cachedDevice.isBusy,
+            actionIconRes = audioSharingOnGoingIcon,
         )
     }
 }
@@ -156,6 +161,7 @@ internal class AvailableAudioSharingMediaDeviceItemFactory(
             if (cachedDevice.isBusy) backgroundOffBusy else backgroundOff,
             "",
             isActive = false,
+            actionIconRes = audioSharingAddIcon,
         )
     }
 }

@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.scene.domain.interactor
 
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
@@ -36,13 +32,13 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.sceneDataSource
-import com.android.systemui.shade.shared.flag.DualShade
+import com.android.systemui.shade.domain.interactor.disableDualShade
+import com.android.systemui.shade.domain.interactor.enableDualShade
 import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
@@ -72,9 +68,9 @@ class SceneContainerOcclusionInteractorTest : SysuiTestCase() {
     private val underTest by lazy { kosmos.sceneContainerOcclusionInteractor }
 
     @Test
-    @DisableFlags(DualShade.FLAG_NAME)
     fun invisibleDueToOcclusion_dualShadeDisabled() =
         testScope.runTest {
+            kosmos.disableDualShade()
             val invisibleDueToOcclusion by collectLastValue(underTest.invisibleDueToOcclusion)
             val keyguardState by collectLastValue(keyguardTransitionInteractor.currentKeyguardState)
 
@@ -134,9 +130,9 @@ class SceneContainerOcclusionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
     fun invisibleDueToOcclusion_dualShadeEnabled() =
         testScope.runTest {
+            kosmos.enableDualShade()
             val invisibleDueToOcclusion by collectLastValue(underTest.invisibleDueToOcclusion)
             val keyguardState by collectLastValue(keyguardTransitionInteractor.currentKeyguardState)
 

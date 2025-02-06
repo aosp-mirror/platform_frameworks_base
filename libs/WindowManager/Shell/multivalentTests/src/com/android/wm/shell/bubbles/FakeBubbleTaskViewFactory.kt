@@ -20,6 +20,7 @@ import android.app.ActivityManager
 import android.content.Context
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.taskview.TaskView
+import com.android.wm.shell.taskview.TaskViewController
 import com.android.wm.shell.taskview.TaskViewTaskController
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -33,7 +34,7 @@ class FakeBubbleTaskViewFactory(
 ) : BubbleTaskViewFactory {
     override fun create(): BubbleTaskView {
         val taskViewTaskController = mock<TaskViewTaskController>()
-        val taskView = TaskView(context, taskViewTaskController)
+        val taskView = TaskView(context, mock<TaskViewController>(), taskViewTaskController)
         val taskInfo = mock<ActivityManager.RunningTaskInfo>()
         whenever(taskViewTaskController.taskInfo).thenReturn(taskInfo)
         return BubbleTaskView(taskView, mainExecutor)

@@ -224,6 +224,12 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
     }
 
+    /** Hides the IME for Bubbles when the device is locked. */
+    public void hideImeForBubblesWhenLocked(int displayId) {
+        PerDisplay pd = mImePerDisplay.get(displayId);
+        pd.setImeInputTargetRequestedVisibility(false, pd.getImeSourceControl().getImeStatsToken());
+    }
+
     /** An implementation of {@link IDisplayWindowInsetsController} for a given display id. */
     public class PerDisplay implements DisplayInsetsController.OnInsetsChangedListener {
         final int mDisplayId;
@@ -447,8 +453,10 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             }
         }
 
-        private int imeTop(float surfaceOffset) {
-            return mImeFrame.top + (int) surfaceOffset;
+        private int imeTop(float surfaceOffset, float surfacePositionY) {
+            // surfaceOffset is already offset by the surface's top inset, so we need to subtract
+            // the top inset so that the return value is in screen coordinates.
+            return mImeFrame.top + (int) (surfaceOffset - surfacePositionY);
         }
 
         private boolean calcIsFloating(InsetsSource imeSource) {
@@ -581,7 +589,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 final float alpha = (mAnimateAlpha || isFloating)
                         ? (value - hiddenY) / (shownY - hiddenY) : 1f;
                 t.setAlpha(animatingLeash, alpha);
-                dispatchPositionChanged(mDisplayId, imeTop(value), t);
+                dispatchPositionChanged(mDisplayId, imeTop(value, defaultY), t);
                 t.apply();
                 mTransactionPool.release(t);
             });
@@ -600,11 +608,12 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     t.setPosition(animatingLeash, x, value);
                     if (DEBUG) {
                         Slog.d(TAG, "onAnimationStart d:" + mDisplayId + " top:"
-                                + imeTop(hiddenY) + "->" + imeTop(shownY)
+                                + imeTop(hiddenY, defaultY) + "->" + imeTop(shownY, defaultY)
                                 + " showing:" + (mAnimationDirection == DIRECTION_SHOW));
                     }
-                    int flags = dispatchStartPositioning(mDisplayId, imeTop(hiddenY),
-                            imeTop(shownY), mAnimationDirection == DIRECTION_SHOW, isFloating, t);
+                    int flags = dispatchStartPositioning(mDisplayId, imeTop(hiddenY, defaultY),
+                            imeTop(shownY, defaultY), mAnimationDirection == DIRECTION_SHOW,
+                            isFloating, t);
                     mAnimateAlpha = (flags & ImePositionProcessor.IME_ANIMATION_NO_ALPHA) == 0;
                     final float alpha = (mAnimateAlpha || isFloating)
                             ? (value - hiddenY) / (shownY - hiddenY)
@@ -658,7 +667,9 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                         if (android.view.inputmethod.Flags.refactorInsetsController()) {
                             setVisibleDirectly(false /* visible */, statsToken);
                         }
-                        ImeTracker.forLogging().onHidden(mStatsToken);
+                        if (!android.view.inputmethod.Flags.refactorInsetsController()) {
+                            ImeTracker.forLogging().onHidden(mStatsToken);
+                        }
                     } else if (mAnimationDirection == DIRECTION_SHOW && !mCancelled) {
                         ImeTracker.forLogging().onShown(mStatsToken);
                     } else if (mCancelled) {

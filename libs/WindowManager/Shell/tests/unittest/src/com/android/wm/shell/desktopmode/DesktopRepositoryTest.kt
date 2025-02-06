@@ -17,14 +17,17 @@
 package com.android.wm.shell.desktopmode
 
 import android.graphics.Rect
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
-import android.testing.AndroidTestingRunner
+import android.platform.test.flag.junit.FlagsParameterization
 import android.util.ArraySet
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.Display.INVALID_DISPLAY
 import androidx.test.filters.SmallTest
+import com.android.window.flags.Flags
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE
+import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_PIP
+import com.android.window.flags.Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.common.ShellExecutor
@@ -33,6 +36,7 @@ import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
 import com.android.wm.shell.sysui.ShellInit
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.fail
+import kotlin.test.assertEquals
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,8 +47,8 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
+import org.junit.Assert.assertThrows
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -55,6 +59,8 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 /**
  * Tests for [@link DesktopRepository].
@@ -62,11 +68,9 @@ import org.mockito.kotlin.whenever
  * Build/Install/Run: atest WMShellUnitTests:DesktopRepositoryTest
  */
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @ExperimentalCoroutinesApi
-class DesktopRepositoryTest : ShellTestCase() {
-
-    @JvmField @Rule val setFlagsRule = SetFlagsRule()
+class DesktopRepositoryTest(flags: FlagsParameterization) : ShellTestCase() {
 
     private lateinit var repo: DesktopRepository
     private lateinit var shellInit: ShellInit
@@ -85,6 +89,8 @@ class DesktopRepositoryTest : ShellTestCase() {
         whenever(runBlocking { persistentRepository.readDesktop(any(), any()) })
             .thenReturn(Desktop.getDefaultInstance())
         shellInit.init()
+        repo.addDesk(displayId = DEFAULT_DISPLAY, deskId = DEFAULT_DESKTOP_ID)
+        repo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = DEFAULT_DESKTOP_ID)
     }
 
     @After
@@ -136,6 +142,7 @@ class DesktopRepositoryTest : ShellTestCase() {
 
     @Test
     fun addTask_multipleDisplays_notifiesCorrectListener() {
+        repo.addDesk(displayId = SECOND_DISPLAY, deskId = SECOND_DISPLAY)
         val listener = TestListener()
         repo.addActiveTaskListener(listener)
 
@@ -149,10 +156,74 @@ class DesktopRepositoryTest : ShellTestCase() {
 
     @Test
     fun addTask_multipleDisplays_moveToAnotherDisplay() {
+        repo.addDesk(displayId = SECOND_DISPLAY, deskId = SECOND_DISPLAY)
         repo.addTask(DEFAULT_DISPLAY, taskId = 1, isVisible = true)
         repo.addTask(SECOND_DISPLAY, taskId = 1, isVisible = true)
         assertThat(repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)).isEmpty()
         assertThat(repo.getFreeformTasksInZOrder(SECOND_DISPLAY)).containsExactly(1)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun addTask_deskDoesNotExist_throws() {
+        repo.removeDesk(deskId = 0)
+
+        assertThrows(Exception::class.java) {
+            repo.addTask(displayId = DEFAULT_DISPLAY, taskId = 5, isVisible = true)
+        }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun addTaskToDesk_deskDoesNotExist_throws() {
+        repo.removeDesk(deskId = 2)
+
+        assertThrows(Exception::class.java) {
+            repo.addTaskToDesk(
+                displayId = DEFAULT_DISPLAY,
+                deskId = 2,
+                taskId = 4,
+                isVisible = true,
+            )
+        }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun addTaskToDesk_addsToZOrderList() {
+        repo.addDesk(DEFAULT_DISPLAY, deskId = 2)
+        repo.addDesk(DEFAULT_DISPLAY, deskId = 3)
+        repo.addTaskToDesk(displayId = DEFAULT_DISPLAY, deskId = 2, taskId = 5, isVisible = true)
+        repo.addTaskToDesk(displayId = DEFAULT_DISPLAY, deskId = 2, taskId = 6, isVisible = true)
+        repo.addTaskToDesk(displayId = DEFAULT_DISPLAY, deskId = 2, taskId = 7, isVisible = true)
+        repo.addTaskToDesk(displayId = DEFAULT_DISPLAY, deskId = 3, taskId = 8, isVisible = true)
+
+        val orderedTasks = repo.getFreeformTasksIdsInDeskInZOrder(deskId = 2)
+        assertThat(orderedTasks[0]).isEqualTo(7)
+        assertThat(orderedTasks[1]).isEqualTo(6)
+        assertThat(orderedTasks[2]).isEqualTo(5)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun addTaskToDesk_visible_addsToVisible() {
+        repo.addDesk(DEFAULT_DISPLAY, deskId = 2)
+
+        repo.addTaskToDesk(displayId = DEFAULT_DISPLAY, deskId = 2, taskId = 5, isVisible = true)
+
+        assertThat(repo.isVisibleTask(5)).isTrue()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun addTaskToDesk_removesFromAllOtherDesks() {
+        repo.addDesk(DEFAULT_DISPLAY, deskId = 2)
+        repo.addDesk(DEFAULT_DISPLAY, deskId = 3)
+        repo.addTaskToDesk(displayId = DEFAULT_DISPLAY, deskId = 2, taskId = 7, isVisible = true)
+
+        repo.addTaskToDesk(displayId = DEFAULT_DISPLAY, deskId = 3, taskId = 7, isVisible = true)
+
+        assertThat(repo.getActiveTaskIdsInDesk(2)).doesNotContain(7)
     }
 
     @Test
@@ -309,19 +380,21 @@ class DesktopRepositoryTest : ShellTestCase() {
 
     @Test
     fun isOnlyVisibleNonClosingTask_multipleDisplays() {
+        repo.addDesk(displayId = SECOND_DISPLAY, deskId = SECOND_DISPLAY)
+        repo.setActiveDesk(displayId = SECOND_DISPLAY, deskId = SECOND_DISPLAY)
         repo.updateTask(DEFAULT_DISPLAY, taskId = 1, isVisible = true)
         repo.updateTask(DEFAULT_DISPLAY, taskId = 2, isVisible = true)
         repo.updateTask(SECOND_DISPLAY, taskId = 3, isVisible = true)
 
         // Not the only task on DEFAULT_DISPLAY
         assertThat(repo.isVisibleTask(1)).isTrue()
-        assertThat(repo.isOnlyVisibleNonClosingTask(1)).isFalse()
+        assertThat(repo.isOnlyVisibleNonClosingTask(1, DEFAULT_DISPLAY)).isFalse()
         // Not the only task on DEFAULT_DISPLAY
         assertThat(repo.isVisibleTask(2)).isTrue()
-        assertThat(repo.isOnlyVisibleNonClosingTask(2)).isFalse()
+        assertThat(repo.isOnlyVisibleNonClosingTask(2, DEFAULT_DISPLAY)).isFalse()
         // The only visible task on SECOND_DISPLAY
         assertThat(repo.isVisibleTask(3)).isTrue()
-        assertThat(repo.isOnlyVisibleNonClosingTask(3)).isTrue()
+        assertThat(repo.isOnlyVisibleNonClosingTask(3, SECOND_DISPLAY)).isTrue()
         // Not a visible task
         assertThat(repo.isVisibleTask(99)).isFalse()
         assertThat(repo.isOnlyVisibleNonClosingTask(99)).isFalse()
@@ -342,6 +415,7 @@ class DesktopRepositoryTest : ShellTestCase() {
 
     @Test
     fun addListener_tasksOnDifferentDisplay_doesNotNotify() {
+        repo.addDesk(displayId = SECOND_DISPLAY, deskId = SECOND_DISPLAY)
         repo.updateTask(SECOND_DISPLAY, taskId = 1, isVisible = true)
         val listener = TestVisibilityListener()
         val executor = TestShellExecutor()
@@ -350,7 +424,7 @@ class DesktopRepositoryTest : ShellTestCase() {
 
         assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(0)
         // One call as adding listener notifies it
-        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(0)
+        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(1)
     }
 
     @Test
@@ -364,11 +438,14 @@ class DesktopRepositoryTest : ShellTestCase() {
         executor.flushAll()
 
         assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(2)
-        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(2)
+        // 1 from registration, 2 for the updates.
+        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(3)
     }
 
     @Test
     fun updateTask_visibleTask_addVisibleTaskNotifiesListenerForThatDisplay() {
+        repo.addDesk(displayId = 1, deskId = 1)
+        repo.setActiveDesk(displayId = 1, deskId = 1)
         val listener = TestVisibilityListener()
         val executor = TestShellExecutor()
         repo.addVisibleTasksListener(listener, executor)
@@ -377,22 +454,27 @@ class DesktopRepositoryTest : ShellTestCase() {
         executor.flushAll()
 
         assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(1)
-        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(1)
+        // 1 for the registration, 1 for the update.
+        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(2)
         assertThat(listener.visibleTasksCountOnSecondaryDisplay).isEqualTo(0)
-        assertThat(listener.visibleChangesOnSecondaryDisplay).isEqualTo(0)
+        // 1 for the registration.
+        assertThat(listener.visibleChangesOnSecondaryDisplay).isEqualTo(1)
 
         repo.updateTask(displayId = 1, taskId = 2, isVisible = true)
         executor.flushAll()
 
         // Listener for secondary display is notified
         assertThat(listener.visibleTasksCountOnSecondaryDisplay).isEqualTo(1)
-        assertThat(listener.visibleChangesOnSecondaryDisplay).isEqualTo(1)
+        // 1 for the registration, 1 for the update.
+        assertThat(listener.visibleChangesOnSecondaryDisplay).isEqualTo(2)
         // No changes to listener for default display
-        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(1)
+        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(2)
     }
 
     @Test
     fun updateTask_taskOnDefaultBecomesVisibleOnSecondDisplay_listenersNotified() {
+        repo.addDesk(displayId = 1, deskId = 1)
+        repo.setActiveDesk(displayId = 1, deskId = 1)
         val listener = TestVisibilityListener()
         val executor = TestShellExecutor()
         repo.addVisibleTasksListener(listener, executor)
@@ -405,14 +487,15 @@ class DesktopRepositoryTest : ShellTestCase() {
         repo.updateTask(displayId = 1, taskId = 1, isVisible = true)
         executor.flushAll()
 
-        // Default display should have 2 calls
-        // 1 - visible task added
-        // 2 - visible task removed
-        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(2)
+        // Default display should have 3 calls
+        // 1 - listener registered
+        // 2 - visible task added
+        // 3 - visible task removed
+        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(3)
         assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(0)
 
-        // Secondary display should have 1 call for visible task added
-        assertThat(listener.visibleChangesOnSecondaryDisplay).isEqualTo(1)
+        // Secondary display should have 2 calls for registration + visible task added
+        assertThat(listener.visibleChangesOnSecondaryDisplay).isEqualTo(2)
         assertThat(listener.visibleTasksCountOnSecondaryDisplay).isEqualTo(1)
     }
 
@@ -430,13 +513,13 @@ class DesktopRepositoryTest : ShellTestCase() {
         repo.updateTask(DEFAULT_DISPLAY, taskId = 1, isVisible = false)
         executor.flushAll()
 
-        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(3)
+        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(4)
 
         repo.updateTask(DEFAULT_DISPLAY, taskId = 2, isVisible = false)
         executor.flushAll()
 
         assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(0)
-        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(4)
+        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(5)
     }
 
     /**
@@ -448,8 +531,8 @@ class DesktopRepositoryTest : ShellTestCase() {
         val listener = TestVisibilityListener()
         val executor = TestShellExecutor()
         repo.addVisibleTasksListener(listener, executor)
-        repo.updateTask(DEFAULT_DISPLAY, taskId = 1, isVisible = true)
-        repo.updateTask(DEFAULT_DISPLAY, taskId = 2, isVisible = true)
+        repo.addTask(DEFAULT_DISPLAY, taskId = 1, isVisible = true)
+        repo.addTask(DEFAULT_DISPLAY, taskId = 2, isVisible = true)
         executor.flushAll()
 
         assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(2)
@@ -457,7 +540,8 @@ class DesktopRepositoryTest : ShellTestCase() {
         repo.updateTask(INVALID_DISPLAY, taskId = 1, isVisible = false)
         executor.flushAll()
 
-        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(3)
+        // 1 from registering, 1x3 for each update including the one to the invalid display.
+        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(4)
         assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(1)
     }
 
@@ -496,6 +580,8 @@ class DesktopRepositoryTest : ShellTestCase() {
 
     @Test
     fun getVisibleTaskCount_multipleDisplays_returnsCorrectCount() {
+        repo.addDesk(displayId = SECOND_DISPLAY, deskId = SECOND_DISPLAY)
+        repo.setActiveDesk(displayId = SECOND_DISPLAY, deskId = SECOND_DISPLAY)
         assertThat(repo.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(0)
         assertThat(repo.getVisibleTaskCount(SECOND_DISPLAY)).isEqualTo(0)
 
@@ -668,24 +754,22 @@ class DesktopRepositoryTest : ShellTestCase() {
     }
 
     @Test
-    fun removeFreeformTask_invalidDisplay_removesTaskFromFreeformTasks() {
+    fun removeTask_invalidDisplay_removesTaskFromFreeformTasks() {
         repo.addTask(DEFAULT_DISPLAY, taskId = 1, isVisible = true)
 
-        repo.removeFreeformTask(INVALID_DISPLAY, taskId = 1)
+        repo.removeTask(INVALID_DISPLAY, taskId = 1)
 
-        val invalidDisplayTasks = repo.getFreeformTasksInZOrder(INVALID_DISPLAY)
-        assertThat(invalidDisplayTasks).isEmpty()
         val validDisplayTasks = repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)
         assertThat(validDisplayTasks).isEmpty()
     }
 
     @Test
     @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE)
-    fun removeFreeformTask_invalidDisplay_persistenceEnabled_removesTaskFromFreeformTasks() {
+    fun removeTask_invalidDisplay_persistenceEnabled_removesTaskFromFreeformTasks() {
         runTest(StandardTestDispatcher()) {
             repo.addTask(DEFAULT_DISPLAY, taskId = 1, isVisible = true)
 
-            repo.removeFreeformTask(INVALID_DISPLAY, taskId = 1)
+            repo.removeTask(INVALID_DISPLAY, taskId = 1)
 
             verify(persistentRepository)
                 .addOrUpdateDesktop(
@@ -707,10 +791,10 @@ class DesktopRepositoryTest : ShellTestCase() {
     }
 
     @Test
-    fun removeFreeformTask_validDisplay_removesTaskFromFreeformTasks() {
+    fun removeTask_validDisplay_removesTaskFromFreeformTasks() {
         repo.addTask(DEFAULT_DISPLAY, taskId = 1, isVisible = true)
 
-        repo.removeFreeformTask(DEFAULT_DISPLAY, taskId = 1)
+        repo.removeTask(DEFAULT_DISPLAY, taskId = 1)
 
         val tasks = repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)
         assertThat(tasks).isEmpty()
@@ -718,11 +802,11 @@ class DesktopRepositoryTest : ShellTestCase() {
 
     @Test
     @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE)
-    fun removeFreeformTask_validDisplay_persistenceEnabled_removesTaskFromFreeformTasks() {
+    fun removeTask_validDisplay_persistenceEnabled_removesTaskFromFreeformTasks() {
         runTest(StandardTestDispatcher()) {
             repo.addTask(DEFAULT_DISPLAY, taskId = 1, isVisible = true)
 
-            repo.removeFreeformTask(DEFAULT_DISPLAY, taskId = 1)
+            repo.removeTask(DEFAULT_DISPLAY, taskId = 1)
 
             verify(persistentRepository)
                 .addOrUpdateDesktop(
@@ -744,10 +828,11 @@ class DesktopRepositoryTest : ShellTestCase() {
     }
 
     @Test
-    fun removeFreeformTask_validDisplay_differentDisplay_doesNotRemovesTask() {
+    fun removeTask_validDisplay_differentDisplay_doesNotRemovesTask() {
+        repo.addDesk(displayId = SECOND_DISPLAY, deskId = SECOND_DISPLAY)
         repo.addTask(DEFAULT_DISPLAY, taskId = 1, isVisible = true)
 
-        repo.removeFreeformTask(SECOND_DISPLAY, taskId = 1)
+        repo.removeTask(SECOND_DISPLAY, taskId = 1)
 
         val tasks = repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)
         assertThat(tasks).containsExactly(1)
@@ -755,11 +840,12 @@ class DesktopRepositoryTest : ShellTestCase() {
 
     @Test
     @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE)
-    fun removeFreeformTask_validDisplayButDifferentDisplay_persistenceEnabled_doesNotRemoveTask() {
+    fun removeTask_validDisplayButDifferentDisplay_persistenceEnabled_doesNotRemoveTask() {
         runTest(StandardTestDispatcher()) {
+            repo.addDesk(displayId = SECOND_DISPLAY, deskId = SECOND_DISPLAY)
             repo.addTask(DEFAULT_DISPLAY, taskId = 1, isVisible = true)
 
-            repo.removeFreeformTask(SECOND_DISPLAY, taskId = 1)
+            repo.removeTask(SECOND_DISPLAY, taskId = 1)
 
             verify(persistentRepository)
                 .addOrUpdateDesktop(
@@ -781,57 +867,59 @@ class DesktopRepositoryTest : ShellTestCase() {
     }
 
     @Test
-    fun removeFreeformTask_removesTaskBoundsBeforeMaximize() {
+    fun removeTask_removesTaskBoundsBeforeMaximize() {
         val taskId = 1
-        repo.addTask(THIRD_DISPLAY, taskId, isVisible = true)
+        repo.addTask(DEFAULT_DISPLAY, taskId, isVisible = true)
         repo.saveBoundsBeforeMaximize(taskId, Rect(0, 0, 200, 200))
 
-        repo.removeFreeformTask(THIRD_DISPLAY, taskId)
+        repo.removeTask(DEFAULT_DISPLAY, taskId)
 
         assertThat(repo.removeBoundsBeforeMaximize(taskId)).isNull()
     }
 
     @Test
-    fun removeFreeformTask_removesTaskBoundsBeforeImmersive() {
+    fun removeTask_removesTaskBoundsBeforeImmersive() {
         val taskId = 1
-        repo.addTask(THIRD_DISPLAY, taskId, isVisible = true)
+        repo.addTask(DEFAULT_DISPLAY, taskId, isVisible = true)
         repo.saveBoundsBeforeFullImmersive(taskId, Rect(0, 0, 200, 200))
 
-        repo.removeFreeformTask(THIRD_DISPLAY, taskId)
+        repo.removeTask(DEFAULT_DISPLAY, taskId)
 
         assertThat(repo.removeBoundsBeforeFullImmersive(taskId)).isNull()
     }
 
     @Test
-    fun removeFreeformTask_removesActiveTask() {
+    fun removeTask_removesActiveTask() {
+        repo.addDesk(THIRD_DISPLAY, THIRD_DISPLAY)
         val taskId = 1
         val listener = TestListener()
         repo.addActiveTaskListener(listener)
         repo.addTask(DEFAULT_DISPLAY, taskId, isVisible = true)
 
-        repo.removeFreeformTask(THIRD_DISPLAY, taskId)
+        repo.removeTask(THIRD_DISPLAY, taskId)
 
         assertThat(repo.isActiveTask(taskId)).isFalse()
         assertThat(listener.activeChangesOnDefaultDisplay).isEqualTo(2)
     }
 
     @Test
-    fun removeFreeformTask_unminimizesTask() {
+    fun removeTask_unminimizesTask() {
         val taskId = 1
         repo.addTask(DEFAULT_DISPLAY, taskId, isVisible = true)
         repo.minimizeTask(DEFAULT_DISPLAY, taskId)
 
-        repo.removeFreeformTask(DEFAULT_DISPLAY, taskId)
+        repo.removeTask(DEFAULT_DISPLAY, taskId)
 
         assertThat(repo.isMinimizedTask(taskId)).isFalse()
     }
 
     @Test
-    fun removeFreeformTask_updatesTaskVisibility() {
+    fun removeTask_updatesTaskVisibility() {
+        repo.addDesk(displayId = THIRD_DISPLAY, deskId = THIRD_DISPLAY)
         val taskId = 1
         repo.addTask(DEFAULT_DISPLAY, taskId, isVisible = true)
 
-        repo.removeFreeformTask(THIRD_DISPLAY, taskId)
+        repo.removeTask(THIRD_DISPLAY, taskId)
 
         assertThat(repo.isVisibleTask(taskId)).isFalse()
     }
@@ -929,8 +1017,8 @@ class DesktopRepositoryTest : ShellTestCase() {
 
     @Test
     fun updateTask_minimizedTaskBecomesVisible_unminimizesTask() {
-        repo.minimizeTask(displayId = 10, taskId = 2)
-        repo.updateTask(displayId = 10, taskId = 2, isVisible = true)
+        repo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = 2)
+        repo.updateTask(displayId = DEFAULT_DISPLAY, taskId = 2, isVisible = true)
 
         val isMinimizedTask = repo.isMinimizedTask(taskId = 2)
 
@@ -1002,34 +1090,34 @@ class DesktopRepositoryTest : ShellTestCase() {
     fun setTaskInFullImmersiveState_savedAsInImmersiveState() {
         assertThat(repo.isTaskInFullImmersiveState(taskId = 1)).isFalse()
 
-        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID, taskId = 1, immersive = true)
+        repo.setTaskInFullImmersiveState(DEFAULT_DISPLAY, taskId = 1, immersive = true)
 
         assertThat(repo.isTaskInFullImmersiveState(taskId = 1)).isTrue()
     }
 
     @Test
     fun removeTaskInFullImmersiveState_removedAsInImmersiveState() {
-        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID, taskId = 1, immersive = true)
+        repo.setTaskInFullImmersiveState(DEFAULT_DISPLAY, taskId = 1, immersive = true)
         assertThat(repo.isTaskInFullImmersiveState(taskId = 1)).isTrue()
 
-        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID, taskId = 1, immersive = false)
+        repo.setTaskInFullImmersiveState(DEFAULT_DISPLAY, taskId = 1, immersive = false)
 
         assertThat(repo.isTaskInFullImmersiveState(taskId = 1)).isFalse()
     }
 
     @Test
     fun removeTaskInFullImmersiveState_otherWasImmersive_otherRemainsImmersive() {
-        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID, taskId = 1, immersive = true)
+        repo.setTaskInFullImmersiveState(DEFAULT_DISPLAY, taskId = 1, immersive = true)
 
-        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID, taskId = 2, immersive = false)
+        repo.setTaskInFullImmersiveState(DEFAULT_DISPLAY, taskId = 2, immersive = false)
 
         assertThat(repo.isTaskInFullImmersiveState(taskId = 1)).isTrue()
     }
 
     @Test
     fun setTaskInFullImmersiveState_sameDisplay_overridesExistingFullImmersiveTask() {
-        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID, taskId = 1, immersive = true)
-        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID, taskId = 2, immersive = true)
+        repo.setTaskInFullImmersiveState(DEFAULT_DISPLAY, taskId = 1, immersive = true)
+        repo.setTaskInFullImmersiveState(DEFAULT_DISPLAY, taskId = 2, immersive = true)
 
         assertThat(repo.isTaskInFullImmersiveState(taskId = 1)).isFalse()
         assertThat(repo.isTaskInFullImmersiveState(taskId = 2)).isTrue()
@@ -1037,34 +1125,153 @@ class DesktopRepositoryTest : ShellTestCase() {
 
     @Test
     fun setTaskInFullImmersiveState_differentDisplay_bothAreImmersive() {
-        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID, taskId = 1, immersive = true)
-        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID + 1, taskId = 2, immersive = true)
+        repo.addDesk(displayId = SECOND_DISPLAY, deskId = SECOND_DISPLAY)
+        repo.setActiveDesk(displayId = SECOND_DISPLAY, deskId = SECOND_DISPLAY)
+        repo.setTaskInFullImmersiveState(DEFAULT_DISPLAY, taskId = 1, immersive = true)
+        repo.setTaskInFullImmersiveState(SECOND_DISPLAY, taskId = 2, immersive = true)
 
         assertThat(repo.isTaskInFullImmersiveState(taskId = 1)).isTrue()
         assertThat(repo.isTaskInFullImmersiveState(taskId = 2)).isTrue()
     }
 
     @Test
-    fun removeDesktop_multipleTasks_removesAll() {
+    fun removeDesk_multipleTasks_removesAll() {
         // The front-most task will be the one added last through `addTask`.
         repo.addTask(displayId = DEFAULT_DISPLAY, taskId = 3, isVisible = true)
         repo.addTask(displayId = DEFAULT_DISPLAY, taskId = 2, isVisible = true)
         repo.addTask(displayId = DEFAULT_DISPLAY, taskId = 1, isVisible = true)
         repo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = 2)
 
-        val tasksBeforeRemoval = repo.removeDesktop(displayId = DEFAULT_DISPLAY)
+        val tasksBeforeRemoval = repo.removeDesk(deskId = DEFAULT_DISPLAY)
 
         assertThat(tasksBeforeRemoval).containsExactly(1, 2, 3).inOrder()
         assertThat(repo.getActiveTasks(displayId = DEFAULT_DISPLAY)).isEmpty()
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun removeDesk_multipleDesks_active_removes() {
+        repo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 2)
+        repo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 3)
+        repo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 3)
+
+        repo.removeDesk(deskId = 3)
+
+        assertThat(repo.getDeskIds(displayId = DEFAULT_DISPLAY)).doesNotContain(3)
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun removeDesk_multipleDesks_inactive_removes() {
+        repo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 2)
+        repo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 3)
+        repo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 3)
+
+        repo.removeDesk(deskId = 2)
+
+        assertThat(repo.getDeskIds(displayId = DEFAULT_DISPLAY)).doesNotContain(2)
+    }
+
+    @Test
     fun getTaskInFullImmersiveState_byDisplay() {
+        repo.addDesk(displayId = SECOND_DISPLAY, deskId = SECOND_DISPLAY)
+        repo.setActiveDesk(displayId = SECOND_DISPLAY, deskId = SECOND_DISPLAY)
         repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID, taskId = 1, immersive = true)
-        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID + 1, taskId = 2, immersive = true)
+        repo.setTaskInFullImmersiveState(SECOND_DISPLAY, taskId = 2, immersive = true)
 
         assertThat(repo.getTaskInFullImmersiveState(DEFAULT_DESKTOP_ID)).isEqualTo(1)
-        assertThat(repo.getTaskInFullImmersiveState(DEFAULT_DESKTOP_ID + 1)).isEqualTo(2)
+        assertThat(repo.getTaskInFullImmersiveState(SECOND_DISPLAY)).isEqualTo(2)
+    }
+
+    @Test
+    fun setTaskInPip_savedAsMinimizedPipInDisplay() {
+        assertThat(repo.isTaskMinimizedPipInDisplay(DEFAULT_DESKTOP_ID, taskId = 1)).isFalse()
+
+        repo.setTaskInPip(DEFAULT_DESKTOP_ID, taskId = 1, enterPip = true)
+
+        assertThat(repo.isTaskMinimizedPipInDisplay(DEFAULT_DESKTOP_ID, taskId = 1)).isTrue()
+    }
+
+    @Test
+    fun removeTaskInPip_removedAsMinimizedPipInDisplay() {
+        repo.setTaskInPip(DEFAULT_DESKTOP_ID, taskId = 1, enterPip = true)
+        assertThat(repo.isTaskMinimizedPipInDisplay(DEFAULT_DESKTOP_ID, taskId = 1)).isTrue()
+
+        repo.setTaskInPip(DEFAULT_DESKTOP_ID, taskId = 1, enterPip = false)
+
+        assertThat(repo.isTaskMinimizedPipInDisplay(DEFAULT_DESKTOP_ID, taskId = 1)).isFalse()
+    }
+
+    @Test
+    fun setTaskInPip_multipleDisplays_bothAreInPip() {
+        repo.addDesk(displayId = SECOND_DISPLAY, deskId = SECOND_DISPLAY)
+        repo.setActiveDesk(displayId = SECOND_DISPLAY, deskId = SECOND_DISPLAY)
+        repo.setTaskInPip(DEFAULT_DESKTOP_ID, taskId = 1, enterPip = true)
+        repo.setTaskInPip(SECOND_DISPLAY, taskId = 2, enterPip = true)
+
+        assertThat(repo.isTaskMinimizedPipInDisplay(DEFAULT_DESKTOP_ID, taskId = 1)).isTrue()
+        assertThat(repo.isTaskMinimizedPipInDisplay(SECOND_DISPLAY, taskId = 2)).isTrue()
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PIP)
+    fun setPipShouldKeepDesktopActive_shouldKeepDesktopActive() {
+        assertThat(repo.shouldDesktopBeActiveForPip(DEFAULT_DESKTOP_ID)).isFalse()
+
+        repo.setTaskInPip(DEFAULT_DESKTOP_ID, taskId = 1, enterPip = true)
+        repo.setPipShouldKeepDesktopActive(DEFAULT_DESKTOP_ID, keepActive = true)
+
+        assertThat(repo.shouldDesktopBeActiveForPip(DEFAULT_DESKTOP_ID)).isTrue()
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PIP)
+    fun setPipShouldNotKeepDesktopActive_shouldNotKeepDesktopActive() {
+        repo.setTaskInPip(DEFAULT_DESKTOP_ID, taskId = 1, enterPip = true)
+        assertThat(repo.shouldDesktopBeActiveForPip(DEFAULT_DESKTOP_ID)).isTrue()
+
+        repo.setPipShouldKeepDesktopActive(DEFAULT_DESKTOP_ID, keepActive = false)
+
+        assertThat(repo.shouldDesktopBeActiveForPip(DEFAULT_DESKTOP_ID)).isFalse()
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PIP)
+    fun removeTaskInPip_shouldNotKeepDesktopActive() {
+        repo.setTaskInPip(DEFAULT_DESKTOP_ID, taskId = 1, enterPip = true)
+        assertThat(repo.shouldDesktopBeActiveForPip(DEFAULT_DESKTOP_ID)).isTrue()
+
+        repo.setTaskInPip(DEFAULT_DESKTOP_ID, taskId = 1, enterPip = false)
+
+        assertThat(repo.shouldDesktopBeActiveForPip(DEFAULT_DESKTOP_ID)).isFalse()
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun addTask_deskDoesNotExists_createsDesk() {
+        repo.addTask(displayId = 999, taskId = 6, isVisible = true)
+
+        assertThat(repo.getActiveTaskIdsInDesk(999)).contains(6)
+    }
+
+    @Test
+    @DisableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun getDisplayForDesk() {
+        repo.addDesk(SECOND_DISPLAY, SECOND_DISPLAY)
+
+        assertEquals(SECOND_DISPLAY, repo.getDisplayForDesk(deskId = SECOND_DISPLAY))
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun getDisplayForDesk_multipleDesks() {
+        repo.addDesk(DEFAULT_DISPLAY, deskId = 6)
+        repo.addDesk(DEFAULT_DISPLAY, deskId = 7)
+        repo.addDesk(SECOND_DISPLAY, deskId = 8)
+        repo.addDesk(SECOND_DISPLAY, deskId = 9)
+
+        assertEquals(DEFAULT_DISPLAY, repo.getDisplayForDesk(deskId = 7))
+        assertEquals(SECOND_DISPLAY, repo.getDisplayForDesk(deskId = 8))
     }
 
     class TestListener : DesktopRepository.ActiveTasksListener {
@@ -1107,5 +1314,10 @@ class DesktopRepositoryTest : ShellTestCase() {
         const val THIRD_DISPLAY = 345
         private const val DEFAULT_USER_ID = 1000
         private const val DEFAULT_DESKTOP_ID = 0
+
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> =
+            FlagsParameterization.allCombinationsOf(Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
     }
 }

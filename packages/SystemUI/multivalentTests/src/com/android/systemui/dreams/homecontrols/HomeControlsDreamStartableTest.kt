@@ -44,7 +44,6 @@ import com.android.systemui.settings.userTracker
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
 import java.util.Optional
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -59,7 +58,6 @@ import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 class HomeControlsDreamStartableTest(flags: FlagsParameterization) : SysuiTestCase() {

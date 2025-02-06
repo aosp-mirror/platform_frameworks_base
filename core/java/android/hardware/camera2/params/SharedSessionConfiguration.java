@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.graphics.ColorSpace;
 import android.graphics.ImageFormat.Format;
 import android.hardware.DataSpace.NamedDataSpace;
@@ -228,6 +229,7 @@ public final class SharedSessionConfiguration {
      *
      * @hide
      */
+    @TestApi
     public SharedSessionConfiguration(int sharedColorSpace,
             @NonNull long[] sharedOutputConfigurations) {
         mColorSpace = sharedColorSpace;

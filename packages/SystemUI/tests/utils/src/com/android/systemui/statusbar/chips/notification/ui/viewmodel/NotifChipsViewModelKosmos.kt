@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.notification.ui.viewmodel
 
+import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.statusbar.chips.notification.domain.interactor.statusBarNotificationChipsInteractor
@@ -24,6 +25,7 @@ import com.android.systemui.statusbar.notification.stack.domain.interactor.heads
 val Kosmos.notifChipsViewModel: NotifChipsViewModel by
     Kosmos.Fixture {
         NotifChipsViewModel(
+            applicationContext,
             applicationCoroutineScope,
             statusBarNotificationChipsInteractor,
             headsUpNotificationInteractor,

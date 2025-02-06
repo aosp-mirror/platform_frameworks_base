@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.data.repository
 
 import android.view.Display
-import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
+import com.android.systemui.statusbar.layout.StatusBarContentInsetsProvider
 import org.mockito.kotlin.mock
 
 class FakeStatusBarContentInsetsProviderStore() : StatusBarContentInsetsProviderStore {

@@ -376,6 +376,14 @@ public class TaskInfo {
     }
 
     /**
+     * Returns the task id.
+     * @hide
+     */
+    public int getTaskId() {
+        return taskId;
+    }
+
+    /**
      * Whether this task is visible.
      */
     public boolean isVisible() {

@@ -26,7 +26,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/transparent">
 
-    <com.android.systemui.common.ui.view.LongPressHandlingView
+    <com.android.systemui.common.ui.view.TouchHandlingView
         android:id="@+id/keyguard_long_press"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

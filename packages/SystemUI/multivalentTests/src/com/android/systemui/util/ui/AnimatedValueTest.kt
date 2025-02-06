@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.util.ui
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -22,7 +20,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest

@@ -150,4 +150,8 @@ interface IContextHubService {
     // Unregister an endpoint with the context hub
     @EnforcePermission("ACCESS_CONTEXT_HUB")
     void unregisterEndpointDiscoveryCallback(in IContextHubEndpointDiscoveryCallback callback);
+
+    // Called when a discovery callback is finished executing
+    @EnforcePermission("ACCESS_CONTEXT_HUB")
+    void onDiscoveryCallbackFinished();
 }

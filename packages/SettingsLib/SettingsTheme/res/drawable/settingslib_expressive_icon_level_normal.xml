@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2025 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+  -->
+
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <vector
+            android:width="20dp"
+            android:height="20dp"
+            android:viewportWidth="20"
+            android:viewportHeight="20">
+            <path
+                android:pathData="M8.804,0.296C9.554,-0.099 10.446,-0.099 11.196,0.296L12.45,0.955C12.703,1.088 12.976,1.178 13.257,1.221L14.654,1.436C15.489,1.564 16.211,2.096 16.589,2.862L17.223,4.144C17.349,4.402 17.518,4.637 17.721,4.84L18.726,5.847C19.328,6.449 19.603,7.31 19.465,8.155L19.236,9.57C19.189,9.855 19.189,10.145 19.236,10.43L19.465,11.845C19.603,12.69 19.328,13.55 18.726,14.153L17.721,15.16C17.518,15.363 17.349,15.597 17.223,15.856L16.589,17.137C16.211,17.903 15.489,18.435 14.654,18.564L13.257,18.78C12.976,18.822 12.703,18.913 12.45,19.045L11.196,19.704C10.446,20.099 9.554,20.099 8.804,19.704L7.549,19.045C7.297,18.913 7.024,18.822 6.743,18.78L5.346,18.564C4.511,18.435 3.789,17.903 3.411,17.137L2.777,15.856C2.651,15.597 2.482,15.363 2.279,15.16L1.274,14.153C0.672,13.55 0.397,12.69 0.535,11.845L0.764,10.43C0.811,10.145 0.811,9.855 0.764,9.57L0.535,8.155C0.397,7.31 0.672,6.449 1.274,5.847L2.279,4.84C2.482,4.637 2.651,4.402 2.777,4.144L3.411,2.862C3.789,2.096 4.511,1.564 5.346,1.436L6.743,1.221C7.024,1.178 7.297,1.088 7.549,0.955L8.804,0.296Z"
+                android:fillColor="@color/settingslib_materialColorOnSurface"/>
+        </vector>
+    </item>
+    <item android:gravity="center">
+        <vector
+            android:width="14dp"
+            android:height="4dp"
+            android:viewportWidth="14"
+            android:viewportHeight="4">
+            <path
+                android:pathData="M0.962,3.106V0.894H13.038V3.106H0.962Z"
+                android:fillColor="@color/settingslib_materialColorSurface"/>
+        </vector>
+    </item>
+</layer-list>

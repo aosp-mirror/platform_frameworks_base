@@ -18,7 +18,6 @@ package com.android.systemui.deviceentry.domain.interactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -26,7 +25,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 
 /** Business logic for device entry auth ripple interactions. */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class AuthRippleInteractor
 @Inject

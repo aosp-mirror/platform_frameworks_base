@@ -14,6 +14,7 @@
 ** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
+#undef ANDROID_UTILS_REF_BASE_DISABLE_IMPLICIT_CONSTRUCTION // TODO:remove this and fix code
 
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>

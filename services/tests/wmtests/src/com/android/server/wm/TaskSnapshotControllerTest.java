@@ -74,8 +74,8 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
 
     @Test
     public void testGetClosingApps_closing() {
-        final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
-                "closingWindow");
+        final WindowState closingWindow = newWindowBuilder("closingWindow",
+                FIRST_APPLICATION_WINDOW).build();
         closingWindow.mActivityRecord.commitVisibility(
                 false /* visible */, true /* performLayout */);
         final ArraySet<ActivityRecord> closingApps = new ArraySet<>();
@@ -88,8 +88,8 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
 
     @Test
     public void testGetClosingApps_notClosing() {
-        final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
-                "closingWindow");
+        final WindowState closingWindow = newWindowBuilder("closingWindow",
+                FIRST_APPLICATION_WINDOW).build();
         final WindowState openingWindow = createAppWindow(closingWindow.getTask(),
                 FIRST_APPLICATION_WINDOW, "openingWindow");
         closingWindow.mActivityRecord.commitVisibility(
@@ -105,8 +105,8 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
 
     @Test
     public void testGetClosingApps_skipClosingAppsSnapshotTasks() {
-        final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
-                "closingWindow");
+        final WindowState closingWindow = newWindowBuilder("closingWindow",
+                FIRST_APPLICATION_WINDOW).build();
         closingWindow.mActivityRecord.commitVisibility(
                 false /* visible */, true /* performLayout */);
         final ArraySet<ActivityRecord> closingApps = new ArraySet<>();
@@ -133,19 +133,19 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
 
     @Test
     public void testGetSnapshotMode() {
-        final WindowState disabledWindow = createWindow(null,
-                FIRST_APPLICATION_WINDOW, mDisplayContent, "disabledWindow");
+        final WindowState disabledWindow = newWindowBuilder("disabledWindow",
+                FIRST_APPLICATION_WINDOW).setDisplay(mDisplayContent).build();
         disabledWindow.mActivityRecord.setRecentsScreenshotEnabled(false);
         assertEquals(SNAPSHOT_MODE_APP_THEME,
                 mWm.mTaskSnapshotController.getSnapshotMode(disabledWindow.getTask()));
 
-        final WindowState normalWindow = createWindow(null,
-                FIRST_APPLICATION_WINDOW, mDisplayContent, "normalWindow");
+        final WindowState normalWindow = newWindowBuilder("normalWindow",
+                FIRST_APPLICATION_WINDOW).setDisplay(mDisplayContent).build();
         assertEquals(SNAPSHOT_MODE_REAL,
                 mWm.mTaskSnapshotController.getSnapshotMode(normalWindow.getTask()));
 
-        final WindowState secureWindow = createWindow(null,
-                FIRST_APPLICATION_WINDOW, mDisplayContent, "secureWindow");
+        final WindowState secureWindow = newWindowBuilder("secureWindow",
+                FIRST_APPLICATION_WINDOW).setDisplay(mDisplayContent).build();
         secureWindow.mAttrs.flags |= FLAG_SECURE;
         assertEquals(SNAPSHOT_MODE_APP_THEME,
                 mWm.mTaskSnapshotController.getSnapshotMode(secureWindow.getTask()));
@@ -297,8 +297,8 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         spyOn(mWm.mTaskSnapshotController);
         doReturn(false).when(mWm.mTaskSnapshotController).shouldDisableSnapshots();
 
-        final WindowState normalWindow = createWindow(null,
-                FIRST_APPLICATION_WINDOW, mDisplayContent, "normalWindow");
+        final WindowState normalWindow = newWindowBuilder("normalWindow",
+                FIRST_APPLICATION_WINDOW).setDisplay(mDisplayContent).build();
         final TaskSnapshot snapshot = new TaskSnapshotPersisterTestBase.TaskSnapshotBuilder()
                 .setTopActivityComponent(normalWindow.mActivityRecord.mActivityComponent).build();
         doReturn(snapshot).when(mWm.mTaskSnapshotController).snapshot(any());

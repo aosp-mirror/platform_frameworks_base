@@ -68,12 +68,9 @@ file evaluates to `true`.
 1.  Set a collection of **aconfig flags** to `true` by running the following
     commands:
     ```console
-    $ adb shell device_config override systemui com.android.systemui.keyguard_bottom_area_refactor true
-    $ adb shell device_config override systemui com.android.systemui.keyguard_wm_state_refactor true
-    $ adb shell device_config override systemui com.android.systemui.migrate_clocks_to_blueprint true
-    $ adb shell device_config override systemui com.android.systemui.notification_avalanche_throttle_hun true
-    $ adb shell device_config override systemui com.android.systemui.predictive_back_sysui true
-    $ adb shell device_config override systemui com.android.systemui.scene_container true
+    $ adb shell aflags enable com.android.systemui.keyguard_wm_state_refactor --immediate
+    $ adb shell aflags enable com.android.systemui.notification_avalanche_throttle_hun --immediate
+    $ adb shell aflags enable com.android.systemui.scene_container --immediate
     ```
 2.  **Restart** System UI by issuing the following command:
     ```console
@@ -87,19 +84,16 @@ file evaluates to `true`.
 
     NOTE: this will be removed proper to the actual release of the framework.
 
-    *(b)* Turn on logging and look for the logging statements in `logcat`:
-    ```console
+    *(b)* look in logcat, see the "Checking if the framework is enabled" section
+    below.
 
-    # Turn on logging from the framework:
-
-    $ adb shell cmd statusbar echo -b SceneFramework:verbose
 
 ### Checking if the framework is enabled
 
 Look for the log statements from the framework:
 
 ```console
-$ adb logcat -v time SceneFramework:* *:S
+$ adb logcat -s SceneFramework
 ```
 
 ### Disabling the framework
@@ -107,7 +101,7 @@ $ adb logcat -v time SceneFramework:* *:S
 To **disable** the framework, simply turn off the main aconfig flag:
 
 ```console
-$ adb shell device_config put systemui com.android.systemui.scene_container false
+$ adb shell aflags unset com.android.systemui.scene_container --immediate
 ```
 
 ## Defining a scene

@@ -16,12 +16,10 @@
 
 package android.hardware.input;
 
-import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.companion.virtual.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -38,7 +36,6 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
-@FlaggedApi(Flags.FLAG_VIRTUAL_STYLUS)
 @SystemApi
 public final class VirtualStylusMotionEvent implements Parcelable {
     private static final int TILT_MIN = -90;
@@ -209,7 +206,6 @@ public final class VirtualStylusMotionEvent implements Parcelable {
     /**
      * Builder for {@link VirtualStylusMotionEvent}.
      */
-    @FlaggedApi(Flags.FLAG_VIRTUAL_STYLUS)
     public static final class Builder {
 
         @ToolType

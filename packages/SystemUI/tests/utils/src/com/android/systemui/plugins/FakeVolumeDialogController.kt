@@ -40,7 +40,8 @@ class FakeVolumeDialogController(private val audioManager: AudioManager) : Volum
     private val callbacks = CopyOnWriteArraySet<VolumeDialogController.Callbacks>()
 
     private var hasVibrator: Boolean = true
-    private var state = VolumeDialogController.State()
+    var state = VolumeDialogController.State()
+        private set
 
     override fun setActiveStream(stream: Int) {
         updateState {
@@ -197,7 +198,7 @@ class FakeVolumeDialogController(private val audioManager: AudioManager) : Volum
     }
 }
 
-private inline fun CopyOnWriteArraySet<VolumeDialogController.Callbacks>.sendEvent(
+private inline fun Collection<VolumeDialogController.Callbacks>.sendEvent(
     event: (callback: VolumeDialogController.Callbacks) -> Unit
 ) {
     for (callback in this) {

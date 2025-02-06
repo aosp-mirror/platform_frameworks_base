@@ -28,7 +28,6 @@ import com.android.systemui.utils.PolicyRestriction
 import com.android.systemui.utils.UserRestrictionChecker
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
@@ -48,7 +47,6 @@ interface BrightnessPolicyRepository {
     }
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class BrightnessPolicyRepositoryImpl
 @Inject

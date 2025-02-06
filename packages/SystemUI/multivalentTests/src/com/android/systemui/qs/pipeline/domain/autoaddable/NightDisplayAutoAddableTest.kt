@@ -29,7 +29,6 @@ import com.android.systemui.qs.tiles.NightDisplayTile
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestResult
@@ -47,7 +46,6 @@ import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class NightDisplayAutoAddableTest : SysuiTestCase() {

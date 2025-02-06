@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.deviceentry.domain.interactor
 
 import com.android.systemui.biometrics.domain.interactor.fingerprintPropertyInteractor
@@ -23,7 +21,6 @@ import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.deviceEntryUdfpsInteractor by Fixture {
     DeviceEntryUdfpsInteractor(

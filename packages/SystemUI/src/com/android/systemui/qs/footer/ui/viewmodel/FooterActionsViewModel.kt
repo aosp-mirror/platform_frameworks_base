@@ -38,14 +38,14 @@ import com.android.systemui.qs.footer.domain.interactor.FooterActionsInteractor
 import com.android.systemui.qs.footer.domain.model.SecurityButtonConfig
 import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeDisplayAware
-import com.android.systemui.shade.shared.flag.DualShade
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.util.icuMessageFormat
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 import kotlin.math.max
 import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,6 +53,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 
@@ -73,7 +74,7 @@ class FooterActionsViewModel(
     val settings: FooterActionsButtonViewModel,
 
     /** The model for the power button. */
-    val power: FooterActionsButtonViewModel?,
+    val power: Flow<FooterActionsButtonViewModel?>,
 
     /**
      * Observe the device monitoring dialog requests and show the dialog accordingly. This function
@@ -116,6 +117,7 @@ class FooterActionsViewModel(
         @ShadeDisplayAware private val context: Context,
         private val falsingManager: FalsingManager,
         private val footerActionsInteractor: FooterActionsInteractor,
+        private val shadeModeInteractor: ShadeModeInteractor,
         private val globalActionsDialogLiteProvider: Provider<GlobalActionsDialogLite>,
         private val activityStarter: ActivityStarter,
         @Named(PM_LITE_ENABLED) private val showPowerButton: Boolean,
@@ -138,9 +140,10 @@ class FooterActionsViewModel(
                 )
             }
 
-            return FooterActionsViewModel(
+            return createFooterActionsViewModel(
                 context,
                 footerActionsInteractor,
+                shadeModeInteractor.shadeMode,
                 falsingManager,
                 globalActionsDialogLite,
                 activityStarter,
@@ -148,7 +151,6 @@ class FooterActionsViewModel(
             )
         }
 
-        @OptIn(ExperimentalCoroutinesApi::class)
         fun create(lifecycleCoroutineScope: LifecycleCoroutineScope): FooterActionsViewModel {
             val globalActionsDialogLite = globalActionsDialogLiteProvider.get()
             if (lifecycleCoroutineScope.isActive) {
@@ -163,9 +165,10 @@ class FooterActionsViewModel(
                 globalActionsDialogLite.destroy()
             }
 
-            return FooterActionsViewModel(
+            return createFooterActionsViewModel(
                 context,
                 footerActionsInteractor,
+                shadeModeInteractor.shadeMode,
                 falsingManager,
                 globalActionsDialogLite,
                 activityStarter,
@@ -175,9 +178,10 @@ class FooterActionsViewModel(
     }
 }
 
-fun FooterActionsViewModel(
+fun createFooterActionsViewModel(
     @ShadeDisplayAware appContext: Context,
     footerActionsInteractor: FooterActionsInteractor,
+    shadeMode: Flow<ShadeMode>,
     falsingManager: FalsingManager,
     globalActionsDialogLite: GlobalActionsDialogLite,
     activityStarter: ActivityStarter,
@@ -272,11 +276,12 @@ fun FooterActionsViewModel(
         userSwitcherViewModel(qsThemedContext, footerActionsInteractor, ::onUserSwitcherClicked)
 
     val settings = settingsButtonViewModel(qsThemedContext, ::onSettingsButtonClicked)
+
     val power =
         if (showPowerButton) {
-            powerButtonViewModel(qsThemedContext, ::onPowerButtonClicked)
+            powerButtonViewModel(qsThemedContext, ::onPowerButtonClicked, shadeMode)
         } else {
-            null
+            flowOf(null)
         }
 
     return FooterActionsViewModel(
@@ -403,19 +408,23 @@ fun settingsButtonViewModel(
 fun powerButtonViewModel(
     qsThemedContext: Context,
     onPowerButtonClicked: (Expandable) -> Unit,
-): FooterActionsButtonViewModel {
-    return FooterActionsButtonViewModel(
-        id = R.id.pm_lite,
-        Icon.Resource(
-            android.R.drawable.ic_lock_power_off,
-            ContentDescription.Resource(R.string.accessibility_quick_settings_power_menu),
-        ),
-        iconTint =
-            Utils.getColorAttrDefaultColor(
-                qsThemedContext,
-                if (DualShade.isEnabled) R.attr.onShadeInactiveVariant else R.attr.onShadeActive,
+    shadeMode: Flow<ShadeMode>,
+): Flow<FooterActionsButtonViewModel?> {
+    return shadeMode.map { mode ->
+        val isDualShade = mode is ShadeMode.Dual
+        FooterActionsButtonViewModel(
+            id = R.id.pm_lite,
+            Icon.Resource(
+                android.R.drawable.ic_lock_power_off,
+                ContentDescription.Resource(R.string.accessibility_quick_settings_power_menu),
             ),
-        backgroundColor = if (DualShade.isEnabled) R.attr.shadeInactive else R.attr.shadeActive,
-        onPowerButtonClicked,
-    )
+            iconTint =
+                Utils.getColorAttrDefaultColor(
+                    qsThemedContext,
+                    if (isDualShade) R.attr.onShadeInactiveVariant else R.attr.onShadeActive,
+                ),
+            backgroundColor = if (isDualShade) R.attr.shadeInactive else R.attr.shadeActive,
+            onPowerButtonClicked,
+        )
+    }
 }

@@ -524,27 +524,21 @@ public final class UsbDescriptorParser {
      * @hide
      */
     public boolean hasMic() {
-        boolean hasMic = false;
-
         ArrayList<UsbDescriptor> acDescriptors =
                 getACInterfaceDescriptors(UsbACInterface.ACI_INPUT_TERMINAL,
                 UsbACInterface.AUDIO_AUDIOCONTROL);
         for (UsbDescriptor descriptor : acDescriptors) {
             if (descriptor instanceof UsbACTerminal) {
                 UsbACTerminal inDescr = (UsbACTerminal) descriptor;
-                if (inDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_IN_MIC
-                        || inDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_BIDIR_HEADSET
-                        || inDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_BIDIR_UNDEFINED
-                        || inDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_EXTERN_LINE) {
-                    hasMic = true;
-                    break;
+                if (inDescr.isInputTerminal()) {
+                    return true;
                 }
             } else {
                 Log.w(TAG, "Undefined Audio Input terminal l: " + descriptor.getLength()
                         + " t:0x" + Integer.toHexString(descriptor.getType()));
             }
         }
-        return hasMic;
+        return false;
     }
 
     /**
@@ -913,18 +907,20 @@ public final class UsbDescriptorParser {
 
         float probability = 0.0f;
 
-        // Look for a microphone
-        boolean hasMic = hasMic();
-
         // Look for a "speaker"
         boolean hasSpeaker = hasSpeaker();
 
-        if (hasMic && hasSpeaker) {
-            probability += 0.75f;
-        }
-
-        if (hasMic && hasHIDInterface()) {
-            probability += 0.25f;
+        if (hasMic()) {
+            if (hasSpeaker) {
+                probability += 0.75f;
+            }
+            if (hasHIDInterface()) {
+                probability += 0.25f;
+            }
+            if (getMaximumInputChannelCount() > 1) {
+                // A headset is more likely to only support mono capture.
+                probability -= 0.25f;
+            }
         }
 
         return probability;
@@ -935,9 +931,11 @@ public final class UsbDescriptorParser {
      * headset. The probability range is between 0.0f (definitely NOT a headset) and
      * 1.0f (definitely IS a headset). A probability of 0.75f seems sufficient
      * to count on the peripheral being a headset.
+     * To align with the output device type, only treat the device as input headset if it is
+     * an output headset.
      */
     public boolean isInputHeadset() {
-        return getInputHeadsetProbability() >= IN_HEADSET_TRIGGER;
+        return getInputHeadsetProbability() >= IN_HEADSET_TRIGGER && isOutputHeadset();
     }
 
     // TODO: Up/Downmix process descriptor is not yet parsed, which may affect the result here.
@@ -948,6 +946,32 @@ public final class UsbDescriptorParser {
                 maxChannelCount = Math.max(maxChannelCount,
                         ((UsbAudioChannelCluster) descriptor).getChannelCount());
             }
+        }
+        return maxChannelCount;
+    }
+
+    private int getMaximumInputChannelCount() {
+        int maxChannelCount = 0;
+        ArrayList<UsbDescriptor> acDescriptors =
+                getACInterfaceDescriptors(UsbACInterface.ACI_INPUT_TERMINAL,
+                        UsbACInterface.AUDIO_AUDIOCONTROL);
+        for (UsbDescriptor descriptor : acDescriptors) {
+            if (!(descriptor instanceof UsbACTerminal)) {
+                continue;
+            }
+            UsbACTerminal inDescr = (UsbACTerminal) descriptor;
+            if (!inDescr.isInputTerminal()) {
+                continue;
+            }
+            // For an input terminal, it should at lease has 1 channel.
+            // Comparing the max channel count with 1 here in case the USB device doesn't report
+            // audio channel cluster.
+            maxChannelCount = Math.max(maxChannelCount, 1);
+            if (!(descriptor instanceof UsbAudioChannelCluster)) {
+                continue;
+            }
+            maxChannelCount = Math.max(maxChannelCount,
+                    ((UsbAudioChannelCluster) descriptor).getChannelCount());
         }
         return maxChannelCount;
     }

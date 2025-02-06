@@ -134,6 +134,8 @@ public class CsipDeviceManager {
             // Do nothing if GroupId has been assigned
             if (!isValidGroupId(cachedDevice.getGroupId())) {
                 final int newGroupId = getBaseGroupId(cachedDevice.getDevice());
+                log("updateCsipDevices: propose new group id " + newGroupId + " for device "
+                        + cachedDevice.getDevice());
                 // Do nothing if there is no GroupId on Bluetooth device
                 if (isValidGroupId(newGroupId)) {
                     cachedDevice.setGroupId(newGroupId);

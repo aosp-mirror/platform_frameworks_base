@@ -26,7 +26,6 @@ import com.android.systemui.volume.panel.component.anc.domain.model.AncSlices
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -38,7 +37,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
 /** Provides a valid slice from [AncSliceRepository]. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @VolumePanelScope
 class AncSliceInteractor
 @Inject

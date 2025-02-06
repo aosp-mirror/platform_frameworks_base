@@ -36,10 +36,7 @@ private const val DEBUG = true
 @SysUISingleton
 class MediaDataRepository
 @Inject
-constructor(
-    private val mediaFlags: MediaFlags,
-    dumpManager: DumpManager,
-) : Dumpable {
+constructor(private val mediaFlags: MediaFlags, dumpManager: DumpManager) : Dumpable {
 
     private val _mediaEntries: MutableStateFlow<Map<String, MediaData>> =
         MutableStateFlow(LinkedHashMap())
@@ -59,27 +56,6 @@ constructor(
     }
 
     /**
-     * Marks the recommendation data as inactive.
-     *
-     * @return true if the recommendation was actually marked as inactive, false otherwise.
-     */
-    fun setRecommendationInactive(key: String): Boolean {
-        if (!mediaFlags.isPersistentSsCardEnabled()) {
-            Log.e(TAG, "Only persistent recommendation can be inactive!")
-            return false
-        }
-        if (DEBUG) Log.d(TAG, "Setting smartspace recommendation inactive")
-
-        if (smartspaceMediaData.value.targetId != key || !smartspaceMediaData.value.isValid()) {
-            // If this doesn't match, or we've already invalidated the data, no action needed
-            return false
-        }
-
-        setRecommendation(smartspaceMediaData.value.copy(isActive = false))
-        return true
-    }
-
-    /**
      * Marks the recommendation data as dismissed.
      *
      * @return true if the recommendation was dismissed or already inactive, false otherwise.
@@ -96,7 +72,7 @@ constructor(
             setRecommendation(
                 SmartspaceMediaData(
                     targetId = smartspaceMediaData.value.targetId,
-                    instanceId = smartspaceMediaData.value.instanceId
+                    instanceId = smartspaceMediaData.value.instanceId,
                 )
             )
         }

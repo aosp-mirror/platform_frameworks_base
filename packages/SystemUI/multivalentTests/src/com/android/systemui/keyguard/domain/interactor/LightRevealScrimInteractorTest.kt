@@ -38,7 +38,6 @@ import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -47,7 +46,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class LightRevealScrimInteractorTest : SysuiTestCase() {
     val kosmos =

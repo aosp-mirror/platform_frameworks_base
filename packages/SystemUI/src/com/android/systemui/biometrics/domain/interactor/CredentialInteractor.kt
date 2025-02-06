@@ -72,10 +72,9 @@ constructor(
         // Request LockSettingsService to return the Gatekeeper Password in the
         // VerifyCredentialResponse so that we can request a Gatekeeper HAT with the
         // Gatekeeper Password and operationId.
-        var effectiveUserId = request.userInfo.deviceCredentialOwnerId
+        val effectiveUserId = request.userInfo.deviceCredentialOwnerId
         val response =
             if (Flags.privateSpaceBp() && effectiveUserId != request.userInfo.userId) {
-                effectiveUserId = request.userInfo.userId
                 lockPatternUtils.verifyTiedProfileChallenge(
                     credential,
                     request.userInfo.userId,
@@ -101,7 +100,7 @@ constructor(
                 lockPatternUtils.verifyGatekeeperPasswordHandle(
                     pwHandle,
                     request.operationInfo.gatekeeperChallenge,
-                    effectiveUserId,
+                    request.userInfo.userId,
                 )
             val hat = gkResponse.gatekeeperHAT
             lockPatternUtils.removeGatekeeperPasswordHandle(pwHandle)

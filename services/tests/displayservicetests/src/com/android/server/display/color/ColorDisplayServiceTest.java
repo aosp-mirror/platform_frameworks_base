@@ -19,6 +19,7 @@ package com.android.server.display.color;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -1192,6 +1193,66 @@ public class ColorDisplayServiceTest {
                 () -> mCds.onDisplayColorModeChanged(ColorDisplayManager.COLOR_MODE_NATURAL),
                 1000);
         verify(mRbcSpy, times(1)).setUp(eq(mContext), anyBoolean());
+    }
+
+    @Test
+    public void sliderScalesWithinRange() {
+        // setup
+        startService();
+        reset(mRbcSpy);
+        doReturn(true).when(mRbcSpy).isAvailable(mContext);
+        when(mContext.getResources().getInteger(
+                R.integer.config_reduceBrightColorsStrengthMax)).thenReturn(85);
+        when(mContext.getResources().getInteger(
+                R.integer.config_reduceBrightColorsStrengthMin)).thenReturn(10);
+        when(mContext.getResources().getInteger(
+                R.integer.config_reduceBrightColorsStrengthDefault)).thenReturn(44);
+
+        // Valid value test //
+        // set on, and to 90% of range
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.REDUCE_BRIGHT_COLORS_LEVEL, 90);
+        // update
+        mCds.mHandler.runWithScissors(
+                () -> mCds.onDisplayColorModeChanged(ColorDisplayManager.COLOR_MODE_NATURAL),
+                1000);
+        // verify this:
+        assertEquals(90, Settings.Secure.getInt(mContext.getContentResolver(),
+                        Settings.Secure.REDUCE_BRIGHT_COLORS_LEVEL, 0));
+        assertEquals(/* 85 - 10 * 0.90f + 10 = */ 77, mRbcSpy.getStrength());
+
+        // Out of range test //
+        // set on, and to 101% of range
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.REDUCE_BRIGHT_COLORS_LEVEL, 101);
+        // update
+        mCds.mHandler.runWithScissors(
+                () -> mCds.onDisplayColorModeChanged(ColorDisplayManager.COLOR_MODE_NATURAL),
+                1000);
+        // verify this:
+        assertEquals(101, Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.REDUCE_BRIGHT_COLORS_LEVEL, 0));
+        assertEquals(/* 85 - 10 * 1.0f + 10 = */ 85, mRbcSpy.getStrength());
+
+        // Invalid value test //
+        // set on, and to an invalid value
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.REDUCE_BRIGHT_COLORS_LEVEL, -1);
+        // update
+        mCds.mHandler.runWithScissors(
+                () -> mCds.onDisplayColorModeChanged(ColorDisplayManager.COLOR_MODE_NATURAL),
+                1000);
+        // verify this, setting will stay the same, strength should set to default?:
+        assertEquals(-1, Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.REDUCE_BRIGHT_COLORS_LEVEL, 0));
+        // default value is set instead!
+        assertEquals(/* default = */ 44, mRbcSpy.getStrength());
     }
 
     /**

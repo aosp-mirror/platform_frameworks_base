@@ -121,6 +121,7 @@ public class StaticLayout extends Layout {
             b.mHyphenationFrequency = Layout.HYPHENATION_FREQUENCY_NONE;
             b.mJustificationMode = Layout.JUSTIFICATION_MODE_NONE;
             b.mLineBreakConfig = LineBreakConfig.NONE;
+            b.mUseBoundsForWidth = false;
             b.mMinimumFontMetrics = null;
             return b;
         }

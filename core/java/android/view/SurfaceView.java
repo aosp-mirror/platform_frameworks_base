@@ -1125,7 +1125,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     }
                 }
 
-                surfaceUpdateTransaction.setDesintationFrame(mBlastSurfaceControl, mSurfaceWidth,
+                surfaceUpdateTransaction.setDestinationFrame(mBlastSurfaceControl, mSurfaceWidth,
                             mSurfaceHeight);
 
                 if (isHardwareAccelerated()) {
@@ -2390,5 +2390,10 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 break;
             }
         }
+    }
+
+    @Override
+    public CharSequence getAccessibilityClassName() {
+        return SurfaceView.class.getName();
     }
 }

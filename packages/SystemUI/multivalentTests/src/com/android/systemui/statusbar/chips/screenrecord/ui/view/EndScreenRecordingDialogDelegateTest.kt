@@ -23,6 +23,10 @@ import android.content.Intent
 import android.content.applicationContext
 import android.content.packageManager
 import android.content.pm.ApplicationInfo
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import android.view.View
+import android.view.Window
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -37,7 +41,6 @@ import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.scree
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -45,12 +48,12 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class EndScreenRecordingDialogDelegateTest : SysuiTestCase() {
     private val kosmos = Kosmos().also { it.testCase = this }
 
@@ -130,7 +133,7 @@ class EndScreenRecordingDialogDelegateTest : SysuiTestCase() {
             verify(sysuiDialog)
                 .setPositiveButton(
                     eq(R.string.screenrecord_stop_dialog_button),
-                    clickListener.capture()
+                    clickListener.capture(),
                 )
 
             // Verify that clicking the button stops the recording
@@ -141,6 +144,36 @@ class EndScreenRecordingDialogDelegateTest : SysuiTestCase() {
 
             assertThat(kosmos.screenRecordRepository.stopRecordingInvoked).isTrue()
         }
+
+    @Test
+    @EnableFlags(com.android.media.projection.flags.Flags.FLAG_SHOW_STOP_DIALOG_POST_CALL_END)
+    fun accessibilityDataSensitive_flagEnabled_appliesSetting() {
+        createAndSetDelegate(recordedTask = null)
+
+        val window = mock<Window>()
+        val decorView = mock<View>()
+        whenever(sysuiDialog.window).thenReturn(window)
+        whenever(window.decorView).thenReturn(decorView)
+
+        underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
+
+        verify(decorView).setAccessibilityDataSensitive(View.ACCESSIBILITY_DATA_SENSITIVE_YES)
+    }
+
+    @Test
+    @DisableFlags(com.android.media.projection.flags.Flags.FLAG_SHOW_STOP_DIALOG_POST_CALL_END)
+    fun accessibilityDataSensitive_flagDisabled_doesNotApplySetting() {
+        createAndSetDelegate(recordedTask = null)
+
+        val window = mock<Window>()
+        val decorView = mock<View>()
+        whenever(sysuiDialog.window).thenReturn(window)
+        whenever(window.decorView).thenReturn(decorView)
+
+        underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
+
+        verify(decorView, never()).setAccessibilityDataSensitive(any())
+    }
 
     private fun createAndSetDelegate(recordedTask: ActivityManager.RunningTaskInfo?) {
         underTest =

@@ -4,6 +4,14 @@ container: "system"
 # NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
 
 flag {
+    name: "a11y_character_in_window_api"
+    namespace: "accessibility"
+    description: "Enables new extra data key for an AccessibilityService to request character bounds in unmagnified window coordinates."
+    bug: "375429616"
+    is_exported: true
+}
+
+flag {
     name: "a11y_expansion_state_api"
     namespace: "accessibility"
     description: "Enables new APIs for an app to convey if a node is expanded or collapsed."
@@ -42,23 +50,15 @@ flag {
 }
 
 flag {
-    name: "a11y_character_in_window_api"
-    namespace: "accessibility"
-    description: "Enables new extra data key for an AccessibilityService to request character bounds in unmagnified window coordinates."
-    bug: "375429616"
-    is_exported: true
-}
-
-flag {
-    namespace: "accessibility"
     name: "allow_shortcut_chooser_on_lockscreen"
+    namespace: "accessibility"
     description: "Allows the a11y shortcut disambig dialog to appear on the lockscreen"
     bug: "303871725"
 }
 
 flag {
-    namespace: "accessibility"
     name: "braille_display_hid"
+    namespace: "accessibility"
     is_exported: true
     description: "Enables new APIs for an AccessibilityService to communicate with a HID Braille display"
     bug: "303522222"
@@ -72,47 +72,62 @@ flag {
 }
 
 flag {
-    namespace: "accessibility"
     name: "collection_info_item_counts"
+    namespace: "accessibility"
     is_exported: true
     description: "Fields for total items and the number of important for accessibility items in a collection"
     bug: "302376158"
 }
 
 flag {
-    namespace: "accessibility"
     name: "copy_events_for_gesture_detection"
+    namespace: "accessibility"
     description: "Creates copies of MotionEvents and GestureEvents in GestureMatcher"
     bug: "280130713"
 }
 
 flag {
-    namespace: "accessibility"
     name: "deprecate_accessibility_announcement_apis"
+    namespace: "accessibility"
     description: "Controls the deprecation of platform APIs related to disruptive accessibility announcements"
     bug: "376727542"
     is_exported: true
 }
 
 flag {
-    namespace: "accessibility"
     name: "deprecate_ani_label_for_apis"
+    namespace: "accessibility"
     description: "Controls the deprecation of AccessibilityNodeInfo labelFor apis"
     bug: "333783827"
     is_exported: true
 }
 
 flag {
+    name: "enable_system_pinch_zoom_gesture"
     namespace: "accessibility"
+    description: "Feature flag for system pinch zoom gesture detector and related opt-out apis"
+    bug: "283323770"
+}
+
+flag {
+    name: "enable_type_window_control"
+    namespace: "accessibility"
+    is_exported: true
+    description: "adds new TYPE_WINDOW_CONTROL to AccessibilityWindowInfo for detecting Window Decorations"
+    bug: "320445550"
+}
+
+flag {
     name: "flash_notification_system_api"
+    namespace: "accessibility"
     is_exported: true
     description: "Makes flash notification APIs as system APIs for calling from mainline module"
     bug: "303131332"
 }
 
 flag {
-    namespace: "accessibility"
     name: "focus_rect_min_size"
+    namespace: "accessibility"
     description: "Ensures the a11y focus rect is big enough to be drawn as visible"
     bug: "368667566"
     metadata {
@@ -121,10 +136,42 @@ flag {
 }
 
 flag {
-    namespace: "accessibility"
     name: "force_invert_color"
+    namespace: "accessibility"
     description: "Enable force force-dark for smart inversion and dark theme everywhere"
     bug: "282821643"
+}
+
+flag {
+    name: "global_action_media_play_pause"
+    namespace: "accessibility"
+    description: "Allow AccessibilityService to perform GLOBAL_ACTION_MEDIA_PLAY_PAUSE"
+    bug: "334954140"
+    is_exported: true
+}
+
+flag {
+    name: "global_action_menu"
+    namespace: "accessibility"
+    description: "Allow AccessibilityService to perform GLOBAL_ACTION_MENU"
+    bug: "334954140"
+    is_exported: true
+}
+
+flag {
+    name: "granular_scrolling"
+    namespace: "accessibility"
+    is_exported: true
+    description: "Allow the use of granular scrolling. This allows scrollable nodes to scroll by increments other than a full screen"
+    bug: "302376158"
+}
+
+flag {
+    name: "indeterminate_range_info"
+    namespace: "accessibility"
+    description: "Creates a way to create an INDETERMINATE RangeInfo"
+    bug: "376108874"
+    is_exported: true
 }
 
 flag {
@@ -146,70 +193,13 @@ flag {
 }
 
 flag {
+    name: "prevent_a11y_nontool_from_injecting_into_sensitive_views"
     namespace: "accessibility"
-    name: "global_action_menu"
-    description: "Allow AccessibilityService to perform GLOBAL_ACTION_MENU"
-    bug: "334954140"
-    is_exported: true
-}
-
-flag {
-    namespace: "accessibility"
-    name: "global_action_media_play_pause"
-    description: "Allow AccessibilityService to perform GLOBAL_ACTION_MEDIA_PLAY_PAUSE"
-    bug: "334954140"
-    is_exported: true
-}
-
-flag {
-    namespace: "accessibility"
-    name: "granular_scrolling"
-    is_exported: true
-    description: "Allow the use of granular scrolling. This allows scrollable nodes to scroll by increments other than a full screen"
-    bug: "302376158"
-}
-
-flag {
-    namespace: "accessibility"
-    name: "reduce_window_content_changed_event_throttle"
-    description: "Reduces the throttle of AccessibilityEvent of TYPE_WINDOW_CONTENT_CHANGED"
-    bug: "277305460"
-}
-
-flag {
-    namespace: "accessibility"
-    name: "remove_child_hover_check_for_touch_exploration"
-    description: "Remove a check for a hovered child that prevents touch events from being delegated to non-direct descendants"
-    bug: "304770837"
-}
-
-flag {
-    name: "skip_accessibility_warning_dialog_for_trusted_services"
-    namespace: "accessibility"
-    description: "Skips showing the accessibility warning dialog for trusted services."
-    bug: "303511250"
-}
-
-flag {
-    namespace: "accessibility"
-    name: "enable_type_window_control"
-    is_exported: true
-    description: "adds new TYPE_WINDOW_CONTROL to AccessibilityWindowInfo for detecting Window Decorations"
-    bug: "320445550"
-}
-
-flag {
-    namespace: "accessibility"
-    name: "update_always_on_a11y_service"
-    description: "Updates the Always-On A11yService state when the user changes the enablement of the shortcut."
-    bug: "298869916"
-}
-
-flag {
-    name: "enable_system_pinch_zoom_gesture"
-    namespace: "accessibility"
-    description: "Feature flag for system pinch zoom gesture detector and related opt-out apis"
-    bug: "283323770"
+    description: "Prevents injected gestures from A11yServices without isAccessibilityTool=true from reaching AccessibilityDataSensitive UI elements"
+    bug: "284180538"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -217,6 +207,30 @@ flag {
     namespace: "accessibility"
     description: "Clear pending messages and callbacks of the handler in AccessibilityInteractionController when the ViewRootImpl is detached from Window to prevent leaking ViewRootImpl"
     bug: "320701910"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "reduce_window_content_changed_event_throttle"
+    namespace: "accessibility"
+    description: "Reduces the throttle of AccessibilityEvent of TYPE_WINDOW_CONTENT_CHANGED"
+    bug: "277305460"
+}
+
+flag {
+    name: "remove_child_hover_check_for_touch_exploration"
+    namespace: "accessibility"
+    description: "Remove a check for a hovered child that prevents touch events from being delegated to non-direct descendants"
+    bug: "304770837"
+}
+
+flag {
+    name: "restore_a11y_secure_settings_on_hsum_device"
+    namespace: "accessibility"
+    description: "Grab the a11y settings and send the settings restored broadcast for current visible foreground user"
+    bug: "381294327"
     metadata {
         purpose: PURPOSE_BUGFIX
     }
@@ -233,13 +247,10 @@ flag {
 }
 
 flag {
-    name: "restore_a11y_secure_settings_on_hsum_device"
+    name: "skip_accessibility_warning_dialog_for_trusted_services"
     namespace: "accessibility"
-    description: "Grab the a11y settings and send the settings restored broadcast for current visible foreground user"
-    bug: "381294327"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
+    description: "Skips showing the accessibility warning dialog for trusted services."
+    bug: "303511250"
 }
 
 flag {
@@ -274,6 +285,13 @@ flag {
 }
 
 flag {
+    namespace: "accessibility"
+    name: "update_always_on_a11y_service"
+    description: "Updates the Always-On A11yService state when the user changes the enablement of the shortcut."
+    bug: "298869916"
+}
+
+flag {
     name: "warning_use_default_dialog_type"
     namespace: "accessibility"
     description: "Uses the default type for the A11yService warning dialog, instead of SYSTEM_ALERT_DIALOG"
@@ -281,12 +299,4 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
-}
-
-flag {
-    name: "indeterminate_range_info"
-    namespace: "accessibility"
-    description: "Creates a way to create an INDETERMINATE RangeInfo"
-    bug: "376108874"
-    is_exported: true
 }

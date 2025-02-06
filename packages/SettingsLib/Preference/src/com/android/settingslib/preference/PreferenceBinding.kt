@@ -17,6 +17,7 @@
 package com.android.settingslib.preference
 
 import android.content.Context
+import androidx.annotation.CallSuper
 import androidx.preference.DialogPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -24,10 +25,10 @@ import androidx.preference.PreferenceScreen
 import androidx.preference.SeekBarPreference
 import com.android.settingslib.metadata.DiscreteIntValue
 import com.android.settingslib.metadata.DiscreteValue
+import com.android.settingslib.metadata.IntRangeValuePreference
 import com.android.settingslib.metadata.PreferenceAvailabilityProvider
 import com.android.settingslib.metadata.PreferenceMetadata
 import com.android.settingslib.metadata.PreferenceScreenMetadata
-import com.android.settingslib.metadata.RangeValue
 
 /** Binding of preference widget and preference metadata. */
 interface PreferenceBinding {
@@ -59,6 +60,7 @@ interface PreferenceBinding {
      * @param preference preference widget created by [createWidget]
      * @param metadata metadata to apply
      */
+    @CallSuper
     fun bind(preference: Preference, metadata: PreferenceMetadata) {
         metadata.apply {
             preference.key = key
@@ -99,7 +101,7 @@ interface PreferenceBinding {
                 } else {
                     preference.setEntryValues(values)
                 }
-            } else if (preference is SeekBarPreference && this is RangeValue) {
+            } else if (preference is SeekBarPreference && this is IntRangeValuePreference) {
                 preference.min = getMinValue(context)
                 preference.max = getMaxValue(context)
                 preference.seekBarIncrement = getIncrementStep(context)

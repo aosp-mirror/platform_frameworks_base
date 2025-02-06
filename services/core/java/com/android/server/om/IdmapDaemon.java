@@ -28,6 +28,7 @@ import android.os.IBinder;
 import android.os.IIdmap2;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemService;
 import android.text.TextUtils;
@@ -40,7 +41,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * To prevent idmap2d from continuously running, the idmap daemon will terminate after 10 seconds
@@ -66,7 +66,7 @@ class IdmapDaemon {
 
     private static IdmapDaemon sInstance;
     private volatile IIdmap2 mService;
-    private final AtomicInteger mOpenedCount = new AtomicInteger();
+    private int mOpenedCount = 0;
     private final Object mIdmapToken = new Object();
 
     /**
@@ -74,15 +74,20 @@ class IdmapDaemon {
      * finalized, the idmap service will be stopped after a period of time unless another connection
      * to the service is open.
      **/
-    private class Connection implements AutoCloseable {
+    private final class Connection implements AutoCloseable {
         @Nullable
         private final IIdmap2 mIdmap2;
         private boolean mOpened = true;
 
-        private Connection(IIdmap2 idmap2) {
+        private Connection() {
+            mIdmap2 = null;
+            mOpened = false;
+        }
+
+        private Connection(@NonNull IIdmap2 idmap2) {
+            mIdmap2 = idmap2;
             synchronized (mIdmapToken) {
-                mOpenedCount.incrementAndGet();
-                mIdmap2 = idmap2;
+                ++mOpenedCount;
             }
         }
 
@@ -94,20 +99,22 @@ class IdmapDaemon {
                 }
 
                 mOpened = false;
-                if (mOpenedCount.decrementAndGet() != 0) {
+                if (--mOpenedCount != 0) {
                     // Only post the callback to stop the service if the service does not have an
                     // open connection.
                     return;
                 }
 
+                final var service = mService;
                 FgThread.getHandler().postDelayed(() -> {
                     synchronized (mIdmapToken) {
-                        // Only stop the service if the service does not have an open connection.
-                        if (mService == null || mOpenedCount.get() != 0) {
+                        // Only stop the service if it's the one we were scheduled for and
+                        // it does not have an open connection.
+                        if (mService != service || mOpenedCount != 0) {
                             return;
                         }
 
-                        stopIdmapService();
+                        stopIdmapServiceLocked();
                         mService = null;
                     }
                 }, mIdmapToken, SERVICE_TIMEOUT_MS);
@@ -175,6 +182,8 @@ class IdmapDaemon {
     }
 
     boolean idmapExists(String overlayPath, int userId) {
+        // The only way to verify an idmap is to read its state on disk.
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
         try (Connection c = connect()) {
             final IIdmap2 idmap2 = c.getIdmap2();
             if (idmap2 == null) {
@@ -187,6 +196,8 @@ class IdmapDaemon {
         } catch (Exception e) {
             Slog.wtf(TAG, "failed to check if idmap exists for " + overlayPath, e);
             return false;
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
         }
     }
 
@@ -242,14 +253,16 @@ class IdmapDaemon {
         } catch (Exception e) {
             Slog.wtf(TAG, "failed to get all fabricated overlays", e);
         } finally {
-            try {
-                if (c.getIdmap2() != null && iteratorId != -1) {
-                    c.getIdmap2().releaseFabricatedOverlayIterator(iteratorId);
+            if (c != null) {
+                try {
+                    if (c.getIdmap2() != null && iteratorId != -1) {
+                        c.getIdmap2().releaseFabricatedOverlayIterator(iteratorId);
+                    }
+                } catch (RemoteException e) {
+                    // ignore
                 }
-            } catch (RemoteException e) {
-                // ignore
+                c.close();
             }
-            c.close();
         }
         return allInfos;
     }
@@ -271,9 +284,11 @@ class IdmapDaemon {
     }
 
     @Nullable
-    private IBinder getIdmapService() throws TimeoutException, RemoteException {
+    private IBinder getIdmapServiceLocked() throws TimeoutException, RemoteException {
         try {
-            SystemService.start(IDMAP_DAEMON);
+            if (!SystemService.isRunning(IDMAP_DAEMON)) {
+                SystemService.start(IDMAP_DAEMON);
+            }
         } catch (RuntimeException e) {
             Slog.wtf(TAG, "Failed to enable idmap2 daemon", e);
             if (e.getMessage().contains("failed to set system property")) {
@@ -306,9 +321,11 @@ class IdmapDaemon {
                         walltimeMillis - endWalltimeMillis + SERVICE_CONNECT_WALLTIME_TIMEOUT_MS));
     }
 
-    private static void stopIdmapService() {
+    private static void stopIdmapServiceLocked() {
         try {
-            SystemService.stop(IDMAP_DAEMON);
+            if (SystemService.isRunning(IDMAP_DAEMON)) {
+                SystemService.stop(IDMAP_DAEMON);
+            }
         } catch (RuntimeException e) {
             // If the idmap daemon cannot be disabled for some reason, it is okay
             // since we already finished invoking idmap.
@@ -326,9 +343,9 @@ class IdmapDaemon {
                 return new Connection(mService);
             }
 
-            IBinder binder = getIdmapService();
+            IBinder binder = getIdmapServiceLocked();
             if (binder == null) {
-                return new Connection(null);
+                return new Connection();
             }
 
             mService = IIdmap2.Stub.asInterface(binder);

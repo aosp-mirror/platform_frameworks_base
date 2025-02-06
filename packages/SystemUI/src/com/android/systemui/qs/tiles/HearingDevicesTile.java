@@ -29,7 +29,6 @@ import android.widget.Button;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.Flags;
 import com.android.systemui.accessibility.hearingaid.HearingDevicesChecker;
 import com.android.systemui.accessibility.hearingaid.HearingDevicesDialogManager;
 import com.android.systemui.animation.Expandable;
@@ -137,10 +136,5 @@ public class HearingDevicesTile extends QSTileImpl<BooleanState> {
     @Override
     public CharSequence getTileLabel() {
         return mContext.getString(R.string.quick_settings_hearing_devices_label);
-    }
-
-    @Override
-    public boolean isAvailable() {
-        return Flags.hearingAidsQsTileDialog();
     }
 }

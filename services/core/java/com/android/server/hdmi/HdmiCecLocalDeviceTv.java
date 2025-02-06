@@ -220,10 +220,6 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         List<HdmiCecMessage> bufferedActiveSource = mDelayedMessageBuffer
                 .getBufferedMessagesWithOpcode(Constants.MESSAGE_ACTIVE_SOURCE);
         if (bufferedActiveSource.isEmpty()) {
-            if (hasAction(RequestActiveSourceAction.class)) {
-                Slog.i(TAG, "RequestActiveSourceAction is in progress. Restarting.");
-                removeAction(RequestActiveSourceAction.class);
-            }
             addAndStartAction(new RequestActiveSourceAction(this, new IHdmiControlCallback.Stub() {
                 @Override
                 public void onComplete(int result) {
@@ -231,7 +227,7 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                         launchRoutingControl(routingForBootup);
                     }
                 }
-            }));
+            }), true);
         } else {
             addCecDeviceForBufferedActiveSource(bufferedActiveSource.get(0));
         }
@@ -328,8 +324,15 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
         }
-        removeAction(DeviceSelectActionFromTv.class);
-        addAndStartAction(new DeviceSelectActionFromTv(this, targetDevice, callback));
+        List<DeviceSelectActionFromTv> actions = getActions(DeviceSelectActionFromTv.class);
+        if (!actions.isEmpty()) {
+            DeviceSelectActionFromTv action = actions.get(0);
+            if (action.getTargetAddress() == targetDevice.getLogicalAddress()) {
+                return;
+            }
+        }
+        addAndStartAction(new DeviceSelectActionFromTv(this, targetDevice, callback),
+                true);
     }
 
     @ServiceThreadOnly
@@ -475,9 +478,8 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 HdmiCecMessageBuilder.buildRoutingChange(
                         getDeviceInfo().getLogicalAddress(), oldPath, newPath);
         mService.sendCecCommand(routingChange);
-        removeAction(RoutingControlAction.class);
         addAndStartAction(
-                new RoutingControlAction(this, newPath, callback));
+                new RoutingControlAction(this, newPath, callback), true);
     }
 
     @ServiceThreadOnly
@@ -801,16 +803,12 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                         mSelectRequestBuffer.process();
                         resetSelectRequestBuffer();
 
-                        List<HotplugDetectionAction> hotplugActions
-                                = getActions(HotplugDetectionAction.class);
-                        if (hotplugActions.isEmpty()) {
+                        if (!hasAction(HotplugDetectionAction.class)) {
                             addAndStartAction(
                                     new HotplugDetectionAction(HdmiCecLocalDeviceTv.this));
                         }
 
-                        List<PowerStatusMonitorAction> powerStatusActions
-                                = getActions(PowerStatusMonitorAction.class);
-                        if (powerStatusActions.isEmpty()) {
+                        if (!hasAction(PowerStatusMonitorAction.class)) {
                             addAndStartAction(
                                     new PowerStatusMonitorAction(HdmiCecLocalDeviceTv.this));
                         }

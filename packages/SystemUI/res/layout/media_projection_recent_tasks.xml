@@ -51,5 +51,5 @@
         android:layout_marginTop="24dp"
         android:importantForAccessibility="no"
         android:src="@*android:drawable/ic_drag_handle"
-        android:tint="?android:attr/textColorSecondary" />
+        android:tint="@*android:color/materialColorSecondary" />
 </LinearLayout>

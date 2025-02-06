@@ -109,7 +109,6 @@ constructor(
             secondaryNetworks = emptyList(),
         )
 
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     private val wifiPickerTrackerInfo: StateFlow<WifiPickerTrackerInfo> =
         if (multiuserWifiPickerTrackerSupport()) {
             selectedUserContext
@@ -301,19 +300,14 @@ constructor(
         wifiPickerTrackerInfo
             .map { it.state == WifiManager.WIFI_STATE_ENABLED }
             .distinctUntilChanged()
-            .logDiffsForTable(
-                tableLogger,
-                columnPrefix = "",
-                columnName = COL_NAME_IS_ENABLED,
-                initialValue = false,
-            )
+            .logDiffsForTable(tableLogger, columnName = COL_NAME_IS_ENABLED, initialValue = false)
             .stateIn(scope, SharingStarted.Eagerly, false)
 
     override val wifiNetwork: StateFlow<WifiNetworkModel> =
         wifiPickerTrackerInfo
             .map { it.primaryNetwork }
             .distinctUntilChanged()
-            .logDiffsForTable(tableLogger, columnPrefix = "", initialValue = WIFI_NETWORK_DEFAULT)
+            .logDiffsForTable(tableLogger, initialValue = WIFI_NETWORK_DEFAULT)
             .stateIn(scope, SharingStarted.Eagerly, WIFI_NETWORK_DEFAULT)
 
     override val secondaryNetworks: StateFlow<List<WifiNetworkModel>> =
@@ -322,7 +316,6 @@ constructor(
             .distinctUntilChanged()
             .logDiffsForTable(
                 tableLogger,
-                columnPrefix = "",
                 columnName = "secondaryNetworks",
                 initialValue = emptyList(),
             )
@@ -401,12 +394,7 @@ constructor(
         wifiPickerTrackerInfo
             .map { it.isDefault }
             .distinctUntilChanged()
-            .logDiffsForTable(
-                tableLogger,
-                columnPrefix = "",
-                columnName = COL_NAME_IS_DEFAULT,
-                initialValue = false,
-            )
+            .logDiffsForTable(tableLogger, columnName = COL_NAME_IS_DEFAULT, initialValue = false)
             .stateIn(scope, SharingStarted.Eagerly, false)
 
     override val wifiActivity: StateFlow<DataActivityModel> =

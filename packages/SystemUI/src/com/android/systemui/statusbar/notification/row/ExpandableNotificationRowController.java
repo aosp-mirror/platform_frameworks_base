@@ -106,6 +106,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final NotificationGutsManager mNotificationGutsManager;
     private final OnUserInteractionCallback mOnUserInteractionCallback;
     private final FalsingManager mFalsingManager;
+    private final NotificationRebindingTracker mNotificationRebindingTracker;
     private final FeatureFlagsClassic mFeatureFlags;
     private final boolean mAllowLongPress;
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
@@ -275,7 +276,8 @@ public class ExpandableNotificationRowController implements NotifViewController 
             NotificationDismissibilityProvider dismissibilityProvider,
             IStatusBarService statusBarService,
             UiEventLogger uiEventLogger,
-            MSDLPlayer msdlPlayer) {
+            MSDLPlayer msdlPlayer,
+            NotificationRebindingTracker notificationRebindingTracker) {
         mView = view;
         mListContainer = listContainer;
         mRemoteInputViewSubcomponentFactory = rivSubcomponentFactory;
@@ -295,6 +297,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
         mNotificationGutsManager = notificationGutsManager;
         mOnUserInteractionCallback = onUserInteractionCallback;
         mFalsingManager = falsingManager;
+        mNotificationRebindingTracker = notificationRebindingTracker;
         mOnFeedbackClickListener = mNotificationGutsManager::openGuts;
         mAllowLongPress = allowLongPress;
         mFeatureFlags = featureFlags;
@@ -343,7 +346,8 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 mSmartReplyConstants,
                 mSmartReplyController,
                 mStatusBarService,
-                mUiEventLogger
+                mUiEventLogger,
+                mNotificationRebindingTracker
         );
         mView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         if (mAllowLongPress) {

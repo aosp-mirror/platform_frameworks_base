@@ -41,13 +41,12 @@ fun BouncerContainer(
         Box {
             Canvas(Modifier.fillMaxSize()) { drawRect(color = backgroundColor) }
 
-            // Separate the bouncer content into a reusable composable that
-            // doesn't have any SceneScope
-            // dependencies
+            // Separate the bouncer content into a reusable composable that doesn't have any
+            // ContentScope dependencies
             BouncerContent(
                 bouncerViewModel,
                 dialogFactory,
-                Modifier.sysuiResTag(Bouncer.TestTags.Root).fillMaxSize()
+                Modifier.sysuiResTag(Bouncer.TestTags.Root).fillMaxSize(),
             )
         }
     }

@@ -34,6 +34,7 @@ import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.StateListDrawable
 import android.graphics.drawable.shapes.RoundRectShape
+import android.os.Bundle
 import android.util.StateSet
 import android.view.LayoutInflater
 import android.view.MotionEvent.ACTION_HOVER_ENTER
@@ -51,12 +52,16 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.WindowlessWindowManager
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction
 import android.widget.Button
 import android.widget.TextView
 import android.window.TaskConstants
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.animation.addListener
+import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.android.wm.shell.R
@@ -178,8 +183,7 @@ class MaximizeMenu(
                 menuHeight,
                 WindowManager.LayoutParams.TYPE_APPLICATION,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                        or WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
+                        or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSPARENT
         )
         lp.title = "Maximize Menu for Task=" + taskInfo.taskId
@@ -287,12 +291,23 @@ class MaximizeMenu(
             requireViewById(R.id.maximize_menu_snap_container) as View
         private val snapWindowText =
             requireViewById(R.id.maximize_menu_snap_window_text) as TextView
-        private val snapRightButton =
-            requireViewById(R.id.maximize_menu_snap_right_button) as Button
-        private val snapLeftButton =
-            requireViewById(R.id.maximize_menu_snap_left_button) as Button
         private val snapButtonsLayout =
             requireViewById(R.id.maximize_menu_snap_menu_layout)
+
+        // If layout direction is RTL, maximize menu will be mirrored, switching the order of the
+        // snap right/left buttons.
+        val isRtl: Boolean =
+            (context.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL)
+        private val snapRightButton = if (isRtl) {
+            requireViewById(R.id.maximize_menu_snap_left_button) as Button
+        } else {
+            requireViewById(R.id.maximize_menu_snap_right_button) as Button
+        }
+        private val snapLeftButton = if (isRtl) {
+            requireViewById(R.id.maximize_menu_snap_right_button) as Button
+        } else {
+            requireViewById(R.id.maximize_menu_snap_left_button) as Button
+        }
 
         private val decorThemeUtil = DecorThemeUtil(context)
 
@@ -402,6 +417,96 @@ class MaximizeMenu(
                     return@setOnTouchListener false
                 }
                 true
+            }
+
+            sizeToggleButton.accessibilityDelegate = object : View.AccessibilityDelegate() {
+                override fun onInitializeAccessibilityNodeInfo(
+                    host: View,
+                    info: AccessibilityNodeInfo
+                ) {
+
+                    super.onInitializeAccessibilityNodeInfo(host, info)
+                    info.addAction(AccessibilityAction.ACTION_CLICK)
+                    host.isClickable = true
+                }
+
+                override fun performAccessibilityAction(
+                    host: View,
+                    action: Int,
+                    args: Bundle?
+                ): Boolean {
+                    if (action == AccessibilityAction.ACTION_CLICK.id) {
+                        onMaximizeClickListener?.invoke()
+                    }
+                    return super.performAccessibilityAction(host, action, args)
+                }
+            }
+
+            snapLeftButton.accessibilityDelegate = object : View.AccessibilityDelegate() {
+                override fun onInitializeAccessibilityNodeInfo(
+                    host: View,
+                    info: AccessibilityNodeInfo
+                ) {
+                    super.onInitializeAccessibilityNodeInfo(host, info)
+                    info.addAction(AccessibilityAction.ACTION_CLICK)
+                    host.isClickable = true
+                }
+
+                override fun performAccessibilityAction(
+                    host: View,
+                    action: Int,
+                    args: Bundle?
+                ): Boolean {
+                    if (action == AccessibilityAction.ACTION_CLICK.id) {
+                        onLeftSnapClickListener?.invoke()
+                    }
+                    return super.performAccessibilityAction(host, action, args)
+                }
+            }
+
+            snapRightButton.accessibilityDelegate = object : View.AccessibilityDelegate() {
+                override fun onInitializeAccessibilityNodeInfo(
+                    host: View,
+                    info: AccessibilityNodeInfo
+                ) {
+                    super.onInitializeAccessibilityNodeInfo(host, info)
+                    info.addAction(AccessibilityAction.ACTION_CLICK)
+                    host.isClickable = true
+                }
+
+                override fun performAccessibilityAction(
+                    host: View,
+                    action: Int,
+                    args: Bundle?
+                ): Boolean {
+                    if (action == AccessibilityAction.ACTION_CLICK.id) {
+                        onRightSnapClickListener?.invoke()
+                    }
+                    return super.performAccessibilityAction(host, action, args)
+                }
+            }
+
+            with(context.resources) {
+                ViewCompat.replaceAccessibilityAction(
+                    snapLeftButton,
+                    AccessibilityActionCompat.ACTION_CLICK,
+                    getString(R.string.maximize_menu_talkback_action_snap_left_text),
+                    null
+                )
+
+                ViewCompat.replaceAccessibilityAction(
+                    snapRightButton,
+                    AccessibilityActionCompat.ACTION_CLICK,
+                    getString(R.string.maximize_menu_talkback_action_snap_right_text),
+                    null
+                )
+
+                ViewCompat.replaceAccessibilityAction(
+                    sizeToggleButton,
+                    AccessibilityActionCompat.ACTION_CLICK,
+                    getString(R.string.maximize_menu_talkback_action_maximize_restore_text),
+                    null
+                )
             }
 
             // Maximize/restore button.

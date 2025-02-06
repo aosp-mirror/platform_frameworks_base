@@ -16654,6 +16654,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Window is obscured, drop this touch.
             return false;
         }
+        if (android.view.accessibility.Flags.preventA11yNontoolFromInjectingIntoSensitiveViews()) {
+            if (event.isInjectedFromAccessibilityService()
+                    // If the event came from an Accessibility Service that does *not* declare
+                    // itself as AccessibilityServiceInfo#isAccessibilityTool and this View is
+                    // declared sensitive then drop the event.
+                    // Only Accessibility Tools are allowed to interact with sensitive Views.
+                    && !event.isInjectedFromAccessibilityTool() && isAccessibilityDataSensitive()) {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -28365,10 +28375,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 if (android.os.Flags.adpfMeasureDuringInputEventBoost()) {
                     final boolean notifyRenderer = hasExpensiveMeasuresDuringInputEvent();
                     if (notifyRenderer) {
-                        Trace.traceBegin(Trace.TRACE_TAG_VIEW,
-                                "CPU_LOAD_UP: " + "hasExpensiveMeasuresDuringInputEvent");
-                        getViewRootImpl().notifyRendererOfExpensiveFrame();
-                        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                        getViewRootImpl().notifyRendererOfExpensiveFrame(
+                                "ADPF_SendHint: hasExpensiveMeasuresDuringInputEvent");
                     }
                 }
                 // measure ourselves, this should set the measured dimension flag back

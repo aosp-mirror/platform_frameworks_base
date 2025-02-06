@@ -32,8 +32,8 @@ import com.android.systemui.fragments.FragmentService
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.navigationbar.NavigationModeController.ModeChangedListener
 import com.android.systemui.plugins.qs.QS
-import com.android.systemui.recents.OverviewProxyService
-import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener
+import com.android.systemui.recents.LauncherProxyService
+import com.android.systemui.recents.LauncherProxyService.LauncherProxyListener
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
@@ -70,7 +70,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
 
     private val view = mock<NotificationsQuickSettingsContainer>()
     private val navigationModeController = mock<NavigationModeController>()
-    private val overviewProxyService = mock<OverviewProxyService>()
+    private val mLauncherProxyService = mock<LauncherProxyService>()
     private val shadeHeaderController = mock<ShadeHeaderController>()
     private val shadeInteractor = mock<ShadeInteractor>()
     private val fragmentService = mock<FragmentService>()
@@ -80,7 +80,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
     private val largeScreenHeaderHelper = mock<LargeScreenHeaderHelper>()
 
     @Captor lateinit var navigationModeCaptor: ArgumentCaptor<ModeChangedListener>
-    @Captor lateinit var taskbarVisibilityCaptor: ArgumentCaptor<OverviewProxyListener>
+    @Captor lateinit var taskbarVisibilityCaptor: ArgumentCaptor<LauncherProxyListener>
     @Captor lateinit var windowInsetsCallbackCaptor: ArgumentCaptor<Consumer<WindowInsets>>
     @Captor lateinit var constraintSetCaptor: ArgumentCaptor<ConstraintSet>
     @Captor lateinit var attachStateListenerCaptor: ArgumentCaptor<View.OnAttachStateChangeListener>
@@ -88,7 +88,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
     lateinit var underTest: NotificationsQSContainerController
 
     private lateinit var navigationModeCallback: ModeChangedListener
-    private lateinit var taskbarVisibilityCallback: OverviewProxyListener
+    private lateinit var taskbarVisibilityCallback: LauncherProxyListener
     private lateinit var windowInsetsCallback: Consumer<WindowInsets>
     private lateinit var fakeSystemClock: FakeSystemClock
     private lateinit var delayableExecutor: FakeExecutor
@@ -110,7 +110,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
             NotificationsQSContainerController(
                 view,
                 navigationModeController,
-                overviewProxyService,
+                mLauncherProxyService,
                 shadeHeaderController,
                 shadeInteractor,
                 fragmentService,
@@ -127,7 +127,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         overrideResource(R.dimen.qs_footer_action_inset, FOOTER_ACTIONS_INSET)
         whenever(navigationModeController.addListener(navigationModeCaptor.capture()))
             .thenReturn(GESTURES_NAVIGATION)
-        doNothing().`when`(overviewProxyService).addCallback(taskbarVisibilityCaptor.capture())
+        doNothing().`when`(mLauncherProxyService).addCallback(taskbarVisibilityCaptor.capture())
         doNothing().`when`(view).setInsetsChangedListener(windowInsetsCallbackCaptor.capture())
         doNothing().`when`(view).applyConstraints(constraintSetCaptor.capture())
         doNothing().`when`(view).addOnAttachStateChangeListener(attachStateListenerCaptor.capture())
@@ -457,7 +457,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
             NotificationsQSContainerController(
                 container,
                 navigationModeController,
-                overviewProxyService,
+                mLauncherProxyService,
                 shadeHeaderController,
                 shadeInteractor,
                 fragmentService,

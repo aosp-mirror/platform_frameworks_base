@@ -152,21 +152,21 @@ flag {
 }
 
 flag {
+  name: "internal_log_event_listener"
+  namespace: "enterprise"
+  description: "Allow internal listeners to see unfiltered event stream"
+  bug: "385730709"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "allow_querying_profile_type"
     is_exported: true
     namespace: "enterprise"
     description: "Public APIs to query if a user is a profile and what kind of profile type it is."
     bug: "323001115"
-}
-
-flag {
-  name: "fix_race_condition_in_tie_profile_lock"
-  namespace: "enterprise"
-  description: "Fix race condition in tieProfileLockIfNecessary()"
-  bug: "355905501"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
 }
 
 flag {

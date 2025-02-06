@@ -174,7 +174,9 @@ final class AutofillTestWatcher extends TestWatcher {
 
         public static void onConnected() {
             Log.i(TAG, "onConnected:  sServiceWatcher=" + sServiceWatcher);
-
+            if (sServiceWatcher == null) {
+                sServiceWatcher = new ServiceWatcher();
+            }
             sServiceWatcher.mConnected.countDown();
         }
 

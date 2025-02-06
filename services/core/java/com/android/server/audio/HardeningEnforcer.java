@@ -54,8 +54,7 @@ public class HardeningEnforcer {
     final ActivityManager mActivityManager;
     final PackageManager mPackageManager;
 
-    final EventLogger mEventLogger = new EventLogger(LOG_NB_EVENTS,
-            "Hardening enforcement");
+    final EventLogger mEventLogger;
 
     // capacity = 4 for each of the focus request types
     static final SparseArray<String> METRIC_COUNTERS_FOCUS_DENIAL = new SparseArray<>(4);
@@ -108,17 +107,13 @@ public class HardeningEnforcer {
     public static final int METHOD_AUDIO_MANAGER_REQUEST_AUDIO_FOCUS = 300;
 
     public HardeningEnforcer(Context ctxt, boolean isAutomotive, AppOpsManager appOps,
-            PackageManager pm) {
+            PackageManager pm, EventLogger logger) {
         mContext = ctxt;
         mIsAutomotive = isAutomotive;
         mAppOps = appOps;
         mActivityManager = ctxt.getSystemService(ActivityManager.class);
         mPackageManager = pm;
-    }
-
-    protected void dump(PrintWriter pw) {
-        // log
-        mEventLogger.dump(pw);
+        mEventLogger = logger;
     }
 
     /**

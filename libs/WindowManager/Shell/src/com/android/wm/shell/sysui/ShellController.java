@@ -46,6 +46,7 @@ import com.android.wm.shell.common.DisplayInsetsController.OnInsetsChangedListen
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.shared.annotations.ExternalThread;
+import com.android.wm.shell.sysui.ShellCommandHandler.ShellCommandActionHandler;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -112,6 +113,19 @@ public class ShellController {
         }
     };
 
+    private ShellCommandActionHandler mDumpCommandHandler = new ShellCommandActionHandler() {
+        @Override
+        public boolean onShellCommand(String[] args, PrintWriter pw) {
+            handleDump(pw);
+            return true;
+        }
+
+        @Override
+        public void printShellCommandHelp(PrintWriter pw, String prefix) {
+            pw.println(prefix + "Dump all Window Manager Shell internal state");
+        }
+    };
+
 
     public ShellController(Context context,
             ShellInit shellInit,
@@ -127,6 +141,7 @@ public class ShellController {
     }
 
     private void onInit() {
+        mShellCommandHandler.addCommandCallback("dump", mDumpCommandHandler, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
         mDisplayInsetsController.addInsetsChangedListener(
                 mContext.getDisplayId(), mInsetsChangeListener);

@@ -36,7 +36,6 @@ import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthentication
 import com.android.systemui.res.R
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
@@ -51,7 +50,6 @@ import kotlinx.coroutines.flow.merge
  * BiometricMessage business logic. Filters biometric error/fail/success events for authentication
  * events that should never surface a message to the user at the current device state.
  */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class BiometricMessageInteractor
 @Inject

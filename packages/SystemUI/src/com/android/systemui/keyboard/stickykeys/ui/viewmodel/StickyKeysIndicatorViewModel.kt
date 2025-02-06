@@ -22,7 +22,6 @@ import com.android.systemui.keyboard.stickykeys.data.repository.StickyKeysReposi
 import com.android.systemui.keyboard.stickykeys.shared.model.Locked
 import com.android.systemui.keyboard.stickykeys.shared.model.ModifierKey
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flatMapLatest
@@ -38,7 +37,6 @@ constructor(
     @Application applicationScope: CoroutineScope,
 ) {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val indicatorContent: Flow<Map<ModifierKey, Locked>> =
         keyboardRepository.isAnyKeyboardConnected
             .flatMapLatest { keyboardPresent ->

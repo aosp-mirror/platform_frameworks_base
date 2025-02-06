@@ -1527,6 +1527,8 @@ public final class SystemServer implements Dumpable {
         boolean disableCameraService = SystemProperties.getBoolean("config.disable_cameraservice",
                 false);
 
+        boolean isDesktop = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_PC);
+
         boolean isWatch = RoSystemFeatures.hasFeatureWatch(context);
 
         boolean isArc = context.getPackageManager().hasSystemFeature(
@@ -1656,7 +1658,7 @@ public final class SystemServer implements Dumpable {
                 t.traceEnd();
             }
 
-            if (!isTv) {
+            if (!isTv && !isDesktop) {
                 t.traceBegin("StartVibratorManagerService");
                 mSystemServiceManager.startService(VibratorManagerService.Lifecycle.class);
                 t.traceEnd();
@@ -1787,15 +1789,17 @@ public final class SystemServer implements Dumpable {
             SignedConfigService.registerUpdateReceiver(mSystemContext);
             t.traceEnd();
 
-            t.traceBegin("AppIntegrityService");
-            mSystemServiceManager.startService(AppIntegrityManagerService.class);
-            t.traceEnd();
+            if (!android.server.Flags.removeAppIntegrityManagerService()) {
+                t.traceBegin("AppIntegrityService");
+                mSystemServiceManager.startService(AppIntegrityManagerService.class);
+                t.traceEnd();
+            }
 
             t.traceBegin("StartLogcatManager");
             mSystemServiceManager.startService(LogcatManagerService.class);
             t.traceEnd();
 
-            if (!isWatch && !isTv && !isAutomotive
+            if (!isWatch && !isTv && !isAutomotive && !isDesktop
                     && android.security.Flags.aflApi()) {
                 t.traceBegin("StartIntrusionDetectionService");
                 mSystemServiceManager.startService(IntrusionDetectionService.class);
@@ -2712,16 +2716,18 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(AuthService.class);
             t.traceEnd();
 
-            if (android.security.Flags.secureLockdown()) {
-                t.traceBegin("StartSecureLockDeviceService.Lifecycle");
-                mSystemServiceManager.startService(SecureLockDeviceService.Lifecycle.class);
-                t.traceEnd();
-            }
+            if (!isWatch && !isTv && !isAutomotive) {
+                if (android.security.Flags.secureLockdown()) {
+                    t.traceBegin("StartSecureLockDeviceService.Lifecycle");
+                    mSystemServiceManager.startService(SecureLockDeviceService.Lifecycle.class);
+                    t.traceEnd();
+                }
 
-            if (android.adaptiveauth.Flags.enableAdaptiveAuth()) {
-                t.traceBegin("StartAuthenticationPolicyService");
-                mSystemServiceManager.startService(AuthenticationPolicyService.class);
-                t.traceEnd();
+                if (android.adaptiveauth.Flags.enableAdaptiveAuth()) {
+                    t.traceBegin("StartAuthenticationPolicyService");
+                    mSystemServiceManager.startService(AuthenticationPolicyService.class);
+                    t.traceEnd();
+                }
             }
 
             if (!isWatch) {
@@ -3126,13 +3132,8 @@ public final class SystemServer implements Dumpable {
                             && context.getPackageManager().hasSystemFeature(
                                     PackageManager.FEATURE_BLUETOOTH_LE))) {
                 t.traceBegin("RangingService");
-                // TODO: b/375264320 - Remove after RELEASE_RANGING_STACK is ramped to next.
-                try {
-                    mSystemServiceManager.startServiceFromJar(RANGING_SERVICE_CLASS,
-                            RANGING_APEX_SERVICE_JAR_PATH);
-                } catch (Throwable e) {
-                    Slog.d(TAG, "service-ranging.jar not found, not starting RangingService");
-                }
+                mSystemServiceManager.startServiceFromJar(RANGING_SERVICE_CLASS,
+                        RANGING_APEX_SERVICE_JAR_PATH);
                 t.traceEnd();
             }
         }

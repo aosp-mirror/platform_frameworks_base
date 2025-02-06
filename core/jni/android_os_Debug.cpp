@@ -729,6 +729,17 @@ static jlong android_os_Debug_getGpuPrivateMemoryKb(JNIEnv* env, jobject clazz) 
     return gpuPrivateMem / 1024;
 }
 
+static jlong android_os_Debug_getKernelCmaUsageKb(JNIEnv* env, jobject clazz) {
+    jlong totalKernelCmaUsageKb = -1;
+    uint64_t size;
+
+    if (meminfo::ReadKernelCmaUsageKb(&size)) {
+        totalKernelCmaUsageKb = size;
+    }
+
+    return totalKernelCmaUsageKb;
+}
+
 static jlong android_os_Debug_getDmabufMappedSizeKb(JNIEnv* env, jobject clazz) {
     jlong dmabufPss = 0;
     std::vector<dmabufinfo::DmaBuffer> dmabufs;
@@ -836,6 +847,7 @@ static const JNINativeMethod gMethods[] = {
         {"getGpuTotalUsageKb", "()J", (void*)android_os_Debug_getGpuTotalUsageKb},
         {"isVmapStack", "()Z", (void*)android_os_Debug_isVmapStack},
         {"logAllocatorStats", "()Z", (void*)android_os_Debug_logAllocatorStats},
+        {"getKernelCmaUsageKb", "()J", (void*)android_os_Debug_getKernelCmaUsageKb},
 };
 
 int register_android_os_Debug(JNIEnv *env)

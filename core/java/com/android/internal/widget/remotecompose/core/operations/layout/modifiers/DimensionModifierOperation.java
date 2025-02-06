@@ -104,6 +104,11 @@ public abstract class DimensionModifierOperation extends Operation
         }
     }
 
+    /**
+     * Returns true if the dimension is set using a weight
+     *
+     * @return true if using weight, false otherwise
+     */
     public boolean hasWeight() {
         return mType == Type.WEIGHT;
     }
@@ -136,6 +141,11 @@ public abstract class DimensionModifierOperation extends Operation
         mOutValue = mValue = value;
     }
 
+    /**
+     * Returns the serialized name for this operation
+     *
+     * @return the serialized name
+     */
     @NonNull
     public String serializedName() {
         return "DIMENSION";

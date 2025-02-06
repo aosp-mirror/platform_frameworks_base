@@ -29,7 +29,6 @@ import com.android.systemui.volume.data.repository.audioRepository
 import com.android.systemui.volume.domain.interactor.audioModeInteractor
 import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -39,7 +38,6 @@ import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class AudioModeLoggerStartableTest : SysuiTestCase() {

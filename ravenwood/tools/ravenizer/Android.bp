@@ -19,7 +19,7 @@ java_binary_host {
         "ow2-asm-tree",
         "ow2-asm-util",
         "junit",
-        "ravenwood-junit-impl-for-ravenizer",
+        "ravenwood-junit-for-ravenizer",
     ],
     visibility: ["//visibility:public"],
 }

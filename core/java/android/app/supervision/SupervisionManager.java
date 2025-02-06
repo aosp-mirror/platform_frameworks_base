@@ -16,6 +16,7 @@
 
 package android.app.supervision;
 
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.UserHandleAware;
@@ -32,11 +33,40 @@ import android.os.RemoteException;
 @SystemService(Context.SUPERVISION_SERVICE)
 public class SupervisionManager {
     private final Context mContext;
-    private final ISupervisionManager mService;
+    @Nullable private final ISupervisionManager mService;
+
+    /**
+     * Activity action: ask the human user to enable supervision for this user. Only the app that
+     * holds the {@code SYSTEM_SUPERVISION} role can launch this intent.
+     *
+     * <p>The intent must be invoked via {@link Activity#startActivityForResult} to receive the
+     * result of whether or not the user approved the action. If approved, the result will be {@link
+     * Activity#RESULT_OK}.
+     *
+     * <p>If supervision is already enabled, the operation will return a failure result.
+     *
+     * @hide
+     */
+    public static final String ACTION_ENABLE_SUPERVISION = "android.app.action.ENABLE_SUPERVISION";
+
+    /**
+     * Activity action: ask the human user to disable supervision for this user. Only the app that
+     * holds the {@code SYSTEM_SUPERVISION} role can launch this intent.
+     *
+     * <p>The intent must be invoked via {@link Activity#startActivityForResult} to receive the
+     * result of whether or not the user approved the action. If approved, the result will be {@link
+     * Activity#RESULT_OK}.
+     *
+     * <p>If supervision is not enabled, the operation will return a failure result.
+     *
+     * @hide
+     */
+    public static final String ACTION_DISABLE_SUPERVISION =
+            "android.app.action.DISABLE_SUPERVISION";
 
     /** @hide */
     @UnsupportedAppUsage
-    public SupervisionManager(Context context, ISupervisionManager service) {
+    public SupervisionManager(Context context, @Nullable ISupervisionManager service) {
         mContext = context;
         mService = service;
     }
@@ -63,10 +93,63 @@ public class SupervisionManager {
             value = android.Manifest.permission.INTERACT_ACROSS_USERS,
             conditional = true)
     public boolean isSupervisionEnabledForUser(@UserIdInt int userId) {
-        try {
-            return mService.isSupervisionEnabledForUser(userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (mService != null) {
+            try {
+                return mService.isSupervisionEnabledForUser(userId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
+        return false;
+    }
+
+    /**
+     * Sets whether the device is supervised for the current user.
+     *
+     * @hide
+     */
+    @UserHandleAware
+    public void setSupervisionEnabled(boolean enabled) {
+        setSupervisionEnabledForUser(mContext.getUserId(), enabled);
+    }
+
+    /**
+     * Sets whether the device is supervised for a given user.
+     *
+     * <p>The caller must be from the same user as the target or hold the {@link
+     * android.Manifest.permission#INTERACT_ACROSS_USERS} permission.
+     *
+     * @hide
+     */
+    @RequiresPermission(
+            value = android.Manifest.permission.INTERACT_ACROSS_USERS,
+            conditional = true)
+    public void setSupervisionEnabledForUser(@UserIdInt int userId, boolean enabled) {
+        if (mService != null) {
+            try {
+                mService.setSupervisionEnabledForUser(userId, enabled);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns the package name of the app that is acting as the active supervision app or null if
+     * supervision is disabled.
+     *
+     * @hide
+     */
+    @UserHandleAware
+    @Nullable
+    public String getActiveSupervisionAppPackage() {
+        if (mService != null) {
+            try {
+                return mService.getActiveSupervisionAppPackage(mContext.getUserId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
     }
 }

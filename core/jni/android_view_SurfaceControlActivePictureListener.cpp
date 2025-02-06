@@ -106,11 +106,13 @@ struct SurfaceControlActivePictureListener : public gui::BnActivePictureListener
     }
 
     status_t startListening() {
-        return SurfaceComposerClient::addActivePictureListener(this);
+        return SurfaceComposerClient::addActivePictureListener(
+                sp<SurfaceControlActivePictureListener>::fromExisting(this));
     }
 
     status_t stopListening() {
-        return SurfaceComposerClient::removeActivePictureListener(this);
+        return SurfaceComposerClient::removeActivePictureListener(
+                sp<SurfaceControlActivePictureListener>::fromExisting(this));
     }
 
 protected:

@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.ui.binder
 
 import android.graphics.Rect
+import android.util.TypedValue
 import android.view.View
 import android.view.accessibility.AccessibilityEvent.TYPE_VIEW_FOCUSED
 import android.widget.TextView
@@ -99,6 +100,13 @@ object KeyguardSettingsViewBinder {
                                     touchHandlingViewModel.onTouchedOutside()
                                 }
                             }
+                        }
+                    }
+
+                    launch("$TAG#viewModel.textSize") {
+                        viewModel.textSize.collect { textSize ->
+                            val textView: TextView = view.requireViewById(R.id.text)
+                            textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize.toFloat())
                         }
                     }
                 }

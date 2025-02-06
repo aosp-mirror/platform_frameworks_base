@@ -5,19 +5,6 @@
 package: "com.android.wm.shell"
 container: "system"
 
-flag {
-    name: "enable_app_pairs"
-    namespace: "multitasking"
-    description: "Enables the ability to create and save app pairs to the Home screen"
-    bug: "274835596"
-}
-
-flag {
-    name: "enable_split_contextual"
-    namespace: "multitasking"
-    description: "Enables invoking split contextually"
-    bug: "276361926"
-}
 
 flag {
     name: "enable_taskbar_navbar_unification"
@@ -31,13 +18,6 @@ flag {
     namespace: "multitasking"
     description: "Enables the new implementation of PiP (PiP2)"
     bug: "311462191"
-}
-
-flag {
-    name: "enable_left_right_split_in_portrait"
-    namespace: "multitasking"
-    description: "Enables left/right split in portrait"
-    bug: "291018646"
 }
 
 flag {
@@ -104,6 +84,13 @@ flag {
 }
 
 flag {
+    name: "enable_create_any_bubble"
+    namespace: "multitasking"
+    description: "Enable UI affordances to create bubbles via launcher app icons"
+    bug: "385220199"
+}
+
+flag {
     name: "only_reuse_bubbled_task_when_launched_from_bubble"
     namespace: "multitasking"
     description: "Allow reusing bubbled tasks for new activities only when launching from bubbles"
@@ -128,6 +115,16 @@ flag {
     namespace: "multitasking"
     description: "Enables tracking top tasks from the shell"
     bug: "342627272"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_recents_bookend_transition"
+    namespace: "multitasking"
+    description: "Use a finish-transition to clean up recents instead of the finish-WCT"
+    bug: "346588978"
     metadata {
         purpose: PURPOSE_BUGFIX
     }
@@ -179,11 +176,4 @@ flag {
     namespace: "multitasking"
     description: "Factor task-view state tracking out of taskviewtransitions"
     bug: "384976265"
-}
-
-flag {
-    name: "enable_non_default_display_split"
-    namespace: "multitasking"
-    description: "Enables split screen on non default displays"
-    bug: "384999213"
 }

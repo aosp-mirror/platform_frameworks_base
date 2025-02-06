@@ -180,7 +180,7 @@ class AppCompatActivityRobot {
 
     void setLetterboxedForFixedOrientationAndAspectRatio(boolean enabled) {
         doReturn(enabled).when(mActivityStack.top().mAppCompatController
-                .getAppCompatAspectRatioPolicy()).isLetterboxedForFixedOrientationAndAspectRatio();
+                .getAspectRatioPolicy()).isLetterboxedForFixedOrientationAndAspectRatio();
     }
 
     void enableFullscreenCameraCompatTreatmentForTopActivity(boolean enabled) {
@@ -213,7 +213,7 @@ class AppCompatActivityRobot {
 
     void setShouldApplyUserMinAspectRatioOverride(boolean enabled) {
         doReturn(enabled).when(mActivityStack.top().mAppCompatController
-                .getAppCompatAspectRatioOverrides()).shouldApplyUserMinAspectRatioOverride();
+                .getAspectRatioOverrides()).shouldApplyUserMinAspectRatioOverride();
     }
 
     void setShouldCreateCompatDisplayInsets(boolean enabled) {
@@ -226,17 +226,17 @@ class AppCompatActivityRobot {
 
     void setShouldApplyUserFullscreenOverride(boolean enabled) {
         doReturn(enabled).when(mActivityStack.top().mAppCompatController
-                .getAppCompatAspectRatioOverrides()).shouldApplyUserFullscreenOverride();
+                .getAspectRatioOverrides()).shouldApplyUserFullscreenOverride();
     }
 
     void setGetUserMinAspectRatioOverrideCode(@UserMinAspectRatio int overrideCode) {
         doReturn(overrideCode).when(mActivityStack.top().mAppCompatController
-                .getAppCompatAspectRatioOverrides()).getUserMinAspectRatioOverrideCode();
+                .getAspectRatioOverrides()).getUserMinAspectRatioOverrideCode();
     }
 
     void setGetUserMinAspectRatioOverrideValue(float overrideValue) {
         doReturn(overrideValue).when(mActivityStack.top().mAppCompatController
-                .getAppCompatAspectRatioOverrides()).getUserMinAspectRatio();
+                .getAspectRatioOverrides()).getUserMinAspectRatio();
     }
 
     void setIgnoreOrientationRequest(boolean enabled) {
@@ -525,7 +525,7 @@ class AppCompatActivityRobot {
             activity.setRequestedOrientation(screenOrientation);
         }
         // Make sure to use the provided configuration to construct the size compat fields.
-        activity.mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
+        activity.mAppCompatController.getSizeCompatModePolicy().clearSizeCompatMode();
         activity.ensureActivityConfiguration();
         // Make sure the display configuration reflects the change of activity.
         if (activity.mDisplayContent.updateOrientation()) {

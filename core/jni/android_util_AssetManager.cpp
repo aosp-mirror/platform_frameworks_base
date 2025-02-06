@@ -198,7 +198,7 @@ static jobject NativeGetOverlayableMap(JNIEnv* env, jclass /*clazz*/, jlong ptr,
   auto assetmanager = LockAndStartAssetManager(ptr);
   const ScopedUtfChars package_name_utf8(env, package_name);
   CHECK(package_name_utf8.c_str() != nullptr);
-  const std::string std_package_name(package_name_utf8.c_str());
+  const std::string_view std_package_name(package_name_utf8.c_str());
   const std::unordered_map<std::string, std::string>* map = nullptr;
 
   assetmanager->ForEachPackage([&](const std::string& this_package_name, uint8_t package_id) {

@@ -24,6 +24,7 @@ import com.android.systemui.dump.dumpManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.settings.userTracker
+import com.android.systemui.supervision.supervisionManager
 
 val Kosmos.securityController by Fixture {
     SecurityControllerImpl(
@@ -34,5 +35,6 @@ val Kosmos.securityController by Fixture {
         fakeExecutor,
         fakeExecutor,
         dumpManager,
+        { supervisionManager },
     )
 }

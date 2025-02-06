@@ -11,7 +11,6 @@ import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
@@ -40,7 +39,6 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     fun start() {
         applicationScope.launch(context = backgroundDispatcher) {
             qsSettingsRestoredRepository.restoreData

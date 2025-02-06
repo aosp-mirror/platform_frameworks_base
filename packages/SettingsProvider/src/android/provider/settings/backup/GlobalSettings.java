@@ -46,6 +46,7 @@ public class GlobalSettings {
         Settings.Global.APP_AUTO_RESTRICTION_ENABLED,
         Settings.Global.AUTO_TIME,
         Settings.Global.AUTO_TIME_ZONE,
+        Settings.Global.TIME_ZONE_NOTIFICATIONS,
         Settings.Global.POWER_SOUNDS_ENABLED,
         Settings.Global.DOCK_SOUNDS_ENABLED,
         Settings.Global.CHARGING_SOUNDS_ENABLED,

@@ -57,6 +57,7 @@ message RemoteViewsProto {
     repeated bytes bitmap_cache = 14;
     optional RemoteCollectionCache remote_collection_cache = 15;
     repeated Action actions = 16;
+    optional int32 uid = 17;
 
     message RemoteCollectionCache {
         message Entry {

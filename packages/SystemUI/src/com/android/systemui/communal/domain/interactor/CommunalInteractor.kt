@@ -28,12 +28,16 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.Flags.communalResponsiveGrid
+import com.android.systemui.Flags.glanceableHubBlurredBackground
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.common.domain.interactor.BatteryInteractor
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
 import com.android.systemui.communal.data.repository.CommunalSmartspaceRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.domain.model.CommunalContentModel.WidgetContent
+import com.android.systemui.communal.posturing.domain.interactor.PosturingInteractor
+import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalContentSize.FixedSize.FULL
 import com.android.systemui.communal.shared.model.CommunalContentSize.FixedSize.HALF
@@ -41,11 +45,14 @@ import com.android.systemui.communal.shared.model.CommunalContentSize.FixedSize.
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.shared.model.EditModeState
+import com.android.systemui.communal.shared.model.WhenToDream
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dock.DockManager
+import com.android.systemui.dock.retrieveIsDocked
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
@@ -65,11 +72,11 @@ import com.android.systemui.statusbar.phone.ManagedProfileController
 import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.emitOnStart
+import com.android.systemui.util.kotlin.isDevicePluggedIn
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -85,6 +92,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -92,7 +100,6 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates business-logic related to communal mode. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class CommunalInteractor
 @Inject
@@ -117,6 +124,9 @@ constructor(
     @CommunalLog logBuffer: LogBuffer,
     @CommunalTableLog tableLogBuffer: TableLogBuffer,
     private val managedProfileController: ManagedProfileController,
+    private val batteryInteractor: BatteryInteractor,
+    private val dockManager: DockManager,
+    private val posturingInteractor: PosturingInteractor,
 ) {
     private val logger = Logger(logBuffer, "CommunalInteractor")
 
@@ -163,7 +173,6 @@ constructor(
             }
             .logDiffsForTable(
                 tableLogBuffer = tableLogBuffer,
-                columnPrefix = "",
                 columnName = "isCommunalAvailable",
                 initialValue = false,
             )
@@ -172,6 +181,37 @@ constructor(
                 started = SharingStarted.WhileSubscribed(),
                 replay = 1,
             )
+
+    /**
+     * Whether communal hub should be shown automatically, depending on the user's [WhenToDream]
+     * state.
+     */
+    val shouldShowCommunal: StateFlow<Boolean> =
+        allOf(
+                isCommunalAvailable,
+                communalSettingsInteractor.whenToDream
+                    .flatMapLatest { whenToDream ->
+                        when (whenToDream) {
+                            WhenToDream.NEVER -> flowOf(false)
+
+                            WhenToDream.WHILE_CHARGING -> batteryInteractor.isDevicePluggedIn
+
+                            WhenToDream.WHILE_DOCKED ->
+                                allOf(
+                                    batteryInteractor.isDevicePluggedIn,
+                                    dockManager.retrieveIsDocked(),
+                                )
+
+                            WhenToDream.WHILE_POSTURED ->
+                                allOf(
+                                    batteryInteractor.isDevicePluggedIn,
+                                    posturingInteractor.postured,
+                                )
+                        }
+                    }
+                    .flowOn(bgDispatcher),
+            )
+            .stateIn(scope = bgScope, started = SharingStarted.Eagerly, initialValue = false)
 
     private val _isDisclaimerDismissed = MutableStateFlow(false)
     val isDisclaimerDismissed: Flow<Boolean> = _isDisclaimerDismissed.asStateFlow()
@@ -300,10 +340,28 @@ constructor(
             }
             .logDiffsForTable(
                 tableLogBuffer = tableLogBuffer,
-                columnPrefix = "",
                 columnName = "isCommunalShowing",
                 initialValue = false,
             )
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
+            )
+
+    /**
+     * Flow that emits {@code true} whenever communal is influencing the shown background on the
+     * screen. This happens when the background for communal is set to blur and communal is visible.
+     * This is used by other components to determine when blur-related emitted values for communal
+     * should be considered.
+     */
+    val isCommunalBlurring: StateFlow<Boolean> =
+        communalSceneInteractor.isCommunalVisible
+            .combine(communalSettingsInteractor.communalBackground) { showing, background ->
+                showing &&
+                    background == CommunalBackgroundType.BLUR &&
+                    glanceableHubBlurredBackground()
+            }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
@@ -487,10 +545,16 @@ constructor(
         }
 
     /** CTA tile to be displayed in the glanceable hub (view mode). */
-    val ctaTileContent: Flow<List<CommunalContentModel.CtaTileInViewMode>> =
-        communalPrefsInteractor.isCtaDismissed.map { isDismissed ->
-            if (isDismissed) emptyList() else listOf(CommunalContentModel.CtaTileInViewMode())
+    val ctaTileContent: Flow<List<CommunalContentModel.CtaTileInViewMode>> by lazy {
+        if (communalSettingsInteractor.isV2FlagEnabled()) {
+            flowOf(listOf<CommunalContentModel.CtaTileInViewMode>())
+        } else {
+            communalPrefsInteractor.isCtaDismissed.map { isDismissed ->
+                if (isDismissed) listOf<CommunalContentModel.CtaTileInViewMode>()
+                else listOf(CommunalContentModel.CtaTileInViewMode())
+            }
         }
+    }
 
     /** A list of tutorial content to be displayed in the communal hub in tutorial mode. */
     val tutorialContent: List<CommunalContentModel.Tutorial> =

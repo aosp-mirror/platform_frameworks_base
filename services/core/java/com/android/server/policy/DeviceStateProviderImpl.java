@@ -45,6 +45,7 @@ import com.android.server.devicestate.DeviceStateProvider;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.policy.devicestate.config.Conditions;
 import com.android.server.policy.devicestate.config.DeviceStateConfig;
+import com.android.server.policy.devicestate.config.Flags;
 import com.android.server.policy.devicestate.config.LidSwitchCondition;
 import com.android.server.policy.devicestate.config.NumericRange;
 import com.android.server.policy.devicestate.config.Properties;
@@ -140,7 +141,16 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     private static final String PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT =
             "com.android.server.policy.PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT";
 
-
+    // Deprecated flag definitions to maintain backwards compatibility.
+    private static final String FLAG_CANCEL_OVERRIDE_REQUESTS = "FLAG_CANCEL_OVERRIDE_REQUESTS";
+    private static final String FLAG_APP_INACCESSIBLE = "FLAG_APP_INACCESSIBLE";
+    private static final String FLAG_EMULATED_ONLY = "FLAG_EMULATED_ONLY";
+    private static final String FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP =
+            "FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP";
+    private static final String FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL =
+            "FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL";
+    private static final String FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE =
+            "FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE";
 
     /** Interface that allows reading the device state configuration. */
     interface ReadableConfig {
@@ -185,15 +195,29 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                             new HashSet<>();
                     Set<@DeviceState.DeviceStateProperties Integer> physicalProperties =
                             new HashSet<>();
-                    final Properties configFlags = stateConfig.getProperties();
-                    if (configFlags != null) {
-                        List<String> configPropertyStrings = configFlags.getProperty();
+                    final Properties configProperties = stateConfig.getProperties();
+                    if (configProperties != null) {
+                        List<String> configPropertyStrings = configProperties.getProperty();
                         for (int i = 0; i < configPropertyStrings.size(); i++) {
                             final String configPropertyString = configPropertyStrings.get(i);
                             addPropertyByString(configPropertyString, systemProperties,
                                     physicalProperties);
                         }
                     }
+
+                    if (android.hardware.devicestate.feature.flags
+                            .Flags.deviceStateConfigurationFlag()) {
+                        // Parse through the deprecated flag configuration to keep compatibility.
+                        final Flags configFlags = stateConfig.getFlags();
+                        if (configFlags != null) {
+                            List<String> configFlagStrings = configFlags.getFlag();
+                            for (int i = 0; i < configFlagStrings.size(); i++) {
+                                final String configFlagString = configFlagStrings.get(i);
+                                addFlagByString(configFlagString, systemProperties);
+                            }
+                        }
+                    }
+
                     DeviceState.Configuration deviceStateConfiguration =
                             new DeviceState.Configuration.Builder(state, name)
                                     .setSystemProperties(systemProperties)
@@ -288,6 +312,34 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                 break;
             default:
                 Slog.w(TAG, "Parsed unknown flag with name: " + propertyString);
+                break;
+        }
+    }
+
+    private static void addFlagByString(String flagString,
+            Set<@DeviceState.SystemDeviceStateProperties Integer> systemProperties) {
+        switch (flagString) {
+            case FLAG_APP_INACCESSIBLE:
+                systemProperties.add(DeviceState.PROPERTY_APP_INACCESSIBLE);
+                break;
+            case FLAG_EMULATED_ONLY:
+                systemProperties.add(DeviceState.PROPERTY_EMULATED_ONLY);
+                break;
+            case FLAG_CANCEL_OVERRIDE_REQUESTS:
+                systemProperties.add(DeviceState.PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS);
+                break;
+            case FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP:
+                systemProperties.add(DeviceState.PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP);
+                break;
+            case FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE:
+                systemProperties.add(DeviceState.PROPERTY_POLICY_UNSUPPORTED_WHEN_POWER_SAVE_MODE);
+                break;
+            case FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL:
+                systemProperties.add(
+                        DeviceState.PROPERTY_POLICY_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL);
+                break;
+            default:
+                Slog.w(TAG, "Parsed unknown flag with name: " + flagString);
                 break;
         }
     }

@@ -100,7 +100,7 @@ constructor(
         keyguardClockInteractor.clockShouldBeCentered.stateIn(
             scope = applicationScope,
             started = SharingStarted.WhileSubscribed(),
-            initialValue = false,
+            initialValue = true,
         )
 
     // To translate elements below smartspace in weather clock to avoid overlapping between date

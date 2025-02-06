@@ -163,9 +163,11 @@ internal class RestrictedSwitchPreferenceModel(
 
                 is BlockedByAdmin ->
                     restrictedMode.getSummary(checkedIfBlockedByAdmin ?: checkedIfNoRestricted())
-                is BlockedByEcm ->
+                is BlockedByEcm -> if (restrictedMode.isBlockedByPhoneCall()) {
+                    context.getString(com.android.settingslib.R.string.disabled_in_phone_call_text)
+                } else {
                     context.getString(com.android.settingslib.R.string.disabled)
-
+                }
                 null -> context.getPlaceholder()
             }
         }

@@ -111,28 +111,37 @@ class DefaultClockFaceLayout(val view: View) : ClockFaceLayout {
                 connect(lockscreenClockViewLargeId, START, PARENT_ID, START)
                 connect(lockscreenClockViewLargeId, END, PARENT_ID, END)
 
-                // In preview, we'll show UDFPS icon for UDFPS devices
-                // and nothing for non-UDFPS devices,
-                // and we're not planning to add this vide in clockHostView
-                // so we only need position of device entry icon to constrain clock
-                // Copied calculation codes from applyConstraints in DefaultDeviceEntrySection
-                clockPreviewConfig.lockId?.let { lockId ->
-                    connect(lockscreenClockViewLargeId, BOTTOM, lockId, TOP)
+                clockPreviewConfig.udfpsTop?.let {
+                    val screenHeight = context.resources.displayMetrics.heightPixels
+                    connect(
+                        lockscreenClockViewLargeId,
+                        BOTTOM,
+                        PARENT_ID,
+                        BOTTOM,
+                        (screenHeight - it).toInt(),
+                    )
                 }
                     ?: run {
-                        val bottomPaddingPx = context.getDimen("lock_icon_margin_bottom")
-                        val defaultDensity =
-                            DisplayMetrics.DENSITY_DEVICE_STABLE.toFloat() /
-                                DisplayMetrics.DENSITY_DEFAULT.toFloat()
-                        val lockIconRadiusPx = (defaultDensity * 36).toInt()
-                        val clockBottomMargin = bottomPaddingPx + 2 * lockIconRadiusPx
-                        connect(
-                            lockscreenClockViewLargeId,
-                            BOTTOM,
-                            PARENT_ID,
-                            BOTTOM,
-                            clockBottomMargin,
-                        )
+                        // Copied calculation codes from applyConstraints in
+                        // DefaultDeviceEntrySection
+                        clockPreviewConfig.lockId?.let { lockId ->
+                            connect(lockscreenClockViewLargeId, BOTTOM, lockId, TOP)
+                        }
+                            ?: run {
+                                val bottomPaddingPx = context.getDimen("lock_icon_margin_bottom")
+                                val defaultDensity =
+                                    DisplayMetrics.DENSITY_DEVICE_STABLE.toFloat() /
+                                        DisplayMetrics.DENSITY_DEFAULT.toFloat()
+                                val lockIconRadiusPx = (defaultDensity * 36).toInt()
+                                val clockBottomMargin = bottomPaddingPx + 2 * lockIconRadiusPx
+                                connect(
+                                    lockscreenClockViewLargeId,
+                                    BOTTOM,
+                                    PARENT_ID,
+                                    BOTTOM,
+                                    clockBottomMargin,
+                                )
+                            }
                     }
 
                 val smallClockViewId = context.getId("lockscreen_clock_view")

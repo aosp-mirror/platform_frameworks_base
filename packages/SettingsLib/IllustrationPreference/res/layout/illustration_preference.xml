@@ -40,6 +40,15 @@
             android:adjustViewBounds="true"
             android:src="@drawable/protection_background"/>
 
+        <ImageView
+            android:id="@+id/background_view_tablet"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            android:src="@drawable/protection_background_tablet"
+            android:visibility="gone"/>
+
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/lottie_view"
             android:layout_width="wrap_content"

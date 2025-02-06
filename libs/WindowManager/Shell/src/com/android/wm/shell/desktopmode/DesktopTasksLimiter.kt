@@ -30,6 +30,8 @@ import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_MINIMIZE_WINDOW
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.ShellTaskOrganizer
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UnminimizeReason
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.sysui.UserChangeListener
@@ -67,19 +69,53 @@ class DesktopTasksLimiter(
         logV("Starting limiter with a maximum of %d tasks", maxTasksLimit)
     }
 
-    private data class TaskDetails(
+    data class TaskDetails(
         val displayId: Int,
         val taskId: Int,
-        var transitionInfo: TransitionInfo?,
+        var transitionInfo: TransitionInfo? = null,
+        val minimizeReason: MinimizeReason? = null,
+        val unminimizeReason: UnminimizeReason? = null,
     )
+
+    /**
+     * Returns the task being minimized in the given transition if that transition is a pending or
+     * active minimize transition.
+     */
+    fun getMinimizingTask(transition: IBinder): TaskDetails? {
+        return minimizeTransitionObserver.getMinimizingTask(transition)
+    }
+
+    /**
+     * Returns the task being unminimized in the given transition if that transition is a pending or
+     * active unminimize transition.
+     */
+    fun getUnminimizingTask(transition: IBinder): TaskDetails? {
+        return minimizeTransitionObserver.getUnminimizingTask(transition)
+    }
 
     // TODO(b/333018485): replace this observer when implementing the minimize-animation
     private inner class MinimizeTransitionObserver : TransitionObserver {
         private val pendingTransitionTokensAndTasks = mutableMapOf<IBinder, TaskDetails>()
         private val activeTransitionTokensAndTasks = mutableMapOf<IBinder, TaskDetails>()
+        private val pendingUnminimizeTransitionTokensAndTasks = mutableMapOf<IBinder, TaskDetails>()
+        private val activeUnminimizeTransitionTokensAndTasks = mutableMapOf<IBinder, TaskDetails>()
 
         fun addPendingTransitionToken(transition: IBinder, taskDetails: TaskDetails) {
             pendingTransitionTokensAndTasks[transition] = taskDetails
+        }
+
+        fun addPendingUnminimizeTransitionToken(transition: IBinder, taskDetails: TaskDetails) {
+            pendingUnminimizeTransitionTokensAndTasks[transition] = taskDetails
+        }
+
+        fun getMinimizingTask(transition: IBinder): TaskDetails? {
+            return pendingTransitionTokensAndTasks[transition]
+                ?: activeTransitionTokensAndTasks[transition]
+        }
+
+        fun getUnminimizingTask(transition: IBinder): TaskDetails? {
+            return pendingUnminimizeTransitionTokensAndTasks[transition]
+                ?: activeUnminimizeTransitionTokensAndTasks[transition]
         }
 
         override fun onTransitionReady(
@@ -89,6 +125,15 @@ class DesktopTasksLimiter(
             finishTransaction: SurfaceControl.Transaction,
         ) {
             val taskRepository = desktopUserRepositories.current
+            handleMinimizeTransitionReady(taskRepository, transition, info)
+            handleUnminimizeTransitionReady(transition)
+        }
+
+        private fun handleMinimizeTransitionReady(
+            taskRepository: DesktopRepository,
+            transition: IBinder,
+            info: TransitionInfo,
+        ) {
             val taskToMinimize = pendingTransitionTokensAndTasks.remove(transition) ?: return
             if (!taskRepository.isActiveTask(taskToMinimize.taskId)) return
             if (!isTaskReadyForMinimize(info, taskToMinimize)) {
@@ -106,6 +151,12 @@ class DesktopTasksLimiter(
             taskRepository.saveBoundsBeforeMinimize(taskToMinimize.taskId, boundsBeforeMinimize)
 
             this@DesktopTasksLimiter.minimizeTask(taskToMinimize.displayId, taskToMinimize.taskId)
+        }
+
+        private fun handleUnminimizeTransitionReady(transition: IBinder) {
+            val taskToUnminimize =
+                pendingUnminimizeTransitionTokensAndTasks.remove(transition) ?: return
+            activeUnminimizeTransitionTokensAndTasks[transition] = taskToUnminimize
         }
 
         /**
@@ -138,11 +189,10 @@ class DesktopTasksLimiter(
             )
         }
 
-        private fun getMinimizeChange(info: TransitionInfo, taskId: Int): TransitionInfo.Change? {
-            return info.changes.find { change ->
+        private fun getMinimizeChange(info: TransitionInfo, taskId: Int): TransitionInfo.Change? =
+            info.changes.find { change ->
                 change.taskInfo?.taskId == taskId && change.mode == TRANSIT_TO_BACK
             }
-        }
 
         override fun onTransitionMerged(merged: IBinder, playing: IBinder) {
             if (activeTransitionTokensAndTasks.remove(merged) != null) {
@@ -150,6 +200,11 @@ class DesktopTasksLimiter(
             }
             pendingTransitionTokensAndTasks.remove(merged)?.let { taskToTransfer ->
                 pendingTransitionTokensAndTasks[playing] = taskToTransfer
+            }
+
+            activeUnminimizeTransitionTokensAndTasks.remove(merged)
+            pendingUnminimizeTransitionTokensAndTasks.remove(merged)?.let { taskToTransfer ->
+                pendingUnminimizeTransitionTokensAndTasks[playing] = taskToTransfer
             }
         }
 
@@ -162,6 +217,8 @@ class DesktopTasksLimiter(
                 }
             }
             pendingTransitionTokensAndTasks.remove(transition)
+            activeUnminimizeTransitionTokensAndTasks.remove(transition)
+            pendingUnminimizeTransitionTokensAndTasks.remove(transition)
         }
     }
 
@@ -234,7 +291,7 @@ class DesktopTasksLimiter(
         // If it's a running task, reorder it to back.
         taskIdToMinimize
             ?.let { shellTaskOrganizer.getRunningTaskInfo(it) }
-            ?.let { wct.reorder(it.token, false /* onTop */) }
+            ?.let { wct.reorder(it.token, /* onTop= */ false) }
         return taskIdToMinimize
     }
 
@@ -242,12 +299,32 @@ class DesktopTasksLimiter(
      * Add a pending minimize transition change to update the list of minimized apps once the
      * transition goes through.
      */
-    fun addPendingMinimizeChange(transition: IBinder, displayId: Int, taskId: Int) {
+    fun addPendingMinimizeChange(
+        transition: IBinder,
+        displayId: Int,
+        taskId: Int,
+        minimizeReason: MinimizeReason,
+    ) {
         minimizeTransitionObserver.addPendingTransitionToken(
             transition,
-            TaskDetails(displayId, taskId, transitionInfo = null),
+            TaskDetails(displayId, taskId, transitionInfo = null, minimizeReason = minimizeReason),
         )
     }
+
+    /**
+     * Add a pending unminimize transition change to allow tracking unminimizing transitions /
+     * tasks.
+     */
+    fun addPendingUnminimizeChange(
+        transition: IBinder,
+        displayId: Int,
+        taskId: Int,
+        unminimizeReason: UnminimizeReason,
+    ) =
+        minimizeTransitionObserver.addPendingUnminimizeTransitionToken(
+            transition,
+            TaskDetails(displayId, taskId, unminimizeReason = unminimizeReason),
+        )
 
     /**
      * Returns the minimized task from the list of visible tasks ordered from front to back with the

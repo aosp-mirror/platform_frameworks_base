@@ -46,7 +46,7 @@ import androidx.test.filters.SmallTest;
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.recents.LauncherProxyService;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.util.settings.SecureSettings;
@@ -86,7 +86,7 @@ public class IMagnificationConnectionTest extends SysuiTestCase {
     @Mock
     private IRemoteMagnificationAnimationCallback mAnimationCallback;
     @Mock
-    private OverviewProxyService mOverviewProxyService;
+    private LauncherProxyService mLauncherProxyService;
     @Mock
     private SecureSettings mSecureSettings;
     @Mock
@@ -114,7 +114,7 @@ public class IMagnificationConnectionTest extends SysuiTestCase {
         assertNotNull(mTestableLooper);
         mMagnification = new MagnificationImpl(getContext(),
                 mTestableLooper.getLooper(), mContext.getMainExecutor(), mCommandQueue,
-                mModeSwitchesController, mSysUiState, mOverviewProxyService, mSecureSettings,
+                mModeSwitchesController, mSysUiState, mLauncherProxyService, mSecureSettings,
                 mDisplayTracker, getContext().getSystemService(DisplayManager.class),
                 mA11yLogger, mIWindowManager, mAccessibilityManager,
                 mViewCaptureAwareWindowManager);

@@ -33,7 +33,7 @@ import com.android.systemui.statusbar.events.PrivacyDotCorner.BottomLeft
 import com.android.systemui.statusbar.events.PrivacyDotCorner.BottomRight
 import com.android.systemui.statusbar.events.PrivacyDotCorner.TopLeft
 import com.android.systemui.statusbar.events.PrivacyDotCorner.TopRight
-import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
+import com.android.systemui.statusbar.layout.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE

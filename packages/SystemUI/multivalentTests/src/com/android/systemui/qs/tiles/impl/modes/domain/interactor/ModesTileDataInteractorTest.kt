@@ -40,7 +40,6 @@ import com.android.systemui.statusbar.policy.data.repository.fakeZenModeReposito
 import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toCollection
 import kotlinx.coroutines.test.runCurrent
@@ -49,7 +48,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class ModesTileDataInteractorTest : SysuiTestCase() {
@@ -58,7 +56,9 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
     private val dispatcher = kosmos.testDispatcher
     private val zenModeRepository = kosmos.fakeZenModeRepository
 
-    private val underTest = ModesTileDataInteractor(context, kosmos.zenModeInteractor, dispatcher)
+    private val underTest by lazy {
+        ModesTileDataInteractor(context, kosmos.zenModeInteractor, dispatcher)
+    }
 
     @Before
     fun setUp() {

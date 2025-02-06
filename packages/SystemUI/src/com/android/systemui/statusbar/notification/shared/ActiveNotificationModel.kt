@@ -68,6 +68,8 @@ data class ActiveNotificationModel(
     val uid: Int,
     /** The notifying app's packageName. */
     val packageName: String,
+    /** The notifying app's display name. */
+    val appName: String,
     /** The intent to execute if UI related to this notification is clicked. */
     val contentIntent: PendingIntent?,
     /** A small per-notification ID, used for statsd logging. */

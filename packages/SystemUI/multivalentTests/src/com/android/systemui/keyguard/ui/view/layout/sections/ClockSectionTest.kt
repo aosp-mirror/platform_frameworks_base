@@ -27,7 +27,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.customization.R as customR
-import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardSmartspaceInteractor
@@ -48,7 +47,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -59,7 +57,6 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.mock
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class ClockSectionTest : SysuiTestCase() {
@@ -156,7 +153,6 @@ class ClockSectionTest : SysuiTestCase() {
 
                 shadeRepository.setShadeLayoutWide(false)
                 keyguardClockInteractor.setClockSize(ClockSize.LARGE)
-                fakeKeyguardRepository.setClockShouldBeCentered(true)
                 notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
                 keyguardSmartspaceInteractor.setBcSmartspaceVisibility(VISIBLE)
                 fakeConfigurationController.notifyConfigurationChanged()
@@ -181,7 +177,6 @@ class ClockSectionTest : SysuiTestCase() {
 
                 shadeRepository.setShadeLayoutWide(true)
                 keyguardClockInteractor.setClockSize(ClockSize.LARGE)
-                fakeKeyguardRepository.setClockShouldBeCentered(true)
                 notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
                 keyguardSmartspaceInteractor.setBcSmartspaceVisibility(VISIBLE)
                 fakeConfigurationController.notifyConfigurationChanged()
@@ -206,7 +201,6 @@ class ClockSectionTest : SysuiTestCase() {
 
                 shadeRepository.setShadeLayoutWide(false)
                 keyguardClockInteractor.setClockSize(ClockSize.LARGE)
-                fakeKeyguardRepository.setClockShouldBeCentered(true)
                 notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
                 keyguardSmartspaceInteractor.setBcSmartspaceVisibility(VISIBLE)
                 fakeConfigurationController.notifyConfigurationChanged()
@@ -230,7 +224,6 @@ class ClockSectionTest : SysuiTestCase() {
 
                 shadeRepository.setShadeLayoutWide(true)
                 keyguardClockInteractor.setClockSize(ClockSize.SMALL)
-                fakeKeyguardRepository.setClockShouldBeCentered(true)
                 notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
                 keyguardSmartspaceInteractor.setBcSmartspaceVisibility(VISIBLE)
                 fakeConfigurationController.notifyConfigurationChanged()
@@ -254,7 +247,6 @@ class ClockSectionTest : SysuiTestCase() {
 
                 shadeRepository.setShadeLayoutWide(false)
                 keyguardClockInteractor.setClockSize(ClockSize.SMALL)
-                fakeKeyguardRepository.setClockShouldBeCentered(true)
                 notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
                 keyguardSmartspaceInteractor.setBcSmartspaceVisibility(VISIBLE)
                 fakeConfigurationController.notifyConfigurationChanged()

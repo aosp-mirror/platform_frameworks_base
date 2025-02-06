@@ -36,7 +36,6 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.utils.FieldSetter
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -55,7 +54,6 @@ import org.mockito.junit.MockitoRule
  * can't mock the AccessibilityShortcutInfo for test. MultiValentTest doesn't compile when using
  * newly introduced methods and constants.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class AccessibilityQsShortcutsRepositoryImplForDeviceTest : SysuiTestCase() {

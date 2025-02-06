@@ -22,6 +22,7 @@ import static com.android.settingslib.enterprise.ActionDisabledLearnMoreButtonLa
 import static com.android.settingslib.enterprise.ManagedDeviceActionDisabledByAdminController.DEFAULT_FOREGROUND_USER_CHECKER;
 
 import android.app.admin.DevicePolicyManager;
+import android.app.supervision.SupervisionManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
@@ -59,12 +60,18 @@ public final class ActionDisabledByAdminControllerFactory {
     }
 
     private static boolean isSupervisedDevice(Context context) {
-        DevicePolicyManager devicePolicyManager =
-                context.getSystemService(DevicePolicyManager.class);
-        ComponentName supervisionComponent =
-                devicePolicyManager.getProfileOwnerOrDeviceOwnerSupervisionComponent(
-                        new UserHandle(UserHandle.myUserId()));
-        return supervisionComponent != null;
+        if (android.app.supervision.flags.Flags.deprecateDpmSupervisionApis()) {
+            SupervisionManager supervisionManager =
+                    context.getSystemService(SupervisionManager.class);
+            return supervisionManager.isSupervisionEnabledForUser(UserHandle.myUserId());
+        } else {
+            DevicePolicyManager devicePolicyManager =
+                    context.getSystemService(DevicePolicyManager.class);
+            ComponentName supervisionComponent =
+                    devicePolicyManager.getProfileOwnerOrDeviceOwnerSupervisionComponent(
+                            new UserHandle(UserHandle.myUserId()));
+            return supervisionComponent != null;
+        }
     }
 
     /**
@@ -77,7 +84,11 @@ public final class ActionDisabledByAdminControllerFactory {
             return false;
         }
         DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
-        return ParentalControlsUtilsInternal.parentConsentRequired(context, dpm,
+        final SupervisionManager sm =
+                android.app.supervision.flags.Flags.deprecateDpmSupervisionApis()
+                        ? context.getSystemService(SupervisionManager.class)
+                        : null;
+        return ParentalControlsUtilsInternal.parentConsentRequired(context, dpm, sm,
                 BiometricAuthenticator.TYPE_ANY_BIOMETRIC, new UserHandle(UserHandle.myUserId()));
     }
 

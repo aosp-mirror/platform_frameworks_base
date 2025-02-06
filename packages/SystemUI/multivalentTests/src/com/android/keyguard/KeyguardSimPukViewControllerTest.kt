@@ -57,7 +57,6 @@ class KeyguardSimPukViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var keyguardSecurityCallback: KeyguardSecurityCallback
     @Mock private lateinit var messageAreaControllerFactory: KeyguardMessageAreaController.Factory
     @Mock private lateinit var latencyTracker: LatencyTracker
-    @Mock private lateinit var liftToActivateListener: LiftToActivateListener
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var falsingCollector: FalsingCollector
     @Mock private lateinit var emergencyButtonController: EmergencyButtonController
@@ -95,7 +94,6 @@ class KeyguardSimPukViewControllerTest : SysuiTestCase() {
                 keyguardSecurityCallback,
                 messageAreaControllerFactory,
                 latencyTracker,
-                liftToActivateListener,
                 telephonyManager,
                 falsingCollector,
                 emergencyButtonController,

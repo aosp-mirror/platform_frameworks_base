@@ -284,11 +284,34 @@ class MenuView extends FrameLayout implements
         onEdgeChanged();
         onPositionChanged();
 
-        if (mFeaturesChangeListener != null) {
+        boolean shouldSendFeatureChangeNotification =
+                com.android.systemui.Flags.floatingMenuNotifyTargetsChangedOnStrictDiff()
+                    ? !areFeatureListsIdentical(targetFeatures, newTargetFeatures)
+                    : true;
+        if (mFeaturesChangeListener != null && shouldSendFeatureChangeNotification) {
             mFeaturesChangeListener.onChange(newTargetFeatures);
         }
 
         mMenuAnimationController.fadeOutIfEnabled();
+    }
+
+    /**
+     * Returns true if the given feature lists are identical lists, i.e. the same list of {@link
+     * AccessibilityTarget} (equality checked via UID) in the same order.
+     */
+    private boolean areFeatureListsIdentical(
+            List<AccessibilityTarget> currentFeatures, List<AccessibilityTarget> newFeatures) {
+        if (currentFeatures.size() != newFeatures.size()) {
+            return false;
+        }
+
+        for (int i = 0; i < currentFeatures.size(); i++) {
+            if (currentFeatures.get(i).getUid() != newFeatures.get(i).getUid()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void onMenuFadeEffectInfoChanged(MenuFadeEffectInfo fadeEffectInfo) {

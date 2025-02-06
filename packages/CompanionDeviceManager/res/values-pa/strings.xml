@@ -18,9 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"ਸੰਬੰਧੀ ਡੀਵਾਈਸ ਪ੍ਰਬੰਧਕ"</string>
     <string name="confirmation_title" msgid="2244241995958340998">"ਕੀ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ਐਪ ਨੂੰ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
+    <string name="message_discovery_soft_timeout" msgid="473346859407859161">"ਪੱਕਾ ਕਰੋ ਕਿ ਇਸ <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> ਦਾ <xliff:g id="DISCOVERY_METHOD">%2$s</xliff:g> ਚਾਲੂ ਹੋਵੇ ਅਤੇ <xliff:g id="PROFILE_NAME">%3$s</xliff:g> ਨੂੰ ਆਪਣੇ ਨਜ਼ਦੀਕ ਰੱਖੋ।"</string>
+    <string name="message_discovery_hard_timeout" msgid="677514663495711424">"ਕੋਈ ਡੀਵਾਈਸ ਨਹੀਂ ਮਿਲਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
+    <string name="discovery_bluetooth" msgid="5693557668470016164">"ਬਲੂਟੁੱਥ"</string>
+    <string name="discovery_wifi" msgid="1551782459721758773">"ਵਾਈ-ਫਾਈ"</string>
+    <string name="discovery_mixed" msgid="7071466134150760127">"ਬਲੂਟੁੱਥ ਅਤੇ ਵਾਈ-ਫਾਈ"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"ਸਮਾਰਟ-ਵਾਚ"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ਵੱਲੋਂ ਪ੍ਰਬੰਧਿਤ ਕੀਤੇ ਜਾਣ ਲਈ ਕੋਈ ਡੀਵਾਈਸ ਚੁਣੋ"</string>
     <string name="chooser_title" msgid="2235819929238267637">"ਸੈੱਟਅੱਪ ਕਰਨ ਲਈ <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ਚੁਣੋ"</string>
+    <string name="single_device_title" msgid="4199861437545438606">"<xliff:g id="PROFILE_NAME">%1$s</xliff:g> ਨੂੰ ਲੱਭਿਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="summary_watch" msgid="8134580124808507407">"ਇਸ ਐਪ ਨੂੰ ਤੁਹਾਡੇ <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> \'ਤੇ ਕਾਲਰ ਦੇ ਨਾਮ ਵਰਗੀ ਜਾਣਕਾਰੀ ਨੂੰ ਸਿੰਕ ਕਰਨ ਅਤੇ ਇਨ੍ਹਾਂ ਇਜਾਜ਼ਤਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਆਗਿਆ ਹੋਵੇਗੀ"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"ਕੀ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ਨੂੰ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"ਡੀਵਾਈਸ"</string>

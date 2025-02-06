@@ -44,6 +44,8 @@ import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.toOffset
 import androidx.compose.ui.unit.toSize
 import com.android.systemui.Flags.communalWidgetResizing
+import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.ui.compose.extensions.firstItemAtOffset
 import com.android.systemui.communal.ui.compose.extensions.plus
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
@@ -105,6 +107,9 @@ internal constructor(
     private var draggingItemDraggedDelta by mutableStateOf(Offset.Zero)
     private var draggingItemInitialOffset by mutableStateOf(Offset.Zero)
 
+    private val spacer = CommunalContentModel.Spacer(CommunalContentSize.Responsive(1))
+    private var spacerIndex: Int? = null
+
     private var previousTargetItemKey: Any? = null
 
     internal val draggingItemOffset: Offset
@@ -140,6 +145,17 @@ internal constructor(
             ?.apply {
                 draggingItemKey = key as String
                 draggingItemInitialOffset = this.offset.toOffset()
+                // Add a spacer after the last widget if it is larger than the dragging widget.
+                // This allows overscrolling, enabling the dragging widget to be placed beyond it.
+                val lastWidget = contentListState.list.lastOrNull { it.isWidgetContent() }
+                if (
+                    lastWidget != null &&
+                        draggingItemLayoutInfo != null &&
+                        lastWidget.size.span > draggingItemLayoutInfo!!.span
+                ) {
+                    contentListState.list.add(spacer)
+                    spacerIndex = contentListState.list.size - 1
+                }
                 return true
             }
 
@@ -162,6 +178,11 @@ internal constructor(
         previousTargetItemKey = null
         draggingItemDraggedDelta = Offset.Zero
         draggingItemInitialOffset = Offset.Zero
+        // Remove spacer, if any, when a drag gesture finishes.
+        spacerIndex?.let {
+            contentListState.list.removeAt(it)
+            spacerIndex = null
+        }
     }
 
     internal fun onDrag(offset: Offset, layoutDirection: LayoutDirection) {

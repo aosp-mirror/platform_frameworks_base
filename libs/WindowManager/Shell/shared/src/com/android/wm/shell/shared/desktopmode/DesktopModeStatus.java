@@ -18,6 +18,8 @@ package com.android.wm.shell.shared.desktopmode;
 
 import static android.hardware.display.DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED;
 
+import static com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper.enableBubbleToFullscreen;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -187,7 +189,7 @@ public class DesktopModeStatus {
      * there should be no pooling.
      */
     public static int getWindowDecorScvhPoolSize(@NonNull Context context) {
-        if (!Flags.enableDesktopWindowingScvhCacheBugFix()) return 0;
+        if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_SCVH_CACHE.isTrue()) return 0;
         final int maxTaskLimit = getMaxTaskLimit(context);
         if (maxTaskLimit > 0) {
             return maxTaskLimit;
@@ -206,30 +208,62 @@ public class DesktopModeStatus {
     /**
      * Return {@code true} if the current device supports desktop mode.
      */
-    @VisibleForTesting
-    public static boolean isDesktopModeSupported(@NonNull Context context) {
+    private static boolean isDesktopModeSupported(@NonNull Context context) {
         return context.getResources().getBoolean(R.bool.config_isDesktopModeSupported);
+    }
+
+    /**
+     * Return {@code true} if the current device supports the developer option for desktop mode.
+     */
+    private static boolean isDesktopModeDevOptionSupported(@NonNull Context context) {
+        return context.getResources().getBoolean(R.bool.config_isDesktopModeDevOptionSupported);
     }
 
     /**
      * Return {@code true} if desktop mode dev option should be shown on current device
      */
     public static boolean canShowDesktopModeDevOption(@NonNull Context context) {
-        return isDeviceEligibleForDesktopMode(context) && Flags.showDesktopWindowingDevOption();
+        return isDeviceEligibleForDesktopModeDevOption(context)
+                && Flags.showDesktopWindowingDevOption();
+    }
+
+    /**
+     * Return {@code true} if desktop mode dev option should be shown on current device
+     */
+    public static boolean canShowDesktopExperienceDevOption(@NonNull Context context) {
+        return Flags.showDesktopExperienceDevOption() && isDeviceEligibleForDesktopMode(context);
     }
 
     /** Returns if desktop mode dev option should be enabled if there is no user override. */
-    public static boolean shouldDevOptionBeEnabledByDefault() {
-        return Flags.enableDesktopWindowingMode();
+    public static boolean shouldDevOptionBeEnabledByDefault(Context context) {
+        return isDeviceEligibleForDesktopMode(context) && Flags.enableDesktopWindowingMode();
     }
 
     /**
      * Return {@code true} if desktop mode is enabled and can be entered on the current device.
      */
     public static boolean canEnterDesktopMode(@NonNull Context context) {
-        if (!isDeviceEligibleForDesktopMode(context)) return false;
+        return (isDeviceEligibleForDesktopMode(context)
+                && DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODE.isTrue())
+                || isDesktopModeEnabledByDevOption(context);
+    }
 
-        return DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODE.isTrue();
+    /**
+     * Check if Desktop mode should be enabled because the dev option is shown and enabled.
+     */
+    private static boolean isDesktopModeEnabledByDevOption(@NonNull Context context) {
+        return DesktopModeFlags.isDesktopModeForcedEnabled()
+                && canShowDesktopModeDevOption(context);
+    }
+
+    /**
+     * Returns whether the multiple desktops feature is enabled for this device (both backend and
+     * frontend implementations).
+     */
+    public static boolean enableMultipleDesktops(@NonNull Context context) {
+        return Flags.enableMultipleDesktopsBackend()
+                && Flags.enableMultipleDesktopsFrontend()
+                && canEnterDesktopMode(context);
     }
 
     /**
@@ -237,7 +271,8 @@ public class DesktopModeStatus {
      * necessarily enabling desktop mode
      */
     public static boolean overridesShowAppHandle(@NonNull Context context) {
-        return Flags.showAppHandleLargeScreens() && deviceHasLargeScreen(context);
+        return (Flags.showAppHandleLargeScreens() || enableBubbleToFullscreen())
+                && deviceHasLargeScreen(context);
     }
 
     /**
@@ -280,8 +315,22 @@ public class DesktopModeStatus {
     /**
      * Return {@code true} if desktop mode is unrestricted and is supported in the device.
      */
-    private static boolean isDeviceEligibleForDesktopMode(@NonNull Context context) {
-        return !enforceDeviceRestrictions() || isDesktopModeSupported(context);
+    public static boolean isDeviceEligibleForDesktopMode(@NonNull Context context) {
+        return !enforceDeviceRestrictions() || isDesktopModeSupported(context) || (
+                Flags.enableDesktopModeThroughDevOption() && isDesktopModeDevOptionSupported(
+                        context));
+    }
+
+    /**
+     * Return {@code true} if the developer option for desktop mode is unrestricted and is supported
+     * in the device.
+     *
+     * Note that, if {@link #isDeviceEligibleForDesktopMode(Context)} is true, then
+     * {@link #isDeviceEligibleForDesktopModeDevOption(Context)} is also true.
+     */
+    private static boolean isDeviceEligibleForDesktopModeDevOption(@NonNull Context context) {
+        return !enforceDeviceRestrictions() || isDesktopModeSupported(context)
+                || isDesktopModeDevOptionSupported(context);
     }
 
     /**

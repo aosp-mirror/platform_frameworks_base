@@ -26,7 +26,6 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertFalse
@@ -37,7 +36,6 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 
-@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CommunalTransitionAnimatorControllerTest : SysuiTestCase() {

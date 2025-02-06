@@ -85,10 +85,7 @@ class WindowExtensionsImpl implements WindowExtensions {
         if (Flags.wlinfoOncreate()) {
             return EXTENSIONS_VERSION_V9;
         }
-        if (Flags.aeBackStackRestore()) {
-            return EXTENSIONS_VERSION_V8;
-        }
-        return EXTENSIONS_VERSION_V7;
+        return EXTENSIONS_VERSION_V8;
     }
 
     private String generateLogMessage() {

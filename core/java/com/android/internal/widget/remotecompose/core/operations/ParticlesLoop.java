@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This provides the mechinism to evolve the particles It consist of a restart equation and a list
+ * This provides the mechanism to evolve the particles It consist of a restart equation and a list
  * of equations particle restarts if restart equation > 0
  */
 public class ParticlesLoop extends PaintOperation implements VariableSupport, Container {
@@ -159,10 +159,10 @@ public class ParticlesLoop extends PaintOperation implements VariableSupport, Co
     /**
      * Write the operation on the buffer
      *
-     * @param buffer
-     * @param id
-     * @param restart
-     * @param equations
+     * @param buffer the buffer to write to
+     * @param id the id of the particle system
+     * @param restart the restart equation
+     * @param equations the equations to evolve the particles
      */
     public static void apply(
             @NonNull WireBuffer buffer,

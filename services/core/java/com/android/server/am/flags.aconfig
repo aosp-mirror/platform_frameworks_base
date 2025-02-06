@@ -270,6 +270,16 @@ flag {
 }
 
 flag {
+    name: "prototype_aggressive_freezing"
+    namespace: "backstage_power"
+    description: "Grant PROCESS_CAPABILITY_CPU_TIME to as many valid states and aggressively freeze other states"
+    bug: "370798593"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "add_modify_raw_oom_adj_service_level"
     namespace: "backstage_power"
     description: "Add a SERVICE_ADJ level to the modifyRawOomAdj method"
@@ -294,6 +304,17 @@ flag {
     namespace: "system_performance"
     description: "Notify ActivityTaskManager of cold starts early to fix app launch behavior."
     bug: "319519089"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "raise_bound_ui_service_threshold"
+    namespace: "backstage_power"
+    is_fixed_read_only: true
+    description: "Raise the threshold OomAdjuster will drop a service with UI to cached."
+    bug: "391691057"
     metadata {
         purpose: PURPOSE_BUGFIX
     }

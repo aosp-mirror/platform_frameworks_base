@@ -29,7 +29,6 @@ import com.android.systemui.util.kotlin.getOrNull
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -42,7 +41,6 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
 @SysUISingleton
-@OptIn(ExperimentalCoroutinesApi::class)
 class HomeControlsComponentInteractor
 @Inject
 constructor(

@@ -21,6 +21,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.LogBufferHelper.Companion.adjustMaxSize
 import com.android.systemui.log.LogcatEchoTracker
 import com.android.systemui.util.time.SystemClock
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
 @SysUISingleton
@@ -31,7 +32,7 @@ constructor(
     private val systemClock: SystemClock,
     private val logcatEchoTracker: LogcatEchoTracker,
 ) {
-    private val existingBuffers = mutableMapOf<String, TableLogBuffer>()
+    private val existingBuffers = ConcurrentHashMap<String, TableLogBuffer>()
 
     /**
      * Creates a new [TableLogBuffer]. This method should only be called from static contexts, where
@@ -42,17 +43,9 @@ constructor(
      * @param maxSize the buffer max size. See [adjustMaxSize]
      * @return a new [TableLogBuffer] registered with [DumpManager]
      */
-    fun create(
-        name: String,
-        maxSize: Int,
-    ): TableLogBuffer {
+    fun create(name: String, maxSize: Int): TableLogBuffer {
         val tableBuffer =
-            TableLogBuffer(
-                adjustMaxSize(maxSize),
-                name,
-                systemClock,
-                logcatEchoTracker,
-            )
+            TableLogBuffer(adjustMaxSize(maxSize), name, systemClock, logcatEchoTracker)
         dumpManager.registerTableLogBuffer(name, tableBuffer)
         return tableBuffer
     }
@@ -66,13 +59,12 @@ constructor(
      *
      * @return a [TableLogBuffer] suitable for reuse
      */
-    fun getOrCreate(
-        name: String,
-        maxSize: Int,
-    ): TableLogBuffer =
-        existingBuffers.getOrElse(name) {
-            val buffer = create(name, maxSize)
-            existingBuffers[name] = buffer
-            buffer
+    fun getOrCreate(name: String, maxSize: Int): TableLogBuffer =
+        synchronized(existingBuffers) {
+            existingBuffers.getOrElse(name) {
+                val buffer = create(name, maxSize)
+                existingBuffers[name] = buffer
+                buffer
+            }
         }
 }

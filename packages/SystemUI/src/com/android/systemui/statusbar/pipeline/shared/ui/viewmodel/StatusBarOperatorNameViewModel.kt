@@ -19,21 +19,24 @@ package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 
 /**
  * View model for the operator name (aka carrier name) of the carrier for the default data
  * subscription.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class StatusBarOperatorNameViewModel
 @Inject
 constructor(mobileIconsInteractor: MobileIconsInteractor) {
     val operatorName: Flow<String?> =
         mobileIconsInteractor.defaultDataSubId.flatMapLatest {
-            mobileIconsInteractor.getMobileConnectionInteractorForSubId(it).carrierName
+            if (it == null) {
+                flowOf(null)
+            } else {
+                mobileIconsInteractor.getMobileConnectionInteractorForSubId(it).carrierName
+            }
         }
 }

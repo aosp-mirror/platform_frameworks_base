@@ -94,7 +94,7 @@
 
     <style name="DialogButtonPositive">
         <item name="android:background">@drawable/dialog_btn_filled</item>
-        <item name="android:textColor">?androidprv:attr/textColorOnAccent</item>
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
         <item name="android:textSize">14sp</item>
         <item name="android:lineHeight">20sp</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>

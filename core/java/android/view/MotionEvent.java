@@ -532,12 +532,28 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static final int FLAG_NO_FOCUS_CHANGE = MotionEventFlag.NO_FOCUS_CHANGE;
 
     /**
-     * This flag indicates that this event was modified by or generated from an accessibility
-     * service. Value = 0x800
+     * This flag indicates that this event was injected from some
+     * {@link android.accessibilityservice.AccessibilityService}, which may be either an
+     * Accessibility Tool OR a service using that API for purposes other than assisting users with
+     * disabilities. Value = 0x800
+     * @see #FLAG_INJECTED_FROM_ACCESSIBILITY_TOOL
      * @hide
      */
     @TestApi
     public static final int FLAG_IS_ACCESSIBILITY_EVENT = MotionEventFlag.IS_ACCESSIBILITY_EVENT;
+
+    /**
+     * This flag indicates that this event was injected from an
+     * {@link android.accessibilityservice.AccessibilityService} with the
+     * {@link android.accessibilityservice.AccessibilityServiceInfo#isAccessibilityTool()} property
+     * set to true. These services (known as "Accessibility Tools") are used to assist users with
+     * disabilities, so events from these services should be able to reach all Views including
+     * Views which set {@link View#isAccessibilityDataSensitive()} to true.
+     * Value = 0x1000
+     * @hide
+     */
+    public static final int FLAG_INJECTED_FROM_ACCESSIBILITY_TOOL =
+            MotionEventFlag.INJECTED_FROM_ACCESSIBILITY_TOOL;
 
     /**
      * Private flag that indicates when the system has detected that this motion event
@@ -2532,6 +2548,24 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         nativeSetFlags(mNativePtr, targetsFocus
                 ? flags | FLAG_TARGET_ACCESSIBILITY_FOCUS
                 : flags & ~FLAG_TARGET_ACCESSIBILITY_FOCUS);
+    }
+
+    /**
+     * @see #FLAG_IS_ACCESSIBILITY_EVENT
+     * @hide
+     */
+    public boolean isInjectedFromAccessibilityService() {
+        final int flags = getFlags();
+        return (flags & FLAG_IS_ACCESSIBILITY_EVENT) != 0;
+    }
+
+    /**
+     * @see #FLAG_INJECTED_FROM_ACCESSIBILITY_TOOL
+     * @hide
+     */
+    public boolean isInjectedFromAccessibilityTool() {
+        final int flags = getFlags();
+        return (flags & FLAG_INJECTED_FROM_ACCESSIBILITY_TOOL) != 0;
     }
 
     /** @hide */

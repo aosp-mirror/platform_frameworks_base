@@ -78,6 +78,9 @@ public interface SatelliteTransmissionUpdateCallback {
     /**
      * Called when framework receives a request to send a datagram.
      *
+     * Informs external apps that device is working on sending a datagram out and is in the process
+     * of checking if all the conditions required to send datagrams are met.
+     *
      * @param datagramType The type of the requested datagram.
      */
     @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)

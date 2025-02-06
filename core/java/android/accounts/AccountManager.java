@@ -30,7 +30,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.Size;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UserHandleAware;
@@ -2019,23 +2018,22 @@ public class AccountManager {
      * @param account the account to copy
      * @param fromUser the user to copy the account from
      * @param toUser the target user
-     * @param callback Callback to invoke when the request completes,
-     *     null for no callback
      * @param handler {@link Handler} identifying the callback thread,
      *     null for the main thread
+     * @param callback Callback to invoke when the request completes,
+     *     null for no callback
      * @return An {@link AccountManagerFuture} which resolves to a Boolean indicated whether it
      * succeeded.
      * @hide
      */
-    @SuppressLint("SamShouldBeLast")
     @NonNull
     @SystemApi
     @RequiresPermission(anyOf = {COPY_ACCOUNTS, INTERACT_ACROSS_USERS_FULL})
     @FlaggedApi(FLAG_SPLIT_CREATE_MANAGED_PROFILE_ENABLED)
     public AccountManagerFuture<Boolean> copyAccountToUser(
             @NonNull final Account account, @NonNull final UserHandle fromUser,
-            @NonNull final UserHandle toUser, @Nullable AccountManagerCallback<Boolean> callback,
-            @Nullable Handler handler) {
+            @NonNull final UserHandle toUser, @Nullable Handler handler,
+            @Nullable AccountManagerCallback<Boolean> callback) {
         if (account == null) throw new IllegalArgumentException("account is null");
         if (toUser == null || fromUser == null) {
             throw new IllegalArgumentException("fromUser and toUser cannot be null");

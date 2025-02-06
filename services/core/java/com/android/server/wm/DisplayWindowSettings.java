@@ -26,6 +26,8 @@ import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static com.android.server.wm.DisplayContent.FORCE_SCALING_MODE_AUTO;
 import static com.android.server.wm.DisplayContent.FORCE_SCALING_MODE_DISABLED;
 
+import static com.android.server.display.feature.flags.Flags.enableDisplayContentModeManagement;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
@@ -120,7 +122,7 @@ class DisplayWindowSettings {
     }
 
     void setIgnoreOrientationRequest(@NonNull DisplayContent displayContent,
-            boolean ignoreOrientationRequest) {
+            @Nullable Boolean ignoreOrientationRequest) {
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         final SettingsProvider.SettingsEntry overrideSettings =
                 mSettingsProvider.getOverrideSettings(displayInfo);
@@ -244,11 +246,27 @@ class DisplayWindowSettings {
     }
 
     void setShouldShowSystemDecorsLocked(@NonNull DisplayContent dc, boolean shouldShow) {
+        final boolean changed = (shouldShow != shouldShowSystemDecorsLocked(dc));
+
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final SettingsProvider.SettingsEntry overrideSettings =
                 mSettingsProvider.getOverrideSettings(displayInfo);
         overrideSettings.mShouldShowSystemDecors = shouldShow;
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
+
+        if (enableDisplayContentModeManagement()) {
+            if (dc.isDefaultDisplay || dc.isPrivate() || !changed) {
+                return;
+            }
+
+            dc.getDisplayPolicy().updateHasNavigationBarIfNeeded();
+
+            if (shouldShow) {
+                mService.mRoot.startSystemDecorations(dc, "setShouldShowSystemDecorsLocked");
+            } else {
+                dc.getDisplayPolicy().notifyDisplayRemoveSystemDecorations();
+            }
+        }
     }
 
     boolean isHomeSupportedLocked(@NonNull DisplayContent dc) {

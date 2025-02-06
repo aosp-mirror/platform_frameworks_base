@@ -19,13 +19,14 @@ package com.android.systemui.statusbar.notification.stack.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.data.repository.NotificationPlaceholderRepository
 import com.android.systemui.statusbar.notification.stack.data.repository.NotificationViewHeightRepository
 import com.android.systemui.statusbar.notification.stack.shared.model.AccessibilityScrollEvent
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrollState
 import java.util.function.Consumer
 import javax.inject.Inject
@@ -44,11 +45,11 @@ constructor(
     private val viewHeightRepository: NotificationViewHeightRepository,
     private val placeholderRepository: NotificationPlaceholderRepository,
     sceneInteractor: SceneInteractor,
-    shadeInteractor: ShadeInteractor,
+    shadeModeInteractor: ShadeModeInteractor,
 ) {
     /** The bounds of the notification stack in the current scene. */
-    val shadeScrimBounds: StateFlow<ShadeScrimBounds?> =
-        placeholderRepository.shadeScrimBounds.asStateFlow()
+    val notificationShadeScrimBounds: StateFlow<ShadeScrimBounds?> =
+        placeholderRepository.notificationShadeScrimBounds.asStateFlow()
 
     /**
      * Whether the stack is expanding from GONE-with-HUN to SHADE
@@ -59,7 +60,7 @@ constructor(
 
     /** The rounding of the notification stack. */
     val shadeScrimRounding: Flow<ShadeScrimRounding> =
-        combine(shadeInteractor.shadeMode, isExpandingFromHeadsUp) {
+        combine(shadeModeInteractor.shadeMode, isExpandingFromHeadsUp) {
                 shadeMode,
                 isExpandingFromHeadsUp ->
                 ShadeScrimRounding(
@@ -119,9 +120,27 @@ constructor(
     }
 
     /** Sets the position of the notification stack in the current scene. */
-    fun setShadeScrimBounds(bounds: ShadeScrimBounds?) {
-        check(bounds == null || bounds.top <= bounds.bottom) { "Invalid bounds: $bounds" }
-        placeholderRepository.shadeScrimBounds.value = bounds
+    fun setNotificationShadeScrimBounds(bounds: ShadeScrimBounds?) {
+        checkValidBounds(bounds)
+        placeholderRepository.notificationShadeScrimBounds.value = bounds
+    }
+
+    /**
+     * Sends the bounds of the QuickSettings panel to the consumer set by [setQsPanelShapeConsumer].
+     *
+     * Used to clip Notification content when the QuickSettings Overlay panel covers it. Sending
+     * `null` resets the negative shape clipping of the Notification Stack.
+     */
+    fun sendQsPanelShape(shape: ShadeScrimShape?) {
+        checkValidBounds(shape?.bounds)
+        placeholderRepository.qsPanelShapeConsumer?.invoke(shape)
+    }
+
+    /**
+     * Sets a consumer to be notified when the QuickSettings Overlay panel changes size or position.
+     */
+    fun setQsPanelShapeConsumer(consumer: ((ShadeScrimShape?) -> Unit)?) {
+        placeholderRepository.qsPanelShapeConsumer = consumer
     }
 
     /** Updates the current scroll state of the notification shade. */
@@ -155,5 +174,9 @@ constructor(
 
     fun setConstrainedAvailableSpace(height: Int) {
         placeholderRepository.constrainedAvailableSpace.value = height
+    }
+
+    private fun checkValidBounds(bounds: ShadeScrimBounds?) {
+        check(bounds == null || bounds.top <= bounds.bottom) { "Invalid bounds: $bounds" }
     }
 }

@@ -30,6 +30,14 @@ interface AutomaticPromotionCoordinator : Coordinator {
          * (but not normally promoted notifications).
          */
         const val EXTRA_WAS_AUTOMATICALLY_PROMOTED = "android.wasAutomaticallyPromoted"
+
+        /**
+         * An extra set only on automatically promoted notifications that contains text that could
+         * reasonably be the short critical text. For now, we're only extracting arrival times. Will
+         * be set as a String.
+         */
+        const val EXTRA_AUTOMATICALLY_EXTRACTED_SHORT_CRITICAL_TEXT =
+            "android.automaticallyExtractedShortCriticalText"
     }
 }
 

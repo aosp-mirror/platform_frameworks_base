@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.scene
 
 import android.provider.Settings
@@ -70,7 +68,6 @@ import com.android.systemui.util.settings.data.repository.userAwareSecureSetting
 import com.android.telecom.mockTelecomManager
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -98,7 +95,6 @@ import org.junit.runner.RunWith
  *   being used when the state is as required (e.g. cannot unlock an already unlocked device, cannot
  *   put to sleep a device that's already asleep, etc.).
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper

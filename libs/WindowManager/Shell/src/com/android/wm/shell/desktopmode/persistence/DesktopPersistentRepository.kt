@@ -24,6 +24,7 @@ import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.Serializer
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.dataStoreFile
 import com.android.framework.protobuf.InvalidProtocolBufferException
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread
@@ -49,6 +50,10 @@ class DesktopPersistentRepository(private val dataStore: DataStore<DesktopPersis
             serializer = DesktopPersistentRepositoriesSerializer,
             produceFile = { context.dataStoreFile(DESKTOP_REPOSITORIES_DATASTORE_FILE) },
             scope = bgCoroutineScope,
+            corruptionHandler =
+                ReplaceFileCorruptionHandler(
+                    produceNewData = { DesktopPersistentRepositories.getDefaultInstance() }
+                ),
         )
     )
 
@@ -127,7 +132,10 @@ class DesktopPersistentRepository(private val dataStore: DataStore<DesktopPersis
                     .toBuilder()
                     .putDesktopRepoByUser(
                         userId,
-                        currentRepository.toBuilder().putDesktop(desktopId, desktop.build()).build(),
+                        currentRepository
+                            .toBuilder()
+                            .putDesktop(desktopId, desktop.build())
+                            .build(),
                     )
                     .build()
             }
@@ -136,6 +144,22 @@ class DesktopPersistentRepository(private val dataStore: DataStore<DesktopPersis
                 TAG,
                 "Error in updating desktop mode related data, data is " +
                     "stored in a file named $DESKTOP_REPOSITORIES_DATASTORE_FILE",
+                exception,
+            )
+        }
+    }
+
+    suspend fun removeUsers(uids: List<Int>) {
+        try {
+            dataStore.updateData { persistentRepositories: DesktopPersistentRepositories ->
+                val persistentRepositoriesBuilder = persistentRepositories.toBuilder()
+                uids.forEach { uid -> persistentRepositoriesBuilder.removeDesktopRepoByUser(uid) }
+                persistentRepositoriesBuilder.build()
+            }
+        } catch (exception: Exception) {
+            Log.e(
+                TAG,
+                "Error in removing user related data, data is stored in a file named $DESKTOP_REPOSITORIES_DATASTORE_FILE",
                 exception,
             )
         }

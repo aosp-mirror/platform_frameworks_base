@@ -1228,6 +1228,8 @@
 
     <!-- Summary for settings preference disabled by app ops [CHAR LIMIT=50] -->
     <string name="disabled_by_app_ops_text">Controlled by Restricted Setting</string>
+    <!-- Summary for settings preference disabled while the device is in a phone call [CHAR LIMIT=50] -->
+    <string name="disabled_in_phone_call_text">Unavailable during calls</string>
 
     <!-- [CHAR LIMIT=25] Manage applications, text telling using an application is disabled. -->
     <string name="disabled">Disabled</string>
@@ -1723,6 +1725,8 @@
 
     <!-- Content description of the data connection type 5G+. [CHAR LIMIT=NONE] -->
     <string name="data_connection_5g_plus" translatable="false">5G+</string>
+    <!-- Content description of the data connection type 5G+ for carrier 2032. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_5g_plus_carrier_2032" translatable="false">5G+</string>
 
     <!-- Content description of the data connection type Carrier WiFi. [CHAR LIMIT=NONE] -->
     <string name="data_connection_carrier_wifi">W+</string>

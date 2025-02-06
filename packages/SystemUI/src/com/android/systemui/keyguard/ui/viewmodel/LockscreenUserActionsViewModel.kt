@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.compose.animation.scene.Swipe
@@ -27,6 +25,7 @@ import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInter
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.viewmodel.dualShadeActions
 import com.android.systemui.shade.ui.viewmodel.singleShadeActions
@@ -39,12 +38,14 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 
 /** Models UI state and handles user input for the lockscreen scene. */
+@OptIn(ExperimentalCoroutinesApi::class)
 class LockscreenUserActionsViewModel
 @AssistedInject
 constructor(
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val communalInteractor: CommunalInteractor,
     private val shadeInteractor: ShadeInteractor,
+    private val shadeModeInteractor: ShadeModeInteractor,
     private val occlusionInteractor: SceneContainerOcclusionInteractor,
 ) : UserActionsViewModel() {
 
@@ -58,7 +59,7 @@ constructor(
                 combine(
                     deviceEntryInteractor.isUnlocked,
                     communalInteractor.isCommunalAvailable,
-                    shadeInteractor.shadeMode,
+                    shadeModeInteractor.shadeMode,
                     occlusionInteractor.isOccludingActivityShown,
                 ) { isDeviceUnlocked, isCommunalAvailable, shadeMode, isOccluded ->
                     buildList {

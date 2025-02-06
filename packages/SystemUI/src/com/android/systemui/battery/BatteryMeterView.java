@@ -19,7 +19,6 @@ import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
 
 import static com.android.settingslib.flags.Flags.newStatusBarIcons;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
-import static com.android.systemui.Flags.gsfQuickSettings;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -34,7 +33,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -52,7 +50,6 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.app.animation.Interpolators;
 import com.android.systemui.DualToneHandler;
-import com.android.systemui.FontStyles;
 import com.android.systemui.battery.unified.BatteryColors;
 import com.android.systemui.battery.unified.BatteryDrawableState;
 import com.android.systemui.battery.unified.BatteryLayersDrawable;
@@ -387,10 +384,6 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         }
         float fontHeight = mBatteryPercentView.getPaint().getFontMetricsInt(null);
         mBatteryPercentView.setLineHeight(TypedValue.COMPLEX_UNIT_PX, fontHeight);
-        if (gsfQuickSettings()) {
-            mBatteryPercentView.setTypeface(
-                    Typeface.create(FontStyles.GSF_LABEL_LARGE, Typeface.NORMAL));
-        }
         if (mTextColor != 0) mBatteryPercentView.setTextColor(mTextColor);
         addView(mBatteryPercentView, new LayoutParams(
                 LayoutParams.WRAP_CONTENT,

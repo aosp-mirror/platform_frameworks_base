@@ -54,7 +54,6 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -69,7 +68,6 @@ import kotlinx.coroutines.withContext
  * A [CoreStartable] responsible for automatically navigating between communal scenes when certain
  * conditions are met.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class CommunalSceneStartable
 @Inject

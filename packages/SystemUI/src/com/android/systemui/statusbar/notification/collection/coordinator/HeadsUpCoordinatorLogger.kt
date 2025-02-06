@@ -148,6 +148,15 @@ class HeadsUpCoordinatorLogger(private val buffer: LogBuffer, private val verbos
         )
     }
 
+    fun logHidePromotedNotificationHeadsUp(key: String) {
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            { str1 = key },
+            { "requesting promoted entry to hide heads up: $str1" },
+        )
+    }
+
     fun logPromotedNotificationForHeadsUpNotFound(key: String) {
         buffer.log(
             TAG,

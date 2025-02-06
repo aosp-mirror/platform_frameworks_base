@@ -612,7 +612,7 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
                 final PackageSetting staticLibPkgSetting =
                         mPm.getPackageSettingForMutation(sharedLibraryInfo.getPackageName());
                 if (staticLibPkgSetting == null) {
-                    Slog.wtf(TAG, "Shared lib without setting: " + sharedLibraryInfo);
+                    Slog.w(TAG, "Shared lib without setting: " + sharedLibraryInfo);
                     continue;
                 }
                 for (int u = 0; u < installedUserCount; u++) {

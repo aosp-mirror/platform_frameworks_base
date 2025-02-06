@@ -40,4 +40,9 @@ internal abstract class StartShadeModule {
     @IntoMap
     @ClassKey(ShadeStartable::class)
     abstract fun provideShadeStartable(startable: ShadeStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(ShadeStateTraceLogger::class)
+    abstract fun provideShadeStateTraceLogger(startable: ShadeStateTraceLogger): CoreStartable
 }

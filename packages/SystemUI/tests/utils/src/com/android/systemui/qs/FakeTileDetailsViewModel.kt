@@ -16,23 +16,10 @@
 
 package com.android.systemui.qs
 
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import com.android.systemui.plugins.qs.TileDetailsViewModel
 
 class FakeTileDetailsViewModel(var tileSpec: String?) : TileDetailsViewModel() {
     private var _clickOnSettingsButton = 0
-
-    @Composable
-    override fun GetContentView() {
-        Text(
-            text = "Fake details content",
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.ExtraBold,
-        )
-    }
 
     override fun clickOnSettingsButton() {
         _clickOnSettingsButton++

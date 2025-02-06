@@ -18,8 +18,13 @@ package com.android.systemui.statusbar.notification.promoted
 
 import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.statusbar.notification.row.shared.skeletonImageTransform
 
 var Kosmos.promotedNotificationContentExtractor by
     Kosmos.Fixture {
-        PromotedNotificationContentExtractorImpl(applicationContext, promotedNotificationLogger)
+        PromotedNotificationContentExtractorImpl(
+            applicationContext,
+            skeletonImageTransform,
+            promotedNotificationLogger,
+        )
     }

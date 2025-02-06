@@ -65,13 +65,13 @@ aconfig_declarations_group {
         "android.sdk.flags-aconfig-java",
         "android.security.flags-aconfig-java",
         "android.server.app.flags-aconfig-java",
+        "android.service.appprediction.flags-aconfig-java",
         "android.service.autofill.flags-aconfig-java",
         "android.service.chooser.flags-aconfig-java",
         "android.service.compat.flags-aconfig-java",
         "android.service.controls.flags-aconfig-java",
         "android.service.dreams.flags-aconfig-java",
         "android.service.notification.flags-aconfig-java",
-        "android.service.appprediction.flags-aconfig-java",
         "android.service.quickaccesswallet.flags-aconfig-java",
         "android.service.voice.flags-aconfig-java",
         "android.speech.flags-aconfig-java",
@@ -102,11 +102,13 @@ aconfig_declarations_group {
         "com.android.media.flags.projection-aconfig-java",
         "com.android.net.http.flags-aconfig-exported-java",
         "com.android.net.thread.platform.flags-aconfig-java",
+        "com.android.permission.flags-aconfig-java-export",
         "com.android.ranging.flags.ranging-aconfig-java-export",
         "com.android.server.contextualsearch.flags-java",
         "com.android.server.flags.services-aconfig-java",
         "com.android.text.flags-aconfig-java",
         "com.android.window.flags.window-aconfig-java",
+        "configinfra_framework_flags_java_exported_lib",
         "conscrypt_exported_aconfig_flags_lib",
         "device_policy_aconfig_flags_lib",
         "display_flags_lib",
@@ -114,6 +116,7 @@ aconfig_declarations_group {
         "framework-jobscheduler-job.flags-aconfig-java",
         "framework_graphics_flags_java_lib",
         "hwui_flags_java_lib",
+        "icu_exported_aconfig_flags_lib",
         "interaction_jank_monitor_flags_lib",
         "keystore2_flags_java-framework",
         "libcore_exported_aconfig_flags_lib",
@@ -158,6 +161,14 @@ java_defaults {
 java_aconfig_library {
     name: "art_exported_aconfig_flags_lib",
     aconfig_declarations: "art-aconfig-flags",
+    mode: "exported",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// ICU
+java_aconfig_library {
+    name: "icu_exported_aconfig_flags_lib",
+    aconfig_declarations: "icu_aconfig_flags",
     mode: "exported",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
@@ -466,7 +477,7 @@ java_aconfig_library {
         "//apex_available:platform",
         "com.android.art",
         "com.android.art.debug",
-        "com.android.btservices",
+        "com.android.bt",
         "com.android.mediaprovider",
         "com.android.permission",
     ],
@@ -522,7 +533,10 @@ aconfig_declarations {
     package: "android.companion.virtualdevice.flags",
     container: "system",
     exportable: true,
-    srcs: ["core/java/android/companion/virtual/flags/*.aconfig"],
+    srcs: [
+        "core/java/android/companion/virtual/flags/flags.aconfig",
+        "core/java/android/companion/virtual/flags/launched_flags.aconfig",
+    ],
 }
 
 java_aconfig_library {
@@ -547,7 +561,7 @@ aconfig_declarations {
     name: "android.companion.virtual.flags-aconfig",
     package: "android.companion.virtual.flags",
     container: "system",
-    srcs: ["core/java/android/companion/virtual/*.aconfig"],
+    srcs: ["core/java/android/companion/virtual/flags/deprecated_flags_do_not_edit.aconfig"],
 }
 
 // InputMethod
@@ -810,6 +824,11 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+cc_aconfig_library {
+    name: "android.media.tv.flags-aconfig-cc",
+    aconfig_declarations: "android.media.tv.flags-aconfig",
+}
+
 // Permissions
 aconfig_declarations {
     name: "android.permission.flags-aconfig",
@@ -827,8 +846,9 @@ java_aconfig_library {
     min_sdk_version: "30",
     apex_available: [
         "//apex_available:platform",
-        "com.android.permission",
         "com.android.nfcservices",
+        "com.android.permission",
+        "com.android.extservices",
     ],
 }
 
@@ -1405,6 +1425,7 @@ java_aconfig_library {
 // Content Capture
 aconfig_declarations {
     name: "android.view.contentcapture.flags-aconfig",
+    exportable: true,
     package: "android.view.contentcapture.flags",
     container: "system",
     srcs: ["core/java/android/view/contentcapture/flags/*.aconfig"],
@@ -1553,6 +1574,13 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+java_aconfig_library {
+    name: "power_flags_lib_host",
+    aconfig_declarations: "power_flags",
+    host_supported: true,
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 // Content
 aconfig_declarations {
     name: "android.content.flags-aconfig",
@@ -1581,6 +1609,13 @@ java_aconfig_library {
     name: "android.app.appfunctions.flags-aconfig-java",
     aconfig_declarations: "android.app.appfunctions.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "android.app.appfunctions.flags-aconfig-java-host",
+    aconfig_declarations: "android.app.appfunctions.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    host_supported: true,
 }
 
 java_aconfig_library {
@@ -1831,6 +1866,41 @@ java_aconfig_library {
 java_aconfig_library {
     name: "aconfig_settingslib_flags_java_lib",
     aconfig_declarations: "aconfig_settingslib_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// SettingsTheme Lib
+aconfig_declarations {
+    name: "aconfig_settings_theme_flags",
+    package: "com.android.settingslib.widget.theme.flags",
+    container: "system",
+    exportable: true,
+    srcs: [
+        "packages/SettingsLib/SettingsTheme/aconfig/settingstheme.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "aconfig_settingstheme_exported_flags_java_lib",
+    aconfig_declarations: "aconfig_settings_theme_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    mode: "exported",
+    min_sdk_version: "21",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.adservices",
+        "com.android.cellbroadcast",
+        "com.android.devicelock",
+        "com.android.extservices",
+        "com.android.healthfitness",
+        "com.android.mediaprovider",
+        "com.android.permission",
+    ],
+}
+
+java_aconfig_library {
+    name: "aconfig_settingstheme_flags_java_lib",
+    aconfig_declarations: "aconfig_settings_theme_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 

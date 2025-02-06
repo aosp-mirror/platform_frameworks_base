@@ -15,8 +15,7 @@
  */
 package com.android.keyguard;
 
-import static com.android.systemui.Flags.gsfBouncer;
-import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_KEY;
+import static com.android.systemui.Flags.bouncerUiRevamp2;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -38,6 +37,8 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.android.settingslib.Utils;
+import com.android.systemui.FontStyles;
+import com.android.systemui.bouncer.shared.constants.PinBouncerConstants.Color;
 import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer;
 import com.android.systemui.res.R;
 
@@ -144,6 +145,11 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
         } else {
             mAnimator = null;
         }
+
+        if (bouncerUiRevamp2()) {
+            mDigitText.setTypeface(
+                    Typeface.create(FontStyles.GSF_LABEL_LARGE_EMPHASIZED, Typeface.NORMAL));
+        }
     }
 
     @Override
@@ -155,13 +161,10 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
      * Reload colors from resources.
      **/
     public void reloadColors() {
-        int textColor = getContext().getColor(NUM_PAD_KEY);
+        int textColor = getContext().getColor(Color.digit);
         int klondikeColor = Utils.getColorAttr(getContext(), android.R.attr.textColorSecondary)
                 .getDefaultColor();
         mDigitText.setTextColor(textColor);
-        if (gsfBouncer()) {
-            mDigitText.setTypeface(Typeface.create("gsf-label-large-emphasized", Typeface.NORMAL));
-        }
         mKlondikeText.setTextColor(klondikeColor);
 
         if (mAnimator != null) mAnimator.reloadColors(getContext());

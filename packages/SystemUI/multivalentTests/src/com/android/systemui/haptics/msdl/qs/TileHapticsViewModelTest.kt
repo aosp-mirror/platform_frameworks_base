@@ -30,7 +30,6 @@ import com.android.systemui.qs.panels.ui.viewmodel.tileViewModel
 import com.android.systemui.testKosmos
 import com.google.android.msdl.data.model.MSDLToken
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -39,7 +38,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class TileHapticsViewModelTest : SysuiTestCase() {
 

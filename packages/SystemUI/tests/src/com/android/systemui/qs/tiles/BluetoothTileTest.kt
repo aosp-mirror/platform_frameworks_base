@@ -238,7 +238,8 @@ class BluetoothTileTest(flags: FlagsParameterization) : SysuiTestCase() {
 
         tile.handleClick(null)
 
-        verify(bluetoothTileDialogViewModel).showDialog(null)
+        verify(bluetoothTileDialogViewModel)
+            .showDetailsContent(/* expandable= */ null, /* view= */ null)
     }
 
     @Test

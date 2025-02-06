@@ -554,7 +554,8 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                     if (motionEventInjector != null
                             && mWindowManagerService.isTouchOrFaketouchDevice()) {
                         motionEventInjector.injectEvents(
-                                gestureSteps.getList(), mClient, sequence, displayId);
+                                gestureSteps.getList(), mClient, sequence, displayId,
+                                mAccessibilityServiceInfo.isAccessibilityTool());
                     } else {
                         try {
                             if (svcClientTracingEnabled()) {

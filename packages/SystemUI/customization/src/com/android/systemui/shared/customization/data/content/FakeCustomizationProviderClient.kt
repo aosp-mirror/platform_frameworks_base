@@ -108,10 +108,6 @@ class FakeCustomizationProviderClient(
         return flags.asStateFlow()
     }
 
-    override fun observeRuntimeValues(): Flow<Bundle> {
-        return runtimeValues.asStateFlow()
-    }
-
     override suspend fun queryAffordances(): List<CustomizationProviderClient.Affordance> {
         return affordances.value
     }

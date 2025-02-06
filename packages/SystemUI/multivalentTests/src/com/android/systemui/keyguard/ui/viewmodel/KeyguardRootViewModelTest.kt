@@ -15,8 +15,6 @@
  *
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.platform.test.flag.junit.FlagsParameterization
@@ -57,7 +55,6 @@ import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf

@@ -28,8 +28,8 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.viewinterop.AndroidView
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.customization.R as customR
 import com.android.systemui.dagger.qualifiers.Application
@@ -42,7 +42,7 @@ import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryBackgroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LongPressHandlingViewLogger
+import com.android.systemui.log.TouchHandlingViewLogger
 import com.android.systemui.log.dagger.LongPressTouchLog
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
@@ -66,7 +66,7 @@ constructor(
     @LongPressTouchLog private val logBuffer: LogBuffer,
 ) {
     @Composable
-    fun SceneScope.LockIcon(overrideColor: Color? = null, modifier: Modifier = Modifier) {
+    fun ContentScope.LockIcon(overrideColor: Color? = null, modifier: Modifier = Modifier) {
         val context = LocalContext.current
 
         AndroidView(
@@ -74,7 +74,7 @@ constructor(
                 DeviceEntryIconView(
                         context,
                         null,
-                        logger = LongPressHandlingViewLogger(logBuffer, tag = TAG),
+                        logger = TouchHandlingViewLogger(logBuffer, tag = TAG),
                     )
                     .apply {
                         id = R.id.device_entry_icon_view

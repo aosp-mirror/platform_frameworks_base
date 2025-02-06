@@ -32,7 +32,7 @@ class AppCompatLetterboxUtils {
      */
     static void calculateLetterboxPosition(@NonNull ActivityRecord activity,
             @NonNull Point outLetterboxPosition) {
-        if (!activity.mAppCompatController.getAppCompatLetterboxPolicy().isRunning()) {
+        if (!activity.mAppCompatController.getLetterboxPolicy().isRunning()) {
             outLetterboxPosition.set(0, 0);
             return;
         }
@@ -54,7 +54,7 @@ class AppCompatLetterboxUtils {
      */
     static void calculateLetterboxOuterBounds(@NonNull ActivityRecord activity,
             @NonNull Rect outOuterBounds) {
-        if (!activity.mAppCompatController.getAppCompatLetterboxPolicy().isRunning()) {
+        if (!activity.mAppCompatController.getLetterboxPolicy().isRunning()) {
             outOuterBounds.setEmpty();
             return;
         }
@@ -82,7 +82,7 @@ class AppCompatLetterboxUtils {
      */
     static void calculateLetterboxInnerBounds(@NonNull ActivityRecord activity,
             @NonNull WindowState window, @NonNull Rect outInnerBounds) {
-        if (!activity.mAppCompatController.getAppCompatLetterboxPolicy().isRunning()) {
+        if (!activity.mAppCompatController.getLetterboxPolicy().isRunning()) {
             outInnerBounds.setEmpty();
             return;
         }

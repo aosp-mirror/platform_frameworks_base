@@ -87,17 +87,27 @@ class BufferReader final : public zip_archive::Reader {
     }
 
     bool ReadAtOffset(uint8_t* buf, size_t len, off64_t offset) const override {
-        if (mInputSize < len || offset > mInputSize - len) {
-            return false;
-        }
-
-        const incfs::map_ptr<uint8_t> pos = mInput.offset(offset);
-        if (!pos.verify(len)) {
+        auto in = AccessAtOffset(buf, len, offset);
+        if (!in) {
           return false;
         }
-
-        memcpy(buf, pos.unsafe_ptr(), len);
+        memcpy(buf, in, len);
         return true;
+    }
+
+    const uint8_t* AccessAtOffset(uint8_t*, size_t len, off64_t offset) const override {
+      if (offset > mInputSize - len) {
+        return nullptr;
+      }
+      const incfs::map_ptr<uint8_t> pos = mInput.offset(offset);
+      if (!pos.verify(len)) {
+        return nullptr;
+      }
+      return pos.unsafe_ptr();
+    }
+
+    bool IsZeroCopy() const override {
+      return true;
     }
 
   private:
@@ -107,7 +117,7 @@ class BufferReader final : public zip_archive::Reader {
 
 class BufferWriter final : public zip_archive::Writer {
   public:
-    BufferWriter(void* output, size_t outputSize) : Writer(),
+    BufferWriter(void* output, size_t outputSize) :
         mOutput(reinterpret_cast<uint8_t*>(output)), mOutputSize(outputSize), mBytesWritten(0) {
     }
 
@@ -119,6 +129,12 @@ class BufferWriter final : public zip_archive::Writer {
         memcpy(mOutput + mBytesWritten, buf, bufSize);
         mBytesWritten += bufSize;
         return true;
+    }
+
+    Buffer GetBuffer(size_t length) override {
+        const auto remaining_size = mOutputSize - mBytesWritten;
+        return remaining_size >= length
+                   ? Buffer(mOutput + mBytesWritten, remaining_size) : Buffer();
     }
 
   private:

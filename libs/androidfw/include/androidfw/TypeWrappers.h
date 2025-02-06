@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef __TYPE_WRAPPERS_H
-#define __TYPE_WRAPPERS_H
+#pragma once
 
 #include <androidfw/ResourceTypes.h>
 #include <utils/ByteOrder.h>
@@ -54,7 +53,7 @@ struct TypeVariant {
         enum class Kind { Begin, End };
         iterator(const TypeVariant* tv, Kind kind)
             : mTypeVariant(tv) {
-          mSparseIndex = mIndex = kind == Kind::Begin ? 0 : tv->mLength;
+          mSparseIndex = mIndex = (kind == Kind::Begin ? 0 : tv->mLength);
           // mSparseIndex here is technically past the number of sparse entries, but it is still
           // ok as it is enough to infer that this is the end iterator.
         }
@@ -75,9 +74,11 @@ struct TypeVariant {
     const ResTable_type* data;
 
 private:
-    size_t mLength;
+    // For a dense table, this is the number of the elements.
+    // For a sparse table, this is the index of the last element + 1.
+    // In both cases, it can be used for iteration as the upper loop bound as in |i < mLength|.
+    uint32_t mLength;
+    bool mSparse;
 };
 
 } // namespace android
-
-#endif // __TYPE_WRAPPERS_H

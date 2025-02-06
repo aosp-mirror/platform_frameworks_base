@@ -32,7 +32,6 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.DateFormatUtil
 import com.android.systemui.utils.leaks.FakeNextAlarmController
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toCollection
 import kotlinx.coroutines.test.runCurrent
@@ -41,7 +40,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class AlarmTileDataInteractorTest : SysuiTestCase() {

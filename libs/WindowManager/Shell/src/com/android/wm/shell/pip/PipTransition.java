@@ -32,8 +32,6 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 
-import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
-import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_BOUNDS;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_SAME;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
@@ -68,12 +66,12 @@ import androidx.annotation.Nullable;
 import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.ComponentUtils;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.common.pip.PipUtils;
-import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.shared.pip.PipContentOverlay;
@@ -116,7 +114,7 @@ public class PipTransition extends PipTransitionController {
     private final HomeTransitionObserver mHomeTransitionObserver;
     private final Optional<SplitScreenController> mSplitScreenOptional;
     private final PipAnimationController mPipAnimationController;
-    private @PipAnimationController.AnimationType int mEnterAnimationType = ANIM_TYPE_BOUNDS;
+    private @AnimationType int mEnterAnimationType = ANIM_TYPE_BOUNDS;
     private Transitions.TransitionFinishCallback mFinishCallback;
     private SurfaceControl.Transaction mFinishTransaction;
     private final Rect mExitDestinationBounds = new Rect();
@@ -374,7 +372,9 @@ public class PipTransition extends PipTransitionController {
 
     @Override
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+            @NonNull SurfaceControl.Transaction startT,
+            @NonNull SurfaceControl.Transaction finishT,
+            @NonNull IBinder mergeTarget,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         end();
     }
@@ -992,7 +992,7 @@ public class PipTransition extends PipTransitionController {
     }
 
     @Override
-    public void setEnterAnimationType(@PipAnimationController.AnimationType int type) {
+    public void setEnterAnimationType(@AnimationType int type) {
         mEnterAnimationType = type;
     }
 
@@ -1359,7 +1359,7 @@ public class PipTransition extends PipTransitionController {
     public boolean isPackageActiveInPip(@Nullable String packageName) {
         final TaskInfo inPipTask = mPipOrganizer.getTaskInfo();
         return packageName != null && inPipTask != null && mPipOrganizer.isInPip()
-                && packageName.equals(SplitScreenUtils.getPackageName(inPipTask.baseIntent));
+                && packageName.equals(ComponentUtils.getPackageName(inPipTask.baseIntent));
     }
 
     private void updatePipForUnhandledTransition(@NonNull TransitionInfo.Change pipChange,

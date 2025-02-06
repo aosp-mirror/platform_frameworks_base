@@ -26,7 +26,6 @@ import android.content.Intent
 import android.os.IBinder
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.view.SurfaceControl
 import android.view.WindowManager
@@ -42,6 +41,7 @@ import android.window.WindowContainerToken
 import androidx.test.filters.SmallTest
 import com.android.window.flags.Flags
 import com.android.wm.shell.ShellTaskOrganizer
+import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.TestSyncExecutor
 import com.android.wm.shell.common.ShellExecutor
@@ -53,7 +53,6 @@ import com.android.wm.shell.windowdecor.extension.isFullscreen
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -71,9 +70,7 @@ import org.mockito.kotlin.whenever
  */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-class TaskStackTransitionObserverTest {
-
-    @JvmField @Rule val setFlagsRule = SetFlagsRule()
+class TaskStackTransitionObserverTest : ShellTestCase() {
 
     @Mock private lateinit var shellInit: ShellInit
     @Mock private lateinit var shellTaskOrganizerLazy: Lazy<ShellTaskOrganizer>

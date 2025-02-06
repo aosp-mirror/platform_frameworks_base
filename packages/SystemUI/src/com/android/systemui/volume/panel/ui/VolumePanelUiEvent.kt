@@ -34,6 +34,8 @@ enum class VolumePanelUiEvent(val metricId: Int) : UiEventLogger.UiEventEnum {
     @UiEvent(doc = "The notification volume slider is touched")
     VOLUME_PANEL_NOTIFICATION_SLIDER_TOUCHED(1642),
     @UiEvent(doc = "The alarm volume slider is touched") VOLUME_PANEL_ALARM_SLIDER_TOUCHED(1643),
+    @UiEvent(doc = "The audio sharing volume slider is touched")
+    VOLUME_PANEL_AUDIO_SHARING_SLIDER_TOUCHED(2068),
     @UiEvent(doc = "Live caption toggle is shown") VOLUME_PANEL_LIVE_CAPTION_TOGGLE_SHOWN(1644),
     @UiEvent(doc = "Live caption toggle is gone") VOLUME_PANEL_LIVE_CAPTION_TOGGLE_GONE(1645),
     @UiEvent(doc = "Live caption toggle is clicked") VOLUME_PANEL_LIVE_CAPTION_TOGGLE_CLICKED(1646),

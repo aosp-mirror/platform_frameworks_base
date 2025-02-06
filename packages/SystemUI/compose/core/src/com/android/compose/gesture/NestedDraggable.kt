@@ -34,9 +34,11 @@ import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
+import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.SuspendingPointerInputModifierNode
 import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
 import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
@@ -52,7 +54,6 @@ import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.Velocity
-import androidx.compose.ui.util.fastSumBy
 import com.android.compose.modifiers.thenIf
 import kotlin.math.sign
 import kotlinx.coroutines.CompletableDeferred
@@ -81,7 +82,13 @@ interface NestedDraggable {
      * in the direction given by [sign], with the given number of [pointersDown] when the touch slop
      * was detected.
      */
-    fun onDragStarted(position: Offset, sign: Float, pointersDown: Int): Controller
+    fun onDragStarted(
+        position: Offset,
+        sign: Float,
+        pointersDown: Int,
+        // TODO(b/382665591): Make this non-nullable.
+        pointerType: PointerType?,
+    ): Controller
 
     /**
      * Whether this draggable should consume any scroll amount with the given [sign] coming from a
@@ -130,9 +137,18 @@ fun Modifier.nestedDraggable(
     orientation: Orientation,
     overscrollEffect: OverscrollEffect? = null,
     enabled: Boolean = true,
+    nestedDragsEnabled: Boolean = true,
 ): Modifier {
     return this.thenIf(overscrollEffect != null) { Modifier.overscroll(overscrollEffect) }
-        .then(NestedDraggableElement(draggable, orientation, overscrollEffect, enabled))
+        .then(
+            NestedDraggableElement(
+                draggable,
+                orientation,
+                overscrollEffect,
+                enabled,
+                nestedDragsEnabled,
+            )
+        )
 }
 
 private data class NestedDraggableElement(
@@ -140,13 +156,71 @@ private data class NestedDraggableElement(
     private val orientation: Orientation,
     private val overscrollEffect: OverscrollEffect?,
     private val enabled: Boolean,
-) : ModifierNodeElement<NestedDraggableNode>() {
-    override fun create(): NestedDraggableNode {
-        return NestedDraggableNode(draggable, orientation, overscrollEffect, enabled)
+    private val nestedDragsEnabled: Boolean,
+) : ModifierNodeElement<NestedDraggableRootNode>() {
+    override fun create(): NestedDraggableRootNode {
+        return NestedDraggableRootNode(
+            draggable,
+            orientation,
+            overscrollEffect,
+            enabled,
+            nestedDragsEnabled,
+        )
     }
 
-    override fun update(node: NestedDraggableNode) {
-        node.update(draggable, orientation, overscrollEffect, enabled)
+    override fun update(node: NestedDraggableRootNode) {
+        node.update(draggable, orientation, overscrollEffect, enabled, nestedDragsEnabled)
+    }
+}
+
+/**
+ * A root node on top of [NestedDraggableNode] so that no [PointerInputModifierNode] is installed
+ * when this draggable is disabled.
+ */
+private class NestedDraggableRootNode(
+    draggable: NestedDraggable,
+    orientation: Orientation,
+    overscrollEffect: OverscrollEffect?,
+    enabled: Boolean,
+    nestedDragsEnabled: Boolean,
+) : DelegatingNode() {
+    private var delegateNode =
+        if (enabled) create(draggable, orientation, overscrollEffect, nestedDragsEnabled) else null
+
+    fun update(
+        draggable: NestedDraggable,
+        orientation: Orientation,
+        overscrollEffect: OverscrollEffect?,
+        enabled: Boolean,
+        nestedDragsEnabled: Boolean,
+    ) {
+        // Disabled.
+        if (!enabled) {
+            delegateNode?.let { undelegate(it) }
+            delegateNode = null
+            return
+        }
+
+        // Disabled => Enabled.
+        val nullableDelegate = delegateNode
+        if (nullableDelegate == null) {
+            delegateNode = create(draggable, orientation, overscrollEffect, nestedDragsEnabled)
+            return
+        }
+
+        // Enabled => Enabled (update).
+        nullableDelegate.update(draggable, orientation, overscrollEffect, nestedDragsEnabled)
+    }
+
+    private fun create(
+        draggable: NestedDraggable,
+        orientation: Orientation,
+        overscrollEffect: OverscrollEffect?,
+        nestedDragsEnabled: Boolean,
+    ): NestedDraggableNode {
+        return delegate(
+            NestedDraggableNode(draggable, orientation, overscrollEffect, nestedDragsEnabled)
+        )
     }
 }
 
@@ -154,7 +228,7 @@ private class NestedDraggableNode(
     private var draggable: NestedDraggable,
     override var orientation: Orientation,
     private var overscrollEffect: OverscrollEffect?,
-    private var enabled: Boolean,
+    private var nestedDragsEnabled: Boolean,
 ) :
     DelegatingNode(),
     PointerInputModifierNode,
@@ -162,17 +236,11 @@ private class NestedDraggableNode(
     CompositionLocalConsumerModifierNode,
     OrientationAware {
     private val nestedScrollDispatcher = NestedScrollDispatcher()
-    private var trackDownPositionDelegate: SuspendingPointerInputModifierNode? = null
-        set(value) {
-            field?.let { undelegate(it) }
-            field = value?.also { delegate(it) }
-        }
-
-    private var detectDragsDelegate: SuspendingPointerInputModifierNode? = null
-        set(value) {
-            field?.let { undelegate(it) }
-            field = value?.also { delegate(it) }
-        }
+    private val trackWheelScroll =
+        delegate(SuspendingPointerInputModifierNode { trackWheelScroll() })
+    private val trackDownPositionDelegate =
+        delegate(SuspendingPointerInputModifierNode { trackDownPosition() })
+    private val detectDragsDelegate = delegate(SuspendingPointerInputModifierNode { detectDrags() })
 
     /** The controller created by the nested scroll logic (and *not* the drag logic). */
     private var nestedScrollController: NestedScrollController? = null
@@ -183,9 +251,10 @@ private class NestedDraggableNode(
      * This is use to track the started position of a drag started on a nested scrollable.
      */
     private var lastFirstDown: Offset? = null
+    private var lastEventWasScrollWheel: Boolean = false
 
-    /** The number of pointers down. */
-    private var pointersDownCount = 0
+    /** The pointers currently down, in order of which they were done and mapping to their type. */
+    private val pointersDown = linkedMapOf<PointerId, PointerType>()
 
     init {
         delegate(nestedScrollModifierNode(this, nestedScrollDispatcher))
@@ -200,23 +269,19 @@ private class NestedDraggableNode(
         draggable: NestedDraggable,
         orientation: Orientation,
         overscrollEffect: OverscrollEffect?,
-        enabled: Boolean,
+        nestedDragsEnabled: Boolean,
     ) {
         this.draggable = draggable
         this.orientation = orientation
         this.overscrollEffect = overscrollEffect
-        this.enabled = enabled
+        this.nestedDragsEnabled = nestedDragsEnabled
 
-        trackDownPositionDelegate?.resetPointerInputHandler()
-        detectDragsDelegate?.resetPointerInputHandler()
+        trackWheelScroll.resetPointerInputHandler()
+        trackDownPositionDelegate.resetPointerInputHandler()
+        detectDragsDelegate.resetPointerInputHandler()
+
         nestedScrollController?.ensureOnDragStoppedIsCalled()
         nestedScrollController = null
-
-        if (!enabled && trackDownPositionDelegate != null) {
-            check(detectDragsDelegate != null)
-            trackDownPositionDelegate = null
-            detectDragsDelegate = null
-        }
     }
 
     override fun onPointerEvent(
@@ -224,21 +289,15 @@ private class NestedDraggableNode(
         pass: PointerEventPass,
         bounds: IntSize,
     ) {
-        if (!enabled) return
-
-        if (trackDownPositionDelegate == null) {
-            check(detectDragsDelegate == null)
-            trackDownPositionDelegate = SuspendingPointerInputModifierNode { trackDownPosition() }
-            detectDragsDelegate = SuspendingPointerInputModifierNode { detectDrags() }
-        }
-
-        checkNotNull(trackDownPositionDelegate).onPointerEvent(pointerEvent, pass, bounds)
-        checkNotNull(detectDragsDelegate).onPointerEvent(pointerEvent, pass, bounds)
+        trackWheelScroll.onPointerEvent(pointerEvent, pass, bounds)
+        trackDownPositionDelegate.onPointerEvent(pointerEvent, pass, bounds)
+        detectDragsDelegate.onPointerEvent(pointerEvent, pass, bounds)
     }
 
     override fun onCancelPointerInput() {
-        trackDownPositionDelegate?.onCancelPointerInput()
-        detectDragsDelegate?.onCancelPointerInput()
+        trackWheelScroll.onCancelPointerInput()
+        trackDownPositionDelegate.onCancelPointerInput()
+        detectDragsDelegate.onCancelPointerInput()
     }
 
     /*
@@ -253,11 +312,6 @@ private class NestedDraggableNode(
 
         awaitEachGesture {
             val down = awaitFirstDown(requireUnconsumed = false)
-            check(down.position == lastFirstDown) {
-                "Position from detectDrags() is not the same as position in trackDownPosition()"
-            }
-            check(pointersDownCount == 1) { "pointersDownCount is equal to $pointersDownCount" }
-
             var overSlop = 0f
             val onTouchSlopReached = { change: PointerInputChange, over: Float ->
                 if (draggable.shouldStartDrag(change)) {
@@ -295,8 +349,14 @@ private class NestedDraggableNode(
                     }
                 }
 
-                check(pointersDownCount > 0) { "pointersDownCount is equal to $pointersDownCount" }
-                val controller = draggable.onDragStarted(down.position, sign, pointersDownCount)
+                check(pointersDown.size > 0) { "pointersDown is empty" }
+                val controller =
+                    draggable.onDragStarted(
+                        down.position,
+                        sign,
+                        pointersDown.size.coerceAtLeast(1),
+                        drag.type,
+                    )
                 if (overSlop != 0f) {
                     onDrag(controller, drag, overSlop, velocityTracker)
                 }
@@ -398,7 +458,7 @@ private class NestedDraggableNode(
         val left = available - consumed
         val postConsumed =
             nestedScrollDispatcher.dispatchPostScroll(
-                consumed = preConsumed + consumed,
+                consumed = consumed,
                 available = left,
                 source = NestedScrollSource.UserInput,
             )
@@ -418,13 +478,15 @@ private class NestedDraggableNode(
         velocity: Velocity,
         performFling: suspend (Velocity) -> Velocity,
     ): Velocity {
+        // Make sure we only use the velocity in this draggable orientation.
+        val orientationVelocity = velocity.toFloat().toVelocity()
         return if (overscrollEffect != null) {
-            overscrollEffect.applyToFling(velocity) { performFling(it) }
+            overscrollEffect.applyToFling(orientationVelocity) { performFling(it) }
 
             // Effects always consume the whole velocity.
             velocity
         } else {
-            performFling(velocity)
+            performFling(orientationVelocity)
         }
     }
 
@@ -436,10 +498,9 @@ private class NestedDraggableNode(
         val available = velocity - preConsumed
         val consumed = performFling(available)
         val left = available - consumed
-        return nestedScrollDispatcher.dispatchPostFling(
-            consumed = consumed + preConsumed,
-            available = left,
-        )
+        val postConsumed =
+            nestedScrollDispatcher.dispatchPostFling(consumed = consumed, available = left)
+        return preConsumed + consumed + postConsumed
     }
 
     /*
@@ -448,22 +509,33 @@ private class NestedDraggableNode(
      * ===============================
      */
 
+    private suspend fun PointerInputScope.trackWheelScroll() {
+        awaitEachGesture {
+            val event = awaitPointerEvent(pass = PointerEventPass.Initial)
+            lastEventWasScrollWheel = event.type == PointerEventType.Scroll
+        }
+    }
+
     private suspend fun PointerInputScope.trackDownPosition() {
         awaitEachGesture {
-            val down = awaitFirstDown(requireUnconsumed = false)
-            lastFirstDown = down.position
-            pointersDownCount = 1
+            try {
+                val down = awaitFirstDown(requireUnconsumed = false)
+                lastFirstDown = down.position
+                pointersDown[down.id] = down.type
 
-            do {
-                pointersDownCount +=
-                    awaitPointerEvent().changes.fastSumBy { change ->
+                do {
+                    awaitPointerEvent().changes.forEach { change ->
                         when {
-                            change.changedToDownIgnoreConsumed() -> 1
-                            change.changedToUpIgnoreConsumed() -> -1
-                            else -> 0
+                            change.changedToDownIgnoreConsumed() -> {
+                                pointersDown[change.id] = change.type
+                            }
+                            change.changedToUpIgnoreConsumed() -> pointersDown.remove(change.id)
                         }
                     }
-            } while (pointersDownCount > 0)
+                } while (pointersDown.size > 0)
+            } finally {
+                pointersDown.clear()
+            }
         }
     }
 
@@ -488,15 +560,23 @@ private class NestedDraggableNode(
         }
 
         val sign = offset.sign
-        if (nestedScrollController == null && draggable.shouldConsumeNestedScroll(sign)) {
-            val startedPosition = checkNotNull(lastFirstDown) { "lastFirstDown is not set" }
+        if (
+            nestedDragsEnabled &&
+                nestedScrollController == null &&
+                // TODO(b/388231324): Remove this.
+                !lastEventWasScrollWheel &&
+                draggable.shouldConsumeNestedScroll(sign) &&
+                lastFirstDown != null
+        ) {
+            val startedPosition = checkNotNull(lastFirstDown)
 
-            // TODO(b/382665591): Replace this by check(pointersDownCount > 0).
-            val pointersDown = pointersDownCount.coerceAtLeast(1)
+            // TODO(b/382665591): Ensure that there is at least one pointer down.
+            val pointersDownCount = pointersDown.size.coerceAtLeast(1)
+            val pointerType = pointersDown.entries.firstOrNull()?.value
             nestedScrollController =
                 NestedScrollController(
                     overscrollEffect,
-                    draggable.onDragStarted(startedPosition, sign, pointersDown),
+                    draggable.onDragStarted(startedPosition, sign, pointersDownCount, pointerType),
                 )
         }
 

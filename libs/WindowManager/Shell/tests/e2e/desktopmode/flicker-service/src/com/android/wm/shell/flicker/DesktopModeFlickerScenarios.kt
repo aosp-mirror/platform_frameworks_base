@@ -19,7 +19,7 @@ package com.android.wm.shell.flicker
 import android.tools.PlatformConsts.DESKTOP_MODE_MINIMUM_WINDOW_HEIGHT
 import android.tools.PlatformConsts.DESKTOP_MODE_MINIMUM_WINDOW_WIDTH
 import android.tools.flicker.AssertionInvocationGroup
-import android.tools.flicker.assertors.assertions.AppLayerIncreasesInSize
+import android.tools.flicker.assertors.assertions.ResizeVeilKeepsIncreasingInSize
 import android.tools.flicker.assertors.assertions.AppLayerIsInvisibleAtEnd
 import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAlways
 import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAtStart
@@ -168,9 +168,11 @@ class DesktopModeFlickerScenarios {
                         TaggedCujTransitionMatcher(associatedTransitionRequired = false)
                     )
                     .build(),
-                // TODO(373638597) Add AppLayerIncreasesInSize assertion
-                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS
-            )
+                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
+                        listOf(
+                            ResizeVeilKeepsIncreasingInSize(DESKTOP_MODE_APP),
+                        ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
+                )
 
         val EDGE_RESIZE =
             FlickerConfigEntry(
@@ -184,7 +186,7 @@ class DesktopModeFlickerScenarios {
                     .build(),
                 assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
                         listOf(
-                            AppLayerIncreasesInSize(DESKTOP_MODE_APP),
+                            ResizeVeilKeepsIncreasingInSize(DESKTOP_MODE_APP),
                         ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 
@@ -223,9 +225,9 @@ class DesktopModeFlickerScenarios {
                 assertions =
                 AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
                         listOf(
-                            // TODO(373638597) Add AppLayerIncreasesInSize assertion
                             AppWindowHasMaxDisplayHeight(DESKTOP_MODE_APP),
-                            AppWindowHasMaxDisplayWidth(DESKTOP_MODE_APP)
+                            AppWindowHasMaxDisplayWidth(DESKTOP_MODE_APP),
+                            ResizeVeilKeepsIncreasingInSize(DESKTOP_MODE_APP),
                         ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 
@@ -368,7 +370,7 @@ class DesktopModeFlickerScenarios {
                 ),
                 assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
                         listOf(
-                            AppLayerIncreasesInSize(DESKTOP_MODE_APP),
+                            ResizeVeilKeepsIncreasingInSize(DESKTOP_MODE_APP),
                             AppWindowHasMaxDisplayHeight(DESKTOP_MODE_APP),
                             AppWindowHasMaxDisplayWidth(DESKTOP_MODE_APP)
                         ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
@@ -393,7 +395,7 @@ class DesktopModeFlickerScenarios {
                 assertions =
                 AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
                         listOf(
-                            AppLayerIncreasesInSize(DESKTOP_MODE_APP),
+                            ResizeVeilKeepsIncreasingInSize(DESKTOP_MODE_APP),
                             AppWindowMaintainsAspectRatioAlways(DESKTOP_MODE_APP),
                             AppWindowHasMaxBoundsInOnlyOneDimension(DESKTOP_MODE_APP)
                         ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
@@ -540,6 +542,30 @@ class DesktopModeFlickerScenarios {
                     listOf(
                         AppWindowBecomesPinned(DESKTOP_MODE_APP),
                     ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
+            )
+
+        val OPEN_APP_WHEN_EXTERNAL_DISPLAY_CONNECTED =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("OPEN_APP_WHEN_EXTERNAL_DISPLAY_CONNECTED"),
+                extractor =
+                ShellTransitionScenarioExtractor(
+                    transitionMatcher =
+                    object : ITransitionMatcher {
+                        override fun findAll(
+                            transitions: Collection<Transition>
+                        ): Collection<Transition> {
+                                return listOf(transitions
+                                    .filter { it.type == TransitionType.OPEN }
+                                    .maxByOrNull { it.id }!!)
+                        }
+                    }
+                ),
+                assertions =
+                        listOf(
+                            AppWindowBecomesVisible(DESKTOP_MODE_APP),
+                            AppWindowOnTopAtEnd(DESKTOP_MODE_APP),
+                            AppWindowBecomesVisible(DESKTOP_WALLPAPER),
+                        ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
     }
 }

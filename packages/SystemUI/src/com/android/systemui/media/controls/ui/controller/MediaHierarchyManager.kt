@@ -37,12 +37,14 @@ import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.app.tracing.traceSection
 import com.android.keyguard.KeyguardViewController
+import com.android.systemui.Dumpable
 import com.android.systemui.Flags.mediaControlsLockscreenShadeBugFix
 import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dreams.DreamOverlayStateController
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
@@ -51,6 +53,7 @@ import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.CrossFadeHelper
 import com.android.systemui.statusbar.StatusBarState
@@ -62,9 +65,9 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.settings.SecureSettings
+import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -96,12 +99,11 @@ val View.isShownNotFaded: Boolean
  * This manager is responsible for placement of the unique media view between the different hosts
  * and animate the positions of the views to achieve seamless transitions.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class MediaHierarchyManager
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val statusBarStateController: SysuiStatusBarStateController,
     private val keyguardStateController: KeyguardStateController,
     private val bypassController: KeyguardBypassController,
@@ -119,7 +121,8 @@ constructor(
     @Application private val coroutineScope: CoroutineScope,
     private val splitShadeStateController: SplitShadeStateController,
     private val logger: MediaViewLogger,
-) {
+    private val dumpManager: DumpManager,
+) : Dumpable {
 
     /** Track the media player setting status on lock screen. */
     private var allowMediaPlayerOnLockScreen: Boolean = true
@@ -476,6 +479,7 @@ constructor(
     }
 
     init {
+        dumpManager.registerNormalDumpable(TAG, this)
         updateConfiguration()
         configurationController.addCallback(
             object : ConfigurationController.ConfigurationListener {
@@ -1342,6 +1346,19 @@ constructor(
 
     private fun isGlanceableHubVisibleToUser(): Boolean {
         return isCommunalShowing && !isPrimaryBouncerShowing && !isAnyShadeFullyExpanded
+    }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        pw.apply {
+            println(
+                "current attachment: $currentAttachmentLocation, " +
+                    "desired location: $desiredLocation, " +
+                    "visible ${getHost(desiredLocation)?.visible}"
+            )
+            println("previous location: $previousLocation")
+            println("bounds: $currentBounds, target $targetBounds")
+            println("clipping: $currentClipping, target $targetClipping")
+        }
     }
 
     companion object {

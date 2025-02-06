@@ -167,6 +167,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private static final int STATE_PRINTER_UNAVAILABLE = 6;
     private static final int STATE_UPDATE_SLOW = 7;
     private static final int STATE_PRINT_COMPLETED = 8;
+    private static final int STATE_FILE_INVALID = 9;
 
     private static final int UI_STATE_PREVIEW = 0;
     private static final int UI_STATE_ERROR = 1;
@@ -404,6 +405,11 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     public void onPause() {
         PrintSpoolerService spooler = mSpoolerProvider.getSpooler();
 
+        if (isInvalid()) {
+            super.onPause();
+            return;
+        }
+
         if (mState == STATE_INITIALIZING) {
             if (isFinishing()) {
                 if (spooler != null) {
@@ -478,7 +484,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
 
         if (mState == STATE_PRINT_CANCELED || mState == STATE_PRINT_CONFIRMED
-                || mState == STATE_PRINT_COMPLETED) {
+                || mState == STATE_PRINT_COMPLETED
+                || mState == STATE_FILE_INVALID) {
             return true;
         }
 
@@ -509,23 +516,32 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     @Override
     public void onMalformedPdfFile() {
         onPrintDocumentError("Cannot print a malformed PDF file");
+        mPrintedDocument.invalid();
+        setState(STATE_FILE_INVALID);
     }
 
     @Override
     public void onSecurePdfFile() {
         onPrintDocumentError("Cannot print a password protected PDF file");
+        mPrintedDocument.invalid();
+        setState(STATE_FILE_INVALID);
     }
 
     private void onPrintDocumentError(String message) {
         setState(mProgressMessageController.cancel());
-        ensureErrorUiShown(null, PrintErrorFragment.ACTION_RETRY);
+        ensureErrorUiShown(
+                getString(R.string.print_cannot_load_page), PrintErrorFragment.ACTION_NONE);
 
         setState(STATE_UPDATE_FAILED);
         if (DEBUG) {
             Log.i(LOG_TAG, "PrintJob state[" +  PrintJobInfo.STATE_FAILED + "] reason: " + message);
         }
         PrintSpoolerService spooler = mSpoolerProvider.getSpooler();
-        spooler.setPrintJobState(mPrintJob.getId(), PrintJobInfo.STATE_FAILED, message);
+        // Use a cancel state for the spooler.  This will prevent the notification from getting
+        // displayed and will remove the job.  The notification (which displays the cancel and
+        // restart options) doesn't make sense for an invalid document since it will just fail
+        // again.
+        spooler.setPrintJobState(mPrintJob.getId(), PrintJobInfo.STATE_CANCELED, message);
         mPrintedDocument.finish();
     }
 
@@ -995,6 +1011,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private void setState(int state) {
+        if (isInvalid()) {
+            return;
+        }
         if (isFinalState(mState)) {
             if (isFinalState(state)) {
                 if (DEBUG) {
@@ -1015,7 +1034,12 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private static boolean isFinalState(int state) {
         return state == STATE_PRINT_CANCELED
                 || state == STATE_PRINT_COMPLETED
-                || state == STATE_CREATE_FILE_FAILED;
+                || state == STATE_CREATE_FILE_FAILED
+                || state == STATE_FILE_INVALID;
+    }
+
+    private boolean isInvalid() {
+        return mState == STATE_FILE_INVALID;
     }
 
     private void updateSelectedPagesFromPreview() {
@@ -1100,7 +1124,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private void ensurePreviewUiShown() {
-        if (isFinishing() || isDestroyed()) {
+        if (isFinishing() || isDestroyed() || isInvalid()) {
             return;
         }
         if (mUiState != UI_STATE_PREVIEW) {
@@ -1257,6 +1281,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private boolean updateDocument(boolean clearLastError) {
+        if (isInvalid()) {
+            return false;
+        }
         if (!clearLastError && mPrintedDocument.hasUpdateError()) {
             return false;
         }
@@ -1676,7 +1703,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 || mState == STATE_UPDATE_FAILED
                 || mState == STATE_CREATE_FILE_FAILED
                 || mState == STATE_PRINTER_UNAVAILABLE
-                || mState == STATE_UPDATE_SLOW) {
+                || mState == STATE_UPDATE_SLOW
+                || mState == STATE_FILE_INVALID) {
             disableOptionsUi(isFinalState(mState));
             return;
         }
@@ -2100,6 +2128,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private boolean canUpdateDocument() {
+        if (isInvalid()) {
+            return false;
+        }
         if (mPrintedDocument.isDestroyed()) {
             return false;
         }

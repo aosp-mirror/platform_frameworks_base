@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import com.android.systemui.qs.pipeline.shared.TileSpec
@@ -39,17 +40,19 @@ data class Selection(val tileSpec: TileSpec, val manual: Boolean)
 
 /** Holds the state of the current selection. */
 class MutableSelectionState {
-    private var _selection = mutableStateOf<Selection?>(null)
-
     /** The [Selection] if a tile is selected, null if not. */
-    val selection by _selection
+    var selection by mutableStateOf<Selection?>(null)
+        private set
+
+    val selected: Boolean
+        get() = selection != null
 
     fun select(tileSpec: TileSpec, manual: Boolean) {
-        _selection.value = Selection(tileSpec, manual)
+        selection = Selection(tileSpec, manual)
     }
 
     fun unSelect() {
-        _selection.value = null
+        selection = null
     }
 }
 

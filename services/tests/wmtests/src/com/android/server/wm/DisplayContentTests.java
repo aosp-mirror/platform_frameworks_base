@@ -1183,6 +1183,18 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(prev, mDisplayContent.getLastOrientationSource());
         // The top will use the rotation from "prev" with fixed rotation.
         assertTrue(top.hasFixedRotationTransform());
+
+        mDisplayContent.continueUpdateOrientationForDiffOrienLaunchingApp();
+        assertFalse(top.hasFixedRotationTransform());
+
+        // Assume that the requested orientation of "prev" is landscape. And the display is also
+        // rotated to landscape. The activities from bottom to top are TaskB{"prev, "behindTop"},
+        // TaskB{"top"}. Then "behindTop" should also get landscape according to ORIENTATION_BEHIND
+        // instead of resolving as undefined which causes to unexpected fixed portrait rotation.
+        final ActivityRecord behindTop = new ActivityBuilder(mAtm).setTask(prev.getTask())
+                .setOnTop(false).setScreenOrientation(SCREEN_ORIENTATION_BEHIND).build();
+        mDisplayContent.applyFixedRotationForNonTopVisibleActivityIfNeeded(behindTop);
+        assertFalse(behindTop.hasFixedRotationTransform());
     }
 
     @Test
@@ -1571,42 +1583,6 @@ public class DisplayContentTests extends WindowTestsBase {
                 is(Configuration.ORIENTATION_PORTRAIT));
     }
 
-    @Test
-    public void testHybridRotationAnimation() {
-        final DisplayContent displayContent = mDefaultDisplay;
-        final WindowState statusBar = newWindowBuilder("statusBar", TYPE_STATUS_BAR).build();
-        final WindowState navBar = newWindowBuilder("navBar", TYPE_NAVIGATION_BAR).build();
-        final WindowState app = newWindowBuilder("app", TYPE_BASE_APPLICATION).build();
-        final WindowState[] windows = { statusBar, navBar, app };
-        makeWindowVisible(windows);
-        final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
-        displayPolicy.addWindowLw(statusBar, statusBar.mAttrs);
-        displayPolicy.addWindowLw(navBar, navBar.mAttrs);
-        final ScreenRotationAnimation rotationAnim = new ScreenRotationAnimation(displayContent,
-                displayContent.getRotation());
-        spyOn(rotationAnim);
-        // Assume that the display rotation is changed so it is frozen in preparation for animation.
-        doReturn(true).when(rotationAnim).hasScreenshot();
-        displayContent.getDisplayRotation().setRotation((displayContent.getRotation() + 1) % 4);
-        displayContent.setRotationAnimation(rotationAnim);
-        // The fade rotation animation also starts to hide some non-app windows.
-        assertNotNull(displayContent.getAsyncRotationController());
-        assertTrue(statusBar.isAnimating(PARENTS, ANIMATION_TYPE_TOKEN_TRANSFORM));
-
-        for (WindowState w : windows) {
-            w.setOrientationChanging(true);
-        }
-        // The display only waits for the app window to unfreeze.
-        assertFalse(displayContent.shouldSyncRotationChange(statusBar));
-        assertFalse(displayContent.shouldSyncRotationChange(navBar));
-        assertTrue(displayContent.shouldSyncRotationChange(app));
-        // If all windows animated by fade rotation animation have done the orientation change,
-        // the animation controller should be cleared.
-        statusBar.setOrientationChanging(false);
-        navBar.setOrientationChanging(false);
-        assertNull(displayContent.getAsyncRotationController());
-    }
-
     @SetupWindows(addWindows = { W_ACTIVITY, W_WALLPAPER, W_STATUS_BAR, W_NAVIGATION_BAR,
             W_INPUT_METHOD, W_NOTIFICATION_SHADE })
     @Test
@@ -1738,7 +1714,6 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testFinishFixedRotationNoAppTransitioningTask() {
-        unblockDisplayRotation(mDisplayContent);
         final ActivityRecord app = createActivityRecord(mDisplayContent);
         final Task task = app.getTask();
         final ActivityRecord app2 = new ActivityBuilder(mWm.mAtmService).setTask(task).build();
@@ -1766,7 +1741,6 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testFixedRotationWithPip() {
         final DisplayContent displayContent = mDefaultDisplay;
         displayContent.setIgnoreOrientationRequest(false);
-        unblockDisplayRotation(displayContent);
         // Unblock the condition in PinnedTaskController#continueOrientationChangeIfNeeded.
         doNothing().when(displayContent).prepareAppTransition(anyInt());
         // Make resume-top really update the activity state.
@@ -1786,7 +1760,6 @@ public class DisplayContentTests extends WindowTestsBase {
 
         assertTrue(displayContent.hasTopFixedRotationLaunchingApp());
         assertTrue(displayContent.mPinnedTaskController.shouldDeferOrientationChange());
-        verify(mWm, never()).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
         clearInvocations(pinnedTask);
 
         // Assume that the PiP enter animation is done then the new bounds are set. Expect the
@@ -1823,7 +1796,6 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testNoFixedRotationOnResumedScheduledApp() {
-        unblockDisplayRotation(mDisplayContent);
         final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();
         app.setVisible(false);
         app.setState(ActivityRecord.State.RESUMED, "test");
@@ -1835,7 +1807,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // The condition should reject using fixed rotation because the resumed client in real case
         // might get display info immediately. And the fixed rotation adjustments haven't arrived
         // client side so the info may be inconsistent with the requested orientation.
-        verify(mDisplayContent).updateOrientation(eq(app), anyBoolean());
+        verify(mDisplayContent).updateOrientationAndComputeConfig(anyBoolean());
         assertFalse(app.isFixedRotationTransforming());
         assertFalse(mDisplayContent.hasTopFixedRotationLaunchingApp());
     }
@@ -1887,9 +1859,6 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testSecondaryInternalDisplayRotationFollowsDefaultDisplay() {
-        // Skip freezing so the unrelated conditions in updateRotationUnchecked won't disturb.
-        doNothing().when(mWm).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
-
         final DisplayRotationCoordinator coordinator =
                 mRootWindowContainer.getDisplayRotationCoordinator();
         final DisplayContent defaultDisplayContent = mDisplayContent;
@@ -1945,9 +1914,6 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testSecondaryNonInternalDisplayDoesNotFollowDefaultDisplay() {
-        // Skip freezing so the unrelated conditions in updateRotationUnchecked won't disturb.
-        doNothing().when(mWm).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
-
         final DisplayRotationCoordinator coordinator =
                 mRootWindowContainer.getDisplayRotationCoordinator();
 
@@ -2018,20 +1984,11 @@ public class DisplayContentTests extends WindowTestsBase {
                     }
                 };
 
-        // kill any existing rotation animation (vestigial from test setup).
-        dc.setRotationAnimation(null);
-
         mWm.updateRotation(true /* alwaysSendConfiguration */, false /* forceRelayout */);
-        // If remote rotation is not finished, the display should not be able to unfreeze.
-        mWm.stopFreezingDisplayLocked();
-        assertTrue(mWm.mDisplayFrozen);
 
         assertTrue(called[0]);
         waitUntilHandlersIdle();
         assertTrue(continued[0]);
-
-        mWm.stopFreezingDisplayLocked();
-        assertFalse(mWm.mDisplayFrozen);
     }
 
     @Test

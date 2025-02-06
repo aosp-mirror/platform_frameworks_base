@@ -192,15 +192,22 @@ public final class SyncTransactionQueue {
                 throw new IllegalStateException("Sync Transactions must be serialized. In Flight: "
                         + mInFlight.mId + " - " + mInFlight.mWCT);
             }
-            mInFlight = this;
             if (DEBUG) Slog.d(TAG, "Sending sync transaction: " + mWCT);
-            if (mLegacyTransition != null) {
-                mId = new WindowOrganizer().startLegacyTransition(mLegacyTransition.getType(),
-                        mLegacyTransition.getAdapter(), this, mWCT);
-            } else {
-                mId = new WindowOrganizer().applySyncTransaction(mWCT, this);
+            try {
+                if (mLegacyTransition != null) {
+                    mId = new WindowOrganizer().startLegacyTransition(mLegacyTransition.getType(),
+                            mLegacyTransition.getAdapter(), this, mWCT);
+                } else {
+                    mId = new WindowOrganizer().applySyncTransaction(mWCT, this);
+                }
+            } catch (RuntimeException e) {
+                Slog.e(TAG, "Send failed", e);
+                // Finish current sync callback immediately.
+                onTransactionReady(mId, new SurfaceControl.Transaction());
+                return;
             }
             if (DEBUG) Slog.d(TAG, " Sent sync transaction. Got id=" + mId);
+            mInFlight = this;
             mMainExecutor.executeDelayed(mOnReplyTimeout, REPLY_TIMEOUT);
         }
 

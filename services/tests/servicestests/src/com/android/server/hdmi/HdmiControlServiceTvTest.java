@@ -16,11 +16,14 @@
 
 package com.android.server.hdmi;
 
+import static android.content.pm.PackageManager.FEATURE_HDMI_CEC;
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_TV;
 
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 
 import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assume.assumeTrue;
 
 import android.content.Context;
 import android.hardware.hdmi.HdmiControlManager;
@@ -60,6 +63,9 @@ public class HdmiControlServiceTvTest {
 
     @Before
     public void setUp() throws Exception {
+        assumeTrue("Test requires FEATURE_HDMI_CEC",
+                InstrumentationRegistry.getTargetContext().getPackageManager()
+                        .hasSystemFeature(FEATURE_HDMI_CEC));
         Context context = InstrumentationRegistry.getTargetContext();
         mMyLooper = mTestLooper.getLooper();
 

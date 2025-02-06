@@ -70,7 +70,6 @@ import com.android.internal.widget.VerifyCredentialResponse;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -204,6 +203,15 @@ public class KeyguardManager {
      * @hide
      */
     public static final String EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS = "check_dpm";
+
+    /**
+     * When switching to a secure user, system server will expect a callback when the UI has
+     * completed the switch.
+     *
+     * @hide
+     */
+    public static final String LOCK_ON_USER_SWITCH_CALLBACK = "onSwitchCallback";
+
 
     /**
      *
@@ -1064,7 +1072,7 @@ public class KeyguardManager {
             Log.e(TAG, "Save lock exception", e);
             success = false;
         } finally {
-            Arrays.fill(password, (byte) 0);
+            LockPatternUtils.zeroize(password);
         }
         return success;
     }

@@ -19,8 +19,15 @@ import android.annotation.NonNull;
 
 import com.android.internal.widget.remotecompose.core.OperationInterface;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.Serializable;
 
 /** Represents a modifier */
-public interface ModifierOperation extends OperationInterface {
+public interface ModifierOperation extends OperationInterface, Serializable {
+    /**
+     * Serialize the string
+     *
+     * @param indent padding to display
+     * @param serializer append the string
+     */
     void serializeToString(int indent, @NonNull StringSerializer serializer);
 }

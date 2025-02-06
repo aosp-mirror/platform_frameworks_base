@@ -49,7 +49,8 @@ public class NotificationProgressModelTest {
         new NotificationProgressModel(List.of(),
                 List.of(),
                 10,
-                false);
+                false,
+                Color.TRANSPARENT);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -58,7 +59,8 @@ public class NotificationProgressModelTest {
                 List.of(new Notification.ProgressStyle.Segment(50).setColor(Color.YELLOW)),
                 List.of(),
                 -1,
-                false);
+                false,
+                Color.TRANSPARENT);
     }
 
     @Test
@@ -74,14 +76,15 @@ public class NotificationProgressModelTest {
         // THEN
         assertThat(restoredModel.getIndeterminateColor()).isEqualTo(Color.RED);
         assertThat(restoredModel.isIndeterminate()).isTrue();
-        assertThat(restoredModel.getProgress()).isEqualTo(-1);
+        assertThat(restoredModel.getProgress()).isEqualTo(0);
         assertThat(restoredModel.getSegments()).isEmpty();
         assertThat(restoredModel.getPoints()).isEmpty();
         assertThat(restoredModel.isStyledByProgress()).isFalse();
+        assertThat(restoredModel.getSegmentsFallbackColor()).isEqualTo(Color.TRANSPARENT);
     }
 
     @Test
-    public void save_and_restore_non_indeterminate_progress_model() {
+    public void save_and_restore_determinate_progress_model() {
         // GIVEN
         final List<Notification.ProgressStyle.Segment> segments = List.of(
                 new Notification.ProgressStyle.Segment(50).setColor(Color.YELLOW),
@@ -92,7 +95,8 @@ public class NotificationProgressModelTest {
         final NotificationProgressModel savedModel = new NotificationProgressModel(segments,
                 points,
                 100,
-                true);
+                true,
+                Color.RED);
 
         final Bundle bundle = savedModel.toBundle();
 
@@ -106,6 +110,38 @@ public class NotificationProgressModelTest {
         assertThat(restoredModel.getPoints()).isEqualTo(points);
         assertThat(restoredModel.getProgress()).isEqualTo(100);
         assertThat(restoredModel.isStyledByProgress()).isTrue();
-        assertThat(restoredModel.getIndeterminateColor()).isEqualTo(-1);
+        assertThat(restoredModel.getSegmentsFallbackColor()).isEqualTo(Color.RED);
+        assertThat(restoredModel.getIndeterminateColor()).isEqualTo(Color.TRANSPARENT);
+    }
+
+    @Test
+    public void save_and_restore_non_determinate_progress_model_segments_fallback_color_invalid() {
+        // GIVEN
+        final List<Notification.ProgressStyle.Segment> segments = List.of(
+                new Notification.ProgressStyle.Segment(50).setColor(Color.YELLOW),
+                new Notification.ProgressStyle.Segment(50).setColor(Color.YELLOW));
+        final List<Notification.ProgressStyle.Point> points = List.of(
+                new Notification.ProgressStyle.Point(0).setColor(Color.RED),
+                new Notification.ProgressStyle.Point(20).setColor(Color.BLUE));
+        final NotificationProgressModel savedModel = new NotificationProgressModel(segments,
+                points,
+                100,
+                true,
+                Color.TRANSPARENT);
+
+        final Bundle bundle = savedModel.toBundle();
+
+        // WHEN
+        final NotificationProgressModel restoredModel =
+                NotificationProgressModel.fromBundle(bundle);
+
+        // THEN
+        assertThat(restoredModel.isIndeterminate()).isFalse();
+        assertThat(restoredModel.getSegments()).isEqualTo(segments);
+        assertThat(restoredModel.getPoints()).isEqualTo(points);
+        assertThat(restoredModel.getProgress()).isEqualTo(100);
+        assertThat(restoredModel.isStyledByProgress()).isTrue();
+        assertThat(restoredModel.getSegmentsFallbackColor()).isEqualTo(Color.TRANSPARENT);
+        assertThat(restoredModel.getIndeterminateColor()).isEqualTo(Color.TRANSPARENT);
     }
 }

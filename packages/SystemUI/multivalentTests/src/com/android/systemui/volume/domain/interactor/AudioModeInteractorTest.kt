@@ -23,7 +23,6 @@ import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.volume.data.repository.FakeAudioRepository
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
@@ -32,7 +31,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class AudioModeInteractorTest : SysuiTestCase() {

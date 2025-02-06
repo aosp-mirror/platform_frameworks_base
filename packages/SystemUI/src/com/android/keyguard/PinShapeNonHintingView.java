@@ -39,6 +39,8 @@ import android.widget.LinearLayout;
 import androidx.core.graphics.drawable.DrawableCompat;
 
 import com.android.app.animation.Interpolators;
+import com.android.systemui.Flags;
+import com.android.systemui.bouncer.shared.constants.PinBouncerConstants.Color;
 import com.android.systemui.res.R;
 
 /**
@@ -48,6 +50,7 @@ import com.android.systemui.res.R;
 public class PinShapeNonHintingView extends LinearLayout implements PinShapeInput {
     private static final int RESET_STAGGER_DELAY = 40;
     private static final int RESET_MAX_DELAY = 200;
+    @Deprecated
     private int mColor = getContext().getColor(PIN_SHAPES);
     private int mPosition = 0;
     private boolean mIsAnimatingReset = false;
@@ -88,7 +91,7 @@ public class PinShapeNonHintingView extends LinearLayout implements PinShapeInpu
         pinDot.setImageResource(mPinShapeAdapter.getShape(mPosition));
         if (pinDot.getDrawable() != null) {
             Drawable wrappedDrawable = DrawableCompat.wrap(pinDot.getDrawable());
-            DrawableCompat.setTint(wrappedDrawable, mColor);
+            DrawableCompat.setTint(wrappedDrawable, getPinShapeColor());
         }
         if (pinDot.getDrawable() instanceof AnimatedVectorDrawable) {
             ((AnimatedVectorDrawable) pinDot.getDrawable()).start();
@@ -214,6 +217,14 @@ public class PinShapeNonHintingView extends LinearLayout implements PinShapeInpu
             });
             animator.start();
             return animator;
+        }
+    }
+
+    private int getPinShapeColor() {
+        if (Flags.bouncerUiRevamp2()) {
+            return mContext.getColor(Color.shape);
+        } else {
+            return mColor;
         }
     }
 }

@@ -130,7 +130,7 @@ class SearchScaffoldTest {
         ).performClick()
     }
 
-    private fun onSearchHint() = composeTestRule.onNodeWithText(
+    private fun onSearchHint() = composeTestRule.onNodeWithContentDescription(
         context.getString(R.string.abc_search_hint)
     )
 

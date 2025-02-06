@@ -28,6 +28,7 @@ import com.android.systemui.statusbar.core.StatusBarRootModernization
 import com.android.systemui.statusbar.policy.statusBarConfigurationController
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -41,12 +42,17 @@ class StatusBarWindowControllerImplTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().also { it.statusBarWindowViewInflater = it.fakeStatusBarWindowViewInflater }
 
-    private val underTest = kosmos.statusBarWindowControllerImpl
+    private lateinit var underTest: StatusBarWindowControllerImpl
     private val fakeExecutor = kosmos.fakeExecutor
     private val fakeWindowManager = kosmos.fakeWindowManager
     private val mockFragmentService = kosmos.fragmentService
     private val fakeStatusBarWindowViewInflater = kosmos.fakeStatusBarWindowViewInflater
     private val statusBarConfigurationController = kosmos.statusBarConfigurationController
+
+    @Before
+    fun setUp() {
+        underTest = kosmos.statusBarWindowControllerImpl
+    }
 
     @Test
     @EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)

@@ -142,33 +142,28 @@ public class KeyguardDisplayManager {
 
     private boolean isKeyguardShowable(Display display) {
         if (display == null) {
-            if (DEBUG) Log.i(TAG, "Cannot show Keyguard on null display");
+            Log.i(TAG, "Cannot show Keyguard on null display");
             return false;
         }
         if (ShadeWindowGoesAround.isEnabled()) {
             int shadeDisplayId = mShadePositionRepositoryProvider.get().getDisplayId().getValue();
             if (display.getDisplayId() == shadeDisplayId) {
-                if (DEBUG) {
-                    Log.i(TAG,
-                            "Do not show KeyguardPresentation on the shade window display");
-                }
+                Log.i(TAG, "Do not show KeyguardPresentation on the shade window display");
                 return false;
             }
         } else {
             if (display.getDisplayId() == mDisplayTracker.getDefaultDisplayId()) {
-                if (DEBUG) Log.i(TAG, "Do not show KeyguardPresentation on the default display");
+                Log.i(TAG, "Do not show KeyguardPresentation on the default display");
                 return false;
             }
         }
         display.getDisplayInfo(mTmpDisplayInfo);
         if ((mTmpDisplayInfo.flags & Display.FLAG_PRIVATE) != 0) {
-            if (DEBUG) Log.i(TAG, "Do not show KeyguardPresentation on a private display");
+            Log.i(TAG, "Do not show KeyguardPresentation on a private display");
             return false;
         }
         if ((mTmpDisplayInfo.flags & Display.FLAG_ALWAYS_UNLOCKED) != 0) {
-            if (DEBUG) {
-                Log.i(TAG, "Do not show KeyguardPresentation on an unlocked display");
-            }
+            Log.i(TAG, "Do not show KeyguardPresentation on an unlocked display");
             return false;
         }
 
@@ -176,14 +171,11 @@ public class KeyguardDisplayManager {
                 mDeviceStateHelper.isConcurrentDisplayActive(display)
                         || mDeviceStateHelper.isRearDisplayOuterDefaultActive(display);
         if (mKeyguardStateController.isOccluded() && deviceStateOccludesKeyguard) {
-            if (DEBUG) {
-                // When activities with FLAG_SHOW_WHEN_LOCKED are shown on top of Keyguard, the
-                // Keyguard state becomes "occluded". In this case, we should not show the
-                // KeyguardPresentation, since the activity is presenting content onto the
-                // non-default display.
-                Log.i(TAG, "Do not show KeyguardPresentation when occluded and concurrent or rear"
-                        + " display is active");
-            }
+            // When activities with FLAG_SHOW_WHEN_LOCKED are shown on top of Keyguard, the Keyguard
+            // state becomes "occluded". In this case, we should not show the KeyguardPresentation,
+            // since the activity is presenting content onto the non-default display.
+            Log.i(TAG, "Do not show KeyguardPresentation when occluded and concurrent or rear"
+                    + " display is active");
             return false;
         }
 
@@ -197,7 +189,7 @@ public class KeyguardDisplayManager {
      */
     private boolean showPresentation(Display display) {
         if (!isKeyguardShowable(display)) return false;
-        if (DEBUG) Log.i(TAG, "Keyguard enabled on display: " + display);
+        Log.i(TAG, "Keyguard enabled on display: " + display);
         final int displayId = display.getDisplayId();
         Presentation presentation = mPresentations.get(displayId);
         if (presentation == null) {
@@ -239,7 +231,7 @@ public class KeyguardDisplayManager {
 
     public void show() {
         if (!mShowing) {
-            if (DEBUG) Log.v(TAG, "show");
+            Log.v(TAG, "show");
             if (mMediaRouter != null) {
                 mMediaRouter.addCallback(MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY,
                         mMediaRouterCallback, MediaRouter.CALLBACK_FLAG_PASSIVE_DISCOVERY);
@@ -253,7 +245,7 @@ public class KeyguardDisplayManager {
 
     public void hide() {
         if (mShowing) {
-            if (DEBUG) Log.v(TAG, "hide");
+            Log.v(TAG, "hide");
             if (mMediaRouter != null) {
                 mMediaRouter.removeCallback(mMediaRouterCallback);
             }

@@ -302,7 +302,9 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
         final long token = Binder.clearCallingIdentity();
         try {
-            mAudioService.setBluetoothA2dpOn(on);
+            if (!Flags.disableSetBluetoothAd2pOnCalls()) {
+                mAudioService.setBluetoothA2dpOn(on);
+            }
         } catch (RemoteException ex) {
             Slog.w(TAG, "RemoteException while calling setBluetoothA2dpOn. on=" + on);
         } finally {
@@ -677,7 +679,9 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 if (DEBUG) {
                     Slog.d(TAG, "restoreBluetoothA2dp(" + a2dpOn + ")");
                 }
-                mAudioService.setBluetoothA2dpOn(a2dpOn);
+                if (!Flags.disableSetBluetoothAd2pOnCalls()) {
+                    mAudioService.setBluetoothA2dpOn(a2dpOn);
+                }
             }
         } catch (RemoteException e) {
             Slog.w(TAG, "RemoteException while calling setBluetoothA2dpOn.");

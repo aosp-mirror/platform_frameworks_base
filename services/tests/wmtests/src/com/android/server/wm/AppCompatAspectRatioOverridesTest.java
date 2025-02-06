@@ -413,7 +413,7 @@ public class AppCompatAspectRatioOverridesTest extends WindowTestsBase {
         @Override
         void onPostActivityCreation(@NonNull ActivityRecord activity) {
             super.onPostActivityCreation(activity);
-            spyOn(activity.mAppCompatController.getAppCompatAspectRatioOverrides());
+            spyOn(activity.mAppCompatController.getAspectRatioOverrides());
         }
 
         void checkShouldApplyUserFullscreenOverride(boolean expected) {
@@ -465,7 +465,7 @@ public class AppCompatAspectRatioOverridesTest extends WindowTestsBase {
         }
 
         private AppCompatAspectRatioOverrides getTopActivityAppCompatAspectRatioOverrides() {
-            return activity().top().mAppCompatController.getAppCompatAspectRatioOverrides();
+            return activity().top().mAppCompatController.getAspectRatioOverrides();
         }
     }
 

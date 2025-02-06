@@ -51,14 +51,12 @@ import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-@ExperimentalCoroutinesApi
 object SceneWindowRootViewBinder {
 
     /** Binds between the view and view-model pertaining to a specific scene container. */
@@ -74,6 +72,7 @@ object SceneWindowRootViewBinder {
         onVisibilityChangedInternal: (isVisible: Boolean) -> Unit,
         dataSourceDelegator: SceneDataSourceDelegator,
         qsSceneAdapter: Provider<QSSceneAdapter>,
+        sceneJankMonitorFactory: SceneJankMonitor.Factory,
     ) {
         val unsortedSceneByKey: Map<SceneKey, Scene> = scenes.associateBy { scene -> scene.key }
         val sortedSceneByKey: Map<SceneKey, Scene> =
@@ -133,6 +132,7 @@ object SceneWindowRootViewBinder {
                                 dataSourceDelegator = dataSourceDelegator,
                                 qsSceneAdapter = qsSceneAdapter,
                                 containerConfig = containerConfig,
+                                sceneJankMonitorFactory = sceneJankMonitorFactory,
                             )
                             .also { it.id = R.id.scene_container_root_composable }
                     )
@@ -169,6 +169,7 @@ object SceneWindowRootViewBinder {
         dataSourceDelegator: SceneDataSourceDelegator,
         qsSceneAdapter: Provider<QSSceneAdapter>,
         containerConfig: SceneContainerConfig,
+        sceneJankMonitorFactory: SceneJankMonitor.Factory,
     ): View {
         return ComposeView(context).apply {
             setContent {
@@ -182,9 +183,10 @@ object SceneWindowRootViewBinder {
                             sceneByKey = sceneByKey,
                             overlayByKey = overlayByKey,
                             initialSceneKey = containerConfig.initialSceneKey,
-                            sceneTransitions = containerConfig.transitions,
+                            transitionsBuilder = containerConfig.transitionsBuilder,
                             dataSourceDelegator = dataSourceDelegator,
                             qsSceneAdapter = qsSceneAdapter,
+                            sceneJankMonitorFactory = sceneJankMonitorFactory,
                         )
                     }
                 }

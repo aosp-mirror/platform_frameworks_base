@@ -325,7 +325,7 @@ public class ConditionProviders extends ManagedServices {
         for (int i = 0; i < N; i++) {
             final Condition c = conditions[i];
             if (mCallback != null) {
-                mCallback.onConditionChanged(c.id, c);
+                mCallback.onConditionChanged(c.id, c, info.uid);
             }
         }
     }
@@ -515,7 +515,7 @@ public class ConditionProviders extends ManagedServices {
 
     public interface Callback {
         void onServiceAdded(ComponentName component);
-        void onConditionChanged(Uri id, Condition condition);
+        void onConditionChanged(Uri id, Condition condition, int callerUid);
     }
 
 }

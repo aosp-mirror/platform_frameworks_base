@@ -1104,7 +1104,10 @@
     -->
     <bool name="config_userSwitchingMustGoThroughLoginScreen">false</bool>
 
-
     <!-- The dream component used when the device is low light environment. -->
     <string translatable="false" name="config_lowLightDreamComponent"/>
+
+    <!-- Configuration for wallpaper focal area -->
+    <bool name="center_align_focal_area_shape">false</bool>
+    <string name="focal_area_target" translatable="false" />
 </resources>

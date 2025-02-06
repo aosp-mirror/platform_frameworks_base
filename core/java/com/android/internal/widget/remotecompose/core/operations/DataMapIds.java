@@ -89,6 +89,15 @@ public class DataMapIds extends Operation {
         return builder.toString();
     }
 
+    /**
+     * Write this operation to the buffer
+     *
+     * @param buffer the buffer to apply the operation to
+     * @param id the id
+     * @param names the names of the variables
+     * @param type the types of the variables
+     * @param ids the ids of the variables
+     */
     public static void apply(
             @NonNull WireBuffer buffer,
             int id,

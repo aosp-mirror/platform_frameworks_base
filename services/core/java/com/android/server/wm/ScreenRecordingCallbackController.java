@@ -22,6 +22,7 @@ import static com.android.internal.protolog.WmProtoLogGroups.WM_ERROR;
 
 import android.media.projection.IMediaProjectionManager;
 import android.media.projection.IMediaProjectionWatcherCallback;
+import android.media.projection.MediaProjectionEvent;
 import android.media.projection.MediaProjectionInfo;
 import android.os.Binder;
 import android.os.IBinder;
@@ -84,6 +85,12 @@ public class ScreenRecordingCallbackController {
         public void onRecordingSessionSet(MediaProjectionInfo mediaProjectionInfo,
                 ContentRecordingSession contentRecordingSession) {
         }
+
+        @Override
+        public void onMediaProjectionEvent(
+                MediaProjectionEvent event,
+                MediaProjectionInfo mediaProjectionInfo,
+                ContentRecordingSession session) {}
     }
 
     ScreenRecordingCallbackController(WindowManagerService wms) {

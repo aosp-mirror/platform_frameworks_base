@@ -38,7 +38,6 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class UserInputDeviceRepositoryTest : SysuiTestCase() {
 
     private lateinit var underTest: UserInputDeviceRepository

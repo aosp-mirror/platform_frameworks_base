@@ -30,10 +30,6 @@ data class ClockConfig(
     /** Transition to AOD should move smartspace like large clock instead of small clock */
     val useAlternateSmartspaceAODTransition: Boolean = false,
 
-    /** Deprecated version of isReactiveToTone; moved to ClockPickerConfig */
-    @Deprecated("TODO(b/352049256): Remove in favor of ClockPickerConfig.isReactiveToTone")
-    val isReactiveToTone: Boolean = true,
-
     /** True if the clock is large frame clock, which will use weather in compose. */
     val useCustomClockScene: Boolean = false,
 )

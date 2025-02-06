@@ -960,6 +960,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     // Stores a list of users whose package restrictions file needs to be updated
     final ArraySet<Integer> mDirtyUsers = new ArraySet<>();
 
+    @GuardedBy("mRunningInstalls")
     final SparseArray<InstallRequest> mRunningInstalls = new SparseArray<>();
     int mNextInstallToken = 1;  // nonzero; will be wrapped back to 1 when ++ overflows
 
@@ -1476,7 +1477,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         ArchiveState archiveState;
         synchronized (mLock) {
             PackageSetting ps = mSettings.getPackageLPr(packageName);
-            if (ps == null) {
+            if (ps == null || snapshot.shouldFilterApplication(ps, binderUid, userId)) {
                 return null;
             }
             var psi = ps.getUserStateOrDefault(userId);
@@ -3291,20 +3292,23 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         // and been launched through some other means, so it is not in a problematic
         // state for observers to see the FIRST_LAUNCH signal.
         mHandler.post(() -> {
-            for (int i = 0; i < mRunningInstalls.size(); i++) {
-                final InstallRequest installRequest = mRunningInstalls.valueAt(i);
-                if (installRequest.getReturnCode() != PackageManager.INSTALL_SUCCEEDED) {
-                    continue;
-                }
-                if (packageName.equals(installRequest.getPkg().getPackageName())) {
-                    // right package; but is it for the right user?
-                    for (int uIndex = 0; uIndex < installRequest.getNewUsers().length; uIndex++) {
-                        if (userId == installRequest.getNewUsers()[uIndex]) {
-                            if (DEBUG_BACKUP) {
-                                Slog.i(TAG, "Package " + packageName
-                                        + " being restored so deferring FIRST_LAUNCH");
+            synchronized (mRunningInstalls) {
+                for (int i = 0; i < mRunningInstalls.size(); i++) {
+                    final InstallRequest installRequest = mRunningInstalls.valueAt(i);
+                    if (installRequest.getReturnCode() != PackageManager.INSTALL_SUCCEEDED) {
+                        continue;
+                    }
+                    final int[] newUsers = installRequest.getNewUsers();
+                    if (packageName.equals(installRequest.getPkg().getPackageName())) {
+                        // right package; but is it for the right user?
+                        for (int uIndex = 0; uIndex < newUsers.length; uIndex++) {
+                            if (userId == newUsers[uIndex]) {
+                                if (DEBUG_BACKUP) {
+                                    Slog.i(TAG, "Package " + packageName
+                                            + " being restored so deferring FIRST_LAUNCH");
+                                }
+                                return;
                             }
-                            return;
                         }
                     }
                 }
@@ -4251,8 +4255,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         CarrierAppUtils.disableCarrierAppsUntilPrivileged(
                 mContext.getOpPackageName(), UserHandle.USER_SYSTEM, mContext);
 
-        disableSkuSpecificApps();
-
         // Read the compatibilty setting when the system is ready.
         boolean compatibilityModeEnabled = android.provider.Settings.Global.getInt(
                 mContext.getContentResolver(),
@@ -4383,29 +4385,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         DexUseManagerLocal dexUseManager = DexOptHelper.getDexUseManagerLocal();
         if (dexUseManager != null) {
             dexUseManager.systemReady();
-        }
-    }
-
-    //TODO: b/111402650
-    private void disableSkuSpecificApps() {
-        String[] apkList = mContext.getResources().getStringArray(
-                R.array.config_disableApksUnlessMatchedSku_apk_list);
-        String[] skuArray = mContext.getResources().getStringArray(
-                R.array.config_disableApkUnlessMatchedSku_skus_list);
-        if (ArrayUtils.isEmpty(apkList)) {
-           return;
-        }
-        String sku = SystemProperties.get("ro.boot.hardware.sku");
-        if (!TextUtils.isEmpty(sku) && ArrayUtils.contains(skuArray, sku)) {
-            return;
-        }
-        final Computer snapshot = snapshotComputer();
-        for (String packageName : apkList) {
-            setSystemAppHiddenUntilInstalled(snapshot, packageName, true);
-            final List<UserInfo> users = mInjector.getUserManagerInternal().getUsers(false);
-            for (int i = 0; i < users.size(); i++) {
-                setSystemAppInstallState(snapshot, packageName, false, users.get(i).id);
-            }
         }
     }
 

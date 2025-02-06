@@ -34,7 +34,6 @@ import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
-import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
@@ -70,7 +69,6 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -84,7 +82,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -134,7 +131,6 @@ class CustomizationProviderTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
-                communalSettingsInteractor = kosmos.communalSettingsInteractor,
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
         val remoteUserSelectionManager =
@@ -205,7 +201,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                 biometricSettingsRepository = biometricSettingsRepository,
                 backgroundDispatcher = testDispatcher,
                 appContext = mContext,
-                communalSettingsInteractor = kosmos.communalSettingsInteractor,
+                accessibilityManager = mock(),
                 sceneInteractor = { kosmos.sceneInteractor },
             )
         underTest.previewManager =

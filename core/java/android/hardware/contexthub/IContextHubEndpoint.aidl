@@ -94,4 +94,10 @@ interface IContextHubEndpoint {
      */
     @EnforcePermission("ACCESS_CONTEXT_HUB")
     void sendMessageDeliveryStatus(int sessionId, int messageSeqNumber, byte errorCode);
+
+    /**
+     * Invoked when a callback from IContextHubEndpointCallback finishes.
+     */
+    @EnforcePermission("ACCESS_CONTEXT_HUB")
+    void onCallbackFinished();
 }

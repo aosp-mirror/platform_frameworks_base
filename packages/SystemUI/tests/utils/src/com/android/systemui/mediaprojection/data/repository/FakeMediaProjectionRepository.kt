@@ -19,6 +19,8 @@ package com.android.systemui.mediaprojection.data.repository
 import android.app.ActivityManager
 import android.media.projection.StopReason
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class FakeMediaProjectionRepository : MediaProjectionRepository {
@@ -27,9 +29,18 @@ class FakeMediaProjectionRepository : MediaProjectionRepository {
     override val mediaProjectionState: MutableStateFlow<MediaProjectionState> =
         MutableStateFlow(MediaProjectionState.NotProjecting)
 
+    private val _projectionStartedDuringCallAndActivePostCallEvent = MutableSharedFlow<Unit>()
+
+    override val projectionStartedDuringCallAndActivePostCallEvent: Flow<Unit> =
+        _projectionStartedDuringCallAndActivePostCallEvent
+
     var stopProjectingInvoked = false
 
     override suspend fun stopProjecting(@StopReason stopReason: Int) {
         stopProjectingInvoked = true
+    }
+
+    suspend fun emitProjectionStartedDuringCallAndActivePostCallEvent() {
+        _projectionStartedDuringCallAndActivePostCallEvent.emit(Unit)
     }
 }

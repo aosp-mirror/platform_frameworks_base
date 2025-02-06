@@ -37,7 +37,6 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -53,7 +52,6 @@ import org.mockito.junit.MockitoRule
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class QSTileViewModelImplTest : SysuiTestCase() {
 
     @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()

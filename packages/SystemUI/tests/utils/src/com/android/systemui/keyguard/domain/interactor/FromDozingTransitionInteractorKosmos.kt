@@ -43,6 +43,6 @@ var Kosmos.fromDozingTransitionInteractor by
             keyguardOcclusionInteractor = keyguardOcclusionInteractor,
             deviceEntryInteractor = deviceEntryInteractor,
             wakeToGoneInteractor = keyguardWakeDirectlyToGoneInteractor,
-            dreamManager = dreamManager
+            dreamManager = dreamManager,
         )
     }

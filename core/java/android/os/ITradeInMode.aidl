@@ -59,4 +59,37 @@ interface ITradeInMode {
      * ENTER_TRADE_IN_MODE permission is required.
      */
     boolean enterEvaluationMode();
+
+    /**
+     * Schedules a wipe to trigger SUW for trade-in mode testing. A reboot is
+     * required. After this, startTesting() can be called.
+     *
+     * ENTER_TRADE_IN_MODE permission is required and ro.debuggable must be 1.
+     */
+    void scheduleWipeForTesting();
+
+    /**
+     * Enables testing. This only takes effect after the next reboot, and is
+     * only allowed in ro.debuggable builds. On the following boot, normal
+     * adbd will be disabled and trade-in mode adbd will be enabled instead.
+     *
+     * ENTER_TRADE_IN_MODE permission is required and ro.debuggable must be 1.
+     */
+    void startTesting();
+
+    /**
+     * Disables testing. This disables trade-in mode and removes any scheduled
+     * trade-in mode wipe.
+     *
+     * ENTER_TRADE_IN_MODE permission is required, ro.debuggable must be 1, and
+     * startTesting() must have been called.
+     */
+    void stopTesting();
+
+    /**
+     * Returns whether the device is testing trade-in mode.
+     *
+     * ENTER_TRADE_IN_MODE permission is required and ro.debuggable must be 1.
+     */
+    boolean isTesting();
 }

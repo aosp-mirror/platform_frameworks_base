@@ -19,23 +19,27 @@ package com.android.server.location.contexthub;
 import android.content.Context;
 import android.hardware.contexthub.ContextHubInfo;
 import android.hardware.contexthub.EndpointInfo;
+import android.hardware.contexthub.ErrorCode;
 import android.hardware.contexthub.HubEndpointInfo;
 import android.hardware.contexthub.HubInfo;
 import android.hardware.contexthub.HubMessage;
 import android.hardware.contexthub.IContextHubEndpoint;
 import android.hardware.contexthub.IContextHubEndpointCallback;
 import android.hardware.contexthub.IEndpointCommunication;
+import android.hardware.contexthub.MessageDeliveryStatus;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * A class that manages registration/unregistration of clients and manages messages to/from clients.
@@ -44,13 +48,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 /* package */ class ContextHubEndpointManager
         implements ContextHubHalEndpointCallback.IEndpointSessionCallback {
+    /** The range of session IDs to use for endpoints */
+    public static final int SERVICE_SESSION_RANGE = 1024;
+
     private static final String TAG = "ContextHubEndpointManager";
 
     /** The hub ID of the Context Hub Service. */
     private static final long SERVICE_HUB_ID = 0x416e64726f696400L;
-
-    /** The range of session IDs to use for endpoints */
-    private static final int SERVICE_SESSION_RANGE = 1024;
 
     /** The length of the array that should be returned by HAL requestSessionIdRange */
     private static final int SERVICE_SESSION_RANGE_LENGTH = 2;
@@ -312,15 +316,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
     @Override
     public void onCloseEndpointSession(int sessionId, byte reason) {
-        boolean callbackInvoked = false;
-        for (ContextHubEndpointBroker broker : mEndpointMap.values()) {
-            if (broker.hasSessionId(sessionId)) {
-                broker.onCloseEndpointSession(sessionId, reason);
-                callbackInvoked = true;
-                break;
-            }
-        }
-
+        boolean callbackInvoked =
+                invokeCallbackForMatchingSession(
+                        sessionId, (broker) -> broker.onCloseEndpointSession(sessionId, reason));
         if (!callbackInvoked) {
             Log.w(TAG, "onCloseEndpointSession: unknown session ID " + sessionId);
         }
@@ -328,15 +326,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
     @Override
     public void onEndpointSessionOpenComplete(int sessionId) {
-        boolean callbackInvoked = false;
-        for (ContextHubEndpointBroker broker : mEndpointMap.values()) {
-            if (broker.hasSessionId(sessionId)) {
-                broker.onEndpointSessionOpenComplete(sessionId);
-                callbackInvoked = true;
-                break;
-            }
-        }
-
+        boolean callbackInvoked =
+                invokeCallbackForMatchingSession(
+                        sessionId, (broker) -> broker.onEndpointSessionOpenComplete(sessionId));
         if (!callbackInvoked) {
             Log.w(TAG, "onEndpointSessionOpenComplete: unknown session ID " + sessionId);
         }
@@ -344,34 +336,52 @@ import java.util.concurrent.ConcurrentHashMap;
 
     @Override
     public void onMessageReceived(int sessionId, HubMessage message) {
-        boolean callbackInvoked = false;
-        for (ContextHubEndpointBroker broker : mEndpointMap.values()) {
-            if (broker.hasSessionId(sessionId)) {
-                broker.onMessageReceived(sessionId, message);
-                callbackInvoked = true;
-                break;
-            }
-        }
-
+        boolean callbackInvoked =
+                invokeCallbackForMatchingSession(
+                        sessionId, (broker) -> broker.onMessageReceived(sessionId, message));
         if (!callbackInvoked) {
             Log.w(TAG, "onMessageReceived: unknown session ID " + sessionId);
+            if (message.isResponseRequired()) {
+                sendMessageDeliveryStatus(
+                        sessionId,
+                        message.getMessageSequenceNumber(),
+                        ErrorCode.DESTINATION_NOT_FOUND);
+            }
         }
     }
 
     @Override
     public void onMessageDeliveryStatusReceived(int sessionId, int sequenceNumber, byte errorCode) {
-        boolean callbackInvoked = false;
-        for (ContextHubEndpointBroker broker : mEndpointMap.values()) {
-            if (broker.hasSessionId(sessionId)) {
-                broker.onMessageDeliveryStatusReceived(sessionId, sequenceNumber, errorCode);
-                callbackInvoked = true;
-                break;
-            }
-        }
-
+        boolean callbackInvoked =
+                invokeCallbackForMatchingSession(
+                        sessionId,
+                        (broker) ->
+                                broker.onMessageDeliveryStatusReceived(
+                                        sessionId, sequenceNumber, errorCode));
         if (!callbackInvoked) {
             Log.w(TAG, "onMessageDeliveryStatusReceived: unknown session ID " + sessionId);
         }
+    }
+
+    /**
+     * Invokes a callback for a session with matching ID.
+     *
+     * @param callback The callback to execute
+     * @return true if a callback was executed
+     */
+    private boolean invokeCallbackForMatchingSession(
+            int sessionId, Consumer<ContextHubEndpointBroker> callback) {
+        for (ContextHubEndpointBroker broker : mEndpointMap.values()) {
+            if (broker.hasSessionId(sessionId)) {
+                try {
+                    callback.accept(broker);
+                } catch (RuntimeException e) {
+                    Log.e(TAG, "Exception while invoking callback", e);
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Unregister the hub (called during init() failure). Silence errors. */
@@ -398,5 +408,32 @@ import java.util.concurrent.ConcurrentHashMap;
      */
     private boolean isSessionIdRangeValid(int minId, int maxId) {
         return (minId <= maxId) && (minId >= 0) && (maxId >= 0);
+    }
+
+    private void sendMessageDeliveryStatus(
+            int sessionId, int messageSequenceNumber, byte errorCode) {
+        MessageDeliveryStatus status = new MessageDeliveryStatus();
+        status.messageSequenceNumber = messageSequenceNumber;
+        status.errorCode = errorCode;
+        try {
+            mHubInterface.sendMessageDeliveryStatusToEndpoint(sessionId, status);
+        } catch (RemoteException e) {
+            Log.w(
+                    TAG,
+                    "Exception while sending message delivery status on session " + sessionId,
+                    e);
+        }
+    }
+
+    @VisibleForTesting
+    /* package */ int getNumAvailableSessions() {
+        synchronized (mSessionIdLock) {
+            return (mMaxSessionId - mMinSessionId + 1) - mReservedSessionIds.size();
+        }
+    }
+
+    @VisibleForTesting
+    /* package */ int getNumRegisteredClients() {
+        return mEndpointMap.size();
     }
 }

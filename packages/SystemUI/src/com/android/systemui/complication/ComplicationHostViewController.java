@@ -18,6 +18,7 @@ package com.android.systemui.complication;
 
 import static com.android.systemui.complication.dagger.ComplicationHostViewModule.SCOPED_COMPLICATIONS_LAYOUT;
 import static com.android.systemui.complication.dagger.ComplicationModule.SCOPED_COMPLICATIONS_MODEL;
+import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -32,9 +33,13 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.settings.SecureSettings;
+
+import kotlinx.coroutines.CoroutineDispatcher;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -77,7 +82,9 @@ public class ComplicationHostViewController extends ViewController<ConstraintLay
             DreamOverlayStateController dreamOverlayStateController,
             LifecycleOwner lifecycleOwner,
             @Named(SCOPED_COMPLICATIONS_MODEL) ComplicationCollectionViewModel viewModel,
-            SecureSettings secureSettings) {
+            SecureSettings secureSettings,
+            ConfigurationInteractor configurationInteractor,
+            @Main CoroutineDispatcher mainDispatcher) {
         super(view);
         mLayoutEngine = layoutEngine;
         mLifecycleOwner = lifecycleOwner;
@@ -87,6 +94,13 @@ public class ComplicationHostViewController extends ViewController<ConstraintLay
         // Whether animations are enabled.
         mIsAnimationEnabled = secureSettings.getFloatForUser(
                 Settings.Global.ANIMATOR_DURATION_SCALE, 1.0f, UserHandle.USER_CURRENT) != 0.0f;
+        // Update layout on configuration change like rotation, fold etc.
+        collectFlow(
+                view,
+                configurationInteractor.getMaxBounds(),
+                mLayoutEngine::updateLayoutEngine,
+                mainDispatcher
+        );
     }
 
     /**

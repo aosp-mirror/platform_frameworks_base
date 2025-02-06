@@ -29,6 +29,7 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayChangeController
 import com.android.wm.shell.common.DisplayController
+import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger
 import com.android.wm.shell.desktopmode.DesktopTasksController
@@ -37,6 +38,7 @@ import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread
 import com.android.wm.shell.shared.annotations.ShellMainThread
+import com.android.wm.shell.transition.FocusTransitionObserver
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
 import com.android.wm.shell.windowdecor.common.WindowDecorTaskResourceLoader
@@ -58,6 +60,8 @@ class DesktopTilingDecorViewModel(
     private val desktopUserRepositories: DesktopUserRepositories,
     private val desktopModeEventLogger: DesktopModeEventLogger,
     private val taskResourceLoader: WindowDecorTaskResourceLoader,
+    private val focusTransitionObserver: FocusTransitionObserver,
+    private val mainExecutor: ShellExecutor,
 ) : DisplayChangeController.OnDisplayChangingListener {
     @VisibleForTesting
     var tilingTransitionHandlerByDisplayId = SparseArray<DesktopTilingWindowDecoration>()
@@ -94,6 +98,8 @@ class DesktopTilingDecorViewModel(
                             returnToDragStartAnimator,
                             desktopUserRepositories,
                             desktopModeEventLogger,
+                            focusTransitionObserver,
+                            mainExecutor,
                         )
                     tilingTransitionHandlerByDisplayId.put(displayId, newHandler)
                     newHandler
@@ -112,9 +118,10 @@ class DesktopTilingDecorViewModel(
     }
 
     fun moveTaskToFrontIfTiled(taskInfo: RunningTaskInfo): Boolean {
+        // Always pass focus=true because taskInfo.isFocused is not updated yet.
         return tilingTransitionHandlerByDisplayId
             .get(taskInfo.displayId)
-            ?.moveTiledPairToFront(taskInfo, isTaskFocused = true) ?: false
+            ?.moveTiledPairToFront(taskInfo.taskId, isFocusedOnDisplay = true) ?: false
     }
 
     fun onOverviewAnimationStateChange(isRunning: Boolean) {

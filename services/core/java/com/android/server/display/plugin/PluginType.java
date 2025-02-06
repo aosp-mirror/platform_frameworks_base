@@ -18,6 +18,7 @@ package com.android.server.display.plugin;
 
 import com.android.internal.annotations.Keep;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.display.plugin.types.HdrBoostOverride;
 
 /**
  * Represent customisation entry point to Framework. OEM and Framework team should define
@@ -28,6 +29,15 @@ import com.android.internal.annotations.VisibleForTesting;
  */
 @Keep
 public class PluginType<T> {
+    /*
+    * PluginType for HDR boost override. If set, system will use overridden value instead
+    * system default parameters. To switch back to default system behaviour, Plugin should set
+    * this type value to null.
+    * Value change will trigger whole power state recalculation, so plugins should not update
+    * value for this type too often.
+    */
+    public static final PluginType<HdrBoostOverride> HDR_BOOST_OVERRIDE = new PluginType<>(
+            HdrBoostOverride.class, "hdr_boost_override");
 
     final Class<T> mType;
     final String mName;

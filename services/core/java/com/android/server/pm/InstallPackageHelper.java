@@ -125,7 +125,6 @@ import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.VerifierInfo;
-import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.net.Uri;
@@ -171,7 +170,6 @@ import com.android.internal.pm.pkg.component.ParsedIntentInfo;
 import com.android.internal.pm.pkg.component.ParsedPermission;
 import com.android.internal.pm.pkg.component.ParsedPermissionGroup;
 import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
-import com.android.internal.security.VerityUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.server.EventLogTags;
@@ -186,7 +184,6 @@ import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedLibraryWrapper;
 import com.android.server.rollback.RollbackManagerInternal;
-import com.android.server.security.FileIntegrityService;
 import com.android.server.utils.WatchedArrayMap;
 import com.android.server.utils.WatchedLongSparseArray;
 
@@ -195,7 +192,6 @@ import dalvik.system.VMRuntime;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.DigestException;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -853,44 +849,52 @@ final class InstallPackageHelper {
         int token;
         if (mPm.mNextInstallToken < 0) mPm.mNextInstallToken = 1;
         token = mPm.mNextInstallToken++;
-        mPm.mRunningInstalls.put(token, request);
+        synchronized (mPm.mRunningInstalls) {
+            mPm.mRunningInstalls.put(token, request);
+        }
 
         if (DEBUG_INSTALL) Log.v(TAG, "+ starting restore round-trip " + token);
 
         final boolean succeeded = request.getReturnCode() == PackageManager.INSTALL_SUCCEEDED;
-        if (succeeded && doRestore) {
-            // Pass responsibility to the Backup Manager.  It will perform a
-            // restore if appropriate, then pass responsibility back to the
-            // Package Manager to run the post-install observer callbacks
-            // and broadcasts.
-            request.closeFreezer();
-            doRestore = performBackupManagerRestore(userId, token, request);
-        }
+        if (succeeded) {
+            request.onRestoreStarted();
+            if (doRestore) {
+                // Pass responsibility to the Backup Manager.  It will perform a
+                // restore if appropriate, then pass responsibility back to the
+                // Package Manager to run the post-install observer callbacks
+                // and broadcasts.
+                // Note: MUST close freezer before backup/restore, otherwise test
+                // of CtsBackupHostTestCases will fail.
+                request.closeFreezer();
+                doRestore = performBackupManagerRestore(userId, token, request);
+            }
 
-        // If this is an update to a package that might be potentially downgraded, then we
-        // need to check with the rollback manager whether there's any userdata that might
-        // need to be snapshotted or restored for the package.
-        //
-        // TODO(narayan): Get this working for cases where userId == UserHandle.USER_ALL.
-        if (succeeded && !doRestore && update) {
-            doRestore = performRollbackManagerRestore(userId, token, request);
-        }
+            // If this is an update to a package that might be potentially downgraded, then we
+            // need to check with the rollback manager whether there's any userdata that might
+            // need to be snapshotted or restored for the package.
+            //
+            // TODO(narayan): Get this working for cases where userId == UserHandle.USER_ALL.
+            if (!doRestore && update) {
+                doRestore = performRollbackManagerRestore(userId, token, request);
+            }
 
-        if (succeeded && doRestore && !request.hasPostInstallRunnable()) {
-            boolean hasNeverBeenRestored =
-                    packageSetting != null && packageSetting.isPendingRestore();
-            request.setPostInstallRunnable(() -> {
-                // Permissions should be restored on each user that has the app installed for the
-                // first time, unless it's an unarchive install for an archived app, in which case
-                // the permissions should be restored on each user that has the app updated.
-                int[] userIdsToRestorePermissions = hasNeverBeenRestored
-                        ? request.getUpdateBroadcastUserIds()
-                        : request.getFirstTimeBroadcastUserIds();
-                for (int restorePermissionUserId : userIdsToRestorePermissions) {
-                    mPm.restorePermissionsAndUpdateRolesForNewUserInstall(request.getName(),
-                            restorePermissionUserId);
-                }
-            });
+            if (doRestore && !request.hasPostInstallRunnable()) {
+                boolean hasNeverBeenRestored =
+                        packageSetting != null && packageSetting.isPendingRestore();
+                request.setPostInstallRunnable(() -> {
+                    // Permissions should be restored on each user that has the app installed for
+                    // the first time, unless it's an unarchive install for an archived app, in
+                    // which case the permissions should be restored on each user that has the
+                    // app updated.
+                    int[] userIdsToRestorePermissions = hasNeverBeenRestored
+                            ? request.getUpdateBroadcastUserIds()
+                            : request.getFirstTimeBroadcastUserIds();
+                    for (int restorePermissionUserId : userIdsToRestorePermissions) {
+                        mPm.restorePermissionsAndUpdateRolesForNewUserInstall(request.getName(),
+                                restorePermissionUserId);
+                    }
+                });
+            }
         }
 
         if (doRestore) {
@@ -900,8 +904,11 @@ final class InstallPackageHelper {
                 }
             }
         } else {
-            // No restore possible, or the Backup Manager was mysteriously not
-            // available -- just fire the post-install work request directly.
+            // No restore possible, or the Backup Manager was mysteriously not available.
+            // we don't need to wait for restore to complete before closing the freezer,
+            // so we can close the freezer right away.
+            // Also just fire the post-install work request directly.
+            request.closeFreezer();
             if (DEBUG_INSTALL) Log.v(TAG, "No restore - queue post-install for " + token);
 
             Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "postInstall", token);
@@ -1151,7 +1158,8 @@ final class InstallPackageHelper {
                 return;
             }
             request.setKeepArtProfile(true);
-            DexOptHelper.performDexoptIfNeeded(request, mDexManager, mContext, null);
+            // TODO(b/388159696): Use performDexoptIfNeededAsync.
+            DexOptHelper.performDexoptIfNeeded(request, mDexManager, null /* installLock */);
         }
     }
 
@@ -1165,11 +1173,8 @@ final class InstallPackageHelper {
                 }
                 try {
                     doRenameLI(request, parsedPackage);
-                    setUpFsVerity(parsedPackage);
-                } catch (Installer.InstallerException | IOException | DigestException
-                         | NoSuchAlgorithmException | PrepareFailure e) {
-                    request.setError(PackageManagerException.INTERNAL_ERROR_VERITY_SETUP,
-                            "Failed to set up verity: " + e);
+                } catch (PrepareFailure e) {
+                    request.setError(e);
                     return false;
                 }
 
@@ -2322,68 +2327,6 @@ final class InstallPackageHelper {
         }
     }
 
-    /**
-     * Set up fs-verity for the given package. For older devices that do not support fs-verity,
-     * this is a no-op.
-     */
-    private void setUpFsVerity(AndroidPackage pkg) throws Installer.InstallerException,
-            PrepareFailure, IOException, DigestException, NoSuchAlgorithmException {
-        if (!PackageManagerServiceUtils.isApkVerityEnabled()) {
-            return;
-        }
-
-        if (isIncrementalPath(pkg.getPath()) && IncrementalManager.getVersion()
-                < IncrementalManager.MIN_VERSION_TO_SUPPORT_FSVERITY) {
-            return;
-        }
-
-        // Collect files we care for fs-verity setup.
-        ArrayMap<String, String> fsverityCandidates = new ArrayMap<>();
-        fsverityCandidates.put(pkg.getBaseApkPath(),
-                VerityUtils.getFsveritySignatureFilePath(pkg.getBaseApkPath()));
-
-        final String dmPath = DexMetadataHelper.buildDexMetadataPathForApk(
-                pkg.getBaseApkPath());
-        if (new File(dmPath).exists()) {
-            fsverityCandidates.put(dmPath, VerityUtils.getFsveritySignatureFilePath(dmPath));
-        }
-
-        for (String path : pkg.getSplitCodePaths()) {
-            fsverityCandidates.put(path, VerityUtils.getFsveritySignatureFilePath(path));
-
-            final String splitDmPath = DexMetadataHelper.buildDexMetadataPathForApk(path);
-            if (new File(splitDmPath).exists()) {
-                fsverityCandidates.put(splitDmPath,
-                        VerityUtils.getFsveritySignatureFilePath(splitDmPath));
-            }
-        }
-
-        var fis = FileIntegrityService.getService();
-        for (Map.Entry<String, String> entry : fsverityCandidates.entrySet()) {
-            try {
-                final String filePath = entry.getKey();
-                if (VerityUtils.hasFsverity(filePath)) {
-                    continue;
-                }
-
-                final String signaturePath = entry.getValue();
-                if (new File(signaturePath).exists()) {
-                    // If signature is provided, enable fs-verity first so that the file can be
-                    // measured for signature check below.
-                    VerityUtils.setUpFsverity(filePath);
-
-                    if (!fis.verifyPkcs7DetachedSignature(signaturePath, filePath)) {
-                        throw new PrepareFailure(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
-                                "fs-verity signature does not verify against a known key");
-                    }
-                }
-            } catch (IOException e) {
-                throw new PrepareFailure(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
-                        "Failed to enable fs-verity: " + e);
-            }
-        }
-    }
-
     private PackageFreezer freezePackageForInstall(String packageName, int userId, int installFlags,
             String killReason, int exitInfoReason, InstallRequest request) {
         if ((installFlags & PackageManager.INSTALL_DONT_KILL_APP) != 0) {
@@ -2789,8 +2732,8 @@ final class InstallPackageHelper {
                                     | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
                 }
 
-                DexOptHelper.performDexoptIfNeeded(installRequest, mDexManager, mContext,
-                        mPm.mInstallLock.getRawLock());
+                DexOptHelper.performDexoptIfNeeded(
+                        installRequest, mDexManager, mPm.mInstallLock.getRawLock());
             }
         }
         PackageManagerServiceUtils.waitForNativeBinariesExtractionForIncremental(
@@ -3060,6 +3003,8 @@ final class InstallPackageHelper {
         }
 
         if (succeeded) {
+            Slog.i(TAG, "installation completed:" + packageName);
+
             if (Flags.aslInApkAppMetadataSource()
                     && pkgSetting.getAppMetadataSource() == APP_METADATA_SOURCE_APK) {
                 if (!extractAppMetadataFromApk(request.getPkg(),
@@ -3099,19 +3044,11 @@ final class InstallPackageHelper {
 
             // Set the OP_ACCESS_RESTRICTED_SETTINGS op, which is used by ECM (see {@link
             // EnhancedConfirmationManager}) as a persistent state denoting whether an app is
-            // currently guarded by ECM, not guarded by ECM, or (in Android V+) that this should
-            // be decided later.
-            if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
-                    && android.security.Flags.extendEcmToAllSettings()) {
-                final int appId = request.getAppId();
-                mPm.mHandler.post(() -> {
-                    for (int userId : firstUserIds) {
-                        // MODE_DEFAULT means that the app's guardedness will be decided lazily
-                        setAccessRestrictedSettingsMode(packageName, appId, userId,
-                                AppOpsManager.MODE_DEFAULT);
-                    }
-                });
-            } else {
+            // currently guarded by ECM, not guarded by ECM or (in Android V+) that this should
+            // be decided later. In Android B, the op's default mode was updated to the
+            // "should be decided later" case, and so this step is now unnecessary.
+            if (!android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
+                    || !android.security.Flags.extendEcmToAllSettings()) {
                 // Apply restricted settings on potentially dangerous packages. Needs to happen
                 // after appOpsManager is notified of the new package
                 if (request.getPackageSource() == PackageInstaller.PACKAGE_SOURCE_LOCAL_FILE

@@ -20,6 +20,7 @@ import static android.security.keystore2.AndroidKeyStoreCipherSpiBase.DEFAULT_MG
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.hardware.security.keymint.EcCurve;
 import android.hardware.security.keymint.KeyParameter;
@@ -732,6 +733,8 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         }
     }
 
+    @RequiresPermission(value = android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            conditional = true)
     private void addAttestationParameters(@NonNull List<KeyParameter> params)
             throws ProviderException, IllegalArgumentException, DeviceIdAttestationException {
         byte[] challenge = mSpec.getAttestationChallenge();
@@ -824,7 +827,13 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                         break;
                     }
                     case AttestationUtils.ID_TYPE_MEID: {
-                        final String meid = telephonyService.getMeid(0);
+                        String meid;
+                        try {
+                            meid = telephonyService.getMeid(0);
+                        } catch (UnsupportedOperationException e) {
+                            Log.e(TAG, "Unable to retrieve MEID", e);
+                            meid = null;
+                        }
                         if (meid == null) {
                             throw new DeviceIdAttestationException("Unable to retrieve MEID");
                         }

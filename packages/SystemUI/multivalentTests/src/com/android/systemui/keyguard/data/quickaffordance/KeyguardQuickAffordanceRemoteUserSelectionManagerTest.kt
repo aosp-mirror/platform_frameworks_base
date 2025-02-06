@@ -27,7 +27,6 @@ import com.android.systemui.shared.customization.data.content.FakeCustomizationP
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -41,7 +40,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardQuickAffordanceRemoteUserSelectionManagerTest : SysuiTestCase() {

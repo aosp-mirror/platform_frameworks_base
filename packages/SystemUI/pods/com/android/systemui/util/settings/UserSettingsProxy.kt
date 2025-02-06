@@ -28,7 +28,6 @@ import com.android.systemui.util.settings.SettingsProxy.Companion.parseFloat
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseFloatOrThrow
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseLongOrThrow
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseLongOrUseDefault
-import kotlinx.coroutines.withContext
 
 /**
  * Used to interact with per-user Settings.Secure and Settings.System settings (but not
@@ -71,7 +70,7 @@ interface UserSettingsProxy : SettingsProxy {
     }
 
     override suspend fun registerContentObserver(uri: Uri, settingsObserver: ContentObserver) {
-        withContext(settingsDispatcherContext("registerContentObserver-A")) {
+        executeOnSettingsScopeDispatcher("registerContentObserver-A") {
             registerContentObserverForUserSync(uri, settingsObserver, userId)
         }
     }
@@ -96,7 +95,7 @@ interface UserSettingsProxy : SettingsProxy {
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver,
     ) {
-        withContext(settingsDispatcherContext("registerContentObserver-B")) {
+        executeOnSettingsScopeDispatcher("registerContentObserver-B") {
             registerContentObserverForUserSync(uri, notifyForDescendants, settingsObserver, userId)
         }
     }
@@ -141,7 +140,7 @@ interface UserSettingsProxy : SettingsProxy {
         settingsObserver: ContentObserver,
         userHandle: Int,
     ) {
-        withContext(settingsDispatcherContext("registerContentObserverForUser-A")) {
+        executeOnSettingsScopeDispatcher("registerContentObserverForUser-A") {
             registerContentObserverForUserSync(name, settingsObserver, userHandle)
         }
     }
@@ -157,7 +156,11 @@ interface UserSettingsProxy : SettingsProxy {
         userHandle: Int,
     ) =
         settingsScope.launch("registerContentObserverForUserAsync-A") {
-            registerContentObserverForUserSync(getUriFor(name), settingsObserver, userHandle)
+            try {
+                registerContentObserverForUserSync(getUriFor(name), settingsObserver, userHandle)
+            } catch (e: SecurityException) {
+                throw SecurityException("registerContentObserverForUserAsync-A, name: $name", e)
+            }
         }
 
     /** Convenience wrapper around [ContentResolver.registerContentObserver] */
@@ -182,7 +185,7 @@ interface UserSettingsProxy : SettingsProxy {
         settingsObserver: ContentObserver,
         userHandle: Int,
     ) {
-        withContext(settingsDispatcherContext("registerContentObserverForUser-B")) {
+        executeOnSettingsScopeDispatcher("registerContentObserverForUser-B") {
             registerContentObserverForUserSync(uri, settingsObserver, userHandle)
         }
     }
@@ -198,7 +201,11 @@ interface UserSettingsProxy : SettingsProxy {
         userHandle: Int,
     ) =
         settingsScope.launch("registerContentObserverForUserAsync-B") {
-            registerContentObserverForUserSync(uri, settingsObserver, userHandle)
+            try {
+                registerContentObserverForUserSync(uri, settingsObserver, userHandle)
+            } catch (e: SecurityException) {
+                throw SecurityException("registerContentObserverForUserAsync-B, uri: $uri", e)
+            }
         }
 
     /**
@@ -215,7 +222,11 @@ interface UserSettingsProxy : SettingsProxy {
         @WorkerThread registered: Runnable,
     ) =
         settingsScope.launch("registerContentObserverForUserAsync-C") {
-            registerContentObserverForUserSync(uri, settingsObserver, userHandle)
+            try {
+                registerContentObserverForUserSync(uri, settingsObserver, userHandle)
+            } catch (e: SecurityException) {
+                throw SecurityException("registerContentObserverForUserAsync-C, uri: $uri", e)
+            }
             registered.run()
         }
 
@@ -252,7 +263,7 @@ interface UserSettingsProxy : SettingsProxy {
         settingsObserver: ContentObserver,
         userHandle: Int,
     ) {
-        withContext(settingsDispatcherContext("registerContentObserverForUser-C")) {
+        executeOnSettingsScopeDispatcher("registerContentObserverForUser-C") {
             registerContentObserverForUserSync(
                 name,
                 notifyForDescendants,
@@ -274,12 +285,16 @@ interface UserSettingsProxy : SettingsProxy {
         userHandle: Int,
     ) {
         settingsScope.launch("registerContentObserverForUserAsync-D") {
-            registerContentObserverForUserSync(
-                getUriFor(name),
-                notifyForDescendants,
-                settingsObserver,
-                userHandle,
-            )
+            try {
+                registerContentObserverForUserSync(
+                    getUriFor(name),
+                    notifyForDescendants,
+                    settingsObserver,
+                    userHandle,
+                )
+            } catch (e: SecurityException) {
+                throw SecurityException("registerContentObserverForUserAsync-D, name: $name", e)
+            }
         }
     }
 
@@ -316,7 +331,7 @@ interface UserSettingsProxy : SettingsProxy {
         settingsObserver: ContentObserver,
         userHandle: Int,
     ) {
-        withContext(settingsDispatcherContext("registerContentObserverForUser-D")) {
+        executeOnSettingsScopeDispatcher("registerContentObserverForUser-D") {
             registerContentObserverForUserSync(
                 uri,
                 notifyForDescendants,
@@ -338,12 +353,16 @@ interface UserSettingsProxy : SettingsProxy {
         userHandle: Int,
     ) =
         settingsScope.launch("registerContentObserverForUserAsync-E") {
-            registerContentObserverForUserSync(
-                uri,
-                notifyForDescendants,
-                settingsObserver,
-                userHandle,
-            )
+            try {
+                registerContentObserverForUserSync(
+                    uri,
+                    notifyForDescendants,
+                    settingsObserver,
+                    userHandle,
+                )
+            } catch (e: SecurityException) {
+                throw SecurityException("registerContentObserverForUserAsync-E, uri: $uri", e)
+            }
         }
 
     /**

@@ -41,7 +41,7 @@ class BootCompleteCacheImpl @Inject constructor(dumpManager: DumpManager) :
     }
 
     init {
-        dumpManager.registerDumpable(TAG, this)
+        dumpManager.registerNormalDumpable(TAG, this)
     }
 
     @GuardedBy("listeners")

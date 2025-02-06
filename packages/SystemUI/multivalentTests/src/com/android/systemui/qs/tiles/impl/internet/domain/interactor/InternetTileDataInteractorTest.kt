@@ -57,14 +57,12 @@ import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupReposi
 import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class InternetTileDataInteractorTest : SysuiTestCase() {

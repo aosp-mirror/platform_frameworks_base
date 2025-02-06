@@ -19,9 +19,6 @@ package com.android.systemui.qs.pipeline.domain.interactor
 import android.content.Context
 import android.content.pm.UserInfo
 import android.os.UserHandle
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
-import android.view.accessibility.Flags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -35,7 +32,6 @@ import com.android.systemui.qs.tiles.ColorInversionTile
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -48,23 +44,10 @@ import org.mockito.Mockito.mock
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class AccessibilityTilesInteractorTest : SysuiTestCase() {
-    private val USER_0_INFO =
-        UserInfo(
-            0,
-            "zero",
-            "",
-            UserInfo.FLAG_ADMIN or UserInfo.FLAG_FULL,
-        )
+    private val USER_0_INFO = UserInfo(0, "zero", "", UserInfo.FLAG_ADMIN or UserInfo.FLAG_FULL)
 
-    private val USER_1_INFO =
-        UserInfo(
-            1,
-            "one",
-            "",
-            UserInfo.FLAG_ADMIN or UserInfo.FLAG_FULL,
-        )
+    private val USER_1_INFO = UserInfo(1, "one", "", UserInfo.FLAG_ADMIN or UserInfo.FLAG_FULL)
 
     private val USER_0_TILES = listOf(TileSpec.create(ColorInversionTile.TILE_SPEC))
     private val USER_1_TILES = listOf(TileSpec.create(ColorCorrectionTile.TILE_SPEC))
@@ -94,20 +77,7 @@ class AccessibilityTilesInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
-    fun currentTilesChanged_a11yQsShortcutFlagOff_nothingHappen() =
-        testScope.runTest {
-            underTest = createInteractor()
-
-            setTiles(USER_0_TILES)
-            runCurrent()
-
-            assertThat(a11yQsShortcutsRepository.notifyA11yManagerTilesChangedRequests).isEmpty()
-        }
-
-    @Test
-    @EnableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
-    fun currentTilesChanged_a11yQsShortcutFlagOn_notifyAccessibilityRepository() =
+    fun currentTilesChanged_notifyAccessibilityRepository() =
         testScope.runTest {
             underTest = createInteractor()
 
@@ -123,8 +93,7 @@ class AccessibilityTilesInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
-    fun userChanged_a11yQsShortcutFlagOn_notifyAccessibilityRepositoryWithCorrectTilesAndUser() =
+    fun userChanged_notifyAccessibilityRepositoryWithCorrectTilesAndUser() =
         testScope.runTest {
             underTest = createInteractor()
             setTiles(USER_0_TILES)
@@ -163,7 +132,7 @@ class AccessibilityTilesInteractorTest : SysuiTestCase() {
         return AccessibilityTilesInteractor(
                 a11yQsShortcutsRepository,
                 testDispatcher,
-                testScope.backgroundScope
+                testScope.backgroundScope,
             )
             .apply { init(currentTilesInteractor) }
     }

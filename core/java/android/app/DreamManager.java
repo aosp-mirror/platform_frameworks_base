@@ -234,4 +234,19 @@ public class DreamManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Notifies dream manager of device postured state, which may affect dream enablement.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_ALLOW_DREAM_WHEN_POSTURED)
+    @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE)
+    public void setDevicePostured(boolean isPostured) {
+        try {
+            mService.setDevicePostured(isPostured);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

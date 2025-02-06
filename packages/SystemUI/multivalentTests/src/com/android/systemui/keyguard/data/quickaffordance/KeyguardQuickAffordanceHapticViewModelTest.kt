@@ -28,7 +28,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -37,7 +36,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class KeyguardQuickAffordanceHapticViewModelTest : SysuiTestCase() {
 

@@ -49,7 +49,6 @@ import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -62,7 +61,6 @@ import org.mockito.MockitoAnnotations
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
-@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 class UdfpsKeyguardInteractorTest(flags: FlagsParameterization) : SysuiTestCase() {

@@ -20,7 +20,6 @@ import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -75,7 +74,6 @@ constructor(
             }
             .emitOnStart()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override val restoreData =
         run {
                 val mutex = Mutex()

@@ -57,7 +57,6 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -73,7 +72,6 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class ControlsStartableTest : SysuiTestCase() {

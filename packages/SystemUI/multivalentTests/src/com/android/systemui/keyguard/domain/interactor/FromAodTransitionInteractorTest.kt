@@ -39,6 +39,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
+import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -61,7 +63,6 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.testKosmos
 import junit.framework.Assert.assertEquals
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -71,7 +72,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class FromAodTransitionInteractorTest : SysuiTestCase() {
@@ -85,11 +85,13 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
 
     private lateinit var powerInteractor: PowerInteractor
     private lateinit var transitionRepository: FakeKeyguardTransitionRepository
+    private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
 
     @Before
     fun setup() {
         powerInteractor = kosmos.powerInteractor
         transitionRepository = kosmos.fakeKeyguardTransitionRepositorySpy
+        bouncerRepository = kosmos.fakeKeyguardBouncerRepository
         underTest = kosmos.fromAodTransitionInteractor
 
         underTest.start()
@@ -289,6 +291,29 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
             kosmos.fakeKeyguardRepository.setBiometricUnlockState(
                 BiometricUnlockMode.WAKE_AND_UNLOCK
             )
+            powerInteractor.setAwakeForTest()
+            runCurrent()
+
+            // Waking up from wake and unlock should not start any transitions, we'll wait for the
+            // dismiss call.
+            assertThat(transitionRepository).noTransitionsStarted()
+
+            underTest.dismissAod()
+            advanceTimeBy(100) // account for debouncing
+
+            assertThat(transitionRepository)
+                .startedTransition(from = KeyguardState.AOD, to = KeyguardState.GONE)
+        }
+
+    @Test
+    fun testWakeAndUnlock_transitionsToGone_evenIfBouncerShows() =
+        testScope.runTest {
+            kosmos.fakeKeyguardRepository.setBiometricUnlockState(
+                BiometricUnlockMode.WAKE_AND_UNLOCK
+            )
+            runCurrent()
+            bouncerRepository.setPrimaryShow(true)
+            runCurrent()
             powerInteractor.setAwakeForTest()
             runCurrent()
 

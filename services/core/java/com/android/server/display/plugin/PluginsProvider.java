@@ -22,6 +22,7 @@ import android.content.Context;
 import com.android.tools.r8.keepanno.annotations.KeepForApi;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Interface that OEMs should implement in order to supply Plugins to PluginManager
@@ -32,5 +33,6 @@ public interface PluginsProvider {
      * Provides list of Plugins to PluginManager
      */
     @NonNull
-    List<Plugin> getPlugins(Context context, PluginStorage storage);
+    List<Plugin> getPlugins(
+            Context context, PluginStorage storage, Set<PluginType<?>> enabledTypes);
 }

@@ -208,7 +208,6 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
         private final InputMethodManager mInputMethodManager;
         private final DelayableExecutor mMainExecutor;
         private final Resources mResources;
-        private final LiftToActivateListener mLiftToActivateListener;
         private final TelephonyManager mTelephonyManager;
         private final EmergencyButtonController.Factory mEmergencyButtonControllerFactory;
         private final FalsingCollector mFalsingCollector;
@@ -227,7 +226,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                 LatencyTracker latencyTracker,
                 KeyguardMessageAreaController.Factory messageAreaControllerFactory,
                 InputMethodManager inputMethodManager, @Main DelayableExecutor mainExecutor,
-                @Main Resources resources, LiftToActivateListener liftToActivateListener,
+                @Main Resources resources,
                 TelephonyManager telephonyManager, FalsingCollector falsingCollector,
                 EmergencyButtonController.Factory emergencyButtonControllerFactory,
                 DevicePostureController devicePostureController,
@@ -244,7 +243,6 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
             mInputMethodManager = inputMethodManager;
             mMainExecutor = mainExecutor;
             mResources = resources;
-            mLiftToActivateListener = liftToActivateListener;
             mTelephonyManager = telephonyManager;
             mEmergencyButtonControllerFactory = emergencyButtonControllerFactory;
             mFalsingCollector = falsingCollector;
@@ -284,7 +282,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                 return new KeyguardPinViewController((KeyguardPINView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
-                        mLiftToActivateListener, emergencyButtonController, mFalsingCollector,
+                        emergencyButtonController, mFalsingCollector,
                         mDevicePostureController, mFeatureFlags, mSelectedUserInteractor,
                         mUiEventLogger, mKeyguardKeyboardInteractor, mBouncerHapticPlayer,
                         mUserActivityNotifier);
@@ -292,14 +290,14 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                 return new KeyguardSimPinViewController((KeyguardSimPinView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
-                        mLiftToActivateListener, mTelephonyManager, mFalsingCollector,
+                        mTelephonyManager, mFalsingCollector,
                         emergencyButtonController, mFeatureFlags, mSelectedUserInteractor,
                         mKeyguardKeyboardInteractor, mBouncerHapticPlayer, mUserActivityNotifier);
             } else if (keyguardInputView instanceof KeyguardSimPukView) {
                 return new KeyguardSimPukViewController((KeyguardSimPukView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
-                        mLiftToActivateListener, mTelephonyManager, mFalsingCollector,
+                        mTelephonyManager, mFalsingCollector,
                         emergencyButtonController, mFeatureFlags, mSelectedUserInteractor,
                         mKeyguardKeyboardInteractor, mBouncerHapticPlayer, mUserActivityNotifier
                 );

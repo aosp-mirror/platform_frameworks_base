@@ -572,8 +572,10 @@ public final class ApduServiceInfo implements Parcelable {
         if (mAutoTransact.getOrDefault(plf.toUpperCase(Locale.ROOT), false)) {
             return true;
         }
-        List<Pattern> patternMatches = mAutoTransactPatterns.keySet().stream()
-                .filter(p -> p.matcher(plf).matches()).toList();
+        boolean isPattern = plf.contains("?") || plf.contains("*");
+        List<Pattern> patternMatches = mAutoTransactPatterns.keySet().stream().filter(
+            p -> isPattern ? p.toString().equals(plf) : p.matcher(plf).matches()).toList();
+
         if (patternMatches == null || patternMatches.size() == 0) {
             return false;
         }

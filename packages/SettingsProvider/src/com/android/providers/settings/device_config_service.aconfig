@@ -101,13 +101,3 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
-
-flag {
-    name: "disable_bulk_compare"
-    namespace: "core_experiments_team_internal"
-    description: "Disable bulk comparison between DeviceConfig and aconfig storage."
-    bug: "312444587"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}

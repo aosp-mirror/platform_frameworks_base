@@ -29,6 +29,8 @@ import com.android.internal.widget.remotecompose.core.operations.layout.Componen
 import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponent;
 import com.android.internal.widget.remotecompose.core.operations.layout.ScrollDelegate;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
@@ -110,6 +112,12 @@ public class MarqueeModifierOperation extends DecoratorModifierOperation impleme
                 mVelocity);
     }
 
+    /**
+     * Serialize the string
+     *
+     * @param indent padding to display
+     * @param serializer append the string
+     */
     // @Override
     public void serializeToString(int indent, StringSerializer serializer) {
         serializer.append(indent, "MARQUEE = [" + mIterations + "]");
@@ -153,14 +161,35 @@ public class MarqueeModifierOperation extends DecoratorModifierOperation impleme
         return "MarqueeModifierOperation(" + mIterations + ")";
     }
 
+    /**
+     * Name of the operation
+     *
+     * @return name
+     */
     public static String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * id of the operation
+     *
+     * @return the operation id
+     */
     public static int id() {
         return OP_CODE;
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param iterations the number of iterations
+     * @param animationMode animation mode
+     * @param repeatDelayMillis repeat delay in ms
+     * @param initialDelayMillis initial delay before the marquee start in ms
+     * @param spacing the spacing between marquee
+     * @param velocity the velocity of the marquee animation
+     */
     public static void apply(
             WireBuffer buffer,
             int iterations,
@@ -178,6 +207,12 @@ public class MarqueeModifierOperation extends DecoratorModifierOperation impleme
         buffer.writeFloat(velocity);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(WireBuffer buffer, List<Operation> operations) {
         int iterations = buffer.readInt();
         int animationMode = buffer.readInt();
@@ -195,6 +230,11 @@ public class MarqueeModifierOperation extends DecoratorModifierOperation impleme
                         velocity));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Modifier Operations", OP_CODE, CLASS_NAME)
                 .description("specify a Marquee Modifier")
@@ -210,5 +250,18 @@ public class MarqueeModifierOperation extends DecoratorModifierOperation impleme
             setContentWidth(layoutComponent.intrinsicWidth(context));
             setContentHeight(layoutComponent.intrinsicHeight(context));
         }
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER)
+                .add("type", "MarqueeModifierOperation")
+                .add("iterations", mIterations)
+                .add("animationMode", mAnimationMode)
+                .add("repeatDelayMillis", mRepeatDelayMillis)
+                .add("initialDelayMillis", mInitialDelayMillis)
+                .add("spacing", mSpacing)
+                .add("velocity", mVelocity);
     }
 }

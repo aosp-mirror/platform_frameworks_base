@@ -178,6 +178,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT,
                     Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS,
                     Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES,
+                    Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_EXPERIENCE_FEATURES,
                     Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES,
                     Settings.Global.DEVELOPMENT_FORCE_RTL,
                     Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW,
@@ -564,7 +565,6 @@ public class SettingsBackupTest {
                     Settings.Global.WATCHDOG_TIMEOUT_MILLIS,
                     Settings.Global.MANAGED_PROVISIONING_DEFER_PROVISIONING_TO_ROLE_HOLDER,
                     Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
-                    Settings.Global.ENABLE_BACK_ANIMATION, // Temporary for T, dev option only
                     Settings.Global.HEARING_DEVICE_LOCAL_AMBIENT_VOLUME, // cache per hearing device
                     Settings.Global.HEARING_DEVICE_LOCAL_NOTIFICATION, // cache per hearing device
                     Settings.Global.Wearable.COMBINED_LOCATION_ENABLE,
@@ -690,6 +690,7 @@ public class SettingsBackupTest {
                  Settings.Secure.DEFAULT_DEVICE_INPUT_METHOD,
                  Settings.Secure.DEVICE_PAIRED,
                  Settings.Secure.DIALER_DEFAULT_APPLICATION,
+                 Settings.Secure.DISABLE_ADAPTIVE_AUTH_LIMIT_LOCK,
                  Settings.Secure.DISABLED_PRINT_SERVICES,
                  Settings.Secure.DISABLE_SECURE_WINDOWS,
                  Settings.Secure.DISABLED_SYSTEM_INPUT_METHODS,

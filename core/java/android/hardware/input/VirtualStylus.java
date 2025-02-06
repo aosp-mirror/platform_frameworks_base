@@ -16,11 +16,9 @@
 
 package android.hardware.input;
 
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.companion.virtual.IVirtualDevice;
-import android.companion.virtual.flags.Flags;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -34,7 +32,6 @@ import android.util.Log;
  *
  * @hide
  */
-@FlaggedApi(Flags.FLAG_VIRTUAL_STYLUS)
 @SystemApi
 public class VirtualStylus extends VirtualInputDevice {
     /** @hide */

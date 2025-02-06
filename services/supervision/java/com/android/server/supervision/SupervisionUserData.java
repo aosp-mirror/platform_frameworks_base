@@ -26,6 +26,7 @@ import android.util.IndentingPrintWriter;
 public class SupervisionUserData {
     public final @UserIdInt int userId;
     public boolean supervisionEnabled;
+    @Nullable public String supervisionAppPackage;
     public boolean supervisionLockScreenEnabled;
     @Nullable public PersistableBundle supervisionLockScreenOptions;
 
@@ -38,6 +39,7 @@ public class SupervisionUserData {
         pw.println("User " + userId + ":");
         pw.increaseIndent();
         pw.println("supervisionEnabled: " + supervisionEnabled);
+        pw.println("supervisionAppPackage: " + supervisionAppPackage);
         pw.println("supervisionLockScreenEnabled: " + supervisionLockScreenEnabled);
         pw.println("supervisionLockScreenOptions: " + supervisionLockScreenOptions);
         pw.decreaseIndent();

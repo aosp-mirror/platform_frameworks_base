@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (C) 2024 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<!--
+    This defines the format of the XML file used to define how displays are arranged
+    in topologies.
+    It is parsed in com/android/server/display/PersistentTopologyStore.java
+    More information on display topology can be found in DisplayTopology.java
+-->
+<xs:schema version="2.0"
+    elementFormDefault="qualified"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:simpleType name="position">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="left"/>
+            <xs:enumeration value="top"/>
+            <xs:enumeration value="right"/>
+            <xs:enumeration value="bottom"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="children">
+        <xs:sequence>
+            <xs:element type="display" name="display" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="display">
+        <xs:sequence>
+            <xs:element type="position" name="position" />
+            <xs:element type="xs:float" name="offset"/>
+            <xs:element type="children" name="children" />
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="id" use="required"/>
+        <xs:attribute type="xs:boolean" name="primary"/>
+    </xs:complexType>
+    <xs:complexType name="topology">
+        <xs:sequence>
+            <xs:element type="display" name="display"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="id" use="required"/>
+        <xs:attribute type="xs:int" name="order" use="required"/>
+        <xs:attribute type="xs:boolean" name="immutable"/>
+    </xs:complexType>
+    <xs:element name="displayTopologyState">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element type="topology" name="topology" maxOccurs="1000" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute type="xs:int" name="version" use="required"/>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

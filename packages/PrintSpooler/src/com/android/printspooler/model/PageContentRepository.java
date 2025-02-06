@@ -510,7 +510,10 @@ public final class PageContentRepository {
                 protected Void doInBackground(Void... params) {
                     synchronized (mLock) {
                         try {
-                            if (mRenderer != null) {
+                            // A page count < 0 indicates there was an error
+                            // opening the document, in which case it doesn't
+                            // need to be closed.
+                            if (mRenderer != null && mPageCount >= 0) {
                                 mRenderer.closeDocument();
                             }
                         } catch (RemoteException re) {

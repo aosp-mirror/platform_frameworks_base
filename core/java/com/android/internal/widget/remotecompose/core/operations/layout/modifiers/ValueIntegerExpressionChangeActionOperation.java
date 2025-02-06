@@ -28,6 +28,8 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 import com.android.internal.widget.remotecompose.core.operations.layout.ActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
@@ -50,6 +52,11 @@ public class ValueIntegerExpressionChangeActionOperation extends Operation
         return "ValueIntegerExpressionChangeActionOperation(" + mTargetValueId + ")";
     }
 
+    /**
+     * The name of the operation used during serialization
+     *
+     * @return the operation serialized name
+     */
     @NonNull
     public String serializedName() {
         return "VALUE_INTEGER_EXPRESSION_CHANGE";
@@ -83,6 +90,13 @@ public class ValueIntegerExpressionChangeActionOperation extends Operation
         document.evaluateIntExpression(mValueExpressionId, (int) mTargetValueId, context);
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param valueId the long id pointing to an int value
+     * @param value the value to set (long id)`
+     */
     public static void apply(@NonNull WireBuffer buffer, long valueId, long value) {
         buffer.start(OP_CODE);
         buffer.writeLong(valueId);
@@ -113,5 +127,14 @@ public class ValueIntegerExpressionChangeActionOperation extends Operation
                                 + " This operation represents a value change for the given id")
                 .field(INT, "TARGET_VALUE_ID", "Value ID")
                 .field(INT, "VALUE_ID", "id of the value to be assigned to the target");
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER, SerializeTags.ACTION)
+                .add("type", "ValueIntegerExpressionChangeActionOperation")
+                .add("targetValueId", mTargetValueId)
+                .add("valueExpressionId", mValueExpressionId);
     }
 }

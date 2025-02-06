@@ -52,6 +52,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
@@ -89,7 +90,7 @@ constructor(
     private val systemSettings: SystemSettings,
     private val selectedUserInteractor: SelectedUserInteractor,
     keyguardEnabledInteractor: KeyguardEnabledInteractor,
-    keyguardServiceLockNowInteractor: KeyguardServiceLockNowInteractor,
+    keyguardServiceShowLockscreenInteractor: KeyguardServiceShowLockscreenInteractor,
     keyguardInteractor: KeyguardInteractor,
 ) {
 
@@ -100,7 +101,15 @@ constructor(
      * depend on that behavior, so for now, we'll replicate it here.
      */
     private val shouldSuppressKeyguard =
-        merge(powerInteractor.isAwake, keyguardServiceLockNowInteractor.lockNowEvents)
+        merge(
+                powerInteractor.isAwake,
+                // Update only when doKeyguardTimeout is called, not on fold or other events, to
+                // match
+                // pre-existing logic.
+                keyguardServiceShowLockscreenInteractor.showNowEvents.filter {
+                    it == ShowWhileAwakeReason.KEYGUARD_TIMEOUT_WHILE_SCREEN_ON
+                },
+            )
             .map { keyguardEnabledInteractor.isKeyguardSuppressed() }
             // Default to false, so that flows that combine this one emit prior to the first
             // wakefulness emission.
@@ -116,9 +125,10 @@ constructor(
      * - We're wake and unlocking (fingerprint auth occurred while asleep).
      * - We're allowed to ignore auth and return to GONE, due to timeouts not elapsing.
      * - We're DREAMING and dismissible.
-     * - We're already GONE. Technically you're already awake when GONE, but this makes it easier to
-     *   reason about this state (for example, if canWakeDirectlyToGone, don't tell WM to pause the
-     *   top activity - something you should never do while GONE as well).
+     * - We're already GONE and not transitioning out of GONE. Technically you're already awake when
+     *   GONE, but this makes it easier to reason about this state (for example, if
+     *   canWakeDirectlyToGone, don't tell WM to pause the top activity - something you should never
+     *   do while GONE as well).
      */
     val canWakeDirectlyToGone =
         combine(
@@ -138,7 +148,8 @@ constructor(
                     canIgnoreAuthAndReturnToGone ||
                     (currentState == KeyguardState.DREAMING &&
                         keyguardInteractor.isKeyguardDismissible.value) ||
-                    currentState == KeyguardState.GONE
+                    (currentState == KeyguardState.GONE &&
+                        transitionInteractor.getStartedState() == KeyguardState.GONE)
             }
             .distinctUntilChanged()
 

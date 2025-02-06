@@ -10,7 +10,6 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
 import com.android.systemui.statusbar.policy.FakeDeviceProvisionedController
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -22,7 +21,6 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class QSSettingsRestoredBroadcastRepositoryTest : SysuiTestCase() {
     private val dispatcher = StandardTestDispatcher()

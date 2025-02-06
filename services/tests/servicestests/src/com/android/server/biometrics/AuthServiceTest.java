@@ -45,7 +45,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.hardware.biometrics.AuthenticationStateListener;
 import android.hardware.biometrics.BiometricManager;
-import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
@@ -504,23 +503,9 @@ public class AuthServiceTest {
                 eq(callback));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testGetLastAuthenticationTime_flaggedOff_throwsUnsupportedOperationException()
-            throws Exception {
-        mSetFlagsRule.disableFlags(Flags.FLAG_LAST_AUTHENTICATION_TIME);
-        setInternalAndTestBiometricPermissions(mContext, true /* hasPermission */);
-
-        mAuthService = new AuthService(mContext, mInjector);
-        mAuthService.onStart();
-
-        mAuthService.mImpl.getLastAuthenticationTime(0,
-                BiometricManager.Authenticators.BIOMETRIC_STRONG);
-    }
-
     @Test
-    public void testGetLastAuthenticationTime_flaggedOn_callsBiometricService()
+    public void testGetLastAuthenticationTime_callsBiometricService()
             throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_LAST_AUTHENTICATION_TIME);
         setInternalAndTestBiometricPermissions(mContext, true /* hasPermission */);
 
         mAuthService = new AuthService(mContext, mInjector);

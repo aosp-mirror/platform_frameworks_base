@@ -40,5 +40,13 @@ public interface SemanticNodeApplier<N> {
             Component component,
             List<AccessibilitySemantics> semantics);
 
+    /**
+     * add children to the node
+     *
+     * @param nodeInfo
+     * @param childIds
+     */
+    void addChildren(N nodeInfo, List<Integer> childIds);
+
     String VIRTUAL_VIEW_ID_KEY = "VirtualViewId";
 }

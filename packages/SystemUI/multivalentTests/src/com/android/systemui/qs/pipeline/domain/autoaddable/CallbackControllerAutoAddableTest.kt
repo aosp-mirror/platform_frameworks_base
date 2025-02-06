@@ -26,7 +26,6 @@ import com.android.systemui.qs.pipeline.domain.model.AutoAddTracking
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.statusbar.policy.CallbackController
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
@@ -34,7 +33,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)

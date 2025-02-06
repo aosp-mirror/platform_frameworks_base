@@ -36,7 +36,6 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -52,7 +51,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Encapsulates business-logic for actions to run when the keyguard is dismissed. */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class KeyguardDismissActionInteractor
 @Inject

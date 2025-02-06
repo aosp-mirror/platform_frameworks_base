@@ -25,15 +25,17 @@ import android.view.View
 import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.plugins.ActivityStarter
+import kotlinx.coroutines.CoroutineScope
 
 interface ActivityStarterInternal {
     /**
      * Registers the given [controllerFactory] for launching and closing transitions matching the
-     * [cookie] and the [ComponentName] that it contains.
+     * [cookie] and the [ComponentName] that it contains, within the given [scope].
      */
     fun registerTransition(
         cookie: ActivityTransitionAnimator.TransitionCookie,
         controllerFactory: ActivityTransitionAnimator.ControllerFactory,
+        scope: CoroutineScope,
     )
 
     /**

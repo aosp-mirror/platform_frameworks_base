@@ -29,6 +29,7 @@ import com.android.systemui.keyguard.ui.viewmodel.keyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardSmartspaceViewModel
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import java.util.Optional
 import org.mockito.Mockito.spy
@@ -61,6 +62,7 @@ val Kosmos.defaultKeyguardBlueprint by
             defaultSettingsPopupMenuSection = mock(),
             defaultStatusBarSection = mock(),
             defaultNotificationStackScrollLayoutSection = mock(),
+            aodPromotedNotificationSection = mock(),
             aodNotificationIconsSection = mock(),
             aodBurnInSection = mock(),
             clockSection = keyguardClockSection,
@@ -82,6 +84,7 @@ val Kosmos.splitShadeBlueprint by
             defaultStatusBarSection = mock(),
             splitShadeNotificationStackScrollLayoutSection = mock(),
             splitShadeGuidelines = mock(),
+            aodPromotedNotificationSection = mock(),
             aodNotificationIconsSection = mock(),
             aodBurnInSection = mock(),
             clockSection = keyguardClockSection,
@@ -98,6 +101,7 @@ val Kosmos.keyguardBlueprintRepository by
                 blueprints = setOf(defaultKeyguardBlueprint, splitShadeBlueprint),
                 handler = fakeExecutorHandler,
                 assert = mock(),
+                log = logcatLogBuffer("blueprints"),
             )
         )
     }

@@ -18,6 +18,8 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.media.MediaCodec.BufferInfo;
 import android.os.Build;
@@ -257,6 +259,8 @@ final public class MediaMuxer {
          */
         private OutputFormat() {}
         /** @hide */
+        @SuppressLint("UnflaggedApi")
+        @TestApi
         public static final int MUXER_OUTPUT_FIRST   = 0;
         /** MPEG4 media file format*/
         public static final int MUXER_OUTPUT_MPEG_4 = MUXER_OUTPUT_FIRST;
@@ -269,6 +273,8 @@ final public class MediaMuxer {
         /** Ogg media file format*/
         public static final int MUXER_OUTPUT_OGG   = MUXER_OUTPUT_FIRST + 4;
         /** @hide */
+        @SuppressLint("UnflaggedApi")
+        @TestApi
         public static final int MUXER_OUTPUT_LAST   = MUXER_OUTPUT_OGG;
     };
 

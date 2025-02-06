@@ -47,7 +47,6 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.android.wm.shell.bubbles.Bubbles
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -60,7 +59,7 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations.initMocks
 
 /** atest SystemUITests:NoteTaskInitializerTest */
-@OptIn(ExperimentalCoroutinesApi::class, InternalNoteTaskApi::class)
+@OptIn(InternalNoteTaskApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 internal class NoteTaskInitializerTest : SysuiTestCase() {

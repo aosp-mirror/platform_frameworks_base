@@ -20,6 +20,7 @@ import android.app.Instrumentation
 import android.tools.NavBar
 import android.tools.Rotation
 import android.tools.traces.parsers.WindowManagerStateHelper
+import android.window.DesktopModeFlags
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
@@ -59,7 +60,7 @@ abstract class SnapResizeAppWindowWithKeyboardShortcuts(
     @Before
     fun setup() {
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() &&
-                Flags.enableTaskResizingKeyboardShortcuts() && tapl.isTablet)
+                DesktopModeFlags.ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS.isTrue && tapl.isTablet)
         testApp.enterDesktopMode(wmHelper, device)
     }
 

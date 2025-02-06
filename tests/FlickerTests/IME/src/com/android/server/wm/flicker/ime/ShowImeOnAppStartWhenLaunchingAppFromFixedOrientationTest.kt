@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.tools.Rotation
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
@@ -81,7 +80,6 @@ class ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest(flicker: LegacyF
     }
 
     @FlakyTest(bugId = 290767483)
-    @Postsubmit
     @Test
     fun imeLayerAlphaOneAfterSnapshotStartingWindowRemoval() {
         val layerTrace = flicker.reader.readLayersTrace() ?: error("Unable to read layers trace")

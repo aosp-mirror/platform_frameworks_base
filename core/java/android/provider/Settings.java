@@ -353,6 +353,18 @@ public final class Settings {
      */
     public static final String ACTION_ONE_HANDED_SETTINGS =
             "android.settings.action.ONE_HANDED_SETTINGS";
+
+    /**
+     * Activity Action: Show Double tap power gesture Settings page.
+     * <p>
+     * Input: Nothing
+     * <p>
+     * Output: Nothing
+     * @hide
+     */
+    public static final String ACTION_DOUBLE_TAP_POWER_SETTINGS =
+            "android.settings.action.DOUBLE_TAP_POWER_SETTINGS";
+
     /**
      * The return values for {@link Settings.Config#set}
      * @hide
@@ -1252,21 +1264,6 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_TEMPERATURE_UNIT_SETTINGS =
             "android.settings.TEMPERATURE_UNIT_SETTINGS";
-
-    /**
-     * Activity Action: Show numbering system configuration settings.
-     * <p>
-     * Input: Nothing.
-     * <p>
-     * Output: After calling {@link android.app.Activity#startActivityForResult}, the callback
-     * {@code onActivityResult} will have resultCode {@link android.app.Activity#RESULT_OK} if
-     * the numbering system settings page is suitable to show on the UI. Otherwise, the result is
-     * set to {@link android.app.Activity#RESULT_CANCELED}.
-     */
-    @FlaggedApi(Flags.FLAG_SYSTEM_REGIONAL_PREFERENCES_API_ENABLED)
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_NUMBERING_SYSTEM_SETTINGS =
-            "android.settings.NUMBERING_SYSTEM_SETTINGS";
 
     /**
      * Activity Action: Show measurement system configuration settings.
@@ -6333,6 +6330,17 @@ public final class Settings {
         public static final String TOUCHPAD_SYSTEM_GESTURES = "touchpad_system_gestures";
 
         /**
+         * Whether touchpad acceleration is enabled.
+         *
+         * When enabled, the speed of the pointer will increase as the user moves their
+         * finger faster on the touchpad.
+         *
+         * @hide
+         */
+        public static final String TOUCHPAD_ACCELERATION_ENABLED =
+                "touchpad_acceleration_enabled";
+
+        /**
          * Whether to enable reversed vertical scrolling for connected mice.
          *
          * When enabled, scrolling down on the mouse wheel will move the screen up and vice versa.
@@ -6370,6 +6378,19 @@ public final class Settings {
          */
         public static final String MOUSE_POINTER_ACCELERATION_ENABLED =
                 "mouse_pointer_acceleration_enabled";
+
+        /**
+         * Mouse scrolling speed setting.
+         *
+         * This is an integer value in a range between -7 and +7, so there are 15 possible values.
+         * The setting only applies when mouse scrolling acceleration is not enabled.
+         *   -7 = slowest
+         *    0 = default speed
+         *   +7 = fastest
+         *
+         * @hide
+         */
+        public static final String MOUSE_SCROLLING_SPEED = "mouse_scrolling_speed";
 
         /**
          * Pointer fill style, specified by
@@ -6614,6 +6635,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(TOUCHPAD_TAP_DRAGGING);
             PRIVATE_SETTINGS.add(TOUCHPAD_RIGHT_CLICK_ZONE);
             PRIVATE_SETTINGS.add(TOUCHPAD_SYSTEM_GESTURES);
+            PRIVATE_SETTINGS.add(TOUCHPAD_ACCELERATION_ENABLED);
             PRIVATE_SETTINGS.add(CAMERA_FLASH_NOTIFICATION);
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION);
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION_COLOR);
@@ -6623,6 +6645,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(MOUSE_POINTER_ACCELERATION_ENABLED);
             PRIVATE_SETTINGS.add(PREFERRED_REGION);
             PRIVATE_SETTINGS.add(MOUSE_SCROLLING_ACCELERATION);
+            PRIVATE_SETTINGS.add(MOUSE_SCROLLING_SPEED);
         }
 
         /**
@@ -9305,6 +9328,26 @@ public final class Settings {
                 "accessibility_autoclick_delay";
 
         /**
+         * Integer setting specifying the autoclick cursor area size (the radius of the autoclick
+         * ring indicator) when {@link #ACCESSIBILITY_AUTOCLICK_ENABLED} is set.
+         *
+         * @see #ACCESSIBILITY_AUTOCLICK_ENABLED
+         * @hide
+         */
+        public static final String ACCESSIBILITY_AUTOCLICK_CURSOR_AREA_SIZE =
+                "accessibility_autoclick_cursor_area_size";
+
+        /**
+         * Setting that specifies whether minor cursor movement will be ignored when
+         * {@link #ACCESSIBILITY_AUTOCLICK_ENABLED} is set.
+         *
+         * @see #ACCESSIBILITY_AUTOCLICK_ENABLED
+         * @hide
+         */
+        public static final String ACCESSIBILITY_AUTOCLICK_IGNORE_MINOR_CURSOR_MOVEMENT =
+                "accessibility_autoclick_ignore_minor_cursor_movement";
+
+        /**
          * Whether or not larger size icons are used for the pointer of mouse/trackpad for
          * accessibility.
          * (0 = false, 1 = true)
@@ -10501,6 +10544,15 @@ public final class Settings {
         public static final String SCREENSAVER_ACTIVATE_ON_SLEEP = "screensaver_activate_on_sleep";
 
         /**
+         * If screensavers are enabled, whether the screensaver should be
+         * automatically launched when the device is stationary and upright.
+         * @hide
+         */
+        @Readable
+        public static final String SCREENSAVER_ACTIVATE_ON_POSTURED =
+                "screensaver_activate_on_postured";
+
+        /**
          * If screensavers are enabled, the default screensaver component.
          * @hide
          */
@@ -10929,7 +10981,10 @@ public final class Settings {
         /**
          * Indicates whether "seen" notifications should be suppressed from the lockscreen.
          * <p>
-         * Type: int (0 for unset, 1 for true, 2 for false)
+         * Type: int (0 for unset_off, 1 for true, 2 for false)
+         * 0 is the default value for phones, which is equivalent to off in effect, before
+         * the notification minimalism feature, this setting is default hidden to phones, we use
+         * 0 instead of 2 to mark that we need to hide this setting toggle in the Settings app.
          *
          * @hide
          */
@@ -10955,6 +11010,21 @@ public final class Settings {
          */
         @Readable
         public static final String SHOW_NOTIFICATION_SNOOZE = "show_notification_snooze";
+
+        /**
+         * Controls whether dual shade is enabled. This splits notifications and quick settings to
+         * have their own independently expandable/collapsible panels, appearing on either side of
+         * the large screen (including unfolded device) or sharing a space on a narrow screen
+         * (including a folded device). Both panels will now cover the screen only partially
+         * (wrapping their content), so a running app or the lockscreen will remain visible in the
+         * background.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        @android.provider.Settings.Readable
+        public static final String DUAL_SHADE = "dual_shade";
 
        /**
          * 1 if it is allowed to remove the primary GAIA account. 0 by default.
@@ -11328,17 +11398,54 @@ public final class Settings {
 
         /**
          * Whether or not biometric is allowed on Keyguard.
+         *
+         * @deprecated Use {@link #FINGERPRINT_KEYGUARD_ENABLED} or {@link #FACE_KEYGUARD_ENABLED}
+         * instead.
+         *
          * @hide
          */
+        @Deprecated
         @Readable
         public static final String BIOMETRIC_KEYGUARD_ENABLED = "biometric_keyguard_enabled";
 
         /**
          * Whether or not biometric is allowed for apps (through BiometricPrompt).
+         *
+         * @deprecated Use {@link #FINGERPRINT_APP_ENABLED} or {@link #FACE_APP_ENABLED} instead.
+         *
+         * @hide
+         */
+        @Deprecated
+        @Readable
+        public static final String BIOMETRIC_APP_ENABLED = "biometric_app_enabled";
+
+        /**
+         * Whether or not fingerprint is allowed on Keyguard.
          * @hide
          */
         @Readable
-        public static final String BIOMETRIC_APP_ENABLED = "biometric_app_enabled";
+        public static final String FINGERPRINT_KEYGUARD_ENABLED = "fingerprint_keyguard_enabled";
+
+        /**
+         * Whether or not fingerprint is allowed for apps (through BiometricPrompt).
+         * @hide
+         */
+        @Readable
+        public static final String FINGERPRINT_APP_ENABLED = "fingerptint_app_enabled";
+
+        /**
+         * Whether or not face is allowed on Keyguard.
+         * @hide
+         */
+        @Readable
+        public static final String FACE_KEYGUARD_ENABLED = "face_keyguard_enabled";
+
+        /**
+         * Whether or not face is allowed for apps (through BiometricPrompt).
+         * @hide
+         */
+        @Readable
+        public static final String FACE_APP_ENABLED = "face_app_enabled";
 
         /**
          * Whether or not mandatory biometrics is enabled.
@@ -12223,49 +12330,6 @@ public final class Settings {
                 "back_gesture_inset_scale_right";
 
         /**
-         * Indicates whether the trackpad back gesture is enabled.
-         * <p>Type: int (0 for false, 1 for true)
-         *
-         * @hide
-         */
-        public static final String TRACKPAD_GESTURE_BACK_ENABLED = "trackpad_gesture_back_enabled";
-
-        /**
-         * Indicates whether the trackpad home gesture is enabled.
-         * <p>Type: int (0 for false, 1 for true)
-         *
-         * @hide
-         */
-        public static final String TRACKPAD_GESTURE_HOME_ENABLED = "trackpad_gesture_home_enabled";
-
-        /**
-         * Indicates whether the trackpad overview gesture is enabled.
-         * <p>Type: int (0 for false, 1 for true)
-         *
-         * @hide
-         */
-        public static final String TRACKPAD_GESTURE_OVERVIEW_ENABLED =
-                "trackpad_gesture_overview_enabled";
-
-        /**
-         * Indicates whether the trackpad notification gesture is enabled.
-         * <p>Type: int (0 for false, 1 for true)
-         *
-         * @hide
-         */
-        public static final String TRACKPAD_GESTURE_NOTIFICATION_ENABLED =
-                "trackpad_gesture_notification_enabled";
-
-        /**
-         * Indicates whether the trackpad quick switch gesture is enabled.
-         * <p>Type: int (0 for false, 1 for true)
-         *
-         * @hide
-         */
-        public static final String TRACKPAD_GESTURE_QUICK_SWITCH_ENABLED =
-                "trackpad_gesture_quick_switch_enabled";
-
-        /**
          * Current provider of proximity-based sharing services.
          * Default value in @string/config_defaultNearbySharingComponent.
          * No VALIDATOR as this setting will not be backed up.
@@ -12369,12 +12433,6 @@ public final class Settings {
          */
         @Readable
         public static final String CAMERA_EXTENSIONS_FALLBACK = "camera_extensions_fallback";
-
-        /**
-         * Controls whether contextual suggestions can be shown in the media controls.
-         * @hide
-         */
-        public static final String MEDIA_CONTROLS_RECOMMENDATION = "qs_media_recommend";
 
         /**
          * Controls magnification mode when magnification is enabled via a system-wide triple tap
@@ -12894,6 +12952,19 @@ public final class Settings {
          */
         public static final String DISABLE_SECURE_WINDOWS = "disable_secure_windows";
 
+        /**
+         * Controls if the adaptive authentication feature should be disabled, which
+         * will attempt to lock the device after a number of consecutive authentication
+         * attempts fail.
+         *
+         * This can only be disabled on debuggable builds. Set to 1 to disable or 0 for the
+         * normal behavior.
+         *
+         * @hide
+         */
+        public static final String DISABLE_ADAPTIVE_AUTH_LIMIT_LOCK =
+                "disable_adaptive_auth_limit_lock";
+
         /** @hide */
         public static final int PRIVATE_SPACE_AUTO_LOCK_ON_DEVICE_LOCK = 0;
         /** @hide */
@@ -13347,6 +13418,16 @@ public final class Settings {
         public static final String AUTO_TIME_ZONE_EXPLICIT = "auto_time_zone_explicit";
 
         /**
+         * Value to specify if the device should send notifications when {@link #AUTO_TIME_ZONE} is
+         * on and the device's time zone changes.
+         *
+         * <p>1=yes, 0=no.
+         *
+         * @hide
+         */
+        public static final String TIME_ZONE_NOTIFICATIONS = "time_zone_notifications";
+
+        /**
          * URI for the car dock "in" event sound.
          * @hide
          */
@@ -13723,6 +13804,16 @@ public final class Settings {
         @Readable
         public static final String DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT
                 = "enable_freeform_support";
+
+        /**
+         * Whether to override the availability of the desktop experiences features on the
+         * device. With desktop experiences enabled, secondary displays can be used to run
+         * apps, in desktop mode by default. Otherwise they can only be used for mirroring.
+         * @hide
+         */
+        @Readable
+        public static final String DEVELOPMENT_OVERRIDE_DESKTOP_EXPERIENCE_FEATURES =
+                "override_desktop_experience_features";
 
         /**
          * Whether to override the availability of the desktop mode on the main display of the
@@ -17436,13 +17527,6 @@ public final class Settings {
          */
         public static final String DEVICE_CONFIG_SYNC_DISABLED = "device_config_sync_disabled";
 
-
-        /**
-         * Whether back preview animations are played when user does a back gesture or presses
-         * the back button.
-         * @hide
-         */
-        public static final String ENABLE_BACK_ANIMATION = "enable_back_animation";
 
         /**
          * An allow list of packages for which the user has granted the permission to communicate

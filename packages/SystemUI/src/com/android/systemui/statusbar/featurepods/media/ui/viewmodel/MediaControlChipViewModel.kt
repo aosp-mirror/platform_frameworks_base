@@ -24,6 +24,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.statusbar.featurepods.media.domain.interactor.MediaControlChipInteractor
 import com.android.systemui.statusbar.featurepods.media.shared.model.MediaControlChipModel
+import com.android.systemui.statusbar.featurepods.popups.shared.model.HoverBehavior
 import com.android.systemui.statusbar.featurepods.popups.shared.model.PopupChipId
 import com.android.systemui.statusbar.featurepods.popups.shared.model.PopupChipModel
 import com.android.systemui.statusbar.featurepods.popups.ui.viewmodel.StatusBarPopupChipViewModel
@@ -33,6 +34,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * [StatusBarPopupChipViewModel] for a media control chip in the status bar. This view model is
@@ -54,40 +56,51 @@ constructor(
      */
     override val chip: StateFlow<PopupChipModel> =
         mediaControlChipInteractor.mediaControlModel
-            .map { mediaControlModel -> toPopupChipModel(mediaControlModel, applicationContext) }
+            .map { mediaControlModel -> toPopupChipModel(mediaControlModel) }
             .stateIn(
                 backgroundScope,
                 SharingStarted.WhileSubscribed(),
                 PopupChipModel.Hidden(PopupChipId.MediaControl),
             )
-}
 
-private fun toPopupChipModel(model: MediaControlChipModel?, context: Context): PopupChipModel {
-    if (model == null || model.songName.isNullOrEmpty()) {
-        return PopupChipModel.Hidden(PopupChipId.MediaControl)
-    }
+    private fun toPopupChipModel(model: MediaControlChipModel?): PopupChipModel {
+        if (model == null || model.songName.isNullOrEmpty()) {
+            return PopupChipModel.Hidden(PopupChipId.MediaControl)
+        }
 
-    val contentDescription = model.appName?.let { ContentDescription.Loaded(description = it) }
-    return PopupChipModel.Shown(
-        chipId = PopupChipId.MediaControl,
-        icon =
-            model.appIcon?.loadDrawable(context)?.let {
+        val contentDescription = model.appName?.let { ContentDescription.Loaded(description = it) }
+
+        val defaultIcon =
+            model.appIcon?.loadDrawable(applicationContext)?.let {
                 Icon.Loaded(drawable = it, contentDescription = contentDescription)
             }
                 ?: Icon.Resource(
                     res = com.android.internal.R.drawable.ic_audio_media,
                     contentDescription = contentDescription,
-                ),
-        hoverIcon =
-            Icon.Resource(
-                res = com.android.internal.R.drawable.ic_media_pause,
-                contentDescription = null,
-            ),
-        chipText = model.songName.toString(),
-        isToggled = false,
-        // TODO(b/385202114): Show a popup containing the media carousal when the chip is toggled.
-        onToggle = {},
-        // TODO(b/385202193): Add support for clicking on the icon on a media chip.
-        onIconPressed = {},
-    )
+                )
+        return PopupChipModel.Shown(
+            chipId = PopupChipId.MediaControl,
+            icon = defaultIcon,
+            chipText = model.songName.toString(),
+            isToggled = false,
+            // TODO(b/385202114): Show a popup containing the media carousal when the chip is
+            // toggled.
+            onToggle = {},
+            hoverBehavior = createHoverBehavior(model),
+        )
+    }
+
+    private fun createHoverBehavior(model: MediaControlChipModel): HoverBehavior {
+        val playOrPause = model.playOrPause ?: return HoverBehavior.None
+        val icon = playOrPause.icon ?: return HoverBehavior.None
+        val action = playOrPause.action ?: return HoverBehavior.None
+
+        val contentDescription =
+            ContentDescription.Loaded(description = playOrPause.contentDescription.toString())
+
+        return HoverBehavior.Button(
+            icon = Icon.Loaded(drawable = icon, contentDescription = contentDescription),
+            onIconPressed = { backgroundScope.launch { action.run() } },
+        )
+    }
 }

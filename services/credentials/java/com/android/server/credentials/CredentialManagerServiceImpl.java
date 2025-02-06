@@ -57,6 +57,13 @@ public final class CredentialManagerServiceImpl extends
         }
     }
 
+    @Nullable
+    @Override
+    @GuardedBy("mLock")
+    public ComponentName getServiceComponentName() {
+        return getComponentName();
+    }
+
     @GuardedBy("mLock")
     public ComponentName getComponentName() {
         return mInfo.getServiceInfo().getComponentName();

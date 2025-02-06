@@ -209,6 +209,21 @@ class AudioSharingRepositoryTest {
     }
 
     @Test
+    fun primaryDeviceChange_emitValues() {
+        testScope.runTest {
+            `when`(assistant.allConnectedDevices).thenReturn(listOf(device1, device2))
+
+            val devices = mutableListOf<CachedBluetoothDevice?>()
+            underTest.primaryDevice.onEach { devices.add(it) }.launchIn(backgroundScope)
+            runCurrent()
+            triggerContentObserverChange()
+            runCurrent()
+
+            Truth.assertThat(devices).containsExactly(null, cachedDevice2)
+        }
+    }
+
+    @Test
     fun secondaryGroupIdChange_profileNotReady_assistantCallbackNotRegistered() {
         testScope.runTest {
             val groupIds = mutableListOf<Int?>()
@@ -265,6 +280,29 @@ class AudioSharingRepositoryTest {
                         "onSecondaryGroupIdChanged groupId=$TEST_GROUP_ID1",
                     )
                 ).inOrder()
+        }
+    }
+
+    @Test
+    fun secondaryDeviceChange_emitValues() {
+        testScope.runTest {
+            `when`(broadcast.isProfileReady).thenReturn(true)
+            `when`(assistant.isProfileReady).thenReturn(true)
+            `when`(volumeControl.isProfileReady).thenReturn(true)
+            val devices = mutableListOf<CachedBluetoothDevice?>()
+            underTest.secondaryDevice.onEach { devices.add(it) }.launchIn(backgroundScope)
+            runCurrent()
+            triggerSourceAdded()
+            runCurrent()
+            triggerContentObserverChange()
+            runCurrent()
+
+            Truth.assertThat(devices)
+                .containsExactly(
+                    null,
+                    cachedDevice2,
+                    cachedDevice1,
+                )
         }
     }
 
@@ -363,7 +401,7 @@ class AudioSharingRepositoryTest {
             TEST_GROUP_ID1
         )
         `when`(assistant.allConnectedDevices).thenReturn(listOf(device1, device2))
-        assistantCallbackCaptor.value.sourceAdded(device1, receiveState)
+        assistantCallbackCaptor.value.sourceAdded(device1)
     }
 
     private fun triggerSourceRemoved() {
@@ -432,11 +470,9 @@ class AudioSharingRepositoryTest {
             onBroadcastStopped(TEST_REASON, TEST_BROADCAST_ID)
         }
         val sourceAdded:
-                BluetoothLeBroadcastAssistant.Callback.(
-                    sink: BluetoothDevice, state: BluetoothLeBroadcastReceiveState
-                ) -> Unit =
-            { sink, state ->
-                onReceiveStateChanged(sink, TEST_SOURCE_ID, state)
+                BluetoothLeBroadcastAssistant.Callback.(sink: BluetoothDevice) -> Unit =
+            { sink ->
+                onSourceAdded(sink, TEST_SOURCE_ID, TEST_REASON)
             }
         val sourceRemoved: BluetoothLeBroadcastAssistant.Callback.(sink: BluetoothDevice) -> Unit =
             { sink ->

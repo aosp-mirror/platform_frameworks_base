@@ -124,7 +124,7 @@ class TableLogBuffer(
      *   the separator token for parsing, so it can't be present in any part of the column name.
      */
     @Synchronized
-    fun <T : Diffable<T>> logDiffs(columnPrefix: String, prevVal: T, newVal: T) {
+    fun <T : Diffable<T>> logDiffs(columnPrefix: String = "", prevVal: T, newVal: T) {
         val row = tempRow
         row.timestamp = systemClock.currentTimeMillis()
         row.columnPrefix = columnPrefix
@@ -136,6 +136,7 @@ class TableLogBuffer(
     /**
      * Logs change(s) to the buffer using [rowInitializer].
      *
+     * @param columnPrefix see [logDiffs].
      * @param rowInitializer a function that will be called immediately to store relevant data on
      *   the row.
      * @param isInitial true if this change represents the starting value for a particular column
@@ -145,9 +146,9 @@ class TableLogBuffer(
      */
     @Synchronized
     fun logChange(
-        columnPrefix: String,
+        columnPrefix: String = "",
         isInitial: Boolean = false,
-        rowInitializer: (TableRowLogger) -> Unit
+        rowInitializer: (TableRowLogger) -> Unit,
     ) {
         val row = tempRow
         row.timestamp = systemClock.currentTimeMillis()

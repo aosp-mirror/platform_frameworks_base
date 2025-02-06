@@ -29,7 +29,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
 class ImageLoaderTest : SysuiTestCase() {
 

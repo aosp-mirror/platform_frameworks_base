@@ -32,16 +32,21 @@ import com.android.internal.widget.remotecompose.core.operations.MatrixTranslate
 import com.android.internal.widget.remotecompose.core.operations.PaintData;
 import com.android.internal.widget.remotecompose.core.operations.TextData;
 import com.android.internal.widget.remotecompose.core.operations.TouchExpression;
+import com.android.internal.widget.remotecompose.core.operations.layout.animation.AnimationSpec;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentModifiers;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentVisibilityOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.DimensionModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.GraphicsLayerModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HeightInModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HeightModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.PaddingModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ScrollModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.WidthInModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.WidthModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ZIndexModifierOperation;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.ArrayList;
 
@@ -204,6 +209,9 @@ public class LayoutComponent extends Component {
         mPaddingRight = 0f;
         mPaddingBottom = 0f;
 
+        WidthInModifierOperation widthInConstraints = null;
+        HeightInModifierOperation heightInConstraints = null;
+
         for (OperationInterface op : mComponentModifiers.getList()) {
             if (op instanceof PaddingModifierOperation) {
                 // We are accumulating padding modifiers to compute the margin
@@ -221,10 +229,16 @@ public class LayoutComponent extends Component {
                 mWidthModifier = (WidthModifierOperation) op;
             } else if (op instanceof HeightModifierOperation && mHeightModifier == null) {
                 mHeightModifier = (HeightModifierOperation) op;
+            } else if (op instanceof WidthInModifierOperation) {
+                widthInConstraints = (WidthInModifierOperation) op;
+            } else if (op instanceof HeightInModifierOperation) {
+                heightInConstraints = (HeightInModifierOperation) op;
             } else if (op instanceof ZIndexModifierOperation) {
                 mZIndexModifier = (ZIndexModifierOperation) op;
             } else if (op instanceof GraphicsLayerModifierOperation) {
                 mGraphicsLayerModifier = (GraphicsLayerModifierOperation) op;
+            } else if (op instanceof AnimationSpec) {
+                mAnimationSpec = (AnimationSpec) op;
             } else if (op instanceof ScrollDelegate) {
                 ScrollDelegate scrollDelegate = (ScrollDelegate) op;
                 if (scrollDelegate.handlesHorizontalScroll()) {
@@ -241,6 +255,22 @@ public class LayoutComponent extends Component {
         if (mHeightModifier == null) {
             mHeightModifier = new HeightModifierOperation(DimensionModifierOperation.Type.WRAP);
         }
+        if (widthInConstraints != null) {
+            mWidthModifier.setWidthIn(widthInConstraints);
+        }
+        if (heightInConstraints != null) {
+            mHeightModifier.setHeightIn(heightInConstraints);
+        }
+
+        if (mAnimationSpec != AnimationSpec.DEFAULT) {
+            for (int i = 0; i < mChildrenComponents.size(); i++) {
+                Component c = mChildrenComponents.get(i);
+                if (c != null && c.getAnimationSpec() == AnimationSpec.DEFAULT) {
+                    c.setAnimationSpec(mAnimationSpec);
+                }
+            }
+        }
+
         setWidth(computeModifierDefinedWidth(null));
         setHeight(computeModifierDefinedHeight(null));
     }
@@ -457,5 +487,31 @@ public class LayoutComponent extends Component {
     @NonNull
     public ArrayList<Component> getChildrenComponents() {
         return mChildrenComponents;
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        super.serialize(serializer);
+        serializer
+                .addTags(SerializeTags.LAYOUT_COMPONENT)
+                .add("paddingLeft", mPaddingLeft)
+                .add("paddingRight", mPaddingRight)
+                .add("paddingTop", mPaddingTop)
+                .add("paddingBottom", mPaddingBottom);
+    }
+
+    @Override
+    public <T> @Nullable T selfOrModifier(Class<T> operationClass) {
+        if (operationClass.isInstance(this)) {
+            return operationClass.cast(this);
+        }
+
+        for (ModifierOperation op : mComponentModifiers.getList()) {
+            if (operationClass.isInstance(op)) {
+                return operationClass.cast(op);
+            }
+        }
+
+        return null;
     }
 }

@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.graphics.PointF;
-import android.hardware.display.DisplayTopology;
+import android.hardware.display.DisplayTopologyGraph;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.KeyGestureEvent;
 import android.os.IBinder;
@@ -51,7 +51,7 @@ public abstract class InputManagerInternal {
      * Called by {@link com.android.server.display.DisplayManagerService} to inform InputManager
      * about changes in the displays topology.
      */
-    public abstract void setDisplayTopology(DisplayTopology topology);
+    public abstract void setDisplayTopology(DisplayTopologyGraph topology);
 
     /**
      * Called by the power manager to tell the input manager whether it should start
@@ -104,13 +104,16 @@ public abstract class InputManagerInternal {
     public abstract PointF getCursorPosition(int displayId);
 
     /**
-     * Enables or disables pointer acceleration for mouse movements.
+     * Set whether all pointer scaling, including linear scaling based on the
+     * user's pointer speed setting, should be enabled or disabled for mice.
      *
      * Note that this only affects pointer movements from mice (that is, pointing devices which send
      * relative motions, including trackballs and pointing sticks), not from other pointer devices
      * such as touchpads and styluses.
+     *
+     * Scaling is enabled by default on new displays until it is explicitly disabled.
      */
-    public abstract void setMousePointerAccelerationEnabled(boolean enabled, int displayId);
+    public abstract void setMouseScalingEnabled(boolean enabled, int displayId);
 
     /**
      * Sets the eligibility of windows on a given display for pointer capture. If a display is

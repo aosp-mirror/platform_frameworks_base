@@ -34,18 +34,6 @@ class ResizeAppWithEdgeResizeTouchpad : ResizeAppWithEdgeResize(InputMethod.TOUC
     @Test
     override fun resizeAppWithEdgeResizeRight() = super.resizeAppWithEdgeResizeRight()
 
-    @ExpectedScenarios(["EDGE_RESIZE"])
-    @Test
-    override fun resizeAppWithEdgeResizeLeft() = super.resizeAppWithEdgeResizeLeft()
-
-    @ExpectedScenarios(["EDGE_RESIZE"])
-    @Test
-    override fun resizeAppWithEdgeResizeTop() = super.resizeAppWithEdgeResizeTop()
-
-    @ExpectedScenarios(["EDGE_RESIZE"])
-    @Test
-    override fun resizeAppWithEdgeResizeBottom() = super.resizeAppWithEdgeResizeBottom()
-
     companion object {
         @JvmStatic
         @FlickerConfigProvider

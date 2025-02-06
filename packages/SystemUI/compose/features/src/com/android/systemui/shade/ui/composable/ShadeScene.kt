@@ -62,9 +62,9 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexContentPicker
-import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateContentDpAsState
@@ -101,6 +101,7 @@ import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneContentViewModel
 import com.android.systemui.shade.ui.viewmodel.ShadeUserActionsViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
@@ -124,8 +125,6 @@ object Shade {
 
     object Dimensions {
         val HorizontalPadding = 16.dp
-        val ScrimOverscrollLimit = 32.dp
-        const val ScrimVisibilityThreshold = 5f
     }
 }
 
@@ -160,15 +159,22 @@ constructor(
     override val userActions: Flow<Map<UserAction, UserActionResult>> = actionsViewModel.actions
 
     @Composable
-    override fun SceneScope.Content(modifier: Modifier) =
+    override fun ContentScope.Content(modifier: Modifier) {
+        val viewModel =
+            rememberViewModel("ShadeScene-viewModel") { contentViewModelFactory.create() }
+        val headerViewModel =
+            rememberViewModel("ShadeScene-headerViewModel") {
+                viewModel.shadeHeaderViewModelFactory.create()
+            }
+        val notificationsPlaceholderViewModel =
+            rememberViewModel("ShadeScene-notifPlaceholderViewModel") {
+                notificationsPlaceholderViewModelFactory.create()
+            }
         ShadeScene(
             notificationStackScrollView.get(),
-            viewModel =
-                rememberViewModel("ShadeScene-viewModel") { contentViewModelFactory.create() },
-            notificationsPlaceholderViewModel =
-                rememberViewModel("ShadeScene-notifPlaceholderViewModel") {
-                    notificationsPlaceholderViewModelFactory.create()
-                },
+            viewModel = viewModel,
+            headerViewModel = headerViewModel,
+            notificationsPlaceholderViewModel = notificationsPlaceholderViewModel,
             createTintedIconManager = tintedIconManagerFactory::create,
             createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
             statusBarIconController = statusBarIconController,
@@ -180,6 +186,7 @@ constructor(
             usingCollapsedLandscapeMedia =
                 Utils.useCollapsedMediaInLandscape(LocalContext.current.resources),
         )
+    }
 
     init {
         qqsMediaHost.expansion = EXPANDED
@@ -193,9 +200,10 @@ constructor(
 }
 
 @Composable
-private fun SceneScope.ShadeScene(
+private fun ContentScope.ShadeScene(
     notificationStackScrollView: NotificationScrollView,
     viewModel: ShadeSceneContentViewModel,
+    headerViewModel: ShadeHeaderViewModel,
     notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
@@ -207,13 +215,13 @@ private fun SceneScope.ShadeScene(
     shadeSession: SaveableSession,
     usingCollapsedLandscapeMedia: Boolean,
 ) {
-
     val shadeMode by viewModel.shadeMode.collectAsStateWithLifecycle()
     when (shadeMode) {
         is ShadeMode.Single ->
             SingleShade(
                 notificationStackScrollView = notificationStackScrollView,
                 viewModel = viewModel,
+                headerViewModel = headerViewModel,
                 notificationsPlaceholderViewModel = notificationsPlaceholderViewModel,
                 createTintedIconManager = createTintedIconManager,
                 createBatteryMeterViewController = createBatteryMeterViewController,
@@ -228,10 +236,8 @@ private fun SceneScope.ShadeScene(
             SplitShade(
                 notificationStackScrollView = notificationStackScrollView,
                 viewModel = viewModel,
+                headerViewModel = headerViewModel,
                 notificationsPlaceholderViewModel = notificationsPlaceholderViewModel,
-                createTintedIconManager = createTintedIconManager,
-                createBatteryMeterViewController = createBatteryMeterViewController,
-                statusBarIconController = statusBarIconController,
                 mediaCarouselController = mediaCarouselController,
                 mediaHost = qsMediaHost,
                 modifier = modifier,
@@ -242,9 +248,10 @@ private fun SceneScope.ShadeScene(
 }
 
 @Composable
-private fun SceneScope.SingleShade(
+private fun ContentScope.SingleShade(
     notificationStackScrollView: NotificationScrollView,
     viewModel: ShadeSceneContentViewModel,
+    headerViewModel: ShadeHeaderViewModel,
     notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
@@ -332,10 +339,7 @@ private fun SceneScope.SingleShade(
                 },
             content = {
                 CollapsedShadeHeader(
-                    viewModelFactory = viewModel.shadeHeaderViewModelFactory,
-                    createTintedIconManager = createTintedIconManager,
-                    createBatteryMeterViewController = createBatteryMeterViewController,
-                    statusBarIconController = statusBarIconController,
+                    viewModel = headerViewModel,
                     modifier = Modifier.layoutId(SingleShadeMeasurePolicy.LayoutId.ShadeHeader),
                 )
 
@@ -410,13 +414,11 @@ private fun SceneScope.SingleShade(
 }
 
 @Composable
-private fun SceneScope.SplitShade(
+private fun ContentScope.SplitShade(
     notificationStackScrollView: NotificationScrollView,
     viewModel: ShadeSceneContentViewModel,
+    headerViewModel: ShadeHeaderViewModel,
     notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
-    createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
-    createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
-    statusBarIconController: StatusBarIconController,
     mediaCarouselController: MediaCarouselController,
     mediaHost: MediaHost,
     modifier: Modifier = Modifier,
@@ -509,10 +511,7 @@ private fun SceneScope.SplitShade(
 
         Column(modifier = Modifier.fillMaxSize()) {
             CollapsedShadeHeader(
-                viewModelFactory = viewModel.shadeHeaderViewModelFactory,
-                createTintedIconManager = createTintedIconManager,
-                createBatteryMeterViewController = createBatteryMeterViewController,
-                statusBarIconController = statusBarIconController,
+                viewModel = headerViewModel,
                 modifier =
                     Modifier.then(brightnessMirrorShowingModifier)
                         .padding(horizontal = { unfoldTranslationXForStartSide.roundToInt() }),
@@ -632,7 +631,7 @@ private fun SceneScope.SplitShade(
 }
 
 @Composable
-private fun SceneScope.ShadeMediaCarousel(
+private fun ContentScope.ShadeMediaCarousel(
     isVisible: Boolean,
     isInRow: Boolean,
     mediaHost: MediaHost,

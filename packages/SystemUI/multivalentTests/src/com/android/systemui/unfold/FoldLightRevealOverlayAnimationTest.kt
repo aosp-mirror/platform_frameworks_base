@@ -37,7 +37,6 @@ import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.power.shared.model.ScreenPowerState
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.util.animation.data.repository.fakeAnimationStatusRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
@@ -59,7 +58,6 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class FoldLightRevealOverlayAnimationTest : SysuiTestCase() {
     @get:Rule val animatorTestRule = AnimatorTestRule(this)
 

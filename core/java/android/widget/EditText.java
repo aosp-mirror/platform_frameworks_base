@@ -57,8 +57,8 @@ import com.android.internal.R;
  * Choosing the input type configures the keyboard type that is shown, acceptable characters,
  * and appearance of the edit text.
  * For example, if you want to accept a secret number, like a unique pin or serial number,
- * you can set inputType to "numericPassword".
- * An inputType of "numericPassword" results in an edit text that accepts numbers only,
+ * you can set inputType to {@link android.R.styleable#TextView_inputType numberPassword}.
+ * An input type of {@code numberPassword} results in an edit text that accepts numbers only,
  * shows a numeric keyboard when focused, and masks the text that is entered for privacy.
  * <p>
  * See the <a href="{@docRoot}guide/topics/ui/controls/text.html">Text Fields</a>

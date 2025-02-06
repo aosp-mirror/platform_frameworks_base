@@ -32,7 +32,6 @@ import android.companion.virtual.audio.VirtualAudioDevice;
 import android.companion.virtual.camera.VirtualCamera;
 import android.companion.virtual.camera.VirtualCameraConfig;
 import android.companion.virtual.sensor.VirtualSensor;
-import android.companion.virtualdevice.flags.Flags;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -83,7 +82,6 @@ import java.util.function.IntConsumer;
 public class VirtualDeviceInternal {
 
     private final Context mContext;
-    private final IVirtualDeviceManager mService;
     private final IVirtualDevice mVirtualDevice;
     private final Object mActivityListenersLock = new Object();
     @GuardedBy("mActivityListenersLock")
@@ -206,7 +204,6 @@ public class VirtualDeviceInternal {
             Context context,
             int associationId,
             VirtualDeviceParams params) throws RemoteException {
-        mService = service;
         mContext = context.getApplicationContext();
         mVirtualDevice = service.createVirtualDevice(
                 new Binder(),
@@ -217,11 +214,7 @@ public class VirtualDeviceInternal {
                 mSoundEffectListener);
     }
 
-    VirtualDeviceInternal(
-            IVirtualDeviceManager service,
-            Context context,
-            IVirtualDevice virtualDevice) {
-        mService = service;
+    VirtualDeviceInternal(Context context, IVirtualDevice virtualDevice) {
         mContext = context.getApplicationContext();
         mVirtualDevice = virtualDevice;
         try {
@@ -479,14 +472,12 @@ public class VirtualDeviceInternal {
             @Nullable VirtualAudioDevice.AudioConfigurationChangeCallback callback) {
         if (mVirtualAudioDevice == null) {
             try {
-                Context context = mContext;
-                if (Flags.deviceAwareRecordAudioPermission()) {
-                    // When using a default policy for audio device-aware RECORD_AUDIO permission
-                    // should not take effect, thus register policies with the default context.
-                    if (mVirtualDevice.getDevicePolicy(POLICY_TYPE_AUDIO) == DEVICE_POLICY_CUSTOM) {
-                        context = mContext.createDeviceContext(getDeviceId());
-                    }
-                }
+                // When using a default policy for audio, the device-aware RECORD_AUDIO permission
+                // should not take effect, thus register policies with the default context.
+                final Context context =
+                        mVirtualDevice.getDevicePolicy(POLICY_TYPE_AUDIO) == DEVICE_POLICY_CUSTOM
+                                ? mContext.createDeviceContext(getDeviceId())
+                                : mContext;
                 mVirtualAudioDevice = new VirtualAudioDevice(context, mVirtualDevice, display,
                         executor, callback, () -> mVirtualAudioDevice = null);
             } catch (RemoteException e) {

@@ -461,12 +461,14 @@ class SplitScreenTransitions {
         return transition;
     }
 
-    void mergeAnimation(IBinder transition, TransitionInfo info, SurfaceControl.Transaction t,
+    void mergeAnimation(IBinder transition, TransitionInfo info,
+            SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
             IBinder mergeTarget, Transitions.TransitionFinishCallback finishCallback) {
         if (mergeTarget != mAnimatingTransition) return;
 
         if (mActiveRemoteHandler != null) {
-            mActiveRemoteHandler.mergeAnimation(transition, info, t, mergeTarget, finishCallback);
+            mActiveRemoteHandler.mergeAnimation(transition, info, startT,
+                    finishT, mergeTarget, finishCallback);
         } else {
             for (int i = mAnimations.size() - 1; i >= 0; --i) {
                 final Animator anim = mAnimations.get(i);

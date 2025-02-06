@@ -59,6 +59,9 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
+import com.android.wm.shell.shared.bubbles.BubbleDropTargetBoundsProvider;
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 
 /**
  * Animated visual indicator for Desktop Mode windowing transitions.
@@ -74,7 +77,11 @@ public class DesktopModeVisualIndicator {
         /** Indicates impending transition into split select on the left side */
         TO_SPLIT_LEFT_INDICATOR,
         /** Indicates impending transition into split select on the right side */
-        TO_SPLIT_RIGHT_INDICATOR
+        TO_SPLIT_RIGHT_INDICATOR,
+        /** Indicates impending transition into bubble on the left side */
+        TO_BUBBLE_LEFT_INDICATOR,
+        /** Indicates impending transition into bubble on the right side */
+        TO_BUBBLE_RIGHT_INDICATOR
     }
 
     /**
@@ -113,6 +120,7 @@ public class DesktopModeVisualIndicator {
     private final RootTaskDisplayAreaOrganizer mRootTdaOrganizer;
     private final ActivityManager.RunningTaskInfo mTaskInfo;
     private final SurfaceControl mTaskSurface;
+    private final @Nullable BubbleDropTargetBoundsProvider mBubbleBoundsProvider;
     private SurfaceControl mLeash;
 
     private final SyncTransactionQueue mSyncQueue;
@@ -127,13 +135,15 @@ public class DesktopModeVisualIndicator {
             ActivityManager.RunningTaskInfo taskInfo, DisplayController displayController,
             Context context, SurfaceControl taskSurface,
             RootTaskDisplayAreaOrganizer taskDisplayAreaOrganizer,
-            DragStartState dragStartState) {
+            DragStartState dragStartState,
+            @Nullable BubbleDropTargetBoundsProvider bubbleBoundsProvider) {
         mSyncQueue = syncQueue;
         mTaskInfo = taskInfo;
         mDisplayController = displayController;
         mContext = context;
         mTaskSurface = taskSurface;
         mRootTdaOrganizer = taskDisplayAreaOrganizer;
+        mBubbleBoundsProvider = bubbleBoundsProvider;
         mCurrentType = NO_INDICATOR;
         mDragStartState = dragStartState;
     }
@@ -149,12 +159,19 @@ public class DesktopModeVisualIndicator {
         // left, and split right for the right edge. This is universal across all drag event types.
         if (inputCoordinates.x < 0) return TO_SPLIT_LEFT_INDICATOR;
         if (inputCoordinates.x > layout.width()) return TO_SPLIT_RIGHT_INDICATOR;
-        // If we are in freeform, we don't want a visible indicator in the "freeform" drag zone.
-        // In drags not originating on a freeform caption, we should default to a TO_DESKTOP
-        // indicator.
-        IndicatorType result = mDragStartState == DragStartState.FROM_FREEFORM
-                ? NO_INDICATOR
-                : TO_DESKTOP_INDICATOR;
+        IndicatorType result;
+        if (BubbleAnythingFlagHelper.enableBubbleToFullscreen()
+                && !DesktopModeStatus.canEnterDesktopMode(mContext)) {
+            // If desktop is not available, default to "no indicator"
+            result = NO_INDICATOR;
+        } else {
+            // If we are in freeform, we don't want a visible indicator in the "freeform" drag zone.
+            // In drags not originating on a freeform caption, we should default to a TO_DESKTOP
+            // indicator.
+            result = mDragStartState == DragStartState.FROM_FREEFORM
+                    ? NO_INDICATOR
+                    : TO_DESKTOP_INDICATOR;
+        }
         final int transitionAreaWidth = mContext.getResources().getDimensionPixelSize(
                 com.android.wm.shell.R.dimen.desktop_mode_transition_region_thickness);
         // Because drags in freeform use task position for indicator calculation, we need to
@@ -166,14 +183,23 @@ public class DesktopModeVisualIndicator {
                 captionHeight);
         final Region splitRightRegion = calculateSplitRightRegion(layout, transitionAreaWidth,
                 captionHeight);
-        if (fullscreenRegion.contains((int) inputCoordinates.x, (int) inputCoordinates.y)) {
+        final int x = (int) inputCoordinates.x;
+        final int y = (int) inputCoordinates.y;
+        if (fullscreenRegion.contains(x, y)) {
             result = TO_FULLSCREEN_INDICATOR;
         }
-        if (splitLeftRegion.contains((int) inputCoordinates.x, (int) inputCoordinates.y)) {
+        if (splitLeftRegion.contains(x, y)) {
             result = IndicatorType.TO_SPLIT_LEFT_INDICATOR;
         }
-        if (splitRightRegion.contains((int) inputCoordinates.x, (int) inputCoordinates.y)) {
+        if (splitRightRegion.contains(x, y)) {
             result = IndicatorType.TO_SPLIT_RIGHT_INDICATOR;
+        }
+        if (BubbleAnythingFlagHelper.enableBubbleToFullscreen()) {
+            if (calculateBubbleLeftRegion(layout).contains(x, y)) {
+                result = IndicatorType.TO_BUBBLE_LEFT_INDICATOR;
+            } else if (calculateBubbleRightRegion(layout).contains(x, y)) {
+                result = IndicatorType.TO_BUBBLE_RIGHT_INDICATOR;
+            }
         }
         if (mDragStartState != DragStartState.DRAGGED_INTENT) {
             transitionIndicator(result);
@@ -238,6 +264,25 @@ public class DesktopModeVisualIndicator {
         return region;
     }
 
+    @VisibleForTesting
+    Region calculateBubbleLeftRegion(DisplayLayout layout) {
+        int regionWidth = mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.bubble_transform_area_width);
+        int regionHeight = mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.bubble_transform_area_height);
+        return new Region(0, layout.height() - regionHeight, regionWidth, layout.height());
+    }
+
+    @VisibleForTesting
+    Region calculateBubbleRightRegion(DisplayLayout layout) {
+        int regionWidth = mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.bubble_transform_area_width);
+        int regionHeight = mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.bubble_transform_area_height);
+        return new Region(layout.width() - regionWidth, layout.height() - regionHeight,
+                layout.width(), layout.height());
+    }
+
     /**
      * Create a fullscreen indicator with no animation
      */
@@ -274,7 +319,7 @@ public class DesktopModeVisualIndicator {
         lp.inputFeatures |= INPUT_FEATURE_NO_INPUT_CHANNEL;
         final WindowlessWindowManager windowManager = new WindowlessWindowManager(
                 mTaskInfo.configuration, mLeash,
-                null /* hostInputToken */);
+                /* hostInputToken= */ null);
         mViewHost = new SurfaceControlViewHost(mContext,
                 mDisplayController.getDisplay(mTaskInfo.displayId), windowManager,
                 "DesktopModeVisualIndicator");
@@ -288,6 +333,11 @@ public class DesktopModeVisualIndicator {
         });
     }
 
+    @VisibleForTesting
+    Rect getIndicatorBounds() {
+        return mView.getBackground().getBounds();
+    }
+
     /**
      * Fade indicator in as provided type. Animator fades it in while expanding the bounds outwards.
      */
@@ -295,7 +345,8 @@ public class DesktopModeVisualIndicator {
         mView.setBackgroundResource(R.drawable.desktop_windowing_transition_background);
         final VisualIndicatorAnimator animator = VisualIndicatorAnimator
                 .fadeBoundsIn(mView, type,
-                        mDisplayController.getDisplayLayout(mTaskInfo.displayId));
+                        mDisplayController.getDisplayLayout(mTaskInfo.displayId),
+                        mBubbleBoundsProvider);
         animator.start();
         mCurrentType = type;
     }
@@ -314,7 +365,8 @@ public class DesktopModeVisualIndicator {
         }
         final VisualIndicatorAnimator animator = VisualIndicatorAnimator
                 .fadeBoundsOut(mView, mCurrentType,
-                        mDisplayController.getDisplayLayout(mTaskInfo.displayId));
+                        mDisplayController.getDisplayLayout(mTaskInfo.displayId),
+                        mBubbleBoundsProvider);
         animator.start();
         if (finishCallback != null) {
             animator.addListener(new AnimatorListenerAdapter() {
@@ -338,11 +390,11 @@ public class DesktopModeVisualIndicator {
         if (mCurrentType == NO_INDICATOR) {
             fadeInIndicator(newType);
         } else if (newType == NO_INDICATOR) {
-            fadeOutIndicator(null /* finishCallback */);
+            fadeOutIndicator(/* finishCallback= */ null);
         } else {
             final VisualIndicatorAnimator animator = VisualIndicatorAnimator.animateIndicatorType(
                     mView, mDisplayController.getDisplayLayout(mTaskInfo.displayId), mCurrentType,
-                    newType);
+                    newType, mBubbleBoundsProvider);
             mCurrentType = newType;
             animator.start();
         }
@@ -397,8 +449,9 @@ public class DesktopModeVisualIndicator {
         }
 
         private static VisualIndicatorAnimator fadeBoundsIn(
-                @NonNull View view, IndicatorType type, @NonNull DisplayLayout displayLayout) {
-            final Rect endBounds = getIndicatorBounds(displayLayout, type);
+                @NonNull View view, IndicatorType type, @NonNull DisplayLayout displayLayout,
+                @Nullable BubbleDropTargetBoundsProvider bubbleBoundsProvider) {
+            final Rect endBounds = getIndicatorBounds(displayLayout, type, bubbleBoundsProvider);
             final Rect startBounds = getMinBounds(endBounds);
             view.getBackground().setBounds(startBounds);
 
@@ -410,8 +463,9 @@ public class DesktopModeVisualIndicator {
         }
 
         private static VisualIndicatorAnimator fadeBoundsOut(
-                @NonNull View view, IndicatorType type, @NonNull DisplayLayout displayLayout) {
-            final Rect startBounds = getIndicatorBounds(displayLayout, type);
+                @NonNull View view, IndicatorType type, @NonNull DisplayLayout displayLayout,
+                @Nullable BubbleDropTargetBoundsProvider bubbleBoundsProvider) {
+            final Rect startBounds = getIndicatorBounds(displayLayout, type, bubbleBoundsProvider);
             final Rect endBounds = getMinBounds(startBounds);
             view.getBackground().setBounds(startBounds);
 
@@ -426,16 +480,19 @@ public class DesktopModeVisualIndicator {
          * Create animator for visual indicator changing type (i.e., fullscreen to freeform,
          * freeform to split, etc.)
          *
-         * @param view          the view for this indicator
-         * @param displayLayout information about the display the transitioning task is currently on
-         * @param origType      the original indicator type
-         * @param newType       the new indicator type
+         * @param view                 the view for this indicator
+         * @param displayLayout        information about the display the transitioning task is
+         *                             currently on
+         * @param origType             the original indicator type
+         * @param newType              the new indicator type
+         * @param bubbleBoundsProvider provides bounds for bubbles indicators
          */
         private static VisualIndicatorAnimator animateIndicatorType(@NonNull View view,
-                @NonNull DisplayLayout displayLayout, IndicatorType origType,
-                IndicatorType newType) {
-            final Rect startBounds = getIndicatorBounds(displayLayout, origType);
-            final Rect endBounds = getIndicatorBounds(displayLayout, newType);
+                @NonNull DisplayLayout displayLayout, IndicatorType origType, IndicatorType newType,
+                @Nullable BubbleDropTargetBoundsProvider bubbleBoundsProvider) {
+            final Rect startBounds = getIndicatorBounds(displayLayout, origType,
+                    bubbleBoundsProvider);
+            final Rect endBounds = getIndicatorBounds(displayLayout, newType, bubbleBoundsProvider);
             final VisualIndicatorAnimator animator = new VisualIndicatorAnimator(
                     view, startBounds, endBounds);
             animator.setInterpolator(new DecelerateInterpolator());
@@ -444,7 +501,8 @@ public class DesktopModeVisualIndicator {
         }
 
         /** Calculates the bounds the indicator should have when fully faded in. */
-        private static Rect getIndicatorBounds(DisplayLayout layout, IndicatorType type) {
+        private static Rect getIndicatorBounds(DisplayLayout layout, IndicatorType type,
+                @Nullable BubbleDropTargetBoundsProvider bubbleBoundsProvider) {
             final Rect desktopStableBounds = new Rect();
             layout.getStableBounds(desktopStableBounds);
             final int padding = desktopStableBounds.top;
@@ -472,6 +530,18 @@ public class DesktopModeVisualIndicator {
                     return new Rect(desktopStableBounds.width() / 2 + padding, padding,
                             desktopStableBounds.width() - padding,
                             desktopStableBounds.height());
+                case TO_BUBBLE_LEFT_INDICATOR:
+                    if (bubbleBoundsProvider == null) {
+                        return new Rect();
+                    }
+                    return bubbleBoundsProvider.getBubbleBarExpandedViewDropTargetBounds(
+                            /* onLeft= */ true);
+                case TO_BUBBLE_RIGHT_INDICATOR:
+                    if (bubbleBoundsProvider == null) {
+                        return new Rect();
+                    }
+                    return bubbleBoundsProvider.getBubbleBarExpandedViewDropTargetBounds(
+                            /* onLeft= */ false);
                 default:
                     throw new IllegalArgumentException("Invalid indicator type provided.");
             }

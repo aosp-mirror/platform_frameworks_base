@@ -36,6 +36,7 @@ public class MediaItem {
     private final String mTitle;
     @MediaItemType
     private final int mMediaItemType;
+    private final boolean mIsFirstDeviceInGroup;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
@@ -54,7 +55,18 @@ public class MediaItem {
      * name.
      */
     public static MediaItem createDeviceMediaItem(@NonNull MediaDevice device) {
-        return new MediaItem(device, device.getName(), MediaItemType.TYPE_DEVICE);
+        return new MediaItem(device, device.getName(), MediaItemType.TYPE_DEVICE, false);
+    }
+
+    /**
+     * Returns a new {@link MediaItemType#TYPE_DEVICE} {@link MediaItem} with its {@link
+     * #getMediaDevice() media device} set to {@code device} and its title set to {@code device}'s
+     * name.
+     */
+    public static MediaItem createDeviceMediaItem(
+            @NonNull MediaDevice device, boolean isFirstDeviceInGroup) {
+        return new MediaItem(
+            device, device.getName(), MediaItemType.TYPE_DEVICE, isFirstDeviceInGroup);
     }
 
     /**
@@ -63,7 +75,10 @@ public class MediaItem {
      */
     public static MediaItem createPairNewDeviceMediaItem() {
         return new MediaItem(
-                /* device */ null, /* title */ null, MediaItemType.TYPE_PAIR_NEW_DEVICE);
+                /* device */ null,
+                /* title */ null,
+                MediaItemType.TYPE_PAIR_NEW_DEVICE,
+                /* mIsFirstDeviceInGroup */ false);
     }
 
     /**
@@ -71,14 +86,22 @@ public class MediaItem {
      * title and a {@code null} {@link #getMediaDevice() media device}.
      */
     public static MediaItem createGroupDividerMediaItem(@Nullable String title) {
-        return new MediaItem(/* device */ null, title, MediaItemType.TYPE_GROUP_DIVIDER);
+        return new MediaItem(
+            /* device */ null,
+            title,
+            MediaItemType.TYPE_GROUP_DIVIDER,
+            /* misFirstDeviceInGroup */ false);
     }
 
     private MediaItem(
-            @Nullable MediaDevice device, @Nullable String title, @MediaItemType int type) {
+            @Nullable MediaDevice device,
+            @Nullable String title,
+            @MediaItemType int type,
+            boolean isFirstDeviceInGroup) {
         this.mMediaDeviceOptional = Optional.ofNullable(device);
         this.mTitle = title;
         this.mMediaItemType = type;
+        this.mIsFirstDeviceInGroup = isFirstDeviceInGroup;
     }
 
     public Optional<MediaDevice> getMediaDevice() {
@@ -105,5 +128,9 @@ public class MediaItem {
 
     public int getMediaItemType() {
         return mMediaItemType;
+    }
+
+    public boolean isFirstDeviceInGroup() {
+        return mIsFirstDeviceInGroup;
     }
 }

@@ -22,7 +22,6 @@ import static com.android.internal.util.Preconditions.checkArgumentPositive;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
@@ -36,6 +35,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.SystemPropertySetter;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -76,7 +76,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * @param <Result> The class holding cache entries; use a boxed primitive if possible
  * @hide
  */
-@TestApi
 @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class PropertyInvalidatedCache<Query, Result> {
     /**
@@ -94,7 +93,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * This is a configuration class that customizes a cache instance.
      * @hide
      */
-    @TestApi
     public static abstract class QueryHandler<Q,R> {
         /**
          * Compute a result given a query.  The semantics are those of Functor.
@@ -133,7 +131,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * the system has permissions to write properties with this module.
      * @hide
      */
-    @TestApi
     public static final String MODULE_TEST = "test";
 
     /**
@@ -141,35 +138,19 @@ public class PropertyInvalidatedCache<Query, Result> {
      * the system processes.
      * @hide
      */
-    @TestApi
     public static final String MODULE_SYSTEM = "system_server";
 
     /**
      * The module used for bluetooth caches.
      * @hide
      */
-    @TestApi
     public static final String MODULE_BLUETOOTH = "bluetooth";
 
     /**
      * The module used for telephony caches.
+     * @hide
      */
     public static final String MODULE_TELEPHONY = "telephony";
-
-    /**
-     * Constants that affect retries when the process is unable to write the property.
-     * The first constant is the number of times the process will attempt to set the
-     * property.  The second constant is the delay between attempts.
-     */
-
-    /**
-     * Wait 200ms between retry attempts and the retry limit is 5.  That gives a total possible
-     * delay of 1s, which should be less than ANR timeouts.  The goal is to have the system crash
-     * because the property could not be set (which is a condition that is easily recognized) and
-     * not crash because of an ANR (which can be confusing to debug).
-     */
-    private static final int PROPERTY_FAILURE_RETRY_DELAY_MILLIS = 200;
-    private static final int PROPERTY_FAILURE_RETRY_LIMIT = 5;
 
     /**
      * Construct a system property that matches the rules described above.  The module is
@@ -185,7 +166,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * error message.
      * @hide
      */
-    @TestApi
     public static @NonNull String createPropertyName(@NonNull String module,
             @NonNull String apiName) {
         char[] api = apiName.toCharArray();
@@ -327,11 +307,8 @@ public class PropertyInvalidatedCache<Query, Result> {
     @GuardedBy("mLock")
     private long mMisses = 0;
 
-    // This counter tracks the number of times {@link #recompute} returned a null value.  Null
-    // results are cached, or not, depending on instantiation arguments.  Caching nulls when they
-    // should not be cached is a functional error. Failing to cache nulls that can be cached is a
-    // performance error.  A non-zero value here means the cache should be examined to be sure
-    // that nulls are correctly cached, or not.
+    // This counter tracks the number of times {@link #recompute} returned a null value and the
+    // result was not cached.
     @GuardedBy("mLock")
     private long mNulls = 0;
 
@@ -958,37 +935,8 @@ public class PropertyInvalidatedCache<Query, Result> {
          */
         @Override
         void setNonceInternal(long value) {
-            // Failing to set the nonce is a fatal error.  Failures setting a system property have
-            // been reported; given that the failure is probably transient, this function includes
-            // a retry.
             final String str = Long.toString(value);
-            RuntimeException failure = null;
-            for (int attempt = 0; attempt < PROPERTY_FAILURE_RETRY_LIMIT; attempt++) {
-                try {
-                    SystemProperties.set(mName, str);
-                    if (attempt > 0) {
-                        // This log is not guarded.  Based on known bug reports, it should
-                        // occur once a week or less.  The purpose of the log message is to
-                        // identify the retries as a source of delay that might be otherwise
-                        // be attributed to the cache itself.
-                        Log.w(TAG, "Nonce set after " + attempt + " tries");
-                    }
-                    return;
-                } catch (RuntimeException e) {
-                    if (failure == null) {
-                        failure = e;
-                    }
-                    try {
-                        Thread.sleep(PROPERTY_FAILURE_RETRY_DELAY_MILLIS);
-                    } catch (InterruptedException x) {
-                        // Ignore this exception.  The desired delay is only approximate and
-                        // there is no issue if the sleep sometimes terminates early.
-                    }
-                }
-            }
-            // This point is reached only if SystemProperties.set() fails at least once.
-            // Rethrow the first exception that was received.
-            throw failure;
+            SystemPropertySetter.setWithRetry(mName, str);
         }
     }
 
@@ -1425,7 +1373,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * @param computer The code to compute values that are not in the cache.
      * @hide
      */
-    @TestApi
     public PropertyInvalidatedCache(int maxEntries, @NonNull String module, @NonNull String api,
             @NonNull String cacheName, @NonNull QueryHandler<Query, Result> computer) {
         this(new Args(module).maxEntries(maxEntries).api(api), cacheName, computer);
@@ -1452,7 +1399,7 @@ public class PropertyInvalidatedCache<Query, Result> {
      * current logic does not care.
      * @hide
      */
-    @TestApi
+    @VisibleForTesting
     public static void setTestMode(boolean mode) {
         synchronized (sGlobalLock) {
             if (sTestMode == mode) {
@@ -1493,7 +1440,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * must be true when this method is called.
      * @hide
      */
-    @TestApi
     public void testPropertyName() {
         synchronized (sGlobalLock) {
             if (sTestMode == false) {
@@ -1585,8 +1531,8 @@ public class PropertyInvalidatedCache<Query, Result> {
      * be re-enabled.
      * @hide
      */
-    @TestApi
-    public final void disableInstance() {
+    @VisibleForTesting
+    public void disableInstance() {
         synchronized (mLock) {
             mDisabled = true;
             clear();
@@ -1622,8 +1568,8 @@ public class PropertyInvalidatedCache<Query, Result> {
      * found in the list of disabled caches.
      * @hide
      */
-    @TestApi
-    public final void forgetDisableLocal() {
+    @VisibleForTesting
+    public void forgetDisableLocal() {
         synchronized (sGlobalLock) {
             sDisabledKeys.remove(mCacheName);
         }
@@ -1646,13 +1592,11 @@ public class PropertyInvalidatedCache<Query, Result> {
      * property.  Once disabled, a cache cannot be reenabled.
      * @hide
      */
-    @TestApi
     public void disableForCurrentProcess() {
         disableLocal(mCacheName);
     }
 
     /** @hide */
-    @TestApi
     public static void disableForCurrentProcess(@NonNull String cacheName) {
         disableLocal(cacheName);
     }
@@ -1661,8 +1605,8 @@ public class PropertyInvalidatedCache<Query, Result> {
      * Return whether a cache instance is disabled.
      * @hide
      */
-    @TestApi
-    public final boolean isDisabled() {
+    @VisibleForTesting
+    public boolean isDisabled() {
         return mDisabled || !sEnabled;
     }
 
@@ -1670,7 +1614,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * Get a value from the cache or recompute it.
      * @hide
      */
-    @TestApi
     public @Nullable Result query(@NonNull Query query) {
         // Let access to mDisabled race: it's atomic anyway.
         long currentNonce = (!isDisabled()) ? getCurrentNonce() : NONCE_DISABLED;
@@ -1782,8 +1725,8 @@ public class PropertyInvalidatedCache<Query, Result> {
                 if (mLastSeenNonce == currentNonce) {
                     if (result != null || mCacheNullResults) {
                         mCache.put(query, result);
-                    }
-                    if (result == null) {
+                    } else if (result == null) {
+                        // The result was null and it was not cached.
                         mNulls++;
                     }
                 }
@@ -1810,8 +1753,8 @@ public class PropertyInvalidatedCache<Query, Result> {
      * just use the static version of this function.
      * @hide
      */
-    @TestApi
-    public final void disableSystemWide() {
+    @VisibleForTesting
+    public void disableSystemWide() {
         disableSystemWide(mPropertyName);
     }
 
@@ -1831,7 +1774,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * to look up the NonceHandler for a given property name.
      * @hide
      */
-    @TestApi
     public void invalidateCache() {
         mNonce.invalidate();
     }
@@ -1860,7 +1802,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * Invalidate caches in all processes that are keyed for the module and api.
      * @hide
      */
-    @TestApi
     public static void invalidateCache(@NonNull String module, @NonNull String api) {
         invalidateCache(createPropertyName(module, api));
     }
@@ -2102,7 +2043,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * temporarily disable caching, use the corking mechanism.
      * @hide
      */
-    @TestApi
     public static void disableForTestMode() {
         Log.d(TAG, "disabling all caches in the process");
         sEnabled = false;
@@ -2111,10 +2051,8 @@ public class PropertyInvalidatedCache<Query, Result> {
     /**
      * Report the disabled status of this cache instance.  The return value does not
      * reflect status of the property key.
-     * @hide
      */
-    @TestApi
-    public boolean getDisabledState() {
+    private boolean getDisabledState() {
         return isDisabled();
     }
 
@@ -2380,12 +2318,14 @@ public class PropertyInvalidatedCache<Query, Result> {
         @GuardedBy("mLock")
         private int mBlockHash = 0;
 
-        // The number of nonces that the native layer can hold.  This is maintained for debug and
-        // logging.
-        private final int mMaxNonce;
+        // The number of nonces that the native layer can hold.  This is maintained for debug,
+        // logging, and testing.
+        @VisibleForTesting
+        public final int mMaxNonce;
 
         // The size of the native byte block.
-        private final int mMaxByte;
+        @VisibleForTesting
+        public final int mMaxByte;
 
         /** @hide */
         @VisibleForTesting
@@ -2542,18 +2482,20 @@ public class PropertyInvalidatedCache<Query, Result> {
             }
         }
 
-        static final AtomicLong sStoreCount = new AtomicLong();
-
-
         // Add a string to the local copy of the block and write the block to shared memory.
         // Return the index of the new string.  If the string has already been recorded, the
-        // shared memory is not updated but the index of the existing string is returned.
+        // shared memory is not updated but the index of the existing string is returned.  Only
+        // mMaxNonce strings can be stored; if mMaxNonce strings have already been allocated,
+        // the method throws.
         public int storeName(@NonNull String str) {
             synchronized (mLock) {
                 Integer handle = mStringHandle.get(str);
                 if (handle == null) {
                     throwIfImmutable();
                     throwIfBadString(str);
+                    if (mHighestIndex + 1 >= mMaxNonce) {
+                        throw new RuntimeException("nonce limit exceeded");
+                    }
                     byte[] block = new byte[mMaxByte];
                     nativeGetByteBlock(mPtr, 0, block);
                     appendStringToMapLocked(str, block);

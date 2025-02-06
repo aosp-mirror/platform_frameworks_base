@@ -61,8 +61,7 @@ import java.util.concurrent.TimeUnit;
  *
  * <p>This class is flag gated by "network_metric_monitor" and "ipsec_tramsform_state"
  */
-// TODO(b/374174952) Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
-@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@TargetApi(Build.VERSION_CODES.BAKLAVA)
 public class IpSecPacketLossDetector extends NetworkMetricMonitor {
     private static final String TAG = IpSecPacketLossDetector.class.getSimpleName();
 
@@ -138,6 +137,8 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
     @NonNull private final Object mCancellationToken = new Object();
     @NonNull private final PacketLossCalculator mPacketLossCalculator;
 
+    @Nullable private BroadcastReceiver mDeviceIdleReceiver;
+
     @Nullable private IpSecTransformWrapper mInboundTransform;
     @Nullable private IpSecTransformState mLastIpSecTransformState;
 
@@ -168,19 +169,21 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
         // Register for system broadcasts to monitor idle mode change
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
+
+        mDeviceIdleReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED.equals(
+                                intent.getAction())
+                        && mPowerManager.isDeviceIdleMode()) {
+                    mLastIpSecTransformState = null;
+                }
+            }
+        };
         getVcnContext()
                 .getContext()
                 .registerReceiver(
-                        new BroadcastReceiver() {
-                            @Override
-                            public void onReceive(Context context, Intent intent) {
-                                if (PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED.equals(
-                                                intent.getAction())
-                                        && mPowerManager.isDeviceIdleMode()) {
-                                    mLastIpSecTransformState = null;
-                                }
-                            }
-                        },
+                        mDeviceIdleReceiver,
                         intentFilter,
                         null /* broadcastPermission not required */,
                         mHandler);
@@ -338,7 +341,12 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
         super.close();
 
         if (mInboundTransform != null) {
-            mInboundTransform.close();
+            mInboundTransform = null;
+        }
+
+        if (mDeviceIdleReceiver != null) {
+            getVcnContext().getContext().unregisterReceiver(mDeviceIdleReceiver);
+            mDeviceIdleReceiver = null;
         }
     }
 

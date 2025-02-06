@@ -23,6 +23,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyboard.shortcut.data.model.InternalKeyboardShortcutGroup
 import com.android.systemui.keyboard.shortcut.data.model.InternalKeyboardShortcutInfo
 import com.android.systemui.keyboard.shortcut.data.source.KeyboardShortcutGroupsSource
+import com.android.systemui.keyboard.shortcut.qualifiers.AccessibilityShortcuts
 import com.android.systemui.keyboard.shortcut.qualifiers.AppCategoriesShortcuts
 import com.android.systemui.keyboard.shortcut.qualifiers.CurrentAppShortcuts
 import com.android.systemui.keyboard.shortcut.qualifiers.InputShortcuts
@@ -30,6 +31,7 @@ import com.android.systemui.keyboard.shortcut.qualifiers.MultitaskingShortcuts
 import com.android.systemui.keyboard.shortcut.qualifiers.SystemShortcuts
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.Accessibility
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.AppCategories
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.CurrentApp
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.InputMethodEditor
@@ -47,11 +49,12 @@ class DefaultShortcutCategoriesRepository
 @Inject
 constructor(
     @Background private val backgroundScope: CoroutineScope,
-    @SystemShortcuts private val systemShortcutsSource: KeyboardShortcutGroupsSource,
-    @MultitaskingShortcuts private val multitaskingShortcutsSource: KeyboardShortcutGroupsSource,
-    @AppCategoriesShortcuts private val appCategoriesShortcutsSource: KeyboardShortcutGroupsSource,
-    @InputShortcuts private val inputShortcutsSource: KeyboardShortcutGroupsSource,
-    @CurrentAppShortcuts private val currentAppShortcutsSource: KeyboardShortcutGroupsSource,
+    @SystemShortcuts systemShortcutsSource: KeyboardShortcutGroupsSource,
+    @MultitaskingShortcuts multitaskingShortcutsSource: KeyboardShortcutGroupsSource,
+    @AppCategoriesShortcuts appCategoriesShortcutsSource: KeyboardShortcutGroupsSource,
+    @InputShortcuts inputShortcutsSource: KeyboardShortcutGroupsSource,
+    @CurrentAppShortcuts currentAppShortcutsSource: KeyboardShortcutGroupsSource,
+    @AccessibilityShortcuts accessibilityShortcutsSource: KeyboardShortcutGroupsSource,
     inputDeviceRepository: ShortcutHelperInputDeviceRepository,
     shortcutCategoriesUtils: ShortcutCategoriesUtils,
 ) : ShortcutCategoriesRepository {
@@ -70,6 +73,10 @@ constructor(
             InternalGroupsSource(
                 source = inputShortcutsSource,
                 typeProvider = { InputMethodEditor },
+            ),
+            InternalGroupsSource(
+                source = accessibilityShortcutsSource,
+                typeProvider = { Accessibility },
             ),
             InternalGroupsSource(
                 source = currentAppShortcutsSource,

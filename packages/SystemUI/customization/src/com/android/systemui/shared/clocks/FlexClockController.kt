@@ -16,6 +16,7 @@
 
 package com.android.systemui.shared.clocks
 
+import com.android.systemui.animation.GSFAxes
 import com.android.systemui.customization.R
 import com.android.systemui.plugins.clocks.AlarmData
 import com.android.systemui.plugins.clocks.AxisType
@@ -23,7 +24,9 @@ import com.android.systemui.plugins.clocks.ClockConfig
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockEvents
 import com.android.systemui.plugins.clocks.ClockFontAxis
+import com.android.systemui.plugins.clocks.ClockFontAxis.Companion.merge
 import com.android.systemui.plugins.clocks.ClockFontAxisSetting
+import com.android.systemui.plugins.clocks.ClockSettings
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.shared.clocks.view.FlexClockView
@@ -32,21 +35,16 @@ import java.util.Locale
 import java.util.TimeZone
 
 /** Controller for the default flex clock */
-class FlexClockController(
-    private val clockCtx: ClockContext,
-    val design: ClockDesign, // TODO(b/364680879): Remove when done inlining
-) : ClockController {
+class FlexClockController(private val clockCtx: ClockContext) : ClockController {
     override val smallClock =
         FlexClockFaceController(
             clockCtx.copy(messageBuffer = clockCtx.messageBuffers.smallClockMessageBuffer),
-            design.small ?: design.large!!,
             isLargeClock = false,
         )
 
     override val largeClock =
         FlexClockFaceController(
             clockCtx.copy(messageBuffer = clockCtx.messageBuffers.largeClockMessageBuffer),
-            design.large ?: design.small!!,
             isLargeClock = true,
         )
 
@@ -55,7 +53,6 @@ class FlexClockController(
             DEFAULT_CLOCK_ID,
             clockCtx.resources.getString(R.string.clock_default_name),
             clockCtx.resources.getString(R.string.clock_default_description),
-            isReactiveToTone = true,
         )
     }
 
@@ -99,7 +96,7 @@ class FlexClockController(
             }
 
             override fun onFontAxesChanged(axes: List<ClockFontAxisSetting>) {
-                val fontAxes = ClockFontAxis.merge(FONT_AXES, axes).map { it.toSetting() }
+                val fontAxes = getDefaultAxes(clockCtx.settings).merge(axes).map { it.toSetting() }
                 smallClock.events.onFontAxesChanged(fontAxes)
                 largeClock.events.onFontAxesChanged(fontAxes)
             }
@@ -125,28 +122,34 @@ class FlexClockController(
     override fun dump(pw: PrintWriter) {}
 
     companion object {
-        val FONT_AXES =
+        fun getDefaultAxes(settings: ClockSettings): List<ClockFontAxis> {
+            return if (settings.clockId == FLEX_CLOCK_ID) {
+                FONT_AXES.merge(LEGACY_FLEX_SETTINGS)
+            } else FONT_AXES
+        }
+
+        private val FONT_AXES =
             listOf(
                 ClockFontAxis(
-                    key = "wght",
+                    key = GSFAxes.WEIGHT,
                     type = AxisType.Float,
-                    minValue = 1f,
+                    minValue = 25f,
                     currentValue = 400f,
                     maxValue = 1000f,
                     name = "Weight",
                     description = "Glyph Weight",
                 ),
                 ClockFontAxis(
-                    key = "wdth",
+                    key = GSFAxes.WIDTH,
                     type = AxisType.Float,
                     minValue = 25f,
-                    currentValue = 100f,
+                    currentValue = 85f,
                     maxValue = 151f,
                     name = "Width",
                     description = "Glyph Width",
                 ),
                 ClockFontAxis(
-                    key = "ROND",
+                    key = GSFAxes.ROUND,
                     type = AxisType.Boolean,
                     minValue = 0f,
                     currentValue = 0f,
@@ -155,7 +158,7 @@ class FlexClockController(
                     description = "Glyph Roundness",
                 ),
                 ClockFontAxis(
-                    key = "slnt",
+                    key = GSFAxes.SLANT,
                     type = AxisType.Boolean,
                     minValue = 0f,
                     currentValue = 0f,
@@ -163,6 +166,14 @@ class FlexClockController(
                     name = "Slant",
                     description = "Glyph Slant",
                 ),
+            )
+
+        private val LEGACY_FLEX_SETTINGS =
+            listOf(
+                ClockFontAxisSetting(GSFAxes.WEIGHT, 600f),
+                ClockFontAxisSetting(GSFAxes.WIDTH, 100f),
+                ClockFontAxisSetting(GSFAxes.ROUND, 100f),
+                ClockFontAxisSetting(GSFAxes.SLANT, 0f),
             )
     }
 }

@@ -81,7 +81,8 @@ public final class PlatformCompatPermissionsTest {
         thrown.expect(SecurityException.class);
         final String packageName = mContext.getPackageName();
 
-        mPlatformCompat.reportChange(1, mPackageManager.getApplicationInfo(packageName, 0));
+        mPlatformCompat.reportChange(1,
+            mPackageManager.getApplicationInfo(packageName, Process.myUid()));
     }
 
     @Test
@@ -90,7 +91,8 @@ public final class PlatformCompatPermissionsTest {
         mUiAutomation.adoptShellPermissionIdentity(LOG_COMPAT_CHANGE);
         final String packageName = mContext.getPackageName();
 
-        mPlatformCompat.reportChange(1, mPackageManager.getApplicationInfo(packageName, 0));
+        mPlatformCompat.reportChange(1,
+            mPackageManager.getApplicationInfo(packageName, Process.myUid()));
     }
 
     @Test
@@ -99,7 +101,7 @@ public final class PlatformCompatPermissionsTest {
         thrown.expect(SecurityException.class);
         final String packageName = mContext.getPackageName();
 
-        mPlatformCompat.reportChangeByPackageName(1, packageName, 0);
+        mPlatformCompat.reportChangeByPackageName(1, packageName, Process.myUid());
     }
 
     @Test
@@ -108,7 +110,7 @@ public final class PlatformCompatPermissionsTest {
         mUiAutomation.adoptShellPermissionIdentity(LOG_COMPAT_CHANGE);
         final String packageName = mContext.getPackageName();
 
-        mPlatformCompat.reportChangeByPackageName(1, packageName, 0);
+        mPlatformCompat.reportChangeByPackageName(1, packageName, Process.myUid());
     }
 
     @Test
@@ -133,7 +135,8 @@ public final class PlatformCompatPermissionsTest {
         thrown.expect(SecurityException.class);
         final String packageName = mContext.getPackageName();
 
-        mPlatformCompat.isChangeEnabled(1, mPackageManager.getApplicationInfo(packageName, 0));
+        mPlatformCompat.isChangeEnabled(1,
+            mPackageManager.getApplicationInfo(packageName, Process.myUid()));
     }
 
     @Test
@@ -143,7 +146,8 @@ public final class PlatformCompatPermissionsTest {
         mUiAutomation.adoptShellPermissionIdentity(READ_COMPAT_CHANGE_CONFIG);
         final String packageName = mContext.getPackageName();
 
-        mPlatformCompat.isChangeEnabled(1, mPackageManager.getApplicationInfo(packageName, 0));
+        mPlatformCompat.isChangeEnabled(1,
+            mPackageManager.getApplicationInfo(packageName, Process.myUid()));
     }
 
     @Test
@@ -152,7 +156,8 @@ public final class PlatformCompatPermissionsTest {
         mUiAutomation.adoptShellPermissionIdentity(READ_COMPAT_CHANGE_CONFIG, LOG_COMPAT_CHANGE);
         final String packageName = mContext.getPackageName();
 
-        mPlatformCompat.isChangeEnabled(1, mPackageManager.getApplicationInfo(packageName, 0));
+        mPlatformCompat.isChangeEnabled(1,
+            mPackageManager.getApplicationInfo(packageName, Process.myUid()));
     }
 
     @Test
@@ -161,7 +166,7 @@ public final class PlatformCompatPermissionsTest {
         thrown.expect(SecurityException.class);
         final String packageName = mContext.getPackageName();
 
-        mPlatformCompat.isChangeEnabledByPackageName(1, packageName, 0);
+        mPlatformCompat.isChangeEnabledByPackageName(1, packageName, Process.myUid());
     }
 
     @Test
@@ -171,7 +176,7 @@ public final class PlatformCompatPermissionsTest {
         mUiAutomation.adoptShellPermissionIdentity(READ_COMPAT_CHANGE_CONFIG);
         final String packageName = mContext.getPackageName();
 
-        mPlatformCompat.isChangeEnabledByPackageName(1, packageName, 0);
+        mPlatformCompat.isChangeEnabledByPackageName(1, packageName, Process.myUid());
     }
 
     @Test
@@ -180,7 +185,7 @@ public final class PlatformCompatPermissionsTest {
         mUiAutomation.adoptShellPermissionIdentity(READ_COMPAT_CHANGE_CONFIG, LOG_COMPAT_CHANGE);
         final String packageName = mContext.getPackageName();
 
-        mPlatformCompat.isChangeEnabledByPackageName(1, packageName, 0);
+        mPlatformCompat.isChangeEnabledByPackageName(1, packageName, Process.myUid());
     }
 
     @Test

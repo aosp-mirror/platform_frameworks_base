@@ -176,12 +176,15 @@ class EnterSystemSplitTest(flicker: LegacyFlickerTest) : ActivityEmbeddingTestBa
     }
 
     @Ignore("Not applicable to this CUJ.")
+    @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {}
 
     @FlakyTest(bugId = 342596801)
+    @Test
     override fun entireScreenCovered() = super.entireScreenCovered()
 
     @FlakyTest(bugId = 342596801)
+    @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 

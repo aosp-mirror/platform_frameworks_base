@@ -435,6 +435,12 @@ public class MediaControlPanel {
         }
         this.mIsSeekBarEnabled = isSeekBarEnabled;
         updateSeekBarVisibility();
+        mMainExecutor.execute(() -> {
+            if (!mMetadataAnimationHandler.isRunning()) {
+                // Trigger a state refresh so that we immediately update visibilities.
+                mMediaViewController.refreshState();
+            }
+        });
     }
 
     /**

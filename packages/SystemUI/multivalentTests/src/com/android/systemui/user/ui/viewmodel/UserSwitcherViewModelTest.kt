@@ -51,7 +51,6 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -66,7 +65,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class UserSwitcherViewModelTest : SysuiTestCase() {
@@ -177,7 +175,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                         guestUserInteractor = guestUserInteractor,
                         uiEventLogger = uiEventLogger,
                         userRestrictionChecker = mock(),
-                        processWrapper = ProcessWrapperFake()
+                        processWrapper = ProcessWrapperFake(activityManager)
                     ),
                 guestUserInteractor = guestUserInteractor,
             )

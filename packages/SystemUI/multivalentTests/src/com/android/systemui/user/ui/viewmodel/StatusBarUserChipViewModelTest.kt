@@ -47,7 +47,6 @@ import com.android.systemui.user.domain.interactor.RefreshUsersScheduler
 import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.toList
@@ -66,7 +65,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.doAnswer
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class StatusBarUserChipViewModelTest : SysuiTestCase() {
@@ -265,7 +263,7 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
                     guestUserInteractor = guestUserInteractor,
                     uiEventLogger = uiEventLogger,
                     userRestrictionChecker = mock(),
-                    processWrapper = ProcessWrapperFake()
+                    processWrapper = ProcessWrapperFake(activityManager)
                 )
         )
     }

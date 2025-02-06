@@ -16,8 +16,6 @@
 
 package com.android.server.backup;
 
-import static com.android.server.backup.BackupManagerService.DEBUG_SCHEDULING;
-
 import android.app.AlarmManager;
 import android.app.job.JobInfo;
 import android.content.ContentResolver;
@@ -168,85 +166,55 @@ public class BackupManagerConstants extends KeyValueSettingObserver {
     // group the calls of these methods in a block syncrhonized on
     // a reference of this object.
     public synchronized long getKeyValueBackupIntervalMilliseconds() {
-        if (DEBUG_SCHEDULING) {
-            Slog.v(
-                    TAG,
-                    "getKeyValueBackupIntervalMilliseconds(...) returns "
-                            + mKeyValueBackupIntervalMilliseconds);
-        }
+        Slog.d(TAG, "getKeyValueBackupIntervalMilliseconds(...) returns "
+                + mKeyValueBackupIntervalMilliseconds);
         return mKeyValueBackupIntervalMilliseconds;
     }
 
     public synchronized long getKeyValueBackupFuzzMilliseconds() {
-        if (DEBUG_SCHEDULING) {
-            Slog.v(
-                    TAG,
-                    "getKeyValueBackupFuzzMilliseconds(...) returns "
-                            + mKeyValueBackupFuzzMilliseconds);
-        }
+        Slog.d(TAG, "getKeyValueBackupFuzzMilliseconds(...) returns "
+                + mKeyValueBackupFuzzMilliseconds);
         return mKeyValueBackupFuzzMilliseconds;
     }
 
     public synchronized boolean getKeyValueBackupRequireCharging() {
-        if (DEBUG_SCHEDULING) {
-            Slog.v(
-                    TAG,
-                    "getKeyValueBackupRequireCharging(...) returns "
-                            + mKeyValueBackupRequireCharging);
-        }
+        Slog.d(TAG,
+                "getKeyValueBackupRequireCharging(...) returns " + mKeyValueBackupRequireCharging);
         return mKeyValueBackupRequireCharging;
     }
 
     public synchronized int getKeyValueBackupRequiredNetworkType() {
-        if (DEBUG_SCHEDULING) {
-            Slog.v(
-                    TAG,
-                    "getKeyValueBackupRequiredNetworkType(...) returns "
-                            + mKeyValueBackupRequiredNetworkType);
-        }
+        Slog.d(TAG, "getKeyValueBackupRequiredNetworkType(...) returns "
+                + mKeyValueBackupRequiredNetworkType);
         return mKeyValueBackupRequiredNetworkType;
     }
 
     public synchronized long getFullBackupIntervalMilliseconds() {
-        if (DEBUG_SCHEDULING) {
-            Slog.v(
-                    TAG,
-                    "getFullBackupIntervalMilliseconds(...) returns "
-                            + mFullBackupIntervalMilliseconds);
-        }
+        Slog.d(TAG, "getFullBackupIntervalMilliseconds(...) returns "
+                + mFullBackupIntervalMilliseconds);
         return mFullBackupIntervalMilliseconds;
     }
 
     public synchronized boolean getFullBackupRequireCharging() {
-        if (DEBUG_SCHEDULING) {
-            Slog.v(TAG, "getFullBackupRequireCharging(...) returns " + mFullBackupRequireCharging);
-        }
+        Slog.d(TAG, "getFullBackupRequireCharging(...) returns " + mFullBackupRequireCharging);
         return mFullBackupRequireCharging;
     }
 
     public synchronized int getFullBackupRequiredNetworkType() {
-        if (DEBUG_SCHEDULING) {
-            Slog.v(
-                    TAG,
-                    "getFullBackupRequiredNetworkType(...) returns "
-                            + mFullBackupRequiredNetworkType);
-        }
+        Slog.d(TAG,
+                "getFullBackupRequiredNetworkType(...) returns " + mFullBackupRequiredNetworkType);
         return mFullBackupRequiredNetworkType;
     }
 
     /** Returns an array of package names that should be notified whenever a backup finishes. */
     public synchronized String[] getBackupFinishedNotificationReceivers() {
-        if (DEBUG_SCHEDULING) {
-            Slog.v(
-                    TAG,
-                    "getBackupFinishedNotificationReceivers(...) returns "
-                            + TextUtils.join(", ", mBackupFinishedNotificationReceivers));
-        }
+        Slog.d(TAG, "getBackupFinishedNotificationReceivers(...) returns " + TextUtils.join(", ",
+                mBackupFinishedNotificationReceivers));
         return mBackupFinishedNotificationReceivers;
     }
 
     public synchronized long getWakelockTimeoutMillis() {
-        Slog.v(TAG, "wakelock timeout: " + mWakelockTimeoutMillis);
+        Slog.d(TAG, "wakelock timeout: " + mWakelockTimeoutMillis);
         return mWakelockTimeoutMillis;
     }
 }

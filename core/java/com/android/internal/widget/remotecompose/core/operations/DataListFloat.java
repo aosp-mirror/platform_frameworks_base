@@ -70,6 +70,13 @@ public class DataListFloat extends Operation implements VariableSupport, ArrayAc
         return "DataListFloat[" + Utils.idString(mId) + "] " + Arrays.toString(mValues);
     }
 
+    /**
+     * Write this operation to the buffer
+     *
+     * @param buffer the buffer to apply the operation to
+     * @param id the id of the array
+     * @param values the values of the array
+     */
     public static void apply(@NonNull WireBuffer buffer, int id, @NonNull float[] values) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);

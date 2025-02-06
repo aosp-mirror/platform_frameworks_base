@@ -40,7 +40,6 @@ import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
@@ -49,7 +48,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class VolumeNavigator
 @Inject

@@ -27,4 +27,7 @@ sealed interface SliderType {
 
     /** The represents media device casting volume. */
     data class MediaDeviceCast(val session: MediaDeviceSession) : SliderType
+
+    /** Represents the audio sharing volume stream. */
+    data object AudioSharingStream : SliderType
 }

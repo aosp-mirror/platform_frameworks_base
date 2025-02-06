@@ -415,7 +415,7 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      *  for permission request permission flow.
      */
     int getPermissionRequestState(@NonNull String packageName, @NonNull String permName,
-            @NonNull String deviceId);
+            int deviceId, @NonNull String persistentDeviceId);
 
     /**
      * Gets the permission states for requested package, persistent device and user.

@@ -27,7 +27,6 @@ import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -37,7 +36,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class DisplayMetricsRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: DisplayMetricsRepository

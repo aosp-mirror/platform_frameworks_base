@@ -18,9 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Companion Device Manager"</string>
     <string name="confirmation_title" msgid="2244241995958340998">"Թույլատրե՞լ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; հավելվածին կառավարել &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; սարքը"</string>
+    <string name="message_discovery_soft_timeout" msgid="473346859407859161">"Համոզվեք, որ այս <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> սարքի <xliff:g id="DISCOVERY_METHOD">%2$s</xliff:g>-ը միացված է, և ձեր <xliff:g id="PROFILE_NAME">%3$s</xliff:g>-ը մոտ պահեք։"</string>
+    <string name="message_discovery_hard_timeout" msgid="677514663495711424">"Սարքեր չեն գտնվել։ Փորձեք ավելի ուշ։"</string>
+    <string name="discovery_bluetooth" msgid="5693557668470016164">"Bluetooth"</string>
+    <string name="discovery_wifi" msgid="1551782459721758773">"Wi-Fi"</string>
+    <string name="discovery_mixed" msgid="7071466134150760127">"Bluetooth և Wi-Fi"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"ժամացույց"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"Ընտրեք սարքը, որը պետք է կառավարվի &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; հավելվածի միջոցով"</string>
     <string name="chooser_title" msgid="2235819929238267637">"Կարգավորելու համար ընտրեք <xliff:g id="PROFILE_NAME">%1$s</xliff:g>ը"</string>
+    <string name="single_device_title" msgid="4199861437545438606">"<xliff:g id="PROFILE_NAME">%1$s</xliff:g> սարքի որոնում"</string>
     <string name="summary_watch" msgid="8134580124808507407">"Այս հավելվածը կկարողանա համաժամացնել տվյալները, օր․՝ զանգողի անունը, և կստանա հետևյալ թույլտվությունները ձեր <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>ում"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Թույլատրե՞լ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; հավելվածին կառավարել &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; սարքը"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"սարք"</string>

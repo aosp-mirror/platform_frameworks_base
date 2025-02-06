@@ -22,9 +22,7 @@ import android.graphics.drawable.Drawable
 import java.io.PrintWriter
 
 /** A fake [SecurityController] to be used in tests. */
-class FakeSecurityController(
-    private val fakeState: FakeState = FakeState(),
-) : SecurityController {
+class FakeSecurityController(private val fakeState: FakeState = FakeState()) : SecurityController {
     private val callbacks = LinkedHashSet<SecurityController.SecurityControllerCallback>()
 
     override fun addCallback(callback: SecurityController.SecurityControllerCallback) {
@@ -91,11 +89,15 @@ class FakeSecurityController(
 
     override fun isParentalControlsEnabled(): Boolean = fakeState.isParentalControlsEnabled
 
-    override fun getDeviceAdminInfo(): DeviceAdminInfo? = fakeState.deviceAdminInfo
+    override fun getDeviceAdminInfo(): DeviceAdminInfo? = null
 
     override fun getIcon(info: DeviceAdminInfo?): Drawable? = null
 
+    override fun getIcon(): Drawable? = null
+
     override fun getLabel(info: DeviceAdminInfo?): CharSequence? = null
+
+    override fun getLabel(): CharSequence? = null
 
     class FakeState(
         var isDeviceManaged: Boolean = false,
@@ -118,6 +120,5 @@ class FakeSecurityController(
         var hasCACertInCurrentUser: Boolean = false,
         var hasCACertInWorkProfile: Boolean = false,
         var isParentalControlsEnabled: Boolean = false,
-        var deviceAdminInfo: DeviceAdminInfo? = null,
     )
 }

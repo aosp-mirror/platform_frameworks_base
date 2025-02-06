@@ -39,7 +39,6 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoMod
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.FakeWifiEventModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -54,7 +53,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 /** This repository vends out data based on demo mode commands */
-@OptIn(ExperimentalCoroutinesApi::class)
 class DemoMobileConnectionsRepository
 @Inject
 constructor(
@@ -166,7 +164,7 @@ constructor(
     private fun <K, V> Map<K, V>.reverse() = entries.associateBy({ it.value }) { it.key }
 
     // TODO(b/261029387): add a command for this value
-    override val defaultDataSubId = MutableStateFlow(INVALID_SUBSCRIPTION_ID)
+    override val defaultDataSubId: MutableStateFlow<Int?> = MutableStateFlow(null)
 
     // TODO(b/261029387): not yet supported
     override val mobileIsDefault: StateFlow<Boolean> = MutableStateFlow(true)

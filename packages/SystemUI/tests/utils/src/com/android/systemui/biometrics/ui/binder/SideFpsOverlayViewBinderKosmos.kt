@@ -27,9 +27,7 @@ import com.android.systemui.keyguard.ui.viewmodel.sideFpsProgressBarViewModel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@OptIn(ExperimentalCoroutinesApi::class)
 val Kosmos.sideFpsOverlayViewBinder by Fixture {
     SideFpsOverlayViewBinder(
         applicationScope = applicationCoroutineScope,

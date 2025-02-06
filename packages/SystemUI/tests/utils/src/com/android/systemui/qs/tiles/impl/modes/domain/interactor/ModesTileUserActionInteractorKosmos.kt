@@ -17,16 +17,20 @@
 package com.android.systemui.qs.tiles.impl.modes.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.mainCoroutineContext
 import com.android.systemui.qs.tiles.base.actions.qsTileIntentUserInputHandler
 import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 import com.android.systemui.statusbar.policy.ui.dialog.modesDialogDelegate
+import com.android.systemui.statusbar.policy.ui.dialog.modesDialogEventLogger
 import javax.inject.Provider
 
 val Kosmos.modesTileUserActionInteractor: ModesTileUserActionInteractor by
     Kosmos.Fixture {
         ModesTileUserActionInteractor(
+            mainCoroutineContext,
             qsTileIntentUserInputHandler,
             Provider { modesDialogDelegate }.get(),
             zenModeInteractor,
+            modesDialogEventLogger,
         )
     }

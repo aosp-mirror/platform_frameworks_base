@@ -16,6 +16,7 @@ android_library {
     ],
     resource_dirs: ["res"],
     static_libs: [
+        "aconfig_settingstheme_exported_flags_java_lib",
         "androidx.preference_preference",
         "com.google.android.material_material",
     ],
@@ -23,12 +24,12 @@ android_library {
     min_sdk_version: "21",
     apex_available: [
         "//apex_available:platform",
+        "com.android.adservices",
         "com.android.cellbroadcast",
         "com.android.devicelock",
         "com.android.extservices",
-        "com.android.permission",
-        "com.android.adservices",
         "com.android.healthfitness",
         "com.android.mediaprovider",
+        "com.android.permission",
     ],
 }

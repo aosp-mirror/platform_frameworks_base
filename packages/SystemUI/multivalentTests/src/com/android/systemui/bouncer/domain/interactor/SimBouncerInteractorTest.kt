@@ -35,7 +35,6 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.mobileConn
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -52,7 +51,6 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class SimBouncerInteractorTest : SysuiTestCase() {
     @Mock lateinit var telephonyManager: TelephonyManager
     @Mock lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor

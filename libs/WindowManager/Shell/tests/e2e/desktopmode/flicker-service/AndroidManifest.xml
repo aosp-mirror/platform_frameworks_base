@@ -47,6 +47,8 @@
     <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
     <!-- Allow the test to connect to perfetto trace processor -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Use trusted virtual displays to emulate an external display -->
+    <uses-permission android:name="android.permission.ADD_TRUSTED_DISPLAY"/>
 
     <!-- Allow the test to write directly to /sdcard/ and connect to trace processor -->
     <application android:requestLegacyExternalStorage="true"

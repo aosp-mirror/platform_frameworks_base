@@ -43,7 +43,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.platform.test.annotations.DisableFlags;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -77,8 +76,6 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -95,9 +92,6 @@ import java.util.Set;
 @TestableLooper.RunWithLooper
 @DisableFlags(Flags.FLAG_ENABLE_PIP2)
 public class PipControllerTest extends ShellTestCase {
-    @ClassRule public static final SetFlagsRule.ClassRule mClassRule = new SetFlagsRule.ClassRule();
-    @Rule public final SetFlagsRule mSetFlagsRule = mClassRule.createSetFlagsRule();
-
     private PipController mPipController;
     private ShellInit mShellInit;
     private ShellController mShellController;

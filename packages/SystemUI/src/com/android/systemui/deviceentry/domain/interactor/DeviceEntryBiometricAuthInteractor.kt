@@ -21,7 +21,6 @@ import com.android.systemui.deviceentry.shared.DeviceEntryBiometricMode
 import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationStatus
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
@@ -30,7 +29,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
 /** Business logic for device entry biometric states that may differ based on the biometric mode. */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class DeviceEntryBiometricAuthInteractor
 @Inject
@@ -70,4 +68,10 @@ constructor(
                 emptyFlow()
             }
         }
+
+    /** Triggered if a face failure occurs regardless of the mode. */
+    val faceFailure: Flow<FailedFaceAuthenticationStatus> =
+        deviceEntryFaceAuthInteractor.authenticationStatus.filterIsInstance<
+            FailedFaceAuthenticationStatus
+        >()
 }

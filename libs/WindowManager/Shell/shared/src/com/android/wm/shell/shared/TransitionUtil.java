@@ -40,7 +40,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
-import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.graphics.Rect;
 import android.util.ArrayMap;
@@ -56,6 +55,9 @@ import java.util.function.Predicate;
 public class TransitionUtil {
     /** Flag applied to a transition change to identify it as a divider bar for animation. */
     public static final int FLAG_IS_DIVIDER_BAR = FLAG_FIRST_CUSTOM;
+
+    /** Flag applied to a transition change to identify it as a desktop wallpaper activity. */
+    public static final int FLAG_IS_DESKTOP_WALLPAPER_ACTIVITY = FLAG_FIRST_CUSTOM << 1;
 
     /** @return true if the transition was triggered by opening something vs closing something */
     public static boolean isOpeningType(@WindowManager.TransitionType int type) {
@@ -122,6 +124,46 @@ public class TransitionUtil {
                 && change.getStartAbsBounds().equals(change.getEndAbsBounds())
                 && (change.getLastParent() == null
                         || change.getLastParent().equals(change.getParent()));
+    }
+
+    /**
+     * Check if all changes in this transition are only ordering changes. If so, we won't animate.
+     */
+    public static boolean isAllOrderOnly(TransitionInfo info) {
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            if (!isOrderOnly(info.getChanges().get(i))) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Look through a transition and see if all non-closing changes are no-animation. If so, no
+     * animation should play.
+     */
+    public static boolean isAllNoAnimation(TransitionInfo info) {
+        if (isClosingType(info.getType())) {
+            // no-animation is only relevant for launching (open) activities.
+            return false;
+        }
+        boolean hasNoAnimation = false;
+        final int changeSize = info.getChanges().size();
+        for (int i = changeSize - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            if (isClosingType(change.getMode())) {
+                // ignore closing apps since they are a side-effect of the transition and don't
+                // animate.
+                continue;
+            }
+            if (change.hasFlags(TransitionInfo.FLAG_NO_ANIMATION)) {
+                hasNoAnimation = true;
+            } else if (!isOrderOnly(change) && !change.hasFlags(TransitionInfo.FLAG_IS_OCCLUDED)) {
+                // Ignore the order only or occluded changes since they shouldn't be visible during
+                // animation. For anything else, we need to animate if at-least one relevant
+                // participant *is* animated,
+                return false;
+            }
+        }
+        return hasNoAnimation;
     }
 
     /**

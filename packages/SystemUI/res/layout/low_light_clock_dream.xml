@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/low_light_clock_dream"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/low_light_clock_background_color">
+
+    <TextClock
+        android:id="@+id/low_light_text_clock"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/low_light_clock_text_size"
+        android:layout_gravity="center"
+        android:fontFamily="google-sans-clock"
+        android:gravity="center_horizontal"
+        android:textColor="@color/low_light_clock_text_color"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMaxTextSize="@dimen/low_light_clock_text_size"
+        android:format12Hour="h:mm"
+        android:format24Hour="H:mm"/>
+
+    <TextView
+        android:id="@+id/charging_status_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/keyguard_indication_margin_bottom"
+        android:gravity="center"
+        android:minHeight="@dimen/low_light_clock_charging_text_min_height"
+        android:layout_gravity="center_horizontal|bottom"
+        android:paddingStart="@dimen/keyguard_indication_text_padding"
+        android:paddingEnd="@dimen/keyguard_indication_text_padding"
+        android:textAppearance="@style/TextAppearance.Keyguard.BottomArea"
+        android:textSize="@dimen/low_light_clock_charging_text_size"
+        android:textFontWeight="@integer/low_light_clock_charging_text_font_weight"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:accessibilityLiveRegion="polite" />
+  </FrameLayout>
+

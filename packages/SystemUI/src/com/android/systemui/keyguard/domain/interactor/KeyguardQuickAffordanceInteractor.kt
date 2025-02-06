@@ -22,13 +22,13 @@ import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.view.accessibility.AccessibilityManager
 import com.android.app.tracing.coroutines.withContextTraced as withContext
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
-import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
@@ -60,7 +60,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -72,7 +71,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class KeyguardQuickAffordanceInteractor
 @Inject
@@ -91,7 +89,7 @@ constructor(
     private val devicePolicyManager: DevicePolicyManager,
     private val dockManager: DockManager,
     private val biometricSettingsRepository: BiometricSettingsRepository,
-    private val communalSettingsInteractor: CommunalSettingsInteractor,
+    private val accessibilityManager: AccessibilityManager,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     @ShadeDisplayAware private val appContext: Context,
     private val sceneInteractor: Lazy<SceneInteractor>,
@@ -115,7 +113,10 @@ constructor(
      *
      * If `false`, the UI goes back to using single taps.
      */
-    fun useLongPress(): Flow<Boolean> = dockManager.retrieveIsDocked().map { !it }
+    fun useLongPress(): Flow<Boolean> =
+        dockManager.retrieveIsDocked().map { isDocked ->
+            !isDocked && !accessibilityManager.isEnabled()
+        }
 
     /** Returns an observable for the quick affordance at the given position. */
     suspend fun quickAffordance(
@@ -464,15 +465,12 @@ constructor(
                 name = Contract.FlagsTable.FLAG_NAME_CUSTOM_LOCK_SCREEN_QUICK_AFFORDANCES_ENABLED,
                 value =
                     !isFeatureDisabledByDevicePolicy() &&
-                        // TODO(b/383391342): remove isV2FlagEnabled check once trunkfood is reached
-                        (appContext.resources.getBoolean(
-                            R.bool.custom_lockscreen_shortcuts_enabled
-                        ) || communalSettingsInteractor.isV2FlagEnabled()),
+                        appContext.resources.getBoolean(R.bool.custom_lockscreen_shortcuts_enabled),
             ),
             KeyguardPickerFlag(
                 name = Contract.FlagsTable.FLAG_NAME_CUSTOM_CLOCKS_ENABLED,
                 value =
-                    com.android.systemui.Flags.lockscreenCustomClocks() ||
+                    com.android.systemui.shared.Flags.lockscreenCustomClocks() ||
                         featureFlags.isEnabled(Flags.LOCKSCREEN_CUSTOM_CLOCKS),
             ),
             KeyguardPickerFlag(

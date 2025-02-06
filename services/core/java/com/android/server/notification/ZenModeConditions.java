@@ -113,15 +113,18 @@ public class ZenModeConditions implements ConditionProviders.Callback {
     }
 
     @Override
-    public void onConditionChanged(Uri id, Condition condition) {
+    public void onConditionChanged(Uri id, Condition condition, int callingUid) {
         if (DEBUG) Log.d(TAG, "onConditionChanged " + id + " " + condition);
         ZenModeConfig config = mHelper.getConfig();
         if (config == null) return;
-        final int callingUid = Binder.getCallingUid();
+        if (!Flags.fixCallingUidFromCps()) {
+            // Old behavior: overwrite with known-bad callingUid (always system_server).
+            callingUid = Binder.getCallingUid();
+        }
 
         // This change is known to be for UserHandle.CURRENT because ConditionProviders for
         // background users are not bound.
-        mHelper.setAutomaticZenRuleState(UserHandle.CURRENT, id, condition,
+        mHelper.setAutomaticZenRuleStateFromConditionProvider(UserHandle.CURRENT, id, condition,
                 callingUid == Process.SYSTEM_UID ? ZenModeConfig.ORIGIN_SYSTEM
                         : ZenModeConfig.ORIGIN_APP,
                 callingUid);

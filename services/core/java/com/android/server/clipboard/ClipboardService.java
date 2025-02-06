@@ -17,8 +17,6 @@
 package com.android.server.clipboard;
 
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
-import static android.companion.virtual.VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED;
-import static android.companion.virtual.VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CLIPBOARD;
 import static android.content.Context.DEVICE_ID_DEFAULT;
@@ -46,7 +44,6 @@ import android.content.Context;
 import android.content.IClipboard;
 import android.content.IOnPrimaryClipChangedListener;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
@@ -219,35 +216,7 @@ public class ClipboardService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.CLIPBOARD_SERVICE, new ClipboardImpl());
-        if (!android.companion.virtual.flags.Flags.vdmPublicApis() && mVdmInternal != null) {
-            registerVirtualDeviceBroadcastReceiver();
-        } else if (android.companion.virtual.flags.Flags.vdmPublicApis() && mVdm != null) {
-            registerVirtualDeviceListener();
-        }
-    }
-
-    private void registerVirtualDeviceBroadcastReceiver() {
-        if (mVirtualDeviceRemovedReceiver != null) {
-            return;
-        }
-        mVirtualDeviceRemovedReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (!intent.getAction().equals(ACTION_VIRTUAL_DEVICE_REMOVED)) {
-                    return;
-                }
-                final int removedDeviceId =
-                        intent.getIntExtra(EXTRA_VIRTUAL_DEVICE_ID, DEVICE_ID_INVALID);
-                synchronized (mLock) {
-                    for (int i = mClipboards.numMaps() - 1; i >= 0; i--) {
-                        mClipboards.delete(mClipboards.keyAt(i), removedDeviceId);
-                    }
-                }
-            }
-        };
-        IntentFilter filter = new IntentFilter(ACTION_VIRTUAL_DEVICE_REMOVED);
-        getContext().registerReceiver(mVirtualDeviceRemovedReceiver, filter,
-                Context.RECEIVER_NOT_EXPORTED);
+        registerVirtualDeviceListener();
     }
 
     private void registerVirtualDeviceListener() {

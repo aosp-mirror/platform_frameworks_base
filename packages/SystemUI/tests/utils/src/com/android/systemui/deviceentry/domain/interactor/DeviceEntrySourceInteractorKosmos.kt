@@ -27,9 +27,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.statusbar.phone.dozeScrimController
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 val Kosmos.deviceEntrySourceInteractor by
     Kosmos.Fixture {
         DeviceEntrySourceInteractor(

@@ -859,7 +859,7 @@ void APerformanceHintManager::layersFromNativeSurfaces(ANativeWindow** windows, 
         std::vector<ANativeWindow*> windowVec(windows, windows + numWindows);
         for (auto&& window : windowVec) {
             Surface* surface = static_cast<Surface*>(window);
-            if (Surface::isValid(surface)) {
+            if (surface != nullptr) {
                 const sp<IBinder>& handle = surface->getSurfaceControlHandle();
                 if (handle != nullptr) {
                     out.push_back(handle);

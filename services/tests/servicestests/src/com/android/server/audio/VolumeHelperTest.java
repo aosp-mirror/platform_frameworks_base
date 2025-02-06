@@ -40,10 +40,8 @@ import static android.media.audio.Flags.autoPublicVolumeApiHardening;
 import static android.view.KeyEvent.ACTION_DOWN;
 import static android.view.KeyEvent.KEYCODE_VOLUME_UP;
 
-import static com.android.media.audio.Flags.FLAG_ABS_VOLUME_INDEX_FIX;
 import static com.android.media.audio.Flags.FLAG_DISABLE_PRESCALE_ABSOLUTE_VOLUME;
 import static com.android.media.audio.Flags.FLAG_RING_MY_CAR;
-import static com.android.media.audio.Flags.absVolumeIndexFix;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -80,11 +78,11 @@ import android.media.AudioSystem;
 import android.media.IDeviceVolumeBehaviorDispatcher;
 import android.media.VolumeInfo;
 import android.media.audiopolicy.AudioVolumeGroup;
+import android.os.IpcDataCache;
 import android.os.Looper;
 import android.os.PermissionEnforcer;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
@@ -115,6 +113,12 @@ public class VolumeHelperTest {
 
     /** Choose a default stream volume value which does not depend on min/max. */
     private static final int DEFAULT_STREAM_VOLUME = 2;
+
+    /**
+     * The default ringer mode affected stream value since the ringer mode delegate is not used
+     * for unit testing.
+     */
+    private static final int DEFAULT_RINGER_MODE_AFFECTED_STREAMS = 0x1a6;
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
@@ -185,6 +189,10 @@ public class VolumeHelperTest {
         public void setMuteAffectedStreams(int muteAffectedStreams) {
             mMuteAffectedStreams = muteAffectedStreams;
         }
+
+        public void setRingerModeAffectedStreams(int ringerModeAffectedStreams) {
+            mRingerModeAffectedStreams = ringerModeAffectedStreams;
+        }
     }
 
     private static class TestDeviceVolumeBehaviorDispatcherStub
@@ -210,6 +218,8 @@ public class VolumeHelperTest {
 
     @Before
     public void setUp() throws Exception {
+        IpcDataCache.disableForTestMode();
+
         mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         mTestLooper = new TestLooper();
 
@@ -547,6 +557,48 @@ public class VolumeHelperTest {
         assertEquals(RINGER_MODE_VIBRATE, mAudioService.getRingerModeInternal());
     }
 
+    @Test
+    public void setStreamVolume_doesNotUnmuteStreamAffectedByRingerMode() throws Exception {
+        assumeFalse("Skipping ringer mode test on automotive", mIsAutomotive);
+        mAudioService.setRingerModeAffectedStreams(DEFAULT_RINGER_MODE_AFFECTED_STREAMS);
+        mAudioService.setRingerModeInternal(RINGER_MODE_VIBRATE, mContext.getOpPackageName());
+
+        mAudioService.setStreamVolume(STREAM_NOTIFICATION, /*index=*/1, /*flags=*/0,
+                mContext.getOpPackageName());
+        mTestLooper.dispatchAll();
+
+        assertEquals(0, mAudioService.getStreamVolume(STREAM_NOTIFICATION));
+    }
+
+    @Test
+    public void adjustUnmuteStreamVolume_doesNotUnmuteStreamAffectedByRingerMode()
+            throws Exception {
+        assumeFalse("Skipping ringer mode test on automotive", mIsAutomotive);
+        mAudioService.setRingerModeAffectedStreams(DEFAULT_RINGER_MODE_AFFECTED_STREAMS);
+        mAudioService.setRingerModeInternal(RINGER_MODE_VIBRATE, mContext.getOpPackageName());
+
+        mAudioService.adjustStreamVolume(STREAM_NOTIFICATION, ADJUST_UNMUTE, /*flags=*/0,
+                mContext.getOpPackageName());
+        mTestLooper.dispatchAll();
+
+        assertEquals(0, mAudioService.getStreamVolume(STREAM_NOTIFICATION));
+    }
+
+    @Test
+    public void adjustRaiseStreamVolume_doesNotUnmuteStreamAffectedByRingerMode()
+            throws Exception {
+        assumeFalse("Skipping ringer mode test on automotive", mIsAutomotive);
+        mAudioService.setRingerModeAffectedStreams(DEFAULT_RINGER_MODE_AFFECTED_STREAMS);
+        mAudioService.setRingerModeInternal(RINGER_MODE_VIBRATE, mContext.getOpPackageName());
+
+        mAudioService.adjustStreamVolume(STREAM_NOTIFICATION, ADJUST_RAISE, /*flags=*/0,
+                mContext.getOpPackageName());
+        mTestLooper.dispatchAll();
+
+        assertEquals(0, mAudioService.getStreamVolume(STREAM_NOTIFICATION));
+    }
+
+
     // --------------------- Permission tests ---------------------
 
     @Test
@@ -620,56 +672,6 @@ public class VolumeHelperTest {
     }
 
     @Test
-    @RequiresFlagsDisabled({FLAG_DISABLE_PRESCALE_ABSOLUTE_VOLUME, FLAG_ABS_VOLUME_INDEX_FIX})
-    public void configurablePreScaleAbsoluteVolume_checkIndex() throws Exception {
-        final int minIndex = mAm.getStreamMinVolume(STREAM_MUSIC);
-        final int maxIndex = mAm.getStreamMaxVolume(STREAM_MUSIC);
-        final VolumeInfo volMedia = new VolumeInfo.Builder(STREAM_MUSIC)
-                .setMinVolumeIndex(minIndex)
-                .setMaxVolumeIndex(maxIndex)
-                .build();
-        final AudioDeviceAttributes bleDevice = new AudioDeviceAttributes(
-                /*native type*/ AudioSystem.DEVICE_OUT_BLE_HEADSET, /*address*/ "fake_ble");
-        final int maxPreScaleIndex = 3;
-        final float[] preScale = new float[maxPreScaleIndex];
-        preScale[0] = mContext.getResources().getFraction(
-                com.android.internal.R.fraction.config_prescaleAbsoluteVolume_index1,
-                1, 1);
-        preScale[1] = mContext.getResources().getFraction(
-                com.android.internal.R.fraction.config_prescaleAbsoluteVolume_index2,
-                1, 1);
-        preScale[2] = mContext.getResources().getFraction(
-                com.android.internal.R.fraction.config_prescaleAbsoluteVolume_index3,
-                1, 1);
-
-        for (int i = 0; i < maxPreScaleIndex; i++) {
-            final int targetIndex = (int) (preScale[i] * maxIndex);
-            final VolumeInfo volCur = new VolumeInfo.Builder(volMedia)
-                    .setVolumeIndex(i + 1).build();
-            // Adjust stream volume with FLAG_ABSOLUTE_VOLUME set (index:1~3)
-            mAudioService.setDeviceVolume(volCur, bleDevice, mContext.getOpPackageName());
-            mTestLooper.dispatchAll();
-
-            assertEquals(volCur,
-                    mAudioService.getDeviceVolume(volCur, bleDevice, mContext.getOpPackageName()));
-            // Stream volume changes
-            verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
-                    STREAM_MUSIC, targetIndex, false, AudioSystem.DEVICE_OUT_BLE_HEADSET);
-        }
-
-        // Adjust stream volume with FLAG_ABSOLUTE_VOLUME set (index:4)
-        final VolumeInfo volIndex4 = new VolumeInfo.Builder(volMedia)
-                .setVolumeIndex(4).build();
-        mAudioService.setDeviceVolume(volIndex4, bleDevice, mContext.getOpPackageName());
-        mTestLooper.dispatchAll();
-
-        assertEquals(volIndex4,
-                mAudioService.getDeviceVolume(volIndex4, bleDevice, mContext.getOpPackageName()));
-        verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
-                STREAM_MUSIC, maxIndex, false, AudioSystem.DEVICE_OUT_BLE_HEADSET);
-    }
-
-    @Test
     @RequiresFlagsEnabled(FLAG_DISABLE_PRESCALE_ABSOLUTE_VOLUME)
     public void disablePreScaleAbsoluteVolume_checkIndex() throws Exception {
         final int minIndex = mAm.getStreamMinVolume(STREAM_MUSIC);
@@ -681,7 +683,6 @@ public class VolumeHelperTest {
         final AudioDeviceAttributes bleDevice = new AudioDeviceAttributes(
                 /*native type*/ AudioSystem.DEVICE_OUT_BLE_HEADSET, /*address*/ "bla");
         final int maxPreScaleIndex = 3;
-        int passedIndex = maxIndex;
 
         for (int i = 0; i < maxPreScaleIndex; i++) {
             final VolumeInfo volCur = new VolumeInfo.Builder(volMedia)
@@ -690,12 +691,9 @@ public class VolumeHelperTest {
             mAudioService.setDeviceVolume(volCur, bleDevice, mContext.getOpPackageName());
             mTestLooper.dispatchAll();
 
-            if (absVolumeIndexFix()) {
-                passedIndex = i + 1;
-            }
             // Stream volume changes
             verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
-                    STREAM_MUSIC, passedIndex, false, AudioSystem.DEVICE_OUT_BLE_HEADSET);
+                    STREAM_MUSIC, /*index=*/i + 1, false, AudioSystem.DEVICE_OUT_BLE_HEADSET);
         }
 
         // Adjust stream volume with FLAG_ABSOLUTE_VOLUME set (index:4)
@@ -704,11 +702,8 @@ public class VolumeHelperTest {
         mAudioService.setDeviceVolume(volIndex4, bleDevice, mContext.getOpPackageName());
         mTestLooper.dispatchAll();
 
-        if (absVolumeIndexFix()) {
-            passedIndex = 4;
-        }
         verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
-                STREAM_MUSIC, passedIndex, false, AudioSystem.DEVICE_OUT_BLE_HEADSET);
+                STREAM_MUSIC, /*index=*/4, false, AudioSystem.DEVICE_OUT_BLE_HEADSET);
     }
 
     // ---------------- DeviceVolumeBehaviorTest ----------------

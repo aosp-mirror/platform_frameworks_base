@@ -22,6 +22,7 @@ import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
+import com.android.systemui.qs.tiles.base.logging.QSTileLogger
 import com.android.systemui.qs.tiles.impl.custom.data.entity.CustomTileDefaults
 import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileDefaultsRepository
 import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTilePackageUpdatesRepository
@@ -31,7 +32,6 @@ import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,7 +47,6 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 
 @QSTileScope
-@OptIn(ExperimentalCoroutinesApi::class)
 class CustomTileDataInteractor
 @Inject
 constructor(
@@ -58,6 +57,7 @@ constructor(
     private val packageUpdatesRepository: CustomTilePackageUpdatesRepository,
     userRepository: UserRepository,
     @QSTileScope private val tileScope: CoroutineScope,
+    qsTileLogger: QSTileLogger,
 ) : QSTileDataInteractor<CustomTileDataModel> {
 
     private val mutableUserFlow = MutableStateFlow(userRepository.getSelectedUserInfo().userHandle)
@@ -71,6 +71,7 @@ constructor(
                     // binding the service might access it
                     customTileInteractor.initForUser(user)
                     // Bind the TileService for not active tile
+                    qsTileLogger.logInfo(tileSpec, "onBindingFlow for user:$user")
                     serviceInteractor.bindOnStart()
 
                     packageUpdatesRepository

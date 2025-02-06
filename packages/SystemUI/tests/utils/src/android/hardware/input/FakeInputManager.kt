@@ -16,16 +16,19 @@
 
 package android.hardware.input
 
+import android.hardware.input.InputGestureData.Trigger
+import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_ALREADY_EXISTS
+import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_DOES_NOT_EXIST
+import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_SUCCESS
 import android.hardware.input.InputManager.InputDeviceListener
 import android.view.InputDevice
 import android.view.KeyCharacterMap
 import android.view.KeyCharacterMap.VIRTUAL_KEYBOARD
 import android.view.KeyEvent
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.invocation.InvocationOnMock
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 
 class FakeInputManager {
 
@@ -49,36 +52,79 @@ class FakeInputManager {
         )
 
     private var inputDeviceListener: InputDeviceListener? = null
+    private val customInputGestures: MutableMap<Trigger, InputGestureData> = mutableMapOf()
+    var addCustomInputGestureErrorCode = CUSTOM_INPUT_GESTURE_RESULT_ERROR_ALREADY_EXISTS
 
-    val inputManager =
-        mock<InputManager> {
-            whenever(getInputDevice(anyInt())).thenAnswer { invocation ->
+    val inputManager: InputManager = mock {
+        on { getCustomInputGestures(any()) }.then { customInputGestures.values.toList() }
+
+        on { addCustomInputGesture(any()) }
+            .then {
+                val inputGestureData = it.getArgument<InputGestureData>(0)
+                val trigger = inputGestureData.trigger
+
+                if (customInputGestures.containsKey(trigger)) {
+                    addCustomInputGestureErrorCode
+                } else {
+                    customInputGestures[trigger] = inputGestureData
+                    CUSTOM_INPUT_GESTURE_RESULT_SUCCESS
+                }
+            }
+
+        on { removeCustomInputGesture(any()) }
+            .then {
+                val inputGestureData = it.getArgument<InputGestureData>(0)
+                val trigger = inputGestureData.trigger
+
+                if (customInputGestures.containsKey(trigger)) {
+                    customInputGestures.remove(trigger)
+                    CUSTOM_INPUT_GESTURE_RESULT_SUCCESS
+                } else {
+                    CUSTOM_INPUT_GESTURE_RESULT_ERROR_DOES_NOT_EXIST
+                }
+            }
+
+        on { removeAllCustomInputGestures(any()) }.then { customInputGestures.clear() }
+
+        on { getInputGesture(any()) }
+            .then {
+                val trigger = it.getArgument<Trigger>(0)
+                customInputGestures[trigger]
+            }
+
+        on { getInputDevice(anyInt()) }
+            .thenAnswer { invocation ->
                 val deviceId = invocation.arguments[0] as Int
                 return@thenAnswer devices[deviceId]
             }
-            whenever(inputDeviceIds).thenAnswer {
+        on { inputDeviceIds }
+            .thenAnswer {
                 return@thenAnswer devices.keys.toIntArray()
             }
 
-            fun setDeviceEnabled(invocation: InvocationOnMock, enabled: Boolean) {
-                val deviceId = invocation.arguments[0] as Int
-                val device = devices[deviceId] ?: return
-                devices[deviceId] = device.copy(enabled = enabled)
-            }
+        fun setDeviceEnabled(invocation: InvocationOnMock, enabled: Boolean) {
+            val deviceId = invocation.arguments[0] as Int
+            val device = devices[deviceId] ?: return
+            devices[deviceId] = device.copy(enabled = enabled)
+        }
 
-            whenever(disableInputDevice(anyInt())).thenAnswer { invocation ->
-                setDeviceEnabled(invocation, enabled = false)
-            }
-            whenever(enableInputDevice(anyInt())).thenAnswer { invocation ->
-                setDeviceEnabled(invocation, enabled = true)
-            }
-            whenever(deviceHasKeys(any(), any())).thenAnswer { invocation ->
+        on { disableInputDevice(anyInt()) }
+            .thenAnswer { invocation -> setDeviceEnabled(invocation, enabled = false) }
+        on { enableInputDevice(anyInt()) }
+            .thenAnswer { invocation -> setDeviceEnabled(invocation, enabled = true) }
+        on { deviceHasKeys(any(), any()) }
+            .thenAnswer { invocation ->
                 val deviceId = invocation.arguments[0] as Int
                 val keyCodes = invocation.arguments[1] as IntArray
                 val supportedKeyCodes = supportedKeyCodesByDeviceId[deviceId]!!
                 return@thenAnswer keyCodes.map { supportedKeyCodes.contains(it) }.toBooleanArray()
             }
-        }
+    }
+
+    fun resetCustomInputGestures() {
+        customInputGestures.clear()
+        addCustomInputGestureErrorCode = CUSTOM_INPUT_GESTURE_RESULT_ERROR_ALREADY_EXISTS
+    }
 
     fun addPhysicalKeyboardIfNotPresent(deviceId: Int, enabled: Boolean = true) {
         if (devices.containsKey(deviceId)) {
@@ -97,7 +143,7 @@ class FakeInputManager {
         vendorId: Int = 0,
         productId: Int = 0,
         isFullKeyboard: Boolean = true,
-        enabled: Boolean = true
+        enabled: Boolean = true,
     ) {
         check(id > 0) { "Physical keyboard ids have to be > 0" }
         addKeyboard(id, vendorId, productId, isFullKeyboard, enabled)
@@ -113,7 +159,7 @@ class FakeInputManager {
         vendorId: Int = 0,
         productId: Int = 0,
         isFullKeyboard: Boolean = true,
-        enabled: Boolean = true
+        enabled: Boolean = true,
     ) {
         val keyboardType =
             if (isFullKeyboard) InputDevice.KEYBOARD_TYPE_ALPHABETIC
@@ -152,7 +198,7 @@ class FakeInputManager {
         id: Int = getId(),
         type: Int = keyboardType,
         sources: Int = getSources(),
-        enabled: Boolean = isEnabled
+        enabled: Boolean = isEnabled,
     ) =
         InputDevice.Builder()
             .setId(id)

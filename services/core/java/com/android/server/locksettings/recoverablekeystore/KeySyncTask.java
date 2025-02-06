@@ -162,7 +162,7 @@ public class KeySyncTask implements Runnable {
             Log.e(TAG, "Unexpected exception thrown during KeySyncTask", e);
         } finally {
             if (mCredential != null) {
-                Arrays.fill(mCredential, (byte) 0); // no longer needed.
+                LockPatternUtils.zeroize(mCredential); // no longer needed.
             }
         }
     }
@@ -506,7 +506,7 @@ public class KeySyncTask implements Runnable {
 
         try {
             byte[] hash = MessageDigest.getInstance(LOCK_SCREEN_HASH_ALGORITHM).digest(bytes);
-            Arrays.fill(bytes, (byte) 0);
+            LockPatternUtils.zeroize(bytes);
             return hash;
         } catch (NoSuchAlgorithmException e) {
             // Impossible, SHA-256 must be supported on Android.

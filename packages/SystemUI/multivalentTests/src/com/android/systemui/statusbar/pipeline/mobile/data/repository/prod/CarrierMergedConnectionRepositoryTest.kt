@@ -30,7 +30,6 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepo
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
@@ -43,7 +42,6 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
 

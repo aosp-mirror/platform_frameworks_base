@@ -11,6 +11,7 @@ import com.android.systemui.res.R
 import com.android.app.animation.Interpolators
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -24,7 +25,7 @@ class SplitShadeLockScreenOverScroller
 constructor(
     configurationController: ConfigurationController,
     dumpManager: DumpManager,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val scrimController: ScrimController,
     private val statusBarStateController: SysuiStatusBarStateController,
     @Assisted private val qSProvider: () -> QS?,

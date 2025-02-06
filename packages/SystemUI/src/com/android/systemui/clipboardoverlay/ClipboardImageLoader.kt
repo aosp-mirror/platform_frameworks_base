@@ -20,15 +20,17 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import android.util.Size
-import com.android.systemui.res.R
+import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.systemui.Flags.clipboardOverlayMultiuser
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.res.R
+import com.android.systemui.settings.UserTracker
 import java.io.IOException
 import java.util.function.Consumer
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -36,8 +38,9 @@ class ClipboardImageLoader
 @Inject
 constructor(
     private val context: Context,
+    private val userTracker: UserTracker,
     @Background private val bgDispatcher: CoroutineDispatcher,
-    @Application private val mainScope: CoroutineScope
+    @Application private val mainScope: CoroutineScope,
 ) {
     private val TAG: String = "ClipboardImageLoader"
 
@@ -46,7 +49,15 @@ constructor(
             withContext(bgDispatcher) {
                 try {
                     val size = context.resources.getDimensionPixelSize(R.dimen.overlay_x_scale)
-                    context.contentResolver.loadThumbnail(uri, Size(size, size * 4), null)
+                    if (clipboardOverlayMultiuser()) {
+                        userTracker.userContentResolver.loadThumbnail(
+                            uri,
+                            Size(size, size * 4),
+                            null,
+                        )
+                    } else {
+                        context.contentResolver.loadThumbnail(uri, Size(size, size * 4), null)
+                    }
                 } catch (e: IOException) {
                     Log.e(TAG, "Thumbnail loading failed!", e)
                     null

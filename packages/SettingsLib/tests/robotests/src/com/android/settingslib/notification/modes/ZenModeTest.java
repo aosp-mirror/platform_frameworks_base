@@ -87,7 +87,7 @@ public class ZenModeTest {
 
     @Test
     public void testBasicMethods_manualDnd() {
-        ZenMode manualMode = TestModeBuilder.MANUAL_DND_INACTIVE;
+        ZenMode manualMode = TestModeBuilder.MANUAL_DND;
 
         assertThat(manualMode.getId()).isEqualTo(ZenMode.MANUAL_DND_MODE_ID);
         assertThat(manualMode.isManualDnd()).isTrue();
@@ -271,7 +271,7 @@ public class ZenModeTest {
 
     @Test
     public void setInterruptionFilter_manualDnd_throws() {
-        ZenMode manualDnd = TestModeBuilder.MANUAL_DND_INACTIVE;
+        ZenMode manualDnd = TestModeBuilder.MANUAL_DND;
 
         assertThrows(IllegalStateException.class,
                 () -> manualDnd.setInterruptionFilter(INTERRUPTION_FILTER_ALL));
@@ -280,24 +280,46 @@ public class ZenModeTest {
     @Test
     public void canEditPolicy_onlyFalseForSpecialDnd() {
         assertThat(TestModeBuilder.EXAMPLE.canEditPolicy()).isTrue();
-        assertThat(TestModeBuilder.MANUAL_DND_ACTIVE.canEditPolicy()).isTrue();
-        assertThat(TestModeBuilder.MANUAL_DND_INACTIVE.canEditPolicy()).isTrue();
 
-        ZenMode dndWithAlarms = TestModeBuilder.manualDnd(INTERRUPTION_FILTER_ALARMS, true);
+        ZenMode inactiveDnd = new TestModeBuilder().makeManualDnd().setActive(false).build();
+        assertThat(inactiveDnd.canEditPolicy()).isTrue();
+
+        ZenMode activeDnd = new TestModeBuilder().makeManualDnd().setActive(true).build();
+        assertThat(activeDnd.canEditPolicy()).isTrue();
+
+        ZenMode dndWithAlarms = new TestModeBuilder()
+                .makeManualDnd()
+                .setInterruptionFilter(INTERRUPTION_FILTER_ALARMS)
+                .setActive(true)
+                .build();
         assertThat(dndWithAlarms.canEditPolicy()).isFalse();
-        ZenMode dndWithNone = TestModeBuilder.manualDnd(INTERRUPTION_FILTER_NONE, true);
+
+        ZenMode dndWithNone = new TestModeBuilder()
+                .makeManualDnd()
+                .setInterruptionFilter(INTERRUPTION_FILTER_NONE)
+                .setActive(true)
+                .build();
         assertThat(dndWithNone.canEditPolicy()).isFalse();
 
         // Note: Backend will never return an inactive manual mode with custom filter.
-        ZenMode badDndWithAlarms = TestModeBuilder.manualDnd(INTERRUPTION_FILTER_ALARMS, false);
+        ZenMode badDndWithAlarms = new TestModeBuilder()
+                .makeManualDnd()
+                .setInterruptionFilter(INTERRUPTION_FILTER_ALARMS)
+                .setActive(false)
+                .build();
         assertThat(badDndWithAlarms.canEditPolicy()).isFalse();
-        ZenMode badDndWithNone = TestModeBuilder.manualDnd(INTERRUPTION_FILTER_NONE, false);
+
+        ZenMode badDndWithNone = new TestModeBuilder()
+                .makeManualDnd()
+                .setInterruptionFilter(INTERRUPTION_FILTER_NONE)
+                .setActive(false)
+                .build();
         assertThat(badDndWithNone.canEditPolicy()).isFalse();
     }
 
     @Test
     public void canEditPolicy_whenTrue_allowsSettingPolicyAndEffects() {
-        ZenMode normalDnd = TestModeBuilder.manualDnd(INTERRUPTION_FILTER_PRIORITY, true);
+        ZenMode normalDnd = new TestModeBuilder().makeManualDnd().setActive(true).build();
 
         assertThat(normalDnd.canEditPolicy()).isTrue();
 
@@ -313,7 +335,11 @@ public class ZenModeTest {
 
     @Test
     public void canEditPolicy_whenFalse_preventsSettingFilterPolicyOrEffects() {
-        ZenMode specialDnd = TestModeBuilder.manualDnd(INTERRUPTION_FILTER_ALARMS, true);
+        ZenMode specialDnd = new TestModeBuilder()
+                .makeManualDnd()
+                .setInterruptionFilter(INTERRUPTION_FILTER_ALARMS)
+                .setActive(true)
+                .build();
 
         assertThat(specialDnd.canEditPolicy()).isFalse();
         assertThrows(IllegalStateException.class,
@@ -324,7 +350,7 @@ public class ZenModeTest {
 
     @Test
     public void comparator_prioritizes() {
-        ZenMode manualDnd = TestModeBuilder.MANUAL_DND_INACTIVE;
+        ZenMode manualDnd = TestModeBuilder.MANUAL_DND;
         ZenMode driving1 = new TestModeBuilder().setName("b1").setType(TYPE_DRIVING).build();
         ZenMode driving2 = new TestModeBuilder().setName("b2").setType(TYPE_DRIVING).build();
         ZenMode bedtime1 = new TestModeBuilder().setName("c1").setType(TYPE_BEDTIME).build();
@@ -403,7 +429,7 @@ public class ZenModeTest {
 
     @Test
     public void getIconKey_manualDnd_isDndIcon() {
-        ZenIcon.Key iconKey = TestModeBuilder.MANUAL_DND_INACTIVE.getIconKey();
+        ZenIcon.Key iconKey = TestModeBuilder.MANUAL_DND.getIconKey();
 
         assertThat(iconKey.resPackage()).isNull();
         assertThat(iconKey.resId()).isEqualTo(

@@ -18,11 +18,11 @@
 <resources>
     <style name="TextAppearance.CardTitle.SettingsLib"
         parent="@style/TextAppearance.SettingsLib.TitleMedium.Emphasized">
-        <item name="android:textColor">@color/settingslib_materialColorOnPrimary</item>
+        <item name="android:textColor">@color/settingslib_materialColorOnSecondaryContainer</item>
     </style>
 
     <style name="TextAppearance.CardSummary.SettingsLib"
         parent="@style/TextAppearance.SettingsLib.LabelMedium">
-        <item name="android:textColor">@color/settingslib_materialColorOnSecondary</item>
+        <item name="android:textColor">@color/settingslib_materialColorOnSecondaryContainer</item>
     </style>
 </resources>

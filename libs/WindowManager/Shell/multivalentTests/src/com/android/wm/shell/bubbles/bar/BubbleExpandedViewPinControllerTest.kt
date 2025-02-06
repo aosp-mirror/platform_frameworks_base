@@ -30,13 +30,13 @@ import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.R
 import com.android.wm.shell.bubbles.BubblePositioner
-import com.android.wm.shell.bubbles.DeviceConfig
 import com.android.wm.shell.shared.bubbles.BaseBubblePinController
 import com.android.wm.shell.shared.bubbles.BaseBubblePinController.Companion.DROP_TARGET_ALPHA_IN_DURATION
 import com.android.wm.shell.shared.bubbles.BaseBubblePinController.Companion.DROP_TARGET_ALPHA_OUT_DURATION
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation.LEFT
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation.RIGHT
+import com.android.wm.shell.shared.bubbles.DeviceConfig
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before

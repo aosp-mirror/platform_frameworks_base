@@ -22,6 +22,7 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
 import android.annotation.NonNull;
 import android.app.admin.DeviceAdminReceiver;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
@@ -459,6 +460,7 @@ public class ApkLiteParseUtils {
         boolean overlayIsStatic = false;
         int overlayPriority = 0;
         int rollbackDataPolicy = 0;
+        int pageSizeCompat = ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED;
 
         String requiredSystemPropertyName = null;
         String requiredSystemPropertyValue = null;
@@ -516,6 +518,10 @@ public class ApkLiteParseUtils {
                 boolean hasBindDeviceAdminPermission =
                         android.Manifest.permission.BIND_DEVICE_ADMIN.equals(permission);
 
+                pageSizeCompat = parser.getAttributeIntValue(ANDROID_RES_NAMESPACE,
+                        "pageSizeCompat",
+                        ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED);
+
                 final int innerDepth = parser.getDepth();
                 int innerType;
                 while ((innerType = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -541,9 +547,9 @@ public class ApkLiteParseUtils {
                         case TAG_USES_SDK_LIBRARY:
                             String usesSdkLibName = parser.getAttributeValue(
                                     ANDROID_RES_NAMESPACE, "name");
-                            // TODO(b/379219371): Due to a bug in bundletool, some apps can use
-                            //  versionMajor as string. Until it is resolved, we are adding a
-                            //  workaround here.
+                            // TODO(b/391604666): Due to a bug in bundletool, old apps could be
+                            //  using versionMajor as string. Do not remove this workaround until
+                            //  b/391604666 is resolved.
                             String usesSdkLibVersionMajorString = parser.getAttributeValue(
                                     ANDROID_RES_NAMESPACE, "versionMajor");
                             long usesSdkLibVersionMajor = XmlUtils.convertValueToInt(
@@ -817,7 +823,7 @@ public class ApkLiteParseUtils {
                         usesSdkLibrariesVersionsMajor, usesSdkLibrariesCertDigests, isStaticLibrary,
                         usesStaticLibraries, usesStaticLibrariesVersions,
                         usesStaticLibrariesCertDigests, updatableSystem, emergencyInstaller,
-                        declaredLibraries));
+                        declaredLibraries, pageSizeCompat));
     }
 
     private static ParseResult<String[]> parseAdditionalCertificates(ParseInput input,

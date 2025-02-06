@@ -318,7 +318,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
             val displayId = 1
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = displayId))
             val onSaved = { _: Uri? -> }
-            focusedDisplayRepository.emit(displayId)
+            focusedDisplayRepository.setDisplayId(displayId)
 
             screenshotExecutor.executeScreenshots(
                 createScreenshotRequest(
@@ -345,7 +345,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
                 display(TYPE_INTERNAL, id = Display.DEFAULT_DISPLAY),
                 display(TYPE_EXTERNAL, id = 1),
             )
-            focusedDisplayRepository.emit(5) // invalid display
+            focusedDisplayRepository.setDisplayId(5) // invalid display
             val onSaved = { _: Uri? -> }
             screenshotExecutor.executeScreenshots(
                 createScreenshotRequest(

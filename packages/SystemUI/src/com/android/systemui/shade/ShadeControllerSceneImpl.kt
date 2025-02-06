@@ -37,7 +37,6 @@ import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -47,7 +46,6 @@ import kotlinx.coroutines.withContext
  *
  * TODO(b/300258424) rename to ShadeControllerImpl and inline/delete all the deprecated methods
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class ShadeControllerSceneImpl
 @Inject
@@ -194,7 +192,6 @@ constructor(
         }
     }
 
-    @ExperimentalCoroutinesApi
     override fun collapseShadeForActivityStart() {
         if (shadeInteractor.isAnyExpanded.value) {
             animateCollapseShadeForcedDelayed()

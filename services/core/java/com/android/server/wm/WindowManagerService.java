@@ -31,7 +31,6 @@ import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.StatusBarManager.DISABLE_MASK;
-import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
@@ -116,13 +115,11 @@ import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WINDOW_MOV
 import static com.android.internal.protolog.WmProtoLogGroups.WM_ERROR;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_SHOW_TRANSACTIONS;
 import static com.android.internal.util.FrameworkStatsLog.SENSITIVE_NOTIFICATION_APP_PROTECTION_APPLIED;
-import static com.android.internal.util.LatencyTracker.ACTION_ROTATE_SCREEN;
 import static com.android.server.LockGuard.INDEX_WINDOW;
 import static com.android.server.LockGuard.installLock;
 import static com.android.server.policy.PhoneWindowManager.TRACE_WAIT_FOR_ALL_WINDOWS_DRAWN_METHOD;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityTaskManagerService.DEMOTE_TOP_REASON_EXPANDED_NOTIFICATION_SHADE;
-import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
@@ -151,7 +148,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerInternal.OnWindowRemovedListener;
 import static com.android.server.wm.WindowManagerServiceDumpProto.BACK_NAVIGATION;
-import static com.android.server.wm.WindowManagerServiceDumpProto.DISPLAY_FROZEN;
 import static com.android.server.wm.WindowManagerServiceDumpProto.FOCUSED_APP;
 import static com.android.server.wm.WindowManagerServiceDumpProto.FOCUSED_DISPLAY_ID;
 import static com.android.server.wm.WindowManagerServiceDumpProto.FOCUSED_WINDOW;
@@ -161,6 +157,7 @@ import static com.android.server.wm.WindowManagerServiceDumpProto.POLICY;
 import static com.android.server.wm.WindowManagerServiceDumpProto.ROOT_WINDOW_CONTAINER;
 import static com.android.server.wm.WindowManagerServiceDumpProto.WINDOW_FRAMES_VALID;
 import static com.android.window.flags.Flags.enableDisplayFocusInShellTransitions;
+import static com.android.window.flags.Flags.enablePresentationForConnectedDisplays;
 import static com.android.window.flags.Flags.multiCrop;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
 
@@ -251,7 +248,6 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.util.proto.ProtoOutputStream;
 import android.view.Choreographer;
@@ -314,6 +310,7 @@ import android.window.ActivityWindowInfo;
 import android.window.AddToSurfaceSyncGroupResult;
 import android.window.ClientWindowFrames;
 import android.window.ConfigurationChangeSetting;
+import android.window.DesktopModeFlags;
 import android.window.IGlobalDragListener;
 import android.window.IScreenRecordingCallback;
 import android.window.ISurfaceSyncGroupCompletedListener;
@@ -331,6 +328,7 @@ import android.window.WindowContextInfo;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -344,6 +342,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.LatencyTracker;
+import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.view.WindowManagerPolicyThread;
 import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
@@ -389,7 +388,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -401,8 +399,6 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final int TRACE_MAX_SECTION_NAME_LENGTH = 127;
 
     static final int LAYOUT_REPEAT_THRESHOLD = 4;
-
-    static final boolean PROFILE_ORIENTATION = false;
 
     /** The maximum length we will accept for a loaded animation duration:
      * this is 10 seconds.
@@ -512,7 +508,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public void onVrStateChanged(boolean enabled) {
             synchronized (mGlobalLock) {
                 mVrModeEnabled = enabled;
-                mRoot.forAllDisplayPolicies(p -> p.onVrStateChangedLw(enabled));
             }
         }
     };
@@ -600,6 +595,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final boolean mLimitedAlphaCompositing;
     final int mMaxUiWidth;
 
+    @NonNull
     @VisibleForTesting
     WindowManagerPolicy mPolicy;
 
@@ -676,6 +672,14 @@ public class WindowManagerService extends IWindowManager.Stub
     private ArrayList<WindowState> mHidingNonSystemOverlayWindows = new ArrayList<>();
 
     /**
+     * A map that tracks uid/count of windows that cause non-system overlay windows to be hidden.
+     * The key is the window's uid and the value is the number of windows with that uid that are
+     * requesting hiding non-system overlay
+     */
+    private final ArrayMap<Integer, Integer> mHidingNonSystemOverlayWindowsCountPerUid =
+            new ArrayMap<>();
+
+    /**
      * In some cases (e.g. when {@link R.bool.config_reverseDefaultRotation} has value
      * {@value true}) we need to map some orientation to others. This {@link SparseIntArray}
      * contains the relation between the source orientation and the one to use.
@@ -741,20 +745,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @Nullable
     private Runnable mPointerDownOutsideFocusRunnable;
 
-    boolean mDisplayFrozen = false;
-    long mDisplayFreezeTime = 0;
-    int mLastDisplayFreezeDuration = 0;
-    Object mLastFinishedFreezeSource = null;
     boolean mSwitchingUser = false;
-
-    final static int WINDOWS_FREEZING_SCREENS_NONE = 0;
-    final static int WINDOWS_FREEZING_SCREENS_ACTIVE = 1;
-    final static int WINDOWS_FREEZING_SCREENS_TIMEOUT = 2;
-    int mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_NONE;
-
-    /** Indicates that the system server is actively demanding the screen be frozen. */
-    boolean mClientFreezingScreen = false;
-    int mAppsFreezingScreen = 0;
 
     @VisibleForTesting
     boolean mPerDisplayFocusEnabled;
@@ -764,11 +755,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     // Number of windows whose insets state have been changed.
     int mWindowsInsetsChanged = 0;
-
-    // This is held as long as we have the screen frozen, to give us time to
-    // perform a rotation animation when turning off shows the lock screen which
-    // changes the orientation.
-    private final PowerManager.WakeLock mScreenFrozenLock;
 
     final TaskSnapshotController mTaskSnapshotController;
     final SnapshotController mSnapshotController;
@@ -844,6 +830,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH);
         private final Uri mMaximumObscuringOpacityForTouchUri = Settings.Global.getUriFor(
                 Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH);
+        private final Uri mDevelopmentOverrideDesktopExperienceUri = Settings.Global.getUriFor(
+                Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_EXPERIENCE_FEATURES);
 
         public SettingsObserver() {
             super(new Handler());
@@ -871,16 +859,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(mMaximumObscuringOpacityForTouchUri, false, this,
                     UserHandle.USER_ALL);
+            resolver.registerContentObserver(mDevelopmentOverrideDesktopExperienceUri, false, this,
+                    UserHandle.USER_ALL);
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             if (uri == null) {
-                return;
-            }
-
-            if (mImmersiveModeConfirmationsUri.equals(uri) || mPolicyControlUri.equals(uri)) {
-                updateSystemUiSettings(true /* handleChange */);
                 return;
             }
 
@@ -919,6 +904,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
+            if (mDevelopmentOverrideDesktopExperienceUri.equals(uri)) {
+                updateDevelopmentOverrideDesktopExperience();
+                return;
+            }
+
             @UpdateAnimationScaleMode
             final int mode;
             if (mWindowAnimationScaleUri.equals(uri)) {
@@ -936,7 +926,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         void loadSettings() {
-            updateSystemUiSettings(false /* handleChange */);
             updateMaximumObscuringOpacityForTouch();
             updateDisableSecureWindows();
         }
@@ -950,21 +939,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     || mMaximumObscuringOpacityForTouch > 1.0f) {
                 mMaximumObscuringOpacityForTouch =
                         InputSettings.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH;
-            }
-        }
-
-        void updateSystemUiSettings(boolean handleChange) {
-            synchronized (mGlobalLock) {
-                boolean changed = false;
-                if (handleChange) {
-                    changed = getDefaultDisplayContentLocked().getDisplayPolicy()
-                            .onSystemUiSettingsChanged();
-                } else {
-                    ImmersiveModeConfirmation.loadSetting(mCurrentUserId, mContext);
-                }
-                if (changed) {
-                    mWindowPlacerLocked.requestTraversal();
-                }
             }
         }
 
@@ -999,6 +973,16 @@ public class WindowManagerService extends IWindowManager.Stub
                     DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 0) != 0;
 
             mAtmService.mForceResizableActivities = forceResizable;
+        }
+
+        void updateDevelopmentOverrideDesktopExperience() {
+            ContentResolver resolver = mContext.getContentResolver();
+            final int overrideDesktopMode = Settings.Global.getInt(resolver,
+                    Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_EXPERIENCE_FEATURES,
+                    DesktopModeFlags.ToggleOverride.OVERRIDE_UNSET.getSetting());
+
+            SystemProperties.set(DesktopModeFlags.SYSTEM_PROPERTY_NAME,
+                    Integer.toString(overrideDesktopMode));
         }
 
         void updateDevEnableNonResizableMultiWindow() {
@@ -1054,13 +1038,16 @@ public class WindowManagerService extends IWindowManager.Stub
     private boolean mAnimationsDisabled = false;
     boolean mPointerLocationEnabled = false;
 
+    @NonNull
     final AppCompatConfiguration mAppCompatConfiguration;
 
     private boolean mIsIgnoreOrientationRequestDisabled;
 
+    @NonNull
     final InputManagerService mInputManager;
     final DisplayManagerInternal mDisplayManagerInternal;
     final DisplayManager mDisplayManager;
+    @NonNull
     final ActivityTaskManagerService mAtmService;
 
     /** Indicates whether this device supports wide color gamut / HDR rendering */
@@ -1071,12 +1058,6 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mAllowTheaterModeWakeFromLayout;
 
     final DragDropController mDragDropController;
-
-    /** For frozen screen animations. */
-    private int mExitAnimId, mEnterAnimId;
-
-    /** The display that the rotation animation is applying to. */
-    private int mFrozenDisplayId = INVALID_DISPLAY;
 
     /** Skip repeated ActivityRecords initialization. Note that AppWindowsToken's version of this
      * is a long initialized to Long.MIN_VALUE so that it doesn't match this value on startup. */
@@ -1116,7 +1097,9 @@ public class WindowManagerService extends IWindowManager.Stub
     static WindowManagerThreadPriorityBooster sThreadPriorityBooster =
             new WindowManagerThreadPriorityBooster();
 
+    @NonNull
     Supplier<SurfaceControl.Builder> mSurfaceControlFactory;
+    @NonNull
     Supplier<SurfaceControl.Transaction> mTransactionFactory;
 
     private final SurfaceControl.Transaction mTransaction;
@@ -1178,19 +1161,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     };
 
-    final ArrayList<AppFreezeListener> mAppFreezeListeners = new ArrayList<>();
-
-    interface AppFreezeListener {
-        void onAppFreezeTimeout();
-    }
-
     private final ScreenRecordingCallbackController mScreenRecordingCallbackController;
 
     private volatile boolean mDisableSecureWindows = false;
 
-    public static WindowManagerService main(final Context context, final InputManagerService im,
-            final boolean showBootMsgs, WindowManagerPolicy policy,
-            ActivityTaskManagerService atm) {
+    /** Creates an instance of the WindowManagerService for the system server. */
+    public static WindowManagerService main(@NonNull final Context context,
+            @NonNull final InputManagerService im, final boolean showBootMsgs,
+            @NonNull final WindowManagerPolicy policy,
+            @NonNull final ActivityTaskManagerService atm) {
         // Using SysUI context to have access to Material colors extracted from Wallpaper.
         final AppCompatConfiguration appCompat = new AppCompatConfiguration(
                 ActivityThread.currentActivityThread().getSystemUiContext());
@@ -1204,15 +1183,19 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Creates and returns an instance of the WindowManagerService. This call allows the caller
-     * to override factories that can be used to stub native calls during test.
+     * to override factories that can be used to stub native calls during test. Tests should use
+     * {@link WindowManagerServiceTestSupport} instead of calling this directly to ensure
+     * proper initialization and cleanup of dependencies.
      */
-    @VisibleForTesting
-    public static WindowManagerService main(final Context context, final InputManagerService im,
-            final boolean showBootMsgs, WindowManagerPolicy policy, ActivityTaskManagerService atm,
-            DisplayWindowSettingsProvider displayWindowSettingsProvider,
-            Supplier<SurfaceControl.Transaction> transactionFactory,
-            Supplier<SurfaceControl.Builder> surfaceControlFactory,
-            AppCompatConfiguration appCompat) {
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    static WindowManagerService main(@NonNull final Context context,
+            @NonNull final InputManagerService im, boolean showBootMsgs,
+            @NonNull final WindowManagerPolicy policy,
+            @NonNull final ActivityTaskManagerService atm,
+            @NonNull final DisplayWindowSettingsProvider displayWindowSettingsProvider,
+            @NonNull final Supplier<SurfaceControl.Transaction> transactionFactory,
+            @NonNull final Supplier<SurfaceControl.Builder> surfaceControlFactory,
+            @NonNull final AppCompatConfiguration appCompat) {
 
         final WindowManagerService[] wms = new WindowManagerService[1];
         DisplayThread.getHandler().runWithScissors(() ->
@@ -1238,12 +1221,13 @@ public class WindowManagerService extends IWindowManager.Stub
         new WindowManagerShellCommand(this).exec(this, in, out, err, args, callback, result);
     }
 
-    private WindowManagerService(Context context, InputManagerService inputManager,
-            boolean showBootMsgs, WindowManagerPolicy policy, ActivityTaskManagerService atm,
-            DisplayWindowSettingsProvider displayWindowSettingsProvider,
-            Supplier<SurfaceControl.Transaction> transactionFactory,
-            Supplier<SurfaceControl.Builder> surfaceControlFactory,
-            AppCompatConfiguration appCompat) {
+    private WindowManagerService(@NonNull Context context,
+            @NonNull InputManagerService inputManager, boolean showBootMsgs,
+            @NonNull WindowManagerPolicy policy, @NonNull ActivityTaskManagerService atm,
+            @NonNull DisplayWindowSettingsProvider displayWindowSettingsProvider,
+            @NonNull Supplier<SurfaceControl.Transaction> transactionFactory,
+            @NonNull Supplier<SurfaceControl.Builder> surfaceControlFactory,
+            @NonNull AppCompatConfiguration appCompat) {
         installLock(this, INDEX_WINDOW);
         mGlobalLock = atm.getGlobalLock();
         mAtmService = atm;
@@ -1357,9 +1341,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mAnimationsDisabled = mPowerManagerInternal
                     .getLowPowerState(ServiceType.ANIMATION).batterySaverEnabled;
         }
-        mScreenFrozenLock = mPowerManager.newWakeLock(
-                PowerManager.PARTIAL_WAKE_LOCK, "SCREEN_FROZEN");
-        mScreenFrozenLock.setReferenceCounted(false);
 
         mRotationWatcherController = new RotationWatcherController(this);
         mDisplayNotificationController = new DisplayWindowListenerController(this);
@@ -1599,11 +1580,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 return WindowManagerGlobal.ADD_DUPLICATE_ADD;
             }
 
-            if (type == TYPE_PRESENTATION || type == TYPE_PRIVATE_PRESENTATION) {
-                mDisplayManagerInternal.onPresentation(displayContent.getDisplay().getDisplayId(),
-                        /*isShown=*/ true);
-            }
-
             if (type == TYPE_PRIVATE_PRESENTATION && !displayContent.isPrivate()) {
                 ProtoLog.w(WM_ERROR,
                         "Attempted to add private presentation window to a non-private display.  "
@@ -1839,7 +1815,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     UserHandle.getUserId(win.getOwningUid()));
             win.setHiddenWhileSuspended(suspended);
 
-            final boolean hideSystemAlertWindows = !mHidingNonSystemOverlayWindows.isEmpty();
+            final boolean hideSystemAlertWindows = shouldHideNonSystemOverlayWindow(win);
             win.setForceHideNonSystemOverlayWindowIfNeeded(hideSystemAlertWindows);
 
             boolean imMayMove = true;
@@ -1954,6 +1930,18 @@ public class WindowManagerService extends IWindowManager.Stub
                 outAttachedFrame.set(0, 0, -1, -1);
             }
             outSizeCompatScale[0] = win.getCompatScaleForClient();
+
+            if (res >= ADD_OKAY
+                    && (type == TYPE_PRESENTATION || type == TYPE_PRIVATE_PRESENTATION)) {
+                displayContent.mIsPresenting = true;
+                if (enablePresentationForConnectedDisplays()) {
+                    // A presentation hides all activities behind on the same display.
+                    displayContent.ensureActivitiesVisible(/*starting=*/ null,
+                            /*notifyClients=*/ true);
+                }
+                mDisplayManagerInternal.onPresentation(displayContent.getDisplay().getDisplayId(),
+                        /*isShown=*/ true);
+            }
         }
 
         Binder.restoreCallingIdentity(origId);
@@ -2049,6 +2037,22 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             return appInfo.targetSdkVersion >= Build.VERSION_CODES.O;
         }
+    }
+
+    private boolean shouldHideNonSystemOverlayWindow(WindowState win) {
+        if (!Flags.fixHideOverlayApi()) {
+            return !mHidingNonSystemOverlayWindows.isEmpty();
+        }
+
+        if (mHidingNonSystemOverlayWindows.isEmpty()) {
+            return false;
+        }
+
+        if (mHidingNonSystemOverlayWindowsCountPerUid.size() == 1
+                && mHidingNonSystemOverlayWindowsCountPerUid.containsKey(win.getOwningUid())) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -3301,7 +3305,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void onUserSwitched() {
-        mSettingsObserver.updateSystemUiSettings(true /* handleChange */);
         synchronized (mGlobalLock) {
             // force a re-application of focused window sysui visibility on each display.
             mRoot.forAllDisplayPolicies(DisplayPolicy::resetSystemBarAttributes);
@@ -3361,60 +3364,6 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public boolean isAppTransitionStateIdle() {
         return getDefaultDisplayContentLocked().mAppTransition.isIdle();
-    }
-
-
-    // -------------------------------------------------------------
-    // Misc IWindowSession methods
-    // -------------------------------------------------------------
-
-    /** Freeze the screen during a user-switch event. Called by UserController. */
-    @Override
-    public void startFreezingScreen(int exitAnim, int enterAnim) {
-        if (!checkCallingPermission(android.Manifest.permission.FREEZE_SCREEN,
-                "startFreezingScreen()")) {
-            throw new SecurityException("Requires FREEZE_SCREEN permission");
-        }
-
-        synchronized (mGlobalLock) {
-            if (!mClientFreezingScreen) {
-                mClientFreezingScreen = true;
-                final long origId = Binder.clearCallingIdentity();
-                try {
-                    startFreezingDisplay(exitAnim, enterAnim);
-                    mH.removeMessages(H.CLIENT_FREEZE_TIMEOUT);
-                    mH.sendEmptyMessageDelayed(H.CLIENT_FREEZE_TIMEOUT, 5000);
-                } finally {
-                    Binder.restoreCallingIdentity(origId);
-                }
-            }
-        }
-    }
-
-    /**
-     * No longer actively demand that the screen remain frozen.
-     * Called by UserController after a user-switch.
-     * This doesn't necessarily immediately unlock the screen; it just allows it if we're ready.
-     */
-    @Override
-    public void stopFreezingScreen() {
-        if (!checkCallingPermission(android.Manifest.permission.FREEZE_SCREEN,
-                "stopFreezingScreen()")) {
-            throw new SecurityException("Requires FREEZE_SCREEN permission");
-        }
-
-        synchronized (mGlobalLock) {
-            if (mClientFreezingScreen) {
-                mClientFreezingScreen = false;
-                mLastFinishedFreezeSource = "client";
-                final long origId = Binder.clearCallingIdentity();
-                try {
-                    stopFreezingDisplayLocked();
-                } finally {
-                    Binder.restoreCallingIdentity(origId);
-                }
-            }
-        }
     }
 
     @Override
@@ -4241,7 +4190,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Nullable
-    private ScreenshotHardwareBuffer takeAssistScreenshot(Set<Integer> windowTypesToExclude) {
+    private ScreenshotHardwareBuffer takeAssistScreenshot(
+            @Nullable ToBooleanFunction<WindowState> predicate) {
         if (!checkCallingPermission(READ_FRAME_BUFFER, "requestAssistScreenshot()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
@@ -4256,7 +4206,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 captureArgs = null;
             } else {
-                captureArgs = displayContent.getLayerCaptureArgs(windowTypesToExclude);
+                captureArgs = displayContent.getLayerCaptureArgs(predicate);
             }
         }
 
@@ -4286,8 +4236,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     @Override
     public boolean requestAssistScreenshot(final IAssistDataReceiver receiver) {
-        final ScreenshotHardwareBuffer shb =
-                takeAssistScreenshot(/* windowTypesToExclude= */ Set.of());
+        final ScreenshotHardwareBuffer shb = takeAssistScreenshot(/* predicate= */ null);
         final Bitmap bm = shb != null ? shb.asBitmap() : null;
         FgThread.getHandler().post(() -> {
             try {
@@ -4411,13 +4360,31 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    boolean getIgnoreOrientationRequest(int displayId) {
+    @Override
+    public boolean getIgnoreOrientationRequest(int displayId) {
         synchronized (mGlobalLock) {
             final DisplayContent display = mRoot.getDisplayContent(displayId);
             if (display == null) {
                 Slog.w(TAG, "Trying to getIgnoreOrientationRequest() for a missing display.");
                 return false;
             }
+            return display.getIgnoreOrientationRequest();
+        }
+    }
+
+    @Nullable
+    Boolean resetIgnoreOrientationRequest(int displayId) {
+        synchronized (mGlobalLock) {
+            final DisplayContent display = mRoot.getDisplayContent(displayId);
+            if (display == null) {
+                return null;
+            }
+            display.mHasSetIgnoreOrientationRequest = false;
+            // Clear existing override settings.
+            mDisplayWindowSettings.setIgnoreOrientationRequest(display,
+                    null /* ignoreOrientationRequest */);
+            // Reload from settings in case there is built-in config.
+            mDisplayWindowSettings.applyRotationSettingsToDisplayLocked(display);
             return display.getIgnoreOrientationRequest();
         }
     }
@@ -5666,11 +5633,8 @@ public class WindowManagerService extends IWindowManager.Stub
     // -------------------------------------------------------------
 
     final class H extends android.os.Handler {
-        public static final int WINDOW_FREEZE_TIMEOUT = 11;
-
         public static final int PERSIST_ANIMATION_SCALE = 14;
         public static final int ENABLE_SCREEN = 16;
-        public static final int APP_FREEZE_TIMEOUT = 17;
         public static final int REPORT_WINDOWS_CHANGE = 19;
 
         public static final int REPORT_HARD_KEYBOARD_STATUS_CHANGE = 22;
@@ -5678,7 +5642,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int WAITING_FOR_DRAWN_TIMEOUT = 24;
         public static final int SHOW_STRICT_MODE_VIOLATION = 25;
 
-        public static final int CLIENT_FREEZE_TIMEOUT = 30;
         public static final int NOTIFY_ACTIVITY_DRAWN = 32;
 
         public static final int NEW_ANIMATOR_SCALE = 34;
@@ -5711,14 +5674,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.v(TAG_WM, "handleMessage: entry what=" + msg.what);
             }
             switch (msg.what) {
-                case WINDOW_FREEZE_TIMEOUT: {
-                    final DisplayContent displayContent = (DisplayContent) msg.obj;
-                    synchronized (mGlobalLock) {
-                        displayContent.onWindowFreezeTimeout();
-                    }
-                    break;
-                }
-
                 case PERSIST_ANIMATION_SCALE: {
                     Settings.Global.putFloat(mContext.getContentResolver(),
                             Settings.Global.WINDOW_ANIMATION_SCALE, mWindowAnimationScaleSetting);
@@ -5754,28 +5709,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 case ENABLE_SCREEN: {
                     performEnableScreen();
-                    break;
-                }
-
-                case APP_FREEZE_TIMEOUT: {
-                    synchronized (mGlobalLock) {
-                        ProtoLog.w(WM_ERROR, "App freeze timeout expired.");
-                        mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_TIMEOUT;
-                        for (int i = mAppFreezeListeners.size() - 1; i >= 0; --i) {
-                            mAppFreezeListeners.get(i).onAppFreezeTimeout();
-                        }
-                    }
-                    break;
-                }
-
-                case CLIENT_FREEZE_TIMEOUT: {
-                    synchronized (mGlobalLock) {
-                        if (mClientFreezingScreen) {
-                            mClientFreezingScreen = false;
-                            mLastFinishedFreezeSource = "client-timeout";
-                            stopFreezingDisplayLocked();
-                        }
-                    }
                     break;
                 }
 
@@ -6387,27 +6320,6 @@ public class WindowManagerService extends IWindowManager.Stub
         return win;
     }
 
-    void makeWindowFreezingScreenIfNeededLocked(WindowState w) {
-        // If the screen is currently frozen, then keep it frozen until this window draws at its
-        // new orientation.
-        if (mFrozenDisplayId != INVALID_DISPLAY && mFrozenDisplayId == w.getDisplayId()
-                && mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
-            ProtoLog.v(WM_DEBUG_ORIENTATION, "Changing surface while display frozen: %s", w);
-            // WindowsState#reportResized won't tell invisible requested window to redraw,
-            // so do not set it as changing orientation to avoid affecting draw state.
-            if (w.isVisibleRequested()) {
-                w.setOrientationChanging(true);
-            }
-            if (mWindowsFreezingScreen == WINDOWS_FREEZING_SCREENS_NONE) {
-                mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_ACTIVE;
-                // XXX should probably keep timeout from
-                // when we first froze the display.
-                mH.sendNewMessageDelayed(H.WINDOW_FREEZE_TIMEOUT, w.getDisplayContent(),
-                        WINDOW_FREEZE_TIMEOUT_DURATION);
-            }
-        }
-    }
-
     void checkDrawnWindowsLocked() {
         if (mWaitingForDrawnCallbacks.isEmpty()) {
             return;
@@ -6474,189 +6386,6 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean changed = mRoot.updateFocusedWindowLocked(mode, updateInputWindows);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         return changed;
-    }
-
-    void startFreezingDisplay(int exitAnim, int enterAnim) {
-        startFreezingDisplay(exitAnim, enterAnim, getDefaultDisplayContentLocked());
-    }
-
-    void startFreezingDisplay(int exitAnim, int enterAnim, DisplayContent displayContent) {
-        startFreezingDisplay(exitAnim, enterAnim, displayContent,
-                ROTATION_UNDEFINED /* overrideOriginalRotation */);
-    }
-
-    void startFreezingDisplay(int exitAnim, int enterAnim, DisplayContent displayContent,
-            int overrideOriginalRotation) {
-        if (mDisplayFrozen || displayContent.getDisplayRotation().isRotatingSeamlessly()) {
-            return;
-        }
-
-        if (!displayContent.isReady() || !displayContent.getDisplayPolicy().isScreenOnFully()
-                || displayContent.getDisplayInfo().state == Display.STATE_OFF
-                || !displayContent.okToAnimate()) {
-            // No need to freeze the screen before the display is ready,  if the screen is off,
-            // or we can't currently animate.
-            return;
-        }
-
-        displayContent.requestDisplayUpdate(() -> {
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WMS.doStartFreezingDisplay");
-            doStartFreezingDisplay(exitAnim, enterAnim, displayContent, overrideOriginalRotation);
-            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-        });
-    }
-
-    private void doStartFreezingDisplay(int exitAnim, int enterAnim, DisplayContent displayContent,
-            int overrideOriginalRotation) {
-        ProtoLog.d(WM_DEBUG_ORIENTATION,
-                            "startFreezingDisplayLocked: exitAnim=%d enterAnim=%d called by %s",
-                            exitAnim, enterAnim, Debug.getCallers(8));
-        mScreenFrozenLock.acquire();
-        // Apply launch power mode to reduce screen frozen time because orientation change may
-        // relaunch activity and redraw windows. This may also help speed up user switching.
-        mAtmService.startPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
-
-        mDisplayFrozen = true;
-        mDisplayFreezeTime = SystemClock.elapsedRealtime();
-        mLastFinishedFreezeSource = null;
-
-        // {@link mDisplayFrozen} prevents us from freezing on multiple displays at the same time.
-        // As a result, we only track the display that has initially froze the screen.
-        mFrozenDisplayId = displayContent.getDisplayId();
-
-        mInputManagerCallback.freezeInputDispatchingLw();
-
-        if (displayContent.mAppTransition.isTransitionSet()) {
-            displayContent.mAppTransition.freeze();
-        }
-
-        if (PROFILE_ORIENTATION) {
-            File file = new File("/data/system/frozen");
-            Debug.startMethodTracing(file.toString(), 8 * 1024 * 1024);
-        }
-
-        mLatencyTracker.onActionStart(ACTION_ROTATE_SCREEN);
-        mExitAnimId = exitAnim;
-        mEnterAnimId = enterAnim;
-
-        final int originalRotation = overrideOriginalRotation != ROTATION_UNDEFINED
-                ? overrideOriginalRotation
-                : displayContent.getDisplayInfo().rotation;
-        displayContent.setRotationAnimation(new ScreenRotationAnimation(displayContent,
-                originalRotation));
-    }
-
-    void stopFreezingDisplayLocked() {
-        if (!mDisplayFrozen) {
-            return;
-        }
-
-        final DisplayContent displayContent = mRoot.getDisplayContent(mFrozenDisplayId);
-        final int numOpeningApps;
-        final boolean waitingForConfig;
-        final boolean waitingForRemoteDisplayChange;
-        if (displayContent != null) {
-            numOpeningApps = displayContent.mOpeningApps.size();
-            waitingForConfig = displayContent.mWaitingForConfig;
-            waitingForRemoteDisplayChange = displayContent.mRemoteDisplayChangeController
-                    .isWaitingForRemoteDisplayChange();
-        } else {
-            waitingForConfig = waitingForRemoteDisplayChange = false;
-            numOpeningApps = 0;
-        }
-        if (waitingForConfig || waitingForRemoteDisplayChange || mAppsFreezingScreen > 0
-                || mWindowsFreezingScreen == WINDOWS_FREEZING_SCREENS_ACTIVE
-                || mClientFreezingScreen || numOpeningApps > 0) {
-            ProtoLog.d(WM_DEBUG_ORIENTATION, "stopFreezingDisplayLocked: Returning "
-                    + "waitingForConfig=%b, waitingForRemoteDisplayChange=%b, "
-                    + "mAppsFreezingScreen=%d, mWindowsFreezingScreen=%d, "
-                    + "mClientFreezingScreen=%b, mOpeningApps.size()=%d",
-                    waitingForConfig, waitingForRemoteDisplayChange,
-                    mAppsFreezingScreen, mWindowsFreezingScreen,
-                    mClientFreezingScreen, numOpeningApps);
-            return;
-        }
-
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WMS.doStopFreezingDisplayLocked-"
-                + mLastFinishedFreezeSource);
-        doStopFreezingDisplayLocked(displayContent);
-        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-    }
-
-    private void doStopFreezingDisplayLocked(DisplayContent displayContent) {
-        ProtoLog.d(WM_DEBUG_ORIENTATION,
-                    "stopFreezingDisplayLocked: Unfreezing now");
-
-        // We must make a local copy of the displayId as it can be potentially overwritten later on
-        // in this method. For example, {@link startFreezingDisplayLocked} may be called as a result
-        // of update rotation, but we reference the frozen display after that call in this method.
-        mFrozenDisplayId = INVALID_DISPLAY;
-        mDisplayFrozen = false;
-        mInputManagerCallback.thawInputDispatchingLw();
-        mLastDisplayFreezeDuration = (int)(SystemClock.elapsedRealtime() - mDisplayFreezeTime);
-        StringBuilder sb = new StringBuilder(128);
-        sb.append("Screen frozen for ");
-        TimeUtils.formatDuration(mLastDisplayFreezeDuration, sb);
-        if (mLastFinishedFreezeSource != null) {
-            sb.append(" due to ");
-            sb.append(mLastFinishedFreezeSource);
-        }
-        ProtoLog.i(WM_ERROR, "%s", sb.toString());
-        mH.removeMessages(H.APP_FREEZE_TIMEOUT);
-        mH.removeMessages(H.CLIENT_FREEZE_TIMEOUT);
-        if (PROFILE_ORIENTATION) {
-            Debug.stopMethodTracing();
-        }
-
-        boolean updateRotation = false;
-
-        ScreenRotationAnimation screenRotationAnimation = displayContent == null ? null
-                : displayContent.getRotationAnimation();
-        if (screenRotationAnimation != null && screenRotationAnimation.hasScreenshot()) {
-            ProtoLog.i(WM_DEBUG_ORIENTATION, "**** Dismissing screen rotation animation");
-            DisplayInfo displayInfo = displayContent.getDisplayInfo();
-            // Get rotation animation again, with new top window
-            if (!displayContent.getDisplayRotation().validateRotationAnimation(
-                    mExitAnimId, mEnterAnimId, false /* forceDefault */)) {
-                mExitAnimId = mEnterAnimId = 0;
-            }
-            if (screenRotationAnimation.dismiss(mTransaction, MAX_ANIMATION_DURATION,
-                    getTransitionAnimationScaleLocked(), displayInfo.logicalWidth,
-                        displayInfo.logicalHeight, mExitAnimId, mEnterAnimId)) {
-                mTransaction.apply();
-            } else {
-                screenRotationAnimation.kill();
-                displayContent.setRotationAnimation(null);
-                updateRotation = true;
-            }
-        } else {
-            if (screenRotationAnimation != null) {
-                screenRotationAnimation.kill();
-                displayContent.setRotationAnimation(null);
-            }
-            updateRotation = true;
-        }
-
-        boolean configChanged;
-
-        // While the display is frozen we don't re-compute the orientation
-        // to avoid inconsistent states.  However, something interesting
-        // could have actually changed during that time so re-evaluate it
-        // now to catch that.
-        configChanged = displayContent != null && displayContent.updateOrientation();
-
-        mScreenFrozenLock.release();
-
-        if (updateRotation && displayContent != null) {
-            ProtoLog.d(WM_DEBUG_ORIENTATION, "Performing post-rotate rotation");
-            configChanged |= displayContent.updateRotationUnchecked();
-        }
-
-        if (configChanged) {
-            displayContent.sendNewConfiguration();
-        }
-        mAtmService.endPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
-        mLatencyTracker.onActionEnd(ACTION_ROTATE_SCREEN);
     }
 
     static int getPropertyInt(String[] tokens, int index, int defUnits, int defDps,
@@ -6959,7 +6688,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (imeWindow != null) {
                 imeWindow.writeIdentifierToProto(proto, INPUT_METHOD_WINDOW);
             }
-            proto.write(DISPLAY_FROZEN, mDisplayFrozen);
             proto.write(FOCUSED_DISPLAY_ID, topFocusedDisplayContent.getDisplayId());
             proto.write(HARD_KEYBOARD_AVAILABLE, mHardKeyboardAvailable);
 
@@ -7082,13 +6810,6 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print(' '); pw.print(dc.mMinSizeOfResizeableTaskDp);
         });
         pw.print("  mBlurEnabled="); pw.println(mBlurController.getBlurEnabled());
-        pw.print("  mLastDisplayFreezeDuration=");
-                TimeUtils.formatDuration(mLastDisplayFreezeDuration, pw);
-                if ( mLastFinishedFreezeSource != null) {
-                    pw.print(" due to ");
-                    pw.print(mLastFinishedFreezeSource);
-                }
-                pw.println();
         pw.print("  mDisableSecureWindows="); pw.println(mDisableSecureWindows);
 
         mInputManagerCallback.dump(pw, "  ");
@@ -7108,10 +6829,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mRoot.dumpLayoutNeededDisplayIds(pw);
 
             pw.print("  mTransactionSequence="); pw.println(mTransactionSequence);
-            pw.print("  mDisplayFrozen="); pw.print(mDisplayFrozen);
-                    pw.print(" windows="); pw.print(mWindowsFreezingScreen);
-                    pw.print(" client="); pw.print(mClientFreezingScreen);
-                    pw.print(" apps="); pw.println(mAppsFreezingScreen);
             final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
             pw.print("  mRotation="); pw.println(defaultDisplayContent.getRotation());
             pw.print("  mLastOrientation=");
@@ -7254,12 +6971,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
         PriorityDump.dump(mPriorityDumper, fd, pw, args);
     }
 
     @NeverCompile // Avoid size overhead of debugging code.
     private void doDump(FileDescriptor fd, PrintWriter pw, String[] args, boolean useProto) {
-        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
         boolean dumpAll = false;
 
         int opti = 0;
@@ -7471,6 +7188,23 @@ public class WindowManagerService extends IWindowManager.Stub
     // support non-default display.
     DisplayContent getDefaultDisplayContentLocked() {
         return mRoot.getDisplayContent(DEFAULT_DISPLAY);
+    }
+
+    /**
+     * Returns the main display content for the user passed as parameter.
+     *
+     * <p>Visible background users may have their own designated main display, distinct from the
+     * system default display (DEFAULT_DISPLAY). Visible background users operate independently
+     * with their own main displays. These secondary user main displays host the secondary home
+     * activities.
+     */
+    @Nullable
+    DisplayContent getUserMainDisplayContentLocked(@UserIdInt int userId) {
+        final int userMainDisplayId = mUmInternal.getMainDisplayAssignedToUser(userId);
+        if (userMainDisplayId == -1) {
+            return null;
+        }
+        return mRoot.getDisplayContent(userMainDisplayId);
     }
 
     public void onOverlayChanged() {
@@ -8932,9 +8666,27 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public ScreenshotHardwareBuffer takeAssistScreenshot(Set<Integer> windowTypesToExclude) {
+        public ScreenshotHardwareBuffer takeAssistScreenshot() {
             // WMS.takeAssistScreenshot takes care of the locking.
-            return WindowManagerService.this.takeAssistScreenshot(windowTypesToExclude);
+            return WindowManagerService.this.takeAssistScreenshot(/* predicate */ null);
+        }
+
+        @Override
+        public ScreenshotHardwareBuffer takeContextualSearchScreenshot(int uid) {
+            // WMS.takeAssistScreenshot takes care of the locking.
+            return WindowManagerService.this.takeAssistScreenshot(win -> {
+                switch (win.getWindowType()) {
+                    case LayoutParams.TYPE_STATUS_BAR:
+                    case LayoutParams.TYPE_NAVIGATION_BAR:
+                    case LayoutParams.TYPE_NAVIGATION_BAR_PANEL:
+                    case LayoutParams.TYPE_POINTER:
+                        return false;
+                    case LayoutParams.TYPE_APPLICATION_OVERLAY:
+                        return uid != win.getOwningUid();
+                    default:
+                        return true;
+                }
+            });
         }
     }
 
@@ -8972,16 +8724,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void registerAppFreezeListener(AppFreezeListener listener) {
-        if (!mAppFreezeListeners.contains(listener)) {
-            mAppFreezeListeners.add(listener);
-        }
-    }
-
-    void unregisterAppFreezeListener(AppFreezeListener listener) {
-        mAppFreezeListeners.remove(listener);
-    }
-
     /** Called to inform window manager if non-Vr UI shoul be disabled or not. */
     public void disableNonVrUi(boolean disable) {
         synchronized (mGlobalLock) {
@@ -9014,22 +8756,42 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
         final boolean systemAlertWindowsHidden = !mHidingNonSystemOverlayWindows.isEmpty();
+        final int numUIDsRequestHidingPreUpdate = mHidingNonSystemOverlayWindowsCountPerUid.size();
         if (surfaceShown && win.hideNonSystemOverlayWindowsWhenVisible()) {
             if (!mHidingNonSystemOverlayWindows.contains(win)) {
                 mHidingNonSystemOverlayWindows.add(win);
+                int uid = win.getOwningUid();
+                int count = mHidingNonSystemOverlayWindowsCountPerUid.getOrDefault(uid, 0);
+                mHidingNonSystemOverlayWindowsCountPerUid.put(uid, count + 1);
             }
         } else {
             mHidingNonSystemOverlayWindows.remove(win);
+            int uid = win.getOwningUid();
+            int count = mHidingNonSystemOverlayWindowsCountPerUid.getOrDefault(uid, 0);
+            if (count <= 1) {
+                mHidingNonSystemOverlayWindowsCountPerUid.remove(win.getOwningUid());
+            } else {
+                mHidingNonSystemOverlayWindowsCountPerUid.put(uid, count - 1);
+            }
         }
-
         final boolean hideSystemAlertWindows = !mHidingNonSystemOverlayWindows.isEmpty();
-
-        if (systemAlertWindowsHidden == hideSystemAlertWindows) {
-            return;
+        final int numUIDSRequestHidingPostUpdate = mHidingNonSystemOverlayWindowsCountPerUid.size();
+        if (Flags.fixHideOverlayApi()) {
+            if (numUIDSRequestHidingPostUpdate == numUIDsRequestHidingPreUpdate) {
+                return;
+            }
+            // The visibility of SAWs needs to be refreshed only when the number of uids that
+            // request hiding SAWs changes 0->1, 1->0, 1->2 or 2->1.
+            if (numUIDSRequestHidingPostUpdate != 1 && numUIDsRequestHidingPreUpdate != 1) {
+                return;
+            }
+        } else {
+            if (systemAlertWindowsHidden == hideSystemAlertWindows) {
+                return;
+            }
         }
-
         mRoot.forAllWindows((w) -> {
-            w.setForceHideNonSystemOverlayWindowIfNeeded(hideSystemAlertWindows);
+            w.setForceHideNonSystemOverlayWindowIfNeeded(shouldHideNonSystemOverlayWindow(w));
         }, false /* traverseTopToBottom */);
     }
 
@@ -9043,22 +8805,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     SurfaceControl.Builder makeSurfaceBuilder() {
         return mSurfaceControlFactory.get();
-    }
-
-    /**
-     * Called when the state of lock task mode changes. This should be used to disable immersive
-     * mode confirmation.
-     *
-     * @param lockTaskState the new lock task mode state. One of
-     *                      {@link ActivityManager#LOCK_TASK_MODE_NONE},
-     *                      {@link ActivityManager#LOCK_TASK_MODE_LOCKED},
-     *                      {@link ActivityManager#LOCK_TASK_MODE_PINNED}.
-     */
-    void onLockTaskStateChanged(int lockTaskState) {
-        // TODO: pass in displayId to determine which display the lock task state changed
-        synchronized (mGlobalLock) {
-            mRoot.forAllDisplayPolicies(p -> p.onLockTaskStateChangedLw(lockTaskState));
-        }
     }
 
     @Override
@@ -10177,9 +9923,10 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Access denied to process: " + pid
                     + ", must have permission " + Manifest.permission.ACCESS_FPS_COUNTER);
         }
-
-        if (mRoot.anyTaskForId(taskId) == null) {
-            throw new IllegalArgumentException("no task with taskId: " + taskId);
+        synchronized (mGlobalLock) {
+            if (mRoot.anyTaskForId(taskId) == null) {
+                throw new IllegalArgumentException("no task with taskId: " + taskId);
+            }
         }
 
         mTaskFpsCallbackController.registerListener(taskId, callback);

@@ -19,10 +19,11 @@ package com.android.systemui.volume.domain.interactor
 import android.content.Context
 import androidx.annotation.IntRange
 import com.android.dream.lowlight.dagger.qualifiers.Application
+import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class FakeAudioSharingInteractor : AudioSharingInteractor {
+class FakeAudioSharingInteractor() : AudioSharingInteractor {
     private val mutableInAudioSharing: MutableStateFlow<Boolean> = MutableStateFlow(false)
     private val mutableVolume: MutableStateFlow<Int?> = MutableStateFlow(null)
     private var audioSharingVolumeBarAvailable = false
@@ -31,6 +32,8 @@ class FakeAudioSharingInteractor : AudioSharingInteractor {
     override val volume: Flow<Int?> = mutableVolume
     override val volumeMin: Int = AUDIO_SHARING_VOLUME_MIN
     override val volumeMax: Int = AUDIO_SHARING_VOLUME_MAX
+    override val primaryDevice = MutableStateFlow<CachedBluetoothDevice?>(null)
+    override val secondaryDevice = MutableStateFlow<CachedBluetoothDevice?>(null)
 
     override suspend fun audioSharingVolumeBarAvailable(@Application context: Context): Boolean =
         audioSharingVolumeBarAvailable
@@ -52,6 +55,14 @@ class FakeAudioSharingInteractor : AudioSharingInteractor {
 
     fun setAudioSharingVolumeBarAvailable(available: Boolean) {
         audioSharingVolumeBarAvailable = available
+    }
+
+    fun setPrimaryDevice(device: CachedBluetoothDevice?) {
+        primaryDevice.value = device
+    }
+
+    fun setSecondaryDevice(device: CachedBluetoothDevice?) {
+        secondaryDevice.value = device
     }
 
     companion object {

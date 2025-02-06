@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalFoundationApi::class)
-
 package com.android.systemui.bouncer.ui.composable
 
 import android.app.AlertDialog
@@ -26,7 +24,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -90,16 +87,15 @@ import androidx.compose.ui.unit.times
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.PlatformButton
 import com.android.compose.animation.Easings
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
-import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.SceneTransitionLayout
+import com.android.compose.animation.scene.rememberMutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.transitions
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
-import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout
 import com.android.systemui.bouncer.ui.viewmodel.AuthMethodBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.BouncerMessageViewModel
 import com.android.systemui.bouncer.ui.viewmodel.BouncerSceneContentViewModel
@@ -172,7 +168,7 @@ private fun StandardLayout(viewModel: BouncerSceneContentViewModel, modifier: Mo
         LocalWindowSizeClass.current.heightSizeClass == WindowHeightSizeClass.Expanded
 
     FoldAware(
-        modifier = modifier.padding(start = 32.dp, top = 92.dp, end = 32.dp, bottom = 48.dp),
+        modifier = modifier.padding(top = 92.dp, bottom = 48.dp),
         viewModel = viewModel,
         aboveFold = {
             Column(
@@ -498,7 +494,7 @@ private fun FoldAware(
     val currentSceneKey =
         if (isSplitAroundTheFold) SceneKeys.SplitSceneKey else SceneKeys.ContiguousSceneKey
 
-    val state = remember { MutableSceneTransitionLayoutState(currentSceneKey, SceneTransitions) }
+    val state = rememberMutableSceneTransitionLayoutState(currentSceneKey, SceneTransitions)
 
     // Update state whenever currentSceneKey has changed.
     LaunchedEffect(state, currentSceneKey) {
@@ -519,7 +515,7 @@ private fun FoldAware(
 }
 
 @Composable
-private fun SceneScope.FoldableScene(
+private fun ContentScope.FoldableScene(
     aboveFold: @Composable BoxScope.() -> Unit,
     belowFold: @Composable BoxScope.() -> Unit,
     isSplit: Boolean,

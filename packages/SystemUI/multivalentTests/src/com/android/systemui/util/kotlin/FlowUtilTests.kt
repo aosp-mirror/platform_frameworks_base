@@ -22,7 +22,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -244,7 +243,6 @@ class SampleFlowTest : SysuiTestCase() {
     }
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class ThrottleFlowTest : SysuiTestCase() {

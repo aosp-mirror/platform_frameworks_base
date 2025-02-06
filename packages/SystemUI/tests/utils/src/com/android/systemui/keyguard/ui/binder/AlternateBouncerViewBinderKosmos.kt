@@ -38,9 +38,7 @@ import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.util.mockito.mock
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@OptIn(ExperimentalCoroutinesApi::class)
 val Kosmos.alternateBouncerViewBinder by
     Kosmos.Fixture {
         AlternateBouncerViewBinder(
@@ -52,7 +50,6 @@ val Kosmos.alternateBouncerViewBinder by
         )
     }
 
-@ExperimentalCoroutinesApi
 private val Kosmos.alternateBouncerDependencies by
     Kosmos.Fixture {
         AlternateBouncerDependencies(
@@ -69,7 +66,6 @@ private val Kosmos.alternateBouncerDependencies by
         )
     }
 
-@ExperimentalCoroutinesApi
 private val Kosmos.alternateBouncerUdfpsIconViewModel by
     Kosmos.Fixture {
         AlternateBouncerUdfpsIconViewModel(

@@ -118,6 +118,7 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.health.connect.HealthConnectManager;
 import android.media.AudioManager;
 import android.media.MediaDrm;
 import android.media.UnsupportedSchemeException;
@@ -4115,7 +4116,7 @@ public class StatsPullAtomService extends SystemService {
         int nOps = opsList.size();
         for (int i = 0; i < nOps; i++) {
             AppOpEntry entry = opsList.get(i);
-            if (entry.mHash >= samplingRate) {
+            if (entry.mHash >= samplingRate || isHealthAppOp(entry.mOp.getOpCode())) {
                 continue;
             }
             StatsEvent e;
@@ -4299,6 +4300,11 @@ public class StatsPullAtomService extends SystemService {
             if (message == null) {
                 Slog.i(TAG, "No runtime appop access message collected");
                 return StatsManager.PULL_SUCCESS;
+            }
+
+            if (isHealthAppOp(AppOpsManager.strOpToOp(message.getOp()))) {
+                // Not log sensitive health app ops.
+                return StatsManager.PULL_SKIP;
             }
 
             pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, message.getUid(),
@@ -4893,7 +4899,7 @@ public class StatsPullAtomService extends SystemService {
             Slog.e(TAG, "Disconnected from keystore service. Cannot pull.", e);
             return StatsManager.PULL_SKIP;
         } catch (ServiceSpecificException e) {
-            Slog.e(TAG, "pulling keystore metrics failed", e);
+            Slog.e(TAG, "Pulling keystore atom with tag " + atomTag + " failed", e);
             return StatsManager.PULL_SKIP;
         } finally {
             Binder.restoreCallingIdentity(callingToken);
@@ -5368,6 +5374,11 @@ public class StatsPullAtomService extends SystemService {
             default:
                 return ACCESSIBILITY_SHORTCUT_STATS__SOFTWARE_SHORTCUT_TYPE__UNKNOWN_TYPE;
         }
+    }
+
+    private boolean isHealthAppOp(int opCode) {
+        String permission = AppOpsManager.opToPermission(opCode);
+        return permission != null && HealthConnectManager.isHealthPermission(mContext, permission);
     }
 
     // Thermal event received from vendor thermal management subsystem

@@ -36,6 +36,7 @@ import android.app.PendingIntent;
 import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -932,6 +933,136 @@ public class RemoteViewsTest {
         TextView replacedTextView = inflated.findViewById(R.id.text);
         assertSame(replacement, replacedTextView);
         assertEquals(testText, replacedTextView.getText());
+    }
+
+    @Test
+    public void estimateMemoryUsage() {
+        Bitmap b1 = Bitmap.createBitmap(1024, 768, Bitmap.Config.ARGB_8888);
+        int b1Memory = b1.getAllocationByteCount();
+        Bitmap b2 = Bitmap.createBitmap(640, 480, Bitmap.Config.ARGB_8888);
+        int b2Memory = b2.getAllocationByteCount();
+        Bitmap b3 = Bitmap.createBitmap(800, 600, Bitmap.Config.ARGB_8888);
+        int b3Memory = b3.getAllocationByteCount();
+
+        final RemoteViews rv = new RemoteViews(mPackage, R.layout.remote_views_test);
+        assertEquals(0, rv.estimateMemoryUsage());
+        assertEquals(0, rv.estimateIconMemoryUsage());
+        assertEquals(0, rv.estimateTotalBitmapMemoryUsage());
+
+        rv.setBitmap(R.id.view, "", b1);
+        rv.setImageViewBitmap(R.id.view, b1); // second instance of b1 is cached
+        rv.setBitmap(R.id.view, "", b2);
+        assertEquals(b1Memory + b2Memory, rv.estimateMemoryUsage());
+        assertEquals(0, rv.estimateIconMemoryUsage());
+        assertEquals(b1Memory + b2Memory, rv.estimateTotalBitmapMemoryUsage());
+
+        rv.setIcon(R.id.view, "", Icon.createWithBitmap(b2));
+        rv.setIcon(R.id.view, "", Icon.createWithBitmap(b3));
+        rv.setImageViewIcon(R.id.view, Icon.createWithBitmap(b3));
+        assertEquals(b1Memory + b2Memory, rv.estimateMemoryUsage());
+        assertEquals(b2Memory + (2 * b3Memory), rv.estimateIconMemoryUsage());
+        assertEquals(b1Memory + (2 * b2Memory) + (2 * b3Memory),
+                rv.estimateTotalBitmapMemoryUsage());
+    }
+
+    @Test
+    public void estimateMemoryUsage_landscapePortrait() {
+        Bitmap b1 = Bitmap.createBitmap(1024, 768, Bitmap.Config.ARGB_8888);
+        int b1Memory = b1.getAllocationByteCount();
+        Bitmap b2 = Bitmap.createBitmap(640, 480, Bitmap.Config.ARGB_8888);
+        int b2Memory = b2.getAllocationByteCount();
+        Bitmap b3 = Bitmap.createBitmap(800, 600, Bitmap.Config.ARGB_8888);
+        int b3Memory = b3.getAllocationByteCount();
+        Bitmap b4 = Bitmap.createBitmap(320, 240, Bitmap.Config.ARGB_8888);
+        int b4Memory = b4.getAllocationByteCount();
+
+        // Landscape and portrait using same bitmaps get counted twice.
+        final RemoteViews rv = new RemoteViews(mPackage, R.layout.remote_views_test);
+        rv.setBitmap(R.id.view, "", b1);
+        rv.setIcon(R.id.view, "", Icon.createWithBitmap(b2));
+        RemoteViews landscapePortraitViews = new RemoteViews(rv, rv);
+        assertEquals(b1Memory, landscapePortraitViews.estimateMemoryUsage());
+        assertEquals(2 * b2Memory, landscapePortraitViews.estimateIconMemoryUsage());
+        assertEquals(b1Memory + (2 * b2Memory),
+                landscapePortraitViews.estimateTotalBitmapMemoryUsage());
+
+        final RemoteViews rv2 = new RemoteViews(mPackage, R.layout.remote_views_test);
+        rv.setBitmap(R.id.view, "", b3);
+        rv.setIcon(R.id.view, "", Icon.createWithBitmap(b4));
+        landscapePortraitViews = new RemoteViews(rv, rv2);
+        assertEquals(b1Memory + b3Memory, landscapePortraitViews.estimateMemoryUsage());
+        assertEquals(b2Memory + b4Memory, landscapePortraitViews.estimateIconMemoryUsage());
+        assertEquals(b1Memory + b2Memory + b3Memory + b4Memory,
+                landscapePortraitViews.estimateTotalBitmapMemoryUsage());
+    }
+
+    @Test
+    public void estimateMemoryUsage_sizedViews() {
+        Bitmap b1 = Bitmap.createBitmap(1024, 768, Bitmap.Config.ARGB_8888);
+        int b1Memory = b1.getAllocationByteCount();
+        Bitmap b2 = Bitmap.createBitmap(640, 480, Bitmap.Config.ARGB_8888);
+        int b2Memory = b2.getAllocationByteCount();
+        Bitmap b3 = Bitmap.createBitmap(800, 600, Bitmap.Config.ARGB_8888);
+        int b3Memory = b3.getAllocationByteCount();
+        Bitmap b4 = Bitmap.createBitmap(320, 240, Bitmap.Config.ARGB_8888);
+        int b4Memory = b4.getAllocationByteCount();
+
+        // Sized views using same bitmaps do not get counted twice.
+        final RemoteViews rv = new RemoteViews(mPackage, R.layout.remote_views_test);
+        rv.setBitmap(R.id.view, "", b1);
+        rv.setIcon(R.id.view, "", Icon.createWithBitmap(b2));
+        RemoteViews sizedViews = new RemoteViews(
+                Map.of(new SizeF(0f, 0f), rv, new SizeF(1f, 1f), rv));
+        assertEquals(b1Memory, sizedViews.estimateMemoryUsage());
+        assertEquals(2 * b2Memory, sizedViews.estimateIconMemoryUsage());
+        assertEquals(b1Memory + (2 * b2Memory), sizedViews.estimateTotalBitmapMemoryUsage());
+
+        final RemoteViews rv2 = new RemoteViews(mPackage, R.layout.remote_views_test);
+        rv.setBitmap(R.id.view, "", b3);
+        rv.setIcon(R.id.view, "", Icon.createWithBitmap(b4));
+        sizedViews = new RemoteViews(Map.of(new SizeF(0f, 0f), rv, new SizeF(1f, 1f), rv2));
+        assertEquals(b1Memory + b3Memory, sizedViews.estimateMemoryUsage());
+        assertEquals(b2Memory + b4Memory, sizedViews.estimateIconMemoryUsage());
+        assertEquals(b1Memory + b2Memory + b3Memory + b4Memory,
+                sizedViews.estimateTotalBitmapMemoryUsage());
+    }
+
+    @Test
+    public void estimateMemoryUsage_nestedViews() {
+        Bitmap b1 = Bitmap.createBitmap(1024, 768, Bitmap.Config.ARGB_8888);
+        int b1Memory = b1.getAllocationByteCount();
+        Bitmap b2 = Bitmap.createBitmap(640, 480, Bitmap.Config.ARGB_8888);
+        int b2Memory = b2.getAllocationByteCount();
+
+        final RemoteViews rv1 = new RemoteViews(mPackage, R.layout.remote_views_test);
+        rv1.setBitmap(R.id.view, "", b1);
+        final RemoteViews rv2 = new RemoteViews(mPackage, R.layout.remote_views_test);
+        rv2.setIcon(R.id.view, "", Icon.createWithBitmap(b2));
+        final RemoteViews rv = new RemoteViews(mPackage, R.layout.remote_views_test);
+        rv.addView(R.id.view, rv1);
+        rv.addView(R.id.view, rv2);
+        assertEquals(b1Memory, rv.estimateMemoryUsage());
+        assertEquals(b2Memory, rv.estimateIconMemoryUsage());
+        assertEquals(b1Memory + b2Memory, rv.estimateTotalBitmapMemoryUsage());
+    }
+
+    @Test
+    public void estimateMemoryUsage_remoteCollectionItems() {
+        Bitmap b1 = Bitmap.createBitmap(1024, 768, Bitmap.Config.ARGB_8888);
+        int b1Memory = b1.getAllocationByteCount();
+        Bitmap b2 = Bitmap.createBitmap(640, 480, Bitmap.Config.ARGB_8888);
+        int b2Memory = b2.getAllocationByteCount();
+
+        final RemoteViews rv1 = new RemoteViews(mPackage, R.layout.remote_views_test);
+        rv1.setBitmap(R.id.view, "", b1);
+        final RemoteViews rv2 = new RemoteViews(mPackage, R.layout.remote_views_test);
+        rv2.setIcon(R.id.view, "", Icon.createWithBitmap(b2));
+        final RemoteViews rv = new RemoteViews(mPackage, R.layout.remote_views_test);
+        rv.setRemoteAdapter(R.id.view, new RemoteViews.RemoteCollectionItems.Builder().addItem(0L,
+                rv1).addItem(1L, rv2).build());
+        assertEquals(b1Memory, rv.estimateMemoryUsage());
+        assertEquals(b2Memory, rv.estimateIconMemoryUsage());
+        assertEquals(b1Memory + b2Memory, rv.estimateTotalBitmapMemoryUsage());
     }
 
     private static LayoutInflater.Factory2 createLayoutInflaterFactory(String viewTypeToReplace,

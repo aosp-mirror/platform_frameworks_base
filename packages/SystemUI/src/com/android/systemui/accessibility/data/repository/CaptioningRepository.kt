@@ -27,7 +27,6 @@ import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -49,7 +48,6 @@ interface CaptioningRepository {
     suspend fun setIsSystemAudioCaptioningEnabled(isEnabled: Boolean)
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class CaptioningRepositoryImpl
 @Inject
 constructor(

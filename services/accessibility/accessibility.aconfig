@@ -145,6 +145,16 @@ flag {
 }
 
 flag {
+    name: "event_dispatcher_raw_event"
+    namespace: "accessibility"
+    description: "Fixes EventDispatcher#sendMotionEvent callers to properly provide raw event"
+    bug: "385812366"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "fix_drag_pointer_when_ending_drag"
     namespace: "accessibility"
     description: "Send the correct pointer id when transitioning from dragging to delegating states."
@@ -193,6 +203,16 @@ flag {
     namespace: "accessibility"
     description: "Register receivers on background handler so they have more time to complete"
     bug: "333890389"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "motion_event_injector_cancel_fix"
+    namespace: "accessibility"
+    description: "Fix the ACTION_CANCEL logic used in MotionEventInjector to avoid InputDispatcher inconsistency"
+    bug: "384451671"
     metadata {
         purpose: PURPOSE_BUGFIX
     }

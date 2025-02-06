@@ -28,6 +28,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import android.graphics.PointF;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
@@ -89,7 +90,7 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
-        final SecureSettings secureSettings = TestUtils.mockSecureSettings();
+        final SecureSettings secureSettings = TestUtils.mockSecureSettings(mContext);
         final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
                 secureSettings, mHearingAidDeviceManager);
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
@@ -210,7 +211,7 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
         mTouchHandler.onInterceptTouchEvent(mStubListView, stubMoveEvent);
         mTouchHandler.onInterceptTouchEvent(mStubListView, stubUpEvent);
 
-        verify(mMenuAnimationController).flingMenuThenSpringToEdge(anyFloat(), anyFloat(),
+        verify(mMenuAnimationController).flingMenuThenSpringToEdge(any(PointF.class), anyFloat(),
                 anyFloat());
     }
 

@@ -577,6 +577,9 @@
     <dimen name="notification_text_size">14sp</dimen>
     <!-- Size of notification text titles (see TextAppearance.StatusBar.EventContent.Title) -->
     <dimen name="notification_title_text_size">14sp</dimen>
+    <!-- Size of notification text titles, 2025 redesign version (see TextAppearance.StatusBar.EventContent.Title) -->
+    <!-- TODO: b/378660052 - When inlining the redesign flag, this should be updated directly in TextAppearance.DeviceDefault.Notification.Title -->
+    <dimen name="notification_2025_title_text_size">16sp</dimen>
     <!-- Size of big notification text titles (see TextAppearance.StatusBar.EventContent.BigTitle) -->
     <dimen name="notification_big_title_text_size">16sp</dimen>
     <!-- Size of smaller notification text (see TextAppearance.StatusBar.EventContent.Line2, Info, Time) -->
@@ -608,11 +611,22 @@
     <!-- Size of the feedback indicator for notifications -->
     <dimen name="notification_feedback_size">20dp</dimen>
 
+    <!-- Size of the (work) profile badge for notifications -->
+    <dimen name="notification_badge_size">12dp</dimen>
+
+    <!-- Size of the (work) profile badge for notifications (2025 redesign version).
+         Scales with font size. Chosen to look good alongside notification_subtext_size text. -->
+    <dimen name="notification_2025_badge_size">14sp</dimen>
+
+    <!-- Baseline for aligning icons in the top line (like the work profile icon or alerting icon)
+         to the text properly. This is equal to notification_2025_badge_size - 2sp. -->
+    <dimen name="notification_2025_badge_baseline">12sp</dimen>
+
+    <!-- Spacing for the top line icons (e.g. the work profile badge). -->
+    <dimen name="notification_2025_badge_margin">4dp</dimen>
+
     <!-- Size of the phishing alert for notifications -->
     <dimen name="notification_phishing_alert_size">@dimen/notification_badge_size</dimen>
-
-    <!-- Size of the profile badge for notifications -->
-    <dimen name="notification_badge_size">12dp</dimen>
 
     <!-- Size of the alerted icon for notifications -->
     <dimen name="notification_alerted_size">@dimen/notification_badge_size</dimen>
@@ -699,6 +713,18 @@
 
     <!-- The minimum window size of the accessibility window magnifier -->
     <dimen name="accessibility_window_magnifier_min_size">122dp</dimen>
+
+    <!-- The accessibility autoclick panel button spacing -->
+    <dimen name="accessibility_autoclick_type_panel_button_spacing">12dp</dimen>
+
+    <!-- The accessibility autoclick panel button width and height -->
+    <dimen name="accessibility_autoclick_type_panel_button_size">36dp</dimen>
+
+    <!-- The accessibility autoclick panel divider width -->
+    <dimen name="accessibility_autoclick_type_panel_divider_width">1dp</dimen>
+
+    <!-- The accessibility autoclick panel divider height -->
+    <dimen name="accessibility_autoclick_type_panel_divider_height">24dp</dimen>
 
     <!-- Margin around the various security views -->
     <dimen name="keyguard_muliuser_selector_margin">8dp</dimen>
@@ -888,6 +914,8 @@
     <dimen name="notification_progress_segSeg_gap">4dp</dimen>
     <!-- The gap between a segment and a point in the notification progress bar -->
     <dimen name="notification_progress_segPoint_gap">4dp</dimen>
+    <!-- The minimum required drawing width of the notification progress bar segments -->
+    <dimen name="notification_progress_segments_min_width">16dp</dimen>
     <!-- The height of the notification progress bar segments -->
     <dimen name="notification_progress_segments_height">6dp</dimen>
     <!-- The height of the notification progress bar faded segments -->

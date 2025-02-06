@@ -36,6 +36,7 @@ import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
@@ -43,7 +44,6 @@ import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.testKosmos
 import com.android.systemui.util.settings.fakeSettings
 import junit.framework.Assert.assertEquals
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -57,7 +57,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
@@ -186,7 +185,7 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
                 canWake,
             )
 
-            kosmos.keyguardServiceLockNowInteractor.onKeyguardServiceDoKeyguardTimeout(null)
+            kosmos.keyguardServiceShowLockscreenInteractor.onKeyguardServiceDoKeyguardTimeout()
             runCurrent()
 
             assertEquals(
@@ -210,7 +209,7 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
                 canWake,
             )
 
-            kosmos.keyguardServiceLockNowInteractor.onKeyguardServiceDoKeyguardTimeout(null)
+            kosmos.keyguardServiceShowLockscreenInteractor.onKeyguardServiceDoKeyguardTimeout()
             runCurrent()
 
             assertEquals(
@@ -405,5 +404,49 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
 
             // It should not have any effect.
             assertEquals(listOf(false, true, false, true), canWake)
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testCanWakeDirectlyToGone_falseAsSoonAsTransitionsAwayFromGone() =
+        testScope.runTest {
+            val canWake by collectValues(underTest.canWakeDirectlyToGone)
+
+            assertEquals(
+                listOf(
+                    false // Defaults to false.
+                ),
+                canWake,
+            )
+
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope,
+            )
+
+            assertEquals(
+                listOf(
+                    false,
+                    true, // Because we're GONE.
+                ),
+                canWake,
+            )
+
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope = testScope,
+                throughTransitionState = TransitionState.RUNNING,
+            )
+
+            assertEquals(
+                listOf(
+                    false,
+                    true,
+                    false, // False as soon as we start a transition away from GONE.
+                ),
+                canWake,
+            )
         }
 }

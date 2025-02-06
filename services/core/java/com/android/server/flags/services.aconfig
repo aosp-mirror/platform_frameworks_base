@@ -78,3 +78,11 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "datetime_notifications"
+    # "location" is used by the Android System Time team for feature flags.
+    namespace: "location"
+    description: "Enable the time notifications feature, a toggle to enable/disable time-related notifications in Date & Time Settings"
+    bug: "283267917"
+}

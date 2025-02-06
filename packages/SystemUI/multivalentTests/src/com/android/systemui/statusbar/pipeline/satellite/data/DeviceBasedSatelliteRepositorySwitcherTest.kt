@@ -35,7 +35,6 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -95,7 +94,6 @@ class DeviceBasedSatelliteRepositorySwitcherTest : SysuiTestCase() {
             testScope.backgroundScope,
         )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun switcherActiveRepo_updatesWhenDemoModeChanges() =
         testScope.runTest {

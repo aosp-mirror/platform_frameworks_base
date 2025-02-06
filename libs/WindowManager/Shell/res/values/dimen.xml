@@ -270,6 +270,8 @@
     <dimen name="bubble_bar_expanded_view_switch_offset">48dp</dimen>
     <!-- Minimum width of the bubble bar manage menu. -->
     <dimen name="bubble_bar_manage_menu_min_width">200dp</dimen>
+    <!-- The Bubble Bar drop zone square size. -->
+    <dimen name="bubble_bar_drop_zone_side_size">200dp</dimen>
     <!-- Size of the dismiss icon in the bubble bar manage menu. -->
     <dimen name="bubble_bar_manage_menu_dismiss_icon_size">16dp</dimen>
     <!-- Padding of the bubble bar manage menu, provides space for menu shadows -->
@@ -293,6 +295,10 @@
     <dimen name="bubble_bar_dismiss_zone_width">192dp</dimen>
     <!-- Height of the box around bottom center of the screen where drag only leads to dismiss -->
     <dimen name="bubble_bar_dismiss_zone_height">242dp</dimen>
+    <!-- Height of the box at the corner of the screen where drag leads to app moving to bubble -->
+    <dimen name="bubble_transform_area_width">140dp</dimen>
+    <!-- Width of the box at the corner of the screen where drag leads to app moving to bubble -->
+    <dimen name="bubble_transform_area_height">140dp</dimen>
 
     <!-- Bottom and end margin for compat buttons. -->
     <dimen name="compat_button_margin">24dp</dimen>

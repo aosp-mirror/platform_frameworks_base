@@ -73,6 +73,7 @@ import android.util.LocalLog;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.autofill.AutofillFeatureFlags;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillManager.AutofillCommitReason;
@@ -672,7 +673,7 @@ final class AutofillManagerServiceImpl
                 flags, mInputMethodManagerInternal, isPrimaryCredential);
         mSessions.put(newSession.id, newSession);
 
-        if (Flags.multipleFillHistory() && !forAugmentedAutofillOnly) {
+        if (AutofillFeatureFlags.isMultipleFillEventHistoryEnabled() && !forAugmentedAutofillOnly) {
             mFillHistories.put(newSession.id, new FillEventHistory(sessionId, null));
         }
 
@@ -772,7 +773,8 @@ final class AutofillManagerServiceImpl
 
             FillEventHistory history = null;
 
-            if (Flags.multipleFillHistory() && mFillHistories != null) {
+            if (AutofillFeatureFlags.isMultipleFillEventHistoryEnabled()
+                        && mFillHistories != null) {
                 history = mFillHistories.get(sessionId);
                 mFillHistories.delete(sessionId);
             }
@@ -922,7 +924,7 @@ final class AutofillManagerServiceImpl
             }
         }
         mSessions.clear();
-        if (Flags.multipleFillHistory()) {
+        if (AutofillFeatureFlags.isMultipleFillEventHistoryEnabled()) {
             mFillHistories.clear();
         }
 
@@ -991,7 +993,7 @@ final class AutofillManagerServiceImpl
             mEventHistory.addEvent(event);
         }
 
-        if (Flags.multipleFillHistory()) {
+        if (AutofillFeatureFlags.isMultipleFillEventHistoryEnabled()) {
             FillEventHistory history = mFillHistories.get(sessionId);
             if (history != null) {
                 history.addEvent(event);
@@ -1180,7 +1182,7 @@ final class AutofillManagerServiceImpl
                 logViewEnteredForHistory(sessionId, clientState, mEventHistory, focusedId);
             }
 
-            if (Flags.multipleFillHistory()) {
+            if (AutofillFeatureFlags.isMultipleFillEventHistoryEnabled()) {
                 FillEventHistory history = mFillHistories.get(sessionId);
                 if (history != null) {
                     logViewEnteredForHistory(sessionId, clientState, history, focusedId);

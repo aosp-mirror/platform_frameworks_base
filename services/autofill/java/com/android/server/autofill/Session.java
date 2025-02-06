@@ -442,6 +442,9 @@ final class Session
     private Bundle mClientState;
 
     @GuardedBy("mLock")
+    private Bundle mClientStateForSecondary;
+
+    @GuardedBy("mLock")
     boolean mDestroyed;
 
     /**
@@ -980,13 +983,19 @@ final class Session
                         mergePreviousSessionLocked(/* forSave= */ false);
                 final List<String> hints = getTypeHintsForProvider();
 
+                Bundle sendBackClientState = mClientState;
+                if (Flags.multipleFillHistory()
+                        && mRequestId.isSecondaryProvider(requestId)) {
+                    sendBackClientState = mClientStateForSecondary;
+                }
+
                 mDelayedFillPendingIntent = createPendingIntent(requestId);
                 request =
                         new FillRequest(
                                 requestId,
                                 contexts,
                                 hints,
-                                mClientState,
+                                sendBackClientState,
                                 flags,
                                 /* inlineSuggestionsRequest= */ null,
                                 /* delayedFillIntentSender= */ mDelayedFillPendingIntent == null
@@ -3317,7 +3326,7 @@ final class Session
                         AUTHENTICATION_RESULT_SUCCESS);
                 if (newClientState != null) {
                     if (sDebug) Slog.d(TAG, "Updating client state from auth dataset");
-                    mClientState = newClientState;
+                    setClientState(newClientState, requestId);
                 }
                 Dataset datasetFromResult = getEffectiveDatasetForAuthentication((Dataset) result);
                 final Dataset oldDataset = authenticatedResponse.getDatasets().get(datasetIdx);
@@ -6700,6 +6709,18 @@ final class Session
     }
 
     @GuardedBy("mLock")
+    private void setClientState(@Nullable Bundle newClientState, int requestId) {
+        if (Flags.multipleFillHistory()
+                && mRequestId.isSecondaryProvider(requestId)) {
+            // Set the secondary clientstate
+            mClientStateForSecondary = newClientState;
+        } else {
+            // The old way - only set the primary provider clientstate
+            mClientState = newClientState;
+        }
+    }
+
+    @GuardedBy("mLock")
     private void processResponseLocked(
             @NonNull FillResponse newResponse, @Nullable Bundle newClientState, int flags) {
         // Make sure we are hiding the UI which will be shown
@@ -6734,7 +6755,9 @@ final class Session
             mResponses = new SparseArray<>(2);
         }
         mResponses.put(requestId, newResponse);
-        mClientState = newClientState != null ? newClientState : newResponse.getClientState();
+
+        setClientState(newClientState != null ? newClientState : newResponse.getClientState(),
+                requestId);
 
         boolean webviewRequestedCredman =
                 newClientState != null

@@ -32,7 +32,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntRect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.modifiers.padding
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.keyguard.ui.composable.LockscreenLongPress
@@ -68,7 +68,7 @@ constructor(
     override val id: String = "default"
 
     @Composable
-    override fun SceneScope.Content(viewModel: LockscreenContentViewModel, modifier: Modifier) {
+    override fun ContentScope.Content(viewModel: LockscreenContentViewModel, modifier: Modifier) {
         val isUdfpsVisible = viewModel.isUdfpsVisible
         val isShadeLayoutWide by viewModel.isShadeLayoutWide.collectAsStateWithLifecycle()
         val unfoldTranslations by viewModel.unfoldTranslations.collectAsStateWithLifecycle()
@@ -109,30 +109,45 @@ constructor(
                             }
                             if (isShadeLayoutWide && !isBypassEnabled) {
                                 with(notificationSection) {
-                                    Notifications(
-                                        areNotificationsVisible = areNotificationsVisible,
-                                        isShadeLayoutWide = true,
-                                        burnInParams = null,
-                                        modifier =
-                                            Modifier.fillMaxWidth(0.5f)
-                                                .fillMaxHeight()
-                                                .align(alignment = Alignment.TopEnd),
-                                    )
+                                    Box(modifier = Modifier.fillMaxHeight()) {
+                                        AodPromotedNotificationArea(
+                                            modifier =
+                                                Modifier.fillMaxWidth(0.5f)
+                                                    .align(alignment = Alignment.TopEnd)
+                                        )
+                                        Notifications(
+                                            areNotificationsVisible = areNotificationsVisible,
+                                            isShadeLayoutWide = true,
+                                            burnInParams = null,
+                                            modifier =
+                                                Modifier.fillMaxWidth(0.5f)
+                                                    .fillMaxHeight()
+                                                    .align(alignment = Alignment.TopEnd),
+                                        )
+                                    }
                                 }
                             }
                         }
 
+                        // Not a mistake; reusing below_clock_padding_start_icons as AOD RON top
+                        // padding for now.
+                        val aodPromotedNotifTopPadding: Dp =
+                            dimensionResource(R.dimen.below_clock_padding_start_icons)
                         val aodIconPadding: Dp =
                             dimensionResource(R.dimen.below_clock_padding_start_icons)
 
                         with(notificationSection) {
                             if (!isShadeLayoutWide && !isBypassEnabled) {
                                 Box(modifier = Modifier.weight(weight = 1f)) {
-                                    AodNotificationIcons(
-                                        modifier =
-                                            Modifier.align(alignment = Alignment.TopStart)
-                                                .padding(start = aodIconPadding)
-                                    )
+                                    Column(Modifier.align(alignment = Alignment.TopStart)) {
+                                        AodPromotedNotificationArea(
+                                            modifier =
+                                                Modifier.padding(top = aodPromotedNotifTopPadding)
+                                        )
+                                        AodNotificationIcons(
+                                            modifier = Modifier.padding(start = aodIconPadding)
+                                        )
+                                    }
                                     Notifications(
                                         areNotificationsVisible = areNotificationsVisible,
                                         isShadeLayoutWide = false,
@@ -140,9 +155,24 @@ constructor(
                                     )
                                 }
                             } else {
-                                AodNotificationIcons(
-                                    modifier = Modifier.padding(start = aodIconPadding)
-                                )
+                                Column {
+                                    if (!isShadeLayoutWide) {
+                                        AodPromotedNotificationArea(
+                                            modifier =
+                                                Modifier.padding(top = aodPromotedNotifTopPadding)
+                                        )
+                                    }
+                                    AodNotificationIcons(
+                                        modifier =
+                                            Modifier.padding(
+                                                top =
+                                                    dimensionResource(
+                                                        R.dimen.keyguard_status_view_bottom_margin
+                                                    ),
+                                                start = aodIconPadding,
+                                            )
+                                    )
+                                }
                             }
                         }
                         if (!isUdfpsVisible && ambientIndicationSectionOptional.isPresent) {

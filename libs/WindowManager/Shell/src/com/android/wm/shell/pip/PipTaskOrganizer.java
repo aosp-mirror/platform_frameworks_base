@@ -28,8 +28,6 @@ import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
 import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
 import static com.android.wm.shell.desktopmode.DesktopModeUtils.calculateInitialBounds;
 import static com.android.wm.shell.desktopmode.DesktopTasksController.DESKTOP_MODE_INITIAL_BOUNDS_SCALE;
-import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
-import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_BOUNDS;
 import static com.android.wm.shell.pip.PipAnimationController.FRACTION_START;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
@@ -43,6 +41,8 @@ import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTI
 import static com.android.wm.shell.pip.PipAnimationController.isInPipDirection;
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
 import static com.android.wm.shell.pip.PipAnimationController.isRemovePipDirection;
+import static com.android.wm.shell.pip.PipTransitionController.ANIM_TYPE_ALPHA;
+import static com.android.wm.shell.pip.PipTransitionController.ANIM_TYPE_BOUNDS;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
@@ -1716,7 +1716,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     private void finishResize(SurfaceControl.Transaction tx, Rect destinationBounds,
             @PipAnimationController.TransitionDirection int direction,
-            @PipAnimationController.AnimationType int type) {
+            @PipTransitionController.AnimationType int type) {
         final Rect preResizeBounds = new Rect(mPipBoundsState.getBounds());
         mPipBoundsState.setBounds(destinationBounds);
         if (direction == TRANSITION_DIRECTION_REMOVE_STACK) {

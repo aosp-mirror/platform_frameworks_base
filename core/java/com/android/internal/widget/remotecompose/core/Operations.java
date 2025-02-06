@@ -18,6 +18,7 @@ package com.android.internal.widget.remotecompose.core;
 import android.annotation.NonNull;
 
 import com.android.internal.widget.remotecompose.core.operations.BitmapData;
+import com.android.internal.widget.remotecompose.core.operations.BitmapFontData;
 import com.android.internal.widget.remotecompose.core.operations.ClickArea;
 import com.android.internal.widget.remotecompose.core.operations.ClipPath;
 import com.android.internal.widget.remotecompose.core.operations.ClipRect;
@@ -30,6 +31,7 @@ import com.android.internal.widget.remotecompose.core.operations.DataMapIds;
 import com.android.internal.widget.remotecompose.core.operations.DataMapLookup;
 import com.android.internal.widget.remotecompose.core.operations.DrawArc;
 import com.android.internal.widget.remotecompose.core.operations.DrawBitmap;
+import com.android.internal.widget.remotecompose.core.operations.DrawBitmapFontText;
 import com.android.internal.widget.remotecompose.core.operations.DrawBitmapInt;
 import com.android.internal.widget.remotecompose.core.operations.DrawBitmapScaled;
 import com.android.internal.widget.remotecompose.core.operations.DrawCircle;
@@ -45,7 +47,10 @@ import com.android.internal.widget.remotecompose.core.operations.DrawTextOnPath;
 import com.android.internal.widget.remotecompose.core.operations.DrawTweenPath;
 import com.android.internal.widget.remotecompose.core.operations.FloatConstant;
 import com.android.internal.widget.remotecompose.core.operations.FloatExpression;
+import com.android.internal.widget.remotecompose.core.operations.FloatFunctionCall;
+import com.android.internal.widget.remotecompose.core.operations.FloatFunctionDefine;
 import com.android.internal.widget.remotecompose.core.operations.Header;
+import com.android.internal.widget.remotecompose.core.operations.ImageAttribute;
 import com.android.internal.widget.remotecompose.core.operations.IntegerExpression;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRestore;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRotate;
@@ -64,6 +69,7 @@ import com.android.internal.widget.remotecompose.core.operations.PathTween;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
 import com.android.internal.widget.remotecompose.core.operations.RootContentDescription;
 import com.android.internal.widget.remotecompose.core.operations.ShaderData;
+import com.android.internal.widget.remotecompose.core.operations.TextAttribute;
 import com.android.internal.widget.remotecompose.core.operations.TextData;
 import com.android.internal.widget.remotecompose.core.operations.TextFromFloat;
 import com.android.internal.widget.remotecompose.core.operations.TextLength;
@@ -72,6 +78,7 @@ import com.android.internal.widget.remotecompose.core.operations.TextLookupInt;
 import com.android.internal.widget.remotecompose.core.operations.TextMeasure;
 import com.android.internal.widget.remotecompose.core.operations.TextMerge;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
+import com.android.internal.widget.remotecompose.core.operations.TimeAttribute;
 import com.android.internal.widget.remotecompose.core.operations.TouchExpression;
 import com.android.internal.widget.remotecompose.core.operations.layout.CanvasContent;
 import com.android.internal.widget.remotecompose.core.operations.layout.ClickModifierOperation;
@@ -88,6 +95,8 @@ import com.android.internal.widget.remotecompose.core.operations.layout.TouchUpM
 import com.android.internal.widget.remotecompose.core.operations.layout.animation.AnimationSpec;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.BoxLayout;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.CanvasLayout;
+import com.android.internal.widget.remotecompose.core.operations.layout.managers.CollapsibleColumnLayout;
+import com.android.internal.widget.remotecompose.core.operations.layout.managers.CollapsibleRowLayout;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.ColumnLayout;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.RowLayout;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.StateLayout;
@@ -97,6 +106,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.modifier
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ClipRectModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentVisibilityOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.GraphicsLayerModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HeightInModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HeightModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HostActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HostNamedActionOperation;
@@ -111,6 +121,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.modifier
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ValueIntegerChangeActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ValueIntegerExpressionChangeActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ValueStringChangeActionOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.WidthInModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.WidthModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ZIndexModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.IntMap;
@@ -143,12 +154,14 @@ public class Operations {
     public static final int DATA_BITMAP = 101;
     public static final int DATA_SHADER = 45;
     public static final int DATA_TEXT = 102;
+    public static final int DATA_BITMAP_FONT = 167;
 
     ///////////////////////////// =====================
     public static final int CLIP_PATH = 38;
     public static final int CLIP_RECT = 39;
     public static final int PAINT_VALUES = 40;
     public static final int DRAW_RECT = 42;
+    public static final int DRAW_BITMAP_FONT_TEXT_RUN = 48;
     public static final int DRAW_TEXT_RUN = 43;
     public static final int DRAW_CIRCLE = 46;
     public static final int DRAW_LINE = 47;
@@ -192,11 +205,16 @@ public class Operations {
     public static final int PATH_TWEEN = 158;
     public static final int PATH_CREATE = 159;
     public static final int PATH_ADD = 160;
-    public static final int PARTICLE_CREATE = 161;
+    public static final int PARTICLE_DEFINE = 161;
     public static final int PARTICLE_PROCESS = 162;
     public static final int PARTICLE_LOOP = 163;
     public static final int IMPULSE_START = 164;
     public static final int IMPULSE_PROCESS = 165;
+    public static final int FUNCTION_CALL = 166;
+    public static final int FUNCTION_DEFINE = 168;
+    public static final int ATTRIBUTE_TEXT = 170;
+    public static final int ATTRIBUTE_IMAGE = 171;
+    public static final int ATTRIBUTE_TIME = 172;
 
     ///////////////////////////////////////// ======================
 
@@ -208,7 +226,9 @@ public class Operations {
     public static final int LAYOUT_CONTENT = 201;
     public static final int LAYOUT_BOX = 202;
     public static final int LAYOUT_ROW = 203;
+    public static final int LAYOUT_COLLAPSIBLE_ROW = 230;
     public static final int LAYOUT_COLUMN = 204;
+    public static final int LAYOUT_COLLAPSIBLE_COLUMN = 233;
     public static final int LAYOUT_CANVAS = 205;
     public static final int LAYOUT_CANVAS_CONTENT = 207;
     public static final int LAYOUT_TEXT = 208;
@@ -218,6 +238,8 @@ public class Operations {
 
     public static final int MODIFIER_WIDTH = 16;
     public static final int MODIFIER_HEIGHT = 67;
+    public static final int MODIFIER_WIDTH_IN = 231;
+    public static final int MODIFIER_HEIGHT_IN = 232;
     public static final int MODIFIER_BACKGROUND = 55;
     public static final int MODIFIER_BORDER = 107;
     public static final int MODIFIER_PADDING = 58;
@@ -268,6 +290,7 @@ public class Operations {
         map.put(HEADER, Header::read);
         map.put(DRAW_BITMAP_INT, DrawBitmapInt::read);
         map.put(DATA_BITMAP, BitmapData::read);
+        map.put(DATA_BITMAP_FONT, BitmapFontData::read);
         map.put(DATA_TEXT, TextData::read);
         map.put(THEME, Theme::read);
         map.put(CLICK_AREA, ClickArea::read);
@@ -284,6 +307,7 @@ public class Operations {
         map.put(DRAW_ROUND_RECT, DrawRoundRect::read);
         map.put(DRAW_TEXT_ON_PATH, DrawTextOnPath::read);
         map.put(DRAW_TEXT_RUN, DrawText::read);
+        map.put(DRAW_BITMAP_FONT_TEXT_RUN, DrawBitmapFontText::read);
         map.put(DRAW_TWEEN_PATH, DrawTweenPath::read);
         map.put(DATA_PATH, PathData::read);
         map.put(PAINT_VALUES, PaintData::read);
@@ -324,6 +348,8 @@ public class Operations {
 
         map.put(MODIFIER_WIDTH, WidthModifierOperation::read);
         map.put(MODIFIER_HEIGHT, HeightModifierOperation::read);
+        map.put(MODIFIER_WIDTH_IN, WidthInModifierOperation::read);
+        map.put(MODIFIER_HEIGHT_IN, HeightInModifierOperation::read);
         map.put(MODIFIER_PADDING, PaddingModifierOperation::read);
         map.put(MODIFIER_BACKGROUND, BackgroundModifierOperation::read);
         map.put(MODIFIER_BORDER, BorderModifierOperation::read);
@@ -359,7 +385,9 @@ public class Operations {
         map.put(LAYOUT_CONTENT, LayoutComponentContent::read);
         map.put(LAYOUT_BOX, BoxLayout::read);
         map.put(LAYOUT_COLUMN, ColumnLayout::read);
+        map.put(LAYOUT_COLLAPSIBLE_COLUMN, CollapsibleColumnLayout::read);
         map.put(LAYOUT_ROW, RowLayout::read);
+        map.put(LAYOUT_COLLAPSIBLE_ROW, CollapsibleRowLayout::read);
         map.put(LAYOUT_CANVAS, CanvasLayout::read);
         map.put(LAYOUT_CANVAS_CONTENT, CanvasContent::read);
         map.put(LAYOUT_TEXT, TextLayout::read);
@@ -377,10 +405,16 @@ public class Operations {
         map.put(PATH_ADD, PathAppend::read);
         map.put(IMPULSE_START, ImpulseOperation::read);
         map.put(IMPULSE_PROCESS, ImpulseProcess::read);
-        map.put(PARTICLE_CREATE, ParticlesCreate::read);
+        map.put(PARTICLE_DEFINE, ParticlesCreate::read);
         map.put(PARTICLE_LOOP, ParticlesLoop::read);
+        map.put(FUNCTION_CALL, FloatFunctionCall::read);
+        map.put(FUNCTION_DEFINE, FloatFunctionDefine::read);
 
         map.put(ACCESSIBILITY_SEMANTICS, CoreSemantics::read);
+        map.put(ATTRIBUTE_IMAGE, ImageAttribute::read);
+        map.put(ATTRIBUTE_TEXT, TextAttribute::read);
+        map.put(ATTRIBUTE_TIME, TimeAttribute::read);
+
         //        map.put(ACCESSIBILITY_CUSTOM_ACTION, CoreSemantics::read);
     }
 }

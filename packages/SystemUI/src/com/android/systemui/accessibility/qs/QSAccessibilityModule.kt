@@ -411,7 +411,7 @@ interface QSAccessibilityModule {
             stateInteractor: HearingDevicesTileDataInteractor,
             userActionInteractor: HearingDevicesTileUserActionInteractor,
         ): QSTileViewModel {
-            return if (Flags.hearingAidsQsTileDialog() && Flags.qsNewTilesFuture()) {
+            return if (Flags.qsNewTilesFuture()) {
                 factory.create(
                     TileSpec.create(HEARING_DEVICES_TILE_SPEC),
                     userActionInteractor,

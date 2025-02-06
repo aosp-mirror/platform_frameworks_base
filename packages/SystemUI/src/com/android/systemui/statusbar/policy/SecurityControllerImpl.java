@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManager.DeviceOwnerType;
+import android.app.supervision.SupervisionManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -62,6 +63,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.supervision.shared.DeprecateDpmSupervisionApis;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -71,6 +73,7 @@ import java.util.ArrayList;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  */
@@ -97,6 +100,7 @@ public class SecurityControllerImpl implements SecurityController {
     private final VpnManager mVpnManager;
     private final DevicePolicyManager mDevicePolicyManager;
     private final PackageManager mPackageManager;
+    private final SupervisionManager mSupervisionManager;
     private final UserManager mUserManager;
     private final Executor mMainExecutor;
     private final Executor mBgExecutor;
@@ -132,7 +136,8 @@ public class SecurityControllerImpl implements SecurityController {
             BroadcastDispatcher broadcastDispatcher,
             @Main Executor mainExecutor,
             @Background Executor bgExecutor,
-            DumpManager dumpManager
+            DumpManager dumpManager,
+            Provider<SupervisionManager> supervisionManagerProvider
     ) {
         mContext = context;
         mUserTracker = userTracker;
@@ -142,6 +147,11 @@ public class SecurityControllerImpl implements SecurityController {
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
         mVpnManager = context.getSystemService(VpnManager.class);
         mPackageManager = context.getPackageManager();
+        if (DeprecateDpmSupervisionApis.isEnabled()) {
+            mSupervisionManager = supervisionManagerProvider.get();
+        } else {
+            mSupervisionManager = null;
+        }
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
@@ -395,12 +405,16 @@ public class SecurityControllerImpl implements SecurityController {
 
     @Override
     public boolean isParentalControlsEnabled() {
-        return getProfileOwnerOrDeviceOwnerSupervisionComponent() != null;
+        if (DeprecateDpmSupervisionApis.isEnabled() && mSupervisionManager != null) {
+            return mSupervisionManager.isSupervisionEnabledForUser(mCurrentUserId);
+        } else {
+            return getProfileOwnerOrDeviceOwnerSupervisionComponent() != null;
+        }
     }
 
     @Override
     public DeviceAdminInfo getDeviceAdminInfo() {
-        return getDeviceAdminInfo(getProfileOwnerOrDeviceOwnerComponent());
+        return getSupervisionDeviceAdminInfo();
     }
 
     @Override
@@ -409,8 +423,26 @@ public class SecurityControllerImpl implements SecurityController {
     }
 
     @Override
+    @Nullable
+    public Drawable getIcon() {
+        DeprecateDpmSupervisionApis.assertInNewMode();
+        return isParentalControlsEnabled()
+            ? mContext.getDrawable(R.drawable.ic_supervision)
+            : null;
+    }
+
+    @Override
     public CharSequence getLabel(DeviceAdminInfo info) {
         return (info == null) ? null : info.loadLabel(mPackageManager);
+    }
+
+    @Override
+    @Nullable
+    public CharSequence getLabel() {
+        DeprecateDpmSupervisionApis.assertInNewMode();
+        return isParentalControlsEnabled()
+                ? mContext.getString(R.string.status_bar_supervision)
+                : null;
     }
 
     private ComponentName getProfileOwnerOrDeviceOwnerSupervisionComponent() {
@@ -419,14 +451,8 @@ public class SecurityControllerImpl implements SecurityController {
                .getProfileOwnerOrDeviceOwnerSupervisionComponent(currentUser);
     }
 
-    // Returns the ComponentName of the current DO/PO. Right now it only checks the supervision
-    // component but can be changed to check for other DO/POs. This change would make getIcon()
-    // and getLabel() work for all admins.
-    private ComponentName getProfileOwnerOrDeviceOwnerComponent() {
-        return getProfileOwnerOrDeviceOwnerSupervisionComponent();
-    }
-
-    private DeviceAdminInfo getDeviceAdminInfo(ComponentName componentName) {
+    private DeviceAdminInfo getSupervisionDeviceAdminInfo() {
+        ComponentName componentName = getProfileOwnerOrDeviceOwnerSupervisionComponent();
         try {
             ResolveInfo resolveInfo = new ResolveInfo();
             resolveInfo.activityInfo = mPackageManager.getReceiverInfo(componentName,

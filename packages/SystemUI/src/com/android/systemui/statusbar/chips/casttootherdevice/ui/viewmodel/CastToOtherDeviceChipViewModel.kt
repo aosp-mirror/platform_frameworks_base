@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel
 
 import android.content.Context
 import androidx.annotation.DrawableRes
+import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.Cuj
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
@@ -41,6 +42,7 @@ import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.ChipTransitionHelper
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
+import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickCallback
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickListener
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
@@ -74,7 +76,7 @@ constructor(
         mediaProjectionChipInteractor.projection
             .map { projectionModel ->
                 when (projectionModel) {
-                    is ProjectionChipModel.NotProjecting -> OngoingActivityChipModel.Hidden()
+                    is ProjectionChipModel.NotProjecting -> OngoingActivityChipModel.Inactive()
                     is ProjectionChipModel.Projecting -> {
                         when (projectionModel.receiver) {
                             ProjectionChipModel.Receiver.CastToOtherDevice -> {
@@ -86,19 +88,19 @@ constructor(
                                 }
                             }
                             ProjectionChipModel.Receiver.ShareToApp ->
-                                OngoingActivityChipModel.Hidden()
+                                OngoingActivityChipModel.Inactive()
                         }
                     }
                 }
             }
             // See b/347726238 for [SharingStarted.Lazily] reasoning.
-            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden())
+            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Inactive())
 
     /**
      * The cast chip to show, based only on MediaRouter API events.
      *
-     * This chip will be [OngoingActivityChipModel.Shown] when the user is casting their screen *or*
-     * their audio.
+     * This chip will be [OngoingActivityChipModel.Active] when the user is casting their screen
+     * *or* their audio.
      *
      * The MediaProjection APIs are typically not invoked for casting *only audio* to another device
      * because MediaProjection is only concerned with *screen* sharing (see b/342169876). We listen
@@ -116,7 +118,7 @@ constructor(
         mediaRouterChipInteractor.mediaRouterCastingState
             .map { routerModel ->
                 when (routerModel) {
-                    is MediaRouterCastModel.DoingNothing -> OngoingActivityChipModel.Hidden()
+                    is MediaRouterCastModel.DoingNothing -> OngoingActivityChipModel.Inactive()
                     is MediaRouterCastModel.Casting -> {
                         // A consequence of b/269975671 is that MediaRouter will mark a device as
                         // casting before casting has actually started. To alleviate this bug a bit,
@@ -130,7 +132,7 @@ constructor(
                     }
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden())
+            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Inactive())
 
     private val internalChip: StateFlow<OngoingActivityChipModel> =
         combine(projectionChip, routerChip) { projection, router ->
@@ -149,24 +151,24 @@ constructor(
                 //
                 // 1. When the user chooses what device to cast to, the MediaRouter APIs mark the
                 // device as casting (even though casting hasn't actually started yet). At this
-                // point, `routerChip` is [OngoingActivityChipModel.Shown] but `projectionChip` is
-                // [OngoingActivityChipModel.Hidden], and we'll show the router chip.
+                // point, `routerChip` is [OngoingActivityChipModel.Active] but `projectionChip` is
+                // [OngoingActivityChipModel.Inactive], and we'll show the router chip.
                 //
                 // 2. Once casting has actually started, the MediaProjection APIs become aware of
                 // the device. At this point, both `routerChip` and `projectionChip` are
-                // [OngoingActivityChipModel.Shown].
+                // [OngoingActivityChipModel.Active].
                 //
                 // Because the MediaProjection APIs have activated, we know that the user is screen
                 // casting (not audio casting). We need to switch to using `projectionChip` because
                 // that chip will show information specific to screen casting. The `projectionChip`
                 // will also show a timer, as opposed to `routerChip`'s icon-only display.
-                if (projection is OngoingActivityChipModel.Shown) {
+                if (projection is OngoingActivityChipModel.Active) {
                     projection
                 } else {
                     router
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden())
+            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Inactive())
 
     private val hideChipDuringDialogTransitionHelper = ChipTransitionHelper(scope)
 
@@ -189,8 +191,9 @@ constructor(
 
     private fun createCastScreenToOtherDeviceChip(
         state: ProjectionChipModel.Projecting
-    ): OngoingActivityChipModel.Shown {
-        return OngoingActivityChipModel.Shown.Timer(
+    ): OngoingActivityChipModel.Active {
+        return OngoingActivityChipModel.Active.Timer(
+            key = KEY,
             icon =
                 OngoingActivityChipModel.ChipIcon.SingleColorIcon(
                     Icon.Resource(
@@ -204,18 +207,31 @@ constructor(
             colors = ColorsModel.Red,
             // TODO(b/332662551): Maybe use a MediaProjection API to fetch this time.
             startTimeMs = systemClock.elapsedRealtime(),
-            createDialogLaunchOnClickListener(
-                createCastScreenToOtherDeviceDialogDelegate(state),
-                dialogTransitionAnimator,
-                DialogCuj(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP, tag = "Cast to other device"),
-                logger,
-                TAG,
-            ),
+            onClickListenerLegacy =
+                createDialogLaunchOnClickListener(
+                    createCastScreenToOtherDeviceDialogDelegate(state),
+                    dialogTransitionAnimator,
+                    DIALOG_CUJ,
+                    logger,
+                    TAG,
+                ),
+            clickBehavior =
+                OngoingActivityChipModel.ClickBehavior.ExpandAction(
+                    onClick =
+                        createDialogLaunchOnClickCallback(
+                            createCastScreenToOtherDeviceDialogDelegate(state),
+                            dialogTransitionAnimator,
+                            DIALOG_CUJ,
+                            logger,
+                            TAG,
+                        )
+                ),
         )
     }
 
-    private fun createIconOnlyCastChip(deviceName: String?): OngoingActivityChipModel.Shown {
-        return OngoingActivityChipModel.Shown.IconOnly(
+    private fun createIconOnlyCastChip(deviceName: String?): OngoingActivityChipModel.Active {
+        return OngoingActivityChipModel.Active.IconOnly(
+            key = KEY,
             icon =
                 OngoingActivityChipModel.ChipIcon.SingleColorIcon(
                     Icon.Resource(
@@ -225,16 +241,24 @@ constructor(
                     )
                 ),
             colors = ColorsModel.Red,
-            createDialogLaunchOnClickListener(
-                createGenericCastToOtherDeviceDialogDelegate(deviceName),
-                dialogTransitionAnimator,
-                DialogCuj(
-                    Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP,
-                    tag = "Cast to other device audio only",
+            onClickListenerLegacy =
+                createDialogLaunchOnClickListener(
+                    createGenericCastToOtherDeviceDialogDelegate(deviceName),
+                    dialogTransitionAnimator,
+                    DIALOG_CUJ_AUDIO_ONLY,
+                    logger,
+                    TAG,
                 ),
-                logger,
-                TAG,
-            ),
+            clickBehavior =
+                OngoingActivityChipModel.ClickBehavior.ExpandAction(
+                    createDialogLaunchOnClickCallback(
+                        createGenericCastToOtherDeviceDialogDelegate(deviceName),
+                        dialogTransitionAnimator,
+                        DIALOG_CUJ_AUDIO_ONLY,
+                        logger,
+                        TAG,
+                    )
+                ),
         )
     }
 
@@ -255,7 +279,15 @@ constructor(
         )
 
     companion object {
+        @VisibleForTesting const val KEY = "CastToOtherDevice"
         @DrawableRes val CAST_TO_OTHER_DEVICE_ICON = R.drawable.ic_cast_connected
+        private val DIALOG_CUJ =
+            DialogCuj(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP, tag = "Cast to other device")
+        private val DIALOG_CUJ_AUDIO_ONLY =
+            DialogCuj(
+                Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP,
+                tag = "Cast to other device audio only",
+            )
         private val TAG = "CastToOtherVM".pad()
     }
 }

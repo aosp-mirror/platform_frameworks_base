@@ -34,7 +34,7 @@ import com.android.systemui.scene.data.repository.WindowRootViewVisibilityReposi
 import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.setActiveNotifs
-import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.notification.init.NotificationsController
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
@@ -70,8 +70,7 @@ class WindowRootViewVisibilityInteractorTest : SysuiTestCase() {
     private val notificationsController = mock<NotificationsController>()
     private val powerInteractor = PowerInteractorFactory.create().powerInteractor
     private val activeNotificationsRepository = kosmos.activeNotificationListRepository
-    private val activeNotificationsInteractor =
-        ActiveNotificationsInteractor(activeNotificationsRepository, testDispatcher)
+    private val activeNotificationsInteractor = kosmos.activeNotificationsInteractor
 
     private val underTest =
         WindowRootViewVisibilityInteractor(

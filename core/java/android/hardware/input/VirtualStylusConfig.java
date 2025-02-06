@@ -16,11 +16,9 @@
 
 package android.hardware.input;
 
-import android.annotation.FlaggedApi;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.companion.virtual.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -29,7 +27,6 @@ import android.os.Parcelable;
  *
  * @hide
  */
-@FlaggedApi(Flags.FLAG_VIRTUAL_STYLUS)
 @SystemApi
 public final class VirtualStylusConfig extends VirtualTouchDeviceConfig implements Parcelable {
 
@@ -68,7 +65,6 @@ public final class VirtualStylusConfig extends VirtualTouchDeviceConfig implemen
     /**
      * Builder for creating a {@link VirtualStylusConfig}.
      */
-    @FlaggedApi(Flags.FLAG_VIRTUAL_STYLUS)
     public static final class Builder extends VirtualTouchDeviceConfig.Builder<Builder> {
 
         /**

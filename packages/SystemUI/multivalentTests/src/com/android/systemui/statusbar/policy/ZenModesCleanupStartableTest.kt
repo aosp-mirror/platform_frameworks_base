@@ -26,7 +26,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.backgroundCoroutineContext
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -40,7 +39,6 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 @EnableFlags(android.app.Flags.FLAG_MODES_UI)

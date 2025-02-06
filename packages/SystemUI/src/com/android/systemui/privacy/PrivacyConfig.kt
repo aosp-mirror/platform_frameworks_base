@@ -85,7 +85,7 @@ class PrivacyConfig @Inject constructor(
             }
 
     init {
-        dumpManager.registerDumpable(TAG, this)
+        dumpManager.registerNormalDumpable(TAG, this)
         deviceConfigProxy.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_PRIVACY,
                 uiExecutor,

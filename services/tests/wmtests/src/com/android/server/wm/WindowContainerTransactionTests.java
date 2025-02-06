@@ -18,20 +18,30 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_APP_COMPAT_REACHABILITY;
+import static android.window.WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID;
+import static android.window.WindowContainerTransaction.HierarchyOp.REACHABILITY_EVENT_X;
+import static android.window.WindowContainerTransaction.HierarchyOp.REACHABILITY_EVENT_Y;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.times;
 
 import android.content.Intent;
+import android.os.Binder;
+import android.os.Bundle;
 import android.platform.test.annotations.Presubmit;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
+import android.window.WindowContainerTransaction.HierarchyOp;
 
 import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
@@ -74,6 +84,34 @@ public class WindowContainerTransactionTests extends WindowTestsBase {
         assertNull(task.getParent());
         assertEquals(0, task.getChildCount());
         assertNull(activity.getParent());
+        verify(mAtm.getLockTaskController(), atLeast(1)).clearLockedTask(task);
+        verify(mAtm.getLockTaskController(), atLeast(1)).clearLockedTask(rootTask);
+    }
+
+    @Test
+    public void testRemoveRootTask() {
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
+        final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
+        final TaskDisplayArea taskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
+
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        WindowContainerToken token = rootTask.getTaskInfo().token;
+        wct.removeTask(token);
+        applyTransaction(wct);
+
+        // There is still an activity to be destroyed, so the task is not removed immediately.
+        assertNotNull(task.getParent());
+        assertTrue(rootTask.hasChild());
+        assertTrue(task.hasChild());
+        assertTrue(activity.finishing);
+
+        activity.destroyed("testRemoveRootTask");
+        // Assert that the container was removed after the activity is destroyed.
+        assertNull(task.getParent());
+        assertEquals(0, task.getChildCount());
+        assertNull(activity.getParent());
+        assertNull(taskDisplayArea.getTask(task1 -> task1.mTaskId == rootTask.mTaskId));
         verify(mAtm.getLockTaskController(), atLeast(1)).clearLockedTask(task);
         verify(mAtm.getLockTaskController(), atLeast(1)).clearLockedTask(rootTask);
     }
@@ -193,6 +231,31 @@ public class WindowContainerTransactionTests extends WindowTestsBase {
                 < tda.mChildren.indexOf(desktopOrganizer.mTasks.get(4).getRootTask()));
         assertTrue(tda.mChildren.indexOf(desktopOrganizer.mTasks.get(4).getRootTask())
                 < tda.mChildren.indexOf(desktopOrganizer.mTasks.get(2).getRootTask()));
+    }
+
+    @Test
+    public void testAppCompat_setReachabilityOffsets() {
+        final Task task = createTask(/* taskId */ 37);
+        final WindowContainerToken containerToken = task.getTaskInfo().token;
+        spyOn(containerToken);
+        final Binder asBinder = new Binder();
+        doReturn(asBinder).when(containerToken).asBinder();
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setReachabilityOffset(containerToken, /* taskId */ task.mTaskId, 10, 20);
+
+        final List<HierarchyOp> hierarchyOps = wct.getHierarchyOps().stream()
+                .filter(op -> op.getType() == HIERARCHY_OP_TYPE_APP_COMPAT_REACHABILITY)
+                .toList();
+
+        assertEquals(1, hierarchyOps.size());
+        final HierarchyOp appCompatOp = hierarchyOps.getFirst();
+        assertNotNull(appCompatOp);
+        final Bundle appCompatOptions = appCompatOp.getAppCompatOptions();
+
+        assertEquals(task.mTaskId, appCompatOptions.getInt(LAUNCH_KEY_TASK_ID));
+        assertEquals(10, appCompatOptions.getInt(REACHABILITY_EVENT_X));
+        assertEquals(20, appCompatOptions.getInt(REACHABILITY_EVENT_Y));
+        assertSame(asBinder, appCompatOp.getContainer());
     }
 
     private Task createTask(int taskId) {

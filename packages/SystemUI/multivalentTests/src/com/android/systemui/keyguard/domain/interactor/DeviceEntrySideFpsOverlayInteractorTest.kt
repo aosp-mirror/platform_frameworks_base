@@ -48,7 +48,6 @@ import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -61,7 +60,6 @@ import org.mockito.Mockito.mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {

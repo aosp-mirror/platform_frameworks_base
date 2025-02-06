@@ -273,6 +273,7 @@ static install_status_t copyFileIfChanged(JNIEnv* env, void* arg, ZipFileRO* zip
     jboolean extractNativeLibs = *(jboolean*)args[1];
     jboolean debuggable = *(jboolean*)args[2];
     jboolean app_compat_16kb = *(jboolean*)args[3];
+    jboolean pageSizeCompatDisabled = *(jboolean*)args[4];
     install_status_t ret = INSTALL_SUCCEEDED;
 
     ScopedUtfChars nativeLibPath(env, *javaNativeLibPath);
@@ -304,6 +305,16 @@ static install_status_t copyFileIfChanged(JNIEnv* env, void* arg, ZipFileRO* zip
         }
 
         if (offset % kPageSize != 0) {
+            // If page size app compat was disabled explicitly in manifest, don't extract libs on
+            // 16 KB page size device.
+            if (kPageSize == 0x4000 && pageSizeCompatDisabled) {
+                ALOGE("pageSizeCompat=disabled library '%s' is not PAGE(%zu)-"
+                      "aligned within apk (APK alignment, not ELF alignment) -"
+                      "and will not be extracted.\n",
+                      fileName, kPageSize);
+                return INSTALL_FAILED_INVALID_APK;
+            }
+
             // If the library is zip-aligned correctly for 4kb devices and app compat is
             // enabled, on 16kb devices fallback to extraction
             if (offset % 0x1000 == 0 && app_compat_16kb) {
@@ -349,21 +360,19 @@ static install_status_t copyFileIfChanged(JNIEnv* env, void* arg, ZipFileRO* zip
  * satisfied :
  *
  * - The entry is under the lib/ directory.
- * - The entry name ends with ".so" and the entry name starts with "lib",
- *   an exception is made for debuggable apps.
  * - The entry filename is "safe" (as determined by isFilenameSafe).
  *
  */
 class NativeLibrariesIterator {
 private:
-    NativeLibrariesIterator(ZipFileRO* zipFile, bool debuggable, void* cookie)
-          : mZipFile(zipFile), mDebuggable(debuggable), mCookie(cookie), mLastSlash(nullptr) {
+    NativeLibrariesIterator(ZipFileRO* zipFile, void* cookie)
+          : mZipFile(zipFile), mCookie(cookie), mLastSlash(nullptr) {
         fileName[0] = '\0';
     }
 
 public:
     static base::expected<std::unique_ptr<NativeLibrariesIterator>, int32_t> create(
-            ZipFileRO* zipFile, bool debuggable) {
+            ZipFileRO* zipFile) {
         // Do not specify a suffix to find both .so files and gdbserver.
         auto result = zipFile->startIterationOrError(APK_LIB.data(), nullptr /* suffix */);
         if (!result.ok()) {
@@ -371,7 +380,7 @@ public:
         }
 
         return std::unique_ptr<NativeLibrariesIterator>(
-                new NativeLibrariesIterator(zipFile, debuggable, result.value()));
+                new NativeLibrariesIterator(zipFile, result.value()));
     }
 
     base::expected<ZipEntryRO, int32_t> next() {
@@ -390,7 +399,7 @@ public:
                 continue;
             }
 
-            const char* lastSlash = util::ValidLibraryPathLastSlash(fileName, false, mDebuggable);
+            const char* lastSlash = util::ValidLibraryPathLastSlash(fileName, false);
             if (lastSlash) {
                 mLastSlash = lastSlash;
                 break;
@@ -415,20 +424,19 @@ private:
 
     char fileName[PATH_MAX];
     ZipFileRO* const mZipFile;
-    const bool mDebuggable;
     void* mCookie;
     const char* mLastSlash;
 };
 
 static install_status_t
 iterateOverNativeFiles(JNIEnv *env, jlong apkHandle, jstring javaCpuAbi,
-                       jboolean debuggable, iterFunc callFunc, void* callArg) {
+                       iterFunc callFunc, void* callArg) {
     ZipFileRO* zipFile = reinterpret_cast<ZipFileRO*>(apkHandle);
     if (zipFile == nullptr) {
         return INSTALL_FAILED_INVALID_APK;
     }
 
-    auto result = NativeLibrariesIterator::create(zipFile, debuggable);
+    auto result = NativeLibrariesIterator::create(zipFile);
     if (!result.ok()) {
         return INSTALL_FAILED_INVALID_APK;
     }
@@ -470,14 +478,13 @@ iterateOverNativeFiles(JNIEnv *env, jlong apkHandle, jstring javaCpuAbi,
     return INSTALL_SUCCEEDED;
 }
 
-static int findSupportedAbi(JNIEnv* env, jlong apkHandle, jobjectArray supportedAbisArray,
-                            jboolean debuggable) {
+static int findSupportedAbi(JNIEnv* env, jlong apkHandle, jobjectArray supportedAbisArray) {
     ZipFileRO* zipFile = reinterpret_cast<ZipFileRO*>(apkHandle);
     if (zipFile == nullptr) {
         return INSTALL_FAILED_INVALID_APK;
     }
 
-    auto result = NativeLibrariesIterator::create(zipFile, debuggable);
+    auto result = NativeLibrariesIterator::create(zipFile);
     if (!result.ok()) {
         return INSTALL_FAILED_INVALID_APK;
     }
@@ -541,33 +548,32 @@ static inline bool app_compat_16kb_enabled() {
     return !android::base::GetBoolProperty("pm.16kb.app_compat.disabled", false);
 }
 
-static jint
-com_android_internal_content_NativeLibraryHelper_copyNativeBinaries(JNIEnv *env, jclass clazz,
-        jlong apkHandle, jstring javaNativeLibPath, jstring javaCpuAbi,
-        jboolean extractNativeLibs, jboolean debuggable)
-{
+static jint com_android_internal_content_NativeLibraryHelper_copyNativeBinaries(
+        JNIEnv* env, jclass clazz, jlong apkHandle, jstring javaNativeLibPath, jstring javaCpuAbi,
+        jboolean extractNativeLibs, jboolean debuggable, jboolean pageSizeCompatDisabled) {
     jboolean app_compat_16kb = app_compat_16kb_enabled();
-    void* args[] = { &javaNativeLibPath, &extractNativeLibs, &debuggable, &app_compat_16kb };
-    return (jint) iterateOverNativeFiles(env, apkHandle, javaCpuAbi, debuggable,
+    void* args[] = {&javaNativeLibPath, &extractNativeLibs, &debuggable, &app_compat_16kb,
+                    &pageSizeCompatDisabled};
+    return (jint) iterateOverNativeFiles(env, apkHandle, javaCpuAbi,
             copyFileIfChanged, reinterpret_cast<void*>(args));
 }
 
 static jlong
 com_android_internal_content_NativeLibraryHelper_sumNativeBinaries(JNIEnv *env, jclass clazz,
-        jlong apkHandle, jstring javaCpuAbi, jboolean debuggable)
+        jlong apkHandle, jstring javaCpuAbi)
 {
     size_t totalSize = 0;
 
-    iterateOverNativeFiles(env, apkHandle, javaCpuAbi, debuggable, sumFiles, &totalSize);
+    iterateOverNativeFiles(env, apkHandle, javaCpuAbi, sumFiles, &totalSize);
 
     return totalSize;
 }
 
 static jint
 com_android_internal_content_NativeLibraryHelper_findSupportedAbi(JNIEnv *env, jclass clazz,
-        jlong apkHandle, jobjectArray javaCpuAbisToSearch, jboolean debuggable)
+        jlong apkHandle, jobjectArray javaCpuAbisToSearch)
 {
-    return (jint) findSupportedAbi(env, apkHandle, javaCpuAbisToSearch, debuggable);
+    return (jint) findSupportedAbi(env, apkHandle, javaCpuAbisToSearch);
 }
 
 enum bitcode_scan_result_t {
@@ -748,7 +754,7 @@ static jint com_android_internal_content_NativeLibraryHelper_checkApkAlignment(
         return PAGE_SIZE_APP_COMPAT_FLAG_ERROR;
     }
 
-    auto result = NativeLibrariesIterator::create(zipFile, debuggable);
+    auto result = NativeLibrariesIterator::create(zipFile);
     if (!result.ok()) {
         ALOGE("Can't iterate over native libs for file:%s", zipFile->getZipFileName());
         return PAGE_SIZE_APP_COMPAT_FLAG_ERROR;
@@ -808,11 +814,11 @@ static const JNINativeMethod gMethods[] = {
         {"nativeOpenApkFd", "(Ljava/io/FileDescriptor;Ljava/lang/String;)J",
          (void*)com_android_internal_content_NativeLibraryHelper_openApkFd},
         {"nativeClose", "(J)V", (void*)com_android_internal_content_NativeLibraryHelper_close},
-        {"nativeCopyNativeBinaries", "(JLjava/lang/String;Ljava/lang/String;ZZ)I",
+        {"nativeCopyNativeBinaries", "(JLjava/lang/String;Ljava/lang/String;ZZZ)I",
          (void*)com_android_internal_content_NativeLibraryHelper_copyNativeBinaries},
-        {"nativeSumNativeBinaries", "(JLjava/lang/String;Z)J",
+        {"nativeSumNativeBinaries", "(JLjava/lang/String;)J",
          (void*)com_android_internal_content_NativeLibraryHelper_sumNativeBinaries},
-        {"nativeFindSupportedAbi", "(J[Ljava/lang/String;Z)I",
+        {"nativeFindSupportedAbi", "(J[Ljava/lang/String;)I",
          (void*)com_android_internal_content_NativeLibraryHelper_findSupportedAbi},
         {"hasRenderscriptBitcode", "(J)I",
          (void*)com_android_internal_content_NativeLibraryHelper_hasRenderscriptBitcode},

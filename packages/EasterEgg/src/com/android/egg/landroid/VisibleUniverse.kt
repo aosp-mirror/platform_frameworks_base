@@ -16,19 +16,31 @@
 
 package com.android.egg.landroid
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.RememberObserver
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.PointMode
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotateRad
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.node.DrawModifierNode
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.util.lerp
 import androidx.core.math.MathUtils.clamp
 import com.android.egg.flags.Flags.flagFlag
+import kotlinx.coroutines.DisposableHandle
 import java.lang.Float.max
 import kotlin.math.exp
 import kotlin.math.sqrt
@@ -55,22 +67,108 @@ fun DrawScope.zoom(zoom: Float, block: ZoomedDrawScope.() -> Unit) {
     ds.scale(zoom) { block(ds) }
 }
 
-class VisibleUniverse(namer: Namer, randomSeed: Long) : Universe(namer, randomSeed) {
-    // Magic variable. Every time we update it, Compose will notice and redraw the universe.
-    val triggerDraw = mutableStateOf(0L)
+/**
+ * A device for observing changes to a [Simulator] such as a [Universe].
+ * [observer] will be invoked each time a [Simulator.step] has completed.
+ */
+@Composable
+fun <S : Simulator> Telescope(
+    subject: S,
+    observer: (S) -> Unit
+) {
+    remember(subject) {
+        object : RememberObserver {
+            lateinit var registration: DisposableHandle
+            var currentObserver by mutableStateOf(observer)
 
-    fun simulateAndDrawFrame(nanos: Long) {
-        // By writing this value, Compose will look for functions that read it (like drawZoomed).
-        triggerDraw.value = nanos
+            override fun onRemembered() {
+                registration = subject.addSimulationStepListener { currentObserver(subject) }
+            }
 
-        step(nanos)
+            override fun onForgotten() {
+                registration.dispose()
+            }
+
+            override fun onAbandoned() {}
+        }
+    }.currentObserver = observer
+}
+
+fun Modifier.drawUniverse(
+    universe: Universe,
+    draw: DrawScope.(Universe) -> Unit
+): Modifier = this then UniverseElement(universe, draw)
+
+@Composable
+fun UniverseCanvas(
+    universe: Universe,
+    modifier: Modifier = Modifier,
+    draw: DrawScope.(Universe) -> Unit
+) {
+    Spacer(modifier.drawUniverse(universe, draw))
+}
+
+private class UniverseElement(
+    val universe: Universe,
+    val draw: DrawScope.(Universe) -> Unit
+) : ModifierNodeElement<UniverseModifierNode>() {
+    override fun create(): UniverseModifierNode = UniverseModifierNode(universe, draw)
+
+    // Called when a modifier is applied to a Layout whose inputs have changed
+    override fun update(node: UniverseModifierNode) {
+        node.universe = universe
+        node.draw = draw
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as UniverseElement
+
+        if (universe != other.universe) return false
+        if (draw != other.draw) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = universe.hashCode()
+        result = 31 * result + draw.hashCode()
+        return result
     }
 }
 
-fun ZoomedDrawScope.drawUniverse(universe: VisibleUniverse) {
-    with(universe) {
-        triggerDraw.value // Please recompose when this value changes.
+private class UniverseModifierNode(
+    universe: Universe,
+    draw: DrawScope.(Universe) -> Unit,
+) : Modifier.Node(), DrawModifierNode {
+    private val universeListener: () -> Unit = { invalidateDraw() }
+    private var removeUniverseListener: DisposableHandle? =
+        universe.addSimulationStepListener(universeListener)
 
+    var universe: Universe = universe
+        set(value) {
+            if (field === value) return
+            removeUniverseListener?.dispose()
+            field = value
+            removeUniverseListener = value.addSimulationStepListener(universeListener)
+        }
+
+    var draw: ContentDrawScope.(Universe) -> Unit = draw
+        set(value) {
+            if (field === value) return
+            field = value
+            invalidateDraw()
+        }
+
+    override fun ContentDrawScope.draw() {
+        draw(universe)
+    }
+}
+
+fun ZoomedDrawScope.drawUniverse(universe: Universe) {
+    with(universe) {
         constraints.forEach {
             when (it) {
                 is Landing -> drawLanding(it)

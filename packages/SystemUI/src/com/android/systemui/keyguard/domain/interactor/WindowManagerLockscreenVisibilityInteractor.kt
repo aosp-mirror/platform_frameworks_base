@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.compose.animation.scene.ObservableTransitionState.Idle
@@ -24,7 +22,6 @@ import com.android.systemui.Flags.transitionRaceCondition
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
-import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.Companion.deviceIsAsleepInState
@@ -35,11 +32,9 @@ import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
-import com.android.systemui.util.kotlin.sample
 import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import dagger.Lazy
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -47,7 +42,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class WindowManagerLockscreenVisibilityInteractor
 @Inject
@@ -84,7 +78,6 @@ constructor(
      * only be visible after swiping 20% of the way up the screen, and should become invisible again
      * if the user swipes back down.
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val transitionSpecificSurfaceBehindVisibility: Flow<Boolean?> =
         transitionInteractor.startedKeyguardTransitionStep
             .flatMapLatest { startedStep ->
@@ -122,7 +115,6 @@ constructor(
      * transitioning between [KeyguardState]s or [Scenes] or the transition-specific visibility used
      * during certain ongoing transitions.
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
     val surfaceBehindVisibility: Flow<Boolean> =
         if (SceneContainerFlag.isEnabled) {
                 sceneInteractor.get().transitionState.flatMapLatestConflated { state ->
@@ -239,12 +231,12 @@ constructor(
     private val lockscreenVisibilityLegacy =
         combine(
                 transitionInteractor.currentKeyguardState,
+                transitionInteractor.startedStepWithPrecedingStep,
                 wakeToGoneInteractor.canWakeDirectlyToGone,
                 surfaceBehindVisibility,
-                ::Triple,
+                ::toQuad,
             )
-            .sample(transitionInteractor.startedStepWithPrecedingStep, ::toQuad)
-            .map { (currentState, canWakeDirectlyToGone, surfaceBehindVis, startedWithPrev) ->
+            .map { (currentState, startedWithPrev, canWakeDirectlyToGone, surfaceBehindVis) ->
                 val startedFromStep = startedWithPrev.previousValue
                 val startedStep = startedWithPrev.newValue
                 val returningToGoneAfterCancellation =
@@ -331,17 +323,9 @@ constructor(
      * clock/smartspace/notif icons are visible.
      */
     val aodVisibility: Flow<Boolean> =
-        combine(
-                keyguardInteractor.isDozing,
-                keyguardInteractor.isAodAvailable,
-                keyguardInteractor.biometricUnlockState,
-            ) { isDozing, isAodAvailable, biometricUnlockState ->
-                // AOD is visible if we're dozing, unless we are wake and unlocking (where we go
-                // directly from AOD to unlocked while dozing).
-                isDozing &&
-                    isAodAvailable &&
-                    !BiometricUnlockMode.isWakeAndUnlock(biometricUnlockState.mode)
-            }
+        transitionInteractor
+            .transitionValue(KeyguardState.AOD)
+            .map { it == 1f }
             .distinctUntilChanged()
 
     companion object {

@@ -21,19 +21,17 @@ import android.app.admin.devicePolicyManager
 import android.content.Intent
 import android.content.pm.UserInfo
 import android.os.UserManager
-import android.os.userManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.broadcastDispatcher
-import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.kosmos.testScope
-import com.android.systemui.settings.FakeUserTracker
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runTest
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.testKosmos
-import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
-import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -48,34 +46,20 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 class CommunalSettingsInteractorTest : SysuiTestCase() {
 
-    private lateinit var userManager: UserManager
-    private lateinit var userRepository: FakeUserRepository
-    private lateinit var userTracker: FakeUserTracker
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
 
-    private val kosmos = testKosmos()
-    private val testScope = kosmos.testScope
-
-    private lateinit var underTest: CommunalSettingsInteractor
+    private val Kosmos.underTest by Kosmos.Fixture { communalSettingsInteractor }
 
     @Before
     fun setUp() {
-        userManager = kosmos.userManager
-        userRepository = kosmos.fakeUserRepository
-        userTracker = kosmos.fakeUserTracker
-
         val userInfos = listOf(MAIN_USER_INFO, USER_INFO_WORK)
-        userRepository.setUserInfos(userInfos)
-        userTracker.set(
-            userInfos = userInfos,
-            selectedUserIndex = 0,
-        )
-
-        underTest = kosmos.communalSettingsInteractor
+        kosmos.fakeUserRepository.setUserInfos(userInfos)
+        kosmos.fakeUserTracker.set(userInfos = userInfos, selectedUserIndex = 0)
     }
 
     @Test
     fun filterUsers_dontFilteredUsersWhenAllAreAllowed() =
-        testScope.runTest {
+        kosmos.runTest {
             // If no users have any keyguard features disabled...
             val disallowedUser by
                 collectLastValue(underTest.workProfileUserDisallowedByDevicePolicy)
@@ -85,11 +69,11 @@ class CommunalSettingsInteractorTest : SysuiTestCase() {
 
     @Test
     fun filterUsers_filterWorkProfileUserWhenDisallowed() =
-        testScope.runTest {
+        kosmos.runTest {
             // If the work profile user has keyguard widgets disabled...
             setKeyguardFeaturesDisabled(
                 USER_INFO_WORK,
-                DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL
+                DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL,
             )
             // ...then the disallowed user match the work profile
             val disallowedUser by
@@ -102,7 +86,7 @@ class CommunalSettingsInteractorTest : SysuiTestCase() {
         whenever(
                 kosmos.devicePolicyManager.getKeyguardDisabledFeatures(
                     anyOrNull(),
-                    ArgumentMatchers.eq(user.id)
+                    ArgumentMatchers.eq(user.id),
                 )
             )
             .thenReturn(disabledFlags)

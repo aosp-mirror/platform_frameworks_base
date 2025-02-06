@@ -245,18 +245,20 @@ public class TaskPersister implements PersisterQueue.Listener {
 
     private static String fileToString(File file) {
         final String newline = System.lineSeparator();
+        BufferedReader reader = null;
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(file));
+            reader = new BufferedReader(new FileReader(file));
             StringBuffer sb = new StringBuffer((int) file.length() * 2);
             String line;
             while ((line = reader.readLine()) != null) {
                 sb.append(line + newline);
             }
-            reader.close();
             return sb.toString();
         } catch (IOException ioe) {
             Slog.e(TAG, "Couldn't read file " + file.getName());
             return null;
+        } finally {
+            IoUtils.closeQuietly(reader);
         }
     }
 

@@ -23,7 +23,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import java.lang.IllegalStateException
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -35,7 +34,6 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class ScreenshotSoundControllerTest : SysuiTestCase() {
 

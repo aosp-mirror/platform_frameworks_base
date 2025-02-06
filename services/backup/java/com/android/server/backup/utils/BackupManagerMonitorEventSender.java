@@ -22,7 +22,6 @@ import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_OPERATION_TYPE;
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT;
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_AGENT_LOGGING_RESULTS;
 
-import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.annotation.Nullable;
@@ -115,15 +114,11 @@ public class BackupManagerMonitorEventSender {
             if (mMonitor != null) {
                 mMonitor.onEvent(bundle);
             } else {
-                if (DEBUG) {
-                    Slog.w(TAG, "backup manager monitor is null unable to send event");
-                }
+                Slog.w(TAG, "backup manager monitor is null unable to send event");
             }
         } catch (RemoteException e) {
             mMonitor = null;
-            if (DEBUG) {
-                Slog.w(TAG, "backup manager monitor went away");
-            }
+            Slog.w(TAG, "backup manager monitor went away");
         }
     }
 

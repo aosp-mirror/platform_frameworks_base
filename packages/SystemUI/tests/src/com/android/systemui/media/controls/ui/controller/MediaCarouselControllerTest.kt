@@ -39,7 +39,6 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
-import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
@@ -79,9 +78,7 @@ import com.google.common.truth.Truth.assertThat
 import java.util.Locale
 import javax.inject.Provider
 import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -114,7 +111,6 @@ private val SMARTSPACE_KEY = "smartspace"
 private const val PAUSED_LOCAL = "paused local"
 private const val PLAYING_LOCAL = "playing local"
 
-@ExperimentalCoroutinesApi
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(ParameterizedAndroidJunit4::class)
@@ -215,7 +211,6 @@ class MediaCarouselControllerTest(flags: FlagsParameterization) : SysuiTestCase(
         verify(mediaHostStatesManager).addCallback(capture(hostStateCallback))
         whenever(mediaControlPanelFactory.get()).thenReturn(panel)
         whenever(panel.mediaViewController).thenReturn(mediaViewController)
-        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
         MediaPlayerData.clear()
         FakeExecutor.exhaustExecutors(bgExecutor)
         FakeExecutor.exhaustExecutors(uiExecutor)
@@ -834,47 +829,6 @@ class MediaCarouselControllerTest(flags: FlagsParameterization) : SysuiTestCase(
         verify(pageIndicator, times(4)).setNumPages(any())
     }
 
-    @DisableSceneContainer
-    @Test
-    fun testRecommendation_persistentEnabled_newSmartspaceLoaded_updatesSort() {
-        verify(mediaDataManager).addListener(capture(listener))
-
-        testRecommendation_persistentEnabled_inactiveSmartspaceDataLoaded_isAdded()
-
-        // When an update to existing smartspace data is loaded
-        listener.value.onSmartspaceMediaDataLoaded(
-            SMARTSPACE_KEY,
-            EMPTY_SMARTSPACE_MEDIA_DATA.copy(isActive = true),
-            true,
-        )
-
-        // Then the carousel is updated
-        assertTrue(MediaPlayerData.playerKeys().elementAt(0).data.active)
-        assertTrue(MediaPlayerData.visiblePlayerKeys().elementAt(0).data.active)
-    }
-
-    @DisableSceneContainer
-    @Test
-    fun testRecommendation_persistentEnabled_inactiveSmartspaceDataLoaded_isAdded() {
-        verify(mediaDataManager).addListener(capture(listener))
-
-        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
-
-        // When inactive smartspace data is loaded
-        listener.value.onSmartspaceMediaDataLoaded(
-            SMARTSPACE_KEY,
-            EMPTY_SMARTSPACE_MEDIA_DATA,
-            false,
-        )
-
-        // Then it is added to the carousel with correct state
-        assertTrue(MediaPlayerData.playerKeys().elementAt(0).isSsMediaRec)
-        assertFalse(MediaPlayerData.playerKeys().elementAt(0).data.active)
-
-        assertTrue(MediaPlayerData.visiblePlayerKeys().elementAt(0).isSsMediaRec)
-        assertFalse(MediaPlayerData.visiblePlayerKeys().elementAt(0).data.active)
-    }
-
     @Test
     fun testOnLockDownMode_hideMediaCarousel() {
         whenever(keyguardUpdateMonitor.isUserInLockdown(context.userId)).thenReturn(true)
@@ -900,7 +854,6 @@ class MediaCarouselControllerTest(flags: FlagsParameterization) : SysuiTestCase(
     @Test
     fun testKeyguardGone_showMediaCarousel() =
         kosmos.testScope.runTest {
-            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
             var updatedVisibility = false
             mediaCarouselController.updateHostVisibility = { updatedVisibility = true }
             mediaCarouselController.mediaCarousel = mediaCarousel
@@ -923,7 +876,6 @@ class MediaCarouselControllerTest(flags: FlagsParameterization) : SysuiTestCase(
     @Test
     fun testKeyguardGone_showMediaCarousel_scene_container() =
         kosmos.testScope.runTest {
-            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
             var updatedVisibility = false
             mediaCarouselController.updateHostVisibility = { updatedVisibility = true }
             mediaCarouselController.mediaCarousel = mediaCarousel
@@ -940,7 +892,6 @@ class MediaCarouselControllerTest(flags: FlagsParameterization) : SysuiTestCase(
     @Test
     fun keyguardShowing_notAllowedOnLockscreen_updateVisibility() {
         kosmos.testScope.runTest {
-            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
             var updatedVisibility = false
             mediaCarouselController.updateHostVisibility = { updatedVisibility = true }
             mediaCarouselController.mediaCarousel = mediaCarousel
@@ -969,7 +920,6 @@ class MediaCarouselControllerTest(flags: FlagsParameterization) : SysuiTestCase(
     @Test
     fun keyguardShowing_allowedOnLockscreen_updateVisibility() {
         kosmos.testScope.runTest {
-            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
             var updatedVisibility = false
             mediaCarouselController.updateHostVisibility = { updatedVisibility = true }
             mediaCarouselController.mediaCarousel = mediaCarousel

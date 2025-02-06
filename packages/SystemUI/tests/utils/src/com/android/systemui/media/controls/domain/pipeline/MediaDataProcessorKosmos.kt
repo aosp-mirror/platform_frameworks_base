@@ -31,9 +31,7 @@ import com.android.systemui.media.controls.shared.model.SmartspaceMediaDataProvi
 import com.android.systemui.media.controls.util.fakeMediaControllerFactory
 import com.android.systemui.media.controls.util.mediaFlags
 import com.android.systemui.media.controls.util.mediaUiEventLogger
-import com.android.systemui.plugins.activityStarter
 import com.android.systemui.util.Utils
-import com.android.systemui.util.settings.fakeSettings
 import com.android.systemui.util.time.systemClock
 
 val Kosmos.mediaDataProcessor by
@@ -49,12 +47,10 @@ val Kosmos.mediaDataProcessor by
             mediaControllerFactory = fakeMediaControllerFactory,
             broadcastDispatcher = broadcastDispatcher,
             dumpManager = dumpManager,
-            activityStarter = activityStarter,
             smartspaceMediaDataProvider = SmartspaceMediaDataProvider(),
             useMediaResumption = Utils.useMediaResumption(applicationContext),
             useQsMediaPlayer = Utils.useQsMediaPlayer(applicationContext),
             systemClock = systemClock,
-            secureSettings = fakeSettings,
             mediaFlags = mediaFlags,
             logger = mediaUiEventLogger,
             smartspaceManager = SmartspaceManager(applicationContext),

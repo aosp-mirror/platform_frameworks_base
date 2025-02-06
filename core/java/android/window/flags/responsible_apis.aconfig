@@ -81,3 +81,10 @@ flag {
     description: "Strict mode violation triggered by grace period usage"
     bug: "384807495"
 }
+
+flag {
+    name: "bal_clear_allowlist_duration"
+    namespace: "responsible_apis"
+    description: "Clear the allowlist duration when clearAllowBgActivityStarts is called"
+    bug: "322159724"
+}

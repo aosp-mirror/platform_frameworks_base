@@ -18,6 +18,10 @@ package com.android.systemui.statusbar.chips.casttootherdevice.ui.view
 
 import android.content.DialogInterface
 import android.content.applicationContext
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import android.view.View
+import android.view.Window
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -33,18 +37,19 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.CastDevice
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class EndGenericCastToOtherDeviceDialogDelegateTest : SysuiTestCase() {
     private val kosmos = Kosmos().also { it.testCase = this }
     private val sysuiDialog = mock<SystemUIDialog>()
@@ -132,7 +137,7 @@ class EndGenericCastToOtherDeviceDialogDelegateTest : SysuiTestCase() {
             verify(sysuiDialog)
                 .setPositiveButton(
                     eq(R.string.cast_to_other_device_stop_dialog_button),
-                    clickListener.capture()
+                    clickListener.capture(),
                 )
 
             // Verify that clicking the button stops the recording
@@ -143,6 +148,36 @@ class EndGenericCastToOtherDeviceDialogDelegateTest : SysuiTestCase() {
 
             assertThat(kosmos.fakeMediaRouterRepository.lastStoppedDevice).isEqualTo(device)
         }
+
+    @Test
+    @EnableFlags(com.android.media.projection.flags.Flags.FLAG_SHOW_STOP_DIALOG_POST_CALL_END)
+    fun accessibilityDataSensitive_flagEnabled_appliesSetting() {
+        createAndSetDelegate()
+
+        val window = mock<Window>()
+        val decorView = mock<View>()
+        whenever(sysuiDialog.window).thenReturn(window)
+        whenever(window.decorView).thenReturn(decorView)
+
+        underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
+
+        verify(decorView).setAccessibilityDataSensitive(View.ACCESSIBILITY_DATA_SENSITIVE_YES)
+    }
+
+    @Test
+    @DisableFlags(com.android.media.projection.flags.Flags.FLAG_SHOW_STOP_DIALOG_POST_CALL_END)
+    fun accessibilityDataSensitive_flagDisabled_doesNotApplySetting() {
+        createAndSetDelegate()
+
+        val window = mock<Window>()
+        val decorView = mock<View>()
+        whenever(sysuiDialog.window).thenReturn(window)
+        whenever(window.decorView).thenReturn(decorView)
+
+        underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
+
+        verify(decorView, never()).setAccessibilityDataSensitive(any())
+    }
 
     private fun createAndSetDelegate(deviceName: String? = null) {
         underTest =

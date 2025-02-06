@@ -67,7 +67,7 @@ class SatelliteDialogUtilsTest {
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    fun mayStartSatelliteWarningDialog_satelliteIsOn_showWarningDialog() = runBlocking {
+    fun mayStartSatelliteWarningDialog_satelliteIsOn_showWarningDialog(): Unit = runBlocking {
         `when`(satelliteManager.registerForModemStateChanged(any(), any()))
                 .thenAnswer { invocation ->
                     val callback = invocation

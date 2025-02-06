@@ -17,17 +17,12 @@
 package com.android.systemui.scene.ui.composable.transitions
 
 import androidx.compose.animation.core.tween
-import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.TransitionBuilder
 import com.android.systemui.communal.ui.compose.AllElements
-import com.android.systemui.communal.ui.compose.Communal
 
 fun TransitionBuilder.dreamToCommunalTransition() {
     spec = tween(durationMillis = 1000)
 
-    // Translate communal hub grid from the end direction.
-    translate(Communal.Elements.Grid, Edge.End)
-
-    // Fade all communal hub elements.
-    timestampRange(startMillis = 167, endMillis = 334) { fade(AllElements) }
+    // Fade in all communal hub elements.
+    fade(AllElements)
 }

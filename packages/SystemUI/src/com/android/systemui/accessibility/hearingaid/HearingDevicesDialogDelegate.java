@@ -286,9 +286,7 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         if (com.android.settingslib.flags.Flags.hearingDevicesAmbientVolumeControl()) {
             setupAmbientControls();
         }
-        if (com.android.systemui.Flags.hearingDevicesDialogRelatedTools()) {
-            setupRelatedToolsView(dialog);
-        }
+        setupRelatedToolsView(dialog);
     }
 
     @Override

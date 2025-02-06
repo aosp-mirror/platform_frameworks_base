@@ -30,6 +30,8 @@ import com.android.internal.widget.remotecompose.core.operations.layout.Componen
 import com.android.internal.widget.remotecompose.core.operations.layout.DecoratorComponent;
 import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponent;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
@@ -52,6 +54,11 @@ public class ComponentVisibilityOperation extends Operation
         return "ComponentVisibilityOperation(" + mVisibilityId + ")";
     }
 
+    /**
+     * Returns the serialized name for this operation
+     *
+     * @return the serialized name
+     */
     @NonNull
     public String serializedName() {
         return "COMPONENT_VISIBILITY";
@@ -74,6 +81,12 @@ public class ComponentVisibilityOperation extends Operation
     @Override
     public void write(@NonNull WireBuffer buffer) {}
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param valueId visibility value
+     */
     public static void apply(@NonNull WireBuffer buffer, int valueId) {
         buffer.start(OP_CODE);
         buffer.writeInt(valueId);
@@ -132,4 +145,13 @@ public class ComponentVisibilityOperation extends Operation
     @Override
     public void layout(
             @NonNull RemoteContext context, Component component, float width, float height) {}
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER)
+                .add("type", "ComponentVisibilityOperation")
+                .add("visibilityId", mVisibilityId)
+                .add("visibility", mVisibility);
+    }
 }

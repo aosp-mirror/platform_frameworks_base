@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.core
 
 import android.content.testableContext
+import android.view.mockIWindowManager
 import com.android.systemui.bouncer.domain.interactor.primaryBouncerInteractor
 import com.android.systemui.display.data.repository.displayRepository
 import com.android.systemui.display.data.repository.displayScopeRepository
@@ -84,5 +85,6 @@ val Kosmos.multiDisplayStatusBarStarter by
             multiDisplayAutoHideControllerStore,
             privacyDotWindowControllerStore,
             lightBarControllerStore,
+            mockIWindowManager,
         )
     }

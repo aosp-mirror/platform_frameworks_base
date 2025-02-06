@@ -200,6 +200,16 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
         }
     }
 
+    @Override
+    public void onSystemReady() {
+        for (int i = 0; i < mConfigurations.length; i++) {
+            final DeviceStatePredicateWrapper configuration = mConfigurations[i];
+            if (configuration.mInitializer != null) {
+                configuration.mInitializer.run();
+            }
+        }
+    }
+
     private void assertUniqueDeviceStateIdentifier(DeviceStatePredicateWrapper configuration) {
         if (mStateConditions.get(configuration.mDeviceState.getIdentifier()) != null) {
             throw new IllegalArgumentException("Device state configurations must have unique"
@@ -461,11 +471,12 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
         private final DeviceState mDeviceState;
         private final Predicate<FoldableDeviceStateProvider> mActiveStatePredicate;
         private final Predicate<FoldableDeviceStateProvider> mAvailabilityPredicate;
+        private final Runnable mInitializer;
 
         private DeviceStatePredicateWrapper(
                 @NonNull DeviceState deviceState,
                 @NonNull Predicate<FoldableDeviceStateProvider> predicate) {
-            this(deviceState, predicate, ALLOWED);
+            this(deviceState, predicate, ALLOWED, /* initializer= */ null);
         }
 
         /** Create a configuration with availability and availability predicate **/
@@ -473,10 +484,28 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
                 @NonNull DeviceState deviceState,
                 @NonNull Predicate<FoldableDeviceStateProvider> activeStatePredicate,
                 @NonNull Predicate<FoldableDeviceStateProvider> availabilityPredicate) {
+            this(deviceState, activeStatePredicate, availabilityPredicate, /* initializer= */ null);
+        }
+
+        /**
+         * Create a configuration with availability and availability predicate.
+         * @param deviceState specifies device state for this configuration
+         * @param activeStatePredicate predicate that should return 'true' when this device state
+         *                             wants to be and can be active
+         * @param availabilityPredicate predicate that should return 'true' only when this device
+         *                              state is allowed
+         * @param initializer callback that will be called when the system is booted and ready
+         */
+        private DeviceStatePredicateWrapper(
+                @NonNull DeviceState deviceState,
+                @NonNull Predicate<FoldableDeviceStateProvider> activeStatePredicate,
+                @NonNull Predicate<FoldableDeviceStateProvider> availabilityPredicate,
+                @Nullable Runnable initializer) {
 
             mDeviceState = deviceState;
             mActiveStatePredicate = activeStatePredicate;
             mAvailabilityPredicate = availabilityPredicate;
+            mInitializer = initializer;
         }
 
         /** Create a configuration with an active state predicate **/
@@ -485,6 +514,16 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
                 @NonNull Predicate<FoldableDeviceStateProvider> activeStatePredicate
         ) {
             return new DeviceStatePredicateWrapper(deviceState, activeStatePredicate);
+        }
+
+        /** Create a configuration with an active state predicate and an initializer **/
+        public static DeviceStatePredicateWrapper createConfig(
+                @NonNull DeviceState deviceState,
+                @NonNull Predicate<FoldableDeviceStateProvider> activeStatePredicate,
+                @Nullable Runnable initializer
+        ) {
+            return new DeviceStatePredicateWrapper(deviceState, activeStatePredicate, ALLOWED,
+                    initializer);
         }
 
         /** Create a configuration with availability and active state predicate **/

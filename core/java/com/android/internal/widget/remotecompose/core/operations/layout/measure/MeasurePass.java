@@ -28,10 +28,17 @@ import java.util.HashMap;
 public class MeasurePass {
     @NonNull HashMap<Integer, ComponentMeasure> mList = new HashMap<>();
 
+    /** Clear the MeasurePass */
     public void clear() {
         mList.clear();
     }
 
+    /**
+     * Add a ComponentMeasure to the MeasurePass
+     *
+     * @param measure the ComponentMeasure to add
+     * @throws Exception
+     */
     public void add(@NonNull ComponentMeasure measure) throws Exception {
         if (measure.mId == -1) {
             throw new Exception("Component has no id!");
@@ -39,10 +46,22 @@ public class MeasurePass {
         mList.put(measure.mId, measure);
     }
 
+    /**
+     * Returns true if the current MeasurePass already contains a ComponentMeasure for the given id.
+     *
+     * @param id
+     * @return
+     */
     public boolean contains(int id) {
         return mList.containsKey(id);
     }
 
+    /**
+     * return the ComponentMeasure associated with a given component
+     *
+     * @param c the Component
+     * @return the associated ComponentMeasure
+     */
     public @NonNull ComponentMeasure get(@NonNull Component c) {
         if (!mList.containsKey(c.getComponentId())) {
             ComponentMeasure measure =
@@ -54,6 +73,12 @@ public class MeasurePass {
         return mList.get(c.getComponentId());
     }
 
+    /**
+     * Returns the ComponentMeasure associated with the id, creating one if none exists.
+     *
+     * @param id the component id
+     * @return the associated ComponentMeasure
+     */
     public @NonNull ComponentMeasure get(int id) {
         if (!mList.containsKey(id)) {
             ComponentMeasure measure =

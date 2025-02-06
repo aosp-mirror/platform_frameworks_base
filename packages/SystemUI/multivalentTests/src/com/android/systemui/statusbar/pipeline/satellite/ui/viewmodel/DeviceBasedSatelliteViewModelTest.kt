@@ -36,7 +36,6 @@ import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkMode
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
@@ -45,7 +44,6 @@ import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.mock
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {

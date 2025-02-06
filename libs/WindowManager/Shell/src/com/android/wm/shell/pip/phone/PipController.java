@@ -22,7 +22,6 @@ import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_PIP_TRANSITION;
-import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN;
@@ -32,6 +31,7 @@ import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTI
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_USER_RESIZE;
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
+import static com.android.wm.shell.pip.PipTransitionController.ANIM_TYPE_ALPHA;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -1317,14 +1317,14 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public Rect startSwipePipToHome(ComponentName componentName, ActivityInfo activityInfo,
-                PictureInPictureParams pictureInPictureParams, int launcherRotation,
-                Rect keepClearArea) {
+        public Rect startSwipePipToHome(ActivityManager.RunningTaskInfo taskInfo,
+                int launcherRotation, Rect keepClearArea) {
             Rect[] result = new Rect[1];
             executeRemoteCallWithTaskPermission(mController, "startSwipePipToHome",
                     (controller) -> {
-                        result[0] = controller.startSwipePipToHome(componentName, activityInfo,
-                                pictureInPictureParams, launcherRotation, keepClearArea);
+                        result[0] = controller.startSwipePipToHome(taskInfo.topActivity,
+                                taskInfo.topActivityInfo, taskInfo.pictureInPictureParams,
+                                launcherRotation, keepClearArea);
                     }, true /* blocking */);
             return result[0];
         }

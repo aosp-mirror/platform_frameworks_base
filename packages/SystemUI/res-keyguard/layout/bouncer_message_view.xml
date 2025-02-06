@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/keyguard_lock_padding"
-        android:focusable="true"
+        android:focusable="false"
          />
 
     <com.android.keyguard.BouncerKeyguardMessageArea
@@ -30,6 +30,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/secondary_message_padding"
-        android:focusable="true" />
+        android:focusable="false" />
 
 </merge>

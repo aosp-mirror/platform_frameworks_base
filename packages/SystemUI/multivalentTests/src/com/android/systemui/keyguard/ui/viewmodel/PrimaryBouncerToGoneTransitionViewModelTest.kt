@@ -66,11 +66,7 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
             runCurrent()
 
             keyguardTransitionRepository.sendTransitionSteps(
-                listOf(
-                    step(0f, TransitionState.STARTED),
-                    step(0.3f),
-                    step(0.6f),
-                ),
+                listOf(step(0f, TransitionState.STARTED), step(0.3f), step(0.6f)),
                 testScope,
             )
 
@@ -87,11 +83,7 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
             whenever(primaryBouncerInteractor.willRunDismissFromKeyguard()).thenReturn(true)
 
             keyguardTransitionRepository.sendTransitionSteps(
-                listOf(
-                    step(0f, TransitionState.STARTED),
-                    step(0.3f),
-                    step(0.6f),
-                ),
+                listOf(step(0f, TransitionState.STARTED), step(0.3f), step(0.6f)),
                 testScope,
             )
 
@@ -149,7 +141,8 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     @Test
     fun notificationAlpha() =
         testScope.runTest {
-            val values by collectValues(underTest.notificationAlpha)
+            val values by
+                collectValues(underTest.notificationAlpha(ViewStateAccessor(alpha = { 0.5f })))
             runCurrent()
 
             keyguardTransitionRepository.sendTransitionSteps(
@@ -158,7 +151,7 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
                 testScope,
             )
 
-            assertThat(values[0]).isEqualTo(1f)
+            assertThat(values[0]).isEqualTo(0.5f)
             assertThat(values[1]).isEqualTo(0f)
             // Should always finish with 1f to show HUNs
             assertThat(values[2]).isEqualTo(1f)
@@ -167,7 +160,7 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     @Test
     fun notificationAlpha_leaveShadeOpen() =
         testScope.runTest {
-            val values by collectValues(underTest.notificationAlpha)
+            val values by collectValues(underTest.notificationAlpha(ViewStateAccessor()))
             runCurrent()
 
             sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(true)
@@ -185,14 +178,14 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
 
     private fun step(
         value: Float,
-        state: TransitionState = TransitionState.RUNNING
+        state: TransitionState = TransitionState.RUNNING,
     ): TransitionStep {
         return TransitionStep(
             from = KeyguardState.PRIMARY_BOUNCER,
             to = KeyguardState.GONE,
             value = value,
             transitionState = state,
-            ownerName = "PrimaryBouncerToGoneTransitionViewModelTest"
+            ownerName = "PrimaryBouncerToGoneTransitionViewModelTest",
         )
     }
 }

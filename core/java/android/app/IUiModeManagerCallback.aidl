@@ -24,4 +24,5 @@ package android.app;
 */
 oneway interface IUiModeManagerCallback {
   void notifyContrastChanged(float contrast);
+  void notifyForceInvertStateChanged(int forceInvertState);
 }

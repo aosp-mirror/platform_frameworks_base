@@ -116,8 +116,8 @@ public class SessionTracker implements CoreStartable {
         mSessionToInstanceId.put(type, instanceId);
 
         if (UserManager.isVisibleBackgroundUsersEnabled() && !mProcessWrapper.isSystemUser()
-                && !mProcessWrapper.isForegroundUser()) {
-            // TODO: b/341604160 - Support visible background users properly.
+                && !mProcessWrapper.isForegroundUserOrProfile()) {
+            // TODO(b/341604160): Support visible background users properly.
             if (DEBUG) {
                 Log.d(TAG, "Status bar manager is disabled for visible background users");
             }
@@ -155,8 +155,8 @@ public class SessionTracker implements CoreStartable {
                 mUiEventLogger.log(endSessionUiEvent, instanceId);
             }
             if (UserManager.isVisibleBackgroundUsersEnabled() && !mProcessWrapper.isSystemUser()
-                    && !mProcessWrapper.isForegroundUser()) {
-                // TODO: b/341604160 - Support visible background users properly.
+                    && !mProcessWrapper.isForegroundUserOrProfile()) {
+                // TODO(b/341604160): Support visible background users properly.
                 if (DEBUG) {
                     Log.d(TAG, "Status bar manager is disabled for visible background users");
                 }

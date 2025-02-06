@@ -18,9 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.keyguard.data.repository.devicePostureRepository
 import com.android.systemui.kosmos.Kosmos
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 val Kosmos.devicePostureInteractor by
     Kosmos.Fixture {
         DevicePostureInteractor(

@@ -92,6 +92,11 @@ public class ComponentMeasure {
                 component.mVisibility);
     }
 
+    /**
+     * Initialize this ComponentMeasure from another ComponentMeasure instance.
+     *
+     * @param m the ComponentMeasure to copy from
+     */
     public void copyFrom(@NonNull ComponentMeasure m) {
         mX = m.mX;
         mY = m.mY;
@@ -100,6 +105,12 @@ public class ComponentMeasure {
         mVisibility = m.mVisibility;
     }
 
+    /**
+     * Returns true if the ComponentMeasure passed is identical to us
+     *
+     * @param m the ComponentMeasure to check
+     * @return true if the passed ComponentMeasure is identical to ourself
+     */
     public boolean same(@NonNull ComponentMeasure m) {
         return mX == m.mX && mY == m.mY && mW == m.mW && mH == m.mH && mVisibility == m.mVisibility;
     }

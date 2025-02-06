@@ -53,6 +53,7 @@ import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler
+import com.android.systemui.statusbar.layout.mockStatusBarContentInsetsProvider
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import com.android.systemui.statusbar.policy.BatteryController
@@ -152,7 +153,8 @@ class KeyguardStatusBarViewControllerTest : SysuiTestCase() {
         shadeViewStateProvider = TestShadeViewStateProvider()
 
         Mockito.`when`(
-                kosmos.statusBarContentInsetsProvider.getStatusBarContentInsetsForCurrentRotation()
+                kosmos.mockStatusBarContentInsetsProvider
+                    .getStatusBarContentInsetsForCurrentRotation()
             )
             .thenReturn(Insets.of(0, 0, 0, 0))
 
@@ -160,8 +162,8 @@ class KeyguardStatusBarViewControllerTest : SysuiTestCase() {
 
         Mockito.`when`(iconManagerFactory.create(ArgumentMatchers.any(), ArgumentMatchers.any()))
             .thenReturn(iconManager)
-        Mockito.`when`(statusBarContentInsetsProviderStore.defaultDisplay)
-            .thenReturn(kosmos.statusBarContentInsetsProvider)
+        Mockito.`when`(statusBarContentInsetsProviderStore.forDisplay(context.displayId))
+            .thenReturn(kosmos.mockStatusBarContentInsetsProvider)
         allowTestableLooperAsMainThread()
         looper.runWithLooper {
             keyguardStatusBarView =
@@ -178,6 +180,7 @@ class KeyguardStatusBarViewControllerTest : SysuiTestCase() {
     private fun createController(): KeyguardStatusBarViewController {
         return KeyguardStatusBarViewController(
             kosmos.testDispatcher,
+            context,
             keyguardStatusBarView,
             carrierTextController,
             configurationController,

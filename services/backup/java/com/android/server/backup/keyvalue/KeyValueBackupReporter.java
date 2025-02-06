@@ -54,13 +54,10 @@ import java.util.List;
 @VisibleForTesting
 public class KeyValueBackupReporter {
     @VisibleForTesting static final String TAG = "KeyValueBackupTask";
-    private static final boolean DEBUG = BackupManagerService.DEBUG;
-    @VisibleForTesting static final boolean MORE_DEBUG = BackupManagerService.MORE_DEBUG;
+    @VisibleForTesting static final boolean DEBUG = BackupManagerService.DEBUG;
 
     static void onNewThread(String threadName) {
-        if (DEBUG) {
-            Slog.d(TAG, "Spinning thread " + threadName);
-        }
+        Slog.d(TAG, "Spinning thread " + threadName);
     }
 
     private final UserBackupManagerService mBackupManagerService;
@@ -87,9 +84,7 @@ public class KeyValueBackupReporter {
     }
 
     void onSkipBackup() {
-        if (DEBUG) {
-            Slog.d(TAG, "Skipping backup since one is already in progress");
-        }
+        Slog.d(TAG, "Skipping backup since one is already in progress");
     }
 
     void onEmptyQueueAtStart() {
@@ -97,9 +92,7 @@ public class KeyValueBackupReporter {
     }
 
     void onQueueReady(List<String> queue) {
-        if (DEBUG) {
-            Slog.v(TAG, "Beginning backup of " + queue.size() + " targets");
-        }
+        Slog.d(TAG, "Beginning backup of " + queue.size() + " targets");
     }
 
     void onTransportReady(String transportName) {
@@ -167,7 +160,7 @@ public class KeyValueBackupReporter {
     }
 
     void onAgentError(String packageName) {
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.i(TAG, "Agent failure for " + packageName + ", re-staging");
         }
         BackupObserverUtils.sendBackupOnPackageResult(
@@ -175,13 +168,11 @@ public class KeyValueBackupReporter {
     }
 
     void onExtractAgentData(String packageName) {
-        if (DEBUG) {
-            Slog.d(TAG, "Invoking agent on " + packageName);
-        }
+        Slog.d(TAG, "Invoking agent on " + packageName);
     }
 
     void onAgentFilesReady(File backupDataFile) {
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.d(TAG, "Data file: " + backupDataFile);
         }
     }
@@ -216,7 +207,7 @@ public class KeyValueBackupReporter {
                                 null, BackupManagerMonitor.EXTRA_LOG_ILLEGAL_KEY, key));
         BackupObserverUtils.sendBackupOnPackageResult(
                 mObserver, packageName, BackupManager.ERROR_AGENT_FAILURE);
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.i(
                     TAG,
                     "Agent failure for " + packageName + " with illegal key " + key + ", dropped");
@@ -232,7 +223,7 @@ public class KeyValueBackupReporter {
     }
 
     void onWriteWidgetData(boolean priorStateExists, @Nullable byte[] widgetState) {
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.i(
                     TAG,
                     "Checking widget update: state="
@@ -243,13 +234,13 @@ public class KeyValueBackupReporter {
     }
 
     void onTransportPerformBackup(String packageName) {
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.v(TAG, "Sending non-empty data to transport for " + packageName);
         }
     }
 
     void onEmptyData(PackageInfo packageInfo) {
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.i(TAG, "No backup data written, not calling transport");
         }
         mBackupManagerMonitorEventSender.monitorEvent(
@@ -273,7 +264,7 @@ public class KeyValueBackupReporter {
     }
 
     void onPackageBackupQuotaExceeded(String packageName) {
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.d(TAG, "Package " + packageName + " hit quota limit on key-value backup");
         }
         BackupObserverUtils.sendBackupOnPackageResult(
@@ -319,7 +310,7 @@ public class KeyValueBackupReporter {
     }
 
     void onCancel() {
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.v(TAG, "Cancel received");
         }
     }
@@ -363,7 +354,7 @@ public class KeyValueBackupReporter {
     }
 
     void onRevertTask() {
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.i(TAG, "Reverting backup queue, re-staging everything");
         }
     }
@@ -373,7 +364,7 @@ public class KeyValueBackupReporter {
     }
 
     void onRemoteCallReturned(RemoteResult result, String logIdentifier) {
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.v(TAG, "Agent call " + logIdentifier + " returned " + result);
         }
     }
@@ -388,7 +379,7 @@ public class KeyValueBackupReporter {
 
     void onTransportNotInitialized(@Nullable String transportName) {
         EventLog.writeEvent(EventLogTags.BACKUP_RESET, transportName);
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.d(TAG, "Transport requires initialization, rerunning");
         }
     }

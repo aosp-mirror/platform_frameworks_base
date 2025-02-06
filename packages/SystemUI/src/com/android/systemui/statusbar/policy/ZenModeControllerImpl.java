@@ -20,7 +20,6 @@ import android.app.AlarmManager;
 import android.app.Flags;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,7 +34,6 @@ import android.os.UserManager;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.service.notification.ZenModeConfig;
-import android.service.notification.ZenModeConfig.ZenRule;
 import android.text.format.DateFormat;
 import android.util.Log;
 
@@ -92,7 +90,6 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
                     }
                     final IntentFilter filter = new IntentFilter(
                             AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
-                    filter.addAction(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED);
                     mBroadcastDispatcher.registerReceiver(mReceiver, filter, null,
                             UserHandle.of(mUserId));
                     mRegistered = true;
@@ -156,21 +153,6 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
     }
 
     @Override
-    public boolean isVolumeRestricted() {
-        return mUserManager.hasUserRestriction(UserManager.DISALLOW_ADJUST_VOLUME,
-                UserHandle.of(mUserId));
-    }
-
-    @Override
-    public boolean areNotificationsHiddenInShade() {
-        if (mZenMode != Global.ZEN_MODE_OFF) {
-            return (mConsolidatedNotificationPolicy.suppressedVisualEffects
-                    & NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST) != 0;
-        }
-        return false;
-    }
-
-    @Override
     public void addCallback(@NonNull Callback callback) {
         synchronized (mCallbacksLock) {
             Log.d(TAG, "Added callback " + callback.getClass());
@@ -206,11 +188,6 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
     }
 
     @Override
-    public ZenRule getManualRule() {
-        return mConfig == null ? null : mConfig.manualRule;
-    }
-
-    @Override
     public ZenModeConfig getConfig() {
         return mConfig;
     }
@@ -228,17 +205,6 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
     }
 
     @Override
-    public ComponentName getEffectsSuppressor() {
-        return NotificationManager.from(mContext).getEffectsSuppressor();
-    }
-
-    @Override
-    public boolean isCountdownConditionSupported() {
-        return NotificationManager.from(mContext)
-                .isSystemConditionProviderEnabled(ZenModeConfig.COUNTDOWN_PATH);
-    }
-
-    @Override
     public int getCurrentUser() {
         return mUserTracker.getUserId();
     }
@@ -247,20 +213,12 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
         fireSafeChange(Callback::onNextAlarmChanged);
     }
 
-    private void fireEffectsSuppressorChanged() {
-        fireSafeChange(Callback::onEffectsSupressorChanged);
-    }
-
     private void fireZenChanged(int zen) {
         fireSafeChange(c -> c.onZenChanged(zen));
     }
 
     private void fireZenAvailableChanged(boolean available) {
         fireSafeChange(c -> c.onZenAvailableChanged(available));
-    }
-
-    private void fireManualRuleChanged(ZenRule rule) {
-        fireSafeChange(c -> c.onManualRuleChanged(rule));
     }
 
     private void fireConsolidatedPolicyChanged(NotificationManager.Policy policy) {
@@ -302,15 +260,9 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
     protected void updateZenModeConfig() {
         final ZenModeConfig config = mNoMan.getZenModeConfig();
         if (Objects.equals(config, mConfig)) return;
-        final ZenRule oldRule = mConfig != null ? mConfig.manualRule : null;
         mConfig = config;
         mZenUpdateTime = System.currentTimeMillis();
         fireConfigChanged(config);
-
-        final ZenRule newRule = config != null ? config.manualRule : null;
-        if (!Objects.equals(oldRule, newRule)) {
-            fireManualRuleChanged(newRule);
-        }
 
         final NotificationManager.Policy consolidatedPolicy =
                 mNoMan.getConsolidatedNotificationPolicy();
@@ -326,9 +278,6 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
         public void onReceive(Context context, Intent intent) {
             if (AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED.equals(intent.getAction())) {
                 fireNextAlarmChanged();
-            }
-            if (NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED.equals(intent.getAction())) {
-                fireEffectsSuppressorChanged();
             }
         }
     };

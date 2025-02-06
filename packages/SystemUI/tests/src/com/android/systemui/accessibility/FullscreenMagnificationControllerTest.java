@@ -30,9 +30,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -51,11 +48,8 @@ import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.Interpolator;
 import android.window.InputTransferToken;
 
-import androidx.annotation.NonNull;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
@@ -80,19 +74,17 @@ import java.util.function.Supplier;
 @RunWith(AndroidTestingRunner.class)
 @FlakyTest(bugId = 385115361)
 public class FullscreenMagnificationControllerTest extends SysuiTestCase {
-    private static final long ANIMATION_DURATION_MS = 100L;
     private static final long WAIT_TIMEOUT_S = 5L * HW_TIMEOUT_MULTIPLIER;
-    private static final long ANIMATION_TIMEOUT_MS =
-            5L * ANIMATION_DURATION_MS * HW_TIMEOUT_MULTIPLIER;
 
     private static final String UNIQUE_DISPLAY_ID_PRIMARY = "000";
     private static final String UNIQUE_DISPLAY_ID_SECONDARY = "111";
     private static final int CORNER_RADIUS_PRIMARY = 10;
     private static final int CORNER_RADIUS_SECONDARY = 20;
+    private static final int DISABLED = 0;
+    private static final int ENABLED = 3;
 
     private FullscreenMagnificationController mFullscreenMagnificationController;
     private SurfaceControlViewHost mSurfaceControlViewHost;
-    private ValueAnimator mShowHideBorderAnimator;
     private SurfaceControl.Transaction mTransaction;
     private TestableWindowManager mWindowManager;
     @Mock
@@ -136,7 +128,6 @@ public class FullscreenMagnificationControllerTest extends SysuiTestCase {
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
 
         mTransaction = new SurfaceControl.Transaction();
-        mShowHideBorderAnimator = spy(newNullTargetObjectAnimator());
         mFullscreenMagnificationController = new FullscreenMagnificationController(
                 mContext,
                 mContext.getMainThreadHandler(),
@@ -146,141 +137,68 @@ public class FullscreenMagnificationControllerTest extends SysuiTestCase {
                 mContext.getSystemService(WindowManager.class),
                 mIWindowManager,
                 scvhSupplier,
-                mTransaction,
-                mShowHideBorderAnimator);
+                mTransaction);
     }
 
     @After
     public void tearDown() {
-        getInstrumentation().runOnMainSync(
-                () -> mFullscreenMagnificationController
-                        .onFullscreenMagnificationActivationChanged(false));
+        getInstrumentation().runOnMainSync(() ->
+                mFullscreenMagnificationController.cleanUpBorder());
     }
 
     @Test
-    public void enableFullscreenMagnification_visibleBorder()
+    public void createShowTargetAnimator_runAnimator_alphaIsEqualToOne() {
+        View view = new View(mContext);
+        view.setAlpha(0f);
+        ValueAnimator animator = mFullscreenMagnificationController.createShowTargetAnimator(view);
+        animator.end();
+        assertThat(view.getAlpha()).isEqualTo(1f);
+    }
+
+    @Test
+    public void createHideTargetAnimator_runAnimator_alphaIsEqualToZero() {
+        View view = new View(mContext);
+        view.setAlpha(1f);
+        ValueAnimator animator = mFullscreenMagnificationController.createHideTargetAnimator(view);
+        animator.end();
+        assertThat(view.getAlpha()).isEqualTo(0f);
+    }
+
+    @Test
+    public void enableFullscreenMagnification_stateEnabled()
             throws InterruptedException, RemoteException {
-        CountDownLatch transactionCommittedLatch = new CountDownLatch(1);
-        CountDownLatch animationEndLatch = new CountDownLatch(1);
-        mTransaction.addTransactionCommittedListener(
-                Runnable::run, transactionCommittedLatch::countDown);
-        mShowHideBorderAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                animationEndLatch.countDown();
-            }
-        });
-        getInstrumentation().runOnMainSync(() ->
-                //Enable fullscreen magnification
-                mFullscreenMagnificationController
-                        .onFullscreenMagnificationActivationChanged(true));
-        assertWithMessage("Failed to wait for transaction committed")
-                .that(transactionCommittedLatch.await(WAIT_TIMEOUT_S, TimeUnit.SECONDS))
-                .isTrue();
-        assertWithMessage("Failed to wait for animation to be finished")
-                .that(animationEndLatch.await(ANIMATION_TIMEOUT_MS, TimeUnit.MILLISECONDS))
-                .isTrue();
-        verify(mShowHideBorderAnimator).start();
+        enableFullscreenMagnificationAndWaitForTransactionAndAnimation();
+
+        assertThat(mFullscreenMagnificationController.getState()).isEqualTo(ENABLED);
         verify(mIWindowManager)
                 .watchRotation(any(IRotationWatcher.class), eq(Display.DEFAULT_DISPLAY));
-        assertThat(mSurfaceControlViewHost.getView().isVisibleToUser()).isTrue();
     }
 
     @Test
-    public void disableFullscreenMagnification_reverseAnimationAndReleaseScvh()
+    public void disableFullscreenMagnification_stateDisabled()
             throws InterruptedException, RemoteException {
-        CountDownLatch transactionCommittedLatch = new CountDownLatch(1);
-        CountDownLatch enableAnimationEndLatch = new CountDownLatch(1);
-        CountDownLatch disableAnimationEndLatch = new CountDownLatch(1);
-        mTransaction.addTransactionCommittedListener(
-                Runnable::run, transactionCommittedLatch::countDown);
-        mShowHideBorderAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
-                if (isReverse) {
-                    disableAnimationEndLatch.countDown();
-                } else {
-                    enableAnimationEndLatch.countDown();
-                }
-            }
+        enableFullscreenMagnificationAndWaitForTransactionAndAnimation();
+
+        getInstrumentation().runOnMainSync(() -> {
+            // Disable fullscreen magnification
+            mFullscreenMagnificationController
+                    .onFullscreenMagnificationActivationChanged(false);
         });
-        getInstrumentation().runOnMainSync(() ->
-                //Enable fullscreen magnification
-                mFullscreenMagnificationController
-                        .onFullscreenMagnificationActivationChanged(true));
-        assertWithMessage("Failed to wait for transaction committed")
-                .that(transactionCommittedLatch.await(WAIT_TIMEOUT_S, TimeUnit.SECONDS))
-                .isTrue();
-        assertWithMessage("Failed to wait for enabling animation to be finished")
-                .that(enableAnimationEndLatch.await(ANIMATION_TIMEOUT_MS, TimeUnit.MILLISECONDS))
-                .isTrue();
-        verify(mShowHideBorderAnimator).start();
+        waitForIdleSync();
+        assertThat(mFullscreenMagnificationController.mShowHideBorderAnimator).isNotNull();
+        mFullscreenMagnificationController.mShowHideBorderAnimator.end();
+        waitForIdleSync();
 
-        getInstrumentation().runOnMainSync(() ->
-                // Disable fullscreen magnification
-                mFullscreenMagnificationController
-                        .onFullscreenMagnificationActivationChanged(false));
-
-        assertWithMessage("Failed to wait for disabling animation to be finished")
-                .that(disableAnimationEndLatch.await(ANIMATION_TIMEOUT_MS, TimeUnit.MILLISECONDS))
-                .isTrue();
-        verify(mShowHideBorderAnimator).reverse();
+        assertThat(mFullscreenMagnificationController.getState()).isEqualTo(DISABLED);
         verify(mSurfaceControlViewHost).release();
         verify(mIWindowManager).removeRotationWatcher(any(IRotationWatcher.class));
     }
 
     @Test
-    public void onFullscreenMagnificationActivationChangeTrue_deactivating_reverseAnimator()
-            throws InterruptedException {
-        // Simulate the hiding border animation is running
-        when(mShowHideBorderAnimator.isRunning()).thenReturn(true);
-        CountDownLatch transactionCommittedLatch = new CountDownLatch(1);
-        CountDownLatch animationEndLatch = new CountDownLatch(1);
-        mTransaction.addTransactionCommittedListener(
-                Runnable::run, transactionCommittedLatch::countDown);
-        mShowHideBorderAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                animationEndLatch.countDown();
-            }
-        });
-
-        getInstrumentation().runOnMainSync(
-                () -> mFullscreenMagnificationController
-                            .onFullscreenMagnificationActivationChanged(true));
-
-        assertWithMessage("Failed to wait for transaction committed")
-                .that(transactionCommittedLatch.await(WAIT_TIMEOUT_S, TimeUnit.SECONDS))
-                .isTrue();
-        assertWithMessage("Failed to wait for animation to be finished")
-                .that(animationEndLatch.await(ANIMATION_TIMEOUT_MS, TimeUnit.MILLISECONDS))
-                        .isTrue();
-        verify(mShowHideBorderAnimator).reverse();
-    }
-
-    @Test
     public void onScreenSizeChanged_activated_borderChangedToExpectedSize()
             throws InterruptedException {
-        CountDownLatch transactionCommittedLatch = new CountDownLatch(1);
-        CountDownLatch animationEndLatch = new CountDownLatch(1);
-        mTransaction.addTransactionCommittedListener(
-                Runnable::run, transactionCommittedLatch::countDown);
-        mShowHideBorderAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                animationEndLatch.countDown();
-            }
-        });
-        getInstrumentation().runOnMainSync(() ->
-                //Enable fullscreen magnification
-                mFullscreenMagnificationController
-                        .onFullscreenMagnificationActivationChanged(true));
-        assertWithMessage("Failed to wait for transaction committed")
-                .that(transactionCommittedLatch.await(WAIT_TIMEOUT_S, TimeUnit.SECONDS))
-                .isTrue();
-        assertWithMessage("Failed to wait for animation to be finished")
-                .that(animationEndLatch.await(ANIMATION_TIMEOUT_MS, TimeUnit.MILLISECONDS))
-                .isTrue();
+        enableFullscreenMagnificationAndWaitForTransactionAndAnimation();
+
         final Rect testWindowBounds = new Rect(
                 mWindowManager.getCurrentWindowMetrics().getBounds());
         testWindowBounds.set(testWindowBounds.left, testWindowBounds.top,
@@ -304,29 +222,8 @@ public class FullscreenMagnificationControllerTest extends SysuiTestCase {
     @Test
     public void enableFullscreenMagnification_applyPrimaryCornerRadius()
             throws InterruptedException {
-        CountDownLatch transactionCommittedLatch = new CountDownLatch(1);
-        CountDownLatch animationEndLatch = new CountDownLatch(1);
-        mTransaction.addTransactionCommittedListener(
-                Runnable::run, transactionCommittedLatch::countDown);
-        mShowHideBorderAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                animationEndLatch.countDown();
-            }
-        });
+        enableFullscreenMagnificationAndWaitForTransactionAndAnimation();
 
-        getInstrumentation().runOnMainSync(() ->
-                //Enable fullscreen magnification
-                mFullscreenMagnificationController
-                        .onFullscreenMagnificationActivationChanged(true));
-        assertWithMessage("Failed to wait for transaction committed")
-                .that(transactionCommittedLatch.await(WAIT_TIMEOUT_S, TimeUnit.SECONDS))
-                .isTrue();
-        assertWithMessage("Failed to wait for animation to be finished")
-                .that(animationEndLatch.await(ANIMATION_TIMEOUT_MS, TimeUnit.MILLISECONDS))
-                .isTrue();
-
-        // Verify the initial corner radius is applied
         GradientDrawable backgroundDrawable =
                 (GradientDrawable) mSurfaceControlViewHost.getView().getBackground();
         assertThat(backgroundDrawable.getCornerRadius()).isEqualTo(CORNER_RADIUS_PRIMARY);
@@ -334,28 +231,8 @@ public class FullscreenMagnificationControllerTest extends SysuiTestCase {
 
     @EnableFlags(Flags.FLAG_UPDATE_CORNER_RADIUS_ON_DISPLAY_CHANGED)
     @Test
-    public void onDisplayChanged_updateCornerRadiusToSecondary() throws InterruptedException {
-        CountDownLatch transactionCommittedLatch = new CountDownLatch(1);
-        CountDownLatch animationEndLatch = new CountDownLatch(1);
-        mTransaction.addTransactionCommittedListener(
-                Runnable::run, transactionCommittedLatch::countDown);
-        mShowHideBorderAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                animationEndLatch.countDown();
-            }
-        });
-
-        getInstrumentation().runOnMainSync(() ->
-                //Enable fullscreen magnification
-                mFullscreenMagnificationController
-                        .onFullscreenMagnificationActivationChanged(true));
-        assertWithMessage("Failed to wait for transaction committed")
-                .that(transactionCommittedLatch.await(WAIT_TIMEOUT_S, TimeUnit.SECONDS))
-                .isTrue();
-        assertWithMessage("Failed to wait for animation to be finished")
-                .that(animationEndLatch.await(ANIMATION_TIMEOUT_MS, TimeUnit.MILLISECONDS))
-                .isTrue();
+    public void onDisplayChanged_applyCornerRadiusToBorder() throws InterruptedException {
+        enableFullscreenMagnificationAndWaitForTransactionAndAnimation();
 
         ArgumentCaptor<DisplayManager.DisplayListener> displayListenerCaptor =
                 ArgumentCaptor.forClass(DisplayManager.DisplayListener.class);
@@ -372,22 +249,34 @@ public class FullscreenMagnificationControllerTest extends SysuiTestCase {
                 .addOverride(
                         com.android.internal.R.dimen.rounded_corner_radius,
                         CORNER_RADIUS_SECONDARY);
+
         getInstrumentation().runOnMainSync(() ->
                 displayListenerCaptor.getValue().onDisplayChanged(Display.DEFAULT_DISPLAY));
         waitForIdleSync();
+
         // Verify the corner radius is updated
         GradientDrawable backgroundDrawable2 =
                 (GradientDrawable) mSurfaceControlViewHost.getView().getBackground();
         assertThat(backgroundDrawable2.getCornerRadius()).isEqualTo(CORNER_RADIUS_SECONDARY);
     }
 
+    private void enableFullscreenMagnificationAndWaitForTransactionAndAnimation()
+            throws InterruptedException {
+        CountDownLatch transactionCommittedLatch = new CountDownLatch(1);
+        mTransaction.addTransactionCommittedListener(
+                Runnable::run, transactionCommittedLatch::countDown);
 
-    private ValueAnimator newNullTargetObjectAnimator() {
-        final ValueAnimator animator =
-                ObjectAnimator.ofFloat(/* target= */ null, View.ALPHA, 0f, 1f);
-        Interpolator interpolator = new DecelerateInterpolator(2.5f);
-        animator.setInterpolator(interpolator);
-        animator.setDuration(ANIMATION_DURATION_MS);
-        return animator;
+        getInstrumentation().runOnMainSync(() ->
+                //Enable fullscreen magnification
+                mFullscreenMagnificationController
+                        .onFullscreenMagnificationActivationChanged(true));
+
+        assertWithMessage("Failed to wait for transaction committed")
+                .that(transactionCommittedLatch.await(WAIT_TIMEOUT_S, TimeUnit.SECONDS))
+                .isTrue();
+        waitForIdleSync();
+        assertThat(mFullscreenMagnificationController.mShowHideBorderAnimator).isNotNull();
+        mFullscreenMagnificationController.mShowHideBorderAnimator.end();
+        waitForIdleSync();
     }
 }

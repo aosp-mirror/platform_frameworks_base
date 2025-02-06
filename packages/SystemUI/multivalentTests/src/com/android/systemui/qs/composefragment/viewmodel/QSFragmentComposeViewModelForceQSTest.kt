@@ -23,7 +23,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,7 +32,6 @@ import platform.test.runner.parameterized.Parameters
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 @RunWithLooper
-@OptIn(ExperimentalCoroutinesApi::class)
 class QSFragmentComposeViewModelForceQSTest(private val testData: TestData) :
     AbstractQSFragmentComposeViewModelTest() {
 

@@ -30,7 +30,6 @@ import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.coroutines.collectLastValue
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -45,7 +44,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class FingerprintRepositoryImplTest : SysuiTestCase() {

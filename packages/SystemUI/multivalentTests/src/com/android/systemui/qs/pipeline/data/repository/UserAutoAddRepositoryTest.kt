@@ -12,7 +12,6 @@ import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -23,7 +22,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)

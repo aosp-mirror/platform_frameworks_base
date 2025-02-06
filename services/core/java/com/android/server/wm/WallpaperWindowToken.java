@@ -89,8 +89,9 @@ class WallpaperWindowToken extends WindowToken {
             // Similar to Task.prepareSurfaces, outside of transitions we need to apply visibility
             // changes directly. In transitions the transition player will take care of applying the
             // visibility change.
-            if (!mTransitionController.inTransition(this)) {
-                getSyncTransaction().setVisibility(mSurfaceControl, isVisible());
+            if (!mTransitionController.isCollecting(this)
+                    && !mTransitionController.isPlayingTarget(this)) {
+                getPendingTransaction().setVisibility(mSurfaceControl, isVisible());
             }
         }
     }

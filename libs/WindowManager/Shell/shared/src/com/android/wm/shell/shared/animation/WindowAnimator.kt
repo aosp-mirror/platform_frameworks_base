@@ -22,6 +22,7 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.util.DisplayMetrics
 import android.util.TypedValue
+import android.view.Choreographer
 import android.view.SurfaceControl
 import android.view.animation.Interpolator
 import android.window.TransitionInfo
@@ -82,6 +83,7 @@ object WindowAnimator {
                 transaction
                     .setPosition(leash, animPos.x, animPos.y)
                     .setScale(leash, animScale, animScale)
+                    .setFrameTimeline(Choreographer.getInstance().vsyncId)
                     .apply()
             }
         }

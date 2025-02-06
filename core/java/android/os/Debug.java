@@ -2783,4 +2783,12 @@ public final class Debug
      */
     public static native boolean logAllocatorStats();
 
+    /**
+     * Return the amount of memory (in kB) allocated by kernel drivers through CMA.
+     * @return a non-negative value or -1 on error.
+     *
+     * @hide
+     */
+    public static native long getKernelCmaUsageKb();
+
 }

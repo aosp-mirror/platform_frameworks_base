@@ -16,12 +16,20 @@
 
 package com.android.systemui.volume.dialog.sliders.shared.model
 
-import android.view.MotionEvent
-
 /** Models input event happened on the Volume Slider */
 sealed interface SliderInputEvent {
 
-    data class Touch(val event: MotionEvent) : SliderInputEvent
+    interface Touch : SliderInputEvent {
+
+        val x: Float
+        val y: Float
+
+        data class Start(override val x: Float, override val y: Float) : Touch
+
+        data class Move(override val x: Float, override val y: Float) : Touch
+
+        data class End(override val x: Float, override val y: Float) : Touch
+    }
 
     data object Button : SliderInputEvent
 }

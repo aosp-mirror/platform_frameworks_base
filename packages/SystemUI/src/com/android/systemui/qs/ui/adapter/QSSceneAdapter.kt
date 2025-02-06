@@ -38,7 +38,7 @@ import com.android.systemui.qs.dagger.QSSceneComponent
 import com.android.systemui.res.R
 import com.android.systemui.settings.brightness.MirrorController
 import com.android.systemui.shade.ShadeDisplayAware
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.util.kotlin.sample
 import java.io.PrintWriter
@@ -202,7 +202,7 @@ class QSSceneAdapterImpl
 constructor(
     private val qsSceneComponentFactory: QSSceneComponent.Factory,
     private val qsImplProvider: Provider<QSImpl>,
-    shadeInteractor: ShadeInteractor,
+    shadeModeInteractor: ShadeModeInteractor,
     displayStateInteractor: DisplayStateInteractor,
     dumpManager: DumpManager,
     @Main private val mainDispatcher: CoroutineDispatcher,
@@ -215,7 +215,7 @@ constructor(
     constructor(
         qsSceneComponentFactory: QSSceneComponent.Factory,
         qsImplProvider: Provider<QSImpl>,
-        shadeInteractor: ShadeInteractor,
+        shadeModeInteractor: ShadeModeInteractor,
         displayStateInteractor: DisplayStateInteractor,
         dumpManager: DumpManager,
         @Main dispatcher: CoroutineDispatcher,
@@ -224,7 +224,7 @@ constructor(
     ) : this(
         qsSceneComponentFactory,
         qsImplProvider,
-        shadeInteractor,
+        shadeModeInteractor,
         displayStateInteractor,
         dumpManager,
         dispatcher,
@@ -331,8 +331,8 @@ constructor(
                 }
             }
             launch {
-                shadeInteractor.shadeMode.collect {
-                    qsImpl.value?.setInSplitShade(it == ShadeMode.Split)
+                shadeModeInteractor.shadeMode.collect {
+                    qsImpl.value?.setInSplitShade(it is ShadeMode.Split)
                 }
             }
             launch {

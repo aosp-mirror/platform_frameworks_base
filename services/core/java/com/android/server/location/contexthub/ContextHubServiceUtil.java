@@ -499,9 +499,11 @@ import java.util.List;
     /* package */
     static HubMessage createHubMessage(Message message) {
         boolean isReliable = (message.flags & Message.FLAG_REQUIRES_DELIVERY_STATUS) != 0;
-        return new HubMessage.Builder(message.type, message.content)
+        HubMessage outMessage = new HubMessage.Builder(message.type, message.content)
                 .setResponseRequired(isReliable)
                 .build();
+        outMessage.setMessageSequenceNumber(message.sequenceNumber);
+        return outMessage;
     }
 
     /**

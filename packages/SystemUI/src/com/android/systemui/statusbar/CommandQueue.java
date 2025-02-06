@@ -111,7 +111,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_COLLAPSE_PANELS                   = 4 << MSG_SHIFT;
     private static final int MSG_EXPAND_SETTINGS                   = 5 << MSG_SHIFT;
     private static final int MSG_SYSTEM_BAR_CHANGED                = 6 << MSG_SHIFT;
-    private static final int MSG_DISPLAY_READY                     = 7 << MSG_SHIFT;
+    private static final int MSG_DISPLAY_ADD_SYSTEM_DECORATIONS    = 7 << MSG_SHIFT;
     private static final int MSG_SHOW_IME_BUTTON                   = 8 << MSG_SHIFT;
     private static final int MSG_TOGGLE_RECENT_APPS                = 9 << MSG_SHIFT;
     private static final int MSG_PRELOAD_RECENT_APPS               = 10 << MSG_SHIFT;
@@ -184,6 +184,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_SET_SPLITSCREEN_FOCUS = 81 << MSG_SHIFT;
     private static final int MSG_TOGGLE_QUICK_SETTINGS_PANEL = 82 << MSG_SHIFT;
     private static final int MSG_WALLET_ACTION_LAUNCH_GESTURE = 83 << MSG_SHIFT;
+    private static final int MSG_DISPLAY_REMOVE_SYSTEM_DECORATIONS = 85 << MSG_SHIFT;
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
     public static final int FLAG_EXCLUDE_RECENTS_PANEL = 1 << 1;
@@ -271,12 +272,12 @@ public class CommandQueue extends IStatusBar.Stub implements
         default void toggleQuickSettingsPanel() { }
 
         /**
-         * Called to notify IME window status changes.
+         * Sets the new IME window status.
          *
-         * @param displayId The id of the display to notify.
-         * @param vis IME visibility.
-         * @param backDisposition Disposition mode of back button.
-         * @param showImeSwitcher {@code true} to show IME switch button.
+         * @param displayId The id of the display to which the IME is bound.
+         * @param vis The IME window visibility.
+         * @param backDisposition The IME back disposition mode.
+         * @param showImeSwitcher Whether the IME Switcher button should be shown.
          */
         default void setImeWindowStatus(int displayId, @ImeWindowVisibility int vis,
                 @BackDispositionMode int backDisposition, boolean showImeSwitcher) { }
@@ -413,9 +414,15 @@ public class CommandQueue extends IStatusBar.Stub implements
         }
 
         /**
-         * @see IStatusBar#onDisplayReady(int)
+         * @see IStatusBar#onDisplayAddSystemDecorations(int)
          */
-        default void onDisplayReady(int displayId) {
+        default void onDisplayAddSystemDecorations(int displayId) {
+        }
+
+        /**
+         * @see IStatusBar#onDisplayRemoveSystemDecorations(int)
+         */
+        default void onDisplayRemoveSystemDecorations(int displayId) {
         }
 
         /**
@@ -1191,9 +1198,17 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void onDisplayReady(int displayId) {
+    public void onDisplayAddSystemDecorations(int displayId) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_DISPLAY_READY, displayId, 0).sendToTarget();
+            mHandler.obtainMessage(MSG_DISPLAY_ADD_SYSTEM_DECORATIONS, displayId, 0).sendToTarget();
+        }
+    }
+
+    @Override
+    public void onDisplayRemoveSystemDecorations(int displayId) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_DISPLAY_REMOVE_SYSTEM_DECORATIONS, displayId, 0)
+                    .sendToTarget();
         }
     }
 
@@ -1510,6 +1525,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         mHandler.obtainMessage(MSG_ENTER_DESKTOP, args).sendToTarget();
     }
 
+
     private final class H extends Handler {
         private H(Looper l) {
             super(l);
@@ -1820,9 +1836,14 @@ public class CommandQueue extends IStatusBar.Stub implements
                         mCallbacks.get(i).showPinningEscapeToast();
                     }
                     break;
-                case MSG_DISPLAY_READY:
+                case MSG_DISPLAY_ADD_SYSTEM_DECORATIONS:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).onDisplayReady(msg.arg1);
+                        mCallbacks.get(i).onDisplayAddSystemDecorations(msg.arg1);
+                    }
+                    break;
+                case MSG_DISPLAY_REMOVE_SYSTEM_DECORATIONS:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).onDisplayRemoveSystemDecorations(msg.arg1);
                     }
                     break;
                 case MSG_RECENTS_ANIMATION_STATE_CHANGED:

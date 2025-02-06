@@ -19,7 +19,6 @@ package com.android.server.audio;
 import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_UNKNOWN;
 import static android.media.AudioSystem.DEVICE_NONE;
 import static android.media.AudioSystem.isBluetoothDevice;
-import static android.media.audio.Flags.automaticBtDeviceType;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
@@ -146,20 +145,11 @@ public final class AdiDeviceState {
     }
 
     public synchronized boolean isBtDeviceCategoryFixed() {
-        if (!automaticBtDeviceType()) {
-            // do nothing
-            return false;
-        }
-
         updateAudioDeviceCategory();
         return mAutoBtCategorySet;
     }
 
     public synchronized boolean updateAudioDeviceCategory() {
-        if (!automaticBtDeviceType()) {
-            // do nothing
-            return false;
-        }
         if (!isBluetoothDevice(mInternalDeviceType)) {
             return false;
         }

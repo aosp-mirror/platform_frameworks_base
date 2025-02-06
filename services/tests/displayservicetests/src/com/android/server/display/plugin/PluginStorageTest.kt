@@ -23,19 +23,21 @@ import org.junit.Test
 
 private val TEST_PLUGIN_TYPE1 = PluginType(String::class.java, "test_type1")
 private val TEST_PLUGIN_TYPE2 = PluginType(String::class.java, "test_type2")
+private val DISPLAY_ID_1 = "display_1"
+private val DISPLAY_ID_2 = "display_2"
 
 @SmallTest
 class PluginStorageTest {
 
-    val storage = PluginStorage()
+    var storage = PluginStorage(setOf(TEST_PLUGIN_TYPE1, TEST_PLUGIN_TYPE2))
 
     @Test
     fun testUpdateValue() {
         val type1Value = "value1"
         val testChangeListener = TestPluginChangeListener<String>()
-        storage.addListener(TEST_PLUGIN_TYPE1, testChangeListener)
+        storage.addListener(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, testChangeListener)
 
-        storage.updateValue(TEST_PLUGIN_TYPE1, type1Value)
+        storage.updateValue(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, type1Value)
 
         assertThat(testChangeListener.receivedValue).isEqualTo(type1Value)
     }
@@ -44,9 +46,9 @@ class PluginStorageTest {
     fun testAddListener() {
         val type1Value = "value1"
         val testChangeListener = TestPluginChangeListener<String>()
-        storage.updateValue(TEST_PLUGIN_TYPE1, type1Value)
+        storage.updateValue(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, type1Value)
 
-        storage.addListener(TEST_PLUGIN_TYPE1, testChangeListener)
+        storage.addListener(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, testChangeListener)
 
         assertThat(testChangeListener.receivedValue).isEqualTo(type1Value)
     }
@@ -55,10 +57,10 @@ class PluginStorageTest {
     fun testRemoveListener() {
         val type1Value = "value1"
         val testChangeListener = TestPluginChangeListener<String>()
-        storage.addListener(TEST_PLUGIN_TYPE1, testChangeListener)
-        storage.removeListener(TEST_PLUGIN_TYPE1, testChangeListener)
+        storage.addListener(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, testChangeListener)
+        storage.removeListener(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, testChangeListener)
 
-        storage.updateValue(TEST_PLUGIN_TYPE1, type1Value)
+        storage.updateValue(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, type1Value)
 
         assertThat(testChangeListener.receivedValue).isNull()
     }
@@ -68,10 +70,10 @@ class PluginStorageTest {
         val type1Value = "value1"
         val type2Value = "value2"
         val testChangeListener = TestPluginChangeListener<String>()
-        storage.updateValue(TEST_PLUGIN_TYPE1, type1Value)
-        storage.updateValue(TEST_PLUGIN_TYPE2, type2Value)
+        storage.updateValue(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, type1Value)
+        storage.updateValue(TEST_PLUGIN_TYPE2, DISPLAY_ID_1, type2Value)
 
-        storage.addListener(TEST_PLUGIN_TYPE1, testChangeListener)
+        storage.addListener(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, testChangeListener)
 
         assertThat(testChangeListener.receivedValue).isEqualTo(type1Value)
     }
@@ -81,13 +83,72 @@ class PluginStorageTest {
         val type1Value = "value1"
         val testChangeListener1 = TestPluginChangeListener<String>()
         val testChangeListener2 = TestPluginChangeListener<String>()
-        storage.addListener(TEST_PLUGIN_TYPE1, testChangeListener1)
-        storage.addListener(TEST_PLUGIN_TYPE2, testChangeListener2)
+        storage.addListener(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, testChangeListener1)
+        storage.addListener(TEST_PLUGIN_TYPE2, DISPLAY_ID_1, testChangeListener2)
 
-        storage.updateValue(TEST_PLUGIN_TYPE1, type1Value)
+        storage.updateValue(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, type1Value)
 
         assertThat(testChangeListener1.receivedValue).isEqualTo(type1Value)
         assertThat(testChangeListener2.receivedValue).isNull()
+    }
+
+    @Test
+    fun testDisabledPluginType() {
+        storage = PluginStorage(setOf(TEST_PLUGIN_TYPE2))
+        val type1Value = "value1"
+        val testChangeListener = TestPluginChangeListener<String>()
+        storage.updateValue(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, type1Value)
+
+        storage.addListener(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, testChangeListener)
+
+        assertThat(testChangeListener.receivedValue).isNull()
+    }
+
+    @Test
+    fun testUpdateGlobal_noDisplaySpecificValue() {
+        val type1Value = "value1"
+        val testChangeListener1 = TestPluginChangeListener<String>()
+        val testChangeListener2 = TestPluginChangeListener<String>()
+        storage.addListener(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, testChangeListener1)
+        storage.addListener(TEST_PLUGIN_TYPE1, DISPLAY_ID_2, testChangeListener2)
+
+        storage.updateGlobalValue(TEST_PLUGIN_TYPE1, type1Value)
+
+        assertThat(testChangeListener1.receivedValue).isEqualTo(type1Value)
+        assertThat(testChangeListener2.receivedValue).isEqualTo(type1Value)
+    }
+
+    @Test
+    fun testUpdateGlobal_withDisplaySpecificValue() {
+        val type1Value = "value1"
+        val type1GlobalValue = "value1Global"
+        val testChangeListener1 = TestPluginChangeListener<String>()
+        val testChangeListener2 = TestPluginChangeListener<String>()
+        storage.addListener(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, testChangeListener1)
+        storage.addListener(TEST_PLUGIN_TYPE1, DISPLAY_ID_2, testChangeListener2)
+
+        storage.updateValue(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, type1Value)
+        storage.updateGlobalValue(TEST_PLUGIN_TYPE1, type1GlobalValue)
+
+        assertThat(testChangeListener1.receivedValue).isEqualTo(type1Value)
+        assertThat(testChangeListener2.receivedValue).isEqualTo(type1GlobalValue)
+    }
+
+    @Test
+    fun testUpdateGlobal_withDisplaySpecificValueRemoved() {
+        val type1Value = "value1"
+        val type1GlobalValue = "value1Global"
+        val testChangeListener1 = TestPluginChangeListener<String>()
+        val testChangeListener2 = TestPluginChangeListener<String>()
+        storage.addListener(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, testChangeListener1)
+        storage.addListener(TEST_PLUGIN_TYPE1, DISPLAY_ID_2, testChangeListener2)
+
+        storage.updateValue(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, type1Value)
+        storage.updateGlobalValue(TEST_PLUGIN_TYPE1, type1GlobalValue)
+        storage.updateValue(TEST_PLUGIN_TYPE1, DISPLAY_ID_1, null)
+
+        assertThat(testChangeListener1.receivedValue).isEqualTo(type1GlobalValue)
+        assertThat(testChangeListener2.receivedValue).isEqualTo(type1GlobalValue)
     }
 
     private class TestPluginChangeListener<T> : PluginChangeListener<T> {

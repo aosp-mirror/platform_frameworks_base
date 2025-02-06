@@ -22,4 +22,5 @@ enum class CommunalBackgroundType(val value: Int) {
     STATIC_GRADIENT(1),
     ANIMATED(2),
     NONE(3),
+    BLUR(4),
 }

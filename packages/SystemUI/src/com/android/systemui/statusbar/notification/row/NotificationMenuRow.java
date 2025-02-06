@@ -42,6 +42,7 @@ import android.widget.FrameLayout.LayoutParams;
 
 import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.Flags;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.AlphaOptimizedImageView;
@@ -262,14 +263,14 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         mFeedbackItem = createFeedbackItem(mContext);
         NotificationEntry entry = mParent.getEntry();
         int personNotifType = mPeopleNotificationIdentifier.getPeopleNotificationType(entry);
-        if (android.app.Flags.notificationClassificationUi()
-                && SYSTEM_RESERVED_IDS.contains(entry.getChannel().getId())) {
-            // Bundled notification; create bundle-specific guts.
-            mInfoItem = createBundleItem(mContext);
-        } else if (personNotifType == PeopleNotificationIdentifier.TYPE_PERSON) {
+        if (personNotifType == PeopleNotificationIdentifier.TYPE_PERSON) {
             mInfoItem = createPartialConversationItem(mContext);
         } else if (personNotifType >= PeopleNotificationIdentifier.TYPE_FULL_PERSON) {
             mInfoItem = createConversationItem(mContext);
+        } else if (android.app.Flags.uiRichOngoing()
+                && Flags.permissionHelperUiRichOngoing()
+                && entry.getSbn().getNotification().isPromotedOngoing()) {
+            mInfoItem = createPromotedItem(mContext);
         } else {
             mInfoItem = createInfoItem(mContext);
         }
@@ -682,12 +683,12 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
                 R.drawable.ic_settings);
     }
 
-    static NotificationMenuItem createBundleItem(Context context) {
+    static NotificationMenuItem createPromotedItem(Context context) {
         Resources res = context.getResources();
         String infoDescription = res.getString(R.string.notification_menu_gear_description);
-        BundleNotificationInfo infoContent =
-                (BundleNotificationInfo) LayoutInflater.from(context).inflate(
-                        R.layout.bundle_notification_info, null, false);
+        PromotedNotificationInfo infoContent =
+                (PromotedNotificationInfo) LayoutInflater.from(context).inflate(
+                        R.layout.promoted_notification_info, null, false);
         return new NotificationMenuItem(context, infoDescription, infoContent,
                 R.drawable.ic_settings);
     }

@@ -17,11 +17,13 @@
 package com.android.systemui.common.ui.compose
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.res.stringResource
 import com.android.systemui.common.shared.model.ContentDescription
 
 /** Returns the loaded [String] or `null` if there isn't one. */
 @Composable
+@ReadOnlyComposable
 fun ContentDescription.load(): String? {
     return when (this) {
         is ContentDescription.Loaded -> description

@@ -17,7 +17,6 @@
 package com.android.systemui.util.coroutines
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -28,7 +27,6 @@ import org.junit.runner.Description
  * Overrides main dispatcher to passed testDispatcher. You probably want to use it when using
  * viewModelScope which has hardcoded main dispatcher.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class MainDispatcherRule(val testDispatcher: TestDispatcher) : TestWatcher() {
     override fun starting(description: Description) {
         Dispatchers.setMain(testDispatcher)

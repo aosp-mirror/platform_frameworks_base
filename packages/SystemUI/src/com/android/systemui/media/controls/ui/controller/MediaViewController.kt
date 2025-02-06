@@ -23,6 +23,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.provider.Settings
 import android.view.View
@@ -43,6 +44,10 @@ import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.view.GutsViewHolder
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.controls.ui.view.MediaViewHolder
+import com.android.systemui.media.controls.ui.view.MediaViewHolder.Companion.headlineSmallTF
+import com.android.systemui.media.controls.ui.view.MediaViewHolder.Companion.labelLargeTF
+import com.android.systemui.media.controls.ui.view.MediaViewHolder.Companion.labelMediumTF
+import com.android.systemui.media.controls.ui.view.MediaViewHolder.Companion.titleMediumTF
 import com.android.systemui.media.controls.ui.view.RecommendationViewHolder
 import com.android.systemui.media.controls.ui.viewmodel.MediaControlViewModel
 import com.android.systemui.media.controls.ui.viewmodel.SeekBarViewModel
@@ -186,6 +191,9 @@ constructor(
 
     var isSeekBarEnabled: Boolean = false
 
+    /** Whether font family should be updated. */
+    private var isFontUpdateAllowed: Boolean = true
+
     /** Not visible value for previous button when scrubbing */
     private var prevNotVisibleValue = ConstraintSet.GONE
     private var isPrevButtonAvailable = false
@@ -225,6 +233,12 @@ constructor(
                 if (isSeekBarEnabled == enabled) return
                 isSeekBarEnabled = enabled
                 MediaControlViewBinder.updateSeekBarVisibility(expandedLayout, isSeekBarEnabled)
+                mainExecutor.execute {
+                    if (!metadataAnimationHandler.isRunning) {
+                        // Trigger a state refresh so that we immediately update visibilities.
+                        refreshState()
+                    }
+                }
             }
         }
 
@@ -883,7 +897,6 @@ constructor(
             currentEndLocation = endLocation
             currentStartLocation = startLocation
             currentTransitionProgress = transitionProgress
-            logger.logMediaLocation("setCurrentState", startLocation, endLocation)
 
             val shouldAnimate = animateNextStateChange && !applyImmediately
 
@@ -900,6 +913,11 @@ constructor(
             // If the view isn't bound, we can drop the animation, otherwise we'll execute it
             animateNextStateChange = false
             if (transitionLayout == null) {
+                logger.logMediaLocation(
+                    "setCurrentState: view not bound",
+                    startLocation,
+                    endLocation,
+                )
                 return
             }
 
@@ -949,7 +967,7 @@ constructor(
                     )
             }
             logger.logMediaSize(
-                "setCurrentState (progress $transitionProgress)",
+                "setCurrentState $startLocation -> $endLocation (progress $transitionProgress)",
                 result.width,
                 result.height,
             )
@@ -973,13 +991,20 @@ constructor(
         val overrideSize = mediaHostStatesManager.carouselSizes[location]
         var overridden = false
         overrideSize?.let {
-            // To be safe we're using a maximum here. The override size should always be set
-            // properly though.
-            if (
+            if (SceneContainerFlag.isEnabled) {
+                result.measureWidth = widthInSceneContainerPx
+                result.measureHeight = heightInSceneContainerPx
+                overridden = true
+            } else if (
                 result.measureHeight != it.measuredHeight || result.measureWidth != it.measuredWidth
             ) {
+                // To be safe we're using a maximum here. The override size should always be set
+                // properly though.
                 result.measureHeight = Math.max(it.measuredHeight, result.measureHeight)
                 result.measureWidth = Math.max(it.measuredWidth, result.measureWidth)
+                overridden = true
+            }
+            if (overridden) {
                 // The measureHeight and the shown height should both be set to the overridden
                 // height
                 result.height = result.measureHeight
@@ -991,7 +1016,6 @@ constructor(
                         state.width = result.width
                     }
                 }
-                overridden = true
             }
         }
         if (overridden && state != null && state.squishFraction <= 1f) {
@@ -1016,7 +1040,22 @@ constructor(
                 expandedLayout.load(context, R.xml.media_recommendations_expanded)
             }
         }
+        readjustPlayPauseWidth()
         refreshState()
+    }
+
+    private fun readjustPlayPauseWidth() {
+        // TODO: move to xml file when flag is removed.
+        if (Flags.mediaControlsUiUpdate()) {
+            collapsedLayout.constrainWidth(
+                R.id.actionPlayPause,
+                context.resources.getDimensionPixelSize(R.dimen.qs_media_action_play_pause_width),
+            )
+            expandedLayout.constrainWidth(
+                R.id.actionPlayPause,
+                context.resources.getDimensionPixelSize(R.dimen.qs_media_action_play_pause_width),
+            )
+        }
     }
 
     /** Get a view state based on the width and height set by the scene */
@@ -1025,6 +1064,18 @@ constructor(
 
         if (state?.measurementInput == null) {
             return null
+        }
+
+        if (state.expansion == 1.0f) {
+            val height =
+                if (state.expandedMatchesParentHeight) {
+                    heightInSceneContainerPx
+                } else {
+                    context.resources.getDimensionPixelSize(
+                        R.dimen.qs_media_session_height_expanded
+                    )
+                }
+            setBackgroundHeights(height)
         }
 
         // Similar to obtainViewState: Let's create a new measurement
@@ -1065,11 +1116,43 @@ constructor(
         return viewState
     }
 
+    private fun updateFontPerLocation(viewHolder: MediaViewHolder?, location: Int) {
+        when (location) {
+            MediaHierarchyManager.LOCATION_COMMUNAL_HUB ->
+                viewHolder?.updateFontFamily(headlineSmallTF, titleMediumTF, labelMediumTF)
+            else -> viewHolder?.updateFontFamily(titleMediumTF, labelLargeTF, labelMediumTF)
+        }
+    }
+
+    private fun MediaViewHolder.updateFontFamily(
+        titleTF: Typeface,
+        artistTF: Typeface,
+        menuTF: Typeface,
+    ) {
+        gutsViewHolder.gutsText.setTypeface(menuTF)
+        gutsViewHolder.dismissText.setTypeface(menuTF)
+        titleText.setTypeface(titleTF)
+        artistText.setTypeface(artistTF)
+        seamlessText.setTypeface(menuTF)
+    }
+
     /**
      * Notify that the location is changing right now and a [setCurrentState] change is imminent.
      * This updates the width the view will me measured with.
      */
-    fun onLocationPreChange(@MediaLocation newLocation: Int) {
+    fun onLocationPreChange(
+        viewHolder: MediaViewHolder?,
+        @MediaLocation newLocation: Int,
+        @MediaLocation prevLocation: Int,
+    ) {
+        isFontUpdateAllowed =
+            isFontUpdateAllowed ||
+                MediaHierarchyManager.LOCATION_COMMUNAL_HUB == newLocation ||
+                MediaHierarchyManager.LOCATION_COMMUNAL_HUB == prevLocation
+        if (Flags.mediaControlsUiUpdate() && isFontUpdateAllowed) {
+            updateFontPerLocation(viewHolder, newLocation)
+            isFontUpdateAllowed = false
+        }
         obtainViewStateForLocation(newLocation)?.let { layoutController.setMeasureState(it) }
     }
 

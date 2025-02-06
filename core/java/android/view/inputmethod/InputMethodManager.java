@@ -391,7 +391,8 @@ public final class InputMethodManager {
      */
     @Deprecated
     @GuardedBy("sLock")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.VANILLA_ICE_CREAM,
+            publicAlternatives = "Use {@code Context#getSystemService(InputMethodManager.class)}.")
     static InputMethodManager sInstance;
 
     /**

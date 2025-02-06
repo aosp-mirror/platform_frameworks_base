@@ -40,7 +40,6 @@ import com.android.systemui.util.time.fakeSystemClock
 import com.android.systemui.util.wakelock.WakeLockFake
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
@@ -60,7 +59,6 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class HomeControlsDreamServiceTest : SysuiTestCase() {

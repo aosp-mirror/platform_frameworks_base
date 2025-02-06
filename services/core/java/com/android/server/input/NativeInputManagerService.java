@@ -130,11 +130,13 @@ interface NativeInputManagerService {
 
     void setPointerSpeed(int speed);
 
-    void setMousePointerAccelerationEnabled(int displayId, boolean enabled);
+    void setMouseScalingEnabled(int displayId, boolean enabled);
 
     void setMouseReverseVerticalScrollingEnabled(boolean enabled);
 
     void setMouseScrollingAccelerationEnabled(boolean enabled);
+
+    void setMouseScrollingSpeed(int speed);
 
     void setMouseSwapPrimaryButtonEnabled(boolean enabled);
 
@@ -155,6 +157,8 @@ interface NativeInputManagerService {
     void setTouchpadThreeFingerTapShortcutEnabled(boolean enabled);
 
     void setTouchpadSystemGesturesEnabled(boolean enabled);
+
+    void setTouchpadAccelerationEnabled(boolean enabled);
 
     void setShowTouches(boolean enabled);
 
@@ -419,13 +423,16 @@ interface NativeInputManagerService {
         public native void setPointerSpeed(int speed);
 
         @Override
-        public native void setMousePointerAccelerationEnabled(int displayId, boolean enabled);
+        public native void setMouseScalingEnabled(int displayId, boolean enabled);
 
         @Override
         public native void setMouseReverseVerticalScrollingEnabled(boolean enabled);
 
         @Override
         public native void setMouseScrollingAccelerationEnabled(boolean enabled);
+
+        @Override
+        public native void setMouseScrollingSpeed(int speed);
 
         @Override
         public native void setMouseSwapPrimaryButtonEnabled(boolean enabled);
@@ -456,6 +463,9 @@ interface NativeInputManagerService {
 
         @Override
         public native void setTouchpadSystemGesturesEnabled(boolean enabled);
+
+        @Override
+        public native void setTouchpadAccelerationEnabled(boolean enabled);
 
         @Override
         public native void setShowTouches(boolean enabled);

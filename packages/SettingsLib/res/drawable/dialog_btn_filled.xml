@@ -28,7 +28,7 @@
         <item>
             <shape android:shape="rectangle">
                 <corners android:radius="@dimen/button_corner_radius"/>
-                <solid android:color="?androidprv:attr/colorAccentPrimary"/>
+                <solid android:color="?androidprv:attr/colorAccent"/>
                 <padding android:left="@dimen/dialog_button_horizontal_padding"
                          android:top="@dimen/dialog_button_vertical_padding"
                          android:right="@dimen/dialog_button_horizontal_padding"

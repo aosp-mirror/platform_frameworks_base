@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.scene.domain.interactor
 
 import android.app.StatusBarManager
@@ -50,7 +48,6 @@ import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFl
 import com.android.systemui.statusbar.disableflags.shared.model.DisableFlagsModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -574,5 +571,51 @@ class SceneInteractorTest : SysuiTestCase() {
             underTest.changeScene(disabledScene, "reason")
 
             assertThat(currentScene).isNotEqualTo(disabledScene)
+        }
+
+    @Test
+    fun transitionAnimations() =
+        kosmos.runTest {
+            val isVisible by collectLastValue(underTest.isVisible)
+            assertThat(isVisible).isTrue()
+
+            underTest.setVisible(false, "test")
+            assertThat(isVisible).isFalse()
+
+            underTest.onTransitionAnimationStart()
+            // One animation is active, forced visible.
+            assertThat(isVisible).isTrue()
+
+            underTest.onTransitionAnimationEnd()
+            // No more active animations, not forced visible.
+            assertThat(isVisible).isFalse()
+
+            underTest.onTransitionAnimationStart()
+            // One animation is active, forced visible.
+            assertThat(isVisible).isTrue()
+
+            underTest.onTransitionAnimationCancelled()
+            // No more active animations, not forced visible.
+            assertThat(isVisible).isFalse()
+
+            underTest.setVisible(true, "test")
+            assertThat(isVisible).isTrue()
+
+            underTest.onTransitionAnimationStart()
+            underTest.onTransitionAnimationStart()
+            // Two animations are active, forced visible.
+            assertThat(isVisible).isTrue()
+
+            underTest.setVisible(false, "test")
+            // Two animations are active, forced visible.
+            assertThat(isVisible).isTrue()
+
+            underTest.onTransitionAnimationEnd()
+            // One animation is still active, forced visible.
+            assertThat(isVisible).isTrue()
+
+            underTest.onTransitionAnimationEnd()
+            // No more active animations, not forced visible.
+            assertThat(isVisible).isFalse()
         }
 }

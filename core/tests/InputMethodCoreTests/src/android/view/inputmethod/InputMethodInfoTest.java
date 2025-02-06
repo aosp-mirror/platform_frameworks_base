@@ -26,7 +26,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.Parcel;
-import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
 
@@ -124,7 +123,6 @@ public class InputMethodInfoTest {
     }
 
     @Test
-    @EnableFlags(android.companion.virtual.flags.Flags.FLAG_VDM_CUSTOM_IME)
     public void testIsVirtualDeviceOnly() throws Exception {
         final InputMethodInfo imi = buildInputMethodForTest(R.xml.ime_meta_virtual_device_only);
 

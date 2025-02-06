@@ -28,11 +28,14 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 import com.android.internal.widget.remotecompose.core.operations.layout.ActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.Serializable;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
 /** Capture a host action information. This can be triggered on eg. a click. */
-public class HostNamedActionOperation extends Operation implements ActionOperation {
+public class HostNamedActionOperation extends Operation implements ActionOperation, Serializable {
     private static final int OP_CODE = Operations.HOST_NAMED_ACTION;
 
     public static final int FLOAT_TYPE = 0;
@@ -57,6 +60,11 @@ public class HostNamedActionOperation extends Operation implements ActionOperati
         return "HostNamedActionOperation(" + mTextId + " : " + mValueId + ")";
     }
 
+    /**
+     * Name used during serialization
+     *
+     * @return the serialized name for this operation
+     */
     @NonNull
     public String serializedName() {
         return "HOST_NAMED_ACTION";
@@ -105,6 +113,14 @@ public class HostNamedActionOperation extends Operation implements ActionOperati
         context.runNamedAction(mTextId, value);
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param textId the text id of the action
+     * @param type the type of the action
+     * @param valueId the value id associated with the action
+     */
     public static void apply(@NonNull WireBuffer buffer, int textId, int type, int valueId) {
         buffer.start(OP_CODE);
         buffer.writeInt(textId);
@@ -135,5 +151,32 @@ public class HostNamedActionOperation extends Operation implements ActionOperati
                 .description("Host Named action. This operation represents a host action")
                 .field(INT, "TEXT_ID", "Named Host Action Text ID")
                 .field(INT, "VALUE_ID", "Named Host Action Value ID");
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER)
+                .add("type", "HostNamedActionOperation")
+                .add("textId", mTextId)
+                .add("actionType", getActionType(mType))
+                .add("valueId", mValueId);
+    }
+
+    private static String getActionType(int value) {
+        switch (value) {
+            case FLOAT_TYPE:
+                return "FLOAT_TYPE";
+            case INT_TYPE:
+                return "INT_TYPE";
+            case STRING_TYPE:
+                return "STRING_TYPE";
+            case FLOAT_ARRAY_TYPE:
+                return "FLOAT_ARRAY_TYPE";
+            case NONE_TYPE:
+                return "NONE_TYPE";
+            default:
+                return "INVALID_TYPE";
+        }
     }
 }

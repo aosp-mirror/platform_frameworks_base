@@ -317,11 +317,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         if ((systemAudioOnPowerOnProp == ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON)
                 || ((systemAudioOnPowerOnProp == USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON)
                 && lastSystemAudioControlStatus && isSystemAudioControlFeatureEnabled())) {
-            if (hasAction(SystemAudioInitiationActionFromAvr.class)) {
-                Slog.i(TAG, "SystemAudioInitiationActionFromAvr is in progress. Restarting.");
-                removeAction(SystemAudioInitiationActionFromAvr.class);
-            }
-            addAndStartAction(new SystemAudioInitiationActionFromAvr(this));
+            addAndStartAction(new SystemAudioInitiationActionFromAvr(this), true);
         }
     }
 
@@ -457,6 +453,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             HdmiLogger.debug("AVR device is not directly connected with TV");
             return Constants.ABORT_NOT_IN_CORRECT_MODE;
         } else {
+            // Action has been removed if it existed, do not attempt to remove again before start.
             addAndStartAction(new ArcInitiationActionFromAvr(this));
             return Constants.HANDLED;
         }
@@ -477,11 +474,9 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
                     && !getActions(ArcTerminationActionFromAvr.class).get(0).mCallbacks.isEmpty()) {
                 IHdmiControlCallback callback =
                         getActions(ArcTerminationActionFromAvr.class).get(0).mCallbacks.get(0);
-                removeAction(ArcTerminationActionFromAvr.class);
-                addAndStartAction(new ArcTerminationActionFromAvr(this, callback));
+                addAndStartAction(new ArcTerminationActionFromAvr(this, callback), true);
             } else {
-                removeAction(ArcTerminationActionFromAvr.class);
-                addAndStartAction(new ArcTerminationActionFromAvr(this));
+                addAndStartAction(new ArcTerminationActionFromAvr(this), true);
             }
             return Constants.HANDLED;
         }
@@ -1036,11 +1031,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     void onSystemAudioControlFeatureSupportChanged(boolean enabled) {
         setSystemAudioControlFeatureEnabled(enabled);
         if (enabled) {
-            if (hasAction(SystemAudioInitiationActionFromAvr.class)) {
-                Slog.i(TAG, "SystemAudioInitiationActionFromAvr is in progress. Restarting.");
-                removeAction(SystemAudioInitiationActionFromAvr.class);
-            }
-            addAndStartAction(new SystemAudioInitiationActionFromAvr(this));
+            addAndStartAction(new SystemAudioInitiationActionFromAvr(this), true);
         }
     }
 
@@ -1221,8 +1212,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         removeAction(ArcTerminationActionFromAvr.class);
         if (SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true)
                 && isDirectConnectToTv() && !isArcEnabled()) {
-            removeAction(ArcInitiationActionFromAvr.class);
-            addAndStartAction(new ArcInitiationActionFromAvr(this));
+            addAndStartAction(new ArcInitiationActionFromAvr(this), true);
         }
     }
 
@@ -1367,10 +1357,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         if (mService.isDeviceDiscoveryHandledByPlayback()) {
             return;
         }
-        if (hasAction(DeviceDiscoveryAction.class)) {
-            Slog.i(TAG, "Device Discovery Action is in progress. Restarting.");
-            removeAction(DeviceDiscoveryAction.class);
-        }
         DeviceDiscoveryAction action = new DeviceDiscoveryAction(this,
                 new DeviceDiscoveryCallback() {
                     @Override
@@ -1380,7 +1366,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
                         }
                     }
                 });
-        addAndStartAction(action);
+        addAndStartAction(action, true);
     }
 
     @Override

@@ -24,9 +24,8 @@ import com.android.systemui.kairos.internal.util.LogIndent
 import com.android.systemui.kairos.internal.util.hashString
 import com.android.systemui.kairos.internal.util.logDuration
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.Maybe.Just
-import com.android.systemui.kairos.util.Maybe.None
-import com.android.systemui.kairos.util.just
+import com.android.systemui.kairos.util.Maybe.Absent
+import com.android.systemui.kairos.util.Maybe.Present
 
 internal class MuxPromptNode<W, K, V>(
     val name: String?,
@@ -94,8 +93,8 @@ internal class MuxPromptNode<W, K, V>(
         val removes = mutableListOf<K>()
         patch.forEach { (k, newUpstream) ->
             when (newUpstream) {
-                is Just -> adds.add(k to newUpstream.value)
-                None -> removes.add(k)
+                is Present -> adds.add(k to newUpstream.value)
+                Absent -> removes.add(k)
             }
         }
 
@@ -311,7 +310,9 @@ internal inline fun <A> switchPromptImplSingle(
         switchPromptImpl(
             getStorage = { singleOf(getStorage()).asIterable() },
             getPatches = {
-                mapImpl(getPatches) { newEvents, _ -> singleOf(just(newEvents)).asIterable() }
+                mapImpl(getPatches) { newEvents, _ ->
+                    singleOf(Maybe.present(newEvents)).asIterable()
+                }
             },
             storeFactory = SingletonMapK.Factory(),
         )

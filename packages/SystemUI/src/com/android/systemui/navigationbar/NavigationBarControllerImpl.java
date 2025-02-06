@@ -18,6 +18,7 @@ package com.android.systemui.navigationbar;
 
 import static com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler.DEBUG_MISSING_GESTURE_TAG;
 import static com.android.systemui.shared.recents.utilities.Utilities.isLargeScreen;
+import static com.android.server.display.feature.flags.Flags.enableDisplayContentModeManagement;
 import static com.android.wm.shell.Flags.enableTaskbarNavbarUnification;
 import static com.android.wm.shell.Flags.enableTaskbarOnPhones;
 
@@ -51,7 +52,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.views.NavigationBar;
 import com.android.systemui.navigationbar.views.NavigationBarView;
-import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.recents.LauncherProxyService;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shared.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
@@ -114,7 +115,7 @@ public class NavigationBarControllerImpl implements
 
     @Inject
     public NavigationBarControllerImpl(Context context,
-            OverviewProxyService overviewProxyService,
+            LauncherProxyService launcherProxyService,
             NavigationModeController navigationModeController,
             SysUiState sysUiFlagsContainer,
             CommandQueue commandQueue,
@@ -144,7 +145,7 @@ public class NavigationBarControllerImpl implements
         mNavMode = navigationModeController.addListener(this);
         mNavBarHelper = navBarHelper;
         mTaskbarDelegate = taskbarDelegate;
-        mTaskbarDelegate.setDependencies(commandQueue, overviewProxyService,
+        mTaskbarDelegate.setDependencies(commandQueue, launcherProxyService,
                 navBarHelper, navigationModeController, sysUiFlagsContainer,
                 dumpManager, autoHideControllerStore.forDisplay(mContext.getDisplayId()),
                 lightBarController, pipOptional, backAnimation.orElse(null),
@@ -273,12 +274,20 @@ public class NavigationBarControllerImpl implements
     private final CommandQueue.Callbacks mCommandQueueCallbacks = new CommandQueue.Callbacks() {
         @Override
         public void onDisplayRemoved(int displayId) {
+            onDisplayRemoveSystemDecorations(displayId);
+        }
+
+        @Override
+        public void onDisplayRemoveSystemDecorations(int displayId) {
             removeNavigationBar(displayId);
             mHasNavBar.delete(displayId);
         }
 
         @Override
-        public void onDisplayReady(int displayId) {
+        public void onDisplayAddSystemDecorations(int displayId) {
+            if (enableDisplayContentModeManagement()) {
+                mHasNavBar.put(displayId, true);
+            }
             Display display = mDisplayManager.getDisplay(displayId);
             mIsLargeScreen = isLargeScreen(mContext);
             createNavigationBar(display, null /* savedState */, null /* result */);

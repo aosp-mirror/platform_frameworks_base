@@ -51,6 +51,7 @@ import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Flags;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
 import com.android.systemui.res.R;
@@ -86,18 +87,26 @@ public class NotificationSnooze extends LinearLayout
     private NotificationSwipeActionHelper mSnoozeListener;
     private StatusBarNotification mSbn;
 
-    private View mSnoozeView;
-    private TextView mSelectedOptionText;
+    @VisibleForTesting
+    public View mSnoozeView;
+    @VisibleForTesting
+    public TextView mSelectedOptionText;
     private TextView mUndoButton;
-    private ImageView mExpandButton;
-    private View mDivider;
-    private ViewGroup mSnoozeOptionContainer;
-    private List<SnoozeOption> mSnoozeOptions;
+    @VisibleForTesting
+    public ImageView mExpandButton;
+    @VisibleForTesting
+    public View mDivider;
+    @VisibleForTesting
+    public ViewGroup mSnoozeOptionContainer;
+    @VisibleForTesting
+    public List<SnoozeOption> mSnoozeOptions;
     private int mCollapsedHeight;
     private SnoozeOption mDefaultOption;
-    private SnoozeOption mSelectedOption;
+    @VisibleForTesting
+    public SnoozeOption mSelectedOption;
     private boolean mSnoozing;
-    private boolean mExpanded;
+    @VisibleForTesting
+    public boolean mExpanded;
     private AnimatorSet mExpandAnimation;
     private KeyValueListParser mParser;
 
@@ -334,7 +343,8 @@ public class NotificationSnooze extends LinearLayout
         }
     }
 
-    private void showSnoozeOptions(boolean show) {
+    @VisibleForTesting
+    public void showSnoozeOptions(boolean show) {
         int drawableId = show ? com.android.internal.R.drawable.ic_collapse_notification
                 : com.android.internal.R.drawable.ic_expand_notification;
         mExpandButton.setImageResource(drawableId);
@@ -381,7 +391,8 @@ public class NotificationSnooze extends LinearLayout
         mExpandAnimation.start();
     }
 
-    private void setSelected(SnoozeOption option, boolean userAction) {
+    @VisibleForTesting
+    public void setSelected(SnoozeOption option, boolean userAction) {
         if (option != mSelectedOption) {
             mSelectedOption = option;
             mSelectedOptionText.setText(option.getConfirmation());
@@ -466,7 +477,12 @@ public class NotificationSnooze extends LinearLayout
 
     @Override
     public boolean handleCloseControls(boolean save, boolean force) {
-        if (mExpanded && !force) {
+        if (Flags.notificationUndoGutsOnConfigChanged() && !save) {
+            // Undo changes and let the guts handle closing the view
+            mSelectedOption = null;
+            showSnoozeOptions(false);
+            return false;
+        } else if (mExpanded && !force) {
             // Collapse expanded state on outside touch
             showSnoozeOptions(false);
             return true;

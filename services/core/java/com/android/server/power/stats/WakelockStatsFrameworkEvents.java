@@ -272,14 +272,10 @@ public class WakelockStatsFrameworkEvents {
                 WakeLockStats extraTime =
                         openOverflowStats.computeIfAbsent(key, k -> new WakeLockStats());
 
-                stats.uptimeMillis += openWakeLockUptime + extraTime.uptimeMillis;
-
-                logger.logResult(
-                        key.getUid(),
-                        key.getTag(),
-                        key.getPowerManagerWakeLockLevel(),
-                        stats.uptimeMillis,
-                        stats.completedCount);
+                long totalUpdate = openWakeLockUptime + stats.uptimeMillis + extraTime.uptimeMillis;
+                long totalCount = stats.completedCount + extraTime.completedCount;
+                logger.logResult(key.getUid(), key.getTag(), key.getPowerManagerWakeLockLevel(),
+                        totalUpdate, totalCount);
             }
         }
     }

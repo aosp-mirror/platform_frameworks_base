@@ -23,6 +23,7 @@ import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
@@ -49,6 +50,9 @@ public final class UserDataRepositoryTest {
     private InputMethodManagerService mMockInputMethodManagerService;
 
     @Mock
+    private UserManagerInternal mMockUserManagerInternal;
+
+    @Mock
     private WindowManagerInternal mMockWindowManagerInternal;
 
     @NonNull
@@ -68,6 +72,12 @@ public final class UserDataRepositoryTest {
         mVisibilityStateComputerFactory = userId -> new ImeVisibilityStateComputer(
                 mMockInputMethodManagerService,
                 new ImeVisibilityStateComputer.Injector() {
+                    @NonNull
+                    @Override
+                    public UserManagerInternal getUserManagerService() {
+                        return mMockUserManagerInternal;
+                    }
+
                     @NonNull
                     @Override
                     public WindowManagerInternal getWmService() {

@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.app.Flags.notificationsRedesignTemplates;
+import static android.util.MathUtils.abs;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -31,6 +32,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.RemoteViews;
@@ -60,6 +62,8 @@ public class NotificationHeaderView extends RelativeLayout {
     private boolean mEntireHeaderClickable;
     private boolean mExpandOnlyOnButton;
     private boolean mAcceptAllTouches;
+    private float mTopLineTranslation;
+    private float mExpandButtonTranslation;
 
     ViewOutlineProvider mProvider = new ViewOutlineProvider() {
         @Override
@@ -205,6 +209,52 @@ public class NotificationHeaderView extends RelativeLayout {
         mExpandButton.setLayoutParams(lp);
     }
 
+    /** The view containing the app name, timestamp etc at the top of the notification. */
+    public NotificationTopLineView getTopLineView() {
+        return mTopLineView;
+    }
+
+    /** The view containing the button to expand the notification. */
+    public NotificationExpandButton getExpandButton() {
+        return mExpandButton;
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        if (notificationsRedesignTemplates()) {
+            mTopLineTranslation = measureCenterTranslation(mTopLineView);
+            mExpandButtonTranslation = measureCenterTranslation(mExpandButton);
+        }
+    }
+
+    private float measureCenterTranslation(View view) {
+        // When the view is centered (see centerTopLine), its height is MATCH_PARENT
+        int parentHeight = getMeasuredHeight();
+        // When the view is top-aligned, its height is WRAP_CONTENT
+        float wrapContentHeight = view.getMeasuredHeight();
+        // Calculate the translation needed between the two alignments
+        final MarginLayoutParams lp = (MarginLayoutParams) view.getLayoutParams();
+        return abs((parentHeight - wrapContentHeight) / 2f - lp.topMargin);
+    }
+
+    /**
+     * The vertical translation necessary between the two positions of the top line, to be used in
+     * the animation. See also {@link NotificationHeaderView#centerTopLine(boolean)}.
+     */
+    public float getTopLineTranslation() {
+        return mTopLineTranslation;
+    }
+
+    /**
+     * The vertical translation necessary between the two positions of the expander, to be used in
+     * the animation. See also {@link NotificationHeaderView#centerTopLine(boolean)}.
+     */
+    public float getExpandButtonTranslation() {
+        return mExpandButtonTranslation;
+    }
+
     /**
      * This is used to make the low-priority header show the bolded text of a title.
      *
@@ -216,14 +266,20 @@ public class NotificationHeaderView extends RelativeLayout {
                 ? R.style.TextAppearance_DeviceDefault_Notification_Title
                 : R.style.TextAppearance_DeviceDefault_Notification_Info;
         // Most of the time, we're showing text in the minimized state
-        View headerText = findViewById(R.id.header_text);
-        if (headerText instanceof TextView) {
-            ((TextView) headerText).setTextAppearance(styleResId);
+        if (findViewById(R.id.header_text) instanceof TextView headerText) {
+            headerText.setTextAppearance(styleResId);
+            if (notificationsRedesignTemplates()) {
+                // TODO: b/378660052 - When inlining the redesign flag, this should be updated
+                //  directly in TextAppearance_DeviceDefault_Notification_Title so we won't need to
+                //  override it here.
+                float textSize = getContext().getResources().getDimension(
+                        R.dimen.notification_2025_title_text_size);
+                headerText.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
+            }
         }
         // If there's no summary or text, we show the app name instead of nothing
-        View appNameText = findViewById(R.id.app_name_text);
-        if (appNameText instanceof TextView) {
-            ((TextView) appNameText).setTextAppearance(styleResId);
+        if (findViewById(R.id.app_name_text) instanceof TextView appNameText) {
+            appNameText.setTextAppearance(styleResId);
         }
     }
 

@@ -363,6 +363,19 @@ public final class MediaProjectionManager {
                 @Nullable ContentRecordingSession session
         ) {
         }
+
+        /**
+         * Called when a specific {@link MediaProjectionEvent} occurs during the media projection
+         * session.
+         *
+         * @param event the media projection event details.
+         * @param info optional details about the media projection host.
+         * @param session optional associated recording session details.
+         */
+        public void onMediaProjectionEvent(
+                final MediaProjectionEvent event,
+                @Nullable MediaProjectionInfo info,
+                @Nullable final ContentRecordingSession session) {}
     }
 
     /** @hide */
@@ -404,6 +417,14 @@ public final class MediaProjectionManager {
                 @Nullable final ContentRecordingSession session
         ) {
             mHandler.post(() -> mCallback.onRecordingSessionSet(info, session));
+        }
+
+        @Override
+        public void onMediaProjectionEvent(
+                final MediaProjectionEvent event,
+                @Nullable MediaProjectionInfo info,
+                @Nullable final ContentRecordingSession session) {
+            mHandler.post(() -> mCallback.onMediaProjectionEvent(event, info, session));
         }
     }
 }

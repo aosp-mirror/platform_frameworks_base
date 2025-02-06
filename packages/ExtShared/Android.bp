@@ -38,6 +38,7 @@ android_app {
     aaptflags: ["--shared-lib"],
     export_package_resources: true,
     optimize: {
+        keep_runtime_invisible_annotations: true,
         proguard_flags_files: ["proguard.proguard"],
     },
 }

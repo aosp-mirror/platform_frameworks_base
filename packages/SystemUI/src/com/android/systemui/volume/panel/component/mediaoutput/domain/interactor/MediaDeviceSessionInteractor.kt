@@ -25,7 +25,6 @@ import com.android.systemui.volume.panel.component.mediaoutput.domain.model.Medi
 import com.android.systemui.volume.panel.component.mediaoutput.shared.model.MediaDeviceSession
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.filterIsInstance
@@ -37,7 +36,6 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 
 /** Allows to observe and change [MediaDeviceSession] state. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class MediaDeviceSessionInteractor
 @Inject

@@ -15,85 +15,92 @@
   limitations under the License.
   -->
 
-<com.android.settingslib.widget.BannerMessageView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    style="@style/Banner.Preference.SettingsLib">
+    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+    android:paddingStart="?android:attr/listPreferredItemPaddingStart">
 
-    <RelativeLayout
-        android:id="@+id/top_row"
+    <com.android.settingslib.widget.BannerMessageView
+        android:id="@+id/banner_background"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
-        android:orientation="horizontal">
+        android:orientation="vertical"
+        style="@style/Banner.Preference.SettingsLib">
 
-        <ImageView
-            android:id="@+id/banner_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_alignParentStart="true"
-            android:importantForAccessibility="no" />
+        <RelativeLayout
+            android:id="@+id/top_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
+            android:orientation="horizontal">
 
-        <ImageButton
-            android:id="@+id/banner_dismiss_btn"
+            <ImageView
+                android:id="@+id/banner_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentStart="true"
+                android:importantForAccessibility="no" />
+
+            <ImageButton
+                android:id="@+id/banner_dismiss_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/settingslib_ic_cross"
+                android:layout_alignParentEnd="true"
+                android:contentDescription="@string/accessibility_banner_message_dismiss"
+                style="@style/Banner.Dismiss.SettingsLib" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/banner_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/settingslib_ic_cross"
-            android:layout_alignParentEnd="true"
-            android:contentDescription="@string/accessibility_banner_message_dismiss"
-            style="@style/Banner.Dismiss.SettingsLib" />
-    </RelativeLayout>
+            android:layout_gravity="start"
+            android:textAlignment="viewStart"
+            android:paddingTop="0dp"
+            android:paddingBottom="4dp"
+            android:textAppearance="@style/Banner.Title.SettingsLib"/>
 
-    <TextView
-        android:id="@+id/banner_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start"
-        android:textAlignment="viewStart"
-        android:paddingTop="0dp"
-        android:paddingBottom="4dp"
-        android:textAppearance="@style/Banner.Title.SettingsLib"/>
-
-    <TextView
-        android:id="@+id/banner_subtitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start"
-        android:textAlignment="viewStart"
-        android:paddingTop="0dp"
-        android:paddingBottom="4dp"
-        android:textAppearance="@style/Banner.Subtitle.SettingsLib"
-        android:visibility="gone"/>
-
-    <TextView
-        android:id="@+id/banner_summary"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start"
-        android:textAlignment="viewStart"
-        android:paddingTop="4dp"
-        android:paddingBottom="8dp"
-        android:textAppearance="@style/Banner.Summary.SettingsLib"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:minHeight="8dp"
-        android:gravity="end">
-
-        <Button
-            android:id="@+id/banner_negative_btn"
+        <TextView
+            android:id="@+id/banner_subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/Banner.ButtonText.SettingsLib"/>
+            android:layout_gravity="start"
+            android:textAlignment="viewStart"
+            android:paddingTop="0dp"
+            android:paddingBottom="4dp"
+            android:textAppearance="@style/Banner.Subtitle.SettingsLib"
+            android:visibility="gone"/>
 
-        <Button
-            android:id="@+id/banner_positive_btn"
+        <TextView
+            android:id="@+id/banner_summary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/Banner.ButtonText.SettingsLib"/>
-    </LinearLayout>
-</com.android.settingslib.widget.BannerMessageView>
+            android:layout_gravity="start"
+            android:textAlignment="viewStart"
+            android:paddingTop="4dp"
+            android:paddingBottom="8dp"
+            android:textAppearance="@style/Banner.Summary.SettingsLib"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:minHeight="8dp"
+            android:gravity="end">
+
+            <Button
+                android:id="@+id/banner_negative_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Banner.ButtonText.SettingsLib"/>
+
+            <Button
+                android:id="@+id/banner_positive_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Banner.ButtonText.SettingsLib"/>
+        </LinearLayout>
+    </com.android.settingslib.widget.BannerMessageView>
+</LinearLayout>

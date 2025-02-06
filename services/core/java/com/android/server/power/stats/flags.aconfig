@@ -97,3 +97,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "extended_battery_history_compression_enabled"
+    namespace: "backstage_power"
+    description: "Compress each battery history chunk on disk"
+    bug: "381937912"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

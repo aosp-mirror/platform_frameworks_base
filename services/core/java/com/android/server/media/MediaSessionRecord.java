@@ -234,11 +234,23 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             };
 
     @GuardedBy("mLock")
-    private @UserEngagementState int mUserEngagementState = USER_DISENGAGED;
+    private @UserEngagementState int mUserEngagementState = USER_ENGAGEMENT_UNSET;
 
-    @IntDef({USER_PERMANENTLY_ENGAGED, USER_TEMPORARILY_ENGAGED, USER_DISENGAGED})
+    @IntDef({
+        USER_ENGAGEMENT_UNSET,
+        USER_PERMANENTLY_ENGAGED,
+        USER_TEMPORARILY_ENGAGED,
+        USER_DISENGAGED
+    })
     @Retention(RetentionPolicy.SOURCE)
     private @interface UserEngagementState {}
+
+    /**
+     * Indicates that the {@link UserEngagementState} is not yet set.
+     *
+     * @see #updateUserEngagedStateIfNeededLocked(boolean)
+     */
+    private static final int USER_ENGAGEMENT_UNSET = -1;
 
     /**
      * Indicates that the session is {@linkplain MediaSession#isActive() active} and in one of the
@@ -263,15 +275,6 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
      * @see #updateUserEngagedStateIfNeededLocked(boolean)
      */
     private static final int USER_DISENGAGED = 2;
-
-    /**
-     * Indicates the duration of the temporary engaged state, in milliseconds.
-     *
-     * <p>When switching to an {@linkplain PlaybackState#isActive() inactive state}, the user is
-     * treated as temporarily engaged, meaning the corresponding session is only considered in an
-     * engaged state for the duration of this timeout, and only if coming from an engaged state.
-     */
-    private static final int TEMP_USER_ENGAGED_TIMEOUT_MS = 600000;
 
     public MediaSessionRecord(
             int ownerPid,
@@ -605,7 +608,8 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
                             if (mUserEngagementState == USER_TEMPORARILY_ENGAGED) {
                                 mHandler.postDelayed(
                                         mUserEngagementTimeoutExpirationRunnable,
-                                        TEMP_USER_ENGAGED_TIMEOUT_MS);
+                                        MediaSessionDeviceConfig
+                                                .getMediaSessionTempUserEngagedDurationMs());
                             }
                         }
                     }
@@ -1062,11 +1066,10 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
         }
         int oldUserEngagedState = mUserEngagementState;
         int newUserEngagedState;
-        if (!isActive() || mPlaybackState == null) {
-            newUserEngagedState = USER_DISENGAGED;
-        } else if (mPlaybackState.isActive()) {
+        if (isActive() && mPlaybackState != null && mPlaybackState.isActive()) {
             newUserEngagedState = USER_PERMANENTLY_ENGAGED;
         } else if (oldUserEngagedState == USER_PERMANENTLY_ENGAGED
+                || oldUserEngagedState == USER_ENGAGEMENT_UNSET
                 || (oldUserEngagedState == USER_TEMPORARILY_ENGAGED && !isTimeoutExpired)) {
             newUserEngagedState = USER_TEMPORARILY_ENGAGED;
         } else {
@@ -1079,14 +1082,15 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
         mUserEngagementState = newUserEngagedState;
         if (newUserEngagedState == USER_TEMPORARILY_ENGAGED && !isGlobalPrioritySessionActive) {
             mHandler.postDelayed(
-                    mUserEngagementTimeoutExpirationRunnable, TEMP_USER_ENGAGED_TIMEOUT_MS);
+                    mUserEngagementTimeoutExpirationRunnable,
+                    MediaSessionDeviceConfig.getMediaSessionTempUserEngagedDurationMs());
         } else {
             mHandler.removeCallbacks(mUserEngagementTimeoutExpirationRunnable);
         }
 
         boolean wasUserEngaged = oldUserEngagedState != USER_DISENGAGED;
         boolean isNowUserEngaged = newUserEngagedState != USER_DISENGAGED;
-        if (wasUserEngaged != isNowUserEngaged) {
+        if (oldUserEngagedState == USER_ENGAGEMENT_UNSET || wasUserEngaged != isNowUserEngaged) {
             mHandler.post(
                     () ->
                             mService.onSessionUserEngagementStateChange(

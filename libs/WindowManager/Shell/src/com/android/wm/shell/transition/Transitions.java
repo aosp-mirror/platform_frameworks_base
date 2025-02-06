@@ -39,6 +39,7 @@ import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPI
 
 import static com.android.systemui.shared.Flags.returnAnimationFrameworkLongLived;
 import static com.android.window.flags.Flags.ensureWallpaperInTransitions;
+import static com.android.wm.shell.shared.TransitionUtil.FLAG_IS_DESKTOP_WALLPAPER_ACTIVITY;
 import static com.android.wm.shell.shared.TransitionUtil.isClosingType;
 import static com.android.wm.shell.shared.TransitionUtil.isOpeningType;
 
@@ -84,6 +85,7 @@ import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes;
+import com.android.wm.shell.desktopmode.DesktopWallpaperActivity;
 import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.FocusTransitionListener;
@@ -190,6 +192,9 @@ public class Transitions implements RemoteCallable<Transitions>,
 
     /** Transition to end the recents transition */
     public static final int TRANSIT_END_RECENTS_TRANSITION = TRANSIT_FIRST_CUSTOM + 22;
+
+    /** Transition type for app compat reachability. */
+    public static final int TRANSIT_MOVE_LETTERBOX_REACHABILITY = TRANSIT_FIRST_CUSTOM + 23;
 
     /** Transition type for desktop mode transitions. */
     public static final int TRANSIT_DESKTOP_MODE_TYPES =
@@ -670,46 +675,6 @@ public class Transitions implements RemoteCallable<Transitions>,
         return -1;
     }
 
-    /**
-     * Look through a transition and see if all non-closing changes are no-animation. If so, no
-     * animation should play.
-     */
-    static boolean isAllNoAnimation(TransitionInfo info) {
-        if (isClosingType(info.getType())) {
-            // no-animation is only relevant for launching (open) activities.
-            return false;
-        }
-        boolean hasNoAnimation = false;
-        final int changeSize = info.getChanges().size();
-        for (int i = changeSize - 1; i >= 0; --i) {
-            final TransitionInfo.Change change = info.getChanges().get(i);
-            if (isClosingType(change.getMode())) {
-                // ignore closing apps since they are a side-effect of the transition and don't
-                // animate.
-                continue;
-            }
-            if (change.hasFlags(FLAG_NO_ANIMATION)) {
-                hasNoAnimation = true;
-            } else if (!TransitionUtil.isOrderOnly(change) && !change.hasFlags(FLAG_IS_OCCLUDED)) {
-                // Ignore the order only or occluded changes since they shouldn't be visible during
-                // animation. For anything else, we need to animate if at-least one relevant
-                // participant *is* animated,
-                return false;
-            }
-        }
-        return hasNoAnimation;
-    }
-
-    /**
-     * Check if all changes in this transition are only ordering changes. If so, we won't animate.
-     */
-    static boolean isAllOrderOnly(TransitionInfo info) {
-        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
-            if (!TransitionUtil.isOrderOnly(info.getChanges().get(i))) return false;
-        }
-        return true;
-    }
-
     private Track getOrCreateTrack(int trackId) {
         while (trackId >= mTracks.size()) {
             mTracks.add(new Track());
@@ -793,6 +758,14 @@ public class Transitions implements RemoteCallable<Transitions>,
             // Actually able to process the sleep now, so re-remove it from the queue and continue
             // the normal flow.
             mReadyDuringSync.remove(active);
+        }
+
+        // If any of the changes are on DesktopWallpaperActivity, add the flag to the change.
+        for (TransitionInfo.Change change : info.getChanges()) {
+            if (change.getTaskInfo() != null
+                    && DesktopWallpaperActivity.isWallpaperTask(change.getTaskInfo())) {
+                change.setFlags(FLAG_IS_DESKTOP_WALLPAPER_ACTIVITY);
+            }
         }
 
         final Track track = getOrCreateTrack(info.getTrack());
@@ -952,7 +925,7 @@ public class Transitions implements RemoteCallable<Transitions>,
                 + " %s is still animating. Notify the animating transition"
                 + " in case they can be merged", ready, playing);
         mTransitionTracer.logMergeRequested(ready.mInfo.getDebugId(), playing.mInfo.getDebugId());
-        playing.mHandler.mergeAnimation(ready.mToken, ready.mInfo, ready.mStartT,
+        playing.mHandler.mergeAnimation(ready.mToken, ready.mInfo, ready.mStartT, ready.mFinishT,
                 playing.mToken, (wct) -> onMerged(playingToken, readyToken));
     }
 
@@ -1386,7 +1359,7 @@ public class Transitions implements RemoteCallable<Transitions>,
             // fast-forward.
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Attempt to merge sync %s"
                     + " into %s via a SLEEP proxy", nextSync, playing);
-            playing.mHandler.mergeAnimation(nextSync.mToken, dummyInfo, dummyT,
+            playing.mHandler.mergeAnimation(nextSync.mToken, dummyInfo, dummyT, dummyT,
                     playing.mToken, (wct) -> {});
             // it's possible to complete immediately. If that happens, just repeat the signal
             // loop until we either finish everything or start playing an animation that isn't
@@ -1434,7 +1407,9 @@ public class Transitions implements RemoteCallable<Transitions>,
          * @param finishTransaction the transaction given to the handler to be applied after the
          *                       transition animation. Unlike startTransaction, the handler is NOT
          *                       expected to apply this transaction. The Transition system will
-         *                       apply it when finishCallback is called.
+         *                       apply it when finishCallback is called. If additional transitions
+         *                       are merged, then the finish transactions for those transitions
+         *                       will be applied after this transaction.
          * @param finishCallback Call this when finished. This MUST be called on main thread.
          * @return true if transition was handled, false if not (falls-back to default).
          */
@@ -1442,6 +1417,17 @@ public class Transitions implements RemoteCallable<Transitions>,
                 @NonNull SurfaceControl.Transaction startTransaction,
                 @NonNull SurfaceControl.Transaction finishTransaction,
                 @NonNull TransitionFinishCallback finishCallback);
+
+        /**
+         * See {@link #mergeAnimation(IBinder, TransitionInfo, SurfaceControl.Transaction, SurfaceControl.Transaction, IBinder, TransitionFinishCallback)}
+         *
+         * This deprecated method header is provided until downstream implementation can migrate to
+         * the call that takes both start & finish transactions.
+         */
+        @Deprecated
+        default void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+                @NonNull SurfaceControl.Transaction startTransaction,
+                @NonNull IBinder mergeTarget, @NonNull TransitionFinishCallback finishCallback) { }
 
         /**
          * Attempts to merge a different transition's animation into an animation that this handler
@@ -1460,14 +1446,25 @@ public class Transitions implements RemoteCallable<Transitions>,
          *
          * @param transition This is the transition that wants to be merged.
          * @param info Information about what is changing in the transition.
-         * @param t Contains surface changes that resulted from the transition.
+         * @param startTransaction The start transaction containing surface changes that resulted
+         *                         from the incoming transition. This should be applied by this
+         *                         active handler only if it chooses to merge the transition.
+         * @param finishTransaction The finish transaction for the incoming transition. Unlike
+         *                          startTransaction, the handler is NOT expected to apply this
+         *                          transaction. If the transition is merged, the Transition system
+         *                          will apply after finishCallback is called following the finish
+         *                          transaction provided in `#startAnimation()`.
          * @param mergeTarget This is the transition that we are attempting to merge with (ie. the
          *                    one this handler is currently already animating).
          * @param finishCallback Call this if merged. This MUST be called on main thread.
          */
         default void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-                @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
-                @NonNull TransitionFinishCallback finishCallback) { }
+                @NonNull SurfaceControl.Transaction startTransaction,
+                @NonNull SurfaceControl.Transaction finishTransaction,
+                @NonNull IBinder mergeTarget, @NonNull TransitionFinishCallback finishCallback) {
+            // Call the legacy implementation by default
+            mergeAnimation(transition, info, startTransaction, mergeTarget, finishCallback);
+        }
 
         /**
          * Checks whether this handler is capable of taking over a transition matching `info`.
@@ -1746,6 +1743,10 @@ public class Transitions implements RemoteCallable<Transitions>,
 
     @Override
     public boolean onShellCommand(String[] args, PrintWriter pw) {
+        if (args.length == 0) {
+            printShellCommandHelp(pw, "");
+            return false;
+        }
         switch (args[0]) {
             case "tracing": {
                 if (!android.tracing.Flags.perfettoTransitionTracing()) {

@@ -26,6 +26,7 @@ import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_ANIMATION_BUGFIX_
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_TOUCH_BOOST_25Q1;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY;
+import static android.view.flags.Flags.FLAG_TOOLKIT_INITIAL_TOUCH_BOOST;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
@@ -34,6 +35,7 @@ import static android.view.flags.Flags.toolkitFrameRateSmallUsesPercentReadOnly;
 
 import static junit.framework.Assert.assertEquals;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.annotation.NonNull;
@@ -177,6 +179,75 @@ public class ViewFrameRateTest {
         });
         instrumentation.waitForIdleSync();
         assertTrue(mViewRoot.mWindowAttributes.type == windowType);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_INITIAL_TOUCH_BOOST)
+    public void initialTouchBoost() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
+
+        mActivityRule.runOnUiThread(() -> {
+            ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
+            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            mMovingView.setLayoutParams(layoutParams);
+            mMovingView.setOnClickListener((v) -> {});
+        });
+        waitForFrameRateCategoryToSettle();
+
+        int[] position = new int[2];
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.getLocationOnScreen(position);
+            position[0] += mMovingView.getWidth() / 2;
+            position[1] += mMovingView.getHeight() / 2;
+        });
+        final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+
+        assertFalse(mViewRoot.getIsTouchBoosting());
+
+        long now = SystemClock.uptimeMillis();
+        MotionEvent down = MotionEvent.obtain(
+                now, // downTime
+                now, // eventTime
+                MotionEvent.ACTION_DOWN, // action
+                position[0], // x
+                position[1], // y
+                0 // metaState
+        );
+
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.getViewRootImpl().dispatchAppVisibility(false);
+        });
+
+        down.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        instrumentation.sendPointerSync(down);
+        down.recycle();
+
+        Thread.sleep(100);
+        // should have touch boost
+        assertTrue(mViewRoot.getIsTouchBoosting());
+
+        MotionEvent up = MotionEvent.obtain(
+                now, // downTime
+                now, // eventTime
+                MotionEvent.ACTION_UP, // action
+                position[0], // x
+                position[1], // y
+                0 // metaState
+        );
+        up.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        instrumentation.sendPointerSync(up);
+        up.recycle();
+
+        // Should not be boosted if nothing is drawn
+        Thread.sleep(30);
+        assertFalse(mViewRoot.getIsTouchBoosting());
+
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.getViewRootImpl().dispatchAppVisibility(true);
+        });
     }
 
     @Test

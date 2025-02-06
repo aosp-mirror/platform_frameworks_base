@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:color="@color/notification_ripple_untinted_color">
+    <item>
+        <inset
+            android:insetBottom="8dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:insetTop="8dp">
+            <shape android:shape="rectangle">
+                <corners android:radius="@dimen/magic_action_button_corner_radius" />
+                <solid android:color="@androidprv:color/materialColorPrimaryContainer" />
+                <stroke
+                    android:width="@dimen/magic_action_button_outline_stroke_width"
+                    android:color="@androidprv:color/materialColorOutlineVariant" />
+            </shape>
+        </inset>
+    </item>
+</ripple>

@@ -1,6 +1,8 @@
 package com.android.systemui.power.shared.model
 
 import com.android.systemui.keyguard.KeyguardService
+import com.android.systemui.log.table.Diffable
+import com.android.systemui.log.table.TableRowLogger
 
 /**
  * Models whether the device is awake or asleep, along with information about why we're in that
@@ -35,7 +37,7 @@ data class WakefulnessModel(
      * to a subsequent power gesture.
      */
     val powerButtonLaunchGestureTriggered: Boolean = false,
-) {
+) : Diffable<WakefulnessModel> {
     fun isAwake() =
         internalWakefulnessState == WakefulnessState.AWAKE ||
             internalWakefulnessState == WakefulnessState.STARTING_TO_WAKE
@@ -57,5 +59,9 @@ data class WakefulnessModel(
     fun isAwakeFromTapOrGesture(): Boolean {
         return isAwake() &&
             (lastWakeReason == WakeSleepReason.TAP || lastWakeReason == WakeSleepReason.GESTURE)
+    }
+
+    override fun logDiffs(prevVal: WakefulnessModel, row: TableRowLogger) {
+        row.logChange(columnName = "wakefulness", value = toString())
     }
 }

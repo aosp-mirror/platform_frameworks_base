@@ -32,3 +32,35 @@ flag {
   description: "Flag that deprecates supervision methods in DPM"
   bug: "382034839"
 }
+
+flag {
+  name: "enable_supervision_app_service"
+  is_exported: true
+  namespace: "supervision"
+  description: "Flag to enable the SupervisionAppService"
+  bug: "389123070"
+}
+
+flag {
+  name: "enable_supervision_settings_screen"
+  is_exported: true
+  namespace: "supervision"
+  description: "Flag that enables the Supervision settings screen with top-level Android settings entry point"
+  bug: "383404606"
+}
+
+flag {
+  name: "enable_app_approval"
+  is_exported: true
+  namespace: "supervision"
+  description: "Flag to enable the App Approval settings in Android settings UI"
+  bug: "390185393"
+}
+
+flag {
+  name: "enable_supervision_pin_recovery_screen"
+  is_exported: true
+  namespace: "supervision"
+  description: "Flag that enables the Supervision pin recovery screen with Supervision settings entry point"
+  bug: "390500290"
+}

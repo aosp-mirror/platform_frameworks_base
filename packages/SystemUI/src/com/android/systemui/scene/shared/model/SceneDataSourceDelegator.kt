@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.scene.shared.model
 
 import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

@@ -101,6 +101,13 @@
          P.S this is a change only intended for wear devices. -->
     <bool name="config_enableViewGroupScalingFading">true</bool>
 
-    <!-- Allow the gesture to double tap the power button to trigger a target action. -->
-    <bool name="config_doubleTapPowerGestureEnabled">false</bool>
+    <!-- Controls the double tap power button gesture to trigger a target action.
+         0: Gesture is disabled
+         1: Launch camera mode, allowing the user to disable/enable the double tap power gesture
+            from launching the camera application.
+         2: Multi target mode, allowing the user to select one of the targets defined in
+            config_doubleTapPowerGestureMultiTargetDefaultAction and to disable/enable the double
+            tap power gesture from triggering the selected target action.
+    -->
+    <integer name="config_doubleTapPowerGestureMode">0</integer>
 </resources>

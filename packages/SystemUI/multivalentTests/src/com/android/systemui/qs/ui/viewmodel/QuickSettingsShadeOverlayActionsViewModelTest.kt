@@ -21,7 +21,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.UserActionResult
+import com.android.compose.animation.scene.UserActionResult.HideOverlay
+import com.android.compose.animation.scene.UserActionResult.ShowOverlay
+import com.android.compose.animation.scene.UserActionResult.ShowOverlay.HideCurrentOverlays
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.EnableSceneContainer
@@ -53,7 +55,7 @@ class QuickSettingsShadeOverlayActionsViewModelTest : SysuiTestCase() {
             val actions by collectLastValue(underTest.actions)
             underTest.activateIn(this)
 
-            assertThat((actions?.get(Swipe.Up) as? UserActionResult.HideOverlay)?.overlay)
+            assertThat((actions?.get(Swipe.Up) as? HideOverlay)?.overlay)
                 .isEqualTo(Overlays.QuickSettingsShade)
             assertThat(actions?.get(Swipe.Down)).isNull()
         }
@@ -66,7 +68,7 @@ class QuickSettingsShadeOverlayActionsViewModelTest : SysuiTestCase() {
             underTest.activateIn(this)
             assertThat(isEditing).isFalse()
 
-            assertThat((actions?.get(Back) as? UserActionResult.HideOverlay)?.overlay)
+            assertThat((actions?.get(Back) as? HideOverlay)?.overlay)
                 .isEqualTo(Overlays.QuickSettingsShade)
         }
 
@@ -87,11 +89,11 @@ class QuickSettingsShadeOverlayActionsViewModelTest : SysuiTestCase() {
             val actions by collectLastValue(underTest.actions)
             underTest.activateIn(this)
 
-            assertThat(
-                    (actions?.get(Swipe.Down(fromSource = SceneContainerEdge.TopLeft))
-                            as? UserActionResult.ReplaceByOverlay)
-                        ?.overlay
-                )
-                .isEqualTo(Overlays.NotificationsShade)
+            val action =
+                (actions?.get(Swipe.Down(fromSource = SceneContainerEdge.TopLeft)) as? ShowOverlay)
+            assertThat(action?.overlay).isEqualTo(Overlays.NotificationsShade)
+            val overlaysToHide = action?.hideCurrentOverlays as? HideCurrentOverlays.Some
+            assertThat(overlaysToHide).isNotNull()
+            assertThat(overlaysToHide?.overlays).containsExactly(Overlays.QuickSettingsShade)
         }
 }

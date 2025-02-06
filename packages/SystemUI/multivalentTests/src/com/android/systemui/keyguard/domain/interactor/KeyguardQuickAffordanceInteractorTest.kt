@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.app.admin.DevicePolicyManager
 import android.os.UserHandle
+import android.view.accessibility.AccessibilityManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
@@ -27,7 +28,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.dock.DockManager
@@ -66,7 +66,6 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -78,7 +77,6 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
@@ -96,6 +94,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     @Mock private lateinit var shadeInteractor: ShadeInteractor
     @Mock private lateinit var logger: KeyguardQuickAffordancesLogger
     @Mock private lateinit var metricsLogger: KeyguardQuickAffordancesMetricsLogger
+    @Mock private lateinit var accessibilityManager: AccessibilityManager
 
     private lateinit var underTest: KeyguardQuickAffordanceInteractor
 
@@ -148,7 +147,6 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
-                communalSettingsInteractor = kosmos.communalSettingsInteractor,
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
         val remoteUserSelectionManager =
@@ -198,12 +196,13 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                 biometricSettingsRepository = biometricSettingsRepository,
                 backgroundDispatcher = kosmos.testDispatcher,
                 appContext = context,
-                communalSettingsInteractor = kosmos.communalSettingsInteractor,
+                accessibilityManager = accessibilityManager,
                 sceneInteractor = { kosmos.sceneInteractor },
             )
         kosmos.keyguardQuickAffordanceInteractor = underTest
 
         whenever(shadeInteractor.anyExpansion).thenReturn(MutableStateFlow(0f))
+        whenever(accessibilityManager.isEnabled()).thenReturn(false)
     }
 
     @Test
@@ -669,6 +668,22 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                         KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END to emptyList(),
                     )
                 )
+        }
+
+    @Test
+    fun useLongPress_withA11yEnabled_isFalse() =
+        testScope.runTest {
+            whenever(accessibilityManager.isEnabled()).thenReturn(true)
+            val useLongPress by collectLastValue(underTest.useLongPress())
+            assertThat(useLongPress).isFalse()
+        }
+
+    @Test
+    fun useLongPress_withA11yDisabled_isFalse() =
+        testScope.runTest {
+            whenever(accessibilityManager.isEnabled()).thenReturn(false)
+            val useLongPress by collectLastValue(underTest.useLongPress())
+            assertThat(useLongPress).isTrue()
         }
 
     @Test

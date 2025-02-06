@@ -87,8 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"شبکه تلفن همراه دردسترس نیست"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"تغییر شبکه ترجیحی را امتحان کنید. برای تغییر، تک‌ضرب بزنید."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"تماس اضطراری امکان‌پذیر نیست"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"دیگر نشان داده نشود"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"برای برقراری تماس اضطراری به شبکه تلفن همراه نیاز دارید"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"هشدارها"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"بازارسال تماس"</string>
@@ -170,7 +169,7 @@
     <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"درحال‌حاضر تماس‌ها، پیام‌ها، و داده‌ها هنگام استفاده از سیم‌کارت <xliff:g id="NETWORK_NAME">%1$s</xliff:g> آسیب‌پذیرتر هستند.\n\nوقتی اتصال شما دوباره رمزگذاری شود، اعلان دیگری دریافت خواهید کرد."</string>
     <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"تنظیمات امنیت شبکه تلفن همراه"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"بیشتر بدانید"</string>
-    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"متوجه‌ام"</string>
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"متوجهم"</string>
     <string name="fcComplete" msgid="1080909484660507044">"کد ویژگی کامل شد."</string>
     <string name="fcError" msgid="5325116502080221346">"مشکل در اتصال یا کد ویژگی نامعتبر."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"تأیید"</string>
@@ -303,6 +302,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"هشدارهای شبکه"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"شبکه دردسترس است"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"‏وضعیت VPN"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"زمان و منطقه‌های زمانی"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"هشدارهایی از سرپرست فناوری اطلاعات"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"هشدارها"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"نمونه برای خرده‌فروشان"</string>
@@ -310,6 +310,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"برنامه درحال اجرا"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"برنامه‌های مصرف‌کننده باتری"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"درشت‌نمایی"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"سمعک"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"کاربرد دسترس‌پذیری"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"نمایشگر"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> درحال استفاده کردن از باتری است"</string>
@@ -1215,7 +1216,7 @@
     <string name="editTextMenuTitle" msgid="857666911134482176">"کنش‌های متنی"</string>
     <string name="error_handwriting_unsupported" msgid="7809438534946014050">"در این فیلد از دست‌نویسی پشتیبانی نمی‌شود"</string>
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"در فیلدهای گذرواژه از دست‌نویسی پشتیبانی نمی‌شود"</string>
-    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"برگشت"</string>
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"برگشتن"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"تغییر روش ورودی"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"باز کردن انتخابگر روش ورودی"</string>
     <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"تنظیمات"</string>
@@ -1407,6 +1408,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"بارگیری برنامه"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"سیم‌کارت جدید جاگذاری شد"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"برای تنظیم آن تک‌ضرب بزنید"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"منطقه زمانی‌تان تغییر کرد"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"درحال‌حاضر در <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> ‏(<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>) هستید"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"تنظیم زمان"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"تاریخ تنظیم"</string>
     <string name="date_time_set" msgid="4603445265164486816">"تنظیم"</string>
@@ -1780,14 +1783,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"حالت یک‌دستی"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"بسیار کم‌نور"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"دستگاه‌های کمک‌شنوایی"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"متصل نیست"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"متصل"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"فعال"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"درحال بار کردن"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"کلیدهای میزان صدا پایین نگه داشته شد. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> روشن شد."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"کلیدهای میزان صدا پایین نگه داشته شد. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> خاموش شد."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"کلیدهای میزان صدا را رها کنید. برای روشن کردن <xliff:g id="SERVICE_NAME">%1$s</xliff:g>، هر دو کلید میزان صدا را مجدداً به‌مدت ۳ ثانیه فشار دهید و نگه دارید."</string>
@@ -1798,6 +1797,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"دفعه بعد که از این میان‌بر استفاده کنید، این ویژگی باز می‌شود. با ۲ انگشت از پایین صفحه تند به بالا بکشید و سریع رها کنید."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"دفعه بعد که از این میان‌بر استفاده کنید، این ویژگی باز می‌شود. با ۳ انگشت از پایین صفحه تند به بالا بکشید و سریع رها کنید."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"درشت‌نمایی"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"از میکروفون تلفن استفاده شود؟"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"از میکروفون سمعک استفاده شود؟"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"برای صدای بهتر یا اگر شارژ باتری سمعک شما کم باشد. این کار فقط درطول تماس میکروفون شما را عوض می‌کند."</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"برای تماس دست‌آزاد می‌توانید از میکروفون سمعک خود استفاده کنید. این کار فقط درطول تماس میکروفون شما را عوض می‌کند."</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"عوض کردن"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"تنظیمات"</string>
     <string name="user_switched" msgid="7249833311585228097">"کاربر کنونی <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"در حالت تغییر به <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"در حال خروج از سیستم <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -2029,7 +2034,7 @@
     <string name="search_language_hint" msgid="7004225294308793583">"نام زبان را تایپ کنید"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"پیشنهادی"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"پیشنهادی"</string>
-    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"زبان‌های پیشنهادی"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"زبان‌های پیشنهادشده"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"مناطق پیشنهادی"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"همه زبان‌ها"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"همه منطقه‌ها"</string>
@@ -2083,6 +2088,12 @@
     <string name="unpin_target" msgid="3963318576590204447">"برداشتن سنجاق"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"برداشتن سنجاق <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"اطلاعات برنامه"</string>
+    <!-- no translation found for shortcut_group_a11y_title (2992150163811583865) -->
+    <skip />
+    <!-- no translation found for suggested_apps_group_a11y_title (2804876567839501831) -->
+    <skip />
+    <!-- no translation found for all_apps_group_a11y_title (7020352520224108745) -->
+    <skip />
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"در حال شروع نسخه نمایشی…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"در حال بازنشانی دستگاه…"</string>
@@ -2237,6 +2248,14 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"پد کنترل چپ"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"پد کنترل راست"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"پد کنترل وسط"</string>
+    <!-- no translation found for accessibility_autoclick_type_settings_panel_title (7354373370578758696) -->
+    <skip />
+    <!-- no translation found for accessibility_autoclick_left_click (2301793352260551080) -->
+    <skip />
+    <!-- no translation found for accessibility_autoclick_pause (3272200156172573568) -->
+    <skip />
+    <!-- no translation found for accessibility_autoclick_position (2933660969907663545) -->
+    <skip />
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> در سطل «محدودشده» قرار گرفت"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"تصویری ارسال کرد"</string>
@@ -2454,6 +2473,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"به‌دلایل امنیتی، محتوای برنامه پس‌از هم‌رسانی صفحه‌نمایش پنهان می‌شود"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"به‌طور خودکار به ماهواره متصل شد"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"‏می‌توانید بدون شبکه تلفن همراه یا Wi-Fi پیام ارسال و دریافت کنید"</string>
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"ازطریق ماهواره می‌توانید پیام ارسال و دریافت کنید و از داده‌های محدود استفاده کنید"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"از «پیام‌رسانی ماهواره‌ای» استفاده شود؟"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"‏ارسال و دریافت پیام بدون شبکه تلفن همراه یا Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"باز کردن «پیام‌نگار»"</string>
@@ -2510,4 +2530,12 @@
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"نقشه"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"برنامه‌ها"</string>
     <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"اثر انگشتانتان دیگر قابل‌شناسایی نیست. «قفل‌گشایی با اثر انگشت» را دوباره راه‌اندازی کنید."</string>
+    <!-- no translation found for usb_apm_usb_plugged_in_when_locked_notification_title (468577168569874967) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_plugged_in_when_locked_notification_text (6695268246267993166) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_suspicious_activity_notification_title (3461195995882871461) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_suspicious_activity_notification_text (6537085605929303187) -->
+    <skip />
 </resources>

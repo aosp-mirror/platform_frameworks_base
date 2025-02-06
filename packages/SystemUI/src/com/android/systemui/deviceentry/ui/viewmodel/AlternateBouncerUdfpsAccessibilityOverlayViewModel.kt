@@ -19,12 +19,10 @@ package com.android.systemui.deviceentry.ui.viewmodel
 import com.android.systemui.accessibility.domain.interactor.AccessibilityInteractor
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
 /** Models the UI state for the alternate bouncer UDFPS accessibility overlay */
-@ExperimentalCoroutinesApi
 class AlternateBouncerUdfpsAccessibilityOverlayViewModel
 @Inject
 constructor(

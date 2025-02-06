@@ -225,7 +225,9 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
 
     @Override
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+            @NonNull SurfaceControl.Transaction startT,
+            @NonNull SurfaceControl.Transaction finishT,
+            @NonNull IBinder mergeTarget,
             @NonNull TransitionFinishCallback finishCallback) {
         if (info.getType() != TRANSIT_CHANGE) {
             return;
@@ -246,7 +248,7 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
             }
         }
         // Apply changes happening during the unfold animation immediately
-        t.apply();
+        startT.apply();
         finishCallback.onTransitionFinished(null);
 
         if (getDefaultDisplayChange(info) == DefaultDisplayChange.DEFAULT_DISPLAY_FOLD) {

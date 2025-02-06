@@ -250,9 +250,9 @@ public class AccessibilityServiceConnectionTest {
     }
 
     @Test
-    public void sendGesture_touchableDevice_injectEvents()
-            throws RemoteException {
+    public void sendGesture_touchableDevice_injectEvents_fromAccessibilityTool() {
         when(mMockWindowManagerInternal.isTouchOrFaketouchDevice()).thenReturn(true);
+        when(mServiceInfo.isAccessibilityTool()).thenReturn(true);
         setServiceBinding(COMPONENT_NAME);
         mConnection.bindLocked();
         mConnection.onServiceConnected(COMPONENT_NAME, mMockIBinder);
@@ -263,13 +263,31 @@ public class AccessibilityServiceConnectionTest {
         mConnection.dispatchGesture(0, parceledListSlice, Display.DEFAULT_DISPLAY);
 
         verify(mMockMotionEventInjector).injectEvents(gestureSteps, mMockServiceClient, 0,
-                Display.DEFAULT_DISPLAY);
+                Display.DEFAULT_DISPLAY, true);
+    }
+
+    @Test
+    public void sendGesture_touchableDevice_injectEvents_fromNonTool() {
+        when(mMockWindowManagerInternal.isTouchOrFaketouchDevice()).thenReturn(true);
+        when(mServiceInfo.isAccessibilityTool()).thenReturn(false);
+        setServiceBinding(COMPONENT_NAME);
+        mConnection.bindLocked();
+        mConnection.onServiceConnected(COMPONENT_NAME, mMockIBinder);
+
+        ParceledListSlice parceledListSlice = mock(ParceledListSlice.class);
+        List<GestureDescription.GestureStep> gestureSteps = mock(List.class);
+        when(parceledListSlice.getList()).thenReturn(gestureSteps);
+        mConnection.dispatchGesture(0, parceledListSlice, Display.DEFAULT_DISPLAY);
+
+        verify(mMockMotionEventInjector).injectEvents(gestureSteps, mMockServiceClient, 0,
+                Display.DEFAULT_DISPLAY, false);
     }
 
     @Test
     public void sendGesture_untouchableDevice_performGestureResultFailed()
             throws RemoteException {
         when(mMockWindowManagerInternal.isTouchOrFaketouchDevice()).thenReturn(false);
+        when(mServiceInfo.isAccessibilityTool()).thenReturn(true);
         setServiceBinding(COMPONENT_NAME);
         mConnection.bindLocked();
         mConnection.onServiceConnected(COMPONENT_NAME, mMockIBinder);
@@ -280,7 +298,7 @@ public class AccessibilityServiceConnectionTest {
         mConnection.dispatchGesture(0, parceledListSlice, Display.DEFAULT_DISPLAY);
 
         verify(mMockMotionEventInjector, never()).injectEvents(gestureSteps, mMockServiceClient, 0,
-                Display.DEFAULT_DISPLAY);
+                Display.DEFAULT_DISPLAY, true);
         verify(mMockServiceClient).onPerformGestureResult(0, false);
     }
 

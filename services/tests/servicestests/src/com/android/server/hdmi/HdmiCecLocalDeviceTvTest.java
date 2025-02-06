@@ -15,6 +15,8 @@
  */
 package com.android.server.hdmi;
 
+import static android.content.pm.PackageManager.FEATURE_HDMI_CEC;
+
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.Constants.ABORT_UNRECOGNIZED_OPCODE;
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
@@ -29,8 +31,8 @@ import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_WAKE_UP_ME
 import static com.android.server.hdmi.HdmiControlService.STANDBY_SCREEN_OFF;
 import static com.android.server.hdmi.HdmiControlService.WAKE_UP_SCREEN_ON;
 import static com.android.server.hdmi.RequestActiveSourceAction.TIMEOUT_WAIT_FOR_TV_ASSERT_ACTIVE_SOURCE_MS;
-import static com.android.server.hdmi.RoutingControlAction.TIMEOUT_ROUTING_INFORMATION_MS;
 import static com.android.server.hdmi.RequestSadAction.RETRY_COUNTER_MAX;
+import static com.android.server.hdmi.RoutingControlAction.TIMEOUT_ROUTING_INFORMATION_MS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -38,6 +40,7 @@ import static junit.framework.Assert.assertEquals;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.eq;
@@ -167,6 +170,9 @@ public class HdmiCecLocalDeviceTvTest {
 
     @Before
     public void setUp() {
+        assumeTrue("Test requires FEATURE_HDMI_CEC",
+                InstrumentationRegistry.getTargetContext().getPackageManager()
+                        .hasSystemFeature(FEATURE_HDMI_CEC));
         Context context = InstrumentationRegistry.getTargetContext();
         mMyLooper = mTestLooper.getLooper();
 

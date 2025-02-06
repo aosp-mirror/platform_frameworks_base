@@ -19,6 +19,7 @@ package com.android.server.policy;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.platform.test.annotations.Presubmit;
 import android.view.KeyEvent;
 
 import org.junit.Before;
@@ -29,6 +30,7 @@ import org.junit.Test;
  *
  * <p>Build/Install/Run: atest WmTests:DeferredKeyActionExecutorTests
  */
+@Presubmit
 public final class DeferredKeyActionExecutorTests {
 
     private DeferredKeyActionExecutor mKeyActionExecutor;

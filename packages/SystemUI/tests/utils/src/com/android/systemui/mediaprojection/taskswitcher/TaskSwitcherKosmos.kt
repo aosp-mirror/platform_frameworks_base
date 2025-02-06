@@ -23,7 +23,6 @@ import com.android.systemui.mediaprojection.data.repository.realMediaProjectionR
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.ActivityTaskManagerTasksRepository
 import com.android.systemui.mediaprojection.taskswitcher.domain.interactor.TaskSwitchInteractor
 import com.android.systemui.mediaprojection.taskswitcher.ui.viewmodel.TaskSwitcherNotificationViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 
 val Kosmos.fakeActivityTaskManager by Kosmos.Fixture { FakeActivityTaskManager() }
@@ -47,5 +46,4 @@ val Kosmos.taskSwitcherInteractor by
 val Kosmos.taskSwitcherViewModel by
     Kosmos.Fixture { TaskSwitcherNotificationViewModel(taskSwitcherInteractor, testDispatcher) }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 fun taskSwitcherKosmos() = Kosmos().apply { testDispatcher = UnconfinedTestDispatcher() }

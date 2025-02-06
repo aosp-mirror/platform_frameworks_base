@@ -853,6 +853,9 @@
     <!-- Text shown when viewing channel settings for notifications related to vpn status -->
     <string name="notification_channel_vpn">VPN status</string>
 
+    <!-- Text shown when viewing channel settings for notifications related to system time -->
+    <string name="notification_channel_system_time">Time and time zones</string>
+
     <!-- Notification channel name. This channel sends high-priority alerts from the user's IT admin for key updates about the user's work device or work profile. -->
     <string name="notification_channel_device_admin">Alerts from your IT admin</string>
 
@@ -879,6 +882,10 @@
     <!-- Text shown when viewing channel settings for notifications related to accessibility
          magnification. [CHAR_LIMIT=NONE]-->
     <string name="notification_channel_accessibility_magnification">Magnification</string>
+
+    <!-- Text shown when viewing channel settings for notifications related to accessibility
+     hearing device. [CHAR_LIMIT=NONE]-->
+    <string name="notification_channel_accessibility_hearing_device">Hearing device</string>
 
     <!-- Text shown when viewing channel settings for notifications related to accessibility
          security policy. [CHAR_LIMIT=NONE]-->
@@ -3875,6 +3882,12 @@
     <string name="carrier_app_notification_title">New SIM inserted</string>
     <string name="carrier_app_notification_text">Tap to set it up</string>
 
+    <!-- Time zone notification strings -->
+    <!-- Title for time zone change notifications -->
+    <string name="time_zone_change_notification_title">Your time zone changed</string>
+    <!-- Body for time zone change notifications -->
+    <string name="time_zone_change_notification_body">You\'re now in <xliff:g id="time_zone_display_name">%1$s</xliff:g> (<xliff:g id="time_zone_offset">%2$s</xliff:g>)</string>
+
     <!-- Date/Time picker dialogs strings -->
 
     <!-- The title of the time picker dialog. [CHAR LIMIT=NONE] -->
@@ -4985,6 +4998,19 @@
     <!-- Text used to describe system navigation features, shown within a UI allowing a user to assign system magnification features to the Accessibility button in the navigation bar. -->
     <string name="accessibility_magnification_chooser_text">Magnification</string>
 
+    <!-- Notification title for switching input to the phone's microphone. It will be shown when making a phone call with the hearing device. [CHAR LIMIT=none] -->
+    <string name="hearing_device_switch_phone_mic_notification_title">Switch to phone mic?</string>
+    <!-- Notification title for switching input to the hearing device's microphone. It will be shown when making a phone call with the hearing device. [CHAR LIMIT=none] -->
+    <string name="hearing_device_switch_hearing_mic_notification_title">Switch to hearing aid mic?</string>
+    <!-- Notification content for switching input to the phone's microphone. It will be shown when making a phone call with the hearing device. [CHAR LIMIT=none] -->
+    <string name="hearing_device_switch_phone_mic_notification_text">For better sound or if your hearing aid battery is low. This only switches your mic during the call.</string>
+    <!-- Notification content for switching input to the hearing device's microphone. It will be shown when making a phone call with the hearing device. [CHAR LIMIT=none] -->
+    <string name="hearing_device_switch_hearing_mic_notification_text">You can use your hearing aid microphone for hands-free calling. This only switches your mic during the call.</string>
+    <!-- Notification action button. Click it will switch the input between phone's microphone and hearing device's microphone. It will be shown when making a phone call with the hearing device. [CHAR LIMIT=none] -->
+    <string name="hearing_device_notification_switch_button">Switch</string>
+    <!-- Notification action button. Click it will open the bluetooth device details page for this hearing device. It will be shown when making a phone call with the hearing device. [CHAR LIMIT=none] -->
+    <string name="hearing_device_notification_settings_button">Settings</string>
+
     <!-- Text spoken when the current user is switched if accessibility is enabled. [CHAR LIMIT=none] -->
     <string name="user_switched">Current user <xliff:g id="name" example="Bob">%1$s</xliff:g>.</string>
     <!-- Message shown when switching to a user [CHAR LIMIT=none] -->
@@ -5718,6 +5744,16 @@
     <string name="unpin_specific_target">Unpin <xliff:g id="label" example="Tweet">%1$s</xliff:g></string>
     <!-- View application info for a target. -->
     <string name="app_info">App info</string>
+    <!-- Accessibility announcement for the shortcut group (https://developer.android.com/training/sharing/direct-share-targets)
+     in the list of targets. [CHAR LIMIT=NONE]-->
+    <string name="shortcut_group_a11y_title">Direct share targets</string>
+    <!-- Accessibility announcement for the suggested application group in the list of targets.
+    [CHAR LIMIT=NONE] -->
+    <string name="suggested_apps_group_a11y_title">App suggestions</string>
+    <!-- Accessibility announcement for the all-applications group in the list of targets.
+    [CHAR LIMIT=NONE] -->
+    <string name="all_apps_group_a11y_title">App list</string>
+
 
     <!-- The representation of a time duration when negative. An example is -1:14. This can be used with a countdown timer for example.-->
     <string name="negative_duration">\u2212<xliff:g id="time" example="1:14">%1$s</xliff:g></string>
@@ -6122,6 +6158,24 @@
     <string name="accessibility_system_action_dpad_right_label">Dpad Right</string>
     <!-- Label for Dpad center action [CHAR LIMIT=NONE] -->
     <string name="accessibility_system_action_dpad_center_label">Dpad Center</string>
+
+    <!-- Accessibility autoclick related strings -->
+    <!-- Label for autoclick type settings panel [CHAR LIMIT=NONE] -->
+    <string name="accessibility_autoclick_type_settings_panel_title">Autoclick type settings panel</string>
+    <!-- Label for autoclick left click button [CHAR LIMIT=NONE] -->
+    <string name="accessibility_autoclick_left_click">Left click</string>
+    <!-- Label for autoclick right click button [CHAR LIMIT=NONE] -->
+    <string name="accessibility_autoclick_right_click">Right click</string>
+    <!-- Label for autoclick double click button [CHAR LIMIT=NONE] -->
+    <string name="accessibility_autoclick_double_click">Double click</string>
+    <!-- Label for autoclick drag button [CHAR LIMIT=NONE] -->
+    <string name="accessibility_autoclick_drag">Drag</string>
+    <!-- Label for autoclick scroll button [CHAR LIMIT=NONE] -->
+    <string name="accessibility_autoclick_scroll">Scroll</string>
+    <!-- Label for autoclick pause button [CHAR LIMIT=NONE] -->
+    <string name="accessibility_autoclick_pause">Pause</string>
+    <!-- Label for autoclick position button [CHAR LIMIT=NONE] -->
+    <string name="accessibility_autoclick_position">Position</string>
 
     <!-- Text to tell the user that a package has been forced by themselves in the RESTRICTED bucket. [CHAR LIMIT=NONE] -->
     <string name="as_app_forced_to_restricted_bucket">
@@ -6620,6 +6674,8 @@ ul.</string>
     <string name="satellite_notification_title">Auto connected to satellite</string>
     <!-- Notification summary when satellite service is auto connected. [CHAR LIMIT=NONE] -->
     <string name="satellite_notification_summary">You can send and receive messages without a mobile or Wi-Fi network</string>
+    <!-- Notification summary when satellite service connected with data service supported. [CHAR LIMIT=NONE] -->
+    <string name="satellite_notification_summary_with_data">You can send and receive messages and use limited data by satellite</string>
     <!-- Notification title when satellite service can be manually enabled. -->
     <string name="satellite_notification_manual_title">Use satellite messaging?</string>
     <!-- Notification summary when satellite service can be manually enabled. [CHAR LIMIT=NONE] -->
@@ -6738,4 +6794,10 @@ ul.</string>
 
     <!-- Fingerprint loe notification string -->
     <string name="fingerprint_loe_notification_msg">Your fingerprints can no longer be recognized. Set up Fingerprint Unlock again.</string>
+
+    <!--  AdvancedProtectionService USB notifications -->
+    <string name="usb_apm_usb_plugged_in_when_locked_notification_title">USB device plugged in when locked</string>
+    <string name="usb_apm_usb_plugged_in_when_locked_notification_text">USB device is plugged in when Android is locked. To use device, please unlock Android first and then reinsert USB device to use it.</string>
+    <string name="usb_apm_usb_suspicious_activity_notification_title">Suspicious USB activity</string>
+    <string name="usb_apm_usb_suspicious_activity_notification_text">USB data signal has been disabled.</string>
 </resources>

@@ -39,7 +39,7 @@ val Kosmos.localMediaRepositoryFactory by
 
 val Kosmos.mediaOutputActionsInteractor by
     Kosmos.Fixture { MediaOutputActionsInteractor(mediaOutputDialogManager) }
-val Kosmos.mediaControllerRepository by Kosmos.Fixture { FakeMediaControllerRepository() }
+var Kosmos.mediaControllerRepository by Kosmos.Fixture { FakeMediaControllerRepository() }
 val Kosmos.mediaOutputInteractor by
     Kosmos.Fixture {
         MediaOutputInteractor(

@@ -20,21 +20,21 @@ import android.graphics.BlendMode
 import android.graphics.BlendModeColorFilter
 import android.graphics.drawable.ClipDrawable
 import android.graphics.drawable.LayerDrawable
-import android.view.View
 import android.service.controls.Control
 import android.service.controls.templates.TemperatureControlTemplate
 import android.service.controls.templates.ThumbnailTemplate
 import android.util.TypedValue
-
-import com.android.systemui.res.R
+import android.view.View
 import com.android.systemui.controls.ui.ControlViewHolder.Companion.MAX_LEVEL
 import com.android.systemui.controls.ui.ControlViewHolder.Companion.MIN_LEVEL
+import com.android.systemui.res.R
+import com.android.systemui.utils.SafeIconLoader
 
 /**
  * Supports display of static images on the background of the tile. When marked active, the title
  * and subtitle will not be visible. To be used with {@link Thumbnailtemplate} only.
  */
-class ThumbnailBehavior(currentUserId: Int) : Behavior {
+class ThumbnailBehavior(currentUserId: Int, private val safeIconLoader: SafeIconLoader) : Behavior {
     lateinit var template: ThumbnailTemplate
     lateinit var control: Control
     lateinit var cvh: ControlViewHolder
@@ -61,17 +61,20 @@ class ThumbnailBehavior(currentUserId: Int) : Behavior {
         shadowRadius = outValue.getFloat()
 
         shadowColor = cvh.context.resources.getColor(R.color.control_thumbnail_shadow_color)
-        cvh.layout.setOnClickListener(View.OnClickListener() {
-            cvh.controlActionCoordinator.touch(cvh, template.getTemplateId(), control)
-        })
+        cvh.layout.setOnClickListener(
+            View.OnClickListener() {
+                cvh.controlActionCoordinator.touch(cvh, template.getTemplateId(), control)
+            }
+        )
     }
 
     override fun bind(cws: ControlWithState, colorOffset: Int) {
         this.control = cws.control!!
         cvh.setStatusText(control.getStatusText())
-        template = control.controlTemplate as? ThumbnailTemplate
+        template =
+            control.controlTemplate as? ThumbnailTemplate
                 ?: (control.controlTemplate as TemperatureControlTemplate).template
-                        as ThumbnailTemplate
+                    as ThumbnailTemplate
 
         val ld = cvh.layout.getBackground() as LayerDrawable
         val clipLayer = ld.findDrawableByLayerId(R.id.clip_layer) as ClipDrawable
@@ -84,18 +87,22 @@ class ThumbnailBehavior(currentUserId: Int) : Behavior {
             cvh.status.setShadowLayer(shadowOffsetX, shadowOffsetY, shadowRadius, shadowColor)
 
             cvh.bgExecutor.execute {
-                val drawable = template.thumbnail
-                        ?.takeIf(canUseIconPredicate)
-                        ?.loadDrawable(cvh.context)
+                val drawable =
+                    template.thumbnail.takeIf(canUseIconPredicate)?.let { safeIconLoader.load(it) }
                 cvh.uiExecutor.execute {
-                    val radius = cvh.context.getResources()
-                        .getDimensionPixelSize(R.dimen.control_corner_radius).toFloat()
+                    val radius =
+                        cvh.context
+                            .getResources()
+                            .getDimensionPixelSize(R.dimen.control_corner_radius)
+                            .toFloat()
                     // TODO(b/290037843): Add a placeholder
-                    drawable?.let {
-                        clipLayer.drawable = CornerDrawable(it, radius)
-                    }
-                    clipLayer.setColorFilter(BlendModeColorFilter(cvh.context.resources
-                        .getColor(R.color.control_thumbnail_tint), BlendMode.LUMINOSITY))
+                    drawable?.let { clipLayer.drawable = CornerDrawable(it, radius) }
+                    clipLayer.setColorFilter(
+                        BlendModeColorFilter(
+                            cvh.context.resources.getColor(R.color.control_thumbnail_tint),
+                            BlendMode.LUMINOSITY,
+                        )
+                    )
                     cvh.applyRenderInfo(enabled, colorOffset)
                 }
             }

@@ -20,6 +20,7 @@ import android.app.ActivityManager.RunningTaskInfo
 import android.graphics.PointF
 import android.graphics.Rect
 import com.android.internal.annotations.VisibleForTesting
+import com.android.wm.shell.desktopmode.calculateAspectRatio
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_BOTTOM
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_LEFT
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_RIGHT
@@ -27,8 +28,6 @@ import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_TOP
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_UNDEFINED
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CtrlType
 import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
 
 /**
  * [AbstractTaskPositionerDecorator] implementation for validating the coordinates associated with a
@@ -59,8 +58,7 @@ class FixedAspectRatioTaskPositionerDecorator (
         lastValidPoint.set(x, y)
         val startingBoundWidth = lastRepositionedBounds.width()
         val startingBoundHeight = lastRepositionedBounds.height()
-        startingAspectRatio = max(startingBoundWidth, startingBoundHeight).toFloat() /
-                min(startingBoundWidth, startingBoundHeight).toFloat()
+        startingAspectRatio = calculateAspectRatio(windowDecoration.mTaskInfo)
         isTaskPortrait = startingBoundWidth <= startingBoundHeight
 
         lastRepositionedBounds.set(

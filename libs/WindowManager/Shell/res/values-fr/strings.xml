@@ -43,6 +43,8 @@
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Écran de gauche à 50 %"</string>
     <string name="accessibility_action_divider_left_30" msgid="6023611335723838727">"Écran de gauche à 30 %"</string>
     <string name="accessibility_action_divider_right_full" msgid="3408505054325944903">"Écran de droite en plein écran"</string>
+    <!-- no translation found for accessibility_action_divider_swap (7026003137401725787) -->
+    <skip />
     <string name="accessibility_action_divider_top_full" msgid="3495871951082107594">"Écran du haut en plein écran"</string>
     <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"Écran du haut à 70 %"</string>
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Écran du haut à 50 %"</string>
@@ -141,6 +143,26 @@
     <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"Restaurer"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"Ancrer à gauche"</string>
     <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"Ancrer à droite"</string>
+    <!-- no translation found for desktop_mode_a11y_action_snap_left (2932955411661734668) -->
+    <skip />
+    <!-- no translation found for desktop_mode_a11y_action_snap_right (4577032451624261787) -->
+    <skip />
+    <!-- no translation found for desktop_mode_a11y_action_maximize_restore (8026037983417986686) -->
+    <skip />
+    <!-- no translation found for app_handle_menu_talkback_split_screen_mode_button_text (7182959681057464802) -->
+    <skip />
+    <!-- no translation found for app_handle_menu_talkback_desktop_mode_button_text (1230110046930843630) -->
+    <skip />
+    <!-- no translation found for maximize_menu_talkback_action_snap_left_text (500309467459084564) -->
+    <skip />
+    <!-- no translation found for maximize_menu_talkback_action_snap_right_text (7010831426654467163) -->
+    <skip />
+    <!-- no translation found for maximize_menu_talkback_action_maximize_restore_text (4942610897847934859) -->
+    <skip />
+    <!-- no translation found for maximize_button_talkback_action_maximize_restore_text (4122441323153198455) -->
+    <skip />
+    <!-- no translation found for minimize_button_talkback_action_maximize_restore_text (8890767445425625935) -->
+    <skip />
     <string name="open_by_default_settings_text" msgid="2526548548598185500">"Ouvrir les paramètres par défaut"</string>
     <string name="open_by_default_dialog_subheader_text" msgid="1729599730664063881">"Choisir comment ouvrir les liens Web pour cette appli"</string>
     <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"Dans l\'application"</string>

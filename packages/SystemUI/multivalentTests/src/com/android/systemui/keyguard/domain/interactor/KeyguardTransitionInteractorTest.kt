@@ -55,7 +55,6 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class KeyguardTransitionInteractorTest : SysuiTestCase() {
     val kosmos = testKosmos()
     val underTest = kosmos.keyguardTransitionInteractor

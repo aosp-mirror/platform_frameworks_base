@@ -36,11 +36,9 @@ class ConvertCommand : public Command {
         kOutputFormatProto, kOutputFormatBinary, kOutputFormatBinary), &output_format_);
     AddOptionalSwitch(
         "--enable-sparse-encoding",
-        "Enables encoding sparse entries using a binary search tree.\n"
-        "This decreases APK size at the cost of resource retrieval performance.\n"
-        "Only applies sparse encoding to Android O+ resources or all resources if minSdk of "
-        "the APK is O+",
-        &enable_sparse_encoding_);
+        "[DEPRECATED] This flag is a no-op as of aapt2 v2.20. Sparse encoding is always\n"
+        "enabled if minSdk of the APK is >= 32.",
+        nullptr);
     AddOptionalSwitch("--force-sparse-encoding",
                       "Enables encoding sparse entries using a binary search tree.\n"
                       "This decreases APK size at the cost of resource retrieval performance.\n"
@@ -87,7 +85,6 @@ class ConvertCommand : public Command {
   std::string output_path_;
   std::optional<std::string> output_format_;
   bool verbose_ = false;
-  bool enable_sparse_encoding_ = false;
   bool force_sparse_encoding_ = false;
   bool enable_compact_entries_ = false;
   std::optional<std::string> resources_config_path_;

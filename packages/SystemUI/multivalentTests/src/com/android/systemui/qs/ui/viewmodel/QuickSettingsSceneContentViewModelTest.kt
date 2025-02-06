@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.ui.viewmodel
 
-import android.platform.test.annotations.DisableFlags
 import android.testing.TestableLooper.RunWithLooper
 import androidx.lifecycle.LifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -39,13 +38,15 @@ import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModelFactory
 import com.android.systemui.shade.data.repository.shadeRepository
-import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.domain.interactor.disableDualShade
+import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 import com.android.systemui.shade.ui.viewmodel.shadeHeaderViewModelFactory
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -54,11 +55,11 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
 @EnableSceneContainer
-@DisableFlags(com.android.systemui.Flags.FLAG_DUAL_SHADE)
 class QuickSettingsSceneContentViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
@@ -73,7 +74,6 @@ class QuickSettingsSceneContentViewModelTest : SysuiTestCase() {
 
     private val sceneContainerStartable = kosmos.sceneContainerStartable
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
-    private val shadeInteractor by lazy { kosmos.shadeInteractor }
 
     private lateinit var underTest: QuickSettingsSceneContentViewModel
 
@@ -90,10 +90,11 @@ class QuickSettingsSceneContentViewModelTest : SysuiTestCase() {
                 footerActionsViewModelFactory = footerActionsViewModelFactory,
                 footerActionsController = footerActionsController,
                 mediaCarouselInteractor = kosmos.mediaCarouselInteractor,
-                shadeInteractor = shadeInteractor,
+                shadeModeInteractor = kosmos.shadeModeInteractor,
                 sceneInteractor = sceneInteractor,
             )
         underTest.activateIn(testScope)
+        kosmos.disableDualShade()
     }
 
     @Test
@@ -107,7 +108,6 @@ class QuickSettingsSceneContentViewModelTest : SysuiTestCase() {
     @Test
     fun addAndRemoveMedia_mediaVisibilityIsUpdated() =
         testScope.runTest {
-            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
             val isMediaVisible by collectLastValue(underTest.isMediaVisible)
             val userMedia = MediaData(active = true)
 
@@ -125,7 +125,6 @@ class QuickSettingsSceneContentViewModelTest : SysuiTestCase() {
     @Test
     fun addInactiveMedia_mediaVisibilityIsUpdated() =
         testScope.runTest {
-            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
             val isMediaVisible by collectLastValue(underTest.isMediaVisible)
             val userMedia = MediaData(active = false)
 

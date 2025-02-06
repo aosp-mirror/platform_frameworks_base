@@ -72,6 +72,7 @@ android_ravenwood_test {
         "tests/**/*.java",
     ],
     auto_gen_config: true,
+    team: "trendy_team_ravenwood",
 }
 
 // Make the current.txt available for use by the cts/tests/signature and /vendor tests.

@@ -61,9 +61,6 @@ struct OptimizeOptions {
   // TODO(b/246489170): keep the old option and format until transform to the new one
   std::optional<std::string> shortened_paths_map_path;
 
-  // Whether sparse encoding should be used for O+ resources.
-  bool enable_sparse_encoding = false;
-
   // Whether sparse encoding should be used for all resources.
   bool force_sparse_encoding = false;
 
@@ -106,11 +103,9 @@ class OptimizeCommand : public Command {
         &kept_artifacts_);
     AddOptionalSwitch(
         "--enable-sparse-encoding",
-        "Enables encoding sparse entries using a binary search tree.\n"
-        "This decreases APK size at the cost of resource retrieval performance.\n"
-        "Only applies sparse encoding to Android O+ resources or all resources if minSdk of "
-        "the APK is O+",
-        &options_.enable_sparse_encoding);
+        "[DEPRECATED] This flag is a no-op as of aapt2 v2.20. Sparse encoding is always\n"
+        "enabled if minSdk of the APK is >= 32.",
+        nullptr);
     AddOptionalSwitch("--force-sparse-encoding",
                       "Enables encoding sparse entries using a binary search tree.\n"
                       "This decreases APK size at the cost of resource retrieval performance.\n"

@@ -2747,8 +2747,7 @@ public class VoiceInteractionManagerService extends SystemService {
                     isManagedProfileVisible = true;
                 }
             }
-            final ScreenCapture.ScreenshotHardwareBuffer shb =
-                    mWmInternal.takeAssistScreenshot(/* windowTypesToExclude= */ Set.of());
+            final ScreenCapture.ScreenshotHardwareBuffer shb = mWmInternal.takeAssistScreenshot();
             final Bitmap bm = shb != null ? shb.asBitmap() : null;
             // Now that everything is fetched, putting it in the launchIntent.
             if (bm != null) {

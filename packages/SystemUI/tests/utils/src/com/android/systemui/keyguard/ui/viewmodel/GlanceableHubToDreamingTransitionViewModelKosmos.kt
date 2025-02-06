@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
+import com.android.systemui.keyguard.ui.glanceableHubBlurComponentFactory
 import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
 import com.android.systemui.kosmos.Kosmos
 
@@ -25,5 +26,6 @@ val Kosmos.glanceableHubToDreamingTransitionViewModel by
         GlanceableHubToDreamingTransitionViewModel(
             configurationInteractor = configurationInteractor,
             animationFlow = keyguardTransitionAnimationFlow,
+            blurFactory = glanceableHubBlurComponentFactory,
         )
     }

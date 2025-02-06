@@ -38,7 +38,7 @@ class QsBatteryModeControllerTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val insetsProviderStore = kosmos.fakeStatusBarContentInsetsProviderStore
-    private val insetsProvider = insetsProviderStore.defaultDisplay
+    private val insetsProvider = insetsProviderStore.forDisplay(context.displayId)
 
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()!!
 

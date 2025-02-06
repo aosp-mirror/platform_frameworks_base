@@ -33,6 +33,9 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.dynamicanimation.animation.DynamicAnimation;
+import androidx.dynamicanimation.animation.SpringAnimation;
+import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.app.animation.Interpolators;
 import com.android.systemui.Dumpable;
@@ -42,6 +45,7 @@ import com.android.systemui.statusbar.notification.Roundable;
 import com.android.systemui.statusbar.notification.RoundableState;
 import com.android.systemui.statusbar.notification.headsup.PinnedStatus;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
+import com.android.systemui.statusbar.notification.stack.MagneticRowListener;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.DumpUtilsKt;
@@ -84,6 +88,55 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
     private float mContentTranslation;
     protected boolean mLastInSection;
     protected boolean mFirstInSection;
+
+    protected SpringAnimation mMagneticAnimator = new SpringAnimation(
+            this /* object */, DynamicAnimation.TRANSLATION_X);
+
+    protected MagneticRowListener mMagneticRowListener = new MagneticRowListener() {
+
+        @Override
+        public void setMagneticTranslation(float translation) {
+            if (mMagneticAnimator.isRunning()) {
+                mMagneticAnimator.animateToFinalPosition(translation);
+            } else {
+                setTranslation(translation);
+            }
+        }
+
+        @Override
+        public void triggerMagneticForce(float endTranslation, @NonNull SpringForce springForce,
+                float startVelocity) {
+            cancelMagneticAnimations();
+            mMagneticAnimator.setSpring(springForce);
+            mMagneticAnimator.setStartVelocity(startVelocity);
+            mMagneticAnimator.animateToFinalPosition(endTranslation);
+        }
+
+        @Override
+        public void cancelMagneticAnimations() {
+            cancelTranslationAnimations();
+            mMagneticAnimator.cancel();
+        }
+
+        @Override
+        public boolean canRowBeDismissed() {
+            return canExpandableViewBeDismissed();
+        }
+    };
+
+    /**
+     * @return true if the ExpandableView can be dismissed. False otherwise.
+     */
+    public boolean canExpandableViewBeDismissed() {
+        return false;
+    }
+
+    /** Cancel any trailing animations on the translation of the view */
+    protected void cancelTranslationAnimations(){}
+
+    public MagneticRowListener getMagneticRowListener() {
+        return mMagneticRowListener;
+    }
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);

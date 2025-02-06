@@ -27,10 +27,12 @@ import com.android.settingslib.notification.data.repository.ZenModeRepositoryImp
 import com.android.settingslib.notification.domain.interactor.NotificationsSoundPolicyInteractor;
 import com.android.settingslib.notification.modes.ZenModesBackend;
 import com.android.systemui.CoreStartable;
+import com.android.systemui.Flags;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
@@ -60,7 +62,6 @@ import com.android.systemui.statusbar.notification.collection.render.Notificatio
 import com.android.systemui.statusbar.notification.data.NotificationDataLayerModule;
 import com.android.systemui.statusbar.notification.domain.NotificationDomainLayerModule;
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor;
-import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModelModule;
 import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.notification.icon.ConversationIconManager;
 import com.android.systemui.statusbar.notification.icon.IconManager;
@@ -85,6 +86,8 @@ import com.android.systemui.statusbar.notification.row.NotificationEntryProcesso
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModelModule;
+import com.android.systemui.statusbar.notification.stack.MagneticNotificationRowManager;
+import com.android.systemui.statusbar.notification.stack.MagneticNotificationRowManagerImpl;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -109,7 +112,6 @@ import javax.inject.Provider;
  * Dagger Module for classes found within the com.android.systemui.statusbar.notification package.
  */
 @Module(includes = {
-        FooterViewModelModule.class,
         KeyguardNotificationVisibilityProviderModule.class,
         NotificationDataLayerModule.class,
         NotificationDomainLayerModule.class,
@@ -119,6 +121,7 @@ import javax.inject.Provider;
         NotificationMemoryModule.class,
         NotificationStatsLoggerModule.class,
         NotificationsLogModule.class,
+        NotificationStackModule.class,
 })
 public interface NotificationsModule {
     @Binds
@@ -166,7 +169,7 @@ public interface NotificationsModule {
     @SysUISingleton
     @Provides
     static NotificationsController provideNotificationsController(
-            Context context,
+            @ShadeDisplayAware Context context,
             Provider<NotificationsControllerImpl> realController,
             Provider<NotificationsControllerStub> stubController) {
         if (context.getResources().getBoolean(R.bool.config_renderNotifications)) {
@@ -320,7 +323,22 @@ public interface NotificationsModule {
         if (PromotedNotificationContentModel.featureFlagEnabled()) {
             return implProvider.get();
         } else {
-            return (entry, recoveredBuilder) -> null;
+            return (entry, recoveredBuilder, imageModelProvider) -> null;
+        }
+    }
+
+    /**
+     * Provide an implementation of {@link MagneticNotificationRowManager} based on its flag.
+     */
+    @Provides
+    @SysUISingleton
+    static MagneticNotificationRowManager provideMagneticNotificationRowManager(
+            Provider<MagneticNotificationRowManagerImpl> implProvider
+    ) {
+        if (Flags.magneticNotificationSwipes()) {
+            return implProvider.get();
+        } else {
+            return MagneticNotificationRowManager.getEmpty();
         }
     }
 }

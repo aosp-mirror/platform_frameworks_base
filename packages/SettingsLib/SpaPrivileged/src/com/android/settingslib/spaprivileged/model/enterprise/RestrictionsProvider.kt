@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.flowOn
 data class EnhancedConfirmation(
     val key: String,
     val packageName: String,
+    val isRestrictedSettingAllowed: Boolean?
 )
 data class Restrictions(
     val userId: Int = UserHandle.myUserId(),
@@ -92,6 +93,9 @@ internal class RestrictionsProviderImpl(
         }
 
         restrictions.enhancedConfirmation?.let { ec ->
+            if (ec.isRestrictedSettingAllowed == true) {
+                return NoRestricted
+            }
             RestrictedLockUtilsInternal
                     .checkIfRequiresEnhancedConfirmation(context, ec.key,
                         ec.packageName)

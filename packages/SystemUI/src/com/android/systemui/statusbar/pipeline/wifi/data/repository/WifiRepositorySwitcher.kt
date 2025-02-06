@@ -29,7 +29,6 @@ import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -54,7 +53,6 @@ import kotlinx.coroutines.flow.stateIn
  * that flow.
  */
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class WifiRepositorySwitcher
 @Inject

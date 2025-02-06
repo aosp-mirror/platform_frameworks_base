@@ -98,7 +98,7 @@ class PrivacyItemController @Inject constructor(
     }
 
     init {
-        dumpManager.registerDumpable(TAG, this)
+        dumpManager.registerNormalDumpable(TAG, this)
         privacyConfig.addCallback(optionsCallback)
     }
 

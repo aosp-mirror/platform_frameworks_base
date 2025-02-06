@@ -22,10 +22,8 @@ import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import dagger.Lazy
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** A base class for non-empty implementations of ShadeController. */
-@OptIn(ExperimentalCoroutinesApi::class)
 abstract class BaseShadeControllerImpl(
     protected val commandQueue: CommandQueue,
     protected val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,

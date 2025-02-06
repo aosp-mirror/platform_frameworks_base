@@ -76,4 +76,11 @@
     <color name="settingslib_materialColorSurfaceContainerLowest">#FFFFFF</color>
     <color name="settingslib_materialColorSurfaceContainerHigh">#E8E8E8</color>
     <color name="settingslib_materialColorSurfaceContainerHighest">#E3E3E3</color>
+
+    <color name="settingslib_colorBackgroundLevel_high">@color/m3_ref_palette_red50</color>
+    <color name="settingslib_colorContentLevel_high">@color/m3_ref_palette_red100</color>
+    <color name="settingslib_colorBackgroundLevel_medium">@color/m3_ref_palette_yellow80</color>
+    <color name="settingslib_colorContentLevel_medium">@color/m3_ref_palette_yellow10</color>
+    <color name="settingslib_colorBackgroundLevel_low">@color/m3_ref_palette_green50</color>
+    <color name="settingslib_colorContentLevel_low">@color/m3_ref_palette_green100</color>
 </resources>

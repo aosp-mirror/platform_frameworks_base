@@ -163,42 +163,6 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     }
 
     @Test
-    public void testIncreasedHeadsUpBeingUsed() {
-        BindParams params = new BindParams(false, false, /* usesIncreasedHeadsUpHeight */ true,
-                REDACTION_TYPE_NONE);
-        Notification.Builder builder = spy(mBuilder);
-        mNotificationInflater.inflateNotificationViews(
-                mRow.getEntry(),
-                mRow,
-                params,
-                true /* inflateSynchronously */,
-                FLAG_CONTENT_VIEW_ALL,
-                builder,
-                mContext,
-                mContext,
-                mSmartReplyStateInflater);
-        verify(builder).createHeadsUpContentView(true);
-    }
-
-    @Test
-    public void testIncreasedHeightBeingUsed() {
-        BindParams params = new BindParams(false, /* usesIncreasedHeight */ true, false,
-                REDACTION_TYPE_NONE);
-        Notification.Builder builder = spy(mBuilder);
-        mNotificationInflater.inflateNotificationViews(
-                mRow.getEntry(),
-                mRow,
-                params,
-                true /* inflateSynchronously */,
-                FLAG_CONTENT_VIEW_ALL,
-                builder,
-                mContext,
-                mContext,
-                mSmartReplyStateInflater);
-        verify(builder).createContentView(true);
-    }
-
-    @Test
     public void testInflationCallsUpdated() throws Exception {
         inflateAndWait(mNotificationInflater, FLAG_CONTENT_VIEW_ALL, mRow);
         verify(mRow).onNotificationUpdated();
@@ -238,7 +202,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 mRow.getEntry(),
                 mRow,
                 FLAG_CONTENT_VIEW_ALL,
-                new BindParams(false, false, false, REDACTION_TYPE_NONE),
+                new BindParams(false, REDACTION_TYPE_NONE),
                 false /* forceInflate */,
                 null /* callback */);
         Assert.assertNull(mRow.getEntry().getRunningTask());
@@ -576,7 +540,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 row.getEntry(),
                 row,
                 contentToInflate,
-                new BindParams(false, false, false, redactionType),
+                new BindParams(false, redactionType),
                 false /* forceInflate */,
                 callback /* callback */);
         assertTrue(countDownLatch.await(500, TimeUnit.MILLISECONDS));

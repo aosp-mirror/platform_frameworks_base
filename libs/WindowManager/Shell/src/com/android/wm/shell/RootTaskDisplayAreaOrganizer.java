@@ -230,6 +230,11 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
         return mDisplayAreasInfo.get(displayId);
     }
 
+    @Nullable
+    public SurfaceControl getDisplayAreaLeash(int displayId) {
+        return mLeashes.get(displayId);
+    }
+
     /**
      * Applies the {@link DisplayAreaInfo} to the {@link DisplayAreaContext} specified by
      * {@link DisplayAreaInfo#displayId}.

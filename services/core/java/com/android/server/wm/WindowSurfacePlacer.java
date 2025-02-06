@@ -127,7 +127,6 @@ class WindowSurfacePlacer {
             mService.mAnimationHandler.removeCallbacks(mPerformSurfacePlacement);
             loopCount--;
         } while (mTraversalScheduled && loopCount > 0);
-        mService.mRoot.mWallpaperActionPending = false;
     }
 
     private void performSurfacePlacementLoop() {

@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.util.MathUtils
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.dagger.SysUISingleton
@@ -33,7 +34,6 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import dagger.Lazy
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 
@@ -41,7 +41,6 @@ import kotlinx.coroutines.flow.flatMapLatest
  * Breaks down PRIMARY_BOUNCER->GONE transition into discrete steps for corresponding views to
  * consume.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class PrimaryBouncerToGoneTransitionViewModel
 @Inject
@@ -65,10 +64,12 @@ constructor(
     val showAllNotifications: Flow<Boolean> =
         bouncerToGoneFlows.showAllNotifications(TO_GONE_DURATION, PRIMARY_BOUNCER)
 
-    val notificationAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
+    fun notificationAlpha(viewState: ViewStateAccessor): Flow<Float> {
+        var startAlpha = 1f
+        return transitionAnimation.sharedFlow(
             duration = 200.milliseconds,
             onStart = {
+                startAlpha = viewState.alpha()
                 leaveShadeOpen = statusBarStateController.leaveOpenOnKeyguardHide()
                 willRunDismissFromKeyguard = primaryBouncerInteractor.willRunDismissFromKeyguard()
             },
@@ -76,11 +77,12 @@ constructor(
                 if (willRunDismissFromKeyguard || leaveShadeOpen) {
                     1f
                 } else {
-                    1f - it
+                    MathUtils.lerp(startAlpha, 0f, it)
                 }
             },
             onFinish = { 1f },
         )
+    }
 
     /** Bouncer container alpha */
     val bouncerAlpha: Flow<Float> =
@@ -165,6 +167,9 @@ constructor(
         } else {
             createBouncerWindowBlurFlow(primaryBouncerInteractor::willRunDismissFromKeyguard)
         }
+
+    override val notificationBlurRadius: Flow<Float> =
+        transitionAnimation.immediatelyTransitionTo(0.0f)
 
     val scrimAlpha: Flow<ScrimAlpha> =
         bouncerToGoneFlows.scrimAlpha(TO_GONE_DURATION, PRIMARY_BOUNCER)

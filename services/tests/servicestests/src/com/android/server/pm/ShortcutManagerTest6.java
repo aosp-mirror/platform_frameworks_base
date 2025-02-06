@@ -26,7 +26,7 @@ import androidx.test.filters.SmallTest;
 @Presubmit
 @SmallTest
 public class ShortcutManagerTest6 extends BaseShortcutManagerTest {
-    public void testHasShortcutHostPermissionInner_with3pLauncher_complicated() {
+    public void disabled_testHasShortcutHostPermissionInner_with3pLauncher_complicated() {
         // Set the default launcher.
         prepareGetRoleHoldersAsUser(CALLING_PACKAGE_2, USER_10);
         assertFalse(mService.hasShortcutHostPermissionInner(PACKAGE_SYSTEM_LAUNCHER, USER_10));

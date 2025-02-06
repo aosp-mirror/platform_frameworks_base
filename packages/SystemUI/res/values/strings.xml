@@ -588,6 +588,12 @@
     <!-- Content description of the cast label showing what we are connected to. [CHAR LIMIT=NONE] -->
     <string name="accessibility_cast_name">Connected to <xliff:g id="cast" example="TV">%s</xliff:g>.</string>
 
+    <!-- Content description of the button to expand the group of devices. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_expand_group">Expand group.</string>
+
+    <!-- Content description of the button to open the application . [CHAR LIMIT=NONE] -->
+    <string name="accessibility_open_application">Open application.</string>
+
     <!-- Content description of an item with no signal and no connection for accessibility (not shown on the screen) [CHAR LIMIT=NONE] -->
     <string name="accessibility_not_connected">Not connected.</string>
     <!-- Content description of the roaming data connection type. [CHAR LIMIT=NONE] -->
@@ -1351,14 +1357,16 @@
     <string name="communal_widgets_disclaimer_text">To open an app using a widget, you\u2019ll need to verify it\u2019s you. Also, keep in mind that anyone can view them, even when your tablet\u2019s locked. Some widgets may not have been intended for your lock screen and may be unsafe to add here.</string>
     <!-- Button for user to verify they understand the information presented. [CHAR LIMIT=50] -->
     <string name="communal_widgets_disclaimer_button">Got it</string>
-    <!-- Label for a lock screen affordance to show widgets on the lock screen. [CHAR LIMIT=20] -->
-    <string name="glanceable_hub_lockscreen_affordance_label">Widgets</string>
-    <!-- Text explaining why the lock screen affordance to show widgets on the lockscreen is disabled and how to enable the affordance in settings. [CHAR LIMIT=NONE] -->
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text">To add the \"Widgets\" shortcut, make sure \"Show widgets on lock screen\" is enabled in settings.</string>
-    <!-- Label for a button used to open Settings in order to enable showing widgets on the lock screen. [CHAR LIMIT=NONE] -->
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label">Settings</string>
     <!-- Content description for a "show screensaver" button on glanceable hub. [CHAR LIMIT=NONE] -->
     <string name="accessibility_glanceable_hub_to_dream_button">Show screensaver button</string>
+    <!-- Title shown in hub onboarding bottom sheet. [CHAR LIMIT=50] -->
+    <string name="hub_onboarding_bottom_sheet_title">Explore hub mode</string>
+    <!-- Information about communal hub shown in the onboarding bottom sheet. [CHAR LIMIT=NONE] -->
+    <string name="hub_onboarding_bottom_sheet_text">Access your favorite widgets and screen savers while charging.</string>
+    <!-- Hub onboarding bottom sheet action button title. [CHAR LIMIT=NONE] -->
+    <string name="hub_onboarding_bottom_sheet_action_button">Let\u2019s go</string>
+    <!-- Text for a tooltip that appears over the "show screensaver" button on glanceable hub. [CHAR LIMIT=NONE] -->
+    <string name="glanceable_hub_to_dream_button_tooltip">Show your favorite screensavers while charging</string>
 
     <!-- Related to user switcher --><skip/>
 
@@ -1930,6 +1938,9 @@
     <!-- Name of the airplane status bar icon. -->
     <string name="status_bar_airplane">Airplane mode</string>
 
+    <!-- Name of the supervision status bar icon. -->
+    <string name="status_bar_supervision">Parental controls</string>
+
     <!-- Description for adding  a quick settings tile -->
 
     <!-- Name of a quick settings tile controlled by broadcast -->
@@ -1963,7 +1974,7 @@
     <!-- Text displayed indicating that the user is connected to a satellite signal. -->
     <string name="satellite_connected_carrier_text">Satellite SOS</string>
     <!-- Text displayed indicating that the user might be able to use satellite SOS. -->
-    <string name="satellite_emergency_only_carrier_text">Emergency calls or SOS</string>
+    <string name="satellite_emergency_only_carrier_text">Emergency calls or SOS only</string>
 
     <!-- Content description skeleton. Input strings should be carrier name and signal bar description [CHAR LIMIT=NONE]-->
     <string name="accessibility_phone_string_format"><xliff:g id="carrier_name" example="Carrier Name">%1$s</xliff:g>, <xliff:g id="signal_strength_description" example="two bars">%2$s</xliff:g>.</string>
@@ -2076,9 +2087,14 @@
     <!-- Text shown in notification guts for conversation notifications that don't implement the full feature -->
     <string name="no_shortcut"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> doesn\u2019t support conversation features</string>
 
-    <!-- TODO: b/381099727 - Mark translatable once feedback layout is finalized. -->
     <!-- [CHAR LIMIT=80] Text shown in feedback button in notification guts for a bundled notification -->
-    <string name="notification_guts_bundle_feedback" translatable="false">Provide Bundle Feedback</string>
+    <string name="notification_guts_bundle_feedback">Feedback</string>
+
+    <!-- [CHAR LIMIT=30] Text shown in button used to dismiss this single notification. -->
+    <string name="notification_inline_dismiss">Dismiss</string>
+
+    <!-- [CHAR LIMIT=30] Text shown in button used to prevent app from showing Live Updates, for this notification and all future ones -->
+    <string name="notification_inline_disable_promotion">Don\'t show again</string>
 
     <!-- Notification: Control panel: Label that displays when the app's notifications cannot be blocked. -->
     <string name="notification_unblockable_desc">These notifications can\'t be modified.</string>
@@ -2250,8 +2266,6 @@
     <string name="keyboard_shortcut_group_system_notifications">Notifications</string>
     <!-- User visible title for the keyboard shortcut that triggers the keyboard shortcuts helper. -->
     <string name="keyboard_shortcut_group_system_shortcuts_helper">Keyboard Shortcuts</string>
-    <!-- User visible title for the keyboard shortcut that switches to the next hardware keyboard layout. -->
-    <string name="keyboard_shortcut_group_system_switch_input">Switch keyboard layout</string>
     <!-- User visible string that joins different shortcuts in a list, e.g. shortcut1 "or" shortcut2 "or" ... -->
     <string  name="keyboard_shortcut_join">or</string>
 
@@ -2366,6 +2380,23 @@
     <string name="keyboard_shortcut_group_applications_calculator">Calculator</string>
     <!-- User visible title for the keyboard shortcut that takes the user to the maps app. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications_maps">Maps</string>
+
+    <!-- User visible title for the keyboard shortcut that toggles bounce keys. [CHAR LIMIT=70]-->
+    <string name="group_accessibility_toggle_bounce_keys">Toggle bounce keys</string>
+    <!-- User visible title for the keyboard shortcut that toggles mouse keys. [CHAR LIMIT=70]-->
+    <string name="group_accessibility_toggle_mouse_keys">Toggle mouse keys</string>
+    <!-- User visible title for the keyboard shortcut that toggles sticky keys. [CHAR LIMIT=70]-->
+    <string name="group_accessibility_toggle_sticky_keys">Toggle sticky keys</string>
+    <!-- User visible title for the keyboard shortcut that toggles slow keys. [CHAR LIMIT=70]-->
+    <string name="group_accessibility_toggle_slow_keys">Toggle slow keys</string>
+    <!-- User visible title for the keyboard shortcut that toggles Voice Access. [CHAR LIMIT=70] -->
+    <string name="group_accessibility_toggle_voice_access">Toggle Voice Access</string>
+    <!-- User visible title for the keyboard shortcut that toggles Talkback. [CHAR LIMIT=70] -->
+    <string name="group_accessibility_toggle_talkback">Toggle Talkback</string>
+    <!-- User visible title for the keyboard shortcut that toggles Magnification. [CHAR LIMIT=70] -->
+    <string name="group_accessibility_toggle_magnification">Toggle Magnification</string>
+    <!-- User visible title for the keyboard shortcut that activates Select to Speak service. [CHAR LIMIT=70] -->
+    <string name="group_accessibility_activate_select_to_speak">Activate Select to Speak</string>
 
     <!-- SysUI Tuner: Label for screen about do not disturb settings [CHAR LIMIT=60] -->
     <string name="volume_and_do_not_disturb">Do Not Disturb</string>
@@ -3369,6 +3400,8 @@
 
     <!-- Content description for a chip in the status bar showing that the user is currently on a call. [CHAR LIMIT=NONE] -->
     <string name="ongoing_call_content_description">Ongoing call</string>
+    <!-- Content description for a chip in the status bar showing that the user currently has an ongoing activity. [CHAR LIMIT=NONE]-->
+    <string name="ongoing_notification_extra_content_description">Ongoing</string>
 
     <!-- Provider Model: Default title of the mobile network in the mobile layout. [CHAR LIMIT=50] -->
     <string name="mobile_data_settings_title">Mobile data</string>
@@ -3623,6 +3656,8 @@
     <string name="rear_display_accessibility_unfolded_animation">Foldable device being flipped around</string>
     <!-- Text for a dialog telling the user that the front screen is turned on. [CHAR_LIMIT=NONE] -->
     <string name="rear_display_unfolded_front_screen_on">Front screen turned on</string>
+    <!-- Text for a dialog telling the user that sliding the progress bar cancels rear display mode, bringing the system contents back to the inner display. [CHAR_LIMIT=NONE] -->
+    <string name="rear_display_unfolded_front_screen_on_slide_to_cancel">Slide to use inner screen</string>
 
     <!-- QuickSettings: Additional label for the auto-rotation quicksettings tile indicating that the setting corresponds to the folded posture for a foldable device [CHAR LIMIT=32] -->
     <string name="quick_settings_rotation_posture_folded">folded</string>
@@ -3775,6 +3810,11 @@
          that shows the user which keyboard shortcuts they can use. The "Split screen" shortcuts are
          for example "Move current app to left split". [CHAR LIMIT=NONE] -->
     <string name="shortcutHelper_category_split_screen">Split screen</string>
+    <!-- Title of the keyboard shortcut helper category "Accessibility". This category contains shortcuts
+         for android accessibility and disability inclusion features such as screen readers, voice control,
+         switch access, talkback, etc. The helper is a component that shows the user which keyboard
+         shortcuts they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcutHelper_category_accessibility">Accessibility</string>
     <!-- Title of the keyboard shortcut helper category "Input". The helper is a component
          that shows the user which keyboard shortcuts they can use. The "Input" shortcuts are
          the ones provided by the keyboard. Examples are "Access emoji" or "Switch to next language"
@@ -3798,7 +3838,7 @@
     <!-- Title at the top of the keyboard shortcut helper UI when in customize mode. The helper
          is a component that shows the user which keyboard shortcuts they can use.
          [CHAR LIMIT=NONE] -->
-    <string name="shortcut_helper_customize_mode_title">Customize keyboard shortcuts</string>
+    <string name="shortcut_helper_customize_mode_title">Customize shortcuts</string>
     <!-- Title at the top of the keyboard shortcut helper remove shortcut dialog.
          The helper is a component that shows the user which keyboard shortcuts they can use. Also
          allows the user to add/remove custom shortcuts.[CHAR LIMIT=NONE] -->
@@ -3812,7 +3852,7 @@
          user what action they need to take in the customization dialog to assign a new custom shortcut.
          The shortcut customize dialog allows users to add/remove custom shortcuts
          [CHAR LIMIT=NONE] -->
-    <string name="shortcut_customize_mode_add_shortcut_description">Press key to assign shortcut</string>
+    <string name="shortcut_customize_mode_add_shortcut_description">To create this shortcut, press the Action key and one or more other keys together</string>
     <!-- Sub title at the top of the remove custom shortcut dialog. Explains to the user what action
          they're about to take when they click remove shortcut. The shortcut customize dialog allows
          users to add/remove custom shortcuts
@@ -3909,7 +3949,7 @@
     <!-- Error message displayed when the user select a key combination that is already in use while
          assigning a new custom key combination to a shortcut in shortcut helper. The helper is a
          component that shows the user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
-    <string name="shortcut_customizer_key_combination_in_use_error_message">Key combination already in use. Try another key.</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message">Key combination already in use. Try another combination.</string>
     <!-- Generic error message displayed when the user selected key combination cannot be used as
          custom keyboard shortcut in shortcut helper. The helper is a component that shows the user
          which keyboard shortcuts they can use and allows users to customize their keyboard
@@ -3919,6 +3959,16 @@
          The helper is a component that shows the user which keyboard shortcuts they can use.
          [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_plus_symbol">+</string>
+    <!-- Accessibility label for the plus icon on a shortcut in shortcut helper that allows the user
+         to add a new custom shortcut.
+         The helper is a component that shows the user which keyboard shortcuts they can use.
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_add_shortcut_button_label">Add shortcut</string>
+    <!-- Accessibility label for the bin(trash) icon on a shortcut in shortcut helper that allows the
+         user to delete an existing custom shortcut.
+         The helper is a component that shows the user which keyboard shortcuts they can use.
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_delete_shortcut_button_label">Delete shortcut</string>
 
     <!-- Keyboard touchpad tutorial scheduler-->
     <!-- Notification title for launching keyboard tutorial [CHAR_LIMIT=100] -->
@@ -3943,6 +3993,8 @@
     <string name="touchpad_tutorial_home_gesture_button">Go home</string>
     <!-- Label for button opening tutorial for "view recent apps" gesture on touchpad [CHAR LIMIT=NONE] -->
     <string name="touchpad_tutorial_recent_apps_gesture_button">View recent apps</string>
+    <!-- Label for button opening tutorial for "switch apps" gesture on touchpad [CHAR LIMIT=NONE] -->
+    <string name="touchpad_tutorial_switch_apps_gesture_button">Switch apps</string>
     <!-- Label for button finishing touchpad tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_tutorial_done_button">Done</string>
     <!-- Screen title after gesture was not done correctly [CHAR LIMIT=NONE] -->
@@ -3980,6 +4032,17 @@
     <string name="touchpad_recent_apps_gesture_success_body">You completed the view recent apps gesture.</string>
     <!-- Text shown to the user after recent gesture was not done correctly [CHAR LIMIT=NONE] -->
     <string name="touchpad_recent_gesture_error_body">To view recent apps, swipe up and hold using three fingers on your touchpad</string>
+    <!-- SWITCH APPS GESTURE -->
+    <!-- Touchpad switch apps gesture action name in tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_switch_apps_gesture_action_title">Switch apps</string>
+    <!-- Touchpad switch apps gesture guidance in gestures tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_switch_apps_gesture_guidance">Swipe right using four fingers on your touchpad</string>
+    <!-- Screen title after switch apps gesture was done successfully [CHAR LIMIT=NONE] -->
+    <string name="touchpad_switch_apps_gesture_success_title">Great job!</string>
+    <!-- Text shown to the user after they complete switch apps gesture tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_switch_apps_gesture_success_body">You completed the switch apps gesture.</string>
+    <!-- Text shown to the user after switch gesture was not done correctly [CHAR LIMIT=NONE] -->
+    <string name="touchpad_switch_gesture_error_body">Swipe right using four fingers on your touchpad to switch apps</string>
 
     <!-- KEYBOARD TUTORIAL-->
     <!-- Action key tutorial title [CHAR LIMIT=NONE] -->

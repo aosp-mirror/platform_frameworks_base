@@ -52,8 +52,7 @@ import java.util.Map;
 import java.util.Set;
 
 /** @hide */
-// TODO(b/374174952): Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
-@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@TargetApi(Build.VERSION_CODES.BAKLAVA)
 class NetworkPriorityClassifier {
     @NonNull private static final String TAG = NetworkPriorityClassifier.class.getSimpleName();
     /**

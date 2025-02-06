@@ -17,6 +17,7 @@
 package com.android.systemui.scene.domain.startable
 
 import com.android.internal.logging.uiEventLogger
+import com.android.systemui.animation.activityTransitionAnimator
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
@@ -32,9 +33,11 @@ import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.keyguard.dismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.trustInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.model.sysUiState
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.disabledContentInteractor
@@ -45,6 +48,7 @@ import com.android.systemui.scene.session.shared.shadeSessionStorage
 import com.android.systemui.scene.shared.logger.sceneLogger
 import com.android.systemui.settings.displayTracker
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.notificationShadeWindowController
 import com.android.systemui.statusbar.phone.centralSurfacesOptional
@@ -85,5 +89,9 @@ val Kosmos.sceneContainerStartable by Fixture {
         vibratorHelper = vibratorHelper,
         msdlPlayer = msdlPlayer,
         disabledContentInteractor = disabledContentInteractor,
+        activityTransitionAnimator = activityTransitionAnimator,
+        shadeModeInteractor = shadeModeInteractor,
+        tableLogBuffer = logcatTableLogBuffer(this, "sceneFrameworkTableLogBuffer"),
+        trustInteractor = trustInteractor,
     )
 }

@@ -34,7 +34,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,7 +53,6 @@ import platform.test.runner.parameterized.Parameters
  * verifies that passing the given model to [DemoMobileConnectionsRepository] results in the correct
  * flows emitting from the given connection.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 internal class DemoMobileConnectionParameterizedTest(private val testCase: TestCase) :

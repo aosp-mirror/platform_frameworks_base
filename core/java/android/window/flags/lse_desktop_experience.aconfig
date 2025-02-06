@@ -463,6 +463,13 @@ flag {
 }
 
 flag {
+    name: "enable_connected_displays_pip"
+    namespace: "lse_desktop_experience"
+    description: "Enables PiP features in connected displays."
+    bug: "362721131"
+}
+
+flag {
     name: "reparent_window_token_api"
     namespace: "lse_desktop_experience"
     description: "Allows to reparent a window token to a different display"
@@ -478,10 +485,10 @@ flag {
 }
 
 flag {
-    name: "enable_multiple_desktops"
+    name: "enable_multiple_desktops_frontend"
     namespace: "lse_desktop_experience"
-    description: "Enable multiple desktop sessions for desktop windowing."
-    bug: "379158791"
+    description: "Enable multiple desktop sessions for desktop windowing (frontend)."
+    bug: "362720309"
 }
 
 flag {
@@ -503,6 +510,13 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enable window drag between connected displays."
     bug: "381172172"
+}
+
+flag {
+    name: "enable_taskbar_connected_displays"
+    namespace: "lse_desktop_experience"
+    description: "Enables connected displays in taskbar."
+    bug: "393398093"
 }
 
 flag {
@@ -531,8 +545,136 @@ flag {
 }
 
 flag {
-    name: "enable_desktop_wallpaper_activity_on_system_user"
+    name: "enable_per_display_package_context_cache_in_statusbar_notif"
+    namespace: "lse_desktop_experience"
+    description: "Enables per-display package context caching in StatusBarNotification"
+    bug: "388886443"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_desktop_wallpaper_activity_for_system_user"
     namespace: "lse_desktop_experience"
     description: "Enables starting DesktopWallpaperActivity on system user."
     bug: "385294350"
+    metadata {
+       purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_display_disconnect_interaction"
+    namespace: "lse_desktop_experience"
+    description: "Enables new interaction that occurs when a display is disconnected."
+    bug: "391652399"
+}
+
+flag {
+    name: "show_desktop_experience_dev_option"
+    namespace: "lse_desktop_experience"
+    description: "Replace the freeform windowing dev options with a desktop experience one."
+    bug: "389092752"
+}
+
+flag {
+    name: "enable_quickswitch_desktop_split_bugfix"
+    namespace: "lse_desktop_experience"
+    description: "Enables splitting QuickSwitch between fullscreen apps and Desktop workspaces."
+    bug: "345296916"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_desktop_windowing_exit_by_minimize_transition_bugfix"
+    namespace: "lse_desktop_experience"
+    description: "Enables exit desktop windowing by minimize transition & motion polish changes"
+    bug: "390161102"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_start_launch_transition_from_taskbar_bugfix"
+    namespace: "lse_desktop_experience"
+    description: "Enables starting a launch transition directly from the taskbar if desktop tasks are visible."
+    bug: "361366053"
+    metadata {
+       purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_non_default_display_split"
+    namespace: "lse_desktop_experience"
+    description: "Enables split screen on non default displays"
+    bug: "384999213"
+}
+
+flag {
+  name: "exclude_caption_from_app_bounds"
+  namespace: "lse_desktop_experience"
+  description: "Whether caption insets are excluded from app bounds in freeform"
+  bug: "388014743"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "enable_desktop_mode_through_dev_option"
+    namespace: "lse_desktop_experience"
+    description: "Enables support for desktop mode through developer options for devices eligible for desktop mode."
+    bug: "382238347"
+    metadata {
+       purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_desktop_taskbar_on_freeform_displays"
+    namespace: "lse_desktop_experience"
+    description: "Forces pinned taskbar with desktop tasks on freeform displays"
+    bug: "390665752"
+}
+
+flag {
+    name: "enable_presentation_for_connected_displays"
+    namespace: "lse_desktop_experience"
+    description: "Enables full support of presentation API for connected displays."
+    bug: "378503083"
+}
+
+flag {
+    name: "enable_full_screen_window_on_removing_split_screen_stage_bugfix"
+    namespace: "lse_desktop_experience"
+    description: "Enables clearing the windowing mode of a freeform window when removing the task from the split screen stage."
+    bug: "372791604"
+    metadata {
+       purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_desktop_trampoline_close_animation_bugfix"
+    namespace: "lse_desktop_experience"
+    description: "Enables a close animation when the app trampolines (a second window is opened, and the first is closed)."
+    bug: "391548553"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_desktop_tab_tearing_minimize_animation_bugfix"
+    namespace: "lse_desktop_experience"
+    description: "Enabling a minimize animation when a new window is opened via tab tearing and the Desktop Windowing open windows limit is reached."
+    bug: "376459606"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

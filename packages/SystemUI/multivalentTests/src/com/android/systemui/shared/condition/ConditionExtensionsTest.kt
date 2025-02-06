@@ -4,20 +4,17 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class ConditionExtensionsTest : SysuiTestCase() {
@@ -25,7 +22,7 @@ class ConditionExtensionsTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        testScope = TestScope(StandardTestDispatcher())
+        testScope = TestScope(UnconfinedTestDispatcher())
     }
 
     @Test
@@ -34,11 +31,9 @@ class ConditionExtensionsTest : SysuiTestCase() {
             val flow = flowOf(true)
             val condition = flow.toCondition(scope = this, Condition.START_EAGERLY)
 
-            runCurrent()
             assertThat(condition.isConditionSet).isFalse()
 
             condition.start()
-            runCurrent()
             assertThat(condition.isConditionSet).isTrue()
             assertThat(condition.isConditionMet).isTrue()
         }
@@ -49,11 +44,9 @@ class ConditionExtensionsTest : SysuiTestCase() {
             val flow = flowOf(false)
             val condition = flow.toCondition(scope = this, Condition.START_EAGERLY)
 
-            runCurrent()
             assertThat(condition.isConditionSet).isFalse()
 
             condition.start()
-            runCurrent()
             assertThat(condition.isConditionSet).isTrue()
             assertThat(condition.isConditionMet).isFalse()
         }
@@ -65,7 +58,6 @@ class ConditionExtensionsTest : SysuiTestCase() {
             val condition = flow.toCondition(scope = this, Condition.START_EAGERLY)
             condition.start()
 
-            runCurrent()
             assertThat(condition.isConditionSet).isFalse()
             assertThat(condition.isConditionMet).isFalse()
         }
@@ -78,11 +70,10 @@ class ConditionExtensionsTest : SysuiTestCase() {
                 flow.toCondition(
                     scope = this,
                     strategy = Condition.START_EAGERLY,
-                    initialValue = true
+                    initialValue = true,
                 )
             condition.start()
 
-            runCurrent()
             assertThat(condition.isConditionSet).isTrue()
             assertThat(condition.isConditionMet).isTrue()
         }
@@ -95,11 +86,10 @@ class ConditionExtensionsTest : SysuiTestCase() {
                 flow.toCondition(
                     scope = this,
                     strategy = Condition.START_EAGERLY,
-                    initialValue = false
+                    initialValue = false,
                 )
             condition.start()
 
-            runCurrent()
             assertThat(condition.isConditionSet).isTrue()
             assertThat(condition.isConditionMet).isFalse()
         }
@@ -111,16 +101,13 @@ class ConditionExtensionsTest : SysuiTestCase() {
             val condition = flow.toCondition(scope = this, strategy = Condition.START_EAGERLY)
             condition.start()
 
-            runCurrent()
             assertThat(condition.isConditionSet).isTrue()
             assertThat(condition.isConditionMet).isFalse()
 
             flow.value = true
-            runCurrent()
             assertThat(condition.isConditionMet).isTrue()
 
             flow.value = false
-            runCurrent()
             assertThat(condition.isConditionMet).isFalse()
 
             condition.stop()
@@ -131,15 +118,12 @@ class ConditionExtensionsTest : SysuiTestCase() {
         testScope.runTest {
             val flow = MutableSharedFlow<Boolean>()
             val condition = flow.toCondition(scope = this, strategy = Condition.START_EAGERLY)
-            runCurrent()
             assertThat(flow.subscriptionCount.value).isEqualTo(0)
 
             condition.start()
-            runCurrent()
             assertThat(flow.subscriptionCount.value).isEqualTo(1)
 
             condition.stop()
-            runCurrent()
             assertThat(flow.subscriptionCount.value).isEqualTo(0)
         }
 }

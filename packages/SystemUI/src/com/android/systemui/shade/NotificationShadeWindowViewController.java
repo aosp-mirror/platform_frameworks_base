@@ -16,10 +16,12 @@
 
 package com.android.systemui.shade;
 
+import static com.android.systemui.Flags.shadeLaunchAccessibility;
 import static com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING;
 import static com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
+import static com.android.systemui.util.kotlin.JavaAdapterKt.combineFlows;
 
 import android.app.StatusBarManager;
 import android.util.Log;
@@ -43,6 +45,7 @@ import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags;
 import com.android.systemui.bouncer.ui.binder.BouncerViewBinder;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
@@ -59,6 +62,7 @@ import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor;
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround;
 import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
 import com.android.systemui.statusbar.BlurUtils;
@@ -84,7 +88,9 @@ import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.window.ui.WindowRootViewBinder;
 import com.android.systemui.window.ui.viewmodel.WindowRootViewModel;
 
+import kotlinx.coroutines.CoroutineDispatcher;
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
+import kotlinx.coroutines.flow.Flow;
 
 import java.io.PrintWriter;
 import java.util.Optional;
@@ -116,6 +122,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
     private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     private final AlternateBouncerInteractor mAlternateBouncerInteractor;
     private final QuickSettingsController mQuickSettingsController;
+    private final CoroutineDispatcher mMainDispatcher;
     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private final GlanceableHubContainerController
             mGlanceableHubContainerController;
@@ -161,7 +168,6 @@ public class NotificationShadeWindowViewController implements Dumpable {
             };
     private final SystemClock mClock;
 
-    @ExperimentalCoroutinesApi
     @Inject
     public NotificationShadeWindowViewController(
             BlurUtils blurUtils,
@@ -174,6 +180,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
             NotificationShadeDepthController depthController,
             NotificationShadeWindowView notificationShadeWindowView,
             ShadeViewController shadeViewController,
+            ShadeAnimationInteractor shadeAnimationInteractor,
             PanelExpansionInteractor panelExpansionInteractor,
             ShadeExpansionStateManager shadeExpansionStateManager,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
@@ -201,7 +208,8 @@ public class NotificationShadeWindowViewController implements Dumpable {
             AlternateBouncerInteractor alternateBouncerInteractor,
             BouncerViewBinder bouncerViewBinder,
             @ShadeDisplayAware Provider<ConfigurationForwarder> configurationForwarder,
-            BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor) {
+            BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor,
+            @Main CoroutineDispatcher mainDispatcher) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
         mStatusBarStateController = statusBarStateController;
@@ -229,6 +237,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mQuickSettingsController = quickSettingsController;
+        mMainDispatcher = mainDispatcher;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -238,9 +247,17 @@ public class NotificationShadeWindowViewController implements Dumpable {
         collectFlow(mView, keyguardTransitionInteractor.transition(
                 Edge.create(LOCKSCREEN, DREAMING)),
                 mLockscreenToDreamingTransition);
+        Flow<Boolean> isLaunchAnimationRunning =
+                shadeLaunchAccessibility()
+                        ? combineFlows(
+                                notificationLaunchAnimationInteractor.isLaunchAnimationRunning(),
+                                shadeAnimationInteractor.isLaunchingActivity(),
+                                (notificationLaunching, shadeLaunching) ->
+                                        notificationLaunching || shadeLaunching)
+                        : notificationLaunchAnimationInteractor.isLaunchAnimationRunning();
         collectFlow(
                 mView,
-                notificationLaunchAnimationInteractor.isLaunchAnimationRunning(),
+                isLaunchAnimationRunning,
                 this::setExpandAnimationRunning);
         if (QSComposeFragment.isEnabled()) {
             collectFlow(mView,
@@ -275,7 +292,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
         if (SceneContainerFlag.isEnabled()) return;
 
         WindowRootViewBinder.INSTANCE.bind(mView, windowRootViewModelFactory, blurUtils,
-                choreographer);
+                choreographer, mMainDispatcher);
     }
 
     private void bindBouncer(BouncerViewBinder bouncerViewBinder) {
@@ -726,9 +743,17 @@ public class NotificationShadeWindowViewController implements Dumpable {
             if (ActivityTransitionAnimator.DEBUG_TRANSITION_ANIMATION) {
                 Log.d(TAG, "Setting mExpandAnimationRunning=" + running);
             }
+
             if (running) {
                 mLaunchAnimationTimeout = mClock.uptimeMillis() + 5000;
             }
+
+            if (shadeLaunchAccessibility()) {
+                // The view needs to know when an animation is ongoing so it can intercept
+                // unnecessary accessibility events.
+                mView.setAnimatingContentLaunch(running);
+            }
+
             mExpandAnimationRunning = running;
             mNotificationShadeWindowController.setLaunchingActivity(mExpandAnimationRunning);
         }

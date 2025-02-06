@@ -37,11 +37,13 @@ import android.os.Bundle;
 import android.os.IPowerStatsService;
 import android.os.Looper;
 import android.os.PowerMonitor;
+import android.os.PowerMonitorReadings;
 import android.os.ResultReceiver;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfigInterface;
+import android.util.IntArray;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -128,6 +130,8 @@ public class PowerStatsServiceTest {
             return realtime;
         }
     }
+
+    private final IntArray mFinePowerMonitorsPermissionGranted = new IntArray();
 
     private final PowerStatsService.Injector mInjector = new PowerStatsService.Injector() {
 
@@ -219,6 +223,11 @@ public class PowerStatsServiceTest {
         @Override
         IntervalRandomNoiseGenerator createIntervalRandomNoiseGenerator() {
             return mMockNoiseGenerator;
+        }
+
+        @Override
+        boolean checkFinePowerMonitorsPermission(Context context, int callingUid) {
+            return mFinePowerMonitorsPermissionGranted.contains(callingUid);
         }
     };
 
@@ -1109,6 +1118,8 @@ public class PowerStatsServiceTest {
         public int resultCode;
         public long[] energyUws;
         public long[] timestamps;
+        @PowerMonitorReadings.PowerMonitorGranularity
+        public int granularity;
 
         GetPowerMonitorsResult() {
             super(null);
@@ -1120,12 +1131,23 @@ public class PowerStatsServiceTest {
             if (resultData != null) {
                 energyUws = resultData.getLongArray(IPowerStatsService.KEY_ENERGY);
                 timestamps = resultData.getLongArray(IPowerStatsService.KEY_TIMESTAMPS);
+                granularity = resultData.getInt(IPowerStatsService.KEY_GRANULARITY);
             }
         }
     }
 
     @Test
     public void getPowerMonitors() {
+        testGetPowerMonitors(PowerMonitorReadings.GRANULARITY_UNSPECIFIED);
+    }
+
+    @Test
+    public void getPowerMonitors_finePowerMonitorPermissionGranted() {
+        mFinePowerMonitorsPermissionGranted.add(APP_UID);
+        testGetPowerMonitors(PowerMonitorReadings.GRANULARITY_FINE);
+    }
+
+    private void testGetPowerMonitors(int expectedGranularity) {
         mMockClock.realtime = 10 * 60_000;
         mMockNoiseGenerator.reseed(314);
 
@@ -1161,6 +1183,7 @@ public class PowerStatsServiceTest {
 
         assertThat(result.energyUws).isEqualTo(new long[]{42, 142, 314, 514});
         assertThat(result.timestamps).isEqualTo(new long[]{600_000, 600_100, 600_000, 600_200});
+        assertThat(result.granularity).isEqualTo(expectedGranularity);
 
         // Test caching/throttling
         mMockClock.realtime += 1;
@@ -1180,6 +1203,7 @@ public class PowerStatsServiceTest {
 
         assertThat(result.energyUws).isEqualTo(new long[]{42, 314});
         assertThat(result.timestamps).isEqualTo(new long[]{600_000, 600_000});
+        assertThat(result.granularity).isEqualTo(expectedGranularity);
 
         mMockClock.realtime += 10 * 60000;
 
@@ -1189,6 +1213,7 @@ public class PowerStatsServiceTest {
         // This time, random noise is added
         assertThat(result.energyUws).isEqualTo(new long[]{298, 399});
         assertThat(result.timestamps).isEqualTo(new long[]{600_301, 600_401});
+        assertThat(result.granularity).isEqualTo(expectedGranularity);
     }
 
     @Test
@@ -1234,7 +1259,6 @@ public class PowerStatsServiceTest {
         assertThrows(NullPointerException.class, () -> iPowerStatsService.getPowerMonitorReadings(
                 new int[] {0}, null));
     }
-
     @Test
     public void getEnergyConsumedAsync_halException() {
         mPowerStatsHALWrapper.exception = new IllegalArgumentException();

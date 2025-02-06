@@ -17,6 +17,7 @@
 package com.android.compose.animation.scene
 
 import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.mechanics.GestureContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 
@@ -193,6 +194,7 @@ private class OneOffSceneTransition(
         get() = oneOffAnimation.progressVelocity
 
     override val isUserInputOngoing: Boolean = false
+    override val gestureContext: GestureContext? = null
 
     override suspend fun run() {
         oneOffAnimation.run()

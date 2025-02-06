@@ -34,7 +34,6 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.utils.os.FakeHandler
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -50,7 +49,6 @@ import org.mockito.kotlin.eq
 
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 class DisplayRepositoryTest : SysuiTestCase() {
 

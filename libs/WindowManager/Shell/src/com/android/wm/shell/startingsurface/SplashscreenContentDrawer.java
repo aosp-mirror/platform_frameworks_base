@@ -633,7 +633,7 @@ public class SplashscreenContentDrawer {
 
         private class ShapeIconFactory extends BaseIconFactory {
             protected ShapeIconFactory(Context context, int fillResIconDpi, int iconBitmapSize) {
-                super(context, fillResIconDpi, iconBitmapSize, true /* shapeDetection */);
+                super(context, fillResIconDpi, iconBitmapSize);
             }
         }
 

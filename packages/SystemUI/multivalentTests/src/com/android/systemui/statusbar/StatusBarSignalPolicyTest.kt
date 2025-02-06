@@ -45,8 +45,11 @@ import kotlin.test.Test
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
 import org.mockito.kotlin.clearInvocations
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verifyNoMoreInteractions
 
 @SmallTest
@@ -106,10 +109,10 @@ class StatusBarSignalPolicyTest : SysuiTestCase() {
             // Make sure the legacy code path does not change airplane mode when the refactor
             // flag is enabled.
             underTest.setIsAirplaneMode(IconState(true, TelephonyIcons.FLIGHT_MODE_ICON, ""))
-            verifyNoMoreInteractions(statusBarIconController)
+            verify(statusBarIconController, never()).setIconVisibility(eq(slotAirplane), any())
 
             underTest.setIsAirplaneMode(IconState(false, TelephonyIcons.FLIGHT_MODE_ICON, ""))
-            verifyNoMoreInteractions(statusBarIconController)
+            verify(statusBarIconController, never()).setIconVisibility(eq(slotAirplane), any())
         }
 
     @Test
@@ -144,10 +147,10 @@ class StatusBarSignalPolicyTest : SysuiTestCase() {
             // Make sure changing airplane mode from airplaneModeRepository does nothing
             // if the StatusBarSignalPolicyRefactor is not enabled.
             airplaneModeInteractor.setIsAirplaneMode(true)
-            verifyNoMoreInteractions(statusBarIconController)
+            verify(statusBarIconController, never()).setIconVisibility(eq(slotAirplane), any())
 
             airplaneModeInteractor.setIsAirplaneMode(false)
-            verifyNoMoreInteractions(statusBarIconController)
+            verify(statusBarIconController, never()).setIconVisibility(eq(slotAirplane), any())
         }
 
     @Test
@@ -196,7 +199,7 @@ class StatusBarSignalPolicyTest : SysuiTestCase() {
             underTest.setEthernetIndicators(
                 IconState(/* visible= */ true, /* icon= */ 1, /* contentDescription= */ "Ethernet")
             )
-            verifyNoMoreInteractions(statusBarIconController)
+            verify(statusBarIconController, never()).setIconVisibility(eq(slotEthernet), any())
 
             underTest.setEthernetIndicators(
                 IconState(
@@ -205,7 +208,7 @@ class StatusBarSignalPolicyTest : SysuiTestCase() {
                     /* contentDescription= */ "No ethernet",
                 )
             )
-            verifyNoMoreInteractions(statusBarIconController)
+            verify(statusBarIconController, never()).setIconVisibility(eq(slotEthernet), any())
         }
 
     @Test
@@ -217,13 +220,13 @@ class StatusBarSignalPolicyTest : SysuiTestCase() {
             clearInvocations(statusBarIconController)
 
             connectivityRepository.fake.setEthernetConnected(default = true, validated = true)
-            verifyNoMoreInteractions(statusBarIconController)
+            verify(statusBarIconController, never()).setIconVisibility(eq(slotEthernet), any())
 
             connectivityRepository.fake.setEthernetConnected(default = false, validated = false)
-            verifyNoMoreInteractions(statusBarIconController)
+            verify(statusBarIconController, never()).setIconVisibility(eq(slotEthernet), any())
 
             connectivityRepository.fake.setEthernetConnected(default = true, validated = false)
-            verifyNoMoreInteractions(statusBarIconController)
+            verify(statusBarIconController, never()).setIconVisibility(eq(slotEthernet), any())
         }
 
     @Test

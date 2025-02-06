@@ -16,12 +16,15 @@
 
 package com.android.systemui.complication.dagger;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.view.LayoutInflater;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.internal.util.Preconditions;
+import com.android.systemui.communal.util.WindowSizeUtils;
+import com.android.systemui.complication.ComplicationLayoutEngine;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.res.R;
 
@@ -42,14 +45,7 @@ public abstract class ComplicationHostViewModule {
     public static final String COMPLICATIONS_FADE_IN_DURATION = "complications_fade_in_duration";
     public static final String COMPLICATIONS_RESTORE_TIMEOUT = "complication_restore_timeout";
     public static final String COMPLICATIONS_FADE_OUT_DELAY = "complication_fade_out_delay";
-    public static final String COMPLICATION_MARGIN_POSITION_START =
-            "complication_margin_position_start";
-    public static final String COMPLICATION_MARGIN_POSITION_TOP =
-            "complication_margin_position_top";
-    public static final String COMPLICATION_MARGIN_POSITION_END =
-            "complication_margin_position_end";
-    public static final String COMPLICATION_MARGIN_POSITION_BOTTOM =
-            "complication_margin_position_bottom";
+    public static final String COMPLICATION_MARGINS = "complication_margins";
 
     /**
      * Generates a {@link ConstraintLayout}, which can host
@@ -72,28 +68,32 @@ public abstract class ComplicationHostViewModule {
         return resources.getDimensionPixelSize(R.dimen.dream_overlay_complication_margin);
     }
 
+    /**
+     * Use small margins for compact window width (mobile portrait), and regular margins for
+     * medium and expanded width (mobile landscape, tablet and large unfolded).
+      */
     @Provides
-    @Named(COMPLICATION_MARGIN_POSITION_START)
-    static int providesComplicationMarginPositionStart(@Main Resources resources) {
-        return resources.getDimensionPixelSize(R.dimen.dream_overlay_container_padding_start);
-    }
-
-    @Provides
-    @Named(COMPLICATION_MARGIN_POSITION_TOP)
-    static int providesComplicationMarginPositionTop(@Main Resources resources) {
-        return resources.getDimensionPixelSize(R.dimen.dream_overlay_container_padding_top);
-    }
-
-    @Provides
-    @Named(COMPLICATION_MARGIN_POSITION_END)
-    static int providesComplicationMarginPositionEnd(@Main Resources resources) {
-        return resources.getDimensionPixelSize(R.dimen.dream_overlay_container_padding_end);
-    }
-
-    @Provides
-    @Named(COMPLICATION_MARGIN_POSITION_BOTTOM)
-    static int providesComplicationMarginPositionBottom(@Main Resources resources) {
-        return resources.getDimensionPixelSize(R.dimen.dream_overlay_container_padding_bottom);
+    @Named(COMPLICATION_MARGINS)
+    static ComplicationLayoutEngine.Margins providesComplicationMargins(@Main Resources resources,
+            Context context) {
+        return WindowSizeUtils.isCompactWindowSize(context)
+                ? new ComplicationLayoutEngine.Margins(resources.getDimensionPixelSize(
+                        R.dimen.dream_overlay_container_small_padding_start),
+                resources.getDimensionPixelSize(
+                        R.dimen.dream_overlay_container_small_padding_top),
+                resources.getDimensionPixelSize(
+                        R.dimen.dream_overlay_container_small_padding_end),
+                resources.getDimensionPixelSize(
+                        R.dimen.dream_overlay_container_small_padding_bottom)) :
+                new ComplicationLayoutEngine.Margins(resources.getDimensionPixelSize(
+                        R.dimen.dream_overlay_container_padding_start),
+                        resources.getDimensionPixelSize(
+                                R.dimen.dream_overlay_container_padding_top),
+                        resources.getDimensionPixelSize(
+                                R.dimen.dream_overlay_container_padding_end),
+                        resources.getDimensionPixelSize(
+                                R.dimen.dream_overlay_container_padding_bottom)
+                        );
     }
 
     /**

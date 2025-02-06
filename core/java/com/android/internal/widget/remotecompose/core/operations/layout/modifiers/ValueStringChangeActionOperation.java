@@ -28,6 +28,8 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 import com.android.internal.widget.remotecompose.core.operations.layout.ActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
@@ -53,6 +55,11 @@ public class ValueStringChangeActionOperation extends Operation implements Actio
         return mTargetValueId;
     }
 
+    /**
+     * The name of the operation used during serialization
+     *
+     * @return the operation serialized name
+     */
     @NonNull
     public String serializedName() {
         return "VALUE_CHANGE";
@@ -85,6 +92,13 @@ public class ValueStringChangeActionOperation extends Operation implements Actio
         context.overrideText(mTargetValueId, mValueId);
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param valueId the string id
+     * @param value the value to set (string id)`
+     */
     public static void apply(@NonNull WireBuffer buffer, int valueId, int value) {
         buffer.start(OP_CODE);
         buffer.writeInt(valueId);
@@ -119,5 +133,14 @@ public class ValueStringChangeActionOperation extends Operation implements Actio
                         INT,
                         "VALUE_ID",
                         "Value ID to be assigned to the target " + "value as a string");
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER, SerializeTags.ACTION)
+                .add("type", "ValueIntegerExpressionChangeActionOperation")
+                .add("targetValueId", mTargetValueId)
+                .add("valueId", mValueId);
     }
 }

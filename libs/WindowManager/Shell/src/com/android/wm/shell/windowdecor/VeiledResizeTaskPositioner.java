@@ -53,7 +53,12 @@ import java.util.function.Supplier;
  * {@link com.android.wm.shell.windowdecor.ResizeVeil}.
  * If the drag is resizing the task, we resize the veil instead.
  * If the drag is repositioning, we update in the typical manner.
+ * <p>
+ * @deprecated This class will be replaced by
+ * {@link com.android.wm.shell.windowdecor.MultiDisplayVeiledResizeTaskPositioner}.
+ * TODO(b/383632995): Remove this class after MultiDisplayVeiledResizeTaskPositioner is launched.
  */
+@Deprecated
 public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.TransitionHandler {
     // Timeout used for resize and drag CUJs, this is longer than the default timeout to avoid
     // timing out in the middle of a resize or drag action.

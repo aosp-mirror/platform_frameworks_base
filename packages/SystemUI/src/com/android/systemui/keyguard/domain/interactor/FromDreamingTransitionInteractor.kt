@@ -44,12 +44,10 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class FromDreamingTransitionInteractor
 @Inject
@@ -125,6 +123,7 @@ constructor(
      * the power button is pressed quickly, we may need to go directly from DREAMING to
      * GLANCEABLE_HUB as the transition to DOZING has not occurred yet.
      */
+    @OptIn(FlowPreview::class)
     @SuppressLint("MissingPermission")
     private fun listenForDreamingToGlanceableHubFromPowerButton() {
         if (!communalSettingsInteractor.isCommunalFlagEnabled()) return

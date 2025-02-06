@@ -40,7 +40,6 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -53,7 +52,6 @@ import android.hardware.devicestate.DeviceState as PlatformDeviceState
 
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 class DeviceStateRepositoryTest : SysuiTestCase() {
 

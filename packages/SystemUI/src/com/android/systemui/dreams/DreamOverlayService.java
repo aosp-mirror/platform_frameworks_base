@@ -562,6 +562,13 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             return;
         }
 
+        if (mCommunalSettingsInteractor.isV2FlagEnabled()) {
+            // Dream wake redirect is not needed in V2 as we do not need to keep the dream awake
+            // underneath the hub anymore as there is no more swipe between the dream and hub. SysUI
+            // will automatically transition to the hub when the dream wakes.
+            return;
+        }
+
         redirectWake(mCommunalAvailable && !glanceableHubAllowKeyguardWhenDreaming());
     }
 

@@ -32,6 +32,7 @@ import android.media.BluetoothProfileConnectionInfo;
 import android.media.FadeManagerConfiguration;
 import android.media.IAudioDeviceVolumeDispatcher;
 import android.media.IAudioFocusDispatcher;
+import android.media.IAudioManagerNative;
 import android.media.IAudioModeDispatcher;
 import android.media.IAudioRoutesObserver;
 import android.media.IAudioServerStateDispatcher;
@@ -83,6 +84,7 @@ interface IAudioService {
     // When a method's argument list is changed, BpAudioManager's corresponding serialization code
     // (if any) in frameworks/native/services/audiomanager/IAudioManager.cpp must be updated.
 
+    IAudioManagerNative getNativeInterface();
     int trackPlayer(in PlayerBase.PlayerIdCard pic);
 
     oneway void playerAttributes(in int piid, in AudioAttributes attr);
@@ -361,13 +363,6 @@ interface IAudioService {
 
     @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     oneway void setCsdAsAFeatureEnabled(boolean csdToggleValue);
-
-    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
-    oneway void setBluetoothAudioDeviceCategory_legacy(in String address, boolean isBle,
-            int deviceCategory);
-
-    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
-    int getBluetoothAudioDeviceCategory_legacy(in String address, boolean isBle);
 
     @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     boolean setBluetoothAudioDeviceCategory(in String address, int deviceCategory);
@@ -817,4 +812,8 @@ interface IAudioService {
     @EnforcePermission("QUERY_AUDIO_STATE")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.QUERY_AUDIO_STATE)")
     boolean shouldNotificationSoundPlay(in AudioAttributes aa);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)")
+    void setEnableHardening(in boolean shouldEnable);
 }

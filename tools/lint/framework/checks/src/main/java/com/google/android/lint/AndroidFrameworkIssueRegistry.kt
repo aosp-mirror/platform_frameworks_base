@@ -19,6 +19,7 @@ package com.google.android.lint
 import com.android.tools.lint.client.api.IssueRegistry
 import com.android.tools.lint.client.api.Vendor
 import com.android.tools.lint.detector.api.CURRENT_API
+import com.google.android.lint.multiuser.PendingIntentGetActivityDetector
 import com.google.android.lint.parcel.SaferParcelChecker
 import com.google.auto.service.AutoService
 
@@ -40,6 +41,7 @@ class AndroidFrameworkIssueRegistry : IssueRegistry() {
         PermissionMethodDetector.ISSUE_PERMISSION_METHOD_USAGE,
         PermissionMethodDetector.ISSUE_CAN_BE_PERMISSION_METHOD,
         FeatureAutomotiveDetector.ISSUE,
+        PendingIntentGetActivityDetector.ISSUE_PENDING_INTENT_GET_ACTIVITY,
     )
 
     override val api: Int

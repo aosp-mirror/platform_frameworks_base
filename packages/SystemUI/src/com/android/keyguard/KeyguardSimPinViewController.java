@@ -91,7 +91,7 @@ public class KeyguardSimPinViewController
             SecurityMode securityMode, LockPatternUtils lockPatternUtils,
             KeyguardSecurityCallback keyguardSecurityCallback,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
-            LatencyTracker latencyTracker, LiftToActivateListener liftToActivateListener,
+            LatencyTracker latencyTracker,
             TelephonyManager telephonyManager, FalsingCollector falsingCollector,
             EmergencyButtonController emergencyButtonController, FeatureFlags featureFlags,
             SelectedUserInteractor selectedUserInteractor,
@@ -99,7 +99,7 @@ public class KeyguardSimPinViewController
             BouncerHapticPlayer bouncerHapticPlayer,
             UserActivityNotifier userActivityNotifier) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
-                messageAreaControllerFactory, latencyTracker, liftToActivateListener,
+                messageAreaControllerFactory, latencyTracker,
                 emergencyButtonController, falsingCollector, featureFlags, selectedUserInteractor,
                 keyguardKeyboardInteractor, bouncerHapticPlayer, userActivityNotifier);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;

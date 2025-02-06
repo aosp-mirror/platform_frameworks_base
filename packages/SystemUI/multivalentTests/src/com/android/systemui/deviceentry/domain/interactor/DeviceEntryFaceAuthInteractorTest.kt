@@ -61,7 +61,6 @@ import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.eq
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
@@ -74,7 +73,6 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {

@@ -30,7 +30,7 @@ import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
 import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubblePositioner;
-import com.android.wm.shell.bubbles.properties.BubbleProperties;
+import com.android.wm.shell.bubbles.ResizabilityChecker;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -43,6 +43,7 @@ import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.taskview.TaskViewRepository;
 import com.android.wm.shell.taskview.TaskViewTransitions;
 import com.android.wm.shell.transition.Transitions;
 
@@ -76,18 +77,19 @@ public class TestableBubbleController extends BubbleController {
             DragAndDropController dragAndDropController,
             ShellExecutor shellMainExecutor,
             Handler shellMainHandler,
+            TaskViewRepository taskViewRepository,
             TaskViewTransitions taskViewTransitions,
             Transitions transitions,
             SyncTransactionQueue syncQueue,
             IWindowManager wmService,
-            BubbleProperties bubbleProperties) {
+            ResizabilityChecker resizabilityChecker) {
         super(context, shellInit, shellCommandHandler, shellController, data, Runnable::run,
                 floatingContentCoordinator, dataRepository, statusBarService, windowManager,
                 displayInsetsController, displayImeController, userManager, launcherApps,
                 bubbleLogger, taskStackListener, shellTaskOrganizer, positioner, displayController,
                 oneHandedOptional, dragAndDropController, shellMainExecutor, shellMainHandler,
-                new SyncExecutor(), taskViewTransitions, transitions,
-                syncQueue, wmService, bubbleProperties);
+                new SyncExecutor(), taskViewRepository, taskViewTransitions, transitions,
+                syncQueue, wmService, resizabilityChecker);
         setInflateSynchronously(true);
         onInit();
     }

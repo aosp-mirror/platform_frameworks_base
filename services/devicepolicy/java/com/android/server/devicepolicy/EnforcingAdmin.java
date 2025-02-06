@@ -23,7 +23,6 @@ import android.app.admin.DeviceAdminAuthority;
 import android.app.admin.DpcAuthority;
 import android.app.admin.RoleAuthority;
 import android.app.admin.UnknownAuthority;
-import android.app.admin.flags.Flags;
 import android.content.ComponentName;
 import android.os.UserHandle;
 
@@ -80,36 +79,24 @@ final class EnforcingAdmin {
     private final int mUserId;
     private final boolean mIsRoleAuthority;
     private final boolean mIsSystemAuthority;
-    private final ActiveAdmin mActiveAdmin;
 
-    static EnforcingAdmin createEnforcingAdmin(@NonNull String packageName, int userId,
-            ActiveAdmin admin) {
+    static EnforcingAdmin createEnforcingAdmin(@NonNull String packageName, int userId) {
         Objects.requireNonNull(packageName);
-        return new EnforcingAdmin(packageName, userId, admin);
+        return new EnforcingAdmin(packageName, userId);
     }
 
     static EnforcingAdmin createEnterpriseEnforcingAdmin(
             @NonNull ComponentName componentName, int userId) {
         Objects.requireNonNull(componentName);
         return new EnforcingAdmin(
-                componentName.getPackageName(), componentName, Set.of(DPC_AUTHORITY), userId,
-                /* activeAdmin=*/ null);
+                componentName.getPackageName(), componentName, Set.of(DPC_AUTHORITY), userId);
     }
 
-    static EnforcingAdmin createEnterpriseEnforcingAdmin(
-            @NonNull ComponentName componentName, int userId, ActiveAdmin activeAdmin) {
-        Objects.requireNonNull(componentName);
-        return new EnforcingAdmin(
-                componentName.getPackageName(), componentName, Set.of(DPC_AUTHORITY), userId,
-                activeAdmin);
-    }
-
-    static EnforcingAdmin createDeviceAdminEnforcingAdmin(ComponentName componentName, int userId,
-            ActiveAdmin activeAdmin) {
+    static EnforcingAdmin createDeviceAdminEnforcingAdmin(ComponentName componentName, int userId) {
         Objects.requireNonNull(componentName);
         return new EnforcingAdmin(
                 componentName.getPackageName(), componentName, Set.of(DEVICE_ADMIN_AUTHORITY),
-                userId, activeAdmin);
+                userId);
     }
 
     static EnforcingAdmin createSystemEnforcingAdmin(@NonNull String systemEntity) {
@@ -124,24 +111,20 @@ final class EnforcingAdmin {
         if (DpcAuthority.DPC_AUTHORITY.equals(authority)) {
             return new EnforcingAdmin(
                     admin.getPackageName(), admin.getComponentName(),
-                    Set.of(DPC_AUTHORITY), admin.getUserHandle().getIdentifier(),
-                    /* activeAdmin = */ null);
+                    Set.of(DPC_AUTHORITY), admin.getUserHandle().getIdentifier());
         } else if (DeviceAdminAuthority.DEVICE_ADMIN_AUTHORITY.equals(authority)) {
             return new EnforcingAdmin(
                     admin.getPackageName(), admin.getComponentName(),
-                    Set.of(DEVICE_ADMIN_AUTHORITY), admin.getUserHandle().getIdentifier(),
-                    /* activeAdmin = */ null);
+                    Set.of(DEVICE_ADMIN_AUTHORITY), admin.getUserHandle().getIdentifier());
         } else if (authority instanceof RoleAuthority roleAuthority) {
             return new EnforcingAdmin(
                     admin.getPackageName(), admin.getComponentName(),
                     Set.of(DEVICE_ADMIN_AUTHORITY), admin.getUserHandle().getIdentifier(),
-                    /* activeAdmin = */ null,
                     /* isRoleAuthority = */ true);
         }
         // TODO(b/324899199): Consider supporting android.app.admin.SystemAuthority.
         return new EnforcingAdmin(admin.getPackageName(), admin.getComponentName(),
-                Set.of(), admin.getUserHandle().getIdentifier(),
-                /* activeAdmin = */ null);
+                Set.of(), admin.getUserHandle().getIdentifier());
     }
 
     static String getRoleAuthorityOf(String roleName) {
@@ -167,7 +150,7 @@ final class EnforcingAdmin {
 
     private EnforcingAdmin(
             String packageName, @Nullable ComponentName componentName, Set<String> authorities,
-            int userId, @Nullable ActiveAdmin activeAdmin) {
+            int userId) {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(authorities);
 
@@ -179,10 +162,9 @@ final class EnforcingAdmin {
         mComponentName = componentName;
         mAuthorities = new HashSet<>(authorities);
         mUserId = userId;
-        mActiveAdmin = activeAdmin;
     }
 
-    private EnforcingAdmin(String packageName, int userId, ActiveAdmin activeAdmin) {
+    private EnforcingAdmin(String packageName, int userId) {
         Objects.requireNonNull(packageName);
 
         // Only role authorities use this constructor.
@@ -194,7 +176,6 @@ final class EnforcingAdmin {
         mComponentName = null;
         // authorities will be loaded when needed
         mAuthorities = null;
-        mActiveAdmin = activeAdmin;
     }
 
     /** Constructor for System authorities. */
@@ -210,12 +191,11 @@ final class EnforcingAdmin {
         mUserId = UserHandle.USER_SYSTEM;
         mComponentName = null;
         mAuthorities = getSystemAuthority(systemEntity);
-        mActiveAdmin = null;
     }
 
     private EnforcingAdmin(
             String packageName, @Nullable ComponentName componentName, Set<String> authorities,
-            int userId, @Nullable ActiveAdmin activeAdmin, boolean isRoleAuthority) {
+            int userId, boolean isRoleAuthority) {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(authorities);
 
@@ -226,7 +206,6 @@ final class EnforcingAdmin {
         mComponentName = componentName;
         mAuthorities = new HashSet<>(authorities);
         mUserId = userId;
-        mActiveAdmin = activeAdmin;
     }
 
     private static Set<String> getRoleAuthoritiesOrDefault(String packageName, int userId) {
@@ -292,14 +271,6 @@ final class EnforcingAdmin {
 
     int getUserId() {
         return mUserId;
-    }
-
-    @Nullable
-    public ActiveAdmin getActiveAdmin() {
-        if (Flags.activeAdminCleanup()) {
-            throw new UnsupportedOperationException("getActiveAdmin() no longer supported");
-        }
-        return mActiveAdmin;
     }
 
     @Nullable
@@ -419,7 +390,7 @@ final class EnforcingAdmin {
                 return null;
             }
             // TODO(b/281697976): load active admin
-            return new EnforcingAdmin(packageName, userId, null);
+            return new EnforcingAdmin(packageName, userId);
         } else if (isSystemAuthority) {
             if (systemEntity == null) {
                 Slogf.wtf(TAG, "Error parsing EnforcingAdmin with SystemAuthority, "
@@ -439,7 +410,7 @@ final class EnforcingAdmin {
                     ? null :  new ComponentName(packageName, className);
             Set<String> authorities = Set.of(authoritiesStr.split(ATTR_AUTHORITIES_SEPARATOR));
             // TODO(b/281697976): load active admin
-            return new EnforcingAdmin(packageName, componentName, authorities, userId, null);
+            return new EnforcingAdmin(packageName, componentName, authorities, userId);
         }
     }
 

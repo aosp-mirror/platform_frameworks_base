@@ -22,21 +22,26 @@ import android.content.packageManager
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.platform.test.annotations.EnableFlags
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_STATUS_BAR_SHOW_AUDIO_ONLY_PROJECTION_CHIP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testCase
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
 import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
 import com.android.systemui.statusbar.chips.mediaprojection.domain.model.ProjectionChipModel
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mockito.doAnswer
 import org.mockito.kotlin.any
@@ -44,8 +49,9 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class MediaProjectionChipInteractorTest : SysuiTestCase() {
-    private val kosmos = Kosmos().also { it.testCase = this }
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val testScope = kosmos.testScope
     private val mediaProjectionRepo = kosmos.fakeMediaProjectionRepository
 
@@ -55,6 +61,26 @@ class MediaProjectionChipInteractorTest : SysuiTestCase() {
     }
 
     private val underTest = kosmos.mediaProjectionChipInteractor
+
+    @Test
+    fun projectionStartedDuringCallAndActivePostCallEvent_eventEmitted_isUnit() =
+        kosmos.runTest {
+            val latest by
+                collectLastValue(underTest.projectionStartedDuringCallAndActivePostCallEvent)
+
+            fakeMediaProjectionRepository.emitProjectionStartedDuringCallAndActivePostCallEvent()
+
+            assertThat(latest).isEqualTo(Unit)
+        }
+
+    @Test
+    fun projectionStartedDuringCallAndActivePostCallEvent_noEventEmitted_isNull() =
+        kosmos.runTest {
+            val latest by
+                collectLastValue(underTest.projectionStartedDuringCallAndActivePostCallEvent)
+
+            assertThat(latest).isNull()
+        }
 
     @Test
     fun projection_notProjectingState_isNotProjecting() =

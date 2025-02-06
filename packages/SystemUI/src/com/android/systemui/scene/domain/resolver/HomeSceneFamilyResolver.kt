@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.scene.domain.resolver
 
+import android.util.Log
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -32,7 +31,6 @@ import dagger.Module
 import dagger.multibindings.IntoSet
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -85,8 +83,8 @@ constructor(
         isUnlocked: Boolean,
         isDreamingWithOverlay: Boolean,
         isAbleToDream: Boolean,
-    ): SceneKey =
-        when {
+    ): SceneKey {
+        val result = when {
             // Dream can run even if Keyguard is disabled, thus it has the highest priority here.
             isDreamingWithOverlay && isAbleToDream -> Scenes.Dream
             !isKeyguardEnabled -> Scenes.Gone
@@ -95,8 +93,21 @@ constructor(
             !isUnlocked -> Scenes.Lockscreen
             else -> Scenes.Gone
         }
+        Log.d(TAG, "homeScene emitting $result, values:")
+        Log.d(TAG, "  isKeyguardEnabled=$isKeyguardEnabled")
+        Log.d(TAG, "  canSwipeToEnter=$canSwipeToEnter")
+        Log.d(TAG, "  isDeviceEntered=$isDeviceEntered" )
+        Log.d(TAG, "  isUnlocked=$isUnlocked")
+        Log.d(TAG, "  isDreamingWithOverlay=$isDreamingWithOverlay")
+        Log.d(TAG, "  isAbleToDream=$isAbleToDream")
+        Log.d(TAG, "")
+        return result
+    }
 
     companion object {
+
+        private const val TAG = "HomeSceneFamilyResolver"
+
         val homeScenes =
             setOf(
                 Scenes.Gone,

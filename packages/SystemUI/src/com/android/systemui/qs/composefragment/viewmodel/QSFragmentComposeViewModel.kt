@@ -59,6 +59,7 @@ import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.panels.domain.interactor.TileSquishinessInteractor
 import com.android.systemui.qs.panels.ui.viewmodel.InFirstPageViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.MediaInRowInLandscapeViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.QuickQuickSettingsViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsContainerViewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
@@ -81,7 +82,6 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.io.PrintWriter
 import javax.inject.Named
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
@@ -91,12 +91,12 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class QSFragmentComposeViewModel
 @AssistedInject
 constructor(
     containerViewModelFactory: QuickSettingsContainerViewModel.Factory,
-    @Main private val resources: Resources,
+    @ShadeDisplayAware private val resources: Resources,
+    quickQuickSettingsViewModelFactory: QuickQuickSettingsViewModel.Factory,
     footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
     private val sysuiStatusBarStateController: SysuiStatusBarStateController,
@@ -104,7 +104,7 @@ constructor(
     DisableFlagsInteractor: DisableFlagsInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val largeScreenShadeInterpolator: LargeScreenShadeInterpolator,
-    private val shadeInteractor: ShadeInteractor,
+    shadeInteractor: ShadeInteractor,
     @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     private val largeScreenHeaderHelper: LargeScreenHeaderHelper,
     private val squishinessInteractor: TileSquishinessInteractor,
@@ -120,6 +120,8 @@ constructor(
 ) : Dumpable, ExclusiveActivatable() {
 
     val containerViewModel = containerViewModelFactory.create(true)
+    val quickQuickSettingsViewModel = quickQuickSettingsViewModelFactory.create()
+
     private val qqsMediaInRowViewModel = mediaInRowInLandscapeViewModelFactory.create(LOCATION_QQS)
     private val qsMediaInRowViewModel = mediaInRowInLandscapeViewModelFactory.create(LOCATION_QS)
 
@@ -477,6 +479,7 @@ constructor(
             }
             launch { hydrator.activate() }
             launch { containerViewModel.activate() }
+            launch { quickQuickSettingsViewModel.activate() }
             launch { qqsMediaInRowViewModel.activate() }
             launch { qsMediaInRowViewModel.activate() }
             awaitCancellation()

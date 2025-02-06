@@ -47,6 +47,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -54,6 +55,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.SurfaceControl;
+import android.window.DisplayAreaInfo;
 import android.window.IRemoteTransition;
 import android.window.RemoteTransition;
 import android.window.TransitionInfo;
@@ -65,6 +67,8 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.launcher3.icons.IconProvider;
+import com.android.wm.shell.Flags;
+import com.android.wm.shell.MockToken;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
@@ -121,6 +125,8 @@ public class SplitTransitionTests extends ShellTestCase {
     private StageTaskListener mSideStage;
     private StageCoordinator mStageCoordinator;
     private SplitScreenTransitions mSplitScreenTransitions;
+    private final DisplayAreaInfo mDisplayAreaInfo = new DisplayAreaInfo(new MockToken().token(),
+            DEFAULT_DISPLAY, 0);
 
     private ActivityManager.RunningTaskInfo mMainChild;
     private ActivityManager.RunningTaskInfo mSideChild;
@@ -146,7 +152,9 @@ public class SplitTransitionTests extends ShellTestCase {
                 mSyncQueue, mTaskOrganizer, mMainStage, mSideStage, mDisplayController,
                 mDisplayImeController, mDisplayInsetsController, mSplitLayout, mTransitions,
                 mTransactionPool, mMainExecutor, mMainHandler, Optional.empty(),
-                mLaunchAdjacentController, Optional.empty(), mSplitState, Optional.empty());
+                mLaunchAdjacentController, Optional.empty(), mSplitState, Optional.empty(),
+                mRootTDAOrganizer);
+        when(mRootTDAOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)).thenReturn(mDisplayAreaInfo);
 
         mStageCoordinator.setMixedHandler(mMixedHandler);
         mSplitScreenTransitions = mStageCoordinator.getSplitTransitions();
@@ -348,8 +356,13 @@ public class SplitTransitionTests extends ShellTestCase {
 
         // Make sure it cleans-up if recents doesn't restore
         WindowContainerTransaction commitWCT = new WindowContainerTransaction();
-        mStageCoordinator.onRecentsInSplitAnimationFinish(commitWCT,
-                mock(SurfaceControl.Transaction.class));
+        if (Flags.enableRecentsBookendTransition()) {
+            mStageCoordinator.onRecentsInSplitAnimationFinishing(false /* returnToApp */, commitWCT,
+                    mock(SurfaceControl.Transaction.class));
+        } else {
+            mStageCoordinator.onRecentsInSplitAnimationFinish(commitWCT,
+                    mock(SurfaceControl.Transaction.class));
+        }
         assertFalse(mStageCoordinator.isSplitScreenVisible());
     }
 
@@ -413,8 +426,13 @@ public class SplitTransitionTests extends ShellTestCase {
         // simulate the restoreWCT being applied:
         mMainStage.onTaskAppeared(mMainChild, mock(SurfaceControl.class));
         mSideStage.onTaskAppeared(mSideChild, mock(SurfaceControl.class));
-        mStageCoordinator.onRecentsInSplitAnimationFinish(restoreWCT,
-                mock(SurfaceControl.Transaction.class));
+        if (Flags.enableRecentsBookendTransition()) {
+            mStageCoordinator.onRecentsInSplitAnimationFinishing(true /* returnToApp */, restoreWCT,
+                    mock(SurfaceControl.Transaction.class));
+        } else {
+            mStageCoordinator.onRecentsInSplitAnimationFinish(restoreWCT,
+                    mock(SurfaceControl.Transaction.class));
+        }
         assertTrue(mStageCoordinator.isSplitScreenVisible());
     }
 

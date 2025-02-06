@@ -19,6 +19,7 @@ package android.hardware.biometrics;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
+import android.app.supervision.SupervisionManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Build;
@@ -55,27 +56,44 @@ public class ParentalControlsUtilsInternal {
         return null;
     }
 
-    public static boolean parentConsentRequired(@NonNull Context context,
-            @NonNull DevicePolicyManager dpm, @BiometricAuthenticator.Modality int modality,
+    /** @return true if parental consent is required in order for biometric sensors to be used. */
+    public static boolean parentConsentRequired(
+            @NonNull Context context,
+            @NonNull DevicePolicyManager dpm,
+            @Nullable SupervisionManager sm,
+            @BiometricAuthenticator.Modality int modality,
             @NonNull UserHandle userHandle) {
         if (getTestComponentName(context, userHandle.getIdentifier()) != null) {
             return true;
         }
 
-        return parentConsentRequired(dpm, modality, userHandle);
+        return parentConsentRequired(dpm, sm, modality, userHandle);
     }
 
     /**
      * @return true if parental consent is required in order for biometric sensors to be used.
      */
-    public static boolean parentConsentRequired(@NonNull DevicePolicyManager dpm,
-            @BiometricAuthenticator.Modality int modality, @NonNull UserHandle userHandle) {
-        final ComponentName cn = getSupervisionComponentName(dpm, userHandle);
-        if (cn == null) {
-            return false;
+    public static boolean parentConsentRequired(
+            @NonNull DevicePolicyManager dpm,
+            @Nullable SupervisionManager sm,
+            @BiometricAuthenticator.Modality int modality,
+            @NonNull UserHandle userHandle) {
+        final int keyguardDisabledFeatures;
+
+        if (android.app.supervision.flags.Flags.deprecateDpmSupervisionApis()) {
+            if (sm != null && !sm.isSupervisionEnabledForUser(userHandle.getIdentifier())) {
+                return false;
+            }
+            // Check for keyguard features disabled by any admin.
+            keyguardDisabledFeatures = dpm.getKeyguardDisabledFeatures(/* admin= */ null);
+        } else {
+            final ComponentName cn = getSupervisionComponentName(dpm, userHandle);
+            if (cn == null) {
+                return false;
+            }
+            keyguardDisabledFeatures = dpm.getKeyguardDisabledFeatures(cn);
         }
 
-        final int keyguardDisabledFeatures = dpm.getKeyguardDisabledFeatures(cn);
         final boolean dpmFpDisabled = containsFlag(keyguardDisabledFeatures,
                 DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT);
         final boolean dpmFaceDisabled = containsFlag(keyguardDisabledFeatures,
@@ -97,7 +115,9 @@ public class ParentalControlsUtilsInternal {
         return consentRequired;
     }
 
+    /** @deprecated Use {@link SupervisionManager} to check for supervision. */
     @Nullable
+    @Deprecated
     public static ComponentName getSupervisionComponentName(@NonNull DevicePolicyManager dpm,
             @NonNull UserHandle userHandle) {
         return dpm.getProfileOwnerOrDeviceOwnerSupervisionComponent(userHandle);

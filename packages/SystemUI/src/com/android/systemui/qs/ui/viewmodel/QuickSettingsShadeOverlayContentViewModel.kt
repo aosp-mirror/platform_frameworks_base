@@ -16,21 +16,18 @@
 
 package com.android.systemui.qs.ui.viewmodel
 
-import androidx.compose.runtime.getValue
-import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.lifecycle.ExclusiveActivatable
-import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
+import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 /**
@@ -44,25 +41,11 @@ class QuickSettingsShadeOverlayContentViewModel
 constructor(
     val shadeInteractor: ShadeInteractor,
     val sceneInteractor: SceneInteractor,
-    val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
-    quickSettingsContainerViewModelFactory: QuickSettingsContainerViewModel.Factory,
+    val notificationStackAppearanceInteractor: NotificationStackAppearanceInteractor,
 ) : ExclusiveActivatable() {
-
-    private val hydrator = Hydrator("QuickSettingsContainerViewModel.hydrator")
-
-    val showHeader: Boolean by
-        hydrator.hydratedStateOf(
-            traceName = "showHeader",
-            initialValue = !shadeInteractor.isShadeLayoutWide.value,
-            source = shadeInteractor.isShadeLayoutWide.map { !it },
-        )
-
-    val quickSettingsContainerViewModel = quickSettingsContainerViewModelFactory.create(false)
 
     override suspend fun onActivated(): Nothing {
         coroutineScope {
-            launch { hydrator.activate() }
-
             launch {
                 sceneInteractor.currentScene.collect { currentScene ->
                     when (currentScene) {
@@ -85,11 +68,14 @@ constructor(
                         )
                     }
             }
-
-            launch { quickSettingsContainerViewModel.activate() }
         }
 
         awaitCancellation()
+    }
+
+    /** Notifies that the bounds of the QuickSettings panel have changed. */
+    fun onPanelShapeChanged(shape: ShadeScrimShape?) {
+        notificationStackAppearanceInteractor.sendQsPanelShape(shape)
     }
 
     fun onScrimClicked() {

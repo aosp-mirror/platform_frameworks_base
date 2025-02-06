@@ -26,6 +26,7 @@ import android.util.Size
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.view.View.LAYOUT_DIRECTION_RTL
 import android.view.View.MeasureSpec.UNSPECIFIED
 import android.view.WindowManager
 import android.widget.ImageView
@@ -52,7 +53,6 @@ class DesktopWindowingEducationTooltipController(
     private val additionalSystemViewContainerFactory: AdditionalSystemViewContainer.Factory,
     private val displayController: DisplayController,
 ) : OnDisplayChangingListener {
-  // TODO: b/369384567 - Set tooltip color scheme to match LT/DT of app theme
   private var tooltipView: View? = null
   private var animator: PhysicsAnimator<View>? = null
   private val springConfig by lazy {
@@ -89,7 +89,7 @@ class DesktopWindowingEducationTooltipController(
   }
 
   /** Hide the current education view if visible */
-  private fun hideEducationTooltip() = animateHideTooltipTransition { cleanUp() }
+  fun hideEducationTooltip() = animateHideTooltipTransition { cleanUp() }
 
   /** Create education view by inflating layout provided. */
   private fun createEducationTooltipView(
@@ -197,8 +197,9 @@ class DesktopWindowingEducationTooltipController(
       background.setTint(tooltipColorScheme.container)
     }
     requireViewById<ImageView>(R.id.arrow_icon).apply {
-      val wrappedDrawable = DrawableCompat.wrap(this.drawable)
-      DrawableCompat.setTint(wrappedDrawable, tooltipColorScheme.container)
+        val wrappedDrawable = DrawableCompat.wrap(this.drawable)
+        DrawableCompat.setTint(wrappedDrawable, tooltipColorScheme.container)
+        if (isRtl()) scaleX = -1f
     }
     requireViewById<TextView>(R.id.tooltip_text).apply { setTextColor(tooltipColorScheme.text) }
     requireViewById<ImageView>(R.id.tooltip_icon).apply {
@@ -227,6 +228,9 @@ class DesktopWindowingEducationTooltipController(
       // Arrow is placed at vertical center on the left edge of the tooltip. Hence decrement
       // half of tooltip height from [tooltipY] to vertically position the tooltip.
       tooltipY -= tooltipDimen.height / 2
+      if (isRtl()) {
+          tooltipX -= tooltipDimen.width
+      }
     }
     return Point(tooltipX, tooltipY)
   }
@@ -260,7 +264,9 @@ class DesktopWindowingEducationTooltipController(
     return context.resources.getDimensionPixelSize(resourceId)
   }
 
-  /**
+    private fun isRtl() = context.resources.configuration.layoutDirection == LAYOUT_DIRECTION_RTL
+
+    /**
    * The configuration for education view features:
    *
    * @property tooltipViewLayout Layout resource ID of the view to be used for education tooltip.
@@ -297,6 +303,6 @@ class DesktopWindowingEducationTooltipController(
   /** Direction of arrow of the tooltip */
   enum class TooltipArrowDirection {
     UP,
-    LEFT,
+    HORIZONTAL
   }
 }

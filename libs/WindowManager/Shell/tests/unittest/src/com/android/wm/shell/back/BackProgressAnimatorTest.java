@@ -32,6 +32,8 @@ import android.window.BackProgressAnimator;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.wm.shell.ShellTestCase;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 @SmallTest
 @TestableLooper.RunWithLooper
 @RunWith(AndroidTestingRunner.class)
-public class BackProgressAnimatorTest {
+public class BackProgressAnimatorTest extends ShellTestCase {
     private BackProgressAnimator mProgressAnimator;
     private BackEvent mReceivedBackEvent;
     private float mTargetProgress = 0.5f;

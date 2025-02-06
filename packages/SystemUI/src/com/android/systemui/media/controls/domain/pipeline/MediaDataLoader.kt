@@ -43,7 +43,9 @@ import android.support.v4.media.MediaMetadataCompat
 import android.text.TextUtils
 import android.util.Log
 import androidx.media.utils.MediaConstants
+import com.android.app.tracing.coroutines.asyncTraced as async
 import com.android.app.tracing.coroutines.traceCoroutine
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -67,7 +69,6 @@ import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import com.android.app.tracing.coroutines.asyncTraced as async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
@@ -511,13 +512,21 @@ constructor(
         sbn.notification.extras.containsKey(Notification.EXTRA_MEDIA_REMOTE_DEVICE)
 
     private fun getResumeMediaAction(action: Runnable): MediaAction {
+        val iconId =
+            if (Flags.mediaControlsUiUpdate()) {
+                R.drawable.ic_media_play_button
+            } else {
+                R.drawable.ic_media_play
+            }
         return MediaAction(
-            Icon.createWithResource(context, R.drawable.ic_media_play)
-                .setTint(themeText)
-                .loadDrawable(context),
+            Icon.createWithResource(context, iconId).setTint(themeText).loadDrawable(context),
             action,
             context.getString(R.string.controls_media_resume),
-            context.getDrawable(R.drawable.ic_media_play_container),
+            if (Flags.mediaControlsUiUpdate()) {
+                context.getDrawable(R.drawable.ic_media_play_button_container)
+            } else {
+                context.getDrawable(R.drawable.ic_media_play_container)
+            },
         )
     }
 

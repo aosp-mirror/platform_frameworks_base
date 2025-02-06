@@ -16,7 +16,6 @@
 
 package com.android.internal.widget;
 
-
 import android.annotation.ColorInt;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
@@ -45,16 +44,20 @@ import java.util.Objects;
  */
 @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
 public final class NotificationProgressModel {
-    private static final int INVALID_INDETERMINATE_COLOR = Color.TRANSPARENT;
+    public static final int INVALID_COLOR = Color.TRANSPARENT;
     private static final String KEY_SEGMENTS = "segments";
     private static final String KEY_POINTS = "points";
     private static final String KEY_PROGRESS = "progress";
     private static final String KEY_IS_STYLED_BY_PROGRESS = "isStyledByProgress";
+    private static final String KEY_SEGMENTS_FALLBACK_COLOR = "segmentsFallColor";
     private static final String KEY_INDETERMINATE_COLOR = "indeterminateColor";
     private final List<Segment> mSegments;
     private final List<Point> mPoints;
     private final int mProgress;
     private final boolean mIsStyledByProgress;
+    @ColorInt
+    private final int mSegmentsFallbackColor;
+
     @ColorInt
     private final int mIndeterminateColor;
 
@@ -62,7 +65,8 @@ public final class NotificationProgressModel {
             @NonNull List<Segment> segments,
             @NonNull List<Point> points,
             int progress,
-            boolean isStyledByProgress
+            boolean isStyledByProgress,
+            @ColorInt int segmentsFallbackColor
     ) {
         Preconditions.checkArgument(progress >= 0);
         Preconditions.checkArgument(!segments.isEmpty());
@@ -70,17 +74,19 @@ public final class NotificationProgressModel {
         mPoints = points;
         mProgress = progress;
         mIsStyledByProgress = isStyledByProgress;
-        mIndeterminateColor = INVALID_INDETERMINATE_COLOR;
+        mSegmentsFallbackColor = segmentsFallbackColor;
+        mIndeterminateColor = INVALID_COLOR;
     }
 
     public NotificationProgressModel(
             @ColorInt int indeterminateColor
     ) {
-        Preconditions.checkArgument(indeterminateColor != INVALID_INDETERMINATE_COLOR);
+        Preconditions.checkArgument(indeterminateColor != INVALID_COLOR);
         mSegments = Collections.emptyList();
         mPoints = Collections.emptyList();
         mProgress = 0;
         mIsStyledByProgress = false;
+        mSegmentsFallbackColor = INVALID_COLOR;
         mIndeterminateColor = indeterminateColor;
     }
 
@@ -105,12 +111,17 @@ public final class NotificationProgressModel {
     }
 
     @ColorInt
+    public int getSegmentsFallbackColor() {
+        return mSegmentsFallbackColor;
+    }
+
+    @ColorInt
     public int getIndeterminateColor() {
         return mIndeterminateColor;
     }
 
     public boolean isIndeterminate() {
-        return mIndeterminateColor != INVALID_INDETERMINATE_COLOR;
+        return mIndeterminateColor != INVALID_COLOR;
     }
 
     /**
@@ -119,7 +130,7 @@ public final class NotificationProgressModel {
     @NonNull
     public Bundle toBundle() {
         final Bundle bundle = new Bundle();
-        if (mIndeterminateColor != INVALID_INDETERMINATE_COLOR) {
+        if (mIndeterminateColor != INVALID_COLOR) {
             bundle.putInt(KEY_INDETERMINATE_COLOR, mIndeterminateColor);
         } else {
             bundle.putParcelableList(KEY_SEGMENTS,
@@ -128,6 +139,9 @@ public final class NotificationProgressModel {
                     Notification.ProgressStyle.getProgressPointsAsBundleList(mPoints));
             bundle.putInt(KEY_PROGRESS, mProgress);
             bundle.putBoolean(KEY_IS_STYLED_BY_PROGRESS, mIsStyledByProgress);
+            if (mSegmentsFallbackColor != INVALID_COLOR) {
+                bundle.putInt(KEY_SEGMENTS_FALLBACK_COLOR, mSegmentsFallbackColor);
+            }
         }
         return bundle;
     }
@@ -138,8 +152,8 @@ public final class NotificationProgressModel {
     @NonNull
     public static NotificationProgressModel fromBundle(@NonNull Bundle bundle) {
         final int indeterminateColor = bundle.getInt(KEY_INDETERMINATE_COLOR,
-                INVALID_INDETERMINATE_COLOR);
-        if (indeterminateColor != INVALID_INDETERMINATE_COLOR) {
+                INVALID_COLOR);
+        if (indeterminateColor != INVALID_COLOR) {
             return new NotificationProgressModel(indeterminateColor);
         } else {
             final List<Segment> segments =
@@ -150,7 +164,10 @@ public final class NotificationProgressModel {
                             bundle.getParcelableArrayList(KEY_POINTS, Bundle.class));
             final int progress = bundle.getInt(KEY_PROGRESS);
             final boolean isStyledByProgress = bundle.getBoolean(KEY_IS_STYLED_BY_PROGRESS);
-            return new NotificationProgressModel(segments, points, progress, isStyledByProgress);
+            final int segmentsFallbackColor = bundle.getInt(KEY_SEGMENTS_FALLBACK_COLOR,
+                    INVALID_COLOR);
+            return new NotificationProgressModel(segments, points, progress, isStyledByProgress,
+                    segmentsFallbackColor);
         }
     }
 
@@ -161,6 +178,7 @@ public final class NotificationProgressModel {
                 + ", mPoints=" + mPoints
                 + ", mProgress=" + mProgress
                 + ", mIsStyledByProgress=" + mIsStyledByProgress
+                + ", mSegmentsFallbackColor=" + mSegmentsFallbackColor
                 + ", mIndeterminateColor=" + mIndeterminateColor + "}";
     }
 
@@ -171,6 +189,7 @@ public final class NotificationProgressModel {
         final NotificationProgressModel that = (NotificationProgressModel) o;
         return mProgress == that.mProgress
                 && mIsStyledByProgress == that.mIsStyledByProgress
+                && mSegmentsFallbackColor == that.mSegmentsFallbackColor
                 && mIndeterminateColor == that.mIndeterminateColor
                 && Objects.equals(mSegments, that.mSegments)
                 && Objects.equals(mPoints, that.mPoints);
@@ -182,6 +201,7 @@ public final class NotificationProgressModel {
                 mPoints,
                 mProgress,
                 mIsStyledByProgress,
+                mSegmentsFallbackColor,
                 mIndeterminateColor);
     }
 }

@@ -77,8 +77,7 @@ import java.util.Set;
  *
  * @hide
  */
-// TODO(b/374174952): Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
-@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@TargetApi(Build.VERSION_CODES.BAKLAVA)
 public class Vcn extends Handler {
     private static final String TAG = Vcn.class.getSimpleName();
 
@@ -209,6 +208,8 @@ public class Vcn extends Handler {
         this(vcnContext, subscriptionGroup, config, snapshot, vcnCallback, new Dependencies());
     }
 
+    // WARNING: This constructor executes on the binder thread. Thread safety MUST be ensured when
+    // accessing data within this constructor and any methods called from here.
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     public Vcn(
             @NonNull VcnContext vcnContext,

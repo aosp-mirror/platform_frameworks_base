@@ -394,11 +394,19 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
      * Returns the divider position as a fraction from 0 to 1.
      */
     public float getDividerPositionAsFraction() {
-        return Math.min(1f, Math.max(0f, mIsLeftRightSplit
-                ? (float) ((getTopLeftBounds().right + getBottomRightBounds().left) / 2f)
-                        / getBottomRightBounds().right
-                : (float) ((getTopLeftBounds().bottom + getBottomRightBounds().top) / 2f)
-                        / getBottomRightBounds().bottom));
+        if (Flags.enableFlexibleTwoAppSplit()) {
+            return Math.min(1f, Math.max(0f, mIsLeftRightSplit
+                    ? (getTopLeftBounds().right + getBottomRightBounds().left) / 2f
+                    / getDisplayWidth()
+                    : (getTopLeftBounds().bottom + getBottomRightBounds().top) / 2f
+                            / getDisplayHeight()));
+        } else {
+            return Math.min(1f, Math.max(0f, mIsLeftRightSplit
+                    ? (float) ((getTopLeftBounds().right + getBottomRightBounds().left) / 2f)
+                    / getBottomRightBounds().right
+                    : (float) ((getTopLeftBounds().bottom + getBottomRightBounds().top) / 2f)
+                            / getBottomRightBounds().bottom));
+        }
     }
 
     private void updateInvisibleRect() {

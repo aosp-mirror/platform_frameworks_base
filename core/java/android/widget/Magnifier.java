@@ -1021,8 +1021,9 @@ public final class Magnifier {
                     .setCallsite("InternalPopupWindow")
                     .build();
 
-            mBBQ = new BLASTBufferQueue("magnifier surface", mBbqSurfaceControl,
-                surfaceWidth, surfaceHeight, PixelFormat.TRANSLUCENT);
+            mBBQ = new BLASTBufferQueue("magnifier surface", /*updateDestinationFrame*/ true);
+            mBBQ.update(mBbqSurfaceControl,
+                    surfaceWidth, surfaceHeight, PixelFormat.TRANSLUCENT);
             mSurface = mBBQ.createSurface();
 
             // Setup the RenderNode tree. The root has two children, one containing the bitmap

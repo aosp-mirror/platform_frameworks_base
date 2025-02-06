@@ -227,9 +227,6 @@ interface IWindowManager
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void endProlongedAnimations();
 
-    void startFreezingScreen(int exitAnim, int enterAnim);
-    void stopFreezingScreen();
-
     // these require DISABLE_KEYGUARD permission
     /** @deprecated use Activity.setShowWhenLocked instead. */
     void disableKeyguard(IBinder token, String tag, int userId);
@@ -1148,4 +1145,9 @@ interface IWindowManager
      * @param deviceId The id of the {@link InputDevice} that will handle the shortcut.
      */
     KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId);
+
+    /**
+     * Returns whether the display with {@code displayId} ignores orientation request.
+     */
+    boolean getIgnoreOrientationRequest(int displayId);
 }

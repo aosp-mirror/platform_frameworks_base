@@ -17,13 +17,14 @@
 package com.android.wm.shell.desktopmode.persistence
 
 import android.os.UserManager
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.filters.SmallTest
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_HSUM
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE
+import com.android.window.flags.Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.desktopmode.DesktopUserRepositories
@@ -40,7 +41,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.spy
@@ -51,8 +51,6 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidTestingRunner::class)
 @ExperimentalCoroutinesApi
 class DesktopRepositoryInitializerTest : ShellTestCase() {
-
-    @JvmField @Rule val setFlagsRule = SetFlagsRule()
 
     private lateinit var repositoryInitializer: DesktopRepositoryInitializer
     private lateinit var shellInit: ShellInit
@@ -85,7 +83,9 @@ class DesktopRepositoryInitializerTest : ShellTestCase() {
 
     @Test
     @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE, FLAG_ENABLE_DESKTOP_WINDOWING_HSUM)
-    fun initWithPersistence_multipleUsers_addedCorrectly() =
+    /** TODO: b/362720497 - add multi-desk version when implemented. */
+    @DisableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun initWithPersistence_multipleUsers_addedCorrectly_multiDesksDisabled() =
         runTest(StandardTestDispatcher()) {
             whenever(persistentRepository.getUserDesktopRepositoryMap())
                 .thenReturn(
@@ -145,7 +145,9 @@ class DesktopRepositoryInitializerTest : ShellTestCase() {
 
     @Test
     @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE)
-    fun initWithPersistence_singleUser_addedCorrectly() =
+    /** TODO: b/362720497 - add multi-desk version when implemented. */
+    @DisableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
+    fun initWithPersistence_singleUser_addedCorrectly_multiDesksDisabled() =
         runTest(StandardTestDispatcher()) {
             whenever(persistentRepository.getUserDesktopRepositoryMap())
                 .thenReturn(mapOf(USER_ID_1 to desktopRepositoryState1))
@@ -156,24 +158,24 @@ class DesktopRepositoryInitializerTest : ShellTestCase() {
 
             repositoryInitializer.initialize(desktopUserRepositories)
 
-            // Desktop Repository currently returns all tasks across desktops for a specific user
-            // since the repository currently doesn't handle desktops. This test logic should be
-            // updated
-            // once the repository handles multiple desktops.
             assertThat(
-                    desktopUserRepositories.getProfile(USER_ID_1).getActiveTasks(DEFAULT_DISPLAY)
+                    desktopUserRepositories
+                        .getProfile(USER_ID_1)
+                        .getActiveTaskIdsInDesk(deskId = DEFAULT_DISPLAY)
                 )
                 .containsExactly(1, 3, 4, 5)
                 .inOrder()
             assertThat(
                     desktopUserRepositories
                         .getProfile(USER_ID_1)
-                        .getExpandedTasksOrdered(DEFAULT_DISPLAY)
+                        .getExpandedTasksIdsInDeskOrdered(deskId = DEFAULT_DISPLAY)
                 )
                 .containsExactly(5, 1)
                 .inOrder()
             assertThat(
-                    desktopUserRepositories.getProfile(USER_ID_1).getMinimizedTasks(DEFAULT_DISPLAY)
+                    desktopUserRepositories
+                        .getProfile(USER_ID_1)
+                        .getMinimizedTaskIdsInDesk(deskId = DEFAULT_DISPLAY)
                 )
                 .containsExactly(3, 4)
                 .inOrder()
@@ -195,6 +197,7 @@ class DesktopRepositoryInitializerTest : ShellTestCase() {
         val desktop1: Desktop =
             Desktop.newBuilder()
                 .setDesktopId(DESKTOP_ID_1)
+                .setDisplayId(DEFAULT_DISPLAY)
                 .addAllZOrderedTasks(freeformTasksInZOrder1)
                 .putTasksByTaskId(
                     1,
@@ -216,6 +219,7 @@ class DesktopRepositoryInitializerTest : ShellTestCase() {
         val desktop2: Desktop =
             Desktop.newBuilder()
                 .setDesktopId(DESKTOP_ID_2)
+                .setDisplayId(DEFAULT_DISPLAY)
                 .addAllZOrderedTasks(freeformTasksInZOrder2)
                 .putTasksByTaskId(
                     4,
@@ -237,6 +241,7 @@ class DesktopRepositoryInitializerTest : ShellTestCase() {
         val desktop3: Desktop =
             Desktop.newBuilder()
                 .setDesktopId(DESKTOP_ID_3)
+                .setDisplayId(DEFAULT_DISPLAY)
                 .addAllZOrderedTasks(freeformTasksInZOrder3)
                 .putTasksByTaskId(
                     7,

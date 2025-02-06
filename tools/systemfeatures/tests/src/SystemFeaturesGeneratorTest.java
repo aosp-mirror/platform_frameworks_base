@@ -76,28 +76,28 @@ public class SystemFeaturesGeneratorTest {
 
         // Also ensure we fall back to the PackageManager for feature APIs without an accompanying
         // versioned feature definition.
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_WATCH, 0)).thenReturn(true);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_WATCH)).thenReturn(true);
         assertThat(RwFeatures.hasFeatureWatch(mContext)).isTrue();
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_WATCH, 0)).thenReturn(false);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_WATCH)).thenReturn(false);
         assertThat(RwFeatures.hasFeatureWatch(mContext)).isFalse();
     }
 
     @Test
     public void testReadonlyDisabledWithDefinedFeatures() {
         // Always fall back to the PackageManager for defined, explicit features queries.
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_WATCH, 0)).thenReturn(true);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_WATCH)).thenReturn(true);
         assertThat(RwFeatures.hasFeatureWatch(mContext)).isTrue();
 
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_WATCH, 0)).thenReturn(false);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_WATCH)).thenReturn(false);
         assertThat(RwFeatures.hasFeatureWatch(mContext)).isFalse();
 
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_WIFI, 0)).thenReturn(true);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_WIFI)).thenReturn(true);
         assertThat(RwFeatures.hasFeatureWifi(mContext)).isTrue();
 
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_VULKAN, 0)).thenReturn(false);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_VULKAN)).thenReturn(false);
         assertThat(RwFeatures.hasFeatureVulkan(mContext)).isFalse();
 
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTO, 0)).thenReturn(false);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTO)).thenReturn(false);
         assertThat(RwFeatures.hasFeatureAuto(mContext)).isFalse();
 
         // For defined and undefined features, conditional queries should report null (unknown).
@@ -139,9 +139,9 @@ public class SystemFeaturesGeneratorTest {
         assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_VULKAN, 100)).isFalse();
 
         // VERSION=
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTO, 0)).thenReturn(false);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTO)).thenReturn(false);
         assertThat(RoFeatures.hasFeatureAuto(mContext)).isFalse();
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTO, 0)).thenReturn(true);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTO)).thenReturn(true);
         assertThat(RoFeatures.hasFeatureAuto(mContext)).isTrue();
         assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_AUTO, -1)).isNull();
         assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_AUTO, 0)).isNull();
@@ -149,9 +149,9 @@ public class SystemFeaturesGeneratorTest {
 
         // For feature APIs without an associated feature definition, conditional queries should
         // report null, and explicit queries should report runtime-defined versions.
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_PC, 0)).thenReturn(true);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_PC)).thenReturn(true);
         assertThat(RoFeatures.hasFeaturePc(mContext)).isTrue();
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_PC, 0)).thenReturn(false);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_PC)).thenReturn(false);
         assertThat(RoFeatures.hasFeaturePc(mContext)).isFalse();
         assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_PC, -1)).isNull();
         assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_PC, 0)).isNull();

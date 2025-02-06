@@ -22,12 +22,10 @@ import com.android.systemui.bouncer.shared.model.BouncerShowMessageModel
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.bouncer.ui.BouncerViewDelegate
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 /** Models UI state for the lock screen bouncer; handles user input. */
-@ExperimentalCoroutinesApi
 class KeyguardBouncerViewModel
 @Inject
 constructor(

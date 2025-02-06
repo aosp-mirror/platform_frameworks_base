@@ -18,9 +18,9 @@ package com.android.systemui.wallpapers.domain.interactor
 
 import com.android.systemui.wallpapers.data.repository.WallpaperRepository
 import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 
 class WallpaperInteractor @Inject constructor(val wallpaperRepository: WallpaperRepository) {
-    val wallpaperSupportsAmbientMode: StateFlow<Boolean> =
+    val wallpaperSupportsAmbientMode: Flow<Boolean> =
         wallpaperRepository.wallpaperSupportsAmbientMode
 }

@@ -16,10 +16,6 @@
 
 package com.android.systemui.keyguard.dagger
 
-import android.content.res.Resources
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.keyguard.ui.transitions.BlurConfig
 import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToPrimaryBouncerTransitionViewModel
@@ -33,14 +29,10 @@ import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGlanceableHubT
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToOccludedTransitionViewModel
-import com.android.systemui.res.R
-import com.android.systemui.window.flag.WindowBlurFlag
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.multibindings.IntoSet
 import dagger.multibindings.Multibinds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * Base module that defines the [PrimaryBouncerTransition] multibinding. All variants of SystemUI
@@ -49,28 +41,12 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @Module
 interface PrimaryBouncerTransitionModule {
     @Multibinds fun primaryBouncerTransitions(): Set<PrimaryBouncerTransition>
-
-    companion object {
-        @Provides
-        @SysUISingleton
-        fun provideBlurConfig(@Main resources: Resources): BlurConfig {
-            val minBlurRadius = resources.getDimensionPixelSize(R.dimen.min_window_blur_radius)
-            val maxBlurRadius =
-                if (WindowBlurFlag.isEnabled) {
-                    resources.getDimensionPixelSize(R.dimen.max_shade_window_blur_radius)
-                } else {
-                    resources.getDimensionPixelSize(R.dimen.max_window_blur_radius)
-                }
-            return BlurConfig(minBlurRadius.toFloat(), maxBlurRadius.toFloat())
-        }
-    }
 }
 
 /**
  * Module that installs all the implementations of [PrimaryBouncerTransition] from different
  * keyguard states to and away from the primary bouncer.
  */
-@ExperimentalCoroutinesApi
 @Module
 interface PrimaryBouncerTransitionImplModule {
     @Binds

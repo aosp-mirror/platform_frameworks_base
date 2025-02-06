@@ -32,6 +32,7 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.R;
+import com.android.wm.shell.ShellTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +48,7 @@ import org.mockito.MockitoAnnotations;
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class LetterboxEduDialogLayoutTest extends CompatUIShellTestCase {
+public class LetterboxEduDialogLayoutTest extends ShellTestCase {
 
     @Mock
     private Runnable mDismissCallback;

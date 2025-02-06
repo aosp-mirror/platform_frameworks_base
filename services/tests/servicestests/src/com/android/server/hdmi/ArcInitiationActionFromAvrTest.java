@@ -15,11 +15,14 @@
  */
 package com.android.server.hdmi;
 
+import static android.content.pm.PackageManager.FEATURE_HDMI_CEC;
+
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.spy;
 
 import android.annotation.RequiresPermission;
@@ -59,6 +62,9 @@ public class ArcInitiationActionFromAvrTest {
 
     @Before
     public void setUp() throws Exception {
+        assumeTrue("Test requires FEATURE_HDMI_CEC",
+                InstrumentationRegistry.getTargetContext().getPackageManager()
+                        .hasSystemFeature(FEATURE_HDMI_CEC));
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
         FakeAudioFramework audioFramework = new FakeAudioFramework();

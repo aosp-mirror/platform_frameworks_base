@@ -39,14 +39,12 @@ class StatusBarOperatorNameViewModelTest : SysuiTestCase() {
         kosmos.runTest {
             val intr1 = fakeMobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
             val intr2 = fakeMobileIconsInteractor.getMobileConnectionInteractorForSubId(2)
-            val invalidIntr = fakeMobileIconsInteractor.getMobileConnectionInteractorForSubId(-1)
 
             // GIVEN default data subId is 1
             fakeMobileIconsInteractor.defaultDataSubId.value = 1
 
             intr1.carrierName.value = "Test Name 1"
             intr2.carrierName.value = "Test Name 2"
-            invalidIntr.carrierName.value = "default network name"
 
             val latest by collectLastValue(underTest.operatorName)
 
@@ -56,8 +54,19 @@ class StatusBarOperatorNameViewModelTest : SysuiTestCase() {
 
             assertThat(latest).isEqualTo("Test Name 2")
 
-            fakeMobileIconsInteractor.defaultDataSubId.value = -1
+            fakeMobileIconsInteractor.defaultDataSubId.value = null
 
-            assertThat(latest).isEqualTo("default network name")
+            assertThat(latest).isNull()
+        }
+
+    @Test
+    fun operatorName_noDefaultDataSubId_null() =
+        kosmos.runTest {
+            // GIVEN defaultDataSubId is null
+            fakeMobileIconsInteractor.defaultDataSubId.value = null
+
+            val latest by collectLastValue(underTest.operatorName)
+
+            assertThat(latest).isNull()
         }
 }

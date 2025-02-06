@@ -24,8 +24,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
@@ -73,7 +73,7 @@ constructor(
     }
 
     @Composable
-    override fun SceneScope.Content(modifier: Modifier) =
+    override fun ContentScope.Content(modifier: Modifier) =
         BouncerScene(
             viewModel = rememberViewModel("BouncerScene") { contentViewModelFactory.create() },
             dialogFactory = dialogFactory,
@@ -82,7 +82,7 @@ constructor(
 }
 
 @Composable
-private fun SceneScope.BouncerScene(
+private fun ContentScope.BouncerScene(
     viewModel: BouncerSceneContentViewModel,
     dialogFactory: BouncerDialogFactory,
     modifier: Modifier = Modifier,
@@ -96,8 +96,8 @@ private fun SceneScope.BouncerScene(
             drawRect(color = backgroundColor)
         }
 
-        // Separate the bouncer content into a reusable composable that doesn't have any SceneScope
-        // dependencies
+        // Separate the bouncer content into a reusable composable that doesn't have any
+        // ContentScope dependencies
         BouncerContent(
             viewModel,
             dialogFactory,

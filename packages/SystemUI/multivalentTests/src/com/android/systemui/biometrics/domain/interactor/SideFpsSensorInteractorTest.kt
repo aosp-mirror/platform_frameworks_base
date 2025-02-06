@@ -55,7 +55,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -69,7 +68,6 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 import org.mockito.junit.MockitoJUnit
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class SideFpsSensorInteractorTest : SysuiTestCase() {

@@ -424,7 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Ülemineku animatsioonimastaap"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animaatori kestuse mastaap"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Modelleeri teisi ekraane"</string>
-    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Menüü kuvamise asukoht"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Varju kuvamise asukoht"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Rakendused"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Ära hoia tegevusi alles"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Hävita kõik tegevused kohe, kui kasutaja neist lahkub"</string>
@@ -523,6 +523,7 @@
     <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"Kiirlaadimine"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Juhib administraator"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Haldavad piiranguga seaded"</string>
+    <string name="disabled_in_phone_call_text" msgid="6568931334337318320">"Pole kõnede ajal saadaval"</string>
     <string name="disabled" msgid="8017887509554714950">"Keelatud"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Lubatud"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Pole lubatud"</string>

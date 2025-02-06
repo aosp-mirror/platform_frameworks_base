@@ -72,8 +72,6 @@ public class BroadcastHelperTest {
     private static final String PACKAGE_CHANGED_TEST_PACKAGE_NAME = "testpackagename";
     private static final String PACKAGE_CHANGED_TEST_MAIN_ACTIVITY =
             PACKAGE_CHANGED_TEST_PACKAGE_NAME + ".MainActivity";
-    private static final String PERMISSION_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED =
-            "android.permission.INTERNAL_RECEIVE_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED";
 
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
@@ -125,34 +123,23 @@ public class BroadcastHelperTest {
 
     @RequiresFlagsEnabled(FLAG_REDUCE_BROADCASTS_FOR_COMPONENT_STATE_CHANGES)
     @Test
-    public void changeNonExportedComponent_sendPackageChangedBroadcastToSystem_withPermission()
+    public void changeNonExportedComponent_sendPackageChangedBroadcastToSystemAndApplicationItself()
             throws Exception {
         changeComponentAndSendPackageChangedBroadcast(false /* changeExportedComponent */,
                 new String[0] /* sharedPackages */);
 
-        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
-        verify(mMockActivityManagerInternal).broadcastIntentWithCallback(
-                captor.capture(), eq(null),
-                eq(new String[]{PERMISSION_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED}),
-                anyInt(), eq(null), eq(null), eq(null));
-        Intent intent = captor.getValue();
-        assertNotNull(intent);
-        assertThat(intent.getPackage()).isEqualTo("android");
-    }
+        ArgumentCaptor<Intent> captorIntent = ArgumentCaptor.forClass(Intent.class);
+        verify(mMockActivityManagerInternal, times(2)).broadcastIntentWithCallback(
+                captorIntent.capture(), eq(null), eq(null), anyInt(), eq(null), eq(null), eq(null));
+        List<Intent> intents = captorIntent.getAllValues();
+        assertNotNull(intents);
+        assertThat(intents.size()).isEqualTo(2);
 
-    @RequiresFlagsEnabled(FLAG_REDUCE_BROADCASTS_FOR_COMPONENT_STATE_CHANGES)
-    @Test
-    public void changeNonExportedComponent_sendPackageChangedBroadcastToApplicationItself()
-            throws Exception {
-        changeComponentAndSendPackageChangedBroadcast(false /* changeExportedComponent */,
-                new String[0] /* sharedPackages */);
+        final Intent intent1 = intents.get(0);
+        assertThat(intent1.getPackage()).isEqualTo("android");
 
-        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
-        verify(mMockActivityManagerInternal).broadcastIntentWithCallback(captor.capture(), eq(null),
-                eq(null), anyInt(), eq(null), eq(null), eq(null));
-        Intent intent = captor.getValue();
-        assertNotNull(intent);
-        assertThat(intent.getPackage()).isEqualTo(PACKAGE_CHANGED_TEST_PACKAGE_NAME);
+        final Intent intent2 = intents.get(1);
+        assertThat(intent2.getPackage()).isEqualTo(PACKAGE_CHANGED_TEST_PACKAGE_NAME);
     }
 
     @RequiresFlagsEnabled(FLAG_REDUCE_BROADCASTS_FOR_COMPONENT_STATE_CHANGES)
@@ -163,31 +150,20 @@ public class BroadcastHelperTest {
                 new String[]{"shared.package"} /* sharedPackages */);
 
         ArgumentCaptor<Intent> captorIntent = ArgumentCaptor.forClass(Intent.class);
-        ArgumentCaptor<String[]> captorRequiredPermissions = ArgumentCaptor.forClass(
-                String[].class);
         verify(mMockActivityManagerInternal, times(3)).broadcastIntentWithCallback(
-                captorIntent.capture(), eq(null), captorRequiredPermissions.capture(), anyInt(),
-                eq(null), eq(null), eq(null));
+                captorIntent.capture(), eq(null), eq(null), anyInt(), eq(null), eq(null), eq(null));
         List<Intent> intents = captorIntent.getAllValues();
-        List<String[]> requiredPermissions = captorRequiredPermissions.getAllValues();
         assertNotNull(intents);
         assertThat(intents.size()).isEqualTo(3);
 
         final Intent intent1 = intents.get(0);
-        final String[] requiredPermission1 = requiredPermissions.get(0);
         assertThat(intent1.getPackage()).isEqualTo("android");
-        assertThat(requiredPermission1).isEqualTo(
-                new String[]{PERMISSION_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED});
 
         final Intent intent2 = intents.get(1);
-        final String[] requiredPermission2 = requiredPermissions.get(1);
         assertThat(intent2.getPackage()).isEqualTo(PACKAGE_CHANGED_TEST_PACKAGE_NAME);
-        assertThat(requiredPermission2).isNull();
 
         final Intent intent3 = intents.get(2);
-        final String[] requiredPermission3 = requiredPermissions.get(2);
         assertThat(intent3.getPackage()).isEqualTo("shared.package");
-        assertThat(requiredPermission3).isNull();
     }
 
     @Test

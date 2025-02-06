@@ -29,6 +29,7 @@ import static org.testng.Assert.assertTrue;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.platform.test.annotations.Presubmit;
 import android.view.KeyEvent;
 
 import androidx.test.filters.SmallTest;
@@ -45,7 +46,7 @@ import java.util.concurrent.TimeUnit;
  * Build/Install/Run:
  *  atest KeyCombinationManagerTests
  */
-
+@Presubmit
 @SmallTest
 public class KeyCombinationManagerTests {
     private KeyCombinationManager mKeyCombinationManager;

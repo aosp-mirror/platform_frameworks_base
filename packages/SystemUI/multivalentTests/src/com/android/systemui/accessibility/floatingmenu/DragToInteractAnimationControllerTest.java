@@ -65,7 +65,7 @@ public class DragToInteractAnimationControllerTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
-        final SecureSettings mockSecureSettings = TestUtils.mockSecureSettings();
+        final SecureSettings mockSecureSettings = TestUtils.mockSecureSettings(mContext);
         final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
                 mockSecureSettings, mHearingAidDeviceManager);
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,

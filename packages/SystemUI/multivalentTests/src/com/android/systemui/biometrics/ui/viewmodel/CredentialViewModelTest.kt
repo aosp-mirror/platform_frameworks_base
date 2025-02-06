@@ -10,7 +10,6 @@ import com.android.systemui.biometrics.domain.interactor.PromptCredentialInterac
 import com.android.systemui.biometrics.promptInfo
 import com.android.systemui.biometrics.shared.model.PromptKind
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -25,7 +24,6 @@ private const val USER_ID = 9
 private const val REQUEST_ID = 9L
 private const val OPERATION_ID = 10L
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CredentialViewModelTest : SysuiTestCase() {

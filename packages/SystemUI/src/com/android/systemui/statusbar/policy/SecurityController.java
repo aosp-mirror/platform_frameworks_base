@@ -15,6 +15,7 @@
  */
 package com.android.systemui.statusbar.policy;
 
+import android.annotation.Nullable;
 import android.app.admin.DeviceAdminInfo;
 import android.content.ComponentName;
 import android.graphics.drawable.Drawable;
@@ -59,12 +60,36 @@ public interface SecurityController extends CallbackController<SecurityControlle
     void onUserSwitched(int newUserId);
     /** Whether or not parental controls is enabled */
     boolean isParentalControlsEnabled();
-    /** DeviceAdminInfo for active admin */
+
+    // TODO(b/382034839): Remove during the cleanup of deprecate_dpm_supervision_apis.
+    /**
+     * DeviceAdminInfo for active admin
+     * @deprecated No longer needed.
+     */
+    @Deprecated
     DeviceAdminInfo getDeviceAdminInfo();
-    /** Icon for admin */
+
+    // TODO(b/382034839): Remove during the cleanup of deprecate_dpm_supervision_apis.
+    /**
+     * Icon for admin
+     * @deprecated Use {@link #getIcon()} instead.
+     */
+    @Deprecated
     Drawable getIcon(DeviceAdminInfo info);
-    /** Label for admin */
+    /** Icon for admin */
+    @Nullable
+    Drawable getIcon();
+
+    // TODO(b/382034839): Remove during the cleanup of deprecate_dpm_supervision_apis.
+    /**
+     * Label for admin
+     * @deprecated Use {@link #getLabel()} instead.
+     */
+    @Deprecated
     CharSequence getLabel(DeviceAdminInfo info);
+    /** Label for admin */
+    @Nullable
+    CharSequence getLabel();
 
     public interface SecurityControllerCallback {
         void onStateChanged();

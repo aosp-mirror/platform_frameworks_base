@@ -30,7 +30,6 @@ import android.graphics.Point;
 import android.graphics.Region;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.util.Size;
 
@@ -41,7 +40,6 @@ import com.android.wm.shell.ShellTestCase;
 
 import com.google.common.testing.EqualsTester;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -86,9 +84,6 @@ public class DragResizeWindowGeometryTests extends ShellTestCase {
             TASK_SIZE.getWidth() - EDGE_RESIZE_HANDLE_INSET / 2, TASK_SIZE.getHeight() / 2);
     private static final Point BOTTOM_INSET_POINT = new Point(TASK_SIZE.getWidth() / 2,
             TASK_SIZE.getHeight() - EDGE_RESIZE_HANDLE_INSET / 2);
-
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     /**
      * Check that both groups of objects satisfy equals/hashcode within each group, and that each

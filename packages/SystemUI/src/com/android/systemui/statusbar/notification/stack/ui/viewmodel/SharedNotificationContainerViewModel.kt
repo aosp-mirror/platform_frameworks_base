@@ -15,8 +15,6 @@
  *
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import android.content.Context
@@ -42,15 +40,18 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE_LOCKED
+import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToOccludedTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.AodToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DozingToGlanceableHubTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DozingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DozingToOccludedTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.DozingToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GoneToAodTransitionViewModel
@@ -75,6 +76,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode.Dual
 import com.android.systemui.shade.shared.model.ShadeMode.Single
 import com.android.systemui.shade.shared.model.ShadeMode.Split
@@ -99,6 +101,7 @@ import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -110,6 +113,7 @@ import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.isActive
 
 /** View-model for the shared notification container, used by both the shade and keyguard spaces */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class SharedNotificationContainerViewModel
 @Inject
@@ -122,7 +126,8 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val shadeInteractor: ShadeInteractor,
-    private val notificationStackAppearanceInteractor: NotificationStackAppearanceInteractor,
+    shadeModeInteractor: ShadeModeInteractor,
+    notificationStackAppearanceInteractor: NotificationStackAppearanceInteractor,
     private val alternateBouncerToGoneTransitionViewModel:
         AlternateBouncerToGoneTransitionViewModel,
     private val alternateBouncerToPrimaryBouncerTransitionViewModel:
@@ -130,9 +135,12 @@ constructor(
     private val aodToGoneTransitionViewModel: AodToGoneTransitionViewModel,
     private val aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
     private val aodToOccludedTransitionViewModel: AodToOccludedTransitionViewModel,
+    private val aodToPrimaryBouncerTransitionViewModel: AodToPrimaryBouncerTransitionViewModel,
     dozingToGlanceableHubTransitionViewModel: DozingToGlanceableHubTransitionViewModel,
     private val dozingToLockscreenTransitionViewModel: DozingToLockscreenTransitionViewModel,
     private val dozingToOccludedTransitionViewModel: DozingToOccludedTransitionViewModel,
+    private val dozingToPrimaryBouncerTransitionViewModel:
+        DozingToPrimaryBouncerTransitionViewModel,
     private val dreamingToLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
     private val glanceableHubToLockscreenTransitionViewModel:
         GlanceableHubToLockscreenTransitionViewModel,
@@ -154,6 +162,7 @@ constructor(
     private val primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel,
     private val primaryBouncerToLockscreenTransitionViewModel:
         PrimaryBouncerToLockscreenTransitionViewModel,
+    private val primaryBouncerTransitions: Set<@JvmSuppressWildcards PrimaryBouncerTransition>,
     aodBurnInViewModel: AodBurnInViewModel,
     private val communalSceneInteractor: CommunalSceneInteractor,
     // Lazy because it's only used in the SceneContainer + Dual Shade configuration.
@@ -228,7 +237,7 @@ constructor(
         if (SceneContainerFlag.isEnabled) {
                 combine(
                     shadeInteractor.isShadeLayoutWide,
-                    shadeInteractor.shadeMode,
+                    shadeModeInteractor.shadeMode,
                     configurationInteractor.onAnyConfigurationChange,
                 ) { isShadeLayoutWide, shadeMode, _ ->
                     with(context.resources) {
@@ -473,7 +482,7 @@ constructor(
      */
     private val alphaForShadeAndQsExpansion: Flow<Float> =
         if (SceneContainerFlag.isEnabled) {
-                shadeInteractor.shadeMode.flatMapLatest { shadeMode ->
+                shadeModeInteractor.shadeMode.flatMapLatest { shadeMode ->
                     when (shadeMode) {
                         Single ->
                             combineTransform(
@@ -535,7 +544,7 @@ constructor(
 
     private fun bouncerToGoneNotificationAlpha(viewState: ViewStateAccessor): Flow<Float> =
         merge(
-                primaryBouncerToGoneTransitionViewModel.notificationAlpha,
+                primaryBouncerToGoneTransitionViewModel.notificationAlpha(viewState),
                 alternateBouncerToGoneTransitionViewModel.notificationAlpha(viewState),
             )
             .sample(communalSceneInteractor.isCommunalVisible) { alpha, isCommunalVisible ->
@@ -552,8 +561,10 @@ constructor(
             aodToGoneTransitionViewModel.notificationAlpha(viewState),
             aodToLockscreenTransitionViewModel.notificationAlpha,
             aodToOccludedTransitionViewModel.lockscreenAlpha(viewState),
+            aodToPrimaryBouncerTransitionViewModel.notificationAlpha,
             dozingToLockscreenTransitionViewModel.lockscreenAlpha,
             dozingToOccludedTransitionViewModel.lockscreenAlpha(viewState),
+            dozingToPrimaryBouncerTransitionViewModel.notificationAlpha,
             dreamingToLockscreenTransitionViewModel.lockscreenAlpha,
             goneToAodTransitionViewModel.notificationAlpha,
             goneToDreamingTransitionViewModel.lockscreenAlpha,
@@ -562,7 +573,7 @@ constructor(
             lockscreenToDreamingTransitionViewModel.lockscreenAlpha,
             lockscreenToGoneTransitionViewModel.notificationAlpha(viewState),
             lockscreenToOccludedTransitionViewModel.lockscreenAlpha,
-            lockscreenToPrimaryBouncerTransitionViewModel.lockscreenAlpha,
+            lockscreenToPrimaryBouncerTransitionViewModel.notificationAlpha,
             alternateBouncerToPrimaryBouncerTransitionViewModel.notificationAlpha,
             occludedToAodTransitionViewModel.lockscreenAlpha,
             occludedToGoneTransitionViewModel.notificationAlpha(viewState),
@@ -625,6 +636,12 @@ constructor(
             .distinctUntilChanged()
             .dumpWhileCollecting("keyguardAlpha")
     }
+
+    val blurRadius =
+        primaryBouncerTransitions
+            .map { transition -> transition.notificationBlurRadius }
+            .merge()
+            .dumpWhileCollecting("blurRadius")
 
     /**
      * Returns a flow of the expected alpha while running a LOCKSCREEN<->GLANCEABLE_HUB or
@@ -780,7 +797,8 @@ constructor(
     }
 
     /**
-     * Wallpaper needs the absolute bottom of notification stack to avoid occlusion
+     * Wallpaper focal area needs the absolute bottom of notification stack to avoid occlusion. It
+     * should not change with notifications in shade.
      *
      * @param calculateMaxNotifications is required by getMaxNotifications as calculateSpace by
      *   calling computeMaxKeyguardNotifications in NotificationStackSizeCalculator
@@ -795,18 +813,24 @@ constructor(
         SceneContainerFlag.assertInLegacyMode()
 
         return combine(
-            getLockscreenDisplayConfig(calculateMaxNotifications).map { (_, maxNotifications) ->
-                val height = calculateHeight(maxNotifications)
-                if (maxNotifications == 0) {
-                    height - shelfHeight
+                getLockscreenDisplayConfig(calculateMaxNotifications).map { (_, maxNotifications) ->
+                    val height = calculateHeight(maxNotifications)
+                    if (maxNotifications == 0) {
+                        height - shelfHeight
+                    } else {
+                        height
+                    }
+                },
+                bounds.map { it.top },
+                isOnLockscreenWithoutShade,
+            ) { height, top, isOnLockscreenWithoutShade ->
+                if (isOnLockscreenWithoutShade) {
+                    top + height
                 } else {
-                    height
+                    null
                 }
-            },
-            bounds.map { it.top },
-        ) { height, top ->
-            top + height
-        }
+            }
+            .filterNotNull()
     }
 
     fun notificationStackChanged() {

@@ -103,7 +103,7 @@ constructor(
         data: MediaData,
         immediately: Boolean,
         receivedSmartspaceCardLatency: Int,
-        isSsReactivated: Boolean
+        isSsReactivated: Boolean,
     ) {
         if (oldKey != null && oldKey != key) {
             mediaFilterRepository.removeMediaEntry(oldKey)
@@ -122,7 +122,7 @@ constructor(
         mediaLogger.logMediaLoaded(data.instanceId, data.active, "loading media")
         mediaFilterRepository.addMediaDataLoadingState(
             MediaDataLoadingModel.Loaded(data.instanceId),
-            isUpdate
+            isUpdate,
         )
 
         // Notify listeners
@@ -132,11 +132,9 @@ constructor(
     override fun onSmartspaceMediaDataLoaded(
         key: String,
         data: SmartspaceMediaData,
-        shouldPrioritize: Boolean
+        shouldPrioritize: Boolean,
     ) {
-        // With persistent recommendation card, we could get a background update while inactive
-        // Otherwise, consider it an invalid update
-        if (!data.isActive && !mediaFlags.isPersistentSsCardEnabled()) {
+        if (!data.isActive) {
             Log.d(TAG, "Inactive recommendation data. Skip triggering.")
             return
         }
@@ -179,7 +177,7 @@ constructor(
                 logger.logRecommendationActivated(
                     mediaData.appUid,
                     mediaData.packageName,
-                    mediaData.instanceId
+                    mediaData.instanceId,
                 )
                 mediaFilterRepository.addMediaDataLoadingState(
                     MediaDataLoadingModel.Loaded(
@@ -187,13 +185,13 @@ constructor(
                         receivedSmartspaceCardLatency =
                             (systemClock.currentTimeMillis() - data.headphoneConnectionTimeMillis)
                                 .toInt(),
-                        isSsReactivated = true
+                        isSsReactivated = true,
                     )
                 )
                 mediaLogger.logMediaLoaded(
                     mediaData.instanceId,
                     mediaData.active,
-                    "reactivating media instead of smartspace"
+                    "reactivating media instead of smartspace",
                 )
                 listeners.forEach { listener ->
                     getKey(lastActiveId)?.let { lastActiveKey ->
@@ -205,7 +203,7 @@ constructor(
                                 (systemClock.currentTimeMillis() -
                                         data.headphoneConnectionTimeMillis)
                                     .toInt(),
-                            isSsReactivated = true
+                            isSsReactivated = true,
                         )
                     }
                 }
@@ -222,7 +220,7 @@ constructor(
         val smartspaceMediaData = mediaFilterRepository.smartspaceMediaData.value
         logger.logRecommendationAdded(
             smartspaceMediaData.packageName,
-            smartspaceMediaData.instanceId
+            smartspaceMediaData.instanceId,
         )
         mediaFilterRepository.setRecommendationsLoadingState(
             SmartspaceMediaLoadingModel.Loaded(key, shouldPrioritizeMutable)
@@ -268,7 +266,7 @@ constructor(
             mediaFilterRepository.setRecommendation(
                 EMPTY_SMARTSPACE_MEDIA_DATA.copy(
                     targetId = smartspaceMediaData.targetId,
-                    instanceId = smartspaceMediaData.instanceId
+                    instanceId = smartspaceMediaData.instanceId,
                 )
             )
         }
@@ -317,12 +315,12 @@ constructor(
                 val isUpdate = mediaFilterRepository.addSelectedUserMediaEntry(data)
                 mediaFilterRepository.addMediaDataLoadingState(
                     MediaDataLoadingModel.Loaded(data.instanceId),
-                    isUpdate
+                    isUpdate,
                 )
                 mediaLogger.logMediaLoaded(
                     data.instanceId,
                     data.active,
-                    "Re-adding $key after user change"
+                    "Re-adding $key after user change",
                 )
                 listenersCopy.forEach { listener -> listener.onMediaDataLoaded(key, null, data) }
             }
@@ -346,7 +344,7 @@ constructor(
             if (dismissIntent == null) {
                 Log.w(
                     TAG,
-                    "Cannot create dismiss action click action: extras missing dismiss_intent."
+                    "Cannot create dismiss action click action: extras missing dismiss_intent.",
                 )
             } else if (
                 dismissIntent.component?.className == EXPORTED_SMARTSPACE_TRAMPOLINE_ACTIVITY_NAME
@@ -357,21 +355,16 @@ constructor(
                 broadcastSender.sendBroadcast(dismissIntent)
             }
 
-            if (mediaFlags.isPersistentSsCardEnabled()) {
-                mediaFilterRepository.setRecommendation(smartspaceMediaData.copy(isActive = false))
-                mediaDataProcessor.setRecommendationInactive(smartspaceMediaData.targetId)
-            } else {
-                mediaFilterRepository.setRecommendation(
-                    EMPTY_SMARTSPACE_MEDIA_DATA.copy(
-                        targetId = smartspaceMediaData.targetId,
-                        instanceId = smartspaceMediaData.instanceId,
-                    )
+            mediaFilterRepository.setRecommendation(
+                EMPTY_SMARTSPACE_MEDIA_DATA.copy(
+                    targetId = smartspaceMediaData.targetId,
+                    instanceId = smartspaceMediaData.instanceId,
                 )
-                mediaDataProcessor.dismissSmartspaceRecommendation(
-                    smartspaceMediaData.targetId,
-                    delay = 0L,
-                )
-            }
+            )
+            mediaDataProcessor.dismissSmartspaceRecommendation(
+                smartspaceMediaData.targetId,
+                delay = 0L,
+            )
         }
     }
 
@@ -421,7 +414,7 @@ constructor(
             get() =
                 SystemProperties.getLong(
                     "debug.sysui.smartspace_max_age",
-                    TimeUnit.MINUTES.toMillis(30)
+                    TimeUnit.MINUTES.toMillis(30),
                 )
     }
 }

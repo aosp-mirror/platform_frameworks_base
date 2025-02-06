@@ -1,0 +1,22 @@
+package: "com.android.window.flags"
+container: "system"
+
+flag {
+    name: "enable_device_state_auto_rotate_setting_logging"
+    namespace: "windowing_frontend"
+    description: "Enable device state auto rotate setting logging"
+    bug: "391147112"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_device_state_auto_rotate_setting_refactor"
+    namespace: "windowing_frontend"
+    description: "Enable refactored device state auto rotate setting logic"
+    bug: "350946537"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

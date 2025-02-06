@@ -85,7 +85,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.NavigationEdgeBackPlugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
-import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.recents.LauncherProxyService;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -155,8 +155,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                 }
             };
 
-    private OverviewProxyService.OverviewProxyListener mQuickSwitchListener =
-            new OverviewProxyService.OverviewProxyListener() {
+    private LauncherProxyService.LauncherProxyListener mQuickSwitchListener =
+            new LauncherProxyService.LauncherProxyListener() {
                 @Override
                 public void onPrioritizedRotation(@Surface.Rotation int rotation) {
                     mStartingQuickstepRotation = rotation;
@@ -197,7 +197,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
 
     private final Context mContext;
     private final UserTracker mUserTracker;
-    private final OverviewProxyService mOverviewProxyService;
+    private final LauncherProxyService mLauncherProxyService;
     private final SysUiState mSysUiState;
     private Runnable mStateChangeCallback;
     private Consumer<Boolean> mButtonForcedVisibleCallback;
@@ -332,7 +332,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                             : SysUiStatsLog.BACK_GESTURE__TYPE__COMPLETED);
                     if (!mInRejectedExclusion) {
                         // Log successful back gesture to contextual edu stats
-                        mOverviewProxyService.updateContextualEduStats(mIsTrackpadThreeFingerSwipe,
+                        mLauncherProxyService.updateContextualEduStats(mIsTrackpadThreeFingerSwipe,
                                 GestureType.BACK);
                     }
                 }
@@ -441,7 +441,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     @AssistedInject
     EdgeBackGestureHandler(
             @Assisted Context context,
-            OverviewProxyService overviewProxyService,
+            LauncherProxyService launcherProxyService,
             SysUiState sysUiState,
             PluginManager pluginManager,
             @BackPanelUiThread UiThreadContext uiThreadContext,
@@ -468,7 +468,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         mBackgroundExecutor = backgroundExecutor;
         mBgHandler = bgHandler;
         mUserTracker = userTracker;
-        mOverviewProxyService = overviewProxyService;
+        mLauncherProxyService = launcherProxyService;
         mSysUiState = sysUiState;
         mPluginManager = pluginManager;
         mNavigationModeController = navigationModeController;
@@ -620,7 +620,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
      */
     public void onNavBarAttached() {
         mIsAttached = true;
-        mOverviewProxyService.addCallback(mQuickSwitchListener);
+        mLauncherProxyService.addCallback(mQuickSwitchListener);
         mSysUiState.addCallback(mSysUiStateCallback);
         mInputManager.registerInputDeviceListener(mInputDeviceListener, mBgHandler);
         int[] inputDevices = mInputManager.getInputDeviceIds();
@@ -636,7 +636,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
      */
     public void onNavBarDetached() {
         mIsAttached = false;
-        mOverviewProxyService.removeCallback(mQuickSwitchListener);
+        mLauncherProxyService.removeCallback(mQuickSwitchListener);
         mSysUiState.removeCallback(mSysUiStateCallback);
         mInputManager.unregisterInputDeviceListener(mInputDeviceListener);
         mTrackpadsConnected.clear();

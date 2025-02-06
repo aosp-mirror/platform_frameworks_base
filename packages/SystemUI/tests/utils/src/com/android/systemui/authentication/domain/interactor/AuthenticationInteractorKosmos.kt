@@ -20,6 +20,7 @@ import com.android.systemui.authentication.data.repository.authenticationReposit
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.user.domain.interactor.selectedUserInteractor
 
 val Kosmos.authenticationInteractor by
@@ -29,5 +30,6 @@ val Kosmos.authenticationInteractor by
             backgroundDispatcher = testDispatcher,
             repository = authenticationRepository,
             selectedUserInteractor = selectedUserInteractor,
+            tableLogBuffer = logcatTableLogBuffer(this, "sceneFrameworkTableLogBuffer"),
         )
     }

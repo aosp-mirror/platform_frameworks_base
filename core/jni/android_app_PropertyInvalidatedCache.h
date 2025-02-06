@@ -147,10 +147,12 @@ template<int maxNonce, size_t maxByte> class CacheNonce : public NonceStore {
     }
 };
 
-// The CacheNonce for system server holds 64 nonces with a string block of 8192 bytes.  This is
-// more than enough for system_server PropertyInvalidatedCache support.  The configuration
-// values are not defined as visible constants.  Clients should use the accessors on the
-// SystemCacheNonce instance if they need the sizing parameters.
-typedef CacheNonce</* max nonce */ 64, /* byte block size */ 8192> SystemCacheNonce;
+// The CacheNonce for system server.  The configuration values are not defined as visible
+// constants.  Clients should use the accessors on the SystemCacheNonce instance if they need
+// the sizing parameters.
+
+// LINT.IfChange(system_nonce_config)
+typedef CacheNonce</* max nonce */ 128, /* byte block size */ 8192> SystemCacheNonce;
+// LINT.ThenChange(/core/tests/coretests/src/android/app/PropertyInvalidatedCacheTests.java:system_nonce_config)
 
 } // namespace android.app.PropertyInvalidatedCache

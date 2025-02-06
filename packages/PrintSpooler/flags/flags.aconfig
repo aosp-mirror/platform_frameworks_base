@@ -1,0 +1,20 @@
+package: "com.android.printspooler.flags"
+container: "system"
+
+flag {
+  name: "log_print_jobs"
+  namespace: "printing"
+  description: "Log print job creation and state transitions."
+  bug: "385340868"
+}
+
+flag {
+    name: "print_edge2edge"
+    namespace: "printing"
+    description: "Enable edge to edge in print spooler"
+    bug: "378652618"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

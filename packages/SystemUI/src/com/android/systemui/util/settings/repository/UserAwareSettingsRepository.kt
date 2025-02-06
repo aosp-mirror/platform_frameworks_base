@@ -22,7 +22,6 @@ import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
 import com.android.systemui.util.settings.UserSettingsProxy
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -37,7 +36,6 @@ import kotlinx.coroutines.withContext
  * the new value.
  */
 // TODO: b/377244768 - Make internal when UserAwareSecureSettingsRepository can be made internal.
-@OptIn(ExperimentalCoroutinesApi::class)
 abstract class UserAwareSettingsRepository(
     private val userSettings: UserSettingsProxy,
     private val userRepository: UserRepository,

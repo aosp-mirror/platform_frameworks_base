@@ -25,6 +25,7 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -477,6 +478,19 @@ public class ActivityTaskManager {
     public boolean removeTask(int taskId) {
         try {
             return getService().removeTask(taskId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @return Whether the app could be universal resizeable (assuming it's on a large screen and
+     * ignoring possible overrides)
+     * @hide
+     */
+    public boolean canBeUniversalResizeable(@NonNull ApplicationInfo appInfo) {
+        try {
+            return getService().canBeUniversalResizeable(appInfo);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -66,7 +66,6 @@ import com.android.settingslib.bluetooth.LocalBluetoothAdapter;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.settingslib.bluetooth.VolumeControlProfile;
-import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.bluetooth.qsdialog.DeviceItem;
@@ -227,7 +226,6 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_HEARING_DEVICES_DIALOG_RELATED_TOOLS)
     public void showDialog_noLiveCaption_noRelatedToolsInConfig_relatedToolLayoutGone() {
         mContext.getOrCreateTestableResources().addOverride(
                 R.array.config_quickSettingsHearingDevicesRelatedToolName, new String[]{});
@@ -239,7 +237,6 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_HEARING_DEVICES_DIALOG_RELATED_TOOLS)
     public void showDialog_hasLiveCaption_noRelatedToolsInConfig_showOneRelatedTool() {
         when(mPackageManager.queryIntentActivities(
                 eq(LIVE_CAPTION_INTENT), anyInt())).thenReturn(
@@ -254,7 +251,6 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_HEARING_DEVICES_DIALOG_RELATED_TOOLS)
     public void showDialog_hasLiveCaption_oneRelatedToolInConfig_showTwoRelatedTools()
             throws PackageManager.NameNotFoundException {
         when(mPackageManager.queryIntentActivities(eq(LIVE_CAPTION_INTENT), anyInt()))

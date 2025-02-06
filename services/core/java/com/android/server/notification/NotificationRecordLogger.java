@@ -32,8 +32,6 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 import android.util.Log;
 
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
@@ -361,6 +359,19 @@ interface NotificationRecordLogger {
 
         private final int mId;
         NotificationPanelEvent(int id) {
+            mId = id;
+        }
+        @Override public int getId() {
+            return mId;
+        }
+    }
+
+    enum NotificationPullStatsEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "Notification Bundle Preferences pulled.")
+        NOTIFICATION_BUNDLE_PREFERENCES_PULLED(2072);
+
+        private final int mId;
+        NotificationPullStatsEvent(int id) {
             mId = id;
         }
         @Override public int getId() {

@@ -1745,6 +1745,22 @@ please see styles_device_defaults.xml.
         <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 
+    <style name="AccessibilityAutoclickPanelButtonLayoutStyle">
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/accessibility_autoclick_button_rounded_background</item>
+        <item name="android:layout_width">@dimen/accessibility_autoclick_type_panel_button_size</item>
+        <item name="android:layout_height">@dimen/accessibility_autoclick_type_panel_button_size</item>
+    </style>
+
+    <style name="AccessibilityAutoclickPanelImageButtonStyle">
+        <item name="android:gravity">center</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:scaleType">center</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:tint">@color/materialColorPrimary</item>
+    </style>
+
     <!--
         TODO(b/309578419): Make activities go edge-to-edge properly and then remove this.
     -->

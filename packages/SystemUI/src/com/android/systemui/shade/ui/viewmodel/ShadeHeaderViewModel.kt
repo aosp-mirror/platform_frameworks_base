@@ -23,18 +23,29 @@ import android.icu.text.DateFormat
 import android.icu.text.DisplayContext
 import android.os.UserHandle
 import android.provider.Settings
+import android.view.ViewGroup
+import androidx.compose.runtime.getValue
 import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyItem
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.PrivacyChipInteractor
 import com.android.systemui.shade.domain.interactor.ShadeHeaderClockInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder
+import com.android.systemui.statusbar.phone.StatusBarLocation
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController
+import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
 import dagger.assisted.AssistedFactory
@@ -56,13 +67,63 @@ class ShadeHeaderViewModel
 constructor(
     @ShadeDisplayAware context: Context,
     private val activityStarter: ActivityStarter,
+    private val sceneInteractor: SceneInteractor,
     private val shadeInteractor: ShadeInteractor,
+    private val shadeModeInteractor: ShadeModeInteractor,
     private val mobileIconsInteractor: MobileIconsInteractor,
     val mobileIconsViewModel: MobileIconsViewModel,
     private val privacyChipInteractor: PrivacyChipInteractor,
     private val clockInteractor: ShadeHeaderClockInteractor,
+    private val tintedIconManagerFactory: TintedIconManager.Factory,
+    private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
+    val statusBarIconController: StatusBarIconController,
+    val notificationIconContainerStatusBarViewBinder: NotificationIconContainerStatusBarViewBinder,
     private val broadcastDispatcher: BroadcastDispatcher,
 ) : ExclusiveActivatable() {
+    private val hydrator = Hydrator("ShadeHeaderViewModel.hydrator")
+
+    val createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager =
+        tintedIconManagerFactory::create
+
+    val createBatteryMeterViewController:
+        (ViewGroup, StatusBarLocation) -> BatteryMeterViewController =
+        batteryMeterViewControllerFactory::create
+
+    val notificationsChipHighlight: HeaderChipHighlight by
+        hydrator.hydratedStateOf(
+            traceName = "notificationsChipHighlight",
+            initialValue = HeaderChipHighlight.None,
+            source =
+                sceneInteractor.currentOverlays.map { overlays ->
+                    when {
+                        Overlays.NotificationsShade in overlays -> HeaderChipHighlight.Strong
+                        Overlays.QuickSettingsShade in overlays -> HeaderChipHighlight.Weak
+                        else -> HeaderChipHighlight.None
+                    }
+                },
+        )
+
+    val quickSettingsChipHighlight: HeaderChipHighlight by
+        hydrator.hydratedStateOf(
+            traceName = "quickSettingsChipHighlight",
+            initialValue = HeaderChipHighlight.None,
+            source =
+                sceneInteractor.currentOverlays.map { overlays ->
+                    when {
+                        Overlays.QuickSettingsShade in overlays -> HeaderChipHighlight.Strong
+                        Overlays.NotificationsShade in overlays -> HeaderChipHighlight.Weak
+                        else -> HeaderChipHighlight.None
+                    }
+                },
+        )
+
+    val isShadeLayoutWide: Boolean by
+        hydrator.hydratedStateOf(
+            traceName = "isShadeLayoutWide",
+            initialValue = shadeInteractor.isShadeLayoutWide.value,
+            source = shadeInteractor.isShadeLayoutWide,
+        )
+
     /** True if there is exactly one mobile connection. */
     val isSingleCarrier: StateFlow<Boolean> = mobileIconsInteractor.isSingleCarrier
 
@@ -128,6 +189,8 @@ constructor(
                     .collect { _mobileSubIds.value = it }
             }
 
+            launch { hydrator.activate() }
+
             awaitCancellation()
         }
     }
@@ -143,11 +206,41 @@ constructor(
     }
 
     /** Notifies that the system icons container was clicked. */
-    fun onSystemIconContainerClicked() {
-        shadeInteractor.collapseEitherShade(
-            loggingReason = "ShadeHeaderViewModel.onSystemIconContainerClicked",
-            transitionKey = SlightlyFasterShadeCollapse,
-        )
+    fun onNotificationIconChipClicked() {
+        if (!shadeModeInteractor.isDualShade) {
+            return
+        }
+        val loggingReason = "ShadeHeaderViewModel.onNotificationIconChipClicked"
+        val currentOverlays = sceneInteractor.currentOverlays.value
+        if (Overlays.NotificationsShade in currentOverlays) {
+            shadeInteractor.collapseNotificationsShade(
+                loggingReason = loggingReason,
+                transitionKey = SlightlyFasterShadeCollapse,
+            )
+        } else {
+            shadeInteractor.expandNotificationsShade(loggingReason)
+        }
+    }
+
+    /** Notifies that the system icons container was clicked. */
+    fun onSystemIconChipClicked() {
+        val loggingReason = "ShadeHeaderViewModel.onSystemIconChipClicked"
+        if (shadeModeInteractor.isDualShade) {
+            val currentOverlays = sceneInteractor.currentOverlays.value
+            if (Overlays.QuickSettingsShade in currentOverlays) {
+                shadeInteractor.collapseQuickSettingsShade(
+                    loggingReason = loggingReason,
+                    transitionKey = SlightlyFasterShadeCollapse,
+                )
+            } else {
+                shadeInteractor.expandQuickSettingsShade(loggingReason)
+            }
+        } else {
+            shadeInteractor.collapseEitherShade(
+                loggingReason = loggingReason,
+                transitionKey = SlightlyFasterShadeCollapse,
+            )
+        }
     }
 
     /** Notifies that the shadeCarrierGroup was clicked. */
@@ -156,6 +249,15 @@ constructor(
             Intent(Settings.ACTION_WIRELESS_SETTINGS),
             0,
         )
+    }
+
+    /** Represents the background highlight of a header icons chip. */
+    sealed interface HeaderChipHighlight {
+        data object None : HeaderChipHighlight
+
+        data object Weak : HeaderChipHighlight
+
+        data object Strong : HeaderChipHighlight
     }
 
     private fun updateDateTexts(invalidateFormats: Boolean) {

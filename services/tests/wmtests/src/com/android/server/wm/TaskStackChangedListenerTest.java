@@ -16,9 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
 import static android.os.Build.HW_TIMEOUT_MULTIPLIER;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
@@ -41,10 +38,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
-import android.graphics.PixelFormat;
-import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
-import android.media.ImageReader;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -57,13 +51,14 @@ import android.widget.LinearLayout;
 import androidx.test.filters.MediumTest;
 
 import com.android.server.wm.utils.CommonUtils;
+import com.android.server.wm.utils.VirtualDisplayTestRule;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -76,9 +71,9 @@ import java.util.function.Predicate;
 @MediumTest
 public class TaskStackChangedListenerTest {
 
+    @Rule
+    public VirtualDisplayTestRule mVirtualDisplayTestRule = new VirtualDisplayTestRule();
     private ITaskStackListener mTaskStackListener;
-    private VirtualDisplay mVirtualDisplay;
-    private ImageReader mImageReader;
     private final ArrayList<Activity> mStartedActivities = new ArrayList<>();
 
     private static final int WAIT_TIMEOUT_MS = 5000 * HW_TIMEOUT_MULTIPLIER;
@@ -93,10 +88,6 @@ public class TaskStackChangedListenerTest {
     public void tearDown() throws Exception {
         if (mTaskStackListener != null) {
             ActivityTaskManager.getService().unregisterTaskStackListener(mTaskStackListener);
-        }
-        if (mVirtualDisplay != null) {
-            mVirtualDisplay.release();
-            mImageReader.close();
         }
         // Finish from bottom to top.
         final int size = mStartedActivities.size();
@@ -116,21 +107,9 @@ public class TaskStackChangedListenerTest {
     private VirtualDisplay createVirtualDisplay() {
         final int width = 800;
         final int height = 600;
-        final int density = 160;
-        final DisplayManager displayManager = getInstrumentation().getContext().getSystemService(
-                DisplayManager.class);
-        mImageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888,
-                2 /* maxImages */);
-        final int flags = VIRTUAL_DISPLAY_FLAG_PRESENTATION | VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
-                | VIRTUAL_DISPLAY_FLAG_PUBLIC;
         final String name = getClass().getSimpleName() + "_VirtualDisplay";
-        mVirtualDisplay = displayManager.createVirtualDisplay(name, width, height, density,
-                mImageReader.getSurface(), flags);
-        mVirtualDisplay.setSurface(mImageReader.getSurface());
-        assertNotNull("display must be registered",
-                Arrays.stream(displayManager.getDisplays()).filter(
-                        d -> d.getName().equals(name)).findAny());
-        return mVirtualDisplay;
+        return mVirtualDisplayTestRule.createDisplayManagerAttachedVirtualDisplay(name, width,
+                height);
     }
 
     @Test

@@ -38,7 +38,6 @@ import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,7 +52,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 /** Business logic for use-cases related to top-level touch handling in the lock screen. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class KeyguardTouchHandlingInteractor
 @Inject

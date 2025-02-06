@@ -17,6 +17,7 @@
 package com.android.systemui.window.ui.viewmodel
 
 import com.android.systemui.keyguard.ui.transitions.FakeBouncerTransition
+import com.android.systemui.keyguard.ui.transitions.FakeGlanceableHubTransition
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.window.domain.interactor.windowRootViewBlurInteractor
 import org.mockito.internal.util.collections.Sets
@@ -26,5 +27,16 @@ val Kosmos.fakeBouncerTransitions by
         Sets.newSet(FakeBouncerTransition(), FakeBouncerTransition())
     }
 
+val Kosmos.fakeGlanceableHubTransitions by
+    Kosmos.Fixture<Set<FakeGlanceableHubTransition>> {
+        Sets.newSet(FakeGlanceableHubTransition(), FakeGlanceableHubTransition())
+    }
+
 val Kosmos.windowRootViewModel by
-    Kosmos.Fixture { WindowRootViewModel(fakeBouncerTransitions, windowRootViewBlurInteractor) }
+    Kosmos.Fixture {
+        WindowRootViewModel(
+            fakeBouncerTransitions,
+            fakeGlanceableHubTransitions,
+            windowRootViewBlurInteractor,
+        )
+    }

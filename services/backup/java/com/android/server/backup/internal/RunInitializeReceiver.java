@@ -16,7 +16,6 @@
 
 package com.android.server.backup.internal;
 
-import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.UserBackupManagerService.RUN_INITIALIZE_ACTION;
 
@@ -47,9 +46,7 @@ public class RunInitializeReceiver extends BroadcastReceiver {
 
         synchronized (mUserBackupManagerService.getQueueLock()) {
             Set<String> pendingInits = mUserBackupManagerService.getPendingInits();
-            if (DEBUG) {
-                Slog.v(TAG, "Running a device init; " + pendingInits.size() + " pending");
-            }
+            Slog.d(TAG, "Running a device init; " + pendingInits.size() + " pending");
 
             if (pendingInits.size() > 0) {
                 String[] transports = pendingInits.toArray(new String[pendingInits.size()]);

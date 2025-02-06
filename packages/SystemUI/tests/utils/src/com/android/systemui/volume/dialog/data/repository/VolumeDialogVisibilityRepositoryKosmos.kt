@@ -19,4 +19,4 @@ package com.android.systemui.volume.dialog.data.repository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.volume.dialog.data.VolumeDialogVisibilityRepository
 
-val Kosmos.volumeDialogVisibilityRepository by Kosmos.Fixture { VolumeDialogVisibilityRepository() }
+var Kosmos.volumeDialogVisibilityRepository by Kosmos.Fixture { VolumeDialogVisibilityRepository() }

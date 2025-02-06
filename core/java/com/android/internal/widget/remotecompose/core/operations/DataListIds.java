@@ -62,6 +62,13 @@ public class DataListIds extends Operation implements VariableSupport, ArrayAcce
         return "map[" + Utils.idString(mId) + "]  \"" + Arrays.toString(mIds) + "\"";
     }
 
+    /**
+     * Write this operation to the buffer
+     *
+     * @param buffer the buffer to apply the operation to
+     * @param id the id of the array
+     * @param ids the values of the array
+     */
     public static void apply(@NonNull WireBuffer buffer, int id, @NonNull int[] ids) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);

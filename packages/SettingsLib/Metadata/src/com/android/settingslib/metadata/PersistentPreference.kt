@@ -44,6 +44,24 @@ annotation class ReadWritePermit {
     }
 }
 
+/** The reason of preference change. */
+@IntDef(
+    PreferenceChangeReason.VALUE,
+    PreferenceChangeReason.STATE,
+    PreferenceChangeReason.DEPENDENT,
+)
+@Retention(AnnotationRetention.SOURCE)
+annotation class PreferenceChangeReason {
+    companion object {
+        /** Preference value is changed. */
+        const val VALUE = 1000
+        /** Preference state (title/summary, enable state, etc.) is changed. */
+        const val STATE = 1001
+        /** Dependent preference state is changed. */
+        const val DEPENDENT = 1002
+    }
+}
+
 /** Indicates how sensitive of the data. */
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.TYPE)
@@ -57,8 +75,11 @@ annotation class SensitivityLevel {
     }
 }
 
-/** Preference interface that has a value persisted in datastore. */
-interface PersistentPreference<T> {
+/** Preference metadata that has a value persisted in datastore. */
+interface PersistentPreference<T> : PreferenceMetadata {
+
+    /** The value type the preference is associated with. */
+    val valueType: Class<T>
 
     /**
      * Returns the key-value storage of the preference.
@@ -67,7 +88,7 @@ interface PersistentPreference<T> {
      * [PreferenceScreenRegistry.getKeyValueStore].
      */
     fun storage(context: Context): KeyValueStore =
-        PreferenceScreenRegistry.getKeyValueStore(context, this as PreferenceMetadata)!!
+        PreferenceScreenRegistry.getKeyValueStore(context, this)!!
 
     /** Returns the required permissions to read preference value. */
     fun getReadPermissions(context: Context): Permissions? = null
@@ -85,7 +106,7 @@ interface PersistentPreference<T> {
             context,
             callingPid,
             callingUid,
-            this as PreferenceMetadata,
+            this,
         )
 
     /** Returns the required permissions to write preference value. */
@@ -110,7 +131,7 @@ interface PersistentPreference<T> {
             value,
             callingPid,
             callingUid,
-            this as PreferenceMetadata,
+            this,
         )
 
     /** The sensitivity level of the preference. */
@@ -123,15 +144,6 @@ sealed interface ValueDescriptor {
 
     /** Returns if given value (represented by index) is valid. */
     fun isValidValue(context: Context, index: Int): Boolean
-}
-
-/**
- * A boolean type value.
- *
- * A zero value means `False`, otherwise it is `True`.
- */
-interface BooleanValue : ValueDescriptor {
-    override fun isValidValue(context: Context, index: Int) = true
 }
 
 /** Value falls into a given array. */
@@ -187,21 +199,3 @@ interface DiscreteIntValue : DiscreteValue<Int> {
     override fun getValue(context: Context, index: Int): Int =
         context.resources.getIntArray(values)[index]
 }
-
-/** Value is between a range. */
-interface RangeValue : ValueDescriptor {
-    /** The lower bound (inclusive) of the range. */
-    fun getMinValue(context: Context): Int
-
-    /** The upper bound (inclusive) of the range. */
-    fun getMaxValue(context: Context): Int
-
-    /** The increment step within the range. 0 means unset, which implies step size is 1. */
-    fun getIncrementStep(context: Context) = 0
-
-    override fun isValidValue(context: Context, index: Int) =
-        index in getMinValue(context)..getMaxValue(context)
-}
-
-/** A persistent preference that has a float value. */
-interface FloatPersistentPreference : PersistentPreference<Float>

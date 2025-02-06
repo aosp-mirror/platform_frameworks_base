@@ -21,6 +21,7 @@ import android.content.res.ColorStateList
 import androidx.annotation.ColorInt
 import com.android.settingslib.Utils
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 
 /** Model representing how the chip in the status bar should be colored. */
 sealed interface ColorsModel {
@@ -54,5 +55,15 @@ sealed interface ColorsModel {
         }
 
         override fun text(context: Context) = context.getColor(android.R.color.white)
+    }
+
+    companion object {
+        /** Converts the promoted notification colors to a [Custom] colors model. */
+        fun PromotedNotificationContentModel.toCustomColorsModel(): Custom {
+            return Custom(
+                backgroundColorInt = this.colors.backgroundColor,
+                primaryTextColorInt = this.colors.primaryTextColor,
+            )
+        }
     }
 }

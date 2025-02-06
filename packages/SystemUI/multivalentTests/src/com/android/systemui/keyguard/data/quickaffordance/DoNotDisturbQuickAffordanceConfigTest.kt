@@ -27,8 +27,8 @@ import android.provider.Settings.Secure.ZEN_DURATION_FOREVER
 import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.settingslib.notification.modes.EnableZenModeDialog
-import com.android.settingslib.notification.modes.TestModeBuilder
+import com.android.settingslib.notification.modes.EnableDndDialogFactory
+import com.android.settingslib.notification.modes.TestModeBuilder.MANUAL_DND
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
@@ -52,7 +52,6 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import java.time.Duration
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -67,7 +66,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
@@ -85,7 +83,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
     @Mock private lateinit var zenModeController: ZenModeController
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var conditionUri: Uri
-    @Mock private lateinit var enableZenModeDialog: EnableZenModeDialog
+    @Mock private lateinit var mEnableDndDialogFactory: EnableDndDialogFactory
     @Captor private lateinit var spyZenMode: ArgumentCaptor<Int>
     @Captor private lateinit var spyConditionId: ArgumentCaptor<Uri?>
 
@@ -105,7 +103,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
                 testDispatcher,
                 testScope.backgroundScope,
                 conditionUri,
-                enableZenModeDialog,
+                mEnableDndDialogFactory,
             )
     }
 
@@ -187,7 +185,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
         testScope.runTest {
             val currentModes by collectLastValue(zenModeRepository.modes)
 
-            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_ACTIVE)
+            zenModeRepository.activateMode(MANUAL_DND)
             secureSettingsRepository.setInt(Settings.Secure.ZEN_DURATION, -2)
             collectLastValue(underTest.lockScreenState)
             runCurrent()
@@ -233,7 +231,6 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
         testScope.runTest {
             val currentModes by collectLastValue(zenModeRepository.modes)
 
-            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_INACTIVE)
             secureSettingsRepository.setInt(Settings.Secure.ZEN_DURATION, ZEN_DURATION_FOREVER)
             collectLastValue(underTest.lockScreenState)
             runCurrent()
@@ -278,7 +275,6 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
     fun onTriggered_dndModeIsOff_settingNotFOREVERorPROMPT_dndWithDuration() =
         testScope.runTest {
             val currentModes by collectLastValue(zenModeRepository.modes)
-            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_INACTIVE)
             secureSettingsRepository.setInt(Settings.Secure.ZEN_DURATION, -900)
             runCurrent()
 
@@ -323,9 +319,8 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
     fun onTriggered_dndModeIsOff_settingIsPROMPT_showDialog() =
         testScope.runTest {
             val expandable: Expandable = mock()
-            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_INACTIVE)
             secureSettingsRepository.setInt(Settings.Secure.ZEN_DURATION, ZEN_DURATION_PROMPT)
-            whenever(enableZenModeDialog.createDialog()).thenReturn(mock())
+            whenever(mEnableDndDialogFactory.createDialog()).thenReturn(mock())
             collectLastValue(underTest.lockScreenState)
             runCurrent()
 
@@ -347,7 +342,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
             whenever(zenModeController.isZenAvailable).thenReturn(true)
             whenever(zenModeController.zen).thenReturn(ZEN_MODE_OFF)
             settings.putInt(Settings.Secure.ZEN_DURATION, ZEN_DURATION_PROMPT)
-            whenever(enableZenModeDialog.createDialog()).thenReturn(mock())
+            whenever(mEnableDndDialogFactory.createDialog()).thenReturn(mock())
             collectLastValue(underTest.lockScreenState)
             runCurrent()
 
@@ -405,10 +400,6 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
         testScope.runTest {
             val lockScreenState by collectLastValue(underTest.lockScreenState)
 
-            val manualDnd = TestModeBuilder.MANUAL_DND_INACTIVE
-            zenModeRepository.addMode(manualDnd)
-            runCurrent()
-
             assertThat(lockScreenState)
                 .isEqualTo(
                     KeyguardQuickAffordanceConfig.LockScreenState.Visible(
@@ -420,7 +411,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
                     )
                 )
 
-            zenModeRepository.activateMode(manualDnd)
+            zenModeRepository.activateMode(MANUAL_DND)
             runCurrent()
 
             assertThat(lockScreenState)

@@ -321,6 +321,16 @@ public class LogModule {
     }
 
     /**
+     * Provides a {@link LogBuffer} for keyguard blueprint logs.
+     */
+    @Provides
+    @SysUISingleton
+    @KeyguardBlueprintLog
+    public static LogBuffer provideKeyguardBlueprintLog(LogBufferFactory factory) {
+        return factory.create("KeyguardBlueprintLog", 100);
+    }
+
+    /**
      * Provides a {@link LogBuffer} for general keyguard clock logs.
      */
     @Provides

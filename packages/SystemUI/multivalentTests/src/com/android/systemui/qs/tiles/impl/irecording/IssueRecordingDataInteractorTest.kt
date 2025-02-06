@@ -31,7 +31,6 @@ import com.android.systemui.settings.fakeUserFileManager
 import com.android.systemui.settings.userTracker
 import com.android.systemui.util.settings.fakeGlobalSettings
 import com.google.common.truth.Truth
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -64,7 +63,6 @@ class IssueRecordingDataInteractorTest : SysuiTestCase() {
         underTest = IssueRecordingDataInteractor(state, kosmos.testScope.testScheduler)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun emitsEvent_whenIsRecordingStatusChanges_correctly() {
         kosmos.testScope.runTest {

@@ -42,7 +42,6 @@ import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -55,7 +54,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @SysUISingleton
-@OptIn(ExperimentalCoroutinesApi::class)
 class EditModeViewModel
 @Inject
 constructor(

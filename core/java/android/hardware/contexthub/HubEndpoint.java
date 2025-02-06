@@ -107,6 +107,13 @@ public class HubEndpoint {
     @GuardedBy("mLock")
     private final SparseArray<HubEndpointSession> mActiveSessions = new SparseArray<>();
 
+    /*
+     * Internal interface used to invoke IContextHubEndpoint calls.
+     */
+    interface EndpointConsumer {
+        void accept(IContextHubEndpoint endpoint) throws RemoteException;
+    }
+
     private final IContextHubEndpointCallback mServiceCallback =
             new IContextHubEndpointCallback.Stub() {
                 @Override
@@ -115,20 +122,14 @@ public class HubEndpoint {
                         HubEndpointInfo initiator,
                         @Nullable String serviceDescriptor)
                         throws RemoteException {
-                    HubEndpointSession activeSession;
-                    synchronized (mLock) {
-                        activeSession = mActiveSessions.get(sessionId);
-                        // TODO(b/378974199): Consider refactor these assertions
-                        if (activeSession != null) {
-                            Log.i(
-                                    TAG,
-                                    "onSessionOpenComplete: session already exists, id="
-                                            + sessionId);
-                            return;
-                        }
+                    boolean sessionExists = getActiveSession(sessionId) != null;
+                    if (sessionExists) {
+                        Log.w(
+                                TAG,
+                                "onSessionOpenComplete: session already exists, id=" + sessionId);
                     }
 
-                    if (mLifecycleCallback != null) {
+                    if (!sessionExists && mLifecycleCallback != null) {
                         mLifecycleCallbackExecutor.execute(
                                 () ->
                                         processSessionOpenRequestResult(
@@ -137,7 +138,96 @@ public class HubEndpoint {
                                                 serviceDescriptor,
                                                 mLifecycleCallback.onSessionOpenRequest(
                                                         initiator, serviceDescriptor)));
+                    } else {
+                        invokeCallbackFinished();
                     }
+                }
+
+                @Override
+                public void onSessionOpenComplete(int sessionId) throws RemoteException {
+                    final HubEndpointSession activeSession = getActiveSession(sessionId);
+                    if (activeSession == null) {
+                        Log.w(
+                                TAG,
+                                "onSessionOpenComplete: no pending session open request? id="
+                                        + sessionId);
+                    } else {
+                        activeSession.setOpened();
+                    }
+
+                    if (activeSession != null && mLifecycleCallback != null) {
+                        mLifecycleCallbackExecutor.execute(
+                                () -> {
+                                    mLifecycleCallback.onSessionOpened(activeSession);
+                                    invokeCallbackFinished();
+                                });
+                    } else {
+                        invokeCallbackFinished();
+                    }
+                }
+
+                @Override
+                public void onSessionClosed(int sessionId, int reason) throws RemoteException {
+                    final HubEndpointSession activeSession = getActiveSession(sessionId);
+                    if (activeSession == null) {
+                        Log.w(TAG, "onSessionClosed: session not active, id=" + sessionId);
+                    }
+
+                    // Execute the callback
+                    if (activeSession != null && mLifecycleCallback != null) {
+                        mLifecycleCallbackExecutor.execute(
+                                () -> {
+                                    mLifecycleCallback.onSessionClosed(activeSession, reason);
+
+                                    // Remove the session object first to call
+                                    activeSession.setClosed();
+                                    synchronized (mLock) {
+                                        mActiveSessions.remove(sessionId);
+                                    }
+                                    invokeCallbackFinished();
+                                });
+                    } else {
+                        invokeCallbackFinished();
+                    }
+                }
+
+                @Override
+                public void onMessageReceived(int sessionId, HubMessage message)
+                        throws RemoteException {
+                    final HubEndpointSession activeSession = getActiveSession(sessionId);
+                    if (activeSession == null) {
+                        Log.w(TAG, "onMessageReceived: session not active, id=" + sessionId);
+                    }
+
+                    if (activeSession == null || mMessageCallback == null) {
+                        sendMessageDeliveryStatus(
+                                sessionId, message, ErrorCode.DESTINATION_NOT_FOUND);
+                    } else {
+                        mMessageCallbackExecutor.execute(
+                                () -> {
+                                    mMessageCallback.onMessageReceived(activeSession, message);
+                                    sendMessageDeliveryStatus(sessionId, message, ErrorCode.OK);
+                                });
+                    }
+                }
+
+                private HubEndpointSession getActiveSession(int sessionId) {
+                    synchronized (mLock) {
+                        return mActiveSessions.get(sessionId);
+                    }
+                }
+
+                private void sendMessageDeliveryStatus(
+                        int sessionId, HubMessage message, byte errorCode) {
+                    if (message.isResponseRequired()) {
+                        invokeCallback(
+                                (callback) ->
+                                        callback.sendMessageDeliveryStatus(
+                                                sessionId,
+                                                message.getMessageSequenceNumber(),
+                                                errorCode));
+                    }
+                    invokeCallbackFinished();
                 }
 
                 private void processSessionOpenRequestResult(
@@ -153,7 +243,7 @@ public class HubEndpoint {
                     if (result.isAccepted()) {
                         acceptSession(sessionId, initiator, serviceDescriptor);
                     } else {
-                        Log.i(
+                        Log.e(
                                 TAG,
                                 "Session "
                                         + sessionId
@@ -163,17 +253,14 @@ public class HubEndpoint {
                                         + result.getReason());
                         rejectSession(sessionId);
                     }
+
+                    invokeCallbackFinished();
                 }
 
                 private void acceptSession(
                         int sessionId,
                         HubEndpointInfo initiator,
                         @Nullable String serviceDescriptor) {
-                    if (mServiceToken == null || mAssignedHubEndpointInfo == null) {
-                        // No longer registered?
-                        return;
-                    }
-
                     // Retrieve the active session
                     HubEndpointSession activeSession;
                     synchronized (mLock) {
@@ -194,14 +281,9 @@ public class HubEndpoint {
                                         mAssignedHubEndpointInfo,
                                         initiator,
                                         serviceDescriptor);
-                        try {
-                            // oneway call to notify system service that the request is completed
-                            mServiceToken.openSessionRequestComplete(sessionId);
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "onSessionOpenRequestResult: ", e);
-                            return;
-                        }
 
+                        invokeCallback(
+                                (callback) -> callback.openSessionRequestComplete(sessionId));
                         mActiveSessions.put(sessionId, activeSession);
                     }
 
@@ -215,115 +297,28 @@ public class HubEndpoint {
                 }
 
                 private void rejectSession(int sessionId) {
-                    if (mServiceToken == null || mAssignedHubEndpointInfo == null) {
-                        // No longer registered?
-                        return;
-                    }
+                    invokeCallback(
+                            (callback) ->
+                                    callback.closeSession(
+                                            sessionId,
+                                            REASON_OPEN_ENDPOINT_SESSION_REQUEST_REJECTED));
+                }
 
+                private void invokeCallbackFinished() {
+                    invokeCallback((callback) -> callback.onCallbackFinished());
+                }
+
+                private void invokeCallback(EndpointConsumer consumer) {
                     try {
-                        mServiceToken.closeSession(
-                                sessionId, REASON_OPEN_ENDPOINT_SESSION_REQUEST_REJECTED);
+                        consumer.accept(mServiceToken);
+                    } catch (IllegalStateException e) {
+                        // It's possible to hit this exception if the endpoint was unregistered
+                        // while processing the callback. It's not a fatal error so we just log
+                        // a warning.
+                        Log.w(TAG, "IllegalStateException while calling callback", e);
                     } catch (RemoteException e) {
                         e.rethrowFromSystemServer();
                     }
-                }
-
-                @Override
-                public void onSessionOpenComplete(int sessionId) throws RemoteException {
-                    final HubEndpointSession activeSession;
-
-                    // Retrieve the active session
-                    synchronized (mLock) {
-                        activeSession = mActiveSessions.get(sessionId);
-                    }
-                    // TODO(b/378974199): Consider refactor these assertions
-                    if (activeSession == null) {
-                        Log.i(
-                                TAG,
-                                "onSessionOpenComplete: no pending session open request? id="
-                                        + sessionId);
-                        return;
-                    }
-
-                    // Execute the callback
-                    activeSession.setOpened();
-                    if (mLifecycleCallback != null) {
-                        mLifecycleCallbackExecutor.execute(
-                                () -> mLifecycleCallback.onSessionOpened(activeSession));
-                    }
-                }
-
-                @Override
-                public void onSessionClosed(int sessionId, int reason) throws RemoteException {
-                    final HubEndpointSession activeSession;
-
-                    // Retrieve the active session
-                    synchronized (mLock) {
-                        activeSession = mActiveSessions.get(sessionId);
-                    }
-                    // TODO(b/378974199): Consider refactor these assertions
-                    if (activeSession == null) {
-                        Log.i(TAG, "onSessionClosed: session not active, id=" + sessionId);
-                        return;
-                    }
-
-                    // Execute the callback
-                    if (mLifecycleCallback != null) {
-                        mLifecycleCallbackExecutor.execute(
-                                () -> {
-                                    mLifecycleCallback.onSessionClosed(activeSession, reason);
-
-                                    // Remove the session object first to call
-                                    activeSession.setClosed();
-                                    synchronized (mLock) {
-                                        mActiveSessions.remove(sessionId);
-                                    }
-                                });
-                    }
-                }
-
-                @Override
-                public void onMessageReceived(int sessionId, HubMessage message)
-                        throws RemoteException {
-                    final HubEndpointSession activeSession;
-
-                    // Retrieve the active session
-                    synchronized (mLock) {
-                        activeSession = mActiveSessions.get(sessionId);
-                    }
-                    if (activeSession == null) {
-                        Log.i(TAG, "onMessageReceived: session not active, id=" + sessionId);
-                    }
-
-                    if (activeSession == null || mMessageCallback == null) {
-                        if (message.isResponseRequired()) {
-                            try {
-                                mServiceToken.sendMessageDeliveryStatus(
-                                        sessionId,
-                                        message.getMessageSequenceNumber(),
-                                        ErrorCode.DESTINATION_NOT_FOUND);
-                            } catch (RemoteException e) {
-                                e.rethrowFromSystemServer();
-                            }
-                        }
-                        return;
-                    }
-
-                    // Execute the callback
-                    mMessageCallbackExecutor.execute(
-                            () -> {
-                                mMessageCallback.onMessageReceived(activeSession, message);
-                                if (message.isResponseRequired()) {
-                                    try {
-                                        mServiceToken.sendMessageDeliveryStatus(
-                                                sessionId,
-                                                message.getMessageSequenceNumber(),
-                                                ErrorCode.OK);
-                                    } catch (RemoteException e) {
-                                        e.rethrowFromSystemServer();
-                                    }
-                                }
-                            });
                 }
             };
 
@@ -348,11 +343,6 @@ public class HubEndpoint {
 
     /** @hide */
     public void register(IContextHubService service) {
-        // TODO(b/378974199): Consider refactor these assertions
-        if (mServiceToken != null) {
-            // Already registered
-            return;
-        }
         try {
             IContextHubEndpoint serviceToken =
                     service.registerEndpoint(
@@ -370,13 +360,6 @@ public class HubEndpoint {
 
     /** @hide */
     public void unregister() {
-        IContextHubEndpoint serviceToken = mServiceToken;
-        // TODO(b/378974199): Consider refactor these assertions
-        if (serviceToken == null) {
-            // Not yet registered
-            return;
-        }
-
         try {
             synchronized (mLock) {
                 // Don't call HubEndpointSession.close() here.
@@ -389,20 +372,11 @@ public class HubEndpoint {
         } catch (RemoteException e) {
             Log.e(TAG, "unregisterEndpoint: failed to unregister endpoint", e);
             e.rethrowFromSystemServer();
-        } finally {
-            mServiceToken = null;
-            mAssignedHubEndpointInfo = null;
         }
     }
 
     /** @hide */
     public void openSession(HubEndpointInfo destinationInfo, @Nullable String serviceDescriptor) {
-        // TODO(b/378974199): Consider refactor these assertions
-        if (mServiceToken == null || mAssignedHubEndpointInfo == null) {
-            // No longer registered?
-            return;
-        }
-
         HubEndpointSession newSession;
         try {
             synchronized (mLock) {
@@ -428,13 +402,6 @@ public class HubEndpoint {
 
     /** @hide */
     public void closeSession(HubEndpointSession session) {
-        IContextHubEndpoint serviceToken = mServiceToken;
-        // TODO(b/378974199): Consider refactor these assertions
-        if (serviceToken == null || mAssignedHubEndpointInfo == null) {
-            // Not registered
-            return;
-        }
-
         synchronized (mLock) {
             if (!mActiveSessions.contains(session.getId())) {
                 // Already closed?
@@ -445,8 +412,7 @@ public class HubEndpoint {
         }
 
         try {
-            // Oneway notification to system service
-            serviceToken.closeSession(session.getId(), REASON_CLOSE_ENDPOINT_SESSION_REQUESTED);
+            mServiceToken.closeSession(session.getId(), REASON_CLOSE_ENDPOINT_SESSION_REQUESTED);
         } catch (RemoteException e) {
             Log.e(TAG, "closeSession: failed to close session " + session, e);
             e.rethrowFromSystemServer();
@@ -457,14 +423,8 @@ public class HubEndpoint {
             HubEndpointSession session,
             HubMessage message,
             @Nullable IContextHubTransactionCallback transactionCallback) {
-        IContextHubEndpoint serviceToken = mServiceToken;
-        if (serviceToken == null) {
-            // Not registered
-            return;
-        }
-
         try {
-            serviceToken.sendMessage(session.getId(), message, transactionCallback);
+            mServiceToken.sendMessage(session.getId(), message, transactionCallback);
         } catch (RemoteException e) {
             Log.e(TAG, "sendMessage: failed to send message session=" + session, e);
             e.rethrowFromSystemServer();

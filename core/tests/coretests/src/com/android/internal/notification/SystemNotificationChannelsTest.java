@@ -17,6 +17,7 @@
 package com.android.internal.notification;
 
 import static com.android.internal.notification.SystemNotificationChannels.ABUSIVE_BACKGROUND_APPS;
+import static com.android.internal.notification.SystemNotificationChannels.ACCESSIBILITY_HEARING_DEVICE;
 import static com.android.internal.notification.SystemNotificationChannels.ACCESSIBILITY_MAGNIFICATION;
 import static com.android.internal.notification.SystemNotificationChannels.ACCESSIBILITY_SECURITY_POLICY;
 import static com.android.internal.notification.SystemNotificationChannels.ACCOUNT;
@@ -90,8 +91,8 @@ public class SystemNotificationChannelsTest {
                         DEVELOPER_IMPORTANT, UPDATES, NETWORK_STATUS, NETWORK_ALERTS,
                         NETWORK_AVAILABLE, VPN, DEVICE_ADMIN, ALERTS, RETAIL_MODE, USB,
                         FOREGROUND_SERVICE, HEAVY_WEIGHT_APP, SYSTEM_CHANGES,
-                        ACCESSIBILITY_MAGNIFICATION, ACCESSIBILITY_SECURITY_POLICY,
-                        ABUSIVE_BACKGROUND_APPS);
+                        ACCESSIBILITY_MAGNIFICATION, ACCESSIBILITY_HEARING_DEVICE,
+                        ACCESSIBILITY_SECURITY_POLICY, ABUSIVE_BACKGROUND_APPS);
     }
 
     @Test

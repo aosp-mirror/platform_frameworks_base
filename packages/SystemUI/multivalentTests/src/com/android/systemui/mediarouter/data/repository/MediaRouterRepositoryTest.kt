@@ -27,13 +27,11 @@ import com.android.systemui.statusbar.policy.CastDevice
 import com.android.systemui.statusbar.policy.fakeCastController
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class MediaRouterRepositoryTest : SysuiTestCase() {
     val kosmos = Kosmos()

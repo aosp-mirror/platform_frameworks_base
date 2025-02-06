@@ -28,7 +28,6 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
@@ -49,7 +48,6 @@ private const val WRONG_REQUEST_ID = 10L
 private const val CHALLENGE = 90L
 private const val OP_PACKAGE_NAME = "biometric.testapp"
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class PromptRepositoryImplTest : SysuiTestCase() {

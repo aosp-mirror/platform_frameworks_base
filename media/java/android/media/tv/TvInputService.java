@@ -161,11 +161,6 @@ public abstract class TvInputService extends Service {
             new RemoteCallbackList<>();
 
     private TvInputManager mTvInputManager;
-    /**
-     * @hide
-     */
-    protected TvInputServiceExtensionManager mTvInputServiceExtensionManager =
-            new TvInputServiceExtensionManager();
 
     @Override
     public final IBinder onBind(Intent intent) {
@@ -230,12 +225,20 @@ public abstract class TvInputService extends Service {
 
             @Override
             public IBinder getExtensionInterface(String name) {
-                if (tifExtensionStandardization() && name != null) {
-                    if (TvInputServiceExtensionManager.checkIsStandardizedInterfaces(name)) {
-                        return mTvInputServiceExtensionManager.getExtensionIBinder(name);
+                IBinder binder = TvInputService.this.getExtensionInterface(name);
+                if (tifExtensionStandardization()) {
+                    if (name != null
+                            && TvInputServiceExtensionManager.checkIsStandardizedInterfaces(name)) {
+                        if (TvInputServiceExtensionManager.checkIsStandardizedIBinder(name,
+                                binder)) {
+                            return binder;
+                        } else {
+                            // binder with standardized name is not standardized
+                            return null;
+                        }
                     }
                 }
-                return TvInputService.this.getExtensionInterface(name);
+                return binder;
             }
 
             @Override

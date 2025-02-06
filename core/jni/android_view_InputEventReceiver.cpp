@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#undef ANDROID_UTILS_REF_BASE_DISABLE_IMPLICIT_CONSTRUCTION // TODO:remove this and fix code
 
 #define LOG_TAG "InputEventReceiver"
 #define ATRACE_TAG ATRACE_TAG_INPUT
@@ -441,7 +442,8 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                     }
                     env->CallVoidMethod(receiverObj.get(), gInputEventReceiverClassInfo.onDragEvent,
                                         jboolean(dragEvent->isExiting()), dragEvent->getX(),
-                                        dragEvent->getY());
+                                        dragEvent->getY(),
+                                        static_cast<jint>(dragEvent->getDisplayId().val()));
                     finishInputEvent(seq, /*handled=*/true);
                     continue;
                 }
@@ -643,7 +645,7 @@ int register_android_view_InputEventReceiver(JNIEnv* env) {
             GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onPointerCaptureEvent",
                              "(Z)V");
     gInputEventReceiverClassInfo.onDragEvent =
-            GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onDragEvent", "(ZFF)V");
+            GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onDragEvent", "(ZFFI)V");
     gInputEventReceiverClassInfo.onTouchModeChanged =
             GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onTouchModeChanged", "(Z)V");
     gInputEventReceiverClassInfo.onBatchedInputEventPending =

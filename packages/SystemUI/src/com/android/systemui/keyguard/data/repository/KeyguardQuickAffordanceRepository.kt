@@ -41,7 +41,6 @@ import com.android.systemui.util.kotlin.FlowDumperImpl
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,7 +52,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Abstracts access to application state related to keyguard quick affordances. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class KeyguardQuickAffordanceRepository
 @Inject
@@ -126,7 +124,7 @@ constructor(
 
     init {
         legacySettingSyncer.startSyncing()
-        dumpManager.registerDumpable("KeyguardQuickAffordances", Dumpster())
+        dumpManager.registerNormalDumpable("KeyguardQuickAffordances", Dumpster())
     }
 
     /**

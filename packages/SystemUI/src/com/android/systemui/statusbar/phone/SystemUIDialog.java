@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.Flags.predictiveBackAnimateDialogs;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -285,15 +283,13 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         for (int i = 0; i < mOnCreateRunnables.size(); i++) {
             mOnCreateRunnables.get(i).run();
         }
-        if (predictiveBackAnimateDialogs()) {
-            View targetView = getWindow().getDecorView();
-            DialogKt.registerAnimationOnBackInvoked(
-                    /* dialog = */ this,
-                    /* targetView = */ targetView,
-                    /* backAnimationSpec= */mDelegate.getBackAnimationSpec(
-                            () -> targetView.getResources().getDisplayMetrics())
-            );
-        }
+        View targetView = getWindow().getDecorView();
+        DialogKt.registerAnimationOnBackInvoked(
+                /* dialog = */ this,
+                /* targetView = */ targetView,
+                /* backAnimationSpec= */mDelegate.getBackAnimationSpec(
+                        () -> targetView.getResources().getDisplayMetrics())
+        );
     }
 
     private void updateWindowSize() {
@@ -401,6 +397,13 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         mDelegate.onWindowFocusChanged(this, hasFocus);
+        if (hasFocus) {
+            // Update SysUI state to reflect that a dialog is showing. This ensures the state is
+            // correct when this dialog regains focus after another dialog was closed.
+            // See b/386871258
+            mSysUiState.setFlag(QuickStepContract.SYSUI_STATE_DIALOG_SHOWING, true)
+                    .commitUpdate(mContext.getDisplayId());
+        }
     }
 
     public void setShowForAllUsers(boolean show) {

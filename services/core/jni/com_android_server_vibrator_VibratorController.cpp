@@ -435,8 +435,8 @@ static jlong vibratorPerformPwleV2Effect(JNIEnv* env, jclass /* clazz */, jlong 
     auto composePwleV2Fn = [&composite, &callback](vibrator::HalWrapper* hal) {
         return hal->composePwleV2(composite, callback);
     };
-    auto result = wrapper->halCall<void>(composePwleV2Fn, "composePwleV2");
-    return result.isOk();
+    auto result = wrapper->halCall<std::chrono::milliseconds>(composePwleV2Fn, "composePwleV2");
+    return result.isOk() ? result.value().count() : (result.isUnsupported() ? 0 : -1);
 }
 
 static void vibratorAlwaysOnEnable(JNIEnv* env, jclass /* clazz */, jlong ptr, jlong id,

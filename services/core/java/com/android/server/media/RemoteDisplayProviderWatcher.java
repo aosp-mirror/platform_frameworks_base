@@ -121,9 +121,11 @@ public final class RemoteDisplayProviderWatcher {
                 int sourceIndex = findProvider(serviceInfo.packageName, serviceInfo.name);
                 if (sourceIndex < 0) {
                     RemoteDisplayProviderProxy provider =
-                            new RemoteDisplayProviderProxy(mContext,
-                            new ComponentName(serviceInfo.packageName, serviceInfo.name),
-                            mUserId);
+                            new RemoteDisplayProviderProxy(
+                                    mContext,
+                                    new ComponentName(serviceInfo.packageName, serviceInfo.name),
+                                    mUserId,
+                                    mHandler.getLooper());
                     provider.start();
                     mProviders.add(targetIndex++, provider);
                     mCallback.addProvider(provider);

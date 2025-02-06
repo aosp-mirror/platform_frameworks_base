@@ -41,18 +41,42 @@ public class NanMap {
     public static final float CLOSE_NAN = Utils.asNan(CLOSE);
     public static final float DONE_NAN = Utils.asNan(DONE);
 
+    /**
+     * Returns true if the float id is a system variable
+     *
+     * @param value the id encoded as float NaN
+     * @return
+     */
     public static boolean isSystemVariable(float value) {
         return (fromNaN(value) >> 20) == 0;
     }
 
+    /**
+     * Returns true if the float id is a normal variable
+     *
+     * @param value the id encoded as float NaN
+     * @return
+     */
     public static boolean isNormalVariable(float value) {
         return (fromNaN(value) >> 20) == 1;
     }
 
+    /**
+     * Returns true if the float id is a data variable
+     *
+     * @param value the id encoded as float NaN
+     * @return
+     */
     public static boolean isDataVariable(float value) {
         return (fromNaN(value) >> 20) == 2;
     }
 
+    /**
+     * Returns true if the float id is an operation variable
+     *
+     * @param value the id encoded as float NaN
+     * @return
+     */
     public static boolean isOperationVariable(float value) {
         return (fromNaN(value) >> 20) == 3;
     }

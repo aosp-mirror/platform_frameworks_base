@@ -34,6 +34,8 @@ import static com.android.systemui.statusbar.notification.stack.NotificationPrio
 
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.FlaggedApi;
+import android.app.Flags;
 import android.app.Notification;
 import android.app.Notification.MessagingStyle.Message;
 import android.app.NotificationChannel;
@@ -810,11 +812,6 @@ public final class NotificationEntry extends ListEntry {
         return !mSbn.isOngoing() || !isLocked;
     }
 
-    public boolean canViewBeDismissed() {
-        if (row == null) return true;
-        return row.canViewBeDismissed();
-    }
-
     @VisibleForTesting
     boolean isExemptFromDndVisualSuppression() {
         if (isNotificationBlockedByPolicy(mSbn.getNotification())) {
@@ -831,6 +828,14 @@ public final class NotificationEntry extends ListEntry {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Returns whether the NotificationEntry is promoted ongoing.
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public boolean isOngoingPromoted() {
+        return mSbn.getNotification().isPromotedOngoing();
     }
 
     /**
@@ -1088,6 +1093,14 @@ public final class NotificationEntry extends ListEntry {
             Log.wtf(TAG, "getting promoted content without feature flag enabled", new Throwable());
             return null;
         }
+    }
+
+    /**
+     * Returns whether the NotificationEntry is promoted ongoing.
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public boolean isPromotedOngoing() {
+        return PromotedNotificationContentModel.isPromotedForStatusBarChip(mSbn.getNotification());
     }
 
     /**

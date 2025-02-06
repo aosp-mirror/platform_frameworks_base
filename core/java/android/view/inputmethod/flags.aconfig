@@ -19,15 +19,6 @@ flag {
 }
 
 flag {
-    name: "imm_userhandle_hostsidetests"
-    is_exported: true
-    namespace: "input_method"
-    description: "Feature flag for replacing UserIdInt with UserHandle in some helper IMM functions"
-    bug: "301713309"
-    is_fixed_read_only: true
-}
-
-flag {
     name: "concurrent_input_methods"
     is_exported: true
     namespace: "input_method"

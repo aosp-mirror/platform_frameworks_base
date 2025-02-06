@@ -39,7 +39,6 @@ import com.android.systemui.util.CarrierConfigTracker
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -72,7 +71,7 @@ interface MobileIconsInteractor {
     val filteredSubscriptions: Flow<List<SubscriptionModel>>
 
     /** Subscription ID of the current default data subscription */
-    val defaultDataSubId: Flow<Int>
+    val defaultDataSubId: Flow<Int?>
 
     /**
      * The current list of [MobileIconInteractor]s associated with the current list of
@@ -128,7 +127,6 @@ interface MobileIconsInteractor {
 }
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class MobileIconsInteractorImpl
 @Inject

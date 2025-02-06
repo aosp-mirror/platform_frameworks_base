@@ -87,7 +87,7 @@ public class WakelockPowerStatsProcessorTest {
         PowerStats ps = new PowerStats(descriptor);
         long[] uidStats = new long[descriptor.uidStatsArrayLength];
 
-        BatteryStatsHistory history = new BatteryStatsHistory(null, null, 0, 10000,
+        BatteryStatsHistory history = new BatteryStatsHistory(null, 10000, null,
                 mock(BatteryStatsHistory.HistoryStepDetailsCalculator.class),
                 mStatsRule.getMockClock(),
                 new MonotonicClock(START_TIME, mStatsRule.getMockClock()), null, null);

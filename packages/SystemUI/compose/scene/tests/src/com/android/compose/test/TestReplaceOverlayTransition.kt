@@ -19,6 +19,7 @@ package com.android.compose.test
 import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.content.state.TransitionState.Transition
+import com.android.mechanics.GestureContext
 import kotlinx.coroutines.CompletableDeferred
 
 /** A [Transition.ShowOrHideOverlay] for tests that will be finished once [finish] is called. */
@@ -81,6 +82,7 @@ fun transition(
 
         override val isInitiatedByUserInput: Boolean = isInitiatedByUserInput
         override val isUserInputOngoing: Boolean = isUserInputOngoing
+        override val gestureContext: GestureContext? = null
 
         override fun freezeAndAnimateToCurrentState() {
             if (onFreezeAndAnimate != null) {

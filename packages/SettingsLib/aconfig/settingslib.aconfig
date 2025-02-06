@@ -219,3 +219,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "adopt_primary_group_management_api"
+    namespace: "cross_device_experiences"
+    description: "Adopt Bluetooth LE broadcast primary group management APIs"
+    bug: "381946931"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

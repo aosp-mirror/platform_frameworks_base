@@ -15,12 +15,8 @@
  *
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
@@ -64,16 +60,18 @@ import com.android.systemui.scene.data.repository.Idle
 import com.android.systemui.scene.data.repository.Transition
 import com.android.systemui.scene.data.repository.setTransition
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.domain.interactor.enableDualShade
+import com.android.systemui.shade.domain.interactor.enableSingleShade
+import com.android.systemui.shade.domain.interactor.enableSplitShade
 import com.android.systemui.shade.mockLargeScreenHeaderHelper
 import com.android.systemui.shade.shadeTestUtil
-import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel.HorizontalPosition
 import com.android.systemui.testKosmos
+import com.android.systemui.window.ui.viewmodel.fakeBouncerTransitions
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.assertIs
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
@@ -142,7 +140,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     @Test
     fun validateMarginStartInSplitShade() =
         testScope.runTest {
-            shadeTestUtil.setSplitShade(true)
+            kosmos.enableSplitShade()
             overrideDimensionPixelSize(R.dimen.notification_panel_margin_horizontal, 20)
 
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
@@ -155,7 +153,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     @Test
     fun validateMarginStart() =
         testScope.runTest {
-            shadeTestUtil.setSplitShade(false)
+            kosmos.enableSingleShade()
             overrideDimensionPixelSize(R.dimen.notification_panel_margin_horizontal, 20)
 
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
@@ -168,9 +166,9 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     @Test
     fun validateHorizontalPositionSingleShade() =
         testScope.runTest {
+            kosmos.enableSingleShade()
             overrideDimensionPixelSize(R.dimen.shade_panel_width, 200)
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
-            shadeTestUtil.setSplitShade(false)
 
             val horizontalPosition = checkNotNull(dimens).horizontalPosition
             assertIs<HorizontalPosition.EdgeToEdge>(horizontalPosition)
@@ -179,9 +177,9 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     @Test
     fun validateHorizontalPositionSplitShade() =
         testScope.runTest {
+            kosmos.enableSplitShade()
             overrideDimensionPixelSize(R.dimen.shade_panel_width, 200)
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
-            shadeTestUtil.setSplitShade(true)
 
             val horizontalPosition = checkNotNull(dimens).horizontalPosition
             assertIs<HorizontalPosition.MiddleToEdge>(horizontalPosition)
@@ -190,25 +188,22 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
     @Test
     @EnableSceneContainer
-    @DisableFlags(DualShade.FLAG_NAME)
     fun validateHorizontalPositionInSceneContainerSingleShade() =
         testScope.runTest {
+            kosmos.enableSingleShade()
             overrideDimensionPixelSize(R.dimen.shade_panel_width, 200)
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
-            shadeTestUtil.setSplitShade(false)
 
             val horizontalPosition = checkNotNull(dimens).horizontalPosition
             assertIs<HorizontalPosition.EdgeToEdge>(horizontalPosition)
         }
 
     @Test
-    @EnableSceneContainer
-    @DisableFlags(DualShade.FLAG_NAME)
     fun validateHorizontalPositionInSceneContainerSplitShade() =
         testScope.runTest {
+            kosmos.enableSplitShade()
             overrideDimensionPixelSize(R.dimen.shade_panel_width, 200)
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
-            shadeTestUtil.setSplitShade(true)
 
             val horizontalPosition = checkNotNull(dimens).horizontalPosition
             assertIs<HorizontalPosition.MiddleToEdge>(horizontalPosition)
@@ -217,12 +212,11 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
     @Test
     @EnableSceneContainer
-    @EnableFlags(DualShade.FLAG_NAME)
     fun validateHorizontalPositionInDualShade_narrowLayout() =
         testScope.runTest {
+            kosmos.enableDualShade(wideLayout = false)
             overrideDimensionPixelSize(R.dimen.shade_panel_width, 200)
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
-            shadeTestUtil.setSplitShade(false)
 
             val horizontalPosition = checkNotNull(dimens).horizontalPosition
             assertIs<HorizontalPosition.EdgeToEdge>(horizontalPosition)
@@ -230,12 +224,11 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
     @Test
     @EnableSceneContainer
-    @EnableFlags(DualShade.FLAG_NAME)
     fun validateHorizontalPositionInDualShade_wideLayout() =
         testScope.runTest {
+            kosmos.enableDualShade(wideLayout = true)
             overrideDimensionPixelSize(R.dimen.shade_panel_width, 200)
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
-            shadeTestUtil.setSplitShade(true)
 
             val horizontalPosition = checkNotNull(dimens).horizontalPosition
             assertIs<HorizontalPosition.FloatAtStart>(horizontalPosition)
@@ -245,8 +238,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     @Test
     fun validatePaddingTopInSplitShade_usesLargeHeaderHelper() =
         testScope.runTest {
+            kosmos.enableSplitShade()
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
-            shadeTestUtil.setSplitShade(true)
             overrideResource(R.bool.config_use_large_screen_shade_header, true)
             overrideDimensionPixelSize(R.dimen.large_screen_shade_header_height, 10)
             overrideDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin, 50)
@@ -261,8 +254,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     @Test
     fun validatePaddingTopInNonSplitShade_usesLargeScreenHeader() =
         testScope.runTest {
+            kosmos.enableSingleShade()
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(10)
-            shadeTestUtil.setSplitShade(false)
             overrideResource(R.bool.config_use_large_screen_shade_header, true)
             overrideDimensionPixelSize(R.dimen.large_screen_shade_header_height, 10)
             overrideDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin, 50)
@@ -277,8 +270,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     @Test
     fun validatePaddingTopInNonSplitShade_doesNotUseLargeScreenHeader() =
         testScope.runTest {
+            kosmos.enableSingleShade()
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(10)
-            shadeTestUtil.setSplitShade(false)
             overrideResource(R.bool.config_use_large_screen_shade_header, false)
             overrideDimensionPixelSize(R.dimen.large_screen_shade_header_height, 10)
             overrideDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin, 50)
@@ -1393,6 +1386,19 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             sharedNotificationContainerInteractor.notificationStackChanged()
             advanceTimeBy(50L)
             assertThat(stackAbsoluteBottom).isEqualTo(100F)
+        }
+
+    @Test
+    fun blurRadius_emitsValues_fromPrimaryBouncerTransitions() =
+        testScope.runTest {
+            val blurRadius by collectLastValue(underTest.blurRadius)
+            assertThat(blurRadius).isEqualTo(0.0f)
+
+            kosmos.fakeBouncerTransitions.first().notificationBlurRadius.value = 30.0f
+            assertThat(blurRadius).isEqualTo(30.0f)
+
+            kosmos.fakeBouncerTransitions.last().notificationBlurRadius.value = 40.0f
+            assertThat(blurRadius).isEqualTo(40.0f)
         }
 
     private suspend fun TestScope.showLockscreen() {

@@ -319,8 +319,10 @@ public class PermissionManagerServiceTestingShim implements PermissionManagerSer
     }
 
     @Override
-    public int getPermissionRequestState(String packageName, String permName, String deviceId) {
-        return mNewImplementation.getPermissionRequestState(packageName, permName, deviceId);
+    public int getPermissionRequestState(String packageName, String permName, int deviceId,
+            String persistentDeviceId) {
+        return mNewImplementation.getPermissionRequestState(
+                packageName, permName, deviceId, persistentDeviceId);
     }
 
     @Override

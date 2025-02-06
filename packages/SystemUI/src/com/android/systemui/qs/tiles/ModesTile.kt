@@ -35,12 +35,14 @@ import com.android.systemui.modes.shared.ModesUiIcons
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.plugins.qs.TileDetailsViewModel
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.asQSTileIcon
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.qs.tiles.dialog.ModesDetailsViewModel
 import com.android.systemui.qs.tiles.impl.modes.domain.interactor.ModesTileDataInteractor
 import com.android.systemui.qs.tiles.impl.modes.domain.interactor.ModesTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
@@ -48,6 +50,7 @@ import com.android.systemui.qs.tiles.impl.modes.ui.ModesTileMapper
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProvider
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.policy.ui.dialog.viewmodel.ModesDialogViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.runBlocking
 
@@ -67,6 +70,7 @@ constructor(
     private val dataInteractor: ModesTileDataInteractor,
     private val tileMapper: ModesTileMapper,
     private val userActionInteractor: ModesTileUserActionInteractor,
+    private val modesDialogViewModel: ModesDialogViewModel,
 ) :
     QSTileImpl<QSTile.State>(
         host,
@@ -112,6 +116,13 @@ constructor(
     override fun handleSecondaryClick(expandable: Expandable?) = runBlocking {
         val model = dataInteractor.getCurrentTileModel()
         userActionInteractor.handleToggleClick(model)
+    }
+
+    override fun getDetailsViewModel(): TileDetailsViewModel {
+        return ModesDetailsViewModel(
+            onSettingsClick = { userActionInteractor.handleLongClick(null) },
+            viewModel = modesDialogViewModel,
+        )
     }
 
     override fun getLongClickIntent(): Intent = userActionInteractor.longClickIntent

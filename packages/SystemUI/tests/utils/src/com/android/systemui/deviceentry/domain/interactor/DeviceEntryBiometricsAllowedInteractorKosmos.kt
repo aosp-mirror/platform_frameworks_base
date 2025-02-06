@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.deviceentry.domain.interactor
 
 import com.android.systemui.biometrics.data.repository.facePropertyRepository
 import com.android.systemui.kosmos.Kosmos
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.deviceEntryBiometricsAllowedInteractor by
     Kosmos.Fixture {

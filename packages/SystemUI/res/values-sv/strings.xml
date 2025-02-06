@@ -250,6 +250,10 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Okänd batterinivå."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Ansluten till <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Ansluten till <xliff:g id="CAST">%s</xliff:g>."</string>
+    <!-- no translation found for accessibility_expand_group (521237935987978624) -->
+    <skip />
+    <!-- no translation found for accessibility_open_application (1749126077501259712) -->
+    <skip />
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Inte ansluten."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Av"</string>
@@ -535,10 +539,12 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Widgetar för låsskärm"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Du måste verifiera din identitet innan du öppnar en app med en widget. Tänk också på att alla kan se dem, även när surfplattan är låst. Vissa widgetar kanske inte är avsedda för låsskärmen och det kan vara osäkert att lägga till dem här."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widgetar"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Om du vill lägga till genvägen Widgetar måste du se till att Visa widgetar på låsskärmen är aktiverat i inställningarna."</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Inställningar"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Visa skärmsläckarknappen"</string>
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"Utforska hubbläget"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"Få åtkomst till dina favoritwidgetar och skärmsläckare under laddning."</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"Då kör vi"</string>
+    <!-- no translation found for glanceable_hub_to_dream_button_tooltip (9018287673822335829) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Byt användare"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"rullgardinsmeny"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alla appar och data i denna session kommer att raderas."</string>
@@ -750,6 +756,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Uppdaterar"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Jobbprofil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Flygplansläge"</string>
+    <string name="status_bar_supervision" msgid="6735015942701134125">"Föräldrakontroller"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Nästa alarm, kl. <xliff:g id="WHEN">%1$s</xliff:g>, kommer inte att höras"</string>
     <string name="alarm_template" msgid="2234991538018805736">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -759,7 +766,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satellit, bra anslutning"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satellit, anslutning tillgänglig"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS-larm via satellit"</string>
-    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Nödsamtal eller SOS"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="9103913890116841786">"Endast nödsamtal eller SOS-larm"</string>
     <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
     <string name="accessibility_no_signal" msgid="7052827511409250167">"ingen signal"</string>
     <string name="accessibility_one_bar" msgid="5342012847647834506">"en stapel"</string>
@@ -800,6 +807,10 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Visas högst upp i konversationsaviseringarna och som profilbild på låsskärmen, visas som bubbla, åsidosätter Stör ej"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> har inte stöd för konversationsfunktioner"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"Stäng"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"Visa inte igen"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Det går inte att ändra de här aviseringarna."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Det går inte att ändra samtalsaviseringarna."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Den här aviseringsgruppen kan inte konfigureras här"</string>
@@ -856,7 +867,6 @@
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Tillbaka"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Aviseringar"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Kortkommandon"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Byt tangentbordslayout"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"eller"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Rensa sökfråga"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Kortkommandon"</string>
@@ -911,6 +921,14 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Kalender"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Kalkylator"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Kartor"</string>
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"Aktivera/inaktivera studsande tangenter"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"Aktivera/inaktivera mustangenter"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"Aktivera/inaktivera låstangentsläget"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"Aktivera/inaktivera långsamma tangenter"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"Aktivera/inaktivera röststyrning"</string>
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"Aktivera/inaktivera TalkBack"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"Aktivera/inaktivera förstoring"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"Aktivera Textuppläsning"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Stör ej"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Genväg till volymknappar"</string>
     <string name="battery" msgid="769686279459897127">"Batteri"</string>
@@ -1289,7 +1307,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ange enhet"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Öppna med fingeravtryck"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Autentisering krävs. Identifiera dig genom att trycka på fingeravtryckssensorn."</string>
-    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <string name="ongoing_call_content_description" msgid="6394763878322348560">"Pågående samtal"</string>
+    <!-- no translation found for ongoing_notification_extra_content_description (2098752668861351265) -->
     <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobildata"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Ansluten"</string>
@@ -1432,17 +1451,18 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Systemappar"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Multikörning"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Delad skärm"</string>
+    <string name="shortcutHelper_category_accessibility" msgid="8068337792277570938">"Tillgänglighet"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Inmatning"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Genvägar till appar"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Aktuell app"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Tillgänglighet"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Kortkommandon"</string>
-    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Anpassa kortkommandon"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"Anpassa kortkommandon"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Vill du ta bort kortkommandot?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Vill du återställa till standardinställningarna?"</string>
-    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Tryck på tangenten för att tilldela ett kortkommando"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="7636040209946696120">"Skapa det här kortkommandot genom att trycka på åtgärdstangenten och en eller flera andra tangenter samtidigt"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Det anpassade kortkommandot raderas permanent."</string>
-    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Alla anpassade genvägar raderas permanent."</string>
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Alla anpassade kortkommandon raderas permanent."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Sökgenvägar"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Inga sökresultat"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikonen Komprimera"</string>
@@ -1462,9 +1482,11 @@
     <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Ja, återställ"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Avbryt"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Tryck på tangenten"</string>
-    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Tangentkombinationen används redan. Testa en annan tangent."</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="3325858369539848162">"Tangentkombinationen används redan. Testa en annan kombination."</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Det går inte att ställa in kortkommandot."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
+    <string name="shortcut_helper_add_shortcut_button_label" msgid="7655779534665954910">"Lägg till genväg"</string>
+    <string name="shortcut_helper_delete_shortcut_button_label" msgid="3148773472696137052">"Radera genväg"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Navigera med tangentbordet"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Lär dig kortkommandon"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Navigera med styrplattan"</string>
@@ -1474,6 +1496,7 @@
     <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"Tillbaka"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Återvänd till startsidan"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Se de senaste apparna"</string>
+    <string name="touchpad_tutorial_switch_apps_gesture_button" msgid="7768255095423767779">"Byta app"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Klar"</string>
     <string name="gesture_error_title" msgid="469064941635578511">"Försök igen!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Tillbaka"</string>
@@ -1491,6 +1514,11 @@
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Bra jobbat!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Du är klar med rörelsen för att se de senaste apparna."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Svep uppåt på styrplattan med tre fingrar och håll kvar för att se nyligen använda appar"</string>
+    <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"Byta app"</string>
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"Svep åt höger med fyra fingrar på styrplattan"</string>
+    <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"Bra jobbat!"</string>
+    <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"Du har slutfört rörelsen för att byta app"</string>
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"Svep åt höger med fyra fingrar på styrplattan för att byta app"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Visa alla appar"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Tryck på åtgärdstangenten på tangentbordet"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Bra gjort!"</string>

@@ -43,7 +43,6 @@ import com.android.systemui.util.concurrency.execution
 import com.google.common.collect.ImmutableList
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.ListenableFuture
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -63,7 +62,6 @@ private const val PACKAGE_NAME = "package_name"
 private const val CUSTOM_ACTION_NAME = "Custom Action"
 private const val CUSTOM_ACTION_COMMAND = "custom-action"
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWithLooper
 @RunWith(AndroidJUnit4::class)

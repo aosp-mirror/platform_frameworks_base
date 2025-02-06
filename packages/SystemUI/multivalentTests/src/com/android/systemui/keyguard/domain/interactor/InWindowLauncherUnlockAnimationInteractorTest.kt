@@ -44,7 +44,6 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class InWindowLauncherUnlockAnimationInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val underTest =

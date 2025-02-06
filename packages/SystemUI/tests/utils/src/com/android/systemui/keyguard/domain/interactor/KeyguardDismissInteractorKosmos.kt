@@ -26,9 +26,7 @@ import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.user.domain.interactor.selectedUserInteractor
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 val Kosmos.keyguardDismissInteractor by
     Kosmos.Fixture {
         KeyguardDismissInteractor(

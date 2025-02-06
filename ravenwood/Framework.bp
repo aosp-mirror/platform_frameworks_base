@@ -399,3 +399,55 @@ java_genrule {
         "framework-statsd.ravenwood.jar",
     ],
 }
+
+//////////////////////
+// framework-graphics
+//////////////////////
+
+java_genrule {
+    name: "framework-graphics.ravenwood-base",
+    tools: ["hoststubgen"],
+    cmd: "$(location hoststubgen) " +
+        "@$(location :ravenwood-standard-options) " +
+
+        "--debug-log $(location framework-graphics.log) " +
+        "--stats-file $(location framework-graphics_stats.csv) " +
+        "--supported-api-list-file $(location framework-graphics_apis.csv) " +
+        "--gen-keep-all-file $(location framework-graphics_keep_all.txt) " +
+        "--gen-input-dump-file $(location framework-graphics_dump.txt) " +
+
+        "--out-impl-jar $(location ravenwood.jar) " +
+        "--in-jar $(location :framework-graphics.impl{.jar}) " +
+
+        "--policy-override-file $(location :ravenwood-common-policies) ",
+    srcs: [
+        ":framework-graphics.impl{.jar}",
+
+        ":ravenwood-common-policies",
+        ":ravenwood-standard-options",
+    ],
+    out: [
+        "ravenwood.jar",
+
+        // Following files are created just as FYI.
+        "framework-graphics_keep_all.txt",
+        "framework-graphics_dump.txt",
+
+        "framework-graphics.log",
+        "framework-graphics_stats.csv",
+        "framework-graphics_apis.csv",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+java_genrule {
+    name: "framework-graphics.ravenwood",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":framework-graphics.ravenwood-base{ravenwood.jar}",
+    ],
+    out: [
+        "framework-graphics.ravenwood.jar",
+    ],
+}

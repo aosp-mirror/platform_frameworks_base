@@ -79,6 +79,8 @@ class MenuInfoRepository {
     private static final int DEFAULT_MIGRATION_TOOLTIP_VALUE_PROMPT = MigrationPrompt.DISABLED;
 
     private final Context mContext;
+    // Pref always get the userId from the context to store SharedPreferences for the correct user
+    private final Context mCurrentUserContext;
     private final Configuration mConfiguration;
     private final AccessibilityManager mAccessibilityManager;
     private final AccessibilityManager.AccessibilityServicesStateChangeListener
@@ -157,6 +159,9 @@ class MenuInfoRepository {
             OnContentsChanged settingsContentsChanged, SecureSettings secureSettings,
             @Nullable HearingAidDeviceManager hearingAidDeviceManager) {
         mContext = context;
+        final int currentUserId = secureSettings.getRealUserHandle(UserHandle.USER_CURRENT);
+        mCurrentUserContext = context.createContextAsUser(
+                UserHandle.of(currentUserId), /* flags= */ 0);
         mAccessibilityManager = accessibilityManager;
         mConfiguration = new Configuration(context.getResources().getConfiguration());
         mSettingsContentsCallback = settingsContentsChanged;
@@ -168,12 +173,13 @@ class MenuInfoRepository {
 
     void loadMenuMoveToTucked(OnInfoReady<Boolean> callback) {
         callback.onReady(
-                Prefs.getBoolean(mContext, Prefs.Key.HAS_ACCESSIBILITY_FLOATING_MENU_TUCKED,
+                Prefs.getBoolean(
+                        mCurrentUserContext, Prefs.Key.HAS_ACCESSIBILITY_FLOATING_MENU_TUCKED,
                         DEFAULT_MOVE_TO_TUCKED_VALUE));
     }
 
     void loadDockTooltipVisibility(OnInfoReady<Boolean> callback) {
-        callback.onReady(Prefs.getBoolean(mContext,
+        callback.onReady(Prefs.getBoolean(mCurrentUserContext,
                 Prefs.Key.HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP,
                 DEFAULT_HAS_SEEN_DOCK_TOOLTIP_VALUE));
     }
@@ -215,19 +221,19 @@ class MenuInfoRepository {
     }
 
     void updateMoveToTucked(boolean isMoveToTucked) {
-        Prefs.putBoolean(mContext, Prefs.Key.HAS_ACCESSIBILITY_FLOATING_MENU_TUCKED,
+        Prefs.putBoolean(mCurrentUserContext, Prefs.Key.HAS_ACCESSIBILITY_FLOATING_MENU_TUCKED,
                 isMoveToTucked);
     }
 
     void updateMenuSavingPosition(Position percentagePosition) {
         mPercentagePosition = percentagePosition;
-        Prefs.putString(mContext, Prefs.Key.ACCESSIBILITY_FLOATING_MENU_POSITION,
+        Prefs.putString(mCurrentUserContext, Prefs.Key.ACCESSIBILITY_FLOATING_MENU_POSITION,
                 percentagePosition.toString());
     }
 
     void updateDockTooltipVisibility(boolean hasSeen) {
-        Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP,
-                hasSeen);
+        Prefs.putBoolean(mCurrentUserContext,
+                Prefs.Key.HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP, hasSeen);
     }
 
     void updateMigrationTooltipVisibility(boolean visible) {
@@ -243,7 +249,7 @@ class MenuInfoRepository {
     }
 
     private Position getStartPosition() {
-        final String absolutePositionString = Prefs.getString(mContext,
+        final String absolutePositionString = Prefs.getString(mCurrentUserContext,
                 Prefs.Key.ACCESSIBILITY_FLOATING_MENU_POSITION, /* defaultValue= */ null);
 
         final float defaultPositionXPercent =
@@ -260,7 +266,7 @@ class MenuInfoRepository {
                 mSecureSettings.getUriFor(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS),
                 /* notifyForDescendants */ false, mMenuTargetFeaturesContentObserver,
                 UserHandle.USER_CURRENT);
-        if (!com.android.systemui.Flags.floatingMenuNarrowTargetContentObserver()) {
+        if (com.android.systemui.Flags.floatingMenuNotifyTargetsChangedOnStrictDiff()) {
             mSecureSettings.registerContentObserverForUserSync(
                     mSecureSettings.getUriFor(ENABLED_ACCESSIBILITY_SERVICES),
                     /* notifyForDescendants */ false,
@@ -281,7 +287,7 @@ class MenuInfoRepository {
                 UserHandle.USER_CURRENT);
         mContext.registerComponentCallbacks(mComponentCallbacks);
 
-        if (!com.android.systemui.Flags.floatingMenuNarrowTargetContentObserver()) {
+        if (com.android.systemui.Flags.floatingMenuNotifyTargetsChangedOnStrictDiff()) {
             mAccessibilityManager.addAccessibilityServicesStateChangeListener(
                     mA11yServicesStateChangeListener);
         }
@@ -311,7 +317,7 @@ class MenuInfoRepository {
         mContext.getContentResolver().unregisterContentObserver(mMenuFadeOutContentObserver);
         mContext.unregisterComponentCallbacks(mComponentCallbacks);
 
-        if (!com.android.systemui.Flags.floatingMenuNarrowTargetContentObserver()) {
+        if (com.android.systemui.Flags.floatingMenuNotifyTargetsChangedOnStrictDiff()) {
             mAccessibilityManager.removeAccessibilityServicesStateChangeListener(
                     mA11yServicesStateChangeListener);
         }

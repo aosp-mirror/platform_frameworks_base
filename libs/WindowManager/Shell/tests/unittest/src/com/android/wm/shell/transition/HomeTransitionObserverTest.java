@@ -39,8 +39,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.TransitionInfo.TransitionMode;
@@ -60,7 +58,6 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -73,9 +70,6 @@ import java.util.List;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class HomeTransitionObserverTest extends ShellTestCase {
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
     private final ShellTaskOrganizer mOrganizer = mock(ShellTaskOrganizer.class);
     private final TransactionPool mTransactionPool = mock(TransactionPool.class);
     private final Context mContext =

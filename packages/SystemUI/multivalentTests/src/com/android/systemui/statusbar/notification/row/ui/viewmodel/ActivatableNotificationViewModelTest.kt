@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.notification.row.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -25,7 +23,6 @@ import com.android.systemui.accessibility.data.repository.FakeAccessibilityRepos
 import com.android.systemui.accessibility.domain.interactor.AccessibilityInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test

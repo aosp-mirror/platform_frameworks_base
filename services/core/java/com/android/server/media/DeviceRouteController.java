@@ -65,13 +65,11 @@ import java.util.List;
         if (strategyForMedia != null
                 && btAdapter != null
                 && Flags.enableAudioPoliciesDeviceAndBluetoothController()) {
-            return new AudioManagerRouteController(
-                    context,
-                    audioManager,
-                    looper,
-                    strategyForMedia,
-                    btAdapter,
-                    onDeviceRouteChangedListener);
+            AudioManagerRouteController controller =
+                    AudioManagerRouteController.getInstance(
+                            context, audioManager, looper, strategyForMedia, btAdapter);
+            controller.registerRouteChangeListener(onDeviceRouteChangedListener);
+            return controller;
         } else {
             IAudioService audioService =
                     IAudioService.Stub.asInterface(

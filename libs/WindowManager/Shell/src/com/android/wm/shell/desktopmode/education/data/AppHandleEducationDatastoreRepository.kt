@@ -22,6 +22,7 @@ import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.Serializer
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.dataStoreFile
 import com.android.framework.protobuf.InvalidProtocolBufferException
 import com.android.internal.annotations.VisibleForTesting
@@ -48,6 +49,10 @@ constructor(private val dataStore: DataStore<WindowingEducationProto>) {
         DataStoreFactory.create(
             serializer = WindowingEducationProtoSerializer,
             produceFile = { context.dataStoreFile(APP_HANDLE_EDUCATION_DATASTORE_FILEPATH) },
+            corruptionHandler =
+                ReplaceFileCorruptionHandler(
+                    produceNewData = { WindowingEducationProto.getDefaultInstance() }
+                ),
         )
     )
 
@@ -86,6 +91,40 @@ constructor(private val dataStore: DataStore<WindowingEducationProto>) {
                     .build()
             } else {
                 preferences.toBuilder().clearAppHandleHintViewedTimestampMillis().build()
+            }
+        }
+    }
+
+    /**
+     * Updates [WindowingEducationProto.enterDesktopModeHintViewedTimestampMillis_] field in
+     * datastore with current timestamp if [isViewed] is true, if not then clears the field.
+     */
+    suspend fun updateEnterDesktopModeHintViewedTimestampMillis(isViewed: Boolean) {
+        dataStore.updateData { preferences ->
+            if (isViewed) {
+                preferences
+                    .toBuilder()
+                    .setEnterDesktopModeHintViewedTimestampMillis(System.currentTimeMillis())
+                    .build()
+            } else {
+                preferences.toBuilder().clearEnterDesktopModeHintViewedTimestampMillis().build()
+            }
+        }
+    }
+
+    /**
+     * Updates [WindowingEducationProto.exitDesktopModeHintViewedTimestampMillis_] field in
+     * datastore with current timestamp if [isViewed] is true, if not then clears the field.
+     */
+    suspend fun updateExitDesktopModeHintViewedTimestampMillis(isViewed: Boolean) {
+        dataStore.updateData { preferences ->
+            if (isViewed) {
+                preferences
+                    .toBuilder()
+                    .setExitDesktopModeHintViewedTimestampMillis(System.currentTimeMillis())
+                    .build()
+            } else {
+                preferences.toBuilder().clearExitDesktopModeHintViewedTimestampMillis().build()
             }
         }
     }

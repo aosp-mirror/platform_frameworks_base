@@ -56,7 +56,6 @@ import com.android.systemui.statusbar.phone.dozeScrimController
 import com.android.systemui.statusbar.phone.screenOffAnimationController
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -68,7 +67,6 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.kotlin.whenever
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
@@ -176,14 +174,14 @@ class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun nonPowerButtonFPS_coExFaceFailure_doNotVibrateError() =
+    fun nonPowerButtonFPS_coExFaceFailure_vibrateError() =
         testScope.runTest {
             val playErrorHaptic by collectLastValue(underTest.playErrorHaptic)
             enrollFingerprint(FingerprintSensorType.UDFPS_ULTRASONIC)
             enrollFace()
             runCurrent()
             faceFailure()
-            assertThat(playErrorHaptic).isNull()
+            assertThat(playErrorHaptic).isNotNull()
         }
 
     @Test
@@ -256,6 +254,22 @@ class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
 
     @EnableSceneContainer
     @Test
+    fun playSuccessHaptic_onFaceAuthSuccess_whenBypassDisabled_sceneContainer() =
+        testScope.runTest {
+            underTest = kosmos.deviceEntryHapticsInteractor
+            val playSuccessHaptic by collectLastValue(underTest.playSuccessHaptic)
+
+            enrollFace()
+            kosmos.configureKeyguardBypass(isBypassAvailable = false)
+            runCurrent()
+            configureDeviceEntryFromBiometricSource(isFaceUnlock = true, bypassEnabled = false)
+            kosmos.fakeDeviceEntryFaceAuthRepository.isAuthenticated.value = true
+
+            assertThat(playSuccessHaptic).isNotNull()
+        }
+
+    @EnableSceneContainer
+    @Test
     fun skipSuccessHaptic_onDeviceEntryFromSfps_whenPowerDown_sceneContainer() =
         testScope.runTest {
             kosmos.configureKeyguardBypass(isBypassAvailable = false)
@@ -299,6 +313,7 @@ class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
     private fun configureDeviceEntryFromBiometricSource(
         isFpUnlock: Boolean = false,
         isFaceUnlock: Boolean = false,
+        bypassEnabled: Boolean = true,
     ) {
         // Mock DeviceEntrySourceInteractor#deviceEntryBiometricAuthSuccessState
         if (isFpUnlock) {
@@ -314,11 +329,14 @@ class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
             )
 
             // Mock DeviceEntrySourceInteractor#faceWakeAndUnlockMode = MODE_UNLOCK_COLLAPSING
-            kosmos.sceneInteractor.setTransitionState(
-                MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(Scenes.Lockscreen)
+            // if the successful face authentication will bypass keyguard
+            if (bypassEnabled) {
+                kosmos.sceneInteractor.setTransitionState(
+                    MutableStateFlow<ObservableTransitionState>(
+                        ObservableTransitionState.Idle(Scenes.Lockscreen)
+                    )
                 )
-            )
+            }
         }
         underTest = kosmos.deviceEntryHapticsInteractor
     }

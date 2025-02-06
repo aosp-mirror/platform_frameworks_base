@@ -180,6 +180,7 @@
     <protected-broadcast android:name="android.bluetooth.device.action.CONNECTION_ACCESS_CANCEL" />
     <protected-broadcast android:name="android.bluetooth.device.action.CONNECTION_ACCESS_REQUEST" />
     <protected-broadcast android:name="android.bluetooth.device.action.KEY_MISSING" />
+    <protected-broadcast android:name="android.bluetooth.device.action.ENCRYPTION_CHANGE" />
     <protected-broadcast android:name="android.bluetooth.device.action.SDP_RECORD" />
     <protected-broadcast android:name="android.bluetooth.device.action.BATTERY_LEVEL_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.device.action.REMOTE_ISSUE_OCCURRED" />
@@ -5405,10 +5406,9 @@
     <permission android:name="android.permission.CHANGE_ACCESSIBILITY_VOLUME"
                 android:protectionLevel="signature" />
 
-    <!-- @FlaggedApi("com.android.server.accessibility.motion_event_observing")
-    @hide
-    @TestApi
-    Allows an accessibility service to observe motion events without consuming them. -->
+    <!-- @TestApi Allows an accessibility service to observe motion events
+         without consuming them.
+         @hide -->
     <permission android:name="android.permission.ACCESSIBILITY_MOTION_EVENT_OBSERVING"
                 android:protectionLevel="signature" />
 
@@ -8308,32 +8308,14 @@
         android:featureFlag="android.app.appfunctions.flags.enable_app_function_manager"
         android:protectionLevel="signature" />
 
-    <!-- Allows a trusted application to perform actions on behalf of users inside of
-         applications with privacy guarantees from the system.
-         <p>This permission is currently only granted to system packages in the
-         {@link android.app.role.SYSTEM_UI_INTELLIGENCE} role which complies with privacy
-         requirements outlined in the Android CDD section "9.8.6 Content Capture".
-         <p>Apps are not able to opt-out from caller having this permission.
-         <p>Protection level: internal|role
-         @SystemApi
-         @hide
-         @FlaggedApi(android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER)  -->
-    <permission android:name="android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED"
-        android:featureFlag="android.app.appfunctions.flags.enable_app_function_manager"
-        android:protectionLevel="internal|role" />
-
     <!-- Allows an application to perform actions on behalf of users inside of
          applications.
-         <p>This permission is currently only granted to preinstalled / system apps having the
-         {@link android.app.role.ASSISTANT} role.
-         <p>Apps contributing app functions can opt to disallow callers with this permission,
-         limiting to only callers with {@link android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED}
-         instead.
-         <p>Protection level: internal|role
+         <p>This permission is currently only granted to privileged system apps.
+         <p>Protection level: internal|privileged
          @FlaggedApi(android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER)  -->
     <permission android:name="android.permission.EXECUTE_APP_FUNCTIONS"
         android:featureFlag="android.app.appfunctions.flags.enable_app_function_manager"
-        android:protectionLevel="internal|role" />
+        android:protectionLevel="internal|privileged" />
 
     <!-- Allows an application to display its suggestions using the autofill framework.
          <p>For now, this permission is only granted to the Browser application.
@@ -8463,6 +8445,14 @@
     <permission android:name="android.permission.MANAGE_KEY_GESTURES"
                 android:protectionLevel="signature"
                 android:featureFlag="com.android.hardware.input.manage_key_gestures" />
+
+    <!-- Allows applications to register listeners for key activeness through
+         InputManagerService.
+         <p>Protection level: signature
+         @hide -->
+    <permission android:name="android.permission.LISTEN_FOR_KEY_ACTIVITY"
+                android:protectionLevel="signature"
+                android:featureFlag="com.android.hardware.input.key_event_activity_detection" />
 
     <uses-permission android:name="android.permission.HANDLE_QUERY_PACKAGE_RESTART" />
 
@@ -8804,22 +8794,6 @@
     -->
     <permission android:name="android.permission.RESERVED_FOR_TESTING_SIGNATURE"
                 android:protectionLevel="signature"/>
-
-    <!--
-        This permission allows the system to receive PACKAGE_CHANGED broadcasts when the component
-        state of a non-exported component has been changed.
-        <p>Not for use by third-party applications. </p>
-        <p>Protection level: internal
-        @hide
-    -->
-    <permission
-        android:name="android.permission.INTERNAL_RECEIVE_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED"
-        android:protectionLevel="internal"
-        android:featureFlag="android.content.pm.reduce_broadcasts_for_component_state_changes"/>
-
-    <uses-permission
-        android:name="android.permission.INTERNAL_RECEIVE_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED"
-        android:featureFlag="android.content.pm.reduce_broadcasts_for_component_state_changes"/>
 
     <!-- @SystemApi
         @FlaggedApi("android.media.tv.flags.kids_mode_tvdb_sharing")
@@ -9271,6 +9245,11 @@
         <service android:name="com.android.server.SmartStorageMaintIdler"
                 android:exported="true"
                 android:permission="android.permission.BIND_JOB_SERVICE" >
+        </service>
+
+        <service android:name="com.android.server.memory.ZramMaintenance"
+                 android:exported="false"
+                 android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
         <service android:name="com.android.server.ZramWriteback"

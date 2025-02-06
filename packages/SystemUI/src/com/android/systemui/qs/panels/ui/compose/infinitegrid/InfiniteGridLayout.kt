@@ -18,15 +18,15 @@ package com.android.systemui.qs.panels.ui.compose.infinitegrid
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.util.fastMap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.grid.ui.compose.VerticalSpannedGrid
 import com.android.systemui.haptics.msdl.qs.TileHapticsViewModelFactoryProvider
@@ -42,6 +42,7 @@ import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.InfiniteGridViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
+import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor.Companion.POSITION_AT_END
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.shared.ui.ElementKeys.toElementKey
 import com.android.systemui.res.R
@@ -58,7 +59,7 @@ constructor(
 ) : PaginatableGridLayout {
 
     @Composable
-    override fun SceneScope.TileGrid(tiles: List<TileViewModel>, modifier: Modifier) {
+    override fun ContentScope.TileGrid(tiles: List<TileViewModel>, modifier: Modifier) {
         DisposableEffect(tiles) {
             val token = Any()
             tiles.forEach { it.startListening(token) }
@@ -86,27 +87,28 @@ constructor(
         val scope = rememberCoroutineScope()
         var cellIndex = 0
 
+        val spans by remember(sizedTiles) { derivedStateOf { sizedTiles.fastMap { it.width } } }
+
         VerticalSpannedGrid(
             columns = columns,
             columnSpacing = dimensionResource(R.dimen.qs_tile_margin_horizontal),
             rowSpacing = dimensionResource(R.dimen.qs_tile_margin_vertical),
-            spans = sizedTiles.fastMap { it.width },
+            spans = spans,
+            keys = { sizedTiles[it].tile.spec },
         ) { spanIndex ->
             val it = sizedTiles[spanIndex]
             val column = cellIndex % columns
             cellIndex += it.width
-            key(it.tile.spec) {
-                Tile(
-                    tile = it.tile,
-                    iconOnly = iconTilesViewModel.isIconTile(it.tile.spec),
-                    modifier = Modifier.element(it.tile.spec.toElementKey(spanIndex)),
-                    squishiness = { squishiness },
-                    tileHapticsViewModelFactoryProvider = tileHapticsViewModelFactoryProvider,
-                    coroutineScope = scope,
-                    bounceableInfo = bounceables.bounceableInfo(it, spanIndex, column, columns),
-                    detailsViewModel = detailsViewModel,
-                )
-            }
+            Tile(
+                tile = it.tile,
+                iconOnly = iconTilesViewModel.isIconTile(it.tile.spec),
+                modifier = Modifier.element(it.tile.spec.toElementKey(spanIndex)),
+                squishiness = { squishiness },
+                tileHapticsViewModelFactoryProvider = tileHapticsViewModelFactoryProvider,
+                coroutineScope = scope,
+                bounceableInfo = bounceables.bounceableInfo(it, spanIndex, column, columns),
+                detailsViewModel = detailsViewModel,
+            )
         }
     }
 
@@ -154,6 +156,7 @@ constructor(
             otherTiles = otherTiles,
             columns = columns,
             modifier = modifier,
+            onAddTile = { onAddTile(it, POSITION_AT_END) },
             onRemoveTile = onRemoveTile,
             onSetTiles = onSetTiles,
             onResize = iconTilesViewModel::resize,

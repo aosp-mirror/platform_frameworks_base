@@ -112,7 +112,7 @@ internal suspend fun awaitCancellationAndThen(block: suspend () -> Unit) {
     }
 }
 
-internal fun CoroutineScope.launchOnCancel(
+internal fun CoroutineScope.invokeOnCancel(
     context: CoroutineContext = EmptyCoroutineContext,
     block: () -> Unit,
 ): Job =

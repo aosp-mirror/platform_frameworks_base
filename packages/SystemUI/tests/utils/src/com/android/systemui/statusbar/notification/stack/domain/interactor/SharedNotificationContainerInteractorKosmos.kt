@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.notification.stack.domain.interactor
 
 import android.content.applicationContext
@@ -25,7 +23,6 @@ import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.shade.largeScreenHeaderHelper
 import com.android.systemui.statusbar.policy.splitShadeStateController
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.sharedNotificationContainerInteractor by
     Kosmos.Fixture {

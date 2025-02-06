@@ -23,16 +23,16 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.inputdevice.tutorial.inputDeviceTutorialLogger
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.Error
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.Finished
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.InProgress
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.collectLastValue
 import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.testKosmos
-import com.android.systemui.touchpad.tutorial.ui.composable.GestureUiState
-import com.android.systemui.touchpad.tutorial.ui.composable.GestureUiState.Error
-import com.android.systemui.touchpad.tutorial.ui.composable.GestureUiState.Finished
-import com.android.systemui.touchpad.tutorial.ui.composable.GestureUiState.InProgress
 import com.android.systemui.touchpad.tutorial.ui.gesture.MultiFingerGesture.Companion.SWIPE_DISTANCE
 import com.android.systemui.touchpad.tutorial.ui.gesture.ThreeFingerGesture
 import com.android.systemui.touchpad.tutorial.ui.gesture.Velocity
@@ -86,8 +86,8 @@ class HomeGestureScreenViewModelTest : SysuiTestCase() {
                 expected =
                     InProgress(
                         progress = 1f,
-                        progressStartMarker = "drag with gesture",
-                        progressEndMarker = "release playback realtime",
+                        startMarker = "drag with gesture",
+                        endMarker = "release playback realtime",
                     ),
             )
         }
@@ -108,7 +108,7 @@ class HomeGestureScreenViewModelTest : SysuiTestCase() {
     @Test
     fun gestureRecognitionTakesLatestDistanceThresholdIntoAccount() =
         kosmos.runTest {
-            val state by collectLastValue(viewModel.gestureUiState)
+            val state by collectLastValue(viewModel.tutorialState)
             performHomeGesture()
             assertThat(state).isInstanceOf(Finished::class.java)
 
@@ -121,7 +121,7 @@ class HomeGestureScreenViewModelTest : SysuiTestCase() {
     @Test
     fun gestureRecognitionTakesLatestVelocityThresholdIntoAccount() =
         kosmos.runTest {
-            val state by collectLastValue(viewModel.gestureUiState)
+            val state by collectLastValue(viewModel.tutorialState)
             performHomeGesture()
             assertThat(state).isInstanceOf(Finished::class.java)
 
@@ -147,8 +147,11 @@ class HomeGestureScreenViewModelTest : SysuiTestCase() {
         fakeConfigRepository.onAnyConfigurationChange()
     }
 
-    private fun Kosmos.assertStateAfterEvents(events: List<MotionEvent>, expected: GestureUiState) {
-        val state by collectLastValue(viewModel.gestureUiState)
+    private fun Kosmos.assertStateAfterEvents(
+        events: List<MotionEvent>,
+        expected: TutorialActionState,
+    ) {
+        val state by collectLastValue(viewModel.tutorialState)
         events.forEach { viewModel.handleEvent(it) }
         assertThat(state).isEqualTo(expected)
     }

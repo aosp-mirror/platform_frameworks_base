@@ -36,13 +36,13 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
 import com.android.systemui.scene.ui.view.WindowRootView
-import com.android.systemui.shade.data.repository.MutableShadeDisplaysRepository
-import com.android.systemui.shade.domain.interactor.ShadeDialogContextInteractor
-import com.android.systemui.shade.domain.interactor.ShadeDialogContextInteractorImpl
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepositoryImpl
 import com.android.systemui.shade.display.ShadeDisplayPolicyModule
+import com.android.systemui.shade.domain.interactor.ShadeDialogContextInteractor
+import com.android.systemui.shade.domain.interactor.ShadeDialogContextInteractorImpl
 import com.android.systemui.shade.domain.interactor.ShadeDisplaysInteractor
+import com.android.systemui.shade.domain.interactor.ShadeExpandedStateInteractor
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl
 import com.android.systemui.statusbar.phone.ConfigurationForwarder
@@ -210,15 +210,6 @@ object ShadeDisplayAwareModule {
         return impl
     }
 
-    @SysUISingleton
-    @Provides
-    fun provideMutableShadePositionRepository(
-        impl: ShadeDisplaysRepositoryImpl
-    ): MutableShadeDisplaysRepository {
-        ShadeWindowGoesAround.isUnexpectedlyInLegacyMode()
-        return impl
-    }
-
     @Provides
     @SysUISingleton
     fun provideShadeDialogContextInteractor(
@@ -276,6 +267,8 @@ object ShadeDisplayAwareModule {
 @Module
 internal interface OptionalShadeDisplayAwareBindings {
     @BindsOptionalOf fun bindOptionalOfWindowRootView(): WindowRootView
+
+    @BindsOptionalOf fun bindOptionalOShadeExpandedStateInteractor(): ShadeExpandedStateInteractor
 }
 
 /**

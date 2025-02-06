@@ -37,10 +37,10 @@ public abstract class AbstractPreferenceController {
 
     private static final String TAG = "AbstractPrefController";
 
-    protected final Context mContext;
+    protected final @NonNull Context mContext;
     private final DevicePolicyManager mDevicePolicyManager;
 
-    public AbstractPreferenceController(Context context) {
+    public AbstractPreferenceController(@NonNull Context context) {
         mContext = context;
         mDevicePolicyManager =
                 (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);

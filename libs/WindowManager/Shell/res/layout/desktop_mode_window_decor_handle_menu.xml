@@ -51,7 +51,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             tools:text="Gmail"
-            android:importantForAccessibility="no"
             android:textColor="@androidprv:color/materialColorOnSurface"
             android:textSize="14sp"
             android:textFontWeight="500"

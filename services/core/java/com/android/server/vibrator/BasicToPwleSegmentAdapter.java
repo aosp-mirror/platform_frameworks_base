@@ -100,6 +100,11 @@ final class BasicToPwleSegmentAdapter implements VibrationSegmentsAdapter {
         }
 
         VibratorInfo.FrequencyProfile frequencyProfile = info.getFrequencyProfile();
+        if (frequencyProfile.isEmpty()) {
+            // The frequency profile has an invalid frequency range, so keep the segments unchanged.
+            return repeatIndex;
+        }
+
         float[] frequenciesHz = frequencyProfile.getFrequenciesHz();
         float[] accelerationsGs = frequencyProfile.getOutputAccelerationsGs();
 

@@ -16,8 +16,6 @@
 
 package com.android.systemui.volume.dialog.domain.interactor
 
-import android.os.Handler
-import android.os.looper
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.plugins.volumeDialogController
@@ -27,6 +25,6 @@ val Kosmos.volumeDialogCallbacksInteractor: VolumeDialogCallbacksInteractor by
         VolumeDialogCallbacksInteractor(
             volumeDialogController = volumeDialogController,
             coroutineScope = applicationCoroutineScope,
-            bgHandler = Handler(looper),
+            bgHandler = null,
         )
     }

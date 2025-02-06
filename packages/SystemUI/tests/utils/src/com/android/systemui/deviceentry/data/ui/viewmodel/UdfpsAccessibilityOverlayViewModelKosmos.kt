@@ -22,9 +22,7 @@ import com.android.systemui.deviceentry.ui.viewmodel.DeviceEntryUdfpsAccessibili
 import com.android.systemui.keyguard.ui.viewmodel.deviceEntryForegroundIconViewModel
 import com.android.systemui.keyguard.ui.viewmodel.deviceEntryIconViewModel
 import com.android.systemui.kosmos.Kosmos
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 val Kosmos.deviceEntryUdfpsAccessibilityOverlayViewModel by
     Kosmos.Fixture {
         DeviceEntryUdfpsAccessibilityOverlayViewModel(

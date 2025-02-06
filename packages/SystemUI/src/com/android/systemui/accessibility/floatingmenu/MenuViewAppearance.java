@@ -28,12 +28,14 @@ import android.graphics.Insets;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.view.DisplayCutout;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
 
 import androidx.annotation.DimenRes;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.res.R;
 
 import java.lang.annotation.Retention;
@@ -291,7 +293,7 @@ class MenuViewAppearance {
         final WindowMetrics windowMetrics = mWindowManager.getCurrentWindowMetrics();
         final WindowInsets windowInsets = windowMetrics.getWindowInsets();
         final Insets insets = windowInsets.getInsetsIgnoringVisibility(
-                WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+                WindowInsets.Type.systemBars());
 
         final Rect bounds = new Rect(windowMetrics.getBounds());
         bounds.left += insets.left;
@@ -300,6 +302,37 @@ class MenuViewAppearance {
         bounds.bottom -= insets.bottom;
 
         return bounds;
+    }
+
+    DisplayCutout getDisplayCutout() {
+        return mWindowManager.getCurrentWindowMetrics().getWindowInsets().getDisplayCutout();
+    }
+
+    float avoidVerticalDisplayCutout(float y, Rect bounds, Rect cutout) {
+        int menuHeight = calculateActualMenuHeight();
+        return avoidVerticalDisplayCutout(y, menuHeight, bounds, cutout);
+    }
+
+    @VisibleForTesting
+    public static float avoidVerticalDisplayCutout(
+            float y, float menuHeight, Rect bounds, Rect cutout) {
+        if (cutout.top > y + menuHeight || cutout.bottom < y) {
+            return y;
+        }
+
+        boolean topAvailable = cutout.top - bounds.top >= menuHeight;
+        boolean bottomAvailable = bounds.bottom - cutout.bottom >= menuHeight;
+        boolean topOrBottom;
+        if (!topAvailable && !bottomAvailable) {
+            return y;
+        } else if (topAvailable && !bottomAvailable) {
+            topOrBottom = true;
+        } else if (!topAvailable && bottomAvailable) {
+            topOrBottom = false;
+        } else {
+            topOrBottom = y + menuHeight * 0.5f < cutout.centerY();
+        }
+        return (topOrBottom) ? cutout.top - menuHeight : cutout.bottom;
     }
 
     boolean isMenuOnLeftSide() {

@@ -22,9 +22,9 @@ import android.content.res.Resources
 import android.view.LayoutInflater
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.wm.shell.R
-import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.bubbles.BubbleViewInfoTask.BubbleViewInfo
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView
+import com.android.wm.shell.common.TestShellExecutor
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 
 /** Helper to create a [Bubble] instance */
@@ -45,10 +45,10 @@ class FakeBubbleFactory {
                         .inflate(R.layout.bubble_bar_expanded_view, null, false /* attachToRoot */)
                         as BubbleBarExpandedView)
                     .apply {
+                        this.bubbleLogger = bubbleLogger
                         initialize(
                             expandedViewManager,
                             bubblePositioner,
-                            bubbleLogger,
                             false, /* isOverflow */
                             bubbleTaskView,
                             mainExecutor,

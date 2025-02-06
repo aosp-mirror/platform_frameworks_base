@@ -20,7 +20,7 @@ import android.provider.Settings.Global.DEVELOPMENT_SHADE_DISPLAY_AWARENESS
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.display.data.repository.DisplayRepository
-import com.android.systemui.shade.data.repository.MutableShadeDisplaysRepository
+import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.shade.display.ShadeDisplayPolicy
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
@@ -35,7 +35,7 @@ constructor(
     private val globalSettings: GlobalSettings,
     private val commandRegistry: CommandRegistry,
     private val displaysRepository: DisplayRepository,
-    private val positionRepository: MutableShadeDisplaysRepository,
+    private val positionRepository: ShadeDisplaysRepository,
     private val policies: Set<@JvmSuppressWildcards ShadeDisplayPolicy>,
     private val defaultPolicy: ShadeDisplayPolicy,
 ) : Command, CoreStartable {
@@ -103,7 +103,7 @@ constructor(
         }
 
         private fun printPolicies() {
-            val currentPolicyName = positionRepository.policy.value.name
+            val currentPolicyName = positionRepository.currentPolicy.name
             pw.println("Available policies: ")
             policies.forEach {
                 pw.print(" - ${it.name}")

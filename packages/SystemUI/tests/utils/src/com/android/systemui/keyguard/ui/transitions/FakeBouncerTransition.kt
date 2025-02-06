@@ -20,4 +20,5 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 class FakeBouncerTransition : PrimaryBouncerTransition {
     override val windowBlurRadius: MutableStateFlow<Float> = MutableStateFlow(0.0f)
+    override val notificationBlurRadius: MutableStateFlow<Float> = MutableStateFlow(0.0f)
 }

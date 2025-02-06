@@ -40,7 +40,6 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class KeyguardClockViewBinderTest : SysuiTestCase() {
     @Mock private lateinit var rootView: ConstraintLayout
     @Mock private lateinit var burnInLayer: Layer

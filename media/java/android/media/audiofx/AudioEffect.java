@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -80,7 +81,8 @@ public class AudioEffect {
 
     private final static String TAG = "AudioEffect-JAVA";
 
-    // effect type UUIDs are taken from hardware/libhardware/include/hardware/audio_effect.h
+    // effect type UUIDs are taken
+    //     from hardware/interfaces/audio/aidl/android/hardware/audio/effect/Descriptor.aidl
 
     /**
      * The following UUIDs define effect types corresponding to standard audio
@@ -146,6 +148,16 @@ public class AudioEffect {
      */
     public static final UUID EFFECT_TYPE_DYNAMICS_PROCESSING = UUID
               .fromString("7261676f-6d75-7369-6364-28e2fd3ac39e");
+
+    /**
+     * @hide
+     * UUID for the Spatializer effect
+     */
+    @SuppressLint("UnflaggedApi") // Test API
+    @TestApi
+    @NonNull
+    public static final UUID EFFECT_TYPE_SPATIALIZER =
+            UUID.fromString("ccd4cf09-a79d-46c2-9aae-06a1698d6c8f");
 
     /**
      * UUID for Haptic Generator.

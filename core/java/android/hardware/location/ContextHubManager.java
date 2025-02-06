@@ -697,6 +697,7 @@ public final class ContextHubManager {
      *
      * @param endpointId Statically generated ID for an endpoint.
      * @return A list of {@link HubDiscoveryInfo} objects that represents the result of discovery.
+     * @throws UnsupportedOperationException If the operation is not supported.
      */
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
@@ -733,6 +734,7 @@ public final class ContextHubManager {
      *     cannot be null or empty.
      * @return A list of {@link HubDiscoveryInfo} objects that represents the result of discovery.
      * @throws IllegalArgumentException if the serviceDescriptor is empty/null.
+     * @throws UnsupportedOperationException If the operation is not supported.
      */
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
@@ -769,6 +771,7 @@ public final class ContextHubManager {
      */
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     private IContextHubEndpointDiscoveryCallback createDiscoveryCallback(
+            IContextHubService service,
             Executor executor,
             HubEndpointDiscoveryCallback callback,
             @Nullable String serviceDescriptor) {
@@ -777,6 +780,7 @@ public final class ContextHubManager {
             public void onEndpointsStarted(HubEndpointInfo[] hubEndpointInfoList) {
                 if (hubEndpointInfoList.length == 0) {
                     Log.w(TAG, "onEndpointsStarted: received empty discovery list");
+                    invokeCallbackFinished(service);
                     return;
                 }
                 executor.execute(
@@ -789,6 +793,7 @@ public final class ContextHubManager {
                             } else {
                                 callback.onEndpointsStarted(discoveryList);
                             }
+                            invokeCallbackFinished(service);
                         });
             }
 
@@ -796,6 +801,7 @@ public final class ContextHubManager {
             public void onEndpointsStopped(HubEndpointInfo[] hubEndpointInfoList, int reason) {
                 if (hubEndpointInfoList.length == 0) {
                     Log.w(TAG, "onEndpointsStopped: received empty discovery list");
+                    invokeCallbackFinished(service);
                     return;
                 }
                 executor.execute(
@@ -808,7 +814,16 @@ public final class ContextHubManager {
                             } else {
                                 callback.onEndpointsStopped(discoveryList, reason);
                             }
+                            invokeCallbackFinished(service);
                         });
+            }
+
+            private void invokeCallbackFinished(IContextHubService service) {
+                try {
+                    service.onDiscoveryCallbackFinished();
+                } catch (RemoteException e) {
+                    e.rethrowFromSystemServer();
+                }
             }
         };
     }
@@ -871,7 +886,7 @@ public final class ContextHubManager {
         Objects.requireNonNull(executor, "executor cannot be null");
         Objects.requireNonNull(callback, "callback cannot be null");
         IContextHubEndpointDiscoveryCallback iCallback =
-                createDiscoveryCallback(executor, callback, null);
+                createDiscoveryCallback(mService, executor, callback, null);
         try {
             mService.registerEndpointDiscoveryCallbackId(endpointId, iCallback);
         } catch (RemoteException e) {
@@ -917,7 +932,7 @@ public final class ContextHubManager {
         }
 
         IContextHubEndpointDiscoveryCallback iCallback =
-                createDiscoveryCallback(executor, callback, serviceDescriptor);
+                createDiscoveryCallback(mService, executor, callback, serviceDescriptor);
         try {
             mService.registerEndpointDiscoveryCallbackDescriptor(serviceDescriptor, iCallback);
         } catch (RemoteException e) {

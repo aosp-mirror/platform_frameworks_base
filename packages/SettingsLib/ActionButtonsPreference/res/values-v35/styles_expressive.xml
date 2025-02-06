@@ -17,9 +17,14 @@
 
 <resources>
     <style name="SettingsLibActionButton.Expressive" parent="SettingsLibButtonStyle.Expressive.Tonal">
-        <item name="android:backgroundTint">@color/settingslib_materialColorPrimaryContainer</item>
-        <item name="iconTint">@color/settingslib_materialColorOnPrimaryContainer</item>
-        <item name="iconGravity">textTop</item>
+        <item name="android:backgroundTint">@color/settingslib_expressive_actionbutton_background</item>
+        <item name="android:textColor">@color/settingslib_expressive_actionbutton_content_color</item>
+        <item name="android:insetTop">@dimen/settingslib_expressive_space_none</item>
+        <item name="android:insetBottom">@dimen/settingslib_expressive_space_none</item>
+        <item name="iconTint">@color/settingslib_expressive_actionbutton_content_color</item>
+        <item name="iconSize">@dimen/settingslib_expressive_space_small4</item>
+        <item name="iconPadding">@dimen/settingslib_expressive_space_none</item>"
+        <item name="iconGravity">textStart</item>
     </style>
 
     <style name="SettingsLibActionButton.Expressive.Label" parent="">

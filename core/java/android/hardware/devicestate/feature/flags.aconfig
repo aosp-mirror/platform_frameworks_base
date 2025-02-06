@@ -39,3 +39,15 @@ flag {
     bug: "372486634"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "device_state_configuration_flag"
+    is_exported: true
+    namespace: "windowing_sdk"
+    description: "Re-add flag parsing for device_state_configuration.xml configuration for devices that didn't update vendor images."
+    bug: "388366842"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

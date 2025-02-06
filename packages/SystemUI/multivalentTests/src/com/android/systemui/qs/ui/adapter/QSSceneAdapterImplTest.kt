@@ -39,7 +39,7 @@ import com.android.systemui.qs.dagger.QSComponent
 import com.android.systemui.qs.dagger.QSSceneComponent
 import com.android.systemui.settings.brightness.MirrorController
 import com.android.systemui.shade.data.repository.fakeShadeRepository
-import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
@@ -50,7 +50,6 @@ import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import java.util.Locale
 import javax.inject.Provider
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -64,7 +63,6 @@ import org.mockito.Mockito.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class QSSceneAdapterImplTest : SysuiTestCase() {
 
     private val kosmos = Kosmos().apply { testCase = this@QSSceneAdapterImplTest }
@@ -118,16 +116,14 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             }
         }
 
-    private val shadeInteractor = kosmos.shadeInteractor
-    private val displayStateInteractor = kosmos.displayStateInteractor
     private val dumpManager = mock<DumpManager>()
 
     private val underTest =
         QSSceneAdapterImpl(
             qsSceneComponentFactory,
             qsImplProvider,
-            shadeInteractor,
-            displayStateInteractor,
+            kosmos.shadeModeInteractor,
+            kosmos.displayStateInteractor,
             dumpManager,
             testDispatcher,
             testScope.backgroundScope,

@@ -910,7 +910,7 @@ MtpResponseCode MtpDatabase::getObjectInfo(MtpObjectHandle handle,
         case MTP_FORMAT_TIFF:
         case MTP_FORMAT_TIFF_EP:
         case MTP_FORMAT_DEFINED: {
-            String8 temp(path);
+            String8 temp {static_cast<std::string_view>(path)};
             std::unique_ptr<FileStream> stream(new FileStream(temp));
             piex::PreviewImageData image_data;
             if (!GetExifFromRawImage(stream.get(), temp, image_data)) {
@@ -967,7 +967,7 @@ void* MtpDatabase::getThumbnail(MtpObjectHandle handle, size_t& outThumbSize) {
             case MTP_FORMAT_TIFF:
             case MTP_FORMAT_TIFF_EP:
             case MTP_FORMAT_DEFINED: {
-                String8 temp(path);
+                String8 temp {static_cast<std::string_view>(path)};
                 std::unique_ptr<FileStream> stream(new FileStream(temp));
                 piex::PreviewImageData image_data;
                 if (!GetExifFromRawImage(stream.get(), temp, image_data)) {

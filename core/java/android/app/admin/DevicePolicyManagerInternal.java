@@ -27,6 +27,7 @@ import android.os.UserManager.EnforcingUser;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Device policy manager local system service interface.
@@ -338,4 +339,10 @@ public abstract class DevicePolicyManagerInternal {
      * Enforces resolved audit logging policy, should only be invoked from device policy engine.
      */
     public abstract void enforceAuditLoggingPolicy(boolean enabled);
+
+    /**
+     * Installs internal callback for security log events.
+     */
+    public abstract void setInternalEventsCallback(
+            @Nullable Consumer<List<SecurityLog.SecurityEvent>> callback);
 }

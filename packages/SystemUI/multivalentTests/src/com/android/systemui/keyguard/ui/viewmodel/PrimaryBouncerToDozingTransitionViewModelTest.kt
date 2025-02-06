@@ -34,13 +34,11 @@ import com.android.systemui.keyguard.ui.transitions.blurConfig
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class PrimaryBouncerToDozingTransitionViewModelTest : SysuiTestCase() {
@@ -128,7 +126,7 @@ class PrimaryBouncerToDozingTransitionViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val values by collectValues(underTest.windowBlurRadius)
 
-            kosmos.bouncerWindowBlurTestUtil.assertTransitionToBlurRadius(
+            kosmos.keyguardWindowBlurTestUtil.assertTransitionToBlurRadius(
                 transitionProgress = listOf(0.0f, 0.2f, 0.3f, 0.65f, 0.7f, 1.0f),
                 startValue = kosmos.blurConfig.maxBlurRadiusPx,
                 endValue = kosmos.blurConfig.minBlurRadiusPx,

@@ -36,6 +36,7 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 
 @SysUISingleton
@@ -80,6 +81,7 @@ constructor(
     /**
      * Listen for the signal that we're waking up and figure what state we need to transition to.
      */
+    @OptIn(FlowPreview::class)
     private fun listenForAodToAwake() {
         // Use PowerInteractor's wakefulness, which is the earliest wake signal available. We
         // have all of the information we need at this time to make a decision about where to
@@ -132,6 +134,8 @@ constructor(
                             if (SceneContainerFlag.isEnabled) return@collect
                             startTransitionTo(
                                 toState = KeyguardState.GONE,
+                                modeOnCanceled = TransitionModeOnCanceled.REVERSE,
+                                ownerReason = "canWakeDirectlyToGone = true",
                             )
                         } else if (shouldTransitionToLockscreen) {
                             val modeOnCanceled =
@@ -146,7 +150,7 @@ constructor(
                             startTransitionTo(
                                 toState = KeyguardState.LOCKSCREEN,
                                 modeOnCanceled = modeOnCanceled,
-                                ownerReason = "listen for aod to awake"
+                                ownerReason = "listen for aod to awake",
                             )
                         } else if (shouldTransitionToOccluded) {
                             startTransitionTo(
@@ -189,7 +193,10 @@ constructor(
         if (SceneContainerFlag.isEnabled) return
         scope.launch("$TAG#listenForAodToPrimaryBouncer") {
             keyguardInteractor.primaryBouncerShowing
-                .filterRelevantKeyguardStateAnd { primaryBouncerShowing -> primaryBouncerShowing }
+                .filterRelevantKeyguardStateAnd { primaryBouncerShowing ->
+                    !isWakeAndUnlock(keyguardInteractor.biometricUnlockState.value.mode) &&
+                        primaryBouncerShowing
+                }
                 .collect { startTransitionTo(KeyguardState.PRIMARY_BOUNCER) }
         }
     }

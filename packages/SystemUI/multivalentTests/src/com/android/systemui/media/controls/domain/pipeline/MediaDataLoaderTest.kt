@@ -47,7 +47,6 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.SbnBuilder
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -387,7 +386,6 @@ class MediaDataLoaderTest : SysuiTestCase() {
             assertThat(result).isNotNull()
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun testLoadMediaDataInBg_cancelMultipleScheduledTasks() =
         testScope.runTest {
@@ -416,7 +414,6 @@ class MediaDataLoaderTest : SysuiTestCase() {
             verify(mockImageLoader, times(1)).loadBitmap(any(), anyInt(), anyInt(), anyInt())
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun testLoadMediaDataInBg_fromResumeToActive_doesNotCancelResumeToActiveTask() =
         testScope.runTest {

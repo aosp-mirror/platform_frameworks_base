@@ -164,6 +164,7 @@ class PreAuthInfo {
                 Slog.d(TAG, "Package: " + opPackageName
                         + " Sensor ID: " + sensor.id
                         + " Modality: " + sensor.modality
+                        + " User id: " + effectiveUserId
                         + " Status: " + status);
 
                 // A sensor with privacy enabled will still be eligible to
@@ -284,7 +285,7 @@ class PreAuthInfo {
 
     private static boolean isEnabledForApp(BiometricService.SettingObserver settingObserver,
             @BiometricAuthenticator.Modality int modality, int userId) {
-        return settingObserver.getEnabledForApps(userId);
+        return settingObserver.getEnabledForApps(userId, modality);
     }
 
     private static boolean isBiometricDisabledByDevicePolicy(

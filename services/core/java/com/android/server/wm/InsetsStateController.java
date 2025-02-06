@@ -255,7 +255,7 @@ class InsetsStateController {
         InsetsControlTarget target = imeTarget != null ? imeTarget : mEmptyImeControlTarget;
         onControlTargetChanged(getImeSourceProvider(), target, false /* fake */);
         ProtoLog.d(WM_DEBUG_IME, "onImeControlTargetChanged %s",
-                target != null ? target.getWindow() : "null");
+                target != null && target.getWindow() != null ? target.getWindow() : target);
         notifyPendingInsetsControlChanged();
     }
 

@@ -22,6 +22,7 @@ import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertNull;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -35,14 +36,19 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.metrics.LogMaker;
 import android.os.UserHandle;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
+import android.view.Display;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.window.flags.Flags;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -52,11 +58,16 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 public class StatusBarNotificationTest {
 
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     private final Context mMockContext = mock(Context.class);
     @Mock
     private Context mRealContext;
     @Mock
     private PackageManager mPm;
+    @Mock
+    private Context mSecondaryDisplayContext;
 
     private static final String PKG = "com.example.o";
     private static final int UID = 9583;
@@ -80,6 +91,10 @@ public class StatusBarNotificationTest {
                 InstrumentationRegistry.getContext().getResources());
         when(mMockContext.getPackageManager()).thenReturn(mPm);
         when(mMockContext.getApplicationInfo()).thenReturn(new ApplicationInfo());
+        when(mMockContext.getDisplayId()).thenReturn(Display.DEFAULT_DISPLAY);
+        when(mSecondaryDisplayContext.getPackageManager()).thenReturn(mPm);
+        when(mSecondaryDisplayContext.getApplicationInfo()).thenReturn(new ApplicationInfo());
+        when(mSecondaryDisplayContext.getDisplayId()).thenReturn(2);
         when(mPm.getApplicationLabel(any())).thenReturn("");
 
         mRealContext = InstrumentationRegistry.getContext();
@@ -218,6 +233,24 @@ public class StatusBarNotificationTest {
         assertNotNull(resultContext);
         assertNotSame(mRealContext, resultContext);
         assertEquals(pkg, resultContext.getPackageName());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_PER_DISPLAY_PACKAGE_CONTEXT_CACHE_IN_STATUSBAR_NOTIF)
+    public void testGetPackageContext_multipleDisplaysCase() {
+        String pkg = "com.android.systemui";
+        int uid = 1000;
+        Notification notification = getNotificationBuilder(GROUP_ID_1, CHANNEL_ID).build();
+        StatusBarNotification sbn = new StatusBarNotification(
+                pkg, pkg, ID, TAG, uid, uid, notification, UserHandle.ALL, null, UID);
+        Context defaultContext = sbn.getPackageContext(mRealContext);
+        Context secondaryContext = sbn.getPackageContext(mSecondaryDisplayContext);
+        assertNotSame(mRealContext, defaultContext);
+        assertNotSame(defaultContext, secondaryContext);
+
+        // Let's make sure it caches it:
+        assertSame(defaultContext, sbn.getPackageContext(mRealContext));
+        assertSame(secondaryContext, sbn.getPackageContext(mSecondaryDisplayContext));
     }
 
     @Test

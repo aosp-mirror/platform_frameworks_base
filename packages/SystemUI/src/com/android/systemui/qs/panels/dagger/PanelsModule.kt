@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.panels.dagger
 
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
@@ -23,6 +24,7 @@ import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepositor
 import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepositoryImpl
 import com.android.systemui.qs.panels.domain.interactor.EditTilesResetInteractor
 import com.android.systemui.qs.panels.domain.interactor.SizedTilesResetInteractor
+import com.android.systemui.qs.panels.domain.startable.QSPanelsCoreStartable
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
 import com.android.systemui.qs.panels.shared.model.PaginatedGridLayoutType
@@ -36,6 +38,8 @@ import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModelImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import dagger.multibindings.IntoSet
 import javax.inject.Named
 
@@ -56,6 +60,11 @@ interface PanelsModule {
     fun bindPaginatedBaseGridLayout(impl: InfiniteGridLayout): PaginatableGridLayout
 
     @Binds @Named("Default") fun bindDefaultGridLayout(impl: PaginatedGridLayout): GridLayout
+
+    @Binds
+    @IntoMap
+    @ClassKey(QSPanelsCoreStartable::class)
+    fun bindQSPanelsCoreStartable(impl: QSPanelsCoreStartable): CoreStartable
 
     companion object {
         @Provides

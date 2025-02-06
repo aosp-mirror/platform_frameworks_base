@@ -1137,6 +1137,15 @@ public abstract class WindowManagerInternal {
      * Returns an instance of {@link ScreenshotHardwareBuffer} containing the current
      * screenshot.
      */
-    public abstract ScreenshotHardwareBuffer takeAssistScreenshot(
-            Set<Integer> windowTypesToExclude);
+    public abstract ScreenshotHardwareBuffer takeAssistScreenshot();
+
+    /**
+     * Returns an instance of {@link ScreenshotHardwareBuffer} containing the current
+     * screenshot, excluding layers that are not appropriate to pass to contextual search
+     * services - such as the cursor or any current contextual search window.
+     *
+     * @param uid the UID of the contextual search application. System alert windows belonging
+     * to this UID will be excluded from the screenshot.
+     */
+    public abstract ScreenshotHardwareBuffer takeContextualSearchScreenshot(int uid);
 }

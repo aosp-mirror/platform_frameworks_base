@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.WindowInsets.Type.navigationBars;
 
-import static com.android.systemui.Flags.predictiveBackAnimateBouncer;
 import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN;
 import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
@@ -112,7 +111,6 @@ import dagger.Lazy;
 import kotlin.Unit;
 
 import kotlinx.coroutines.CoroutineDispatcher;
-import kotlinx.coroutines.ExperimentalCoroutinesApi;
 import kotlinx.coroutines.Job;
 
 import java.io.PrintWriter;
@@ -131,7 +129,7 @@ import javax.inject.Inject;
  * which is in turn, reported to this class by the current
  * {@link com.android.keyguard.KeyguardViewController}.
  */
-@ExperimentalCoroutinesApi @SysUISingleton
+@SysUISingleton
 public class StatusBarKeyguardViewManager implements RemoteInputController.Callback,
         StatusBarStateController.StateListener, ConfigurationController.ConfigurationListener,
         ShadeExpansionListener, NavigationModeController.ModeChangedListener,
@@ -328,7 +326,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private float mQsExpansion;
 
     final Set<KeyguardViewManagerCallback> mCallbacks = new HashSet<>();
-    private boolean mIsBackAnimationEnabled;
     private final UdfpsOverlayInteractor mUdfpsOverlayInteractor;
     private final ActivityStarter mActivityStarter;
 
@@ -434,7 +431,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 .map(SysUIUnfoldComponent::getFoldAodAnimationController).orElse(null);
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mBouncerInteractor = bouncerInteractor;
-        mIsBackAnimationEnabled = predictiveBackAnimateBouncer();
         mUdfpsOverlayInteractor = udfpsOverlayInteractor;
         mActivityStarter = activityStarter;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
@@ -630,7 +626,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     private boolean shouldPlayBackAnimation() {
         // Suppress back animation when bouncer shouldn't be dismissed on back invocation.
-        return !needsFullscreenBouncer() && mIsBackAnimationEnabled;
+        return !needsFullscreenBouncer();
     }
 
     @Override

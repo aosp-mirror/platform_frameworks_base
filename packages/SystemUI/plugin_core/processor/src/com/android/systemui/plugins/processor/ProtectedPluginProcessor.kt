@@ -24,6 +24,7 @@ import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
+import javax.lang.model.element.Modifier
 import javax.lang.model.element.PackageElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.TypeKind
@@ -183,11 +184,17 @@ class ProtectedPluginProcessor : AbstractProcessor() {
                     // Method implementations
                     for (method in methods) {
                         val methodName = method.simpleName
+                        if (methods.any { methodName.startsWith("${it.simpleName}\$") }) {
+                            continue
+                        }
                         val returnTypeName = method.returnType.toString()
                         val callArgs = StringBuilder()
                         var isFirst = true
+                        val isStatic = method.modifiers.contains(Modifier.STATIC)
 
-                        line("@Override")
+                        if (!isStatic) {
+                            line("@Override")
+                        }
                         parenBlock("public $returnTypeName $methodName") {
                             // While copying the method signature for the proxy type, we also
                             // accumulate arguments for the nested callsite.
@@ -202,7 +209,8 @@ class ProtectedPluginProcessor : AbstractProcessor() {
                         }
 
                         val isVoid = method.returnType.kind == TypeKind.VOID
-                        val nestedCall = "mInstance.$methodName($callArgs)"
+                        val methodContainer = if (isStatic) sourceName else "mInstance"
+                        val nestedCall = "$methodContainer.$methodName($callArgs)"
                         val callStatement =
                             when {
                                 isVoid -> "$nestedCall;"

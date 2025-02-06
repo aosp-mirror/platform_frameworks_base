@@ -36,10 +36,10 @@ cc_library {
     ldflags: ["-z max-page-size=0x1000"],
 }
 
-android_test_helper_app {
-    name: "app_with_4kb_elf",
+java_defaults {
+    name: "app_with_4kb_elf_defaults",
     srcs: ["app_with_4kb_elf/src/**/*.java"],
-    manifest: "app_with_4kb_elf/app_with_4kb_elf.xml",
+    resource_dirs: ["app_with_4kb_elf/res"],
     compile_multilib: "64",
     jni_libs: [
         "libpunchtest_4kb",
@@ -47,7 +47,36 @@ android_test_helper_app {
     static_libs: [
         "androidx.test.rules",
         "platform-test-annotations",
+        "androidx.test.uiautomator_uiautomator",
+        "sysui-helper",
     ],
+}
+
+android_test_helper_app {
+    name: "app_with_4kb_elf",
+    defaults: ["app_with_4kb_elf_defaults"],
+    manifest: "app_with_4kb_elf/app_with_4kb_elf.xml",
+    use_embedded_native_libs: true,
+}
+
+android_test_helper_app {
+    name: "app_with_4kb_compressed_elf",
+    defaults: ["app_with_4kb_elf_defaults"],
+    manifest: "app_with_4kb_elf/app_with_4kb_elf.xml",
+    use_embedded_native_libs: false,
+}
+
+android_test_helper_app {
+    name: "page_size_compat_disabled_app",
+    defaults: ["app_with_4kb_elf_defaults"],
+    manifest: "app_with_4kb_elf/page_size_compat_disabled.xml",
+    use_embedded_native_libs: true,
+}
+
+android_test_helper_app {
+    name: "app_with_4kb_elf_no_override",
+    defaults: ["app_with_4kb_elf_defaults"],
+    manifest: "app_with_4kb_elf/app_with_4kb_no_override.xml",
     use_embedded_native_libs: true,
 }
 
@@ -99,6 +128,9 @@ java_test_host {
         ":embedded_native_libs_test_app",
         ":extract_native_libs_test_app",
         ":app_with_4kb_elf",
+        ":page_size_compat_disabled_app",
+        ":app_with_4kb_compressed_elf",
+        ":app_with_4kb_elf_no_override",
     ],
     test_suites: ["general-tests"],
     test_config: "AndroidTest.xml",

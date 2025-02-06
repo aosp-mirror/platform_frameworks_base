@@ -64,14 +64,12 @@ import dagger.Lazy;
 
 import kotlin.Unit;
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi;
-
 import javax.inject.Inject;
 
 /**
  * Implementation of DozeHost for SystemUI.
  */
-@ExperimentalCoroutinesApi @SysUISingleton
+@SysUISingleton
 public final class DozeServiceHost implements DozeHost {
     private static final String TAG = "DozeServiceHost";
     private final IListenerSet<Callback> mCallbacks = new CopyOnLoopListenerSet<>();
@@ -232,7 +230,11 @@ public final class DozeServiceHost implements DozeHost {
             mDozingRequested = true;
             updateDozing();
             mDozeLog.traceDozing(mStatusBarStateController.isDozing());
-            mCentralSurfaces.updateIsKeyguard();
+            // This is initialized in a CoreStartable, but binder calls from DreamManagerService can
+            // arrive earlier
+            if (mCentralSurfaces != null) {
+                mCentralSurfaces.updateIsKeyguard();
+            }
         }
     }
 

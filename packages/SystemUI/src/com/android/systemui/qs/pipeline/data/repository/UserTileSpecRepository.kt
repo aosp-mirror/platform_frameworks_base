@@ -3,6 +3,7 @@ package com.android.systemui.qs.pipeline.data.repository
 import android.annotation.UserIdInt
 import android.database.ContentObserver
 import android.provider.Settings
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -15,6 +16,8 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,7 +26,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -46,6 +48,9 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) {
+
+    private val _tilesReadFromSettings = Channel<Set<TileSpec>>(capacity = 2)
+    val tilesReadFromSettings: ReceiveChannel<Set<TileSpec>> = _tilesReadFromSettings
 
     private val defaultTiles: List<TileSpec>
         get() = defaultTilesRepository.defaultTiles
@@ -147,7 +152,11 @@ constructor(
     }
 
     private suspend fun loadTilesFromSettingsAndParse(userId: Int): List<TileSpec> {
-        return parseTileSpecs(loadTilesFromSettings(userId), userId)
+        val loadedTiles = loadTilesFromSettings(userId)
+        if (loadedTiles.isNotEmpty()) {
+            _tilesReadFromSettings.send(loadedTiles.toSet())
+        }
+        return parseTileSpecs(loadedTiles, userId)
     }
 
     private suspend fun loadTilesFromSettings(userId: Int): List<TileSpec> {

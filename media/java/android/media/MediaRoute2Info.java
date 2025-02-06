@@ -961,8 +961,7 @@ public final class MediaRoute2Info implements Parcelable {
      *
      * @hide
      */
-    @FlaggedApi(FLAG_ENABLE_MEDIA_ROUTE_2_INFO_PROVIDER_PACKAGE_NAME)
-    public boolean isVisibleTo(String packageName) {
+    public boolean isVisibleTo(@NonNull String packageName) {
         return !mIsVisibilityRestricted
                 || TextUtils.equals(getProviderPackageName(), packageName)
                 || mAllowedPackages.contains(packageName);

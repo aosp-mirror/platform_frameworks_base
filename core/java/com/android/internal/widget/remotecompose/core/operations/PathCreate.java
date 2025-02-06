@@ -131,6 +131,14 @@ public class PathCreate extends PaintOperation implements VariableSupport {
         return OP_CODE;
     }
 
+    /**
+     * add a create path operation
+     *
+     * @param buffer buffer to add to
+     * @param id the id of the path
+     * @param startX the start x of the path (moveTo x,y)
+     * @param startY the start y of the path (moveTo x,y)
+     */
     public static void apply(@NonNull WireBuffer buffer, int id, float startX, float startY) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
@@ -165,6 +173,12 @@ public class PathCreate extends PaintOperation implements VariableSupport {
                 .field(FLOAT, "startX", "initial start y");
     }
 
+    /**
+     * convert a path to a string
+     *
+     * @param path path to convert (expressed as an array of floats)
+     * @return the text representing the path
+     */
     @NonNull
     public static String pathString(@Nullable float[] path) {
         if (path == null) {

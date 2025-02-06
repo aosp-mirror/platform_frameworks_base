@@ -366,8 +366,8 @@ public class AidlConversion {
                             return AudioFormat.CHANNEL_OUT_9POINT1POINT4;
                         case AudioChannelLayout.LAYOUT_9POINT1POINT6:
                             return AudioFormat.CHANNEL_OUT_9POINT1POINT6;
-                        case AudioChannelLayout.LAYOUT_13POINT_360RA:
-                            return AudioFormat.CHANNEL_OUT_13POINT_360RA;
+                        case AudioChannelLayout.LAYOUT_13POINT0:
+                            return AudioFormat.CHANNEL_OUT_13POINT0;
                         case AudioChannelLayout.LAYOUT_22POINT2:
                             return AudioFormat.CHANNEL_OUT_22POINT2;
                         case AudioChannelLayout.LAYOUT_MONO_HAPTIC_A:

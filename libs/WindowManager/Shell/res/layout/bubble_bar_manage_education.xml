@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/bubble_popup_text_margin"
         android:maxWidth="@dimen/bubble_popup_content_max_width"
-        android:maxLines="1"
+        android:maxLines="2"
         android:ellipsize="end"
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Headline"
         android:textColor="@androidprv:color/materialColorOnSurface"

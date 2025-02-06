@@ -20,13 +20,18 @@ import android.annotation.SuppressLint
 import android.app.DreamManager
 import android.content.Intent
 import android.provider.Settings
+import androidx.compose.runtime.getValue
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.communal.domain.interactor.CommunalPrefsInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.policy.BatteryController
+import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
+import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.isDevicePluggedIn
 import com.android.systemui.util.kotlin.sample
 import dagger.assisted.AssistedFactory
@@ -37,7 +42,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -47,18 +51,40 @@ class CommunalToDreamButtonViewModel
 constructor(
     @Background private val backgroundContext: CoroutineContext,
     batteryController: BatteryController,
+    private val prefsInteractor: CommunalPrefsInteractor,
     private val settingsInteractor: CommunalSettingsInteractor,
     private val activityStarter: ActivityStarter,
     private val dreamManager: DreamManager,
     private val uiEventLogger: UiEventLogger,
 ) : ExclusiveActivatable() {
 
+    private val hydrator = Hydrator("CommunalToDreamButtonViewModel.hydrator")
     private val _requests = Channel<Unit>(Channel.BUFFERED)
 
     /** Whether we should show a button on hub to switch to dream. */
-    @SuppressLint("MissingPermission")
-    val shouldShowDreamButtonOnHub =
-        batteryController.isDevicePluggedIn().distinctUntilChanged().flowOn(backgroundContext)
+    val shouldShowDreamButtonOnHub: Boolean by
+        hydrator.hydratedStateOf(
+            traceName = "shouldShowDreamButtonOnHub",
+            initialValue = false,
+            source = batteryController.isDevicePluggedIn().distinctUntilChanged(),
+        )
+
+    /** Return whether to show the dream button tooltip. */
+    val shouldShowTooltip: Boolean by
+        hydrator.hydratedStateOf(
+            traceName = "shouldShowTooltip",
+            initialValue = false,
+            source =
+                allOf(
+                    not(prefsInteractor.isDreamButtonTooltipDismissed),
+                    prefsInteractor.isHubOnboardingDismissed,
+                ),
+        )
+
+    /** Set the dream button tooltip to be dismissed. */
+    fun setDreamButtonTooltipDismissed() {
+        prefsInteractor.setDreamButtonTooltipDismissed()
+    }
 
     /** Handle a tap on the "show dream" button. */
     fun onShowDreamButtonTap() {
@@ -85,6 +111,8 @@ constructor(
                     }
                 }
         }
+
+        launch { hydrator.activate() }
 
         awaitCancellation()
     }

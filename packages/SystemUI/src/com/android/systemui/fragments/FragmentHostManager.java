@@ -30,6 +30,7 @@ import android.os.Looper;
 import android.os.Parcelable;
 import android.os.Trace;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -51,6 +52,8 @@ import java.util.HashMap;
 import javax.inject.Provider;
 
 public class FragmentHostManager {
+
+    private static final String TAG = "FragmentHostManager";
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Context mContext;
@@ -84,7 +87,7 @@ public class FragmentHostManager {
         FragmentHostManager create(View rootView);
     }
 
-    private void createFragmentHost(Parcelable savedState) {
+    private void createFragmentHost(@Nullable Parcelable savedState) {
         mFragments = FragmentController.createController(new HostCallbacks());
         mFragments.attachHost(null);
         mLifecycleCallbacks = new FragmentLifecycleCallbacks() {
@@ -115,12 +118,21 @@ public class FragmentHostManager {
         mFragments.dispatchResume();
     }
 
+    @Nullable
     private Parcelable destroyFragmentHost() {
-        mFragments.dispatchPause();
-        Parcelable p = mFragments.saveAllState();
-        mFragments.dispatchStop();
-        mFragments.dispatchDestroy();
-        mFragments.getFragmentManager().unregisterFragmentLifecycleCallbacks(mLifecycleCallbacks);
+        Parcelable p = null;
+        try {
+            mFragments.dispatchPause();
+            p = mFragments.saveAllState();
+            mFragments.dispatchStop();
+            mFragments.dispatchDestroy();
+            mFragments
+                    .getFragmentManager()
+                    .unregisterFragmentLifecycleCallbacks(mLifecycleCallbacks);
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "Failed to destroy fragment host. This is expected to happen only in "
+                    + "tests when displays are added and removed quickly");
+        }
         return p;
     }
 

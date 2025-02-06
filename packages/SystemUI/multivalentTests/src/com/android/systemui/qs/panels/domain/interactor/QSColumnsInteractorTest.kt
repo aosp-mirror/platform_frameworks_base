@@ -17,8 +17,6 @@
 package com.android.systemui.qs.panels.domain.interactor
 
 import android.content.res.mainResources
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -29,8 +27,9 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.panels.data.repository.QSColumnsRepository
 import com.android.systemui.qs.panels.data.repository.qsColumnsRepository
 import com.android.systemui.res.R
-import com.android.systemui.shade.data.repository.fakeShadeRepository
-import com.android.systemui.shade.shared.flag.DualShade
+import com.android.systemui.shade.domain.interactor.enableDualShade
+import com.android.systemui.shade.domain.interactor.enableSingleShade
+import com.android.systemui.shade.domain.interactor.enableSplitShade
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -65,35 +64,36 @@ class QSColumnsInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(DualShade.FLAG_NAME)
     fun withSingleShade_returnsCorrectValue() =
         with(kosmos) {
             testScope.runTest {
                 val latest by collectLastValue(underTest.columns)
+
+                kosmos.enableSingleShade()
 
                 assertThat(latest).isEqualTo(1)
             }
         }
 
     @Test
-    @EnableFlags(DualShade.FLAG_NAME)
     fun withDualShade_returnsCorrectValue() =
         with(kosmos) {
             testScope.runTest {
                 val latest by collectLastValue(underTest.columns)
+
+                kosmos.enableDualShade()
 
                 assertThat(latest).isEqualTo(2)
             }
         }
 
     @Test
-    @DisableFlags(DualShade.FLAG_NAME)
     fun withSplitShade_returnsCorrectValue() =
         with(kosmos) {
             testScope.runTest {
                 val latest by collectLastValue(underTest.columns)
 
-                fakeShadeRepository.setShadeLayoutWide(true)
+                kosmos.enableSplitShade()
 
                 assertThat(latest).isEqualTo(3)
             }

@@ -31,6 +31,7 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.shared.R as sharedR
 import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.flow.combine
 
 object KeyguardSmartspaceViewBinder {
     @JvmStatic
@@ -43,21 +44,25 @@ object KeyguardSmartspaceViewBinder {
         return keyguardRootView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch("$TAG#clockViewModel.hasCustomWeatherDataDisplay") {
-                    clockViewModel.hasCustomWeatherDataDisplay.collect { hasCustomWeatherDataDisplay
-                        ->
-                        updateDateWeatherToBurnInLayer(
-                            keyguardRootView,
-                            clockViewModel,
-                            smartspaceViewModel,
+                    combine(
+                            smartspaceViewModel.isWeatherVisible,
+                            clockViewModel.hasCustomWeatherDataDisplay,
+                            ::Pair,
                         )
-                        blueprintInteractor.refreshBlueprint(
-                            Config(
-                                Type.SmartspaceVisibility,
-                                checkPriority = false,
-                                terminatePrevious = false,
+                        .collect {
+                            updateDateWeatherToBurnInLayer(
+                                keyguardRootView,
+                                clockViewModel,
+                                smartspaceViewModel,
                             )
-                        )
-                    }
+                            blueprintInteractor.refreshBlueprint(
+                                Config(
+                                    Type.SmartspaceVisibility,
+                                    checkPriority = false,
+                                    terminatePrevious = false,
+                                )
+                            )
+                        }
                 }
 
                 launch("$TAG#smartspaceViewModel.bcSmartspaceVisibility") {

@@ -108,9 +108,7 @@ final class ContentRecorder implements WindowContainerListener {
 
     ContentRecorder(@NonNull DisplayContent displayContent) {
         this(displayContent, new RemoteMediaProjectionManagerWrapper(displayContent.mDisplayId),
-                new DisplayManagerFlags().isConnectedDisplayManagementEnabled()
-                        && !new DisplayManagerFlags()
-                                    .isPixelAnisotropyCorrectionInLogicalDisplayEnabled()
+                !new DisplayManagerFlags().isPixelAnisotropyCorrectionInLogicalDisplayEnabled()
                         && displayContent.getDisplayInfo().type == Display.TYPE_EXTERNAL);
     }
 

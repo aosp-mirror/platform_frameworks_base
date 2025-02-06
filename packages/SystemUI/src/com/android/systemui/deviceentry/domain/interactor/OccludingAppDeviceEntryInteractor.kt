@@ -40,7 +40,6 @@ import com.android.systemui.util.kotlin.combine
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -52,7 +51,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 /** Business logic for handling authentication events when an app is occluding the lockscreen. */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class OccludingAppDeviceEntryInteractor
 @Inject

@@ -76,22 +76,30 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
     private IQuickAccessWalletService mService;
 
     @Nullable
-    private final QuickAccessWalletServiceInfo mServiceInfo;
+    private QuickAccessWalletServiceInfo mServiceInfo;
 
     private static final int MSG_TIMEOUT_SERVICE = 5;
 
     QuickAccessWalletClientImpl(@NonNull Context context, @Nullable Executor bgExecutor) {
         mContext = context.getApplicationContext();
-        mServiceInfo = QuickAccessWalletServiceInfo.tryCreate(context);
+        mServiceInfo = null;
         mHandler = new Handler(Looper.getMainLooper());
         mLifecycleExecutor = (bgExecutor == null) ? Runnable::run : bgExecutor;
         mRequestQueue = new ArrayDeque<>();
         mEventListeners = new HashMap<>(1);
     }
 
+    private QuickAccessWalletServiceInfo ensureServiceInfo() {
+        if (mServiceInfo == null) {
+            mServiceInfo = QuickAccessWalletServiceInfo.tryCreate(mContext);
+        }
+
+        return mServiceInfo;
+    }
+
     @Override
     public boolean isWalletServiceAvailable() {
-        return mServiceInfo != null;
+        return ensureServiceInfo() != null;
     }
 
     @Override
@@ -239,12 +247,14 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
     @Override
     @Nullable
     public Intent createWalletIntent() {
-        if (mServiceInfo == null) {
+        QuickAccessWalletServiceInfo serviceInfo = ensureServiceInfo();
+        if (serviceInfo == null) {
             return null;
         }
-        String packageName = mServiceInfo.getComponentName().getPackageName();
-        String walletActivity = mServiceInfo.getWalletActivity();
-        return createIntent(walletActivity, packageName, ACTION_VIEW_WALLET);
+        String packageName = serviceInfo.getComponentName().getPackageName();
+        int userId = serviceInfo.getUserId();
+        String walletActivity = serviceInfo.getWalletActivity();
+        return createIntent(walletActivity, packageName, userId, ACTION_VIEW_WALLET);
     }
 
     @Override
@@ -297,17 +307,21 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
     @Override
     @Nullable
     public Intent createWalletSettingsIntent() {
-        if (mServiceInfo == null) {
+        QuickAccessWalletServiceInfo serviceInfo = ensureServiceInfo();
+        if (serviceInfo == null) {
             return null;
         }
-        String packageName = mServiceInfo.getComponentName().getPackageName();
-        String settingsActivity = mServiceInfo.getSettingsActivity();
-        return createIntent(settingsActivity, packageName, ACTION_VIEW_WALLET_SETTINGS);
+        String packageName = serviceInfo.getComponentName().getPackageName();
+        String settingsActivity = serviceInfo.getSettingsActivity();
+        return createIntent(settingsActivity, packageName, UserHandle.myUserId(),
+                ACTION_VIEW_WALLET_SETTINGS);
     }
 
     @Nullable
-    private Intent createIntent(@Nullable String activityName, String packageName, String action) {
-        PackageManager pm = mContext.getPackageManager();
+    private Intent createIntent(@Nullable String activityName, String packageName,
+            int userId, String action) {
+        Context userContext = mContext.createContextAsUser(UserHandle.of(userId), 0);
+        PackageManager pm = userContext.getPackageManager();
         if (TextUtils.isEmpty(activityName)) {
             activityName = queryActivityForAction(pm, packageName, action);
         }
@@ -352,30 +366,42 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
     @Override
     @Nullable
     public Drawable getLogo() {
-        return mServiceInfo == null ? null : mServiceInfo.getWalletLogo(mContext);
+        QuickAccessWalletServiceInfo serviceInfo = ensureServiceInfo();
+        return serviceInfo == null ? null : serviceInfo.getWalletLogo(mContext);
     }
 
     @Nullable
     @Override
     public Drawable getTileIcon() {
-        return mServiceInfo == null ? null : mServiceInfo.getTileIcon();
+        QuickAccessWalletServiceInfo serviceInfo = ensureServiceInfo();
+        return serviceInfo == null ? null : serviceInfo.getTileIcon();
+    }
+
+    @Nullable
+    @Override
+    public UserHandle getUser() {
+        QuickAccessWalletServiceInfo serviceInfo = ensureServiceInfo();
+        return serviceInfo == null ? null : UserHandle.of(serviceInfo.getUserId());
     }
 
     @Override
     @Nullable
     public CharSequence getServiceLabel() {
-        return mServiceInfo == null ? null : mServiceInfo.getServiceLabel(mContext);
+        QuickAccessWalletServiceInfo serviceInfo = ensureServiceInfo();
+        return serviceInfo == null ? null : serviceInfo.getServiceLabel(mContext);
     }
 
     @Override
     @Nullable
     public CharSequence getShortcutShortLabel() {
-        return mServiceInfo == null ? null : mServiceInfo.getShortcutShortLabel(mContext);
+        QuickAccessWalletServiceInfo serviceInfo = ensureServiceInfo();
+        return serviceInfo == null ? null : serviceInfo.getShortcutShortLabel(mContext);
     }
 
     @Override
     public CharSequence getShortcutLongLabel() {
-        return mServiceInfo == null ? null : mServiceInfo.getShortcutLongLabel(mContext);
+        QuickAccessWalletServiceInfo serviceInfo = ensureServiceInfo();
+        return serviceInfo == null ? null : serviceInfo.getShortcutLongLabel(mContext);
     }
 
     private void connect() {
@@ -383,7 +409,8 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
     }
 
     private void connectInternal() {
-        if (mServiceInfo == null) {
+        QuickAccessWalletServiceInfo serviceInfo = ensureServiceInfo();
+        if (serviceInfo == null) {
             Log.w(TAG, "Wallet service unavailable");
             return;
         }
@@ -392,7 +419,7 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
         }
         mIsConnected = true;
         Intent intent = new Intent(SERVICE_INTERFACE);
-        intent.setComponent(mServiceInfo.getComponentName());
+        intent.setComponent(serviceInfo.getComponentName());
         int flags = Context.BIND_AUTO_CREATE | Context.BIND_WAIVE_PRIORITY;
         mLifecycleExecutor.execute(() -> mContext.bindService(intent, this, flags));
         resetServiceConnectionTimeout();

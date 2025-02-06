@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard
 
 import android.app.IActivityTaskManager
+import android.os.RemoteException
 import android.util.Log
 import android.view.IRemoteAnimationFinishedCallback
 import android.view.RemoteAnimationTarget
@@ -156,6 +157,13 @@ constructor(
         setWmLockscreenState(lockscreenShowing = lockscreenShown)
     }
 
+    /**
+     * Called when the keyguard going away remote animation is started, and we have a
+     * RemoteAnimationTarget to animate.
+     *
+     * This is triggered either by this class calling ATMS#keyguardGoingAway, or by WM directly,
+     * such as when an activity with FLAG_DISMISS_KEYGUARD is launched over a dismissible keyguard.
+     */
     fun onKeyguardGoingAwayRemoteAnimationStart(
         @WindowManager.TransitionOldType transit: Int,
         apps: Array<RemoteAnimationTarget>,
@@ -163,19 +171,31 @@ constructor(
         nonApps: Array<RemoteAnimationTarget>,
         finishedCallback: IRemoteAnimationFinishedCallback,
     ) {
-        // Make sure this is true - we set it true when requesting keyguardGoingAway, but there are
-        // cases where WM starts this transition on its own.
-        isKeyguardGoingAway = true
+        // If we weren't expecting the keyguard to be going away, WM triggered this transition.
+        if (!isKeyguardGoingAway) {
+            // Since WM triggered this, we're likely not transitioning to GONE yet. See if we can
+            // start that transition.
+            keyguardDismissTransitionInteractor.startDismissKeyguardTransition(
+                reason = "Going away remote animation started",
+                onAlreadyGone = {
+                    // Called if we're already GONE by the time the dismiss transition would have
+                    // started. This can happen due to timing issues, where the remote animation
+                    // took a long time to start, and something else caused us to unlock in the
+                    // meantime. Since we're already GONE, simply end the remote animation
+                    // immediately.
+                    Log.d(
+                        TAG,
+                        "onKeyguardGoingAwayRemoteAnimationStart: " +
+                            "Dismiss transition was not started; we're already GONE. " +
+                            "Ending remote animation.",
+                    )
+                    finishedCallback.onAnimationFinished()
+                    isKeyguardGoingAway = false
+                },
+            )
 
-        // Ensure that we've started a dismiss keyguard transition. WindowManager can start the
-        // going away animation on its own, if an activity launches and then requests dismissing the
-        // keyguard. In this case, this is the first and only signal we'll receive to start
-        // a transition to GONE. This transition needs to start even if we're not provided an app
-        // animation target - it's possible the app is destroyed on creation, etc. but we'll still
-        // be unlocking.
-        keyguardDismissTransitionInteractor.startDismissKeyguardTransition(
-            reason = "Going away remote animation started"
-        )
+            isKeyguardGoingAway = true
+        }
 
         if (apps.isNotEmpty()) {
             goingAwayRemoteAnimationFinishedCallback = finishedCallback
@@ -246,7 +266,11 @@ constructor(
         if (enableNewKeyguardShellTransitions) {
             startKeyguardTransition(lockscreenShowing, aodVisible)
         } else {
-            activityTaskManagerService.setLockScreenShown(lockscreenShowing, aodVisible)
+            try {
+                activityTaskManagerService.setLockScreenShown(lockscreenShowing, aodVisible)
+            } catch (e: RemoteException) {
+                Log.e(TAG, "Remote exception", e)
+            }
         }
         this.isLockscreenShowing = lockscreenShowing
         this.isAodVisible = aodVisible
@@ -278,6 +302,6 @@ constructor(
     }
 
     companion object {
-        private val TAG = WindowManagerLockscreenVisibilityManager::class.java.simpleName
+        private val TAG = "WindowManagerLsVis"
     }
 }

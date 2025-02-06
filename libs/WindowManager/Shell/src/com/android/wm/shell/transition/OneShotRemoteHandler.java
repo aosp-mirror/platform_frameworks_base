@@ -96,7 +96,9 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
 
     @Override
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+            @NonNull SurfaceControl.Transaction startT,
+            @NonNull SurfaceControl.Transaction finishT,
+            @NonNull IBinder mergeTarget,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Merging registered One-shot remote"
                 + " transition %s for (#%d).", mRemote, info.getDebugId());
@@ -111,7 +113,7 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
                 // process won't be cleared if the remote applied it. We don't actually know if the
                 // remote applied the transaction, but applying twice will break surfaceflinger
                 // so just assume the worst-case and clear the local transaction.
-                t.clear();
+                startT.clear();
                 mMainExecutor.execute(() -> {
                     finishCallback.onTransitionFinished(wct);
                 });
@@ -121,8 +123,8 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
             // If the remote is actually in the same process, then make a copy of parameters since
             // remote impls assume that they have to clean-up native references.
             final SurfaceControl.Transaction remoteT =
-                    RemoteTransitionHandler.copyIfLocal(t, mRemote.getRemoteTransition());
-            final TransitionInfo remoteInfo = remoteT == t ? info : info.localRemoteCopy();
+                    RemoteTransitionHandler.copyIfLocal(startT, mRemote.getRemoteTransition());
+            final TransitionInfo remoteInfo = remoteT == startT ? info : info.localRemoteCopy();
             mRemote.getRemoteTransition().mergeAnimation(
                     transition, remoteInfo, remoteT, mergeTarget, cb);
         } catch (RemoteException e) {

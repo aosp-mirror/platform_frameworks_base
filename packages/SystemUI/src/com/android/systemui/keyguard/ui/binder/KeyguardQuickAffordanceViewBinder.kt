@@ -39,6 +39,7 @@ import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.binder.IconViewBinder
+import com.android.systemui.common.ui.view.updateLongClickListener
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordanceHapticViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordanceViewModel
@@ -275,6 +276,7 @@ constructor(
                     )
             } else {
                 view.setOnClickListener(OnClickListener(viewModel, checkNotNull(falsingManager)))
+                view.updateLongClickListener(null)
             }
         } else {
             view.onLongClickListener = null

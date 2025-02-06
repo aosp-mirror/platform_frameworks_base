@@ -103,6 +103,7 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -537,11 +538,16 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
 
         if (Flags.populationDensityProvider()) {
+            long startTime = System.currentTimeMillis();
             setProxyPopulationDensityProvider(
                     ProxyPopulationDensityProvider.createAndRegister(mContext));
+            int duration = (int) (System.currentTimeMillis() - startTime);
             if (mPopulationDensityProvider == null) {
                 Log.e(TAG, "no population density provider found");
             }
+            FrameworkStatsLog.write(FrameworkStatsLog.POPULATION_DENSITY_PROVIDER_LOADING_REPORTED,
+                /* provider_null= */ (mPopulationDensityProvider == null),
+                /* provider_start_time_millis= */ duration);
         }
         if (mPopulationDensityProvider != null && Flags.densityBasedCoarseLocations()) {
             setLocationFudgerCache(new LocationFudgerCache(mPopulationDensityProvider));

@@ -104,7 +104,7 @@ static jlong shapeTextRun(const uint16_t* text, int textSize, int start, int cou
             } else {
                 fontId = fonts.size();  // This is new to us. Create new one.
                 std::shared_ptr<minikin::Font> font;
-                if (resolvedFace->fIsVariationInstance) {
+                if (resolvedFace->isVariationInstance()) {
                     // The optimization for target SDK 35 or before because the variation instance
                     // is already created and no runtime variation resolution happens on such
                     // environment.

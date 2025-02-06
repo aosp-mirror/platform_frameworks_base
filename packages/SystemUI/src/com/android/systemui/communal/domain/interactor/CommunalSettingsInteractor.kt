@@ -21,6 +21,7 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.communal.data.model.CommunalEnabledState
 import com.android.systemui.communal.data.repository.CommunalSettingsRepository
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
+import com.android.systemui.communal.shared.model.WhenToDream
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.dagger.CommunalTableLog
@@ -32,7 +33,6 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -43,7 +43,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class CommunalSettingsInteractor
 @Inject
@@ -73,6 +72,12 @@ constructor(
     val isScreensaverEnabled: Flow<Boolean> =
         userInteractor.selectedUserInfo.flatMapLatest { user ->
             repository.getScreensaverEnabledState(user)
+        }
+
+    /** When to dream for the currently selected user. */
+    val whenToDream: Flow<WhenToDream> =
+        userInteractor.selectedUserInfo.flatMapLatest { user ->
+            repository.getWhenToDreamState(user)
         }
 
     /**

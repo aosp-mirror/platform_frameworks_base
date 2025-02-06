@@ -17,6 +17,7 @@
 package com.android.settingslib.metadata
 
 import android.content.Context
+import android.os.Bundle
 
 /** A node in preference hierarchy that is associated with [PreferenceMetadata]. */
 open class PreferenceHierarchyNode internal constructor(val metadata: PreferenceMetadata) {
@@ -54,8 +55,14 @@ internal constructor(private val context: Context, metadata: PreferenceMetadata)
      *
      * @throws NullPointerException if screen is not registered to [PreferenceScreenRegistry]
      */
-    operator fun String.unaryPlus() =
-        +PreferenceHierarchyNode(PreferenceScreenRegistry.create(context, this)!!)
+    operator fun String.unaryPlus() = addPreferenceScreen(this, null)
+
+    /**
+     * Adds parameterized preference screen with given key (as a placeholder) to the hierarchy.
+     *
+     * @see String.unaryPlus
+     */
+    infix fun String.args(args: Bundle) = createPreferenceScreenHierarchy(this, args)
 
     operator fun PreferenceHierarchyNode.unaryPlus() = also { children.add(it) }
 
@@ -122,6 +129,14 @@ internal constructor(private val context: Context, metadata: PreferenceMetadata)
         }
 
     /**
+     * Adds parameterized preference screen with given key (as a placeholder) to the hierarchy.
+     *
+     * @see addPreferenceScreen
+     */
+    fun addParameterizedScreen(screenKey: String, args: Bundle) =
+        addPreferenceScreen(screenKey, args)
+
+    /**
      * Adds preference screen with given key (as a placeholder) to the hierarchy.
      *
      * This is mainly to support Android Settings overlays. OEMs might want to custom some of the
@@ -132,11 +147,13 @@ internal constructor(private val context: Context, metadata: PreferenceMetadata)
      *
      * @throws NullPointerException if screen is not registered to [PreferenceScreenRegistry]
      */
-    fun addPreferenceScreen(screenKey: String) {
-        children.add(
-            PreferenceHierarchy(context, PreferenceScreenRegistry.create(context, screenKey)!!)
-        )
-    }
+    fun addPreferenceScreen(screenKey: String) = addPreferenceScreen(screenKey, null)
+
+    private fun addPreferenceScreen(screenKey: String, args: Bundle?): PreferenceHierarchyNode =
+        createPreferenceScreenHierarchy(screenKey, args).also { children.add(it) }
+
+    private fun createPreferenceScreenHierarchy(screenKey: String, args: Bundle?) =
+        PreferenceHierarchyNode(PreferenceScreenRegistry.create(context, screenKey, args)!!)
 
     /** Extensions to add more preferences to the hierarchy. */
     operator fun PreferenceHierarchy.plusAssign(init: PreferenceHierarchy.() -> Unit) = init(this)

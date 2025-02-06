@@ -155,6 +155,9 @@ public class ThermalManagerService extends SystemService {
     @VisibleForTesting
     final TemperatureWatcher mTemperatureWatcher;
 
+    @VisibleForTesting
+    final AtomicBoolean mIsHalSkinForecastSupported = new AtomicBoolean(false);
+
     private final ThermalHalWrapper.WrapperThermalChangedCallback mWrapperCallback =
             new ThermalHalWrapper.WrapperThermalChangedCallback() {
                 @Override
@@ -254,6 +257,18 @@ public class ThermalManagerService extends SystemService {
             }
             onTemperatureMapChangedLocked();
             mTemperatureWatcher.getAndUpdateThresholds();
+            // we only check forecast if a single SKIN sensor threshold is reported
+            synchronized (mTemperatureWatcher.mSamples) {
+                if (mTemperatureWatcher.mSevereThresholds.size() == 1) {
+                    try {
+                        mIsHalSkinForecastSupported.set(
+                                Flags.allowThermalHalSkinForecast()
+                                        && !Float.isNaN(mHalWrapper.forecastSkinTemperature(10)));
+                    } catch (UnsupportedOperationException e) {
+                        Slog.i(TAG, "Thermal HAL does not support forecastSkinTemperature");
+                    }
+                }
+            }
             mHalReady.set(true);
         }
     }
@@ -1092,6 +1107,8 @@ public class ThermalManagerService extends SystemService {
         protected abstract List<TemperatureThreshold> getTemperatureThresholds(boolean shouldFilter,
                 int type);
 
+        protected abstract float forecastSkinTemperature(int forecastSeconds);
+
         protected abstract boolean connectToHal();
 
         protected abstract void dump(PrintWriter pw, String prefix);
@@ -1124,7 +1141,15 @@ public class ThermalManagerService extends SystemService {
     @VisibleForTesting
     static class ThermalHalAidlWrapper extends ThermalHalWrapper implements IBinder.DeathRecipient {
         /* Proxy object for the Thermal HAL AIDL service. */
+
+        @GuardedBy("mHalLock")
         private IThermal mInstance = null;
+
+        private IThermal getHalInstance() {
+            synchronized (mHalLock) {
+                return mInstance;
+            }
+        }
 
         /** Callback for Thermal HAL AIDL. */
         private final IThermalChangedCallback mThermalCallbackAidl =
@@ -1169,151 +1194,180 @@ public class ThermalManagerService extends SystemService {
         @Override
         protected List<Temperature> getCurrentTemperatures(boolean shouldFilter,
                 int type) {
-            synchronized (mHalLock) {
-                final List<Temperature> ret = new ArrayList<>();
-                if (mInstance == null) {
-                    return ret;
-                }
-                try {
-                    final android.hardware.thermal.Temperature[] halRet =
-                            shouldFilter ? mInstance.getTemperaturesWithType(type)
-                                    : mInstance.getTemperatures();
-                    if (halRet == null) {
-                        return ret;
-                    }
-                    for (android.hardware.thermal.Temperature t : halRet) {
-                        if (!Temperature.isValidStatus(t.throttlingStatus)) {
-                            Slog.e(TAG, "Invalid temperature status " + t.throttlingStatus
-                                    + " received from AIDL HAL");
-                            t.throttlingStatus = Temperature.THROTTLING_NONE;
-                        }
-                        if (shouldFilter && t.type != type) {
-                            continue;
-                        }
-                        ret.add(new Temperature(t.value, t.type, t.name, t.throttlingStatus));
-                    }
-                } catch (IllegalArgumentException | IllegalStateException e) {
-                    Slog.e(TAG, "Couldn't getCurrentCoolingDevices due to invalid status", e);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Couldn't getCurrentTemperatures, reconnecting", e);
-                    connectToHal();
-                }
+            final IThermal instance = getHalInstance();
+            final List<Temperature> ret = new ArrayList<>();
+            if (instance == null) {
                 return ret;
             }
+            try {
+                final android.hardware.thermal.Temperature[] halRet =
+                        shouldFilter ? instance.getTemperaturesWithType(type)
+                                : instance.getTemperatures();
+                if (halRet == null) {
+                    return ret;
+                }
+                for (android.hardware.thermal.Temperature t : halRet) {
+                    if (!Temperature.isValidStatus(t.throttlingStatus)) {
+                        Slog.e(TAG, "Invalid temperature status " + t.throttlingStatus
+                                + " received from AIDL HAL");
+                        t.throttlingStatus = Temperature.THROTTLING_NONE;
+                    }
+                    if (shouldFilter && t.type != type) {
+                        continue;
+                    }
+                    ret.add(new Temperature(t.value, t.type, t.name, t.throttlingStatus));
+                }
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                Slog.e(TAG, "Couldn't getCurrentCoolingDevices due to invalid status", e);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Couldn't getCurrentTemperatures, reconnecting", e);
+                synchronized (mHalLock) {
+                    connectToHalIfNeededLocked(instance);
+                }
+            }
+            return ret;
         }
 
         @Override
         protected List<CoolingDevice> getCurrentCoolingDevices(boolean shouldFilter,
                 int type) {
-            synchronized (mHalLock) {
-                final List<CoolingDevice> ret = new ArrayList<>();
-                if (mInstance == null) {
-                    return ret;
-                }
-                try {
-                    final android.hardware.thermal.CoolingDevice[] halRet = shouldFilter
-                            ? mInstance.getCoolingDevicesWithType(type)
-                            : mInstance.getCoolingDevices();
-                    if (halRet == null) {
-                        return ret;
-                    }
-                    for (android.hardware.thermal.CoolingDevice t : halRet) {
-                        if (!CoolingDevice.isValidType(t.type)) {
-                            Slog.e(TAG, "Invalid cooling device type " + t.type + " from AIDL HAL");
-                            continue;
-                        }
-                        if (shouldFilter && t.type != type) {
-                            continue;
-                        }
-                        ret.add(new CoolingDevice(t.value, t.type, t.name));
-                    }
-                } catch (IllegalArgumentException | IllegalStateException e) {
-                    Slog.e(TAG, "Couldn't getCurrentCoolingDevices due to invalid status", e);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Couldn't getCurrentCoolingDevices, reconnecting", e);
-                    connectToHal();
-                }
+            final IThermal instance = getHalInstance();
+            final List<CoolingDevice> ret = new ArrayList<>();
+            if (instance == null) {
                 return ret;
             }
+            try {
+                final android.hardware.thermal.CoolingDevice[] halRet = shouldFilter
+                        ? instance.getCoolingDevicesWithType(type)
+                        : instance.getCoolingDevices();
+                if (halRet == null) {
+                    return ret;
+                }
+                for (android.hardware.thermal.CoolingDevice t : halRet) {
+                    if (!CoolingDevice.isValidType(t.type)) {
+                        Slog.e(TAG, "Invalid cooling device type " + t.type + " from AIDL HAL");
+                        continue;
+                    }
+                    if (shouldFilter && t.type != type) {
+                        continue;
+                    }
+                    ret.add(new CoolingDevice(t.value, t.type, t.name));
+                }
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                Slog.e(TAG, "Couldn't getCurrentCoolingDevices due to invalid status", e);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Couldn't getCurrentCoolingDevices, reconnecting", e);
+                synchronized (mHalLock) {
+                    connectToHalIfNeededLocked(instance);
+                }
+            }
+            return ret;
         }
 
         @Override
         @NonNull
         protected List<TemperatureThreshold> getTemperatureThresholds(
                 boolean shouldFilter, int type) {
-            synchronized (mHalLock) {
-                final List<TemperatureThreshold> ret = new ArrayList<>();
-                if (mInstance == null) {
-                    return ret;
-                }
-                try {
-                    final TemperatureThreshold[] halRet =
-                            shouldFilter ? mInstance.getTemperatureThresholdsWithType(type)
-                                    : mInstance.getTemperatureThresholds();
-                    if (halRet == null) {
-                        return ret;
-                    }
-                    if (shouldFilter) {
-                        return Arrays.stream(halRet).filter(t -> t.type == type).collect(
-                                Collectors.toList());
-                    }
-                    return Arrays.asList(halRet);
-                } catch (IllegalArgumentException | IllegalStateException e) {
-                    Slog.e(TAG, "Couldn't getTemperatureThresholds due to invalid status", e);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Couldn't getTemperatureThresholds, reconnecting...", e);
-                    connectToHal();
-                }
+            final IThermal instance = getHalInstance();
+            final List<TemperatureThreshold> ret = new ArrayList<>();
+            if (instance == null) {
                 return ret;
             }
+            try {
+                final TemperatureThreshold[] halRet =
+                        shouldFilter ? instance.getTemperatureThresholdsWithType(type)
+                                : instance.getTemperatureThresholds();
+                if (halRet == null) {
+                    return ret;
+                }
+                if (shouldFilter) {
+                    return Arrays.stream(halRet).filter(t -> t.type == type).collect(
+                            Collectors.toList());
+                }
+                return Arrays.asList(halRet);
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                Slog.e(TAG, "Couldn't getTemperatureThresholds due to invalid status", e);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Couldn't getTemperatureThresholds, reconnecting...", e);
+                synchronized (mHalLock) {
+                    connectToHalIfNeededLocked(instance);
+                }
+            }
+            return ret;
+        }
+
+        @Override
+        protected float forecastSkinTemperature(int forecastSeconds) {
+            final IThermal instance = getHalInstance();
+            if (instance == null) {
+                return Float.NaN;
+            }
+            try {
+                return instance.forecastSkinTemperature(forecastSeconds);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Couldn't forecastSkinTemperature, reconnecting...", e);
+                synchronized (mHalLock) {
+                    connectToHalIfNeededLocked(instance);
+                }
+            }
+            return Float.NaN;
         }
 
         @Override
         protected boolean connectToHal() {
             synchronized (mHalLock) {
-                IBinder binder = Binder.allowBlocking(ServiceManager.waitForDeclaredService(
-                        IThermal.DESCRIPTOR + "/default"));
-                initProxyAndRegisterCallback(binder);
+                return connectToHalIfNeededLocked(mInstance);
             }
+        }
+
+        @GuardedBy("mHalLock")
+        protected boolean connectToHalIfNeededLocked(IThermal instance) {
+            if (instance != mInstance) {
+                // instance has been updated since last used
+                return true;
+            }
+            IBinder binder = Binder.allowBlocking(ServiceManager.waitForDeclaredService(
+                    IThermal.DESCRIPTOR + "/default"));
+            initProxyAndRegisterCallbackLocked(binder);
             return mInstance != null;
         }
 
         @VisibleForTesting
         void initProxyAndRegisterCallback(IBinder binder) {
             synchronized (mHalLock) {
-                if (binder != null) {
-                    mInstance = IThermal.Stub.asInterface(binder);
+                initProxyAndRegisterCallbackLocked(binder);
+            }
+        }
+
+        @GuardedBy("mHalLock")
+        protected void initProxyAndRegisterCallbackLocked(IBinder binder) {
+            if (binder != null) {
+                mInstance = IThermal.Stub.asInterface(binder);
+                try {
+                    binder.linkToDeath(this, 0);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to connect IThermal AIDL instance", e);
+                    connectToHal();
+                }
+                if (mInstance != null) {
                     try {
-                        binder.linkToDeath(this, 0);
+                        Slog.i(TAG, "Thermal HAL AIDL service connected with version "
+                                + mInstance.getInterfaceVersion());
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Unable to read interface version from Thermal HAL", e);
+                        connectToHal();
+                        return;
+                    }
+                    try {
+                        mInstance.registerThermalChangedCallback(mThermalCallbackAidl);
+                    } catch (IllegalArgumentException | IllegalStateException e) {
+                        Slog.e(TAG, "Couldn't registerThermalChangedCallback due to invalid status",
+                                e);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "Unable to connect IThermal AIDL instance", e);
                         connectToHal();
                     }
-                    if (mInstance != null) {
-                        try {
-                            Slog.i(TAG, "Thermal HAL AIDL service connected with version "
-                                    + mInstance.getInterfaceVersion());
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "Unable to read interface version from Thermal HAL", e);
-                            connectToHal();
-                            return;
-                        }
-                        registerThermalChangedCallback();
-                    }
                 }
-            }
-        }
-
-        @VisibleForTesting
-        void registerThermalChangedCallback() {
-            try {
-                mInstance.registerThermalChangedCallback(mThermalCallbackAidl);
-            } catch (IllegalArgumentException | IllegalStateException e) {
-                Slog.e(TAG, "Couldn't registerThermalChangedCallback due to invalid status",
-                        e);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to connect IThermal AIDL instance", e);
-                connectToHal();
             }
         }
 
@@ -1442,6 +1496,11 @@ public class ThermalManagerService extends SystemService {
                 }
                 return (mThermalHal10 != null);
             }
+        }
+
+        @Override
+        protected float forecastSkinTemperature(int forecastSeconds) {
+            throw new UnsupportedOperationException("Not supported in Thermal HAL 1.0");
         }
 
         @Override
@@ -1580,6 +1639,11 @@ public class ThermalManagerService extends SystemService {
                 }
                 return (mThermalHal11 != null);
             }
+        }
+
+        @Override
+        protected float forecastSkinTemperature(int forecastSeconds) {
+            throw new UnsupportedOperationException("Not supported in Thermal HAL 1.1");
         }
 
         @Override
@@ -1746,6 +1810,11 @@ public class ThermalManagerService extends SystemService {
                 }
                 return (mThermalHal20 != null);
             }
+        }
+
+        @Override
+        protected float forecastSkinTemperature(int forecastSeconds) {
+            throw new UnsupportedOperationException("Not supported in Thermal HAL 2.0");
         }
 
         @Override
@@ -1977,6 +2046,39 @@ public class ThermalManagerService extends SystemService {
 
         float getForecast(int forecastSeconds) {
             synchronized (mSamples) {
+                // If we don't have any thresholds, we can't normalize the temperatures,
+                // so return early
+                if (mSevereThresholds.isEmpty()) {
+                    Slog.e(TAG, "No temperature thresholds found");
+                    FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED,
+                            Binder.getCallingUid(),
+                            THERMAL_HEADROOM_CALLED__API_STATUS__NO_TEMPERATURE_THRESHOLD,
+                            Float.NaN, forecastSeconds);
+                    return Float.NaN;
+                }
+            }
+            if (mIsHalSkinForecastSupported.get()) {
+                float threshold = -1f;
+                synchronized (mSamples) {
+                    // we only do forecast if a single SKIN sensor threshold is reported
+                    if (mSevereThresholds.size() == 1) {
+                        threshold = mSevereThresholds.valueAt(0);
+                    }
+                }
+                if (threshold > 0) {
+                    try {
+                        final float forecastTemperature =
+                                mHalWrapper.forecastSkinTemperature(forecastSeconds);
+                        return normalizeTemperature(forecastTemperature, threshold);
+                    } catch (UnsupportedOperationException e) {
+                        Slog.wtf(TAG, "forecastSkinTemperature returns unsupported");
+                    } catch (Exception e) {
+                        Slog.e(TAG, "forecastSkinTemperature fails");
+                    }
+                    return Float.NaN;
+                }
+            }
+            synchronized (mSamples) {
                 mLastForecastCallTimeMillis = SystemClock.elapsedRealtime();
                 if (mSamples.isEmpty()) {
                     getAndUpdateTemperatureSamples();
@@ -1989,17 +2091,6 @@ public class ThermalManagerService extends SystemService {
                     FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED,
                             Binder.getCallingUid(),
                             FrameworkStatsLog.THERMAL_HEADROOM_CALLED__API_STATUS__NO_TEMPERATURE,
-                            Float.NaN, forecastSeconds);
-                    return Float.NaN;
-                }
-
-                // If we don't have any thresholds, we can't normalize the temperatures,
-                // so return early
-                if (mSevereThresholds.isEmpty()) {
-                    Slog.e(TAG, "No temperature thresholds found");
-                    FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED,
-                            Binder.getCallingUid(),
-                            THERMAL_HEADROOM_CALLED__API_STATUS__NO_TEMPERATURE_THRESHOLD,
                             Float.NaN, forecastSeconds);
                     return Float.NaN;
                 }

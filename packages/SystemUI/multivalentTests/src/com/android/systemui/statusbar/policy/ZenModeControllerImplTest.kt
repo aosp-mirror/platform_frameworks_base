@@ -31,7 +31,6 @@ import com.android.systemui.util.settings.fakeGlobalSettings
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -42,7 +41,6 @@ import org.mockito.Mockito
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
@@ -88,45 +86,6 @@ class ZenModeControllerImplTest : SysuiTestCase() {
         controller.addCallback(mockCallback)
         controller.fireConfigChanged(config)
         Mockito.verify(mockCallback).onConfigChanged(ArgumentMatchers.eq(config))
-    }
-
-    @Test
-    fun testAreNotificationsHiddenInShade_zenOffShadeSuppressed() {
-        config.suppressedVisualEffects =
-            NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST
-        controller.updateZenMode(Settings.Global.ZEN_MODE_OFF)
-        controller.updateZenModeConfig()
-        assertThat(controller.areNotificationsHiddenInShade()).isFalse()
-    }
-
-    @Test
-    fun testAreNotificationsHiddenInShade_zenOnShadeNotSuppressed() {
-        val policy =
-            NotificationManager.Policy(
-                0,
-                0,
-                0,
-                NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR,
-            )
-        whenever(mNm.consolidatedNotificationPolicy).thenReturn(policy)
-        controller.updateConsolidatedNotificationPolicy()
-        controller.updateZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS)
-        assertThat(controller.areNotificationsHiddenInShade()).isFalse()
-    }
-
-    @Test
-    fun testAreNotificationsHiddenInShade_zenOnShadeSuppressed() {
-        val policy =
-            NotificationManager.Policy(
-                0,
-                0,
-                0,
-                NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST,
-            )
-        whenever(mNm.consolidatedNotificationPolicy).thenReturn(policy)
-        controller.updateConsolidatedNotificationPolicy()
-        controller.updateZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS)
-        assertThat(controller.areNotificationsHiddenInShade()).isTrue()
     }
 
     @Test

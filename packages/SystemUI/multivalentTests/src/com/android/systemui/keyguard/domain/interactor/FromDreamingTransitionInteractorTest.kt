@@ -38,17 +38,17 @@ import com.android.systemui.keyguard.data.repository.keyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
@@ -59,7 +59,6 @@ import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 class FromDreamingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiTestCase() {
@@ -77,7 +76,7 @@ class FromDreamingTransitionInteractorTest(flags: FlagsParameterization?) : Sysu
     }
 
     private val kosmos =
-        testKosmos().apply {
+        testKosmos().useUnconfinedTestDispatcher().apply {
             this.fakeKeyguardTransitionRepository =
                 FakeKeyguardTransitionRepository(
                     // This test sends transition steps manually in the test cases.
@@ -88,44 +87,40 @@ class FromDreamingTransitionInteractorTest(flags: FlagsParameterization?) : Sysu
             this.keyguardTransitionRepository = fakeKeyguardTransitionRepositorySpy
         }
 
-    private val testScope = kosmos.testScope
-    private val underTest by lazy { kosmos.fromDreamingTransitionInteractor }
-
-    private val powerInteractor = kosmos.powerInteractor
-    private val transitionRepository = kosmos.fakeKeyguardTransitionRepositorySpy
+    private val Kosmos.underTest by Kosmos.Fixture { fromDreamingTransitionInteractor }
+    private val Kosmos.transitionRepository by
+        Kosmos.Fixture { fakeKeyguardTransitionRepositorySpy }
 
     @Before
     fun setup() {
         runBlocking {
-            transitionRepository.sendTransitionSteps(
+            kosmos.transitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.DREAMING,
-                testScope,
+                kosmos.testScope,
             )
-            reset(transitionRepository)
+            reset(kosmos.transitionRepository)
             kosmos.setCommunalAvailable(true)
         }
-        underTest.start()
+        kosmos.underTest.start()
     }
 
     @Test
     @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     @Ignore("Until b/349837588 is fixed")
     fun testTransitionToOccluded_ifDreamEnds_occludingActivityOnTop() =
-        testScope.runTest {
-            kosmos.fakeKeyguardRepository.setDreaming(true)
+        kosmos.runTest {
+            fakeKeyguardRepository.setDreaming(true)
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.DREAMING,
-                testScope,
+                kosmos.testScope,
             )
-            runCurrent()
 
             reset(transitionRepository)
 
-            kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(onTop = true)
-            kosmos.fakeKeyguardRepository.setDreaming(false)
-            runCurrent()
+            keyguardOcclusionRepository.setShowWhenLockedActivityInfo(onTop = true)
+            fakeKeyguardRepository.setDreaming(false)
 
             assertThat(transitionRepository)
                 .startedTransition(from = KeyguardState.DREAMING, to = KeyguardState.OCCLUDED)
@@ -134,19 +129,15 @@ class FromDreamingTransitionInteractorTest(flags: FlagsParameterization?) : Sysu
     @Test
     @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testDoesNotTransitionToOccluded_occludingActivityOnTop_whileStillDreaming() =
-        testScope.runTest {
-            kosmos.fakeKeyguardRepository.setDreaming(true)
+        kosmos.runTest {
+            fakeKeyguardRepository.setDreaming(true)
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.DREAMING,
                 testScope,
             )
-            runCurrent()
-
             reset(transitionRepository)
-
-            kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(onTop = true)
-            runCurrent()
+            keyguardOcclusionRepository.setShowWhenLockedActivityInfo(onTop = true)
 
             assertThat(transitionRepository).noTransitionsStarted()
         }
@@ -154,11 +145,9 @@ class FromDreamingTransitionInteractorTest(flags: FlagsParameterization?) : Sysu
     @Test
     @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionsToLockscreen_whenOccludingActivityEnds() =
-        testScope.runTest {
-            runCurrent()
-
-            kosmos.fakeKeyguardRepository.setDreaming(true)
-            kosmos.keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(true)
+        kosmos.runTest {
+            fakeKeyguardRepository.setDreaming(true)
+            keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(true)
             // Transition to DREAMING and set the power interactor awake
             powerInteractor.setAwakeForTest()
 
@@ -167,15 +156,15 @@ class FromDreamingTransitionInteractorTest(flags: FlagsParameterization?) : Sysu
                 to = KeyguardState.DREAMING,
                 testScope,
             )
-            kosmos.fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockMode.NONE)
+            fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockMode.NONE)
 
             // Get past initial setup
-            advanceTimeBy(600L)
+            testScope.advanceTimeBy(600L)
             reset(transitionRepository)
 
-            kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(onTop = false)
-            kosmos.fakeKeyguardRepository.setDreaming(false)
-            advanceTimeBy(60L)
+            keyguardOcclusionRepository.setShowWhenLockedActivityInfo(onTop = false)
+            fakeKeyguardRepository.setDreaming(false)
+            testScope.advanceTimeBy(60L)
 
             assertThat(transitionRepository)
                 .startedTransition(from = KeyguardState.DREAMING, to = KeyguardState.LOCKSCREEN)
@@ -183,7 +172,7 @@ class FromDreamingTransitionInteractorTest(flags: FlagsParameterization?) : Sysu
 
     @Test
     fun testTransitionToAlternateBouncer() =
-        testScope.runTest {
+        kosmos.runTest {
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.DREAMING,
@@ -191,8 +180,7 @@ class FromDreamingTransitionInteractorTest(flags: FlagsParameterization?) : Sysu
             )
             reset(transitionRepository)
 
-            kosmos.fakeKeyguardBouncerRepository.setAlternateVisible(true)
-            runCurrent()
+            fakeKeyguardBouncerRepository.setAlternateVisible(true)
 
             assertThat(transitionRepository)
                 .startedTransition(
@@ -205,7 +193,7 @@ class FromDreamingTransitionInteractorTest(flags: FlagsParameterization?) : Sysu
     @EnableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     fun testTransitionToGlanceableHubOnWake() =
-        testScope.runTest {
+        kosmos.runTest {
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.DREAMING,
@@ -213,17 +201,15 @@ class FromDreamingTransitionInteractorTest(flags: FlagsParameterization?) : Sysu
             )
             reset(transitionRepository)
 
-            whenever(kosmos.dreamManager.canStartDreaming(anyBoolean())).thenReturn(true)
-            kosmos.setCommunalAvailable(true)
-            runCurrent()
+            setCommunalAvailable(true)
+            whenever(dreamManager.canStartDreaming(anyBoolean())).thenReturn(true)
 
             // Device wakes up.
             powerInteractor.setAwakeForTest()
-            advanceTimeBy(150L)
-            runCurrent()
+            testScope.advanceTimeBy(150L)
 
             // We transition to the hub when waking up.
-            assertThat(kosmos.communalSceneRepository.currentScene.value)
+            assertThat(communalSceneRepository.currentScene.value)
                 .isEqualTo(CommunalScenes.Communal)
             // No transitions are directly started by this interactor.
             assertThat(transitionRepository).noTransitionsStarted()

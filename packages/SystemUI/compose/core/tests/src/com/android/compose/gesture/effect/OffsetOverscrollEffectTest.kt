@@ -55,10 +55,7 @@ class OffsetOverscrollEffectTest {
         }
     }
 
-    private fun setupOverscrollableBox(
-        scrollableOrientation: Orientation,
-        overscrollEffectOrientation: Orientation = scrollableOrientation,
-    ): LayoutInfo {
+    private fun setupOverscrollableBox(scrollableOrientation: Orientation): LayoutInfo {
         val layoutSize: Dp = 200.dp
         var touchSlop: Float by Delegates.notNull()
         // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
@@ -67,7 +64,7 @@ class OffsetOverscrollEffectTest {
         rule.setContent {
             density = LocalDensity.current
             touchSlop = LocalViewConfiguration.current.touchSlop
-            val overscrollEffect = rememberOffsetOverscrollEffect(overscrollEffectOrientation)
+            val overscrollEffect = rememberOffsetOverscrollEffect()
 
             Box(
                 Modifier.overscroll(overscrollEffect)
@@ -102,11 +99,7 @@ class OffsetOverscrollEffectTest {
 
     @Test
     fun applyNoOffset_duringHorizontalOverscroll() {
-        val info =
-            setupOverscrollableBox(
-                scrollableOrientation = Orientation.Vertical,
-                overscrollEffectOrientation = Orientation.Horizontal,
-            )
+        val info = setupOverscrollableBox(scrollableOrientation = Orientation.Vertical)
 
         rule.onNodeWithTag(BOX_TAG).assertTopPositionInRootIsEqualTo(0.dp)
 

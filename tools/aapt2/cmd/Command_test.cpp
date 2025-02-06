@@ -118,4 +118,63 @@ TEST(CommandTest, OptionsWithValues) {
   EXPECT_NE(0, command.Execute({"--flag1"s, "2"s}, &std::cerr));
 }
 
+TEST(CommandTest, ShortOptions) {
+  TestCommand command;
+  bool flag = false;
+  command.AddOptionalSwitch("--flag", "", &flag);
+
+  ASSERT_EQ(0, command.Execute({"--flag"s}, &std::cerr));
+  EXPECT_TRUE(flag);
+
+  // Short version of a switch should work.
+  flag = false;
+  ASSERT_EQ(0, command.Execute({"-f"s}, &std::cerr));
+  EXPECT_TRUE(flag);
+
+  // Ambiguous names shouldn't parse via short options.
+  command.AddOptionalSwitch("--flag-2", "", &flag);
+  ASSERT_NE(0, command.Execute({"-f"s}, &std::cerr));
+
+  // But when we have a proper flag like that it should still work.
+  flag = false;
+  command.AddOptionalSwitch("-f", "", &flag);
+  ASSERT_EQ(0, command.Execute({"-f"s}, &std::cerr));
+  EXPECT_TRUE(flag);
+
+  // A regular short flag works fine as well.
+  flag = false;
+  command.AddOptionalSwitch("-d", "", &flag);
+  ASSERT_EQ(0, command.Execute({"-d"s}, &std::cerr));
+  EXPECT_TRUE(flag);
+
+  // A flag with a value only works via its long name syntax.
+  std::optional<std::string> val;
+  command.AddOptionalFlag("--with-val", "", &val);
+  ASSERT_EQ(0, command.Execute({"--with-val"s, "1"s}, &std::cerr));
+  EXPECT_TRUE(val);
+  EXPECT_STREQ("1", val->c_str());
+
+  // Make sure the flags that require a value can't be parsed via short syntax, -w=blah
+  // looks weird.
+  ASSERT_NE(0, command.Execute({"-w"s, "2"s}, &std::cerr));
+}
+
+TEST(CommandTest, OptionsWithNullptrToAcceptValues) {
+  TestCommand command;
+  command.AddRequiredFlag("--rflag", "", nullptr);
+  command.AddRequiredFlagList("--rlflag", "", nullptr);
+  command.AddOptionalFlag("--oflag", "", nullptr);
+  command.AddOptionalFlagList("--olflag", "", (std::vector<std::string>*)nullptr);
+  command.AddOptionalFlagList("--olflag2", "", (std::unordered_set<std::string>*)nullptr);
+  command.AddOptionalSwitch("--switch", "", nullptr);
+
+  ASSERT_EQ(0, command.Execute({
+    "--rflag"s, "1"s,
+    "--rlflag"s, "1"s,
+    "--oflag"s, "1"s,
+    "--olflag"s, "1"s,
+    "--olflag2"s, "1"s,
+    "--switch"s}, &std::cerr));
+}
+
 }  // namespace aapt

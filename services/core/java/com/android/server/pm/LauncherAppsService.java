@@ -35,6 +35,7 @@ import static android.content.PermissionChecker.checkCallingOrSelfPermissionForP
 import static android.content.pm.LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS;
 import static android.content.pm.LauncherApps.FLAG_CACHE_NOTIFICATION_SHORTCUTS;
 import static android.content.pm.LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS;
+import static android.view.WindowManager.PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI;
 
 import static com.android.server.pm.PackageArchiver.isArchivingEnabled;
 
@@ -118,7 +119,6 @@ import android.window.IDumpCallback;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
-import com.android.internal.infra.AndroidFuture;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
@@ -850,7 +850,9 @@ public class LauncherAppsService extends SystemService {
                     // package does not exist; should not happen
                     return null;
                 }
-                return new LauncherActivityInfoInternal(activityInfo, incrementalStatesInfo, user);
+                return new LauncherActivityInfoInternal(activityInfo, incrementalStatesInfo, user,
+                        supportsMultiInstance(mIPM, activityInfo.getComponentName(),
+                                user.getIdentifier()));
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -941,7 +943,7 @@ public class LauncherAppsService extends SystemService {
                         archiveState.getActivityInfos();
                 for (int j = 0; j < archiveActivityInfoList.size(); j++) {
                     launcherActivityList.add(
-                            constructLauncherActivityInfoForArchivedApp(
+                            constructLauncherActivityInfoForArchivedApp(mIPM,
                                     user, applicationInfo, archiveActivityInfoList.get(j)));
                 }
             }
@@ -949,6 +951,7 @@ public class LauncherAppsService extends SystemService {
         }
 
         private static LauncherActivityInfoInternal constructLauncherActivityInfoForArchivedApp(
+                IPackageManager pm,
                 UserHandle user,
                 ApplicationInfo applicationInfo,
                 ArchiveState.ArchiveActivityInfo archiveActivityInfo) {
@@ -964,7 +967,9 @@ public class LauncherAppsService extends SystemService {
                     activityInfo,
                     new IncrementalStatesInfo(
                             false /* isLoading */, 0 /* progress */, 0 /* loadingCompletedTime */),
-                    user);
+                    user,
+                    supportsMultiInstance(pm, activityInfo.getComponentName(),
+                            user.getIdentifier()));
         }
 
         @NonNull
@@ -1025,7 +1030,9 @@ public class LauncherAppsService extends SystemService {
                     continue;
                 }
                 results.add(new LauncherActivityInfoInternal(ri.activityInfo,
-                        incrementalStatesInfo, user));
+                        incrementalStatesInfo, user,
+                        supportsMultiInstance(mIPM, ri.activityInfo.getComponentName(),
+                                user.getIdentifier())));
             }
             return results;
         }
@@ -1657,6 +1664,29 @@ public class LauncherAppsService extends SystemService {
                         FLAG_MUTABLE, null /* opts */, user);
             } finally {
                 Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        /**
+         * Returns whether the specified activity info has the multi-instance property declared.
+         */
+        @VisibleForTesting
+        static boolean supportsMultiInstance(@NonNull IPackageManager pm,
+                @NonNull ComponentName component, int userId) {
+            try {
+                // Try to get the property for the component
+                return pm.getPropertyAsUser(
+                        PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI, component.getPackageName(),
+                        component.getClassName(), userId).getBoolean();
+            } catch (Exception e) {
+                try {
+                    // Fallback to the property for the app
+                    return pm.getPropertyAsUser(
+                            PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI, component.getPackageName(),
+                            null, userId).getBoolean();
+                } catch (Exception e2) {
+                    return false;
+                }
             }
         }
 

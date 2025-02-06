@@ -32,7 +32,6 @@ import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -42,7 +41,6 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class BurnInInteractorTest : SysuiTestCase() {

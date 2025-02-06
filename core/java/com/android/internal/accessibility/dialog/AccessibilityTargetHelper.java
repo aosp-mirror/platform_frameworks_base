@@ -181,7 +181,8 @@ public final class AccessibilityTargetHelper {
         final InvisibleToggleAllowListingFeatureTarget magnification =
                 new InvisibleToggleAllowListingFeatureTarget(context,
                         shortcutType,
-                        isShortcutContained(context, shortcutType, MAGNIFICATION_CONTROLLER_NAME),
+                        isShortcutContained(
+                                context, shortcutType, MAGNIFICATION_CONTROLLER_NAME),
                         MAGNIFICATION_CONTROLLER_NAME,
                         uid,
                         context.getString(R.string.accessibility_magnification_chooser_text),

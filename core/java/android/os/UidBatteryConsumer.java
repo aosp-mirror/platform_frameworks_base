@@ -147,7 +147,7 @@ public final class UidBatteryConsumer extends BatteryConsumer {
 
                 for (int screenState = 0; screenState < SCREEN_STATE_COUNT; screenState++) {
                     if (mData.layout.screenStateDataIncluded
-                            && screenState == POWER_STATE_UNSPECIFIED) {
+                            && screenState == SCREEN_STATE_UNSPECIFIED) {
                         continue;
                     }
 

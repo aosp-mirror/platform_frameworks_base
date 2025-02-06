@@ -88,7 +88,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
     }
 
     private WindowState createDreamWindow() {
-        final WindowState win = createDreamWindow(null, TYPE_BASE_APPLICATION, "dream");
+        final WindowState win = createDreamWindow("dream", TYPE_BASE_APPLICATION);
         final WindowManager.LayoutParams attrs = win.mAttrs;
         attrs.width = MATCH_PARENT;
         attrs.height = MATCH_PARENT;

@@ -53,7 +53,6 @@ import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.time.fakeSystemClock
 import com.android.systemui.volume.data.repository.audioRepository
 import com.android.systemui.volume.domain.interactor.FakeAudioSharingInteractor
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -66,7 +65,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 @TestableLooper.RunWithLooper

@@ -131,10 +131,14 @@ private fun SuccessAnimation(
 ) {
     val composition by
         rememberLottieComposition(LottieCompositionSpec.RawRes(finishedState.successAnimation))
+    var animationFinished by rememberSaveable(key = "animationFinished") { mutableStateOf(false) }
     val progress by animateLottieCompositionAsState(composition, iterations = 1)
+    if (progress == 1f) {
+        animationFinished = true
+    }
     LottieAnimation(
         composition = composition,
-        progress = { progress },
+        progress = { if (animationFinished) 1f else progress },
         dynamicProperties = animationProperties,
         modifier = Modifier.fillMaxSize(),
     )

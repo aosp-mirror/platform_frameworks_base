@@ -33,7 +33,6 @@ import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -51,7 +50,6 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class AutoAddInteractorTest : SysuiTestCase() {
     private val testScope = TestScope()
 

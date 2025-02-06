@@ -28,6 +28,8 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 import com.android.internal.widget.remotecompose.core.operations.layout.ActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
@@ -49,6 +51,11 @@ public class ValueIntegerChangeActionOperation extends Operation implements Acti
         return "ValueChangeActionOperation(" + mTargetValueId + ")";
     }
 
+    /**
+     * The name of the operation used during serialization
+     *
+     * @return the operation serialized name
+     */
     @NonNull
     public String serializedName() {
         return "VALUE_INTEGER_CHANGE";
@@ -81,6 +88,13 @@ public class ValueIntegerChangeActionOperation extends Operation implements Acti
         context.overrideInteger(mTargetValueId, mValue);
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer a WireBuffer
+     * @param valueId the value id
+     * @param value the value to set
+     */
     public static void apply(@NonNull WireBuffer buffer, int valueId, int value) {
         buffer.start(OP_CODE);
         buffer.writeInt(valueId);
@@ -111,5 +125,14 @@ public class ValueIntegerChangeActionOperation extends Operation implements Acti
                                 + " This operation represents a value change for the given id")
                 .field(INT, "TARGET_VALUE_ID", "Value ID")
                 .field(INT, "VALUE", "integer value to be assigned to the target");
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER, SerializeTags.ACTION)
+                .add("type", "ValueIntegerChangeActionOperation")
+                .add("targetValueId", mTargetValueId)
+                .add("value", mValue);
     }
 }

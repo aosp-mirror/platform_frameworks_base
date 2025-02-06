@@ -38,10 +38,6 @@ sealed interface VolumeDialogEventModel {
 
     data class LayoutDirectionChanged(val layoutDirection: Int) : VolumeDialogEventModel
 
-    data object ShowVibrateHint : VolumeDialogEventModel
-
-    data object ShowSilentHint : VolumeDialogEventModel
-
     data object ScreenOff : VolumeDialogEventModel
 
     data class ShowSafetyWarning(val flags: Int) : VolumeDialogEventModel
@@ -52,4 +48,11 @@ sealed interface VolumeDialogEventModel {
         VolumeDialogEventModel
 
     data object VolumeChangedFromKey : VolumeDialogEventModel
+
+    /**
+     * Signals that the
+     * [com.android.systemui.volume.dialog.domain.interactor.VolumeDialogCallbacksInteractor] is
+     * ready to process the events.
+     */
+    data object SubscribedToEvents : VolumeDialogEventModel
 }

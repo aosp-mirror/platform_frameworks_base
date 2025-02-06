@@ -2045,7 +2045,7 @@ public final class PermissionManager {
 
         if (deviceId == Context.DEVICE_ID_DEFAULT) {
             persistentDeviceId = VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT;
-        } else if (android.companion.virtual.flags.Flags.vdmPublicApis()) {
+        } else {
             VirtualDeviceManager virtualDeviceManager = mContext.getSystemService(
                     VirtualDeviceManager.class);
             if (virtualDeviceManager != null) {
@@ -2059,9 +2059,6 @@ public final class PermissionManager {
                     Slog.e(LOG_TAG, "Cannot find persistent device Id for " + deviceId);
                 }
             }
-        } else {
-            Slog.e(LOG_TAG, "vdmPublicApis flag is not enabled when device Id " + deviceId
-                    + "is not default.");
         }
         return persistentDeviceId;
     }

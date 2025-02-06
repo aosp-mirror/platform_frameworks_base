@@ -180,9 +180,7 @@ public class KeyValueAdbBackupEngine {
                 Slog.e(TAG, "Key-value backup failed on package " + packageName);
                 return false;
             }
-            if (DEBUG) {
-                Slog.i(TAG, "Key-value backup success for package " + packageName);
-            }
+            Slog.i(TAG, "Key-value backup success for package " + packageName);
             return true;
         } catch (RemoteException e) {
             Slog.e(TAG, "Error invoking agent for backup on " + packageName + ". " + e);
@@ -210,9 +208,7 @@ public class KeyValueAdbBackupEngine {
                 AppMetadataBackupWriter writer =
                         new AppMetadataBackupWriter(output, mPackageManager);
 
-                if (DEBUG) {
-                    Slog.d(TAG, "Writing manifest for " + mPackage.packageName);
-                }
+                Slog.d(TAG, "Writing manifest for " + mPackage.packageName);
 
                 writer.backupManifest(
                         mPackage,
@@ -223,9 +219,7 @@ public class KeyValueAdbBackupEngine {
                         /* withApk */ false);
                 mManifestFile.delete();
 
-                if (DEBUG) {
-                    Slog.d(TAG, "Writing key-value package payload" + mPackage.packageName);
-                }
+                Slog.d(TAG, "Writing key-value package payload" + mPackage.packageName);
                 FullBackup.backupToTar(mPackage.packageName, FullBackup.KEY_VALUE_DATA_TOKEN, null,
                         mDataDir.getAbsolutePath(),
                         mBackupDataName.getAbsolutePath(),
@@ -283,9 +277,7 @@ public class KeyValueAdbBackupEngine {
             if (!mBackupManagerService.waitUntilOperationComplete(token)) {
                 Slog.e(TAG, "Full backup failed on package " + mCurrentPackage.packageName);
             } else {
-                if (DEBUG) {
-                    Slog.d(TAG, "Full package backup success: " + mCurrentPackage.packageName);
-                }
+                Slog.d(TAG, "Full package backup success: " + mCurrentPackage.packageName);
             }
         } catch (IOException e) {
             Slog.e(TAG, "Error backing up " + mCurrentPackage.packageName + ": " + e);

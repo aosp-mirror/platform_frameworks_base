@@ -34,7 +34,7 @@ interface IAppFunctionManager {
     * @param request the request to execute an app function.
     * @param callback the callback to report the result.
     */
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf = {android.Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,android.Manifest.permission.EXECUTE_APP_FUNCTIONS}, conditional = true)")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = android.Manifest.permission.EXECUTE_APP_FUNCTIONS, conditional = true)")
     ICancellationSignal executeAppFunction(
         in ExecuteAppFunctionAidlRequest request,
         in IExecuteAppFunctionCallback callback

@@ -30,7 +30,6 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -40,7 +39,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class StickyKeysIndicatorCoordinatorTest : SysuiTestCase() {

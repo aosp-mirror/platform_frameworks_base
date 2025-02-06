@@ -16,10 +16,50 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import androidx.compose.runtime.getValue
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
-import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
+import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.flowOf
 
-class KeyguardMediaViewModel @Inject constructor(mediaCarouselInteractor: MediaCarouselInteractor) {
-    val isMediaVisible: StateFlow<Boolean> = mediaCarouselInteractor.hasActiveMediaOrRecommendation
+class KeyguardMediaViewModel
+@AssistedInject
+constructor(
+    mediaCarouselInteractor: MediaCarouselInteractor,
+    keyguardInteractor: KeyguardInteractor,
+) : ExclusiveActivatable() {
+
+    private val hydrator = Hydrator("KeyguardMediaViewModel.hydrator")
+    /**
+     * Whether media carousel is visible on lockscreen. Media may be presented on lockscreen but
+     * still hidden on certain surfaces like AOD
+     */
+    val isMediaVisible: Boolean by
+        hydrator.hydratedStateOf(
+            traceName = "isMediaVisible",
+            source =
+                keyguardInteractor.isDozing.flatMapLatestConflated { isDozing ->
+                    if (isDozing) {
+                        flowOf(false)
+                    } else {
+                        mediaCarouselInteractor.hasActiveMediaOrRecommendation
+                    }
+                },
+            initialValue =
+                !keyguardInteractor.isDozing.value &&
+                    mediaCarouselInteractor.hasActiveMediaOrRecommendation.value,
+        )
+
+    override suspend fun onActivated(): Nothing {
+        hydrator.activate()
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): KeyguardMediaViewModel
+    }
 }

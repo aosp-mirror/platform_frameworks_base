@@ -341,6 +341,13 @@ public class MediaQualityContract {
         public static final String PARAMETER_FILM_MODE = "film_mode";
 
         /**
+         * Enable/disable black color auto stretch
+         *
+         * @hide
+         */
+        public static final String PARAMETER_BLACK_STRETCH = "black_stretch";
+
+        /**
          * Enable/disable blue color auto stretch
          *
          * <p>Type: BOOLEAN
@@ -384,6 +391,353 @@ public class MediaQualityContract {
          */
         public static final String PARAMETER_AUTO_SUPER_RESOLUTION_ENABLED =
                 "auto_super_resolution_enabled";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_LEVEL_RANGE = "level_range";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_GAMUT_MAPPING = "gamut_mapping";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_PC_MODE = "pc_mode";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_LOW_LATENCY = "low_latency";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_VRR = "vrr";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_CVRR = "cvrr";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_HDMI_RGB_RANGE = "hdmi_rgb_range";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_SPACE = "color_space";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_PANEL_INIT_MAX_LUMINCE_NITS =
+                "panel_init_max_lumince_nits";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_PANEL_INIT_MAX_LUMINCE_VALID =
+                "panel_init_max_lumince_valid";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_GAMMA = "gamma";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TEMPERATURE_RED_GAIN =
+                "color_temperature_red_gain";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TEMPERATURE_GREEN_GAIN =
+                "color_temperature_green_gain";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TEMPERATURE_BLUE_GAIN =
+                "color_temperature_blue_gain";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TEMPERATURE_RED_OFFSET =
+                "color_temperature_red_offset";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TEMPERATURE_GREEN_OFFSET =
+                "color_temperature_green_offset";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TEMPERATURE_BLUE_OFFSET =
+                "color_temperature_blue_offset";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_ELEVEN_POINT_RED = "eleven_point_red";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_ELEVEN_POINT_GREEN = "eleven_point_green";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_ELEVEN_POINT_BLUE = "eleven_point_blue";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_LOW_BLUE_LIGHT = "low_blue_light";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_LD_MODE = "ld_mode";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_OSD_RED_GAIN = "osd_red_gain";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_OSD_GREEN_GAIN = "osd_green_gain";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_OSD_BLUE_GAIN = "osd_blue_gain";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_OSD_RED_OFFSET = "osd_red_offset";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_OSD_GREEN_OFFSET = "osd_green_offset";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_OSD_BLUE_OFFSET = "osd_blue_offset";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_OSD_HUE = "osd_hue";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_OSD_SATURATION = "osd_saturation";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_OSD_CONTRAST = "osd_contrast";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_SWITCH = "color_tuner_switch";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_HUE_RED = "color_tuner_hue_red";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_HUE_GREEN = "color_tuner_hue_green";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_HUE_BLUE = "color_tuner_hue_blue";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_HUE_CYAN = "color_tuner_hue_cyan";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_HUE_MAGENTA = "color_tuner_hue_magenta";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_HUE_YELLOW = "color_tuner_hue_yellow";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_HUE_FLESH = "color_tuner_hue_flesh";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_SATURATION_RED =
+                "color_tuner_saturation_red";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_SATURATION_GREEN =
+                "color_tuner_saturation_green";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_SATURATION_BLUE =
+                "color_tuner_saturation_blue";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_SATURATION_CYAN =
+                "color_tuner_saturation_cyan";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_SATURATION_MAGENTA =
+                "color_tuner_saturation_magenta";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_SATURATION_YELLOW =
+                "color_tuner_saturation_yellow";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_SATURATION_FLESH =
+                "color_tuner_saturation_flesh";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_LUMINANCE_RED =
+                "color_tuner_luminance_red";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_LUMINANCE_GREEN =
+                "color_tuner_luminance_green";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_LUMINANCE_BLUE =
+                "color_tuner_luminance_blue";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_LUMINANCE_CYAN =
+                "color_tuner_luminance_cyan";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_LUMINANCE_MAGENTA =
+                "color_tuner_luminance_magenta";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_LUMINANCE_YELLOW =
+                "color_tuner_luminance_yellow";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_COLOR_TUNER_LUMINANCE_FLESH =
+                "color_tuner_luminance_flesh";
+
+        /**
+         * @hide
+         *
+         */
+        public static final String PARAMETER_PICTURE_QUALITY_EVENT_TYPE =
+                "picture_quality_event_type";
 
         private PictureQuality() {
         }
@@ -640,6 +994,12 @@ public class MediaQualityContract {
          * <p>Type: STRING
          */
         public static final String PARAMETER_DIGITAL_OUTPUT_MODE = "digital_output_mode";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_SOUND_STYLE = "sound_style";
+
 
 
         private SoundQuality() {

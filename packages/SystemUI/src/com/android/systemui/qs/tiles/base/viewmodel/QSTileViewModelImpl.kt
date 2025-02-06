@@ -40,7 +40,6 @@ import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -70,7 +69,6 @@ import kotlinx.coroutines.flow.transformLatest
  * Don't use this constructor directly. Instead, inject [QSTileViewModelFactory] to create a new
  * instance of this class.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class QSTileViewModelImpl<DATA_TYPE>(
     override val config: QSTileConfig,
     private val userActionInteractor: () -> QSTileUserActionInteractor<DATA_TYPE>,

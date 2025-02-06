@@ -16,5 +16,5 @@
   -->
 <resources>
     <dimen name="media_output_dialog_icon_left_radius">0dp</dimen>
-    <dimen name="media_output_dialog_icon_right_radius">28dp</dimen>
+    <dimen name="media_output_dialog_icon_right_radius">@dimen/media_output_dialog_active_background_radius</dimen>
 </resources>

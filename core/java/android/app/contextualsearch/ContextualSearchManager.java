@@ -43,7 +43,6 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
-@FlaggedApi(Flags.FLAG_ENABLE_SERVICE)
 public final class ContextualSearchManager {
 
     /**

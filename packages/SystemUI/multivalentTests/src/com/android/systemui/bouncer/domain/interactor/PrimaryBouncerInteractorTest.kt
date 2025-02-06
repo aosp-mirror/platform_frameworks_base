@@ -105,7 +105,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
                 mSelectedUserInteractor,
                 faceAuthInteractor,
             )
-        whenever(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
+        whenever(repository.isPrimaryBouncerStartingDisappearAnimation()).thenReturn(false)
         whenever(repository.primaryBouncerShow.value).thenReturn(false)
         whenever(bouncerView.delegate).thenReturn(bouncerViewDelegate)
         resources = context.orCreateTestableResources
@@ -199,7 +199,6 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun testExpansion_fullyShown() {
         whenever(repository.panelExpansionAmount.value).thenReturn(0.5f)
-        whenever(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
         underTest.setPanelExpansion(EXPANSION_VISIBLE)
         verify(falsingCollector).onBouncerShown()
         verify(mPrimaryBouncerCallbackInteractor).dispatchFullyShown()
@@ -208,7 +207,6 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun testExpansion_fullyHidden() {
         whenever(repository.panelExpansionAmount.value).thenReturn(0.5f)
-        whenever(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
         underTest.setPanelExpansion(EXPANSION_HIDDEN)
         verify(repository).setPrimaryShow(false)
         verify(falsingCollector).onBouncerHidden()
@@ -307,7 +305,6 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     fun testIsFullShowing() {
         whenever(repository.primaryBouncerShow.value).thenReturn(true)
         whenever(repository.panelExpansionAmount.value).thenReturn(EXPANSION_VISIBLE)
-        whenever(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
         assertThat(underTest.isFullyShowing()).isTrue()
         whenever(repository.primaryBouncerShow.value).thenReturn(false)
         assertThat(underTest.isFullyShowing()).isFalse()
@@ -333,9 +330,9 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testIsAnimatingAway() {
-        whenever(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(Runnable {})
+        whenever(repository.isPrimaryBouncerStartingDisappearAnimation()).thenReturn(true)
         assertThat(underTest.isAnimatingAway()).isTrue()
-        whenever(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
+        whenever(repository.isPrimaryBouncerStartingDisappearAnimation()).thenReturn(false)
         assertThat(underTest.isAnimatingAway()).isFalse()
     }
 

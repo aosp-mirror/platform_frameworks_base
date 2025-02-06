@@ -15,12 +15,12 @@
  */
 package com.android.server.selinux;
 
-import static com.android.compatibility.common.util.SystemUtil.runWithShellPermissionIdentity;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -28,7 +28,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
-import android.provider.DeviceConfig;
 import android.util.EventLog;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -59,6 +58,7 @@ public class SelinuxAuditLogsCollectorTest {
     private final SelinuxAuditLogsCollector mSelinuxAutidLogsCollector =
             // Ignore rate limiting for tests
             new SelinuxAuditLogsCollector(
+                    () -> TEST_DOMAIN,
                     new RateLimiter(mClock, /* window= */ Duration.ofMillis(0)),
                     new QuotaLimiter(
                             mClock, /* windowSize= */ Duration.ofHours(1), /* maxPermits= */ 5));
@@ -67,13 +67,6 @@ public class SelinuxAuditLogsCollectorTest {
 
     @Before
     public void setUp() {
-        runWithShellPermissionIdentity(
-                () ->
-                        DeviceConfig.setLocalOverride(
-                                DeviceConfig.NAMESPACE_ADSERVICES,
-                                SelinuxAuditLogBuilder.CONFIG_SELINUX_AUDIT_DOMAIN,
-                                TEST_DOMAIN));
-
         mSelinuxAutidLogsCollector.setStopRequested(false);
         // move the clock forward for the limiters.
         mClock.currentTimeMillis += Duration.ofHours(1).toMillis();
@@ -85,12 +78,11 @@ public class SelinuxAuditLogsCollectorTest {
 
     @After
     public void tearDown() {
-        runWithShellPermissionIdentity(() -> DeviceConfig.clearAllLocalOverrides());
         mMockitoSession.finishMocking();
     }
 
     @Test
-    public void testWriteAuditLogs() {
+    public void testWriteAuditLogs() throws Exception {
         writeTestLog("granted", "perm", TEST_DOMAIN, "ttype", "tclass");
         writeTestLog("denied", "perm1", TEST_DOMAIN, "ttype1", "tclass1");
 
@@ -126,7 +118,7 @@ public class SelinuxAuditLogsCollectorTest {
     }
 
     @Test
-    public void testWriteAuditLogs_multiplePerms() {
+    public void testWriteAuditLogs_multiplePerms() throws Exception {
         writeTestLog("denied", "perm1 perm2", TEST_DOMAIN, "ttype", "tclass");
         writeTestLog("denied", "perm3 perm4", TEST_DOMAIN, "ttype", "tclass");
 
@@ -162,7 +154,7 @@ public class SelinuxAuditLogsCollectorTest {
     }
 
     @Test
-    public void testWriteAuditLogs_withPaths() {
+    public void testWriteAuditLogs_withPaths() throws Exception {
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass", "/good/path");
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass", "/very/long/path");
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass", "/short_path");
@@ -226,7 +218,7 @@ public class SelinuxAuditLogsCollectorTest {
     }
 
     @Test
-    public void testWriteAuditLogs_withCategories() {
+    public void testWriteAuditLogs_withCategories() throws Exception {
         writeTestLog("denied", "perm", TEST_DOMAIN, new int[] {123}, "ttype", null, "tclass");
         writeTestLog("denied", "perm", TEST_DOMAIN, new int[] {123, 456}, "ttype", null, "tclass");
         writeTestLog("denied", "perm", TEST_DOMAIN, null, "ttype", new int[] {666}, "tclass");
@@ -297,7 +289,7 @@ public class SelinuxAuditLogsCollectorTest {
     }
 
     @Test
-    public void testWriteAuditLogs_withPathAndCategories() {
+    public void testWriteAuditLogs_withPathAndCategories() throws Exception {
         writeTestLog(
                 "denied",
                 "perm",
@@ -327,7 +319,7 @@ public class SelinuxAuditLogsCollectorTest {
     }
 
     @Test
-    public void testWriteAuditLogs_permissive() {
+    public void testWriteAuditLogs_permissive() throws Exception {
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass", true);
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass", false);
@@ -365,7 +357,7 @@ public class SelinuxAuditLogsCollectorTest {
     }
 
     @Test
-    public void testNotWriteAuditLogs_notTestDomain() {
+    public void testNotWriteAuditLogs_notTestDomain() throws Exception {
         writeTestLog("denied", "perm", "stype", "ttype", "tclass");
 
         boolean done = mSelinuxAutidLogsCollector.collect(ANSWER_TAG);
@@ -388,7 +380,7 @@ public class SelinuxAuditLogsCollectorTest {
     }
 
     @Test
-    public void testWriteAuditLogs_upToQuota() {
+    public void testWriteAuditLogs_upToQuota() throws Exception {
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
@@ -398,9 +390,9 @@ public class SelinuxAuditLogsCollectorTest {
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
 
-        boolean done = mSelinuxAutidLogsCollector.collect(ANSWER_TAG);
+        assertThrows(QuotaExceededException.class, () ->
+                mSelinuxAutidLogsCollector.collect(ANSWER_TAG));
 
-        assertThat(done).isTrue();
         verify(
                 () ->
                         FrameworkStatsLog.write(
@@ -418,7 +410,7 @@ public class SelinuxAuditLogsCollectorTest {
     }
 
     @Test
-    public void testWriteAuditLogs_resetQuota() {
+    public void testWriteAuditLogs_resetQuota() throws Exception {
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
@@ -427,8 +419,8 @@ public class SelinuxAuditLogsCollectorTest {
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
 
-        boolean done = mSelinuxAutidLogsCollector.collect(ANSWER_TAG);
-        assertThat(done).isTrue();
+        assertThrows(QuotaExceededException.class, () ->
+                mSelinuxAutidLogsCollector.collect(ANSWER_TAG));
         verify(
                 () ->
                         FrameworkStatsLog.write(
@@ -451,8 +443,8 @@ public class SelinuxAuditLogsCollectorTest {
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
         // move the clock forward to reset the quota limiter.
         mClock.currentTimeMillis += Duration.ofHours(1).toMillis();
-        done = mSelinuxAutidLogsCollector.collect(ANSWER_TAG);
-        assertThat(done).isTrue();
+        assertThrows(QuotaExceededException.class, () ->
+                mSelinuxAutidLogsCollector.collect(ANSWER_TAG));
         verify(
                 () ->
                         FrameworkStatsLog.write(
@@ -470,13 +462,10 @@ public class SelinuxAuditLogsCollectorTest {
     }
 
     @Test
-    public void testNotWriteAuditLogs_stopRequested() {
+    public void testNotWriteAuditLogs_stopRequested() throws Exception {
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
-        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
-        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
-        // These are not pushed.
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
 
@@ -518,7 +507,7 @@ public class SelinuxAuditLogsCollectorTest {
     }
 
     @Test
-    public void testAuditLogs_resumeJobDoesNotExceedLimit() {
+    public void testAuditLogs_resumeJobDoesNotExceedLimit() throws Exception {
         writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
         mSelinuxAutidLogsCollector.setStopRequested(true);
 

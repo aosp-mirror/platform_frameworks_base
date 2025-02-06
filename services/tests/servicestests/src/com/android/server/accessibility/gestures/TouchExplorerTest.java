@@ -33,6 +33,8 @@ import static com.android.server.accessibility.gestures.TouchState.STATE_DRAGGIN
 import static com.android.server.accessibility.gestures.TouchState.STATE_GESTURE_DETECTING;
 import static com.android.server.accessibility.gestures.TouchState.STATE_TOUCH_EXPLORING;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
@@ -132,10 +134,12 @@ public class TouchExplorerTest {
      */
     private class EventCaptor implements EventStreamTransformation {
         List<MotionEvent> mEvents = new ArrayList<>();
+        List<MotionEvent> mRawEvents = new ArrayList<>();
 
         @Override
         public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
             mEvents.add(0, event.copy());
+            mRawEvents.add(0, rawEvent.copy());
         }
 
         @Override
@@ -461,6 +465,45 @@ public class TouchExplorerTest {
                 AccessibilityService.GESTURE_3_FINGER_SWIPE_DOWN);
     }
 
+    @Test
+    public void testSendHoverExitIfNeeded_lastSentHoverExit_noActionNeeded() {
+        // Prep TouchState so that the last injected hover event was a HOVER_EXIT
+        mTouchExplorer.getState().onInjectedMotionEvent(hoverExitEvent());
+
+        mTouchExplorer.sendHoverExitAndTouchExplorationGestureEndIfNeeded(/*policyFlags=*/0);
+
+        assertNoCapturedEvents();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_EVENT_DISPATCHER_RAW_EVENT)
+    public void testSendHoverExitIfNeeded_lastSentHoverEnter_sendsHoverExit_withCorrectRawEvent() {
+        final MotionEvent rawEvent = downEvent();
+        final MotionEvent modifiedEvent = hoverEnterEvent();
+        // Use different display IDs just so that we can differentiate between the raw event and
+        // the modified event later during test assertions.
+        final int rawDisplayId = 123;
+        final int modifiedDisplayId = 456;
+        rawEvent.setDisplayId(rawDisplayId);
+        modifiedEvent.setDisplayId(modifiedDisplayId);
+        // Prep TouchState to track the last received modified and raw events
+        mTouchExplorer.getState().onReceivedMotionEvent(modifiedEvent, rawEvent, /*policyFlags=*/0);
+        // Prep TouchState so that the last injected hover event was not a HOVER_EXIT
+        mTouchExplorer.getState().onInjectedMotionEvent(modifiedEvent);
+
+        mTouchExplorer.sendHoverExitAndTouchExplorationGestureEndIfNeeded(/*policyFlags=*/0);
+
+        assertThat(getCapturedEvents().size()).isEqualTo(1);
+        assertThat(getCapturedRawEvents().size()).isEqualTo(1);
+        MotionEvent sentEvent = getCapturedEvents().get(0);
+        MotionEvent sentRawEvent = getCapturedRawEvents().get(0);
+        // TouchExplorer should send ACTION_HOVER_EXIT built from the last injected hover event
+        assertThat(sentEvent.getAction()).isEqualTo(ACTION_HOVER_EXIT);
+        assertThat(sentEvent.getDisplayId()).isEqualTo(modifiedDisplayId);
+        // ... while passing along the original raw (unmodified) event
+        assertThat(sentRawEvent.getDisplayId()).isEqualTo(rawDisplayId);
+    }
+
     /**
      * Used to play back event data of a gesture by parsing the log into MotionEvents and sending
      * them to TouchExplorer.
@@ -630,6 +673,10 @@ public class TouchExplorerTest {
         return ((EventCaptor) mCaptor).mEvents;
     }
 
+    private List<MotionEvent> getCapturedRawEvents() {
+        return ((EventCaptor) mCaptor).mRawEvents;
+    }
+
     private MotionEvent cancelEvent() {
         mLastDownTime = SystemClock.uptimeMillis();
         return fromTouchscreen(
@@ -686,6 +733,20 @@ public class TouchExplorerTest {
         final MotionEvent event = MotionEvent.obtainNoHistory(mLastEvent);
         event.setAction(action);
         return event;
+    }
+
+    private MotionEvent hoverEnterEvent() {
+        mLastDownTime = SystemClock.uptimeMillis();
+        return fromTouchscreen(
+                MotionEvent.obtain(
+                        mLastDownTime, mLastDownTime, ACTION_HOVER_ENTER, DEFAULT_X, DEFAULT_Y, 0));
+    }
+
+    private MotionEvent hoverExitEvent() {
+        mLastDownTime = SystemClock.uptimeMillis();
+        return fromTouchscreen(
+                MotionEvent.obtain(
+                        mLastDownTime, mLastDownTime, ACTION_HOVER_EXIT, DEFAULT_X, DEFAULT_Y, 0));
     }
 
     private void moveEachPointers(MotionEvent event, PointF... points) {

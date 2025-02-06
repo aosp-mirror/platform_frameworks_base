@@ -44,7 +44,6 @@ import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.Application;
-import android.app.LoadedApk;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.appwidget.AppWidgetHostView;
@@ -160,6 +159,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -720,6 +720,11 @@ public class RemoteViews implements Parcelable, Filter {
             // Nothing to visit by default.
         }
 
+        /** See {@link RemoteViews#visitIcons(Consumer)}. **/
+        public void visitIcons(@NonNull Consumer<Icon> visitor) {
+            // Nothing to visit by default.
+        }
+
         public abstract void writeToParcel(Parcel dest, int flags);
 
         /**
@@ -846,6 +851,29 @@ public class RemoteViews implements Parcelable, Filter {
         }
         if (mPortrait != null) {
             mPortrait.visitUris(visitor);
+        }
+    }
+
+    /**
+     * Note all {@link Icon} that are referenced internally.
+     * @hide
+     */
+    public void visitIcons(@NonNull Consumer<Icon> visitor) {
+        if (mActions != null) {
+            for (int i = 0; i < mActions.size(); i++) {
+                mActions.get(i).visitIcons(visitor);
+            }
+        }
+        if (mSizedRemoteViews != null) {
+            for (int i = 0; i < mSizedRemoteViews.size(); i++) {
+                mSizedRemoteViews.get(i).visitIcons(visitor);
+            }
+        }
+        if (mLandscape != null) {
+            mLandscape.visitIcons(visitor);
+        }
+        if (mPortrait != null) {
+            mPortrait.visitIcons(visitor);
         }
     }
 
@@ -1310,6 +1338,19 @@ public class RemoteViews implements Parcelable, Filter {
             }
 
             mItems.visitUris(visitor);
+        }
+
+        @Override
+        public void visitIcons(Consumer<Icon> visitor) {
+            if (mItems == null) {
+                RemoteCollectionItems cachedItems = mCollectionCache.getItemsForId(mIntentId);
+                if (cachedItems != null) {
+                    cachedItems.visitIcons(visitor);
+                }
+                return;
+            }
+
+            mItems.visitIcons(visitor);
         }
 
         @Override
@@ -2386,7 +2427,7 @@ public class RemoteViews implements Parcelable, Filter {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         ArrayList<Bitmap> mBitmaps;
         SparseIntArray mBitmapHashes;
-        int mBitmapMemory = -1;
+        long mBitmapMemory = -1;
 
         public BitmapCache() {
             mBitmaps = new ArrayList<>();
@@ -2450,7 +2491,7 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
-        public int getBitmapMemory() {
+        public long getBitmapMemory() {
             if (mBitmapMemory < 0) {
                 mBitmapMemory = 0;
                 int count = mBitmaps.size();
@@ -2734,6 +2775,13 @@ public class RemoteViews implements Parcelable, Filter {
                     if (icon != null) visitIconUri(icon, visitor);
                     break;
                 // TODO(b/281044385): Should we do anything about type BUNDLE?
+            }
+        }
+
+        @Override
+        public void visitIcons(@NonNull Consumer<Icon> visitor) {
+            if (mType == ICON && getParameterValue(null) instanceof Icon icon) {
+                visitor.accept(icon);
             }
         }
     }
@@ -4137,6 +4185,11 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public void visitUris(@NonNull Consumer<Uri> visitor) {
             mNestedViews.visitUris(visitor);
+        }
+
+        @Override
+        public void visitIcons(@NonNull Consumer<Icon> visitor) {
+            mNestedViews.visitIcons(visitor);
         }
 
         @Override
@@ -6393,12 +6446,40 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Returns an estimate of the bitmap heap memory usage for this RemoteViews.
+     * Returns an estimate of the bitmap heap memory usage by setBitmap and setImageViewBitmap in
+     * this RemoteViews.
+     *
+     * @hide
      */
-    /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public int estimateMemoryUsage() {
+    public long estimateMemoryUsage() {
         return mBitmapCache.getBitmapMemory();
+    }
+
+    /**
+     * Returns an estimate of bitmap heap memory usage by setIcon and setImageViewIcon in this
+     * RemoteViews. Note that this function will count duplicate Icons in its estimate.
+     *
+     * @hide
+     */
+    public long estimateIconMemoryUsage() {
+        AtomicLong total = new AtomicLong(0);
+        visitIcons(icon -> {
+            if (icon.getType() == Icon.TYPE_BITMAP || icon.getType() == Icon.TYPE_ADAPTIVE_BITMAP) {
+                total.addAndGet(icon.getBitmap().getAllocationByteCount());
+            }
+        });
+        return total.get();
+    }
+
+    /**
+     * Returns an estimate of the bitmap heap memory usage for all Icon and Bitmap actions in this
+     * RemoteViews.
+     *
+     * @hide
+     */
+    public long estimateTotalBitmapMemoryUsage() {
+        return estimateMemoryUsage() + estimateIconMemoryUsage();
     }
 
     /**
@@ -8484,8 +8565,14 @@ public class RemoteViews implements Parcelable, Filter {
                 return context;
             }
             try {
-                LoadedApk.checkAndUpdateApkPaths(mApplication);
-                Context applicationContext = context.createApplicationContext(mApplication,
+                // Use PackageManager as the source of truth for application information, rather
+                // than the parceled ApplicationInfo provided by the app.
+                ApplicationInfo sanitizedApplication =
+                        context.getPackageManager().getApplicationInfoAsUser(
+                                mApplication.packageName, 0,
+                                UserHandle.getUserId(mApplication.uid));
+                Context applicationContext = context.createApplicationContext(
+                        sanitizedApplication,
                         Context.CONTEXT_RESTRICTED);
                 // Get the correct apk paths while maintaining the current context's configuration.
                 return applicationContext.createConfigurationContext(
@@ -9763,6 +9850,15 @@ public class RemoteViews implements Parcelable, Filter {
                 view.visitUris(visitor);
             }
         }
+
+        /**
+         * See {@link RemoteViews#visitIcons(Consumer)}.
+         */
+        private void visitIcons(@NonNull Consumer<Icon> visitor) {
+            for (RemoteViews view : mViews) {
+                view.visitIcons(visitor);
+            }
+        }
     }
 
     /**
@@ -9986,6 +10082,7 @@ public class RemoteViews implements Parcelable, Filter {
         if (mApplication != null) {
             // mApplication may be null if this was created with DrawInstructions constructor.
             out.write(RemoteViewsProto.PACKAGE_NAME, mApplication.packageName);
+            out.write(RemoteViewsProto.UID, mApplication.uid);
         }
         Resources appResources = getContextForResourcesEnsuringCorrectCachedApkPaths(
                 context).getResources();
@@ -10067,6 +10164,7 @@ public class RemoteViews implements Parcelable, Filter {
             int mApplyFlags = 0;
             long mProviderInstanceId = -1;
             String mPackageName = null;
+            Integer mUid = null;
             SizeF mIdealSize = null;
             String mLayoutResName = null;
             String mLightBackgroundResName = null;
@@ -10088,6 +10186,9 @@ public class RemoteViews implements Parcelable, Filter {
                         break;
                     case (int) RemoteViewsProto.PACKAGE_NAME:
                         ref.mPackageName = in.readString(RemoteViewsProto.PACKAGE_NAME);
+                        break;
+                    case (int) RemoteViewsProto.UID:
+                        ref.mUid = in.readInt(RemoteViewsProto.UID);
                         break;
                     case (int) RemoteViewsProto.IDEAL_SIZE:
                         final long idealSizeToken = in.start(RemoteViewsProto.IDEAL_SIZE);
@@ -10190,8 +10291,9 @@ public class RemoteViews implements Parcelable, Filter {
             Resources appResources = null;
             if (!ref.mHasDrawInstructions) {
                 checkProtoResultNotNull(ref.mPackageName, "No application info");
-                rv.mApplication = context.getPackageManager().getApplicationInfo(ref.mPackageName,
-                        /* flags= */ 0);
+                checkProtoResultNotNull(ref.mUid, "No uid");
+                rv.mApplication = context.getPackageManager().getApplicationInfoAsUser(
+                        ref.mPackageName, /* flags= */ 0, UserHandle.getUserId(ref.mUid));
                 appContext = rv.getContextForResourcesEnsuringCorrectCachedApkPaths(context);
                 appResources = appContext.getResources();
 

@@ -46,6 +46,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.Executors
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -121,6 +122,12 @@ class RecordIssueTileTest : SysuiTestCase() {
                 delegateFactory,
                 recordingController,
             )
+    }
+
+    @After
+    fun teardown() {
+        tile.destroy()
+        testableLooper.processAllMessages()
     }
 
     @Test

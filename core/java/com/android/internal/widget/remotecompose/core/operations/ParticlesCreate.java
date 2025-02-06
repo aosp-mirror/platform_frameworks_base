@@ -39,7 +39,7 @@ import java.util.List;
  * for constructing the particles
  */
 public class ParticlesCreate extends Operation implements VariableSupport {
-    private static final int OP_CODE = Operations.PARTICLE_CREATE;
+    private static final int OP_CODE = Operations.PARTICLE_DEFINE;
     private static final String CLASS_NAME = "ParticlesCreate";
     private final int mId;
     private final float[][] mEquations;

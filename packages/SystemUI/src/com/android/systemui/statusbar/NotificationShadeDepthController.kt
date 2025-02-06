@@ -22,7 +22,6 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.Configuration
 import android.os.SystemClock
-import android.os.Trace
 import android.util.IndentingPrintWriter
 import android.util.Log
 import android.util.MathUtils
@@ -33,12 +32,17 @@ import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.app.animation.Interpolators
+import com.android.app.tracing.coroutines.TrackTracer
 import com.android.systemui.Dumpable
+import com.android.systemui.Flags
+import com.android.systemui.Flags.spatialModelAppPushback
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.shade.ShadeExpansionListener
 import com.android.systemui.shared.Flags.ambientAod
@@ -51,8 +55,9 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.WallpaperController
 import com.android.systemui.window.domain.interactor.WindowRootViewBlurInteractor
-import com.android.systemui.window.flag.WindowBlurFlag
+import com.android.wm.shell.appzoomout.AppZoomOut
 import java.io.PrintWriter
+import java.util.Optional
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.sign
@@ -71,14 +76,16 @@ constructor(
     private val blurUtils: BlurUtils,
     private val biometricUnlockController: BiometricUnlockController,
     private val keyguardStateController: KeyguardStateController,
+    private val keyguardInteractor: KeyguardInteractor,
     private val choreographer: Choreographer,
     private val wallpaperController: WallpaperController,
     private val notificationShadeWindowController: NotificationShadeWindowController,
     private val dozeParameters: DozeParameters,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val splitShadeStateController: SplitShadeStateController,
     private val windowRootViewBlurInteractor: WindowRootViewBlurInteractor,
     @Application private val applicationScope: CoroutineScope,
+    private val appZoomOutOptional: Optional<AppZoomOut>,
     dumpManager: DumpManager,
     configurationController: ConfigurationController,
 ) : ShadeExpansionListener, Dumpable {
@@ -226,7 +233,7 @@ constructor(
         val zoomOut = blurRadiusToZoomOut(blurRadius = shadeRadius)
         // Make blur be 0 if it is necessary to stop blur effect.
         if (scrimsVisible) {
-            if (!WindowBlurFlag.isEnabled) {
+            if (!Flags.notificationShadeBlur()) {
                 blur = 0
             }
         }
@@ -254,7 +261,9 @@ constructor(
     }
 
     private val shouldBlurBeOpaque: Boolean
-        get() = if (WindowBlurFlag.isEnabled) false else scrimsVisible && !blursDisabledForAppLaunch
+        get() =
+            if (Flags.notificationShadeBlur()) false
+            else scrimsVisible && !blursDisabledForAppLaunch
 
     /** Callback that updates the window blur value and is called only once per frame. */
     @VisibleForTesting
@@ -263,7 +272,7 @@ constructor(
             updateScheduled = false
             val (blur, zoomOutFromShadeRadius) = computeBlurAndZoomOut()
             val opaque = shouldBlurBeOpaque
-            Trace.traceCounter(Trace.TRACE_TAG_APP, "shade_blur_radius", blur)
+            TrackTracer.instantForGroup("shade", "shade_blur_radius", blur)
             blurUtils.applyBlur(root.viewRootImpl, blur, opaque)
             onBlurApplied(blur, zoomOutFromShadeRadius)
         }
@@ -271,6 +280,12 @@ constructor(
     private fun onBlurApplied(appliedBlurRadius: Int, zoomOutFromShadeRadius: Float) {
         lastAppliedBlur = appliedBlurRadius
         wallpaperController.setNotificationShadeZoom(zoomOutFromShadeRadius)
+        if (spatialModelAppPushback()) {
+            appZoomOutOptional.ifPresent { appZoomOut ->
+                appZoomOut.setProgress(zoomOutFromShadeRadius)
+            }
+            keyguardInteractor.setZoomOut(zoomOutFromShadeRadius)
+        }
         listeners.forEach {
             it.onWallpaperZoomOutChanged(zoomOutFromShadeRadius)
             it.onBlurRadiusChanged(appliedBlurRadius)
@@ -377,14 +392,14 @@ constructor(
     }
 
     private fun initBlurListeners() {
-        if (!WindowBlurFlag.isEnabled) return
+        if (!Flags.bouncerUiRevamp()) return
 
         applicationScope.launch {
             Log.d(TAG, "Starting coroutines for window root view blur")
             windowRootViewBlurInteractor.onBlurAppliedEvent.collect { appliedBlurRadius ->
                 if (updateScheduled) {
                     // Process the blur applied event only if we scheduled the update
-                    Trace.traceCounter(Trace.TRACE_TAG_APP, "shade_blur_radius", appliedBlurRadius)
+                    TrackTracer.instantForGroup("shade", "shade_blur_radius", appliedBlurRadius)
                     updateScheduled = false
                     onBlurApplied(appliedBlurRadius, zoomOutCalculatedFromShadeRadius)
                 } else {
@@ -512,7 +527,7 @@ constructor(
     private fun scheduleUpdate() {
         val (blur, zoomOutFromShadeRadius) = computeBlurAndZoomOut()
         zoomOutCalculatedFromShadeRadius = zoomOutFromShadeRadius
-        if (WindowBlurFlag.isEnabled) {
+        if (Flags.bouncerUiRevamp() || Flags.glanceableHubBlurredBackground()) {
             updateScheduled =
                 windowRootViewBlurInteractor.requestBlurForShade(blur, shouldBlurBeOpaque)
             return

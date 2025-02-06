@@ -24,7 +24,7 @@ import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.domain.interactor.remoteInputInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.notification.emptyshade.ui.viewmodel.emptyShadeViewModelFactory
-import com.android.systemui.statusbar.notification.footer.ui.viewmodel.footerViewModel
+import com.android.systemui.statusbar.notification.footer.ui.viewmodel.footerViewModelFactory
 import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.notificationShelfViewModel
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationStackInteractor
@@ -35,7 +35,7 @@ val Kosmos.notificationListViewModel by Fixture {
     NotificationListViewModel(
         notificationShelfViewModel,
         hideListViewModel,
-        Optional.of(footerViewModel),
+        footerViewModelFactory,
         emptyShadeViewModelFactory,
         Optional.of(notificationListLoggerViewModel),
         activeNotificationsInteractor,

@@ -141,8 +141,6 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         STRIPPED.putInt("STRIPPED", 1);
     }
 
-    private boolean isFirstRetrievedFromABundle = false;
-
     /**
      * Constructs a new, empty Bundle.
      */
@@ -400,7 +398,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         if ((bundle.mFlags & FLAG_HAS_BINDERS_KNOWN) == 0) {
             mFlags &= ~FLAG_HAS_BINDERS_KNOWN;
         }
-        mFlags |= bundle.mFlags & FLAG_HAS_INTENT;
+        setHasIntent(hasIntent() || bundle.hasIntent());
     }
 
     /**
@@ -467,7 +465,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @hide
      */
     public boolean hasIntent() {
-        return (mFlags & FLAG_HAS_INTENT) != 0;
+        return super.hasIntent();
     }
 
     /** {@hide} */
@@ -593,7 +591,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         mFlags &= ~FLAG_HAS_FDS_KNOWN;
         mFlags &= ~FLAG_HAS_BINDERS_KNOWN;
         if (intentClass != null && intentClass.isInstance(value)) {
-            mFlags |= FLAG_HAS_INTENT;
+            setHasIntent(true);
         }
     }
 
@@ -1022,27 +1020,10 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
             return null;
         }
         try {
-            Bundle bundle = (Bundle) o;
-            bundle.setClassLoaderSameAsContainerBundleWhenRetrievedFirstTime(this);
-            return bundle;
+            return (Bundle) o;
         } catch (ClassCastException e) {
             typeWarning(key, o, "Bundle", e);
             return null;
-        }
-    }
-
-    /**
-     * Set the ClassLoader of a bundle to its container bundle. This is necessary so that when a
-     * bundle's ClassLoader is changed, it can be propagated to its children. Do this only when it
-     * is retrieved from the container bundle first time though. Once it is accessed outside of its
-     * container, its ClassLoader should no longer be changed by its container anymore.
-     *
-     * @param containerBundle the bundle this bundle is retrieved from.
-     */
-    void setClassLoaderSameAsContainerBundleWhenRetrievedFirstTime(BaseBundle containerBundle) {
-        if (!isFirstRetrievedFromABundle) {
-            setClassLoader(containerBundle.getClassLoader());
-            isFirstRetrievedFromABundle = true;
         }
     }
 

@@ -18,7 +18,6 @@ package com.android.wm.shell.compatui.impl
 
 
 import android.graphics.Point
-import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.testing.AndroidTestingRunner
 import android.view.View
 import androidx.test.filters.SmallTest
@@ -29,7 +28,6 @@ import com.android.wm.shell.compatui.api.CompatUISpec
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -44,9 +42,6 @@ import org.junit.runner.RunWith
 class DefaultCompatUIRepositoryTest {
 
     lateinit var repository: CompatUIRepository
-
-    @get:Rule
-    val mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
 
     @Before
     fun setUp() {

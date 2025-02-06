@@ -16,7 +16,6 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import junit.framework.Assert.assertEquals
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -53,7 +52,6 @@ class MessageContainerControllerTest : SysuiTestCase() {
     lateinit var workProfileData: WorkProfileMessageController.WorkProfileFirstRunData
 
     @Before
-    @ExperimentalCoroutinesApi
     fun setup() {
         MockitoAnnotations.initMocks(this)
         messageContainer =

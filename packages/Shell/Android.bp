@@ -29,6 +29,7 @@ android_app {
         "device_policy_aconfig_flags_lib",
     ],
     flags_packages: [
+        "android.companion.virtualdevice.flags-aconfig",
         "android.security.flags-aconfig",
         "android.permission.flags-aconfig",
         "wear_aconfig_declarations",
@@ -55,6 +56,7 @@ android_library {
     platform_apis: true,
     manifest: "AndroidManifest.xml",
     flags_packages: [
+        "android.companion.virtualdevice.flags-aconfig",
         "android.security.flags-aconfig",
         "android.permission.flags-aconfig",
     ],

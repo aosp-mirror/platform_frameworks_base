@@ -137,3 +137,10 @@ flag {
     bug: "335874198"
     is_exported: true
 }
+
+flag {
+    name: "toolkit_initial_touch_boost"
+    namespace: "toolkit"
+    description: "Feature flag to update initial touch boost logic"
+    bug: "393004744"
+}

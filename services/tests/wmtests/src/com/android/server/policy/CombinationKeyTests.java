@@ -23,6 +23,7 @@ import static com.android.server.policy.PhoneWindowManager.POWER_VOLUME_UP_BEHAV
 import static com.android.server.policy.PhoneWindowManager.POWER_VOLUME_UP_BEHAVIOR_MUTE;
 
 import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.Presubmit;
 import android.view.ViewConfiguration;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -38,6 +39,7 @@ import org.junit.runner.RunWith;
  * Build/Install/Run:
  *  atest WmTests:CombinationKeyTests
  */
+@Presubmit
 @MediumTest
 @RunWith(AndroidJUnit4.class)
 @DisableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER_MULTI_KEY_GESTURES)

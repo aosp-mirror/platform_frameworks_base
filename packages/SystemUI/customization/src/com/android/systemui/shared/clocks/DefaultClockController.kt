@@ -284,6 +284,8 @@ class DefaultClockController(
         override fun onPositionUpdated(fromLeft: Int, direction: Int, fraction: Float) {}
 
         override fun onPositionUpdated(distance: Float, fraction: Float) {}
+
+        override fun onFidgetTap(x: Float, y: Float) {}
     }
 
     inner class LargeClockAnimations(

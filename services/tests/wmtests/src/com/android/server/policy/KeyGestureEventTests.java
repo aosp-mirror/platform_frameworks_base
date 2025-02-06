@@ -176,10 +176,10 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                         KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL,
                         KeyEvent.KEYCODE_NOTIFICATION,
                         0},
-                {"Meta + Ctrl + S -> Take Screenshot",
-                        new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_S},
+                {"Meta + S -> Take Screenshot",
+                        new int[]{META_KEY, KeyEvent.KEYCODE_S},
                         KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT, KeyEvent.KEYCODE_S,
-                        META_ON | CTRL_ON},
+                        META_ON},
                 {"Meta + / -> Open Shortcut Helper", new int[]{META_KEY, KeyEvent.KEYCODE_SLASH},
                         KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER,
                         KeyEvent.KEYCODE_SLASH, META_ON},
@@ -544,17 +544,6 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
     }
 
     @Test
-    public void testKeyGestureSplitscreenFocus() {
-        Assert.assertTrue(sendKeyGestureEventComplete(
-                KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT));
-        mPhoneWindowManager.assertSetSplitscreenFocus(true);
-
-        Assert.assertTrue(sendKeyGestureEventComplete(
-                KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT));
-        mPhoneWindowManager.assertSetSplitscreenFocus(false);
-    }
-
-    @Test
     public void testKeyGestureShortcutHelper() {
         Assert.assertTrue(sendKeyGestureEventComplete(
                 KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER));
@@ -755,6 +744,18 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
         Assert.assertTrue(
                 sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK));
         mPhoneWindowManager.assertTalkBack(false);
+    }
+
+    @Test
+    @EnableFlags(com.android.hardware.input.Flags.FLAG_ENABLE_VOICE_ACCESS_KEY_GESTURES)
+    public void testKeyGestureToggleVoiceAccess() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_VOICE_ACCESS));
+        mPhoneWindowManager.assertVoiceAccess(true);
+
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_VOICE_ACCESS));
+        mPhoneWindowManager.assertVoiceAccess(false);
     }
 
     @Test

@@ -21,6 +21,7 @@ import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.ShadeModule
@@ -71,3 +72,19 @@ val Kosmos.shadeInteractorImpl by
             shadeModeInteractor = shadeModeInteractor,
         )
     }
+var Kosmos.notificationElement: NotificationShadeElement by
+    Kosmos.Fixture {
+        NotificationShadeElement(shadeInteractor, testScope.backgroundScope.coroutineContext)
+    }
+var Kosmos.qsElement: QSShadeElement by
+    Kosmos.Fixture { QSShadeElement(shadeInteractor, testScope.backgroundScope.coroutineContext) }
+val Kosmos.shadeExpandedStateInteractor by
+    Kosmos.Fixture {
+        ShadeExpandedStateInteractorImpl(
+            shadeInteractor,
+            testScope.backgroundScope,
+            notificationElement,
+            qsElement,
+        )
+    }
+val Kosmos.fakeShadeExpandedStateInteractor by Kosmos.Fixture { FakeShadeExpandedStateInteractor() }

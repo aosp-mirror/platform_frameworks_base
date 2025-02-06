@@ -27,18 +27,21 @@ import android.graphics.RectF;
 import android.view.Surface;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.IconNormalizer;
 import com.android.wm.shell.R;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
+import com.android.wm.shell.shared.bubbles.BubbleDropTargetBoundsProvider;
+import com.android.wm.shell.shared.bubbles.DeviceConfig;
 
 /**
  * Keeps track of display size, configuration, and specific bubble sizes. One place for all
  * placement and positioning calculations to refer to.
  */
-public class BubblePositioner {
+public class BubblePositioner implements BubbleDropTargetBoundsProvider {
 
     /** The screen edge the bubble stack is pinned to */
     public enum StackPinnedEdge {
@@ -87,6 +90,7 @@ public class BubblePositioner {
     private int mExpandedViewLargeScreenWidth;
     private int mExpandedViewLargeScreenInsetClosestEdge;
     private int mExpandedViewLargeScreenInsetFurthestEdge;
+    private int mExpandedViewBubbleBarWidth;
 
     private int mOverflowWidth;
     private int mExpandedViewPadding;
@@ -98,6 +102,7 @@ public class BubblePositioner {
     private int mManageButtonHeight;
     private int mOverflowHeight;
     private int mMinimumFlyoutWidthLargeScreen;
+    private int mBubbleBarExpandedViewDropTargetPadding;
 
     private PointF mRestingStackPosition;
 
@@ -158,12 +163,15 @@ public class BubblePositioner {
         mBubbleOffscreenAmount = res.getDimensionPixelSize(R.dimen.bubble_stack_offscreen);
         mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
         mBubbleElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
+        mExpandedViewBubbleBarWidth = Math.min(
+                res.getDimensionPixelSize(R.dimen.bubble_bar_expanded_view_width),
+                mPositionRect.width() - 2 * mExpandedViewPadding
+        );
+        mBubbleBarExpandedViewDropTargetPadding = res.getDimensionPixelSize(
+                R.dimen.bubble_bar_expanded_view_drop_target_padding);
 
         if (mShowingInBubbleBar) {
-            mExpandedViewLargeScreenWidth = Math.min(
-                    res.getDimensionPixelSize(R.dimen.bubble_bar_expanded_view_width),
-                    mPositionRect.width() - 2 * mExpandedViewPadding
-            );
+            mExpandedViewLargeScreenWidth = mExpandedViewBubbleBarWidth;
         } else if (mDeviceConfig.isSmallTablet()) {
             mExpandedViewLargeScreenWidth = (int) (bounds.width()
                     * EXPANDED_VIEW_SMALL_TABLET_WIDTH_PERCENT);
@@ -756,20 +764,20 @@ public class BubblePositioner {
      * is being shown, for a normal bubble.
      */
     public PointF getDefaultStartPosition() {
-        return getDefaultStartPosition(false /* isAppBubble */);
+        return getDefaultStartPosition(false /* isNoteBubble */);
     }
 
     /**
      * The stack position to use if we don't have a saved location or if user education
      * is being shown.
      *
-     * @param isAppBubble whether this start position is for an app bubble or not.
+     * @param isNoteBubble whether this start position is for a note bubble or not.
      */
-    public PointF getDefaultStartPosition(boolean isAppBubble) {
+    public PointF getDefaultStartPosition(boolean isNoteBubble) {
         // Normal bubbles start on the left if we're in LTR, right otherwise.
         // TODO (b/294284894): update language around "app bubble" here
         // App bubbles start on the right in RTL, left otherwise.
-        final boolean startOnLeft = isAppBubble ? mDeviceConfig.isRtl() : !mDeviceConfig.isRtl();
+        final boolean startOnLeft = isNoteBubble ? mDeviceConfig.isRtl() : !mDeviceConfig.isRtl();
         return getStartPosition(startOnLeft ? StackPinnedEdge.LEFT : StackPinnedEdge.RIGHT);
     }
 
@@ -888,7 +896,7 @@ public class BubblePositioner {
      * How wide the expanded view should be when showing from the bubble bar.
      */
     public int getExpandedViewWidthForBubbleBar(boolean isOverflow) {
-        return isOverflow ? mOverflowWidth : mExpandedViewLargeScreenWidth;
+        return isOverflow ? mOverflowWidth : mExpandedViewBubbleBarWidth;
     }
 
     /**
@@ -961,5 +969,15 @@ public class BubblePositioner {
         }
         int top = getExpandedViewBottomForBubbleBar() - height;
         out.offsetTo(left, top);
+    }
+
+    @NonNull
+    @Override
+    public Rect getBubbleBarExpandedViewDropTargetBounds(boolean onLeft) {
+        Rect bounds = new Rect();
+        getBubbleBarExpandedViewBounds(onLeft, false, bounds);
+        bounds.inset(mBubbleBarExpandedViewDropTargetPadding,
+                mBubbleBarExpandedViewDropTargetPadding);
+        return bounds;
     }
 }

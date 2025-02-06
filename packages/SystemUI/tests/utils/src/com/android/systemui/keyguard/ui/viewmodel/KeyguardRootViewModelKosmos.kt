@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.communal.domain.interactor.communalInteractor
@@ -31,7 +29,7 @@ import com.android.systemui.statusbar.notification.icon.ui.viewmodel.notificatio
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.dozeParameters
 import com.android.systemui.statusbar.phone.screenOffAnimationController
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.android.systemui.wallpapers.domain.interactor.wallpaperFocalAreaInteractor
 
 val Kosmos.keyguardRootViewModel by Fixture {
     KeyguardRootViewModel(
@@ -56,9 +54,12 @@ val Kosmos.keyguardRootViewModel by Fixture {
         aodToGoneTransitionViewModel = aodToGoneTransitionViewModel,
         aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
         aodToOccludedTransitionViewModel = aodToOccludedTransitionViewModel,
+        aodToPrimaryBouncerTransitionViewModel = aodToPrimaryBouncerTransitionViewModel,
+        dozingToDreamingTransitionViewModel = dozingToDreamingTransitionViewModel,
         dozingToGoneTransitionViewModel = dozingToGoneTransitionViewModel,
         dozingToLockscreenTransitionViewModel = dozingToLockscreenTransitionViewModel,
         dozingToOccludedTransitionViewModel = dozingToOccludedTransitionViewModel,
+        dozingToPrimaryBouncerTransitionViewModel = dozingToPrimaryBouncerTransitionViewModel,
         dreamingToAodTransitionViewModel = dreamingToAodTransitionViewModel,
         dreamingToGoneTransitionViewModel = dreamingToGoneTransitionViewModel,
         dreamingToLockscreenTransitionViewModel = dreamingToLockscreenTransitionViewModel,
@@ -88,5 +89,6 @@ val Kosmos.keyguardRootViewModel by Fixture {
         screenOffAnimationController = screenOffAnimationController,
         aodBurnInViewModel = aodBurnInViewModel,
         shadeInteractor = shadeInteractor,
+        wallpaperFocalAreaInteractor = wallpaperFocalAreaInteractor,
     )
 }

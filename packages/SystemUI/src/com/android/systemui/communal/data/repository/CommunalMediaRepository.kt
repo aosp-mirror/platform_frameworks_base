@@ -52,7 +52,6 @@ constructor(
     override val mediaModel: Flow<CommunalMediaModel> =
         _mediaModel.logDiffsForTable(
             tableLogBuffer = tableLogBuffer,
-            columnPrefix = "",
             initialValue = CommunalMediaModel.INACTIVE,
         )
 

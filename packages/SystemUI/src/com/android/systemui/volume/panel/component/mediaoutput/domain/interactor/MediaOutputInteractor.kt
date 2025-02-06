@@ -37,7 +37,6 @@ import com.android.systemui.volume.panel.shared.model.wrapInResult
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -54,7 +53,6 @@ import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.withContext
 
 /** Provides observable models about the current media session state. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class MediaOutputInteractor
 @Inject

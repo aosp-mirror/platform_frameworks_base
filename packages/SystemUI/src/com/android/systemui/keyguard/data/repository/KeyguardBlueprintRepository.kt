@@ -18,7 +18,6 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.os.Handler
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
@@ -26,6 +25,9 @@ import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint.Companion.DEFAULT
 import com.android.systemui.keyguard.ui.view.layout.blueprints.KeyguardBlueprintModule
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Config
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.Logger
+import com.android.systemui.log.dagger.KeyguardBlueprintLog
 import com.android.systemui.util.ThreadAssert
 import java.io.PrintWriter
 import java.util.TreeMap
@@ -51,7 +53,10 @@ constructor(
     blueprints: Set<@JvmSuppressWildcards KeyguardBlueprint>,
     @Main val handler: Handler,
     val assert: ThreadAssert,
+    @KeyguardBlueprintLog log: LogBuffer,
 ) {
+    private val logger = Logger(log, "KeyguardBlueprintRepository")
+
     // This is TreeMap so that we can order the blueprints and assign numerical values to the
     // blueprints in the adb tool.
     private val blueprintIdMap: TreeMap<String, KeyguardBlueprint> =
@@ -69,11 +74,12 @@ constructor(
     fun applyBlueprint(blueprintId: String?): Boolean {
         val blueprint = blueprintIdMap[blueprintId]
         if (blueprint == null) {
-            Log.e(
-                TAG,
-                "Could not find blueprint with id: $blueprintId. " +
+            logger.e({
+                "Could not find blueprint with id: $str1. " +
                     "Perhaps it was not added to KeyguardBlueprintModule?"
-            )
+            }) {
+                str1 = blueprintId
+            }
             return false
         }
 
@@ -99,7 +105,9 @@ constructor(
                 targetTransitionConfig?.let {
                     val success = refreshTransition.tryEmit(it)
                     if (!success) {
-                        Log.e(TAG, "refreshBlueprint: Failed to emit blueprint refresh: $it")
+                        logger.e({ "refreshBlueprint: Failed to emit blueprint refresh: $str1" }) {
+                            str1 = "$it"
+                        }
                     }
                 }
                 targetTransitionConfig = null
@@ -110,15 +118,13 @@ constructor(
         if ((targetTransitionConfig?.type?.priority ?: Int.MIN_VALUE) < config.type.priority) {
             if (targetTransitionConfig == null) scheduleCallback()
             targetTransitionConfig = config
+        } else {
+            logger.i({ "Skipping low priority transition: $str1" }) { str1 = "$config" }
         }
     }
 
     /** Prints all available blueprints to the PrintWriter. */
     fun printBlueprints(pw: PrintWriter) {
         blueprintIdMap.onEachIndexed { index, entry -> pw.println("$index: ${entry.key}") }
-    }
-
-    companion object {
-        private const val TAG = "KeyguardBlueprintRepository"
     }
 }

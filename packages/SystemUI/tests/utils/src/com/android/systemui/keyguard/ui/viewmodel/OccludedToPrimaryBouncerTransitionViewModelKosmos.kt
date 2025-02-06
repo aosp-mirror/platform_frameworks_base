@@ -25,5 +25,6 @@ val Kosmos.occludedToPrimaryBouncerTransitionViewModel by Fixture {
     OccludedToPrimaryBouncerTransitionViewModel(
         animationFlow = keyguardTransitionAnimationFlow,
         blurConfig = blurConfig,
+        shadeDependentFlows = shadeDependentFlows,
     )
 }

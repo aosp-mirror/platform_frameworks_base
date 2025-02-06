@@ -31,6 +31,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.EventStreamTransformation;
+import com.android.server.accessibility.Flags;
 import com.android.server.policy.WindowManagerPolicy;
 
 /**
@@ -297,7 +298,8 @@ class EventDispatcher {
                 sendMotionEvent(
                         prototype,
                         action,
-                        mState.getLastReceivedEvent(),
+                        Flags.eventDispatcherRawEvent() ? mState.getLastReceivedRawEvent() :
+                                mState.getLastReceivedEvent(),
                         pointerIdBits,
                         policyFlags);
             }
@@ -327,7 +329,8 @@ class EventDispatcher {
                 sendMotionEvent(
                         event,
                         action,
-                        mState.getLastReceivedEvent(),
+                        Flags.eventDispatcherRawEvent() ? mState.getLastReceivedRawEvent() :
+                                mState.getLastReceivedEvent(),
                         pointerIdBits,
                         policyFlags);
             }
@@ -394,8 +397,10 @@ class EventDispatcher {
                 continue;
             }
             final int action = computeInjectionAction(MotionEvent.ACTION_POINTER_UP, i);
-            sendMotionEvent(
-                    prototype, action, mState.getLastReceivedEvent(), pointerIdBits, policyFlags);
+            sendMotionEvent(prototype, action,
+                    Flags.eventDispatcherRawEvent() ? mState.getLastReceivedRawEvent() :
+                            mState.getLastReceivedEvent(),
+                    pointerIdBits, policyFlags);
             pointerIdBits &= ~(1 << pointerId);
         }
     }

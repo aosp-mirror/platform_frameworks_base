@@ -323,6 +323,10 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
     fun logRemoveEntryAfterExpand(entry: NotificationEntry) {
         buffer.log(TAG, VERBOSE, { str1 = entry.logKey }, { "remove entry after expand: $str1" })
     }
+
+    fun logDroppedHuns(entryList: String) {
+        buffer.log(TAG, VERBOSE, { str1 = entryList }, { "[AC] Drop HUNs: $str1" })
+    }
 }
 
 private const val TAG = "HeadsUpManager"

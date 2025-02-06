@@ -22,10 +22,8 @@ import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.keyguard.AuthKeyguardMessageArea
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerMessageAreaViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Binds the alternate bouncer message view to its view-model. */
-@ExperimentalCoroutinesApi
 object AlternateBouncerMessageAreaViewBinder {
 
     /** Binds the view to the view-model, continuing to update the former based on the latter. */

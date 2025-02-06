@@ -23,6 +23,7 @@ import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
 
 import java.util.List;
 
@@ -94,6 +95,11 @@ public class TouchCancelModifierOperation extends ListActionsOperation implement
         return "TouchCancelModifier";
     }
 
+    /**
+     * Write the operation on the buffer
+     *
+     * @param buffer a WireBuffer
+     */
     public static void apply(WireBuffer buffer) {
         buffer.start(OP_CODE);
     }
@@ -108,10 +114,21 @@ public class TouchCancelModifierOperation extends ListActionsOperation implement
         operations.add(new TouchCancelModifierOperation());
     }
 
+    /**
+     * Add documentation for this operation
+     *
+     * @param doc a DocumentationBuilder
+     */
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Modifier Operations", OP_CODE, name())
                 .description(
                         "Touch cancel modifier. This operation contains"
                                 + " a list of action executed on Touch cancel");
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        super.serialize(serializer);
+        serializer.add("type", "TouchCancelModifierOperation");
     }
 }

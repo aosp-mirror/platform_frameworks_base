@@ -32,6 +32,7 @@ import com.android.systemui.keyboard.shortcut.data.repository.ShortcutCategories
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperInputDeviceRepository
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperStateRepository
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperTestHelper
+import com.android.systemui.keyboard.shortcut.data.source.AccessibilityShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.AppCategoriesShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.CurrentAppShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.InputShortcutsSource
@@ -78,6 +79,9 @@ var Kosmos.shortcutHelperInputShortcutsSource: KeyboardShortcutGroupsSource by
 var Kosmos.shortcutHelperCurrentAppShortcutsSource: KeyboardShortcutGroupsSource by
     Kosmos.Fixture { CurrentAppShortcutsSource(windowManager) }
 
+var Kosmos.shortcutHelperAccessibilityShortcutsSource: KeyboardShortcutGroupsSource by
+    Kosmos.Fixture { AccessibilityShortcutsSource(mainResources) }
+
 val Kosmos.shortcutHelperExclusions by
     Kosmos.Fixture { ShortcutHelperExclusions(applicationContext) }
 
@@ -100,6 +104,7 @@ val Kosmos.defaultShortcutCategoriesRepository by
             shortcutHelperAppCategoriesShortcutsSource,
             shortcutHelperInputShortcutsSource,
             shortcutHelperCurrentAppShortcutsSource,
+            shortcutHelperAccessibilityShortcutsSource,
             shortcutHelperInputDeviceRepository,
             shortcutCategoriesUtils,
         )
@@ -154,6 +159,7 @@ val Kosmos.shortcutHelperCoreStartable by
             shortcutHelperStateRepository,
             activityStarter,
             testScope,
+            customInputGesturesRepository,
         )
     }
 
@@ -210,6 +216,7 @@ val Kosmos.shortcutCustomizationDialogStarterFactory by
                 return ShortcutCustomizationDialogStarter(
                     shortcutCustomizationViewModelFactory,
                     systemUIDialogFactory,
+                    mainResources,
                 )
             }
         }

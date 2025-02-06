@@ -28,7 +28,6 @@ import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.volume.data.repository.audioSharingRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -44,7 +43,6 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -107,6 +105,28 @@ class AudioSharingRepositoryTest : SysuiTestCase() {
                 audioSharingRepository.setAudioSharingAvailable(false)
                 underTest.startAudioSharing()
                 verify(leAudioBroadcastProfile, never()).startPrivateBroadcast()
+            }
+        }
+
+    @Test
+    fun testStopAudioSharing() =
+        with(kosmos) {
+            testScope.runTest {
+                whenever(localBluetoothManager.profileManager).thenReturn(profileManager)
+                whenever(profileManager.leAudioBroadcastProfile).thenReturn(leAudioBroadcastProfile)
+                audioSharingRepository.setAudioSharingAvailable(true)
+                underTest.stopAudioSharing()
+                verify(leAudioBroadcastProfile).stopLatestBroadcast()
+            }
+        }
+
+    @Test
+    fun testStopAudioSharing_flagOff_doNothing() =
+        with(kosmos) {
+            testScope.runTest {
+                audioSharingRepository.setAudioSharingAvailable(false)
+                underTest.stopAudioSharing()
+                verify(leAudioBroadcastProfile, never()).stopLatestBroadcast()
             }
         }
 

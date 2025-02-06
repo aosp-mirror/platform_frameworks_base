@@ -18,12 +18,16 @@ package com.android.systemui.scene.ui.viewmodel
 
 import android.view.HapticFeedbackConstants
 import android.view.View
+import androidx.compose.ui.hapticfeedback.HapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.reveal.ContainerRevealHaptics
 import com.android.systemui.Flags
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.ui.composable.SceneContainer
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.google.android.msdl.data.model.MSDLToken
 import com.google.android.msdl.domain.MSDLPlayer
@@ -34,6 +38,7 @@ import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 
 /**
  * Models haptics UI state for the scene container.
@@ -60,16 +65,36 @@ constructor(
             .distinctUntilChanged()
 
     override suspend fun onActivated(): Nothing {
-        isShadePullHapticsRequired.collect { playShadePullHaptics ->
-            if (!playShadePullHaptics) return@collect
+        playShadePullHaptics()
+        awaitCancellation()
+    }
 
-            if (Flags.msdlFeedback()) {
-                msdlPlayer.playToken(MSDLToken.SWIPE_THRESHOLD_INDICATOR)
-            } else {
-                view.performHapticFeedback(HapticFeedbackConstants.GESTURE_START)
+    /**
+     * Returns a handler for reveal transition haptics in [SceneContainer] for the given
+     * [hapticFeedback] target.
+     */
+    fun getRevealHaptics(hapticFeedback: HapticFeedback): ContainerRevealHaptics {
+        return object : ContainerRevealHaptics {
+            override fun onRevealThresholdCrossed(revealed: Boolean) {
+                if (revealed) {
+                    hapticFeedback.performHapticFeedback(
+                        HapticFeedbackType.GestureThresholdActivate
+                    )
+                }
             }
         }
-        awaitCancellation()
+    }
+
+    private suspend fun playShadePullHaptics() {
+        isShadePullHapticsRequired
+            .filter { it }
+            .collect {
+                if (Flags.msdlFeedback()) {
+                    msdlPlayer.playToken(MSDLToken.SWIPE_THRESHOLD_INDICATOR)
+                } else {
+                    view.performHapticFeedback(HapticFeedbackConstants.GESTURE_START)
+                }
+            }
     }
 
     private fun ObservableTransitionState.isValidForShadePullHaptics(): Boolean {

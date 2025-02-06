@@ -25,17 +25,21 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
+import com.android.settingslib.datastore.DataChangeReason
 import com.android.settingslib.datastore.HandlerExecutor
 import com.android.settingslib.datastore.KeyValueStore
 import com.android.settingslib.datastore.KeyedDataObservable
 import com.android.settingslib.datastore.KeyedObservable
 import com.android.settingslib.datastore.KeyedObserver
+import com.android.settingslib.metadata.EXTRA_BINDING_SCREEN_ARGS
 import com.android.settingslib.metadata.PersistentPreference
+import com.android.settingslib.metadata.PreferenceChangeReason
 import com.android.settingslib.metadata.PreferenceHierarchy
 import com.android.settingslib.metadata.PreferenceHierarchyNode
 import com.android.settingslib.metadata.PreferenceLifecycleContext
 import com.android.settingslib.metadata.PreferenceLifecycleProvider
 import com.android.settingslib.metadata.PreferenceMetadata
+import com.android.settingslib.metadata.PreferenceScreenMetadata
 import com.android.settingslib.metadata.PreferenceScreenRegistry
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableMultimap
@@ -49,7 +53,7 @@ import com.google.common.collect.ImmutableMultimap
  */
 class PreferenceScreenBindingHelper(
     context: Context,
-    fragment: PreferenceFragment,
+    private val fragment: PreferenceFragment,
     private val preferenceBindingFactory: PreferenceBindingFactory,
     private val preferenceScreen: PreferenceScreen,
     private val preferenceHierarchy: PreferenceHierarchy,
@@ -68,12 +72,10 @@ class PreferenceScreenBindingHelper(
             override fun <T : Any> requirePreference(key: String) = findPreference<T>(key)!!
 
             override fun getKeyValueStore(key: String) =
-                (findPreference<Preference>(key)?.preferenceDataStore
-                        as? PreferenceDataStoreAdapter)
-                    ?.keyValueStore
+                findPreference<Preference>(key)?.preferenceDataStore?.findKeyValueStore()
 
             override fun notifyPreferenceChange(key: String) =
-                notifyChange(key, CHANGE_REASON_STATE)
+                notifyChange(key, PreferenceChangeReason.STATE)
 
             @Suppress("DEPRECATION")
             override fun startActivityForResult(
@@ -91,7 +93,13 @@ class PreferenceScreenBindingHelper(
     private val preferenceObserver: KeyedObserver<String?>
 
     private val storageObserver =
-        KeyedObserver<String> { key, _ -> notifyChange(key, CHANGE_REASON_VALUE) }
+        KeyedObserver<String> { key, reason ->
+            if (DataChangeReason.isDataChange(reason)) {
+                notifyChange(key, PreferenceChangeReason.VALUE)
+            } else {
+                notifyChange(key, PreferenceChangeReason.STATE)
+            }
+        }
 
     init {
         val preferencesBuilder = ImmutableMap.builder<String, PreferenceHierarchyNode>()
@@ -129,26 +137,33 @@ class PreferenceScreenBindingHelper(
         addObserver(preferenceObserver, mainExecutor)
 
         preferenceScreen.forEachRecursively {
-            val preferenceDataStore = it.preferenceDataStore
-            if (preferenceDataStore is PreferenceDataStoreAdapter) {
+            it.preferenceDataStore?.findKeyValueStore()?.let { keyValueStore ->
                 val key = it.key
-                val keyValueStore = preferenceDataStore.keyValueStore
                 storages[key] = keyValueStore
                 keyValueStore.addObserver(key, storageObserver, mainExecutor)
             }
         }
     }
 
+    private fun PreferenceDataStore.findKeyValueStore(): KeyValueStore? =
+        when (this) {
+            is PreferenceDataStoreAdapter -> keyValueStore
+            is PreferenceDataStoreDelegate -> delegate.findKeyValueStore()
+            else -> null
+        }
+
     private fun onPreferenceChange(key: String?, reason: Int) {
         if (key == null) return
 
         // bind preference to update UI
         preferenceScreen.findPreference<Preference>(key)?.let {
-            preferences[key]?.let { node -> preferenceBindingFactory.bind(it, node) }
+            val node = preferences[key] ?: return@let
+            preferenceBindingFactory.bind(it, node)
+            if (it == preferenceScreen) fragment.updateActivityTitle()
         }
 
         // check reason to avoid potential infinite loop
-        if (reason != CHANGE_REASON_DEPENDENT) {
+        if (reason != PreferenceChangeReason.DEPENDENT) {
             notifyDependents(key, mutableSetOf())
         }
     }
@@ -157,7 +172,7 @@ class PreferenceScreenBindingHelper(
     private fun notifyDependents(key: String, notifiedKeys: MutableSet<String>) {
         if (!notifiedKeys.add(key)) return
         for (dependency in dependencies[key]) {
-            notifyChange(dependency, CHANGE_REASON_DEPENDENT)
+            notifyChange(dependency, PreferenceChangeReason.DEPENDENT)
             notifyDependents(dependency, notifiedKeys)
         }
     }
@@ -210,24 +225,19 @@ class PreferenceScreenBindingHelper(
     }
 
     companion object {
-        /** Preference value is changed. */
-        const val CHANGE_REASON_VALUE = 0
-        /** Preference state (title/summary, enable state, etc.) is changed. */
-        const val CHANGE_REASON_STATE = 1
-        /** Dependent preference state is changed. */
-        const val CHANGE_REASON_DEPENDENT = 2
-
         /** Updates preference screen that has incomplete hierarchy. */
         @JvmStatic
         fun bind(preferenceScreen: PreferenceScreen) {
-            PreferenceScreenRegistry.create(preferenceScreen.context, preferenceScreen.key)?.run {
+            val context = preferenceScreen.context
+            val args = preferenceScreen.peekExtras()?.getBundle(EXTRA_BINDING_SCREEN_ARGS)
+            PreferenceScreenRegistry.create(context, preferenceScreen.key, args)?.run {
                 if (!hasCompleteHierarchy()) {
                     val preferenceBindingFactory =
                         (this as? PreferenceScreenCreator)?.preferenceBindingFactory ?: return
                     bindRecursively(
                         preferenceScreen,
                         preferenceBindingFactory,
-                        getPreferenceHierarchy(preferenceScreen.context),
+                        getPreferenceHierarchy(context),
                     )
                 }
             }
@@ -238,17 +248,17 @@ class PreferenceScreenBindingHelper(
             preferenceBindingFactory: PreferenceBindingFactory,
             preferenceHierarchy: PreferenceHierarchy,
         ) {
+            val preferenceScreenMetadata = preferenceHierarchy.metadata as PreferenceScreenMetadata
             val preferences = mutableMapOf<String, PreferenceHierarchyNode>()
-            preferenceHierarchy.forEachRecursively {
-                val metadata = it.metadata
-                preferences[metadata.key] = it
-            }
+            preferenceHierarchy.forEachRecursively { preferences[it.metadata.key] = it }
             val storages = mutableMapOf<KeyValueStore, PreferenceDataStore>()
 
             fun Preference.setPreferenceDataStore(metadata: PreferenceMetadata) {
                 (metadata as? PersistentPreference<*>)?.storage(context)?.let { storage ->
                     preferenceDataStore =
-                        storages.getOrPut(storage) { PreferenceDataStoreAdapter(storage) }
+                        storages.getOrPut(storage) {
+                            storage.toPreferenceDataStore(preferenceScreenMetadata, metadata)
+                        }
                 }
             }
 

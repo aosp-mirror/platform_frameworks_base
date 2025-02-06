@@ -15,8 +15,6 @@
  *
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.keyguard.data.repository
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -31,7 +29,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.util.ThreadAssert
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest

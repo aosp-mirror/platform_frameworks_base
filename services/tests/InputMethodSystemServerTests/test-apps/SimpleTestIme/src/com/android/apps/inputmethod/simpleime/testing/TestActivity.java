@@ -25,12 +25,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowInsets;
-import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.lang.ref.WeakReference;
@@ -42,10 +42,10 @@ import java.lang.ref.WeakReference;
  * in the instruments package. More details see {@link
  * Instrumentation#startActivitySync(Intent)}.</>
  */
-public class TestActivity extends Activity {
+public final class TestActivity extends Activity {
+
     private static final String TAG = "TestActivity";
-    private static WeakReference<TestActivity> sLastCreatedInstance =
-            new WeakReference<>(null);
+    private static WeakReference<TestActivity> sLastCreatedInstance = new WeakReference<>(null);
 
     /**
      * Start a new test activity with an editor and wait for it to begin running before returning.
@@ -53,13 +53,13 @@ public class TestActivity extends Activity {
      * @param instrumentation application instrumentation
      * @return the newly started activity
      */
-    public static TestActivity start(Instrumentation instrumentation) {
-        Intent intent =
-                new Intent()
-                        .setAction(Intent.ACTION_MAIN)
-                        .setClass(instrumentation.getTargetContext(), TestActivity.class)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    @NonNull
+    public static TestActivity startSync(@NonNull Instrumentation instrumentation) {
+        final var intent = new Intent()
+                .setAction(Intent.ACTION_MAIN)
+                .setClass(instrumentation.getTargetContext(), TestActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         return (TestActivity) instrumentation.startActivitySync(intent);
     }
 
@@ -70,12 +70,12 @@ public class TestActivity extends Activity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        LinearLayout rootView = new LinearLayout(this);
+        final var rootView = new LinearLayout(this);
         mEditText = new EditText(this);
-        mEditText.setContentDescription("Input box");
+        mEditText.setHint("editText");
         rootView.addView(mEditText, new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
         rootView.setFitsSystemWindows(true);
         setContentView(rootView);
@@ -83,40 +83,39 @@ public class TestActivity extends Activity {
         sLastCreatedInstance = new WeakReference<>(this);
     }
 
-    /** Get the last created TestActivity instance. */
-    public static @Nullable TestActivity getLastCreatedInstance() {
+    /** Get the last created TestActivity instance, if available. */
+    @Nullable
+    public static TestActivity getLastCreatedInstance() {
         return sLastCreatedInstance.get();
     }
 
     /** Shows soft keyboard via InputMethodManager. */
     public boolean showImeWithInputMethodManager(int flags) {
-        InputMethodManager imm = getSystemService(InputMethodManager.class);
-        boolean result = imm.showSoftInput(mEditText, flags);
+        final var imm = getSystemService(InputMethodManager.class);
+        final boolean result = imm.showSoftInput(mEditText, flags);
         Log.i(TAG, "showIme() via InputMethodManager, result=" + result);
         return result;
     }
 
     /** Shows soft keyboard via WindowInsetsController. */
-    public boolean showImeWithWindowInsetsController() {
-        WindowInsetsController windowInsetsController = mEditText.getWindowInsetsController();
-        windowInsetsController.show(WindowInsets.Type.ime());
+    public void showImeWithWindowInsetsController() {
+        final var controller = mEditText.getWindowInsetsController();
+        controller.show(WindowInsets.Type.ime());
         Log.i(TAG, "showIme() via WindowInsetsController");
-        return true;
     }
 
     /** Hides soft keyboard via InputMethodManager. */
     public boolean hideImeWithInputMethodManager(int flags) {
-        InputMethodManager imm = getSystemService(InputMethodManager.class);
-        boolean result = imm.hideSoftInputFromWindow(mEditText.getWindowToken(), flags);
+        final var imm = getSystemService(InputMethodManager.class);
+        final boolean result = imm.hideSoftInputFromWindow(mEditText.getWindowToken(), flags);
         Log.i(TAG, "hideIme() via InputMethodManager, result=" + result);
         return result;
     }
 
     /** Hides soft keyboard via WindowInsetsController. */
-    public boolean hideImeWithWindowInsetsController() {
-        WindowInsetsController windowInsetsController = mEditText.getWindowInsetsController();
-        windowInsetsController.hide(WindowInsets.Type.ime());
+    public void hideImeWithWindowInsetsController() {
+        final var controller = mEditText.getWindowInsetsController();
+        controller.hide(WindowInsets.Type.ime());
         Log.i(TAG, "hideIme() via WindowInsetsController");
-        return true;
     }
 }

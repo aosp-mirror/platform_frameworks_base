@@ -32,9 +32,7 @@ enum class DesktopModeTransitionSource : Parcelable {
     /** Transitions with source unknown. */
     UNKNOWN;
 
-    override fun describeContents(): Int {
-        return 0
-    }
+    override fun describeContents(): Int = 0
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeString(name)
@@ -44,9 +42,8 @@ enum class DesktopModeTransitionSource : Parcelable {
         @JvmField
         val CREATOR =
             object : Parcelable.Creator<DesktopModeTransitionSource> {
-                override fun createFromParcel(parcel: Parcel): DesktopModeTransitionSource {
-                    return parcel.readString()?.let { valueOf(it) } ?: UNKNOWN
-                }
+                override fun createFromParcel(parcel: Parcel): DesktopModeTransitionSource =
+                    parcel.readString()?.let { valueOf(it) } ?: UNKNOWN
 
                 override fun newArray(size: Int) = arrayOfNulls<DesktopModeTransitionSource>(size)
             }

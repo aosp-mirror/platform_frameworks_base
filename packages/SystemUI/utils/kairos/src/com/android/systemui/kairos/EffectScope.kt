@@ -16,33 +16,46 @@
 
 package com.android.systemui.kairos
 
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Job
 
 /**
- * Scope for external side-effects triggered by the Kairos network. This still occurs within the
- * context of a transaction, so general suspending calls are disallowed to prevent blocking the
- * transaction. You can use [effectCoroutineScope] to [launch][kotlinx.coroutines.launch] new
- * coroutines to perform long-running asynchronous work. This scope is alive for the duration of the
- * containing [BuildScope] that this side-effect scope is running in.
+ * Scope for external side-effects triggered by the Kairos network.
+ *
+ * This still occurs within the context of a transaction, so general suspending calls are disallowed
+ * to prevent blocking the transaction. You can [launch] new coroutines to perform long-running
+ * asynchronous work. These coroutines are kept alive for the duration of the containing
+ * [BuildScope] that this side-effect scope is running in.
  */
 @ExperimentalKairosApi
-interface EffectScope : TransactionScope {
+interface EffectScope : HasNetwork, TransactionScope {
     /**
-     * A [CoroutineScope] whose lifecycle lives for as long as this [EffectScope] is alive. This is
-     * generally until the [Job][kotlinx.coroutines.Job] returned by [BuildScope.effect] is
-     * cancelled.
+     * Creates a coroutine that is a child of this [EffectScope], and returns its future result as a
+     * [Deferred].
+     *
+     * @see kotlinx.coroutines.async
      */
-    @ExperimentalKairosApi val effectCoroutineScope: CoroutineScope
+    fun <R> async(
+        context: CoroutineContext = EmptyCoroutineContext,
+        start: CoroutineStart = CoroutineStart.DEFAULT,
+        block: suspend KairosCoroutineScope.() -> R,
+    ): Deferred<R>
 
     /**
-     * A [KairosNetwork] instance that can be used to transactionally query / modify the Kairos
-     * network.
+     * Launches a new coroutine that is a child of this [EffectScope] without blocking the current
+     * thread and returns a reference to the coroutine as a [Job].
      *
-     * The lambda passed to [KairosNetwork.transact] on this instance will receive an [BuildScope]
-     * that is lifetime-bound to this [EffectScope]. Once this [EffectScope] is no longer alive, any
-     * modifications to the Kairos network performed via this [KairosNetwork] instance will be
-     * undone (any registered [observers][BuildScope.observe] are unregistered, and any pending
-     * [side-effects][BuildScope.effect] are cancelled).
+     * @see kotlinx.coroutines.launch
      */
-    @ExperimentalKairosApi val kairosNetwork: KairosNetwork
+    fun launch(
+        context: CoroutineContext = EmptyCoroutineContext,
+        start: CoroutineStart = CoroutineStart.DEFAULT,
+        block: suspend KairosCoroutineScope.() -> Unit,
+    ): Job = async(context, start, block)
 }
+
+@ExperimentalKairosApi interface KairosCoroutineScope : HasNetwork, CoroutineScope

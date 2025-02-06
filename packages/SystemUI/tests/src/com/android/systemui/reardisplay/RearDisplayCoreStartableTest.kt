@@ -45,7 +45,6 @@ import org.mockito.kotlin.whenever
 
 /** atest SystemUITests:com.android.systemui.reardisplay.RearDisplayCoreStartableTest */
 @SmallTest
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class RearDisplayCoreStartableTest : SysuiTestCase() {
 
     private val kosmos = testKosmos().useUnconfinedTestDispatcher()

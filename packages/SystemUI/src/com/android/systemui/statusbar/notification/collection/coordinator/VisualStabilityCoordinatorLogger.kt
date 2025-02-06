@@ -32,7 +32,8 @@ constructor(@VisualStabilityLog private val buffer: LogBuffer) {
         wasReorderingAllowed: Boolean,
         isReorderingAllowed: Boolean,
         field: String,
-        value: Boolean
+        value: Boolean,
+        async: Boolean,
     ) {
         buffer.log(
             TAG,
@@ -44,13 +45,15 @@ constructor(@VisualStabilityLog private val buffer: LogBuffer) {
                 bool4 = isReorderingAllowed
                 str1 = field
                 str2 = value.toString()
+                str3 = async.toString()
             },
             {
                 "stability allowances changed:" +
                     " pipelineRunAllowed $bool1->$bool2" +
                     " reorderingAllowed $bool3->$bool4" +
                     " when setting $str1=$str2"
-            }
+                " async=$str3"
+            },
         )
     }
 }

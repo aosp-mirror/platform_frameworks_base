@@ -23,6 +23,7 @@ import android.app.appfunctions.IAppFunctionService;
 import android.app.appfunctions.ICancellationCallback;
 import android.app.appfunctions.IExecuteAppFunctionCallback;
 import android.app.appfunctions.SafeOneTimeExecuteAppFunctionCallback;
+import android.content.pm.SigningInfo;
 import android.os.SystemClock;
 import android.util.Slog;
 
@@ -38,14 +39,17 @@ public class RunAppFunctionServiceCallback implements RunServiceCallCallback<IAp
     private final ExecuteAppFunctionAidlRequest mRequestInternal;
     private final SafeOneTimeExecuteAppFunctionCallback mSafeExecuteAppFunctionCallback;
     private final ICancellationCallback mCancellationCallback;
+    private final SigningInfo mCallerSigningInfo;
 
     public RunAppFunctionServiceCallback(
             ExecuteAppFunctionAidlRequest requestInternal,
             ICancellationCallback cancellationCallback,
-            SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback) {
-        this.mRequestInternal = requestInternal;
-        this.mSafeExecuteAppFunctionCallback = safeExecuteAppFunctionCallback;
-        this.mCancellationCallback = cancellationCallback;
+            SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback,
+            SigningInfo callerSigningInfo) {
+        mRequestInternal = requestInternal;
+        mSafeExecuteAppFunctionCallback = safeExecuteAppFunctionCallback;
+        mCancellationCallback = cancellationCallback;
+        mCallerSigningInfo = callerSigningInfo;
     }
 
     @Override
@@ -58,6 +62,7 @@ public class RunAppFunctionServiceCallback implements RunServiceCallCallback<IAp
             service.executeAppFunction(
                     mRequestInternal.getClientRequest(),
                     mRequestInternal.getCallingPackage(),
+                    mCallerSigningInfo,
                     mCancellationCallback,
                     new IExecuteAppFunctionCallback.Stub() {
                         @Override

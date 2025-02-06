@@ -35,7 +35,6 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.SurfaceControl;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -46,6 +45,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.LaunchAdjacentController;
+import com.android.wm.shell.desktopmode.DesktopModeLoggerTransitionObserver;
 import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopUserRepositories;
@@ -55,7 +55,6 @@ import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -71,9 +70,6 @@ import java.util.Optional;
 @RunWith(AndroidJUnit4.class)
 public final class FreeformTaskListenerTests extends ShellTestCase {
 
-    @Rule
-    public final SetFlagsRule setFlagsRule = new SetFlagsRule();
-
     @Mock
     private ShellTaskOrganizer mTaskOrganizer;
     @Mock
@@ -88,6 +84,8 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
     private DesktopRepository mDesktopRepository;
     @Mock
     private DesktopTasksController mDesktopTasksController;
+    @Mock
+    private DesktopModeLoggerTransitionObserver mDesktopModeLoggerTransitionObserver;
     @Mock
     private LaunchAdjacentController mLaunchAdjacentController;
     @Mock
@@ -114,6 +112,7 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
                         mTaskOrganizer,
                         Optional.of(mDesktopUserRepositories),
                         Optional.of(mDesktopTasksController),
+                        mDesktopModeLoggerTransitionObserver,
                         mLaunchAdjacentController,
                         mWindowDecorViewModel,
                         Optional.of(mTaskChangeListener));
@@ -159,7 +158,8 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
     }
 
     @Test
-    public void focusTaskChanged_addsFreeformTaskToRepo() {
+    @DisableFlags(FLAG_ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS)
+    public void focusTaskChanged_noTransitionObserversFlag_addsFreeformTaskToRepo() {
         ActivityManager.RunningTaskInfo task =
                 new TestRunningTaskInfoBuilder().setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         task.isFocused = true;
@@ -167,6 +167,19 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
         mFreeformTaskListener.onFocusTaskChanged(task);
 
         verify(mDesktopUserRepositories.getCurrent())
+                .addTask(task.displayId, task.taskId, task.isVisible);
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS)
+    public void focusTaskChanged_enableTransitionObservers_freeformTaskNotAddedToRepo() {
+        ActivityManager.RunningTaskInfo task =
+                new TestRunningTaskInfoBuilder().setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+        task.isFocused = true;
+
+        mFreeformTaskListener.onFocusTaskChanged(task);
+
+        verify(mDesktopUserRepositories.getCurrent(), never())
                 .addTask(task.displayId, task.taskId, task.isVisible);
     }
 
@@ -224,7 +237,7 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
         task.displayId = INVALID_DISPLAY;
         mFreeformTaskListener.onTaskVanished(task);
 
-        verify(mDesktopUserRepositories.getCurrent(), never()).removeFreeformTask(task.displayId,
+        verify(mDesktopUserRepositories.getCurrent(), never()).removeTask(task.displayId,
                 task.taskId);
     }
 
@@ -248,7 +261,7 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
                 .minimizeTask(task.displayId, task.taskId);
         verify(mDesktopUserRepositories.getCurrent()).removeClosingTask(task.taskId);
         verify(mDesktopUserRepositories.getCurrent())
-                .removeFreeformTask(task.displayId, task.taskId);
+                .removeTask(task.displayId, task.taskId);
     }
 
     @Test
@@ -265,8 +278,21 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
         verify(mDesktopUserRepositories.getCurrent(), never())
                 .removeClosingTask(task.taskId);
         verify(mDesktopUserRepositories.getCurrent(), never())
-                .removeFreeformTask(task.displayId, task.taskId);
+                .removeTask(task.displayId, task.taskId);
     }
+
+    @Test
+    public void onTaskVanished_withDesktopModeLogger_forwards() {
+        ActivityManager.RunningTaskInfo task =
+                new TestRunningTaskInfoBuilder().setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+        task.isVisible = true;
+        mFreeformTaskListener.onTaskAppeared(task, mMockSurfaceControl);
+
+        mFreeformTaskListener.onTaskVanished(task);
+
+        verify(mDesktopModeLoggerTransitionObserver).onTaskVanished(task);
+    }
+
 
     @Test
     public void onTaskInfoChanged_withDesktopController_forwards() {

@@ -74,6 +74,77 @@ class CommunalPrefsInteractorTest : SysuiTestCase() {
             assertThat(isCtaDismissed).isFalse()
         }
 
+    @Test
+    fun setHubOnboardingDismissed_currentUser() =
+        testScope.runTest {
+            setSelectedUser(MAIN_USER)
+            val isHubOnboardingDismissed by collectLastValue(underTest.isHubOnboardingDismissed)
+
+            assertThat(isHubOnboardingDismissed).isFalse()
+            underTest.setHubOnboardingDismissed(MAIN_USER)
+            assertThat(isHubOnboardingDismissed).isTrue()
+        }
+
+    @Test
+    fun setHubOnboardingDismissed_anotherUser() =
+        testScope.runTest {
+            setSelectedUser(MAIN_USER)
+            val isHubOnboardingDismissed by collectLastValue(underTest.isHubOnboardingDismissed)
+
+            assertThat(isHubOnboardingDismissed).isFalse()
+            underTest.setHubOnboardingDismissed(SECONDARY_USER)
+            assertThat(isHubOnboardingDismissed).isFalse()
+        }
+
+    @Test
+    fun isHubOnboardingDismissed_userSwitch() =
+        testScope.runTest {
+            setSelectedUser(MAIN_USER)
+            underTest.setHubOnboardingDismissed(MAIN_USER)
+            val isHubOnboardingDismissed by collectLastValue(underTest.isHubOnboardingDismissed)
+
+            assertThat(isHubOnboardingDismissed).isTrue()
+            setSelectedUser(SECONDARY_USER)
+            assertThat(isHubOnboardingDismissed).isFalse()
+        }
+
+    @Test
+    fun setDreamButtonTooltipDismissed_currentUser() =
+        testScope.runTest {
+            setSelectedUser(MAIN_USER)
+            val isDreamButtonTooltipDismissed by
+                collectLastValue(underTest.isDreamButtonTooltipDismissed)
+
+            assertThat(isDreamButtonTooltipDismissed).isFalse()
+            underTest.setDreamButtonTooltipDismissed(MAIN_USER)
+            assertThat(isDreamButtonTooltipDismissed).isTrue()
+        }
+
+    @Test
+    fun setDreamButtonTooltipDismissed_anotherUser() =
+        testScope.runTest {
+            setSelectedUser(MAIN_USER)
+            val isDreamButtonTooltipDismissed by
+                collectLastValue(underTest.isDreamButtonTooltipDismissed)
+
+            assertThat(isDreamButtonTooltipDismissed).isFalse()
+            underTest.setDreamButtonTooltipDismissed(SECONDARY_USER)
+            assertThat(isDreamButtonTooltipDismissed).isFalse()
+        }
+
+    @Test
+    fun isDreamButtonTooltipDismissed_userSwitch() =
+        testScope.runTest {
+            setSelectedUser(MAIN_USER)
+            underTest.setDreamButtonTooltipDismissed(MAIN_USER)
+            val isDreamButtonTooltipDismissed by
+                collectLastValue(underTest.isDreamButtonTooltipDismissed)
+
+            assertThat(isDreamButtonTooltipDismissed).isTrue()
+            setSelectedUser(SECONDARY_USER)
+            assertThat(isDreamButtonTooltipDismissed).isFalse()
+        }
+
     private suspend fun setSelectedUser(user: UserInfo) {
         with(kosmos.fakeUserRepository) {
             setUserInfos(listOf(user))

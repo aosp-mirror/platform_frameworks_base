@@ -156,13 +156,11 @@ class ToggleResizeDesktopTaskTransitionHandler(
         return matchingChanges.first()
     }
 
-    private fun isWallpaper(change: TransitionInfo.Change): Boolean {
-        return (change.flags and TransitionInfo.FLAG_IS_WALLPAPER) != 0
-    }
+    private fun isWallpaper(change: TransitionInfo.Change): Boolean =
+        (change.flags and TransitionInfo.FLAG_IS_WALLPAPER) != 0
 
-    private fun isValidTaskChange(change: TransitionInfo.Change): Boolean {
-        return change.taskInfo != null && change.taskInfo?.taskId != -1
-    }
+    private fun isValidTaskChange(change: TransitionInfo.Change): Boolean =
+        change.taskInfo != null && change.taskInfo?.taskId != -1
 
     companion object {
         private const val RESIZE_DURATION_MS = 300L

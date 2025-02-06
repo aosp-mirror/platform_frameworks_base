@@ -32,6 +32,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.DisplayMetrics;
+import android.view.Choreographer;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.WindowManager.TransitionType;
@@ -184,6 +185,7 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
                 t.setPosition(sc, mPosition.x * (1 - fraction), mPosition.y * (1 - fraction))
                         .setScale(sc, currentScaleX, currentScaleY)
                         .show(sc)
+                        .setFrameTimeline(Choreographer.getInstance().getVsyncId())
                         .apply();
             });
             animator.addListener(new AnimatorListenerAdapter() {

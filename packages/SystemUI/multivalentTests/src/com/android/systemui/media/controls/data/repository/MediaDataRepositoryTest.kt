@@ -22,8 +22,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.Flags
-import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.MediaTestHelper
 import com.android.systemui.media.controls.shared.model.MediaData
@@ -76,29 +74,6 @@ class MediaDataRepositoryTest : SysuiTestCase() {
 
             assertThat(entries!!.size).isEqualTo(1)
             assertThat(entries!![secondKey]).isEqualTo(secondData)
-        }
-
-    @Test
-    fun setRecommendationInactive() =
-        testScope.runTest {
-            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, true)
-            val smartspaceData by collectLastValue(underTest.smartspaceMediaData)
-            val icon = Icon.createWithResource(context, R.drawable.ic_media_play)
-            val recommendation =
-                SmartspaceMediaData(
-                    targetId = KEY_MEDIA_SMARTSPACE,
-                    isActive = true,
-                    recommendations = MediaTestHelper.getValidRecommendationList(icon),
-                )
-
-            underTest.setRecommendation(recommendation)
-
-            assertThat(smartspaceData).isEqualTo(recommendation)
-
-            underTest.setRecommendationInactive(KEY_MEDIA_SMARTSPACE)
-
-            assertThat(smartspaceData).isNotEqualTo(recommendation)
-            assertThat(smartspaceData!!.isActive).isFalse()
         }
 
     @Test

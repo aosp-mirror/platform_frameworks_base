@@ -38,6 +38,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -62,7 +63,7 @@ import java.util.function.BiConsumer;
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class UserAspectRatioSettingsLayoutTest extends CompatUIShellTestCase {
+public class UserAspectRatioSettingsLayoutTest extends ShellTestCase {
 
     private static final int TASK_ID = 1;
 

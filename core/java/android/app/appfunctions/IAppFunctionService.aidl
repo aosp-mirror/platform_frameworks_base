@@ -35,12 +35,15 @@ oneway interface IAppFunctionService {
      *
      * @param request  the function execution request.
      * @param callingPackage The package name of the app that is requesting the execution.
+     * @param callingPackageSigningInfo The signing information of the app that is requesting the
+     *      execution.
      * @param cancellationCallback a callback to send back the cancellation transport.
      * @param callback a callback to report back the result.
      */
     void executeAppFunction(
         in ExecuteAppFunctionRequest request,
         in String callingPackage,
+        in android.content.pm.SigningInfo callingPackageSigningInfo,
         in ICancellationCallback cancellationCallback,
         in IExecuteAppFunctionCallback callback
     );

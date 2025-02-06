@@ -81,11 +81,11 @@ import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import com.android.systemui.util.kotlin.DisposableHandles
 import com.android.systemui.util.settings.SecureSettings
+import com.android.systemui.wallpapers.domain.interactor.WallpaperFocalAreaInteractor
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -94,7 +94,6 @@ import org.json.JSONObject
 
 /** Renders the preview of the lock screen. */
 class KeyguardPreviewRenderer
-@OptIn(ExperimentalCoroutinesApi::class)
 @AssistedInject
 constructor(
     @Application private val context: Context,
@@ -117,6 +116,7 @@ constructor(
     private val secureSettings: SecureSettings,
     private val defaultShortcutsSection: DefaultShortcutsSection,
     private val keyguardQuickAffordanceViewBinder: KeyguardQuickAffordanceViewBinder,
+    private val wallpaperFocalAreaInteractor: WallpaperFocalAreaInteractor,
 ) {
     val hostToken: IBinder? = bundle.getBinder(KEY_HOST_TOKEN)
     private val width: Int = bundle.getInt(KEY_VIEW_WIDTH)
@@ -321,7 +321,6 @@ constructor(
         smartSpaceView?.alpha = if (shouldHighlightSelectedAffordance) DIM_ALPHA else 1.0f
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private fun setupKeyguardRootView(previewContext: Context, rootView: FrameLayout) {
         val keyguardRootView = KeyguardRootView(previewContext, null)
         rootView.addView(

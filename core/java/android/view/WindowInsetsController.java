@@ -34,6 +34,9 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Interface to control windows that generate insets.
+ *
+ * For guidance, see <a href="https://developer.android.com/develop/ui/views/layout/immersive">
+ * Hide system bars for immersive mode</a>.
  */
 public interface WindowInsetsController {
 

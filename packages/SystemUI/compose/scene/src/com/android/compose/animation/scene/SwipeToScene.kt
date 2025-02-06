@@ -19,175 +19,38 @@ package com.android.compose.animation.scene
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
-import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
-import androidx.compose.ui.input.pointer.PointerEvent
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.node.DelegatingNode
-import androidx.compose.ui.node.ModifierNodeElement
-import androidx.compose.ui.node.PointerInputModifierNode
-import androidx.compose.ui.unit.IntSize
 import com.android.compose.animation.scene.content.Content
+import com.android.compose.gesture.nestedDraggable
 
 /**
  * Configures the swipeable behavior of a [SceneTransitionLayout] depending on the current state.
  */
 @Stable
-internal fun Modifier.swipeToScene(
-    draggableHandler: DraggableHandlerImpl,
-    swipeDetector: SwipeDetector,
-): Modifier {
-    return if (draggableHandler.enabled()) {
-        this.then(SwipeToSceneElement(draggableHandler, swipeDetector))
-    } else {
-        this
-    }
+internal fun Modifier.swipeToScene(draggableHandler: DraggableHandler): Modifier {
+    val contentForSwipes = draggableHandler.contentForSwipes()
+    val enabled = draggableHandler.enabled(contentForSwipes)
+    return this.nestedDraggable(
+        draggable = draggableHandler,
+        orientation = draggableHandler.orientation,
+        overscrollEffect = draggableHandler.overscrollEffect,
+        enabled = enabled,
+        nestedDragsEnabled = enabled && contentForSwipes.areNestedSwipesAllowed(),
+    )
 }
 
-private fun DraggableHandlerImpl.enabled(): Boolean {
-    return isDrivingTransition || contentForSwipes().shouldEnableSwipes(orientation)
+internal fun DraggableHandler.enabled(contentForSwipes: Content = contentForSwipes()): Boolean {
+    return isDrivingTransition || contentForSwipes.shouldEnableSwipes(orientation)
 }
 
-private fun DraggableHandlerImpl.contentForSwipes(): Content {
+private fun DraggableHandler.contentForSwipes(): Content {
     return layoutImpl.contentForUserActions()
 }
 
 /** Whether swipe should be enabled in the given [orientation]. */
-internal fun Content.shouldEnableSwipes(orientation: Orientation): Boolean {
+private fun Content.shouldEnableSwipes(orientation: Orientation): Boolean {
     if (userActions.isEmpty()) {
         return false
     }
 
     return userActions.keys.any { it is Swipe.Resolved && it.direction.orientation == orientation }
-}
-
-/**
- * Finds the best matching [UserActionResult] for the given [swipe] within this [Content].
- * Prioritizes actions with matching [Swipe.Resolved.fromSource].
- *
- * @param swipe The swipe to match against.
- * @return The best matching [UserActionResult], or `null` if no match is found.
- */
-internal fun Content.findActionResultBestMatch(swipe: Swipe.Resolved): UserActionResult? {
-    var bestPoints = Int.MIN_VALUE
-    var bestMatch: UserActionResult? = null
-    userActions.forEach { (actionSwipe, actionResult) ->
-        if (
-            actionSwipe !is Swipe.Resolved ||
-                // The direction must match.
-                actionSwipe.direction != swipe.direction ||
-                // The number of pointers down must match.
-                actionSwipe.pointerCount != swipe.pointerCount ||
-                // The action requires a specific fromSource.
-                (actionSwipe.fromSource != null && actionSwipe.fromSource != swipe.fromSource) ||
-                // The action requires a specific pointerType.
-                (actionSwipe.pointersType != null && actionSwipe.pointersType != swipe.pointersType)
-        ) {
-            // This action is not eligible.
-            return@forEach
-        }
-
-        val sameFromSource = actionSwipe.fromSource == swipe.fromSource
-        val samePointerType = actionSwipe.pointersType == swipe.pointersType
-        // Prioritize actions with a perfect match.
-        if (sameFromSource && samePointerType) {
-            return actionResult
-        }
-
-        var points = 0
-        if (sameFromSource) points++
-        if (samePointerType) points++
-
-        // Otherwise, keep track of the best eligible action.
-        if (points > bestPoints) {
-            bestPoints = points
-            bestMatch = actionResult
-        }
-    }
-    return bestMatch
-}
-
-private data class SwipeToSceneElement(
-    val draggableHandler: DraggableHandlerImpl,
-    val swipeDetector: SwipeDetector,
-) : ModifierNodeElement<SwipeToSceneRootNode>() {
-    override fun create(): SwipeToSceneRootNode =
-        SwipeToSceneRootNode(draggableHandler, swipeDetector)
-
-    override fun update(node: SwipeToSceneRootNode) {
-        node.update(draggableHandler, swipeDetector)
-    }
-}
-
-private class SwipeToSceneRootNode(
-    draggableHandler: DraggableHandlerImpl,
-    swipeDetector: SwipeDetector,
-) : DelegatingNode() {
-    private var delegateNode = delegate(SwipeToSceneNode(draggableHandler, swipeDetector))
-
-    fun update(draggableHandler: DraggableHandlerImpl, swipeDetector: SwipeDetector) {
-        if (draggableHandler == delegateNode.draggableHandler) {
-            // Simple update, just update the swipe detector directly and keep the node.
-            delegateNode.swipeDetector = swipeDetector
-        } else {
-            // The draggableHandler changed, force recreate the underlying SwipeToSceneNode.
-            undelegate(delegateNode)
-            delegateNode = delegate(SwipeToSceneNode(draggableHandler, swipeDetector))
-        }
-    }
-}
-
-private class SwipeToSceneNode(
-    val draggableHandler: DraggableHandlerImpl,
-    swipeDetector: SwipeDetector,
-) : DelegatingNode(), PointerInputModifierNode {
-    private val dispatcher = NestedScrollDispatcher()
-    private val multiPointerDraggableNode =
-        delegate(
-            MultiPointerDraggableNode(
-                orientation = draggableHandler.orientation,
-                onDragStarted = draggableHandler::onDragStarted,
-                onFirstPointerDown = ::onFirstPointerDown,
-                swipeDetector = swipeDetector,
-                dispatcher = dispatcher,
-            )
-        )
-
-    var swipeDetector: SwipeDetector
-        get() = multiPointerDraggableNode.swipeDetector
-        set(value) {
-            multiPointerDraggableNode.swipeDetector = value
-        }
-
-    private val nestedScrollHandlerImpl =
-        NestedScrollHandlerImpl(
-            draggableHandler = draggableHandler,
-            pointersInfoOwner = { multiPointerDraggableNode.pointersInfo() },
-        )
-
-    init {
-        delegate(nestedScrollModifierNode(nestedScrollHandlerImpl.connection, dispatcher))
-    }
-
-    private fun onFirstPointerDown() {
-        // When we drag our finger across the screen, the NestedScrollConnection keeps track of all
-        // the scroll events until we lift our finger. However, in some cases, the connection might
-        // not receive the "up" event. This can lead to an incorrect initial state for the gesture.
-        // To prevent this issue, we can call the reset() method when the first finger touches the
-        // screen. This ensures that the NestedScrollConnection starts from a correct state.
-        nestedScrollHandlerImpl.connection.reset()
-    }
-
-    override fun onDetach() {
-        // Make sure we reset the scroll connection when this modifier is removed from composition
-        nestedScrollHandlerImpl.connection.reset()
-    }
-
-    override fun onPointerEvent(
-        pointerEvent: PointerEvent,
-        pass: PointerEventPass,
-        bounds: IntSize,
-    ) = multiPointerDraggableNode.onPointerEvent(pointerEvent, pass, bounds)
-
-    override fun onCancelPointerInput() = multiPointerDraggableNode.onCancelPointerInput()
 }

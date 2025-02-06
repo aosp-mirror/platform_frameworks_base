@@ -28,7 +28,6 @@ import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -48,7 +47,6 @@ class DetailsViewModelTest : SysuiTestCase() {
         underTest = kosmos.detailsViewModel
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun changeTileDetailsViewModel() = with(kosmos) {
         testScope.runTest {
@@ -62,8 +60,8 @@ class DetailsViewModelTest : SysuiTestCase() {
             val tiles = currentTilesInteractor.currentTiles.value
 
             assertThat(currentTilesInteractor.currentTilesSpecs.size).isEqualTo(2)
-            assertThat(tiles!![1].spec).isEqualTo(specNoDetails)
-            (tiles!![1].tile as FakeQSTile).hasDetailsViewModel = false
+            assertThat(tiles[1].spec).isEqualTo(specNoDetails)
+            (tiles[1].tile as FakeQSTile).hasDetailsViewModel = false
 
             assertThat(underTest.activeTileDetails).isNull()
 

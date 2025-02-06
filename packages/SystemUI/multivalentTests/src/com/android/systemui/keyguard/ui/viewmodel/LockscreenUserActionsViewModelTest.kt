@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.keyguard.ui.viewmodel
 
-import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
@@ -47,10 +44,11 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys
 import com.android.systemui.scene.ui.viewmodel.SceneContainerEdge
 import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.domain.interactor.disableDualShade
+import com.android.systemui.shade.domain.interactor.enableDualShade
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.math.pow
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.BeforeClass
@@ -176,10 +174,10 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_COMMUNAL_HUB)
-    @DisableFlags(Flags.FLAG_DUAL_SHADE)
     fun userActions_fullscreenShade() =
         testScope.runTest {
             underTest.activateIn(this)
+            kosmos.disableDualShade()
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 if (canSwipeToEnter) {
@@ -267,7 +265,7 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_COMMUNAL_HUB, Flags.FLAG_DUAL_SHADE)
+    @EnableFlags(Flags.FLAG_COMMUNAL_HUB)
     fun userActions_dualShade() =
         testScope.runTest {
             underTest.activateIn(this)
@@ -280,7 +278,7 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
                 }
             )
             sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
-            kosmos.shadeRepository.setShadeLayoutWide(!isNarrowScreen)
+            kosmos.enableDualShade(wideLayout = !isNarrowScreen)
             kosmos.setCommunalAvailable(isCommunalAvailable)
             kosmos.fakePowerRepository.updateWakefulness(
                 rawState =

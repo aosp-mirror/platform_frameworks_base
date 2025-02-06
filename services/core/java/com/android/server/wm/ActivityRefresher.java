@@ -77,10 +77,10 @@ class ActivityRefresher {
         final boolean cycleThroughStop =
                 mWmService.mAppCompatConfiguration
                         .isCameraCompatRefreshCycleThroughStopEnabled()
-                        && !activity.mAppCompatController.getAppCompatCameraOverrides()
+                        && !activity.mAppCompatController.getCameraOverrides()
                             .shouldRefreshActivityViaPauseForCameraCompat();
 
-        activity.mAppCompatController.getAppCompatCameraOverrides().setIsRefreshRequested(true);
+        activity.mAppCompatController.getCameraOverrides().setIsRefreshRequested(true);
         ProtoLog.v(WM_DEBUG_STATES,
                 "Refreshing activity for freeform camera compatibility treatment, "
                         + "activityRecord=%s", activity);
@@ -97,25 +97,25 @@ class ActivityRefresher {
                 }
             }, REFRESH_CALLBACK_TIMEOUT_MS);
         } catch (RemoteException e) {
-            activity.mAppCompatController.getAppCompatCameraOverrides()
+            activity.mAppCompatController.getCameraOverrides()
                     .setIsRefreshRequested(false);
         }
     }
 
     boolean isActivityRefreshing(@NonNull ActivityRecord activity) {
-        return activity.mAppCompatController.getAppCompatCameraOverrides().isRefreshRequested();
+        return activity.mAppCompatController.getCameraOverrides().isRefreshRequested();
     }
 
     void onActivityRefreshed(@NonNull ActivityRecord activity) {
         // TODO(b/333060789): can we tell that refresh did not happen by observing the activity
         //  state?
-        activity.mAppCompatController.getAppCompatCameraOverrides().setIsRefreshRequested(false);
+        activity.mAppCompatController.getCameraOverrides().setIsRefreshRequested(false);
     }
 
     private boolean shouldRefreshActivity(@NonNull ActivityRecord activity,
             @NonNull Configuration newConfig, @NonNull Configuration lastReportedConfig) {
         return mWmService.mAppCompatConfiguration.isCameraCompatRefreshEnabled()
-                && activity.mAppCompatController.getAppCompatCameraOverrides()
+                && activity.mAppCompatController.getCameraOverrides()
                     .shouldRefreshActivityForCameraCompat()
                 && ArrayUtils.find(mEvaluators.toArray(), evaluator ->
                 ((Evaluator) evaluator)

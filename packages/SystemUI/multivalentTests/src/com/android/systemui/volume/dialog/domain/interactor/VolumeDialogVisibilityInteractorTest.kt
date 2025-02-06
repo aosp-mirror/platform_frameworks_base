@@ -31,7 +31,6 @@ import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityMod
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -41,7 +40,6 @@ import org.junit.runner.RunWith
 
 private val dialogTimeoutDuration = 3.seconds
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper

@@ -19,9 +19,7 @@ package android.app.wallpaper;
 import static android.app.Flags.FLAG_LIVE_WALLPAPER_CONTENT_HANDLING;
 
 import android.annotation.FlaggedApi;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.app.WallpaperManager.ScreenOrientation;
@@ -514,8 +512,7 @@ public final class WallpaperDescription implements Parcelable {
          * @hide
          */
         @NonNull
-        @TestApi
-        @SuppressLint("MissingGetterMatchingBuilder")
+        @SystemApi
         public Builder setCropHints(@NonNull Map<Point, Rect> cropHints) {
             mCropHints = new SparseArray<>();
             cropHints.forEach(
@@ -531,8 +528,7 @@ public final class WallpaperDescription implements Parcelable {
          * @hide
          */
         @NonNull
-        @TestApi
-        @SuppressLint("MissingGetterMatchingBuilder")
+        @SystemApi
         public Builder setCropHints(@NonNull SparseArray<Rect> cropHints) {
             mCropHints = cropHints;
             return this;

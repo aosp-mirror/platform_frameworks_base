@@ -112,6 +112,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     private Insets mPendingInsets;
     private float mPendingFraction;
     private boolean mFinished;
+    private boolean mCancelling;
     private boolean mCancelled;
     private boolean mShownOnFinish;
     private float mCurrentAlpha = 1.0f;
@@ -371,7 +372,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         mPendingInsets = mLayoutInsetsDuringAnimation == LAYOUT_INSETS_DURING_ANIMATION_SHOWN
                 ? mShownInsets : mHiddenInsets;
         mPendingAlpha = 1f;
-        mPendingFraction = 1f;
+        mCancelling = true;
         applyChangeInsets(null);
         mCancelled = true;
         mListener.onCancelled(mReadyDispatched ? this : null);
@@ -488,15 +489,15 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
             return;
         }
 
-        final boolean visible = mPendingFraction == 0
-                // The first frame of ANIMATION_TYPE_SHOW should be invisible since it is
-                // animated from the hidden state.
-                ? mAnimationType != ANIMATION_TYPE_SHOW
-                : mPendingFraction < 1f || (mFinished
-                        ? mShownOnFinish
-                        // If the animation is cancelled, mFinished and mShownOnFinish are not set.
+        final boolean visible = mFinished
+                ? mShownOnFinish
+                : (mCancelling
+                        // If the animation is being cancelled, mShownOnFinish is not valid.
                         // Here uses mLayoutInsetsDuringAnimation to decide if it should be visible.
-                        : mLayoutInsetsDuringAnimation == LAYOUT_INSETS_DURING_ANIMATION_SHOWN);
+                        ? mLayoutInsetsDuringAnimation == LAYOUT_INSETS_DURING_ANIMATION_SHOWN
+                        // The first frame of ANIMATION_TYPE_SHOW should be invisible since it is
+                        // animated from the hidden state.
+                        : (mAnimationType != ANIMATION_TYPE_SHOW || mPendingFraction != 0));
 
         // TODO: Implement behavior when inset spans over multiple types
         for (int i = controls.size() - 1; i >= 0; i--) {

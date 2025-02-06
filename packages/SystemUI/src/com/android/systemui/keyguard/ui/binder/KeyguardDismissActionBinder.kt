@@ -23,11 +23,9 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInte
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Runs actions on keyguard dismissal. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class KeyguardDismissActionBinder
 @Inject

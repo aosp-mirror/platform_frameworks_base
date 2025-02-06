@@ -41,6 +41,7 @@ import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction
 import android.widget.Button
+import com.android.systemui.Flags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.shared.system.ActivityManagerWrapper
@@ -52,6 +53,7 @@ import com.android.systemui.statusbar.SmartReplyController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.notification.logging.NotificationLogger
+import com.android.systemui.statusbar.notification.row.MagicActionBackgroundDrawable
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState.SuppressedActions
 import com.android.systemui.statusbar.policy.SmartReplyView.SmartActions
@@ -394,8 +396,16 @@ constructor(
         action: Notification.Action,
         delayOnClickListener: Boolean,
         packageContext: Context,
-    ): Button =
-        (LayoutInflater.from(parent.context).inflate(R.layout.smart_action_button, parent, false)
+    ): Button {
+        val isMagicAction = Flags.notificationMagicActionsTreatment() &&
+                smartActions.fromAssistant &&
+                action.extras.getBoolean(Notification.Action.EXTRA_IS_MAGIC, false)
+        val layoutRes = if (isMagicAction) {
+            R.layout.magic_action_button
+        } else {
+            R.layout.smart_action_button
+        }
+        return (LayoutInflater.from(parent.context).inflate(layoutRes, parent, false)
                 as Button)
             .apply {
                 text = action.title
@@ -425,6 +435,8 @@ constructor(
                 // Mark this as an Action button
                 (layoutParams as SmartReplyView.LayoutParams).mButtonType = SmartButtonType.ACTION
             }
+
+    }
 
     private fun onSmartActionClick(
         entry: NotificationEntry,

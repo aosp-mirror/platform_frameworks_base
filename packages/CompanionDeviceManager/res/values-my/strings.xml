@@ -18,9 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"တွဲဖက်ကိရိယာ မန်နေဂျာ"</string>
     <string name="confirmation_title" msgid="2244241995958340998">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ကို သုံးရန် &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; အက်ပ်ကို ခွင့်ပြုမလား။"</string>
+    <string name="message_discovery_soft_timeout" msgid="473346859407859161">"ဤ <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> သည် <xliff:g id="DISCOVERY_METHOD">%2$s</xliff:g> ဖွင့်ထားပြီး သင့် <xliff:g id="PROFILE_NAME">%3$s</xliff:g> အနီးတွင်ရှိကြောင်း သေချာပါစေ။"</string>
+    <string name="message_discovery_hard_timeout" msgid="677514663495711424">"မည်သည့်စက်မျှ မတွေ့ပါ။ နောက်မှ ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="discovery_bluetooth" msgid="5693557668470016164">"ဘလူးတုသ်"</string>
+    <string name="discovery_wifi" msgid="1551782459721758773">"Wi-Fi"</string>
+    <string name="discovery_mixed" msgid="7071466134150760127">"ဘလူးတုသ်၊ Wi-Fi"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"နာရီ"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; က စီမံခန့်ခွဲရန် စက်တစ်ခုကို ရွေးပါ"</string>
     <string name="chooser_title" msgid="2235819929238267637">"စနစ်ထည့်သွင်းရန် <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ကို ရွေးပါ"</string>
+    <string name="single_device_title" msgid="4199861437545438606">"<xliff:g id="PROFILE_NAME">%1$s</xliff:g> ကို ရှာနေသည်"</string>
     <string name="summary_watch" msgid="8134580124808507407">"ခေါ်ဆိုသူ၏အမည်ကဲ့သို့ အချက်အလက်ကို စင့်ခ်လုပ်ရန်နှင့် သင့် <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> တွင် ၎င်းခွင့်ပြုချက်များရယူရန် ဤအက်ပ်ကိုခွင့်ပြုမည်"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ကို &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; အား စီမံခွင့်ပြုမလား။"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"စက်"</string>

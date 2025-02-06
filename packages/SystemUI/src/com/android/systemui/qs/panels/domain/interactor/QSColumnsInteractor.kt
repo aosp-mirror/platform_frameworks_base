@@ -19,7 +19,7 @@ package com.android.systemui.qs.panels.domain.interactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.qs.panels.data.repository.QSColumnsRepository
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -29,17 +29,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class QSColumnsInteractor
 @Inject
 constructor(
     @Application scope: CoroutineScope,
     repo: QSColumnsRepository,
-    shadeInteractor: ShadeInteractor,
+    shadeModeInteractor: ShadeModeInteractor,
 ) {
-    @OptIn(ExperimentalCoroutinesApi::class)
     val columns: StateFlow<Int> =
-        shadeInteractor.shadeMode
+        shadeModeInteractor.shadeMode
             .flatMapLatest {
                 when (it) {
                     ShadeMode.Dual -> repo.dualShadeColumns

@@ -64,7 +64,7 @@
             android:id="@+id/expand_menu_button"
             android:layout_width="16dp"
             android:layout_height="16dp"
-            android:src="@drawable/ic_baseline_expand_more_24"
+            android:src="@drawable/ic_baseline_expand_more_16"
             android:background="@null"
             android:scaleType="fitCenter"
             android:clickable="false"
@@ -101,7 +101,7 @@
         android:layout_width="44dp"
         android:layout_height="40dp"
         android:layout_gravity="end"
-        android:layout_marginHorizontal="8dp"
+        android:layout_marginEnd="8dp"
         android:clickable="true"
         android:focusable="true"/>
 

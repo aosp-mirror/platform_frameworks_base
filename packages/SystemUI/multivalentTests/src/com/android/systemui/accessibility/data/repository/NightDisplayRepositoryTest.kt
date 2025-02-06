@@ -39,7 +39,6 @@ import com.android.systemui.util.settings.fakeSettings
 import com.android.systemui.utils.leaks.FakeLocationController
 import com.google.common.truth.Truth.assertThat
 import java.time.LocalTime
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -47,7 +46,6 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.verify
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class NightDisplayRepositoryTest : SysuiTestCase() {

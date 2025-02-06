@@ -21,7 +21,18 @@
             <enum name="high" value="0"/>
             <enum name="medium" value="1"/>
             <enum name="low" value="2"/>
+            <enum name="normal" value="3"/>
         </attr>
         <attr format="string" name="subtitle" />
+        <attr format="string" name="bannerHeader" />
+        <attr format="integer" name="buttonOrientation" />
+    </declare-styleable>
+
+    <declare-styleable name="BannerMessagePreferenceGroup">
+        <attr format="string" name="expandKey" />
+        <attr format="string" name="expandTitle" />
+        <attr format="string" name="collapseKey" />
+        <attr format="string" name="collapseTitle" />
+        <attr format="reference" name="collapseIcon" />
     </declare-styleable>
 </resources>

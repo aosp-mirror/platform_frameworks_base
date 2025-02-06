@@ -1,5 +1,2 @@
-rule android.util.IndentingPrintWriter android.net.vcn.module.repackaged.android.util.IndentingPrintWriter
 rule android.util.LocalLog android.net.vcn.module.repackaged.android.util.LocalLog
-rule com.android.internal.util.IndentingPrintWriter android.net.vcn.module.repackaged.com.android.internal.util.IndentingPrintWriter
-rule com.android.internal.util.MessageUtils android.net.vcn.module.repackaged.com.android.internal.util.MessageUtils
 rule com.android.internal.util.WakeupMessage android.net.vcn.module.repackaged.com.android.internal.util.WakeupMessage

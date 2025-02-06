@@ -35,6 +35,7 @@ object DesktopTestHelpers {
     ): RunningTaskInfo =
         TestRunningTaskInfoBuilder()
             .setDisplayId(displayId)
+            .setParentTaskId(displayId)
             .setToken(MockToken().token())
             .setActivityType(ACTIVITY_TYPE_STANDARD)
             .setWindowingMode(WINDOWING_MODE_FREEFORM)
@@ -73,10 +74,14 @@ object DesktopTestHelpers {
             .setLastActiveTime(100)
             .build()
 
+    /**
+     * Create a new System Modal task builder, i.e. a builder for a task with only transparent
+     * activities.
+     */
+    fun createSystemModalTaskBuilder(displayId: Int = DEFAULT_DISPLAY): TestRunningTaskInfoBuilder =
+        createFullscreenTaskBuilder(displayId).setActivityStackTransparent(true).setNumActivities(1)
+
     /** Create a new System Modal task, i.e. a task with only transparent activities. */
     fun createSystemModalTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo =
-        createFullscreenTaskBuilder(displayId)
-            .setActivityStackTransparent(true)
-            .setNumActivities(1)
-            .build()
+        createSystemModalTaskBuilder(displayId).build()
 }

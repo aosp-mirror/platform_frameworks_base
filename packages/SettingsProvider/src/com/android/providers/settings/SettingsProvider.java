@@ -385,6 +385,9 @@ public class SettingsProvider extends ContentProvider {
 
     private static final Set<String> sDeviceConfigAllowlistedNamespaces = new ArraySet<>();
 
+    // TODO(b/388901162): Remove this when the same constant is exposed as an API in DeviceConfig.
+    private static final String DEVICE_CONFIG_OVERRIDES_NAMESPACE = "device_config_overrides";
+
     // We have to call in the user manager with no lock held,
     private volatile UserManager mUserManager;
 
@@ -1869,7 +1872,7 @@ public class SettingsProvider extends ContentProvider {
                 }
                 case MUTATION_OPERATION_RESET -> {
                     return mSettingsRegistry.resetSettingsLocked(SETTINGS_TYPE_SECURE,
-                            UserHandle.USER_SYSTEM, callingPackage, mode, tag);
+                            owningUserId, callingPackage, mode, tag);
                 }
             }
         }
@@ -2480,12 +2483,21 @@ public class SettingsProvider extends ContentProvider {
             for (String flag : flags) {
                 boolean namespaceAllowed = false;
                 if (isRestrictedShell) {
-                    int delimiterIndex = flag.indexOf("/");
-                    String flagNamespace;
-                    if (delimiterIndex != -1) {
-                        flagNamespace = flag.substring(0, delimiterIndex);
-                    } else {
-                        flagNamespace = flag;
+                    String flagNamespace = getFlagNamespace(flag);
+                    // If the namespace indicates this is a flag override, then the actual
+                    // namespace and flag name should be used for the allowlist verification.
+                    if (DEVICE_CONFIG_OVERRIDES_NAMESPACE.equals(flagNamespace)) {
+                        // Override flags are in the following form:
+                        // device_config_overrides/namespace:flagName
+                        int slashIndex = flag.indexOf("/");
+                        int colonIndex = flag.indexOf(":", slashIndex);
+                        if (slashIndex != -1 && colonIndex != -1 && (slashIndex + 1) < flag.length()
+                                && (colonIndex + 1) < flag.length()) {
+                            flagNamespace = flag.substring(slashIndex + 1, colonIndex);
+                            StringBuilder flagBuilder = new StringBuilder(flagNamespace);
+                            flagBuilder.append("/").append(flag.substring(colonIndex + 1));
+                            flag = flagBuilder.toString();
+                        }
                     }
                     if (allowlistedDeviceConfigNamespaces.contains(flagNamespace)) {
                         namespaceAllowed = true;
@@ -2510,6 +2522,23 @@ public class SettingsProvider extends ContentProvider {
             throw new SecurityException("Permission denial to mutate flag, must have root, "
                 + "WRITE_DEVICE_CONFIG, or WRITE_ALLOWLISTED_DEVICE_CONFIG");
         }
+    }
+
+    /**
+     * Returns the namespace for the provided {@code flag}.
+     * <p>
+     * Flags are expected to be in the form namespace/flagName; if the '/' delimiter does
+     * not exist, then the provided flag is returned as the namespace.
+     */
+    private static String getFlagNamespace(String flag) {
+        int delimiterIndex = flag.indexOf("/");
+        String flagNamespace;
+        if (delimiterIndex != -1) {
+            flagNamespace = flag.substring(0, delimiterIndex);
+        } else {
+            flagNamespace = flag;
+        }
+        return flagNamespace;
     }
 
     // The check is added mainly for auto devices. On auto devices, it is possible that
@@ -4043,7 +4072,7 @@ public class SettingsProvider extends ContentProvider {
 
         @VisibleForTesting
         final class UpgradeController {
-            private static final int SETTINGS_VERSION = 226;
+            private static final int SETTINGS_VERSION = 227;
 
             private final int mUserId;
 
@@ -6122,17 +6151,7 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 220) {
-                    final SettingsState globalSettings = getGlobalSettingsLocked();
-                    final Setting enableBackAnimation =
-                            globalSettings.getSettingLocked(Global.ENABLE_BACK_ANIMATION);
-                    if (enableBackAnimation.isNull()) {
-                        final boolean defEnableBackAnimation =
-                                getContext()
-                                        .getResources()
-                                        .getBoolean(R.bool.def_enable_back_animation);
-                        initGlobalSettingsDefaultValLocked(
-                                Settings.Global.ENABLE_BACK_ANIMATION, defEnableBackAnimation);
-                    }
+                    // Version 221: Removed
                     currentVersion = 221;
                 }
 
@@ -6245,6 +6264,51 @@ public class SettingsProvider extends ContentProvider {
                         }
                     }
                     currentVersion = 226;
+                }
+
+                // Version 226: Introduces dreaming while postured setting and migrates user from
+                // docked dream trigger to postured dream trigger.
+                if (currentVersion == 226) {
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting dreamOnDock = secureSettings.getSettingLocked(
+                            Secure.SCREENSAVER_ACTIVATE_ON_DOCK);
+                    final Setting dreamsEnabled = secureSettings.getSettingLocked(
+                            Secure.SCREENSAVER_ENABLED);
+                    final boolean dreamOnPosturedDefault = getContext().getResources().getBoolean(
+                            com.android.internal.R.bool.config_dreamsActivatedOnPosturedByDefault);
+                    final boolean dreamsEnabledByDefault = getContext().getResources().getBoolean(
+                            com.android.internal.R.bool.config_dreamsEnabledByDefault);
+
+                    if (dreamOnPosturedDefault && !dreamOnDock.isNull()
+                            && dreamOnDock.getValue().equals("1")) {
+                        // Disable dock activation and enable postured.
+                        secureSettings.insertSettingOverrideableByRestoreLocked(
+                                Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
+                                "0",
+                                null,
+                                true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                        secureSettings.insertSettingOverrideableByRestoreLocked(
+                                Secure.SCREENSAVER_ACTIVATE_ON_POSTURED,
+                                "1",
+                                null,
+                                true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+
+                        // Disable dreams overall, so user doesn't start to unexpectedly see dreams
+                        // enabled when postured.
+                        if (!dreamsEnabledByDefault && !dreamsEnabled.isNull()
+                                && dreamsEnabled.getValue().equals("1")) {
+                            secureSettings.insertSettingOverrideableByRestoreLocked(
+                                    Secure.SCREENSAVER_ENABLED,
+                                    "0",
+                                    null,
+                                    true,
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+
+                    currentVersion = 227;
                 }
 
                 // vXXX: Add new settings above this point.

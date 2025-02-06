@@ -18,21 +18,30 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.LocalOverscrollFactory
+import androidx.compose.foundation.OverscrollEffect
+import androidx.compose.foundation.OverscrollFactory
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberOverscrollEffect
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
@@ -46,11 +55,15 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestOverlays.OverlayA
 import com.android.compose.animation.scene.TestOverlays.OverlayB
+import com.android.compose.animation.scene.TestOverlays.OverlayC
+import com.android.compose.animation.scene.TestOverlays.OverlayD
 import com.android.compose.animation.scene.TestScenes.SceneA
+import com.android.compose.animation.scene.UserActionResult.ShowOverlay
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.assertSizeIsEqualTo
 import com.android.compose.test.setContentAndCreateMainScope
@@ -73,7 +86,7 @@ class OverlayTest {
 
     @Test
     fun showThenHideOverlay() {
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
         lateinit var coroutineScope: CoroutineScope
         rule.setContent {
             coroutineScope = rememberCoroutineScope()
@@ -115,7 +128,7 @@ class OverlayTest {
 
     @Test
     fun multipleOverlays() {
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
         lateinit var coroutineScope: CoroutineScope
         rule.setContent {
             coroutineScope = rememberCoroutineScope()
@@ -213,7 +226,7 @@ class OverlayTest {
             }
         }
 
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
         lateinit var coroutineScope: CoroutineScope
         rule.setContent {
             coroutineScope = rememberCoroutineScope()
@@ -285,7 +298,7 @@ class OverlayTest {
     fun overlayAlignment() {
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(SceneA, initialOverlays = setOf(OverlayA))
+                MutableSceneTransitionLayoutStateForTests(SceneA, initialOverlays = setOf(OverlayA))
             }
         var alignment by mutableStateOf(Alignment.Center)
         rule.setContent {
@@ -320,7 +333,7 @@ class OverlayTest {
     fun overlayMaxSizeIsCurrentSceneSize() {
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(SceneA, initialOverlays = setOf(OverlayA))
+                MutableSceneTransitionLayoutStateForTests(SceneA, initialOverlays = setOf(OverlayA))
             }
 
         val contentTag = "overlayContent"
@@ -547,7 +560,7 @@ class OverlayTest {
         val sharedIntValueByContent = mutableMapOf<ContentKey, Int>()
 
         @Composable
-        fun SceneScope.animateContentInt(targetValue: Int) {
+        fun ContentScope.animateContentInt(targetValue: Int) {
             val animatedValue = animateContentIntAsState(targetValue, sharedIntKey)
             LaunchedEffect(animatedValue) {
                 try {
@@ -742,7 +755,7 @@ class OverlayTest {
 
     @Test
     fun overscrollingOverlay_movableElementNotInOverlay() {
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateImpl(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
 
         val key = MovableElementKey("Foo", contents = setOf(SceneA))
         val movableElementChildTag = "movableElementChildTag"
@@ -769,7 +782,7 @@ class OverlayTest {
 
     @Test
     fun overlaysAreModalByDefault() {
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateImpl(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
 
         val scrollState = ScrollState(initial = 0)
         val scope =
@@ -820,5 +833,125 @@ class OverlayTest {
         rule.waitForIdle()
         assertThat(state.transitionState).isIdle()
         assertThat(state.transitionState).hasCurrentOverlays(/* empty */ )
+    }
+
+    @Test
+    fun showOverlay_hideAllOverlays() {
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutStateForTests(
+                    SceneA,
+                    initialOverlays = setOf(OverlayA, OverlayB, OverlayC),
+                    // We don't allow overlay C to be hidden.
+                    canHideOverlay = { it != OverlayC },
+                )
+            }
+
+        var touchSlop = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            SceneTransitionLayout(state) {
+                scene(SceneA) { Box(Modifier.fillMaxSize()) }
+                overlay(OverlayA) { Box(Modifier.fillMaxSize()) }
+                overlay(OverlayB) { Box(Modifier.fillMaxSize()) }
+                overlay(
+                    OverlayC,
+                    mapOf(
+                        Swipe.Down to
+                            ShowOverlay(
+                                OverlayD,
+                                hideCurrentOverlays = ShowOverlay.HideCurrentOverlays.All,
+                            )
+                    ),
+                ) {
+                    Box(Modifier.fillMaxSize())
+                }
+                overlay(OverlayD) { Box(Modifier.fillMaxSize()) }
+            }
+        }
+
+        assertThat(state.transitionState).hasCurrentOverlays(OverlayA, OverlayB, OverlayC)
+
+        rule.onRoot().performTouchInput {
+            down(center)
+            moveBy(Offset(0f, touchSlop))
+        }
+
+        // We closed all overlay, but C can not be hidden.
+        val transition = assertThat(state.transitionState).isShowOrHideOverlayTransition()
+        assertThat(transition).hasCurrentScene(SceneA)
+        assertThat(transition).hasCurrentOverlays(OverlayC)
+        assertThat(transition).hasProgress(0f)
+        assertThat(transition).hasOverlay(OverlayD)
+
+        rule.onRoot().performTouchInput { moveBy(Offset(0f, bottom / 2f)) }
+        assertThat(transition).hasProgress(0.5f)
+
+        rule.onRoot().performTouchInput { up() }
+        rule.waitForIdle()
+        assertThat(state.transitionState).isIdle()
+        assertThat(state.transitionState).hasCurrentScene(SceneA)
+        assertThat(state.transitionState).hasCurrentOverlays(OverlayC, OverlayD)
+    }
+
+    @Test
+    fun effectFactory() {
+        val effects = mutableSetOf<OverscrollEffect>()
+        var customFactory by mutableStateOf<OverscrollFactory?>(null)
+        rule.setContent {
+            CompositionLocalProvider(LocalOverscrollFactory provides DefaultEffectFactory) {
+                SceneTransitionLayout(
+                    remember { MutableSceneTransitionLayoutStateForTests(SceneA) }
+                ) {
+                    scene(SceneA, effectFactory = customFactory) {
+                        val effect = checkNotNull(rememberOverscrollEffect())
+                        SideEffect {
+                            effects.add(effect)
+                            effects.add(horizontalOverscrollEffect)
+                            effects.add(verticalOverscrollEffect)
+                        }
+                    }
+                }
+            }
+        }
+
+        assertThat(effects.size).isEqualTo(3)
+        effects.forEach { assertThat(it).isInstanceOf(DefaultEffect::class.java) }
+
+        effects.clear()
+        customFactory = CustomEffectFactory
+        rule.waitForIdle()
+
+        assertThat(effects.size).isEqualTo(3)
+        effects.forEach { assertThat(it).isInstanceOf(CustomEffect::class.java) }
+    }
+
+    private abstract class NoOpEffect : OverscrollEffect {
+        override val isInProgress: Boolean = false
+
+        override suspend fun applyToFling(
+            velocity: Velocity,
+            performFling: suspend (Velocity) -> Velocity,
+        ) {
+            performFling(velocity)
+        }
+
+        override fun applyToScroll(
+            delta: Offset,
+            source: NestedScrollSource,
+            performScroll: (Offset) -> Offset,
+        ): Offset = performScroll(delta)
+    }
+
+    private class DefaultEffect : NoOpEffect()
+
+    private class CustomEffect : NoOpEffect()
+
+    private data object DefaultEffectFactory : OverscrollFactory {
+        override fun createOverscrollEffect(): OverscrollEffect = DefaultEffect()
+    }
+
+    private data object CustomEffectFactory : OverscrollFactory {
+        override fun createOverscrollEffect(): OverscrollEffect = CustomEffect()
     }
 }

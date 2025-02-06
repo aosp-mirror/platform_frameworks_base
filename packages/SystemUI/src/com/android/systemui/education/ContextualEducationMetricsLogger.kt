@@ -42,8 +42,8 @@ class ContextualEducationMetricsLogger @Inject constructor() {
             }
         SysUiStatsLog.write(
             SysUiStatsLog.CONTEXTUAL_EDUCATION_TRIGGERED,
-            statsGestureType,
             statsEducationType,
+            statsGestureType,
         )
     }
 }

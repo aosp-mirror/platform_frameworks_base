@@ -17,23 +17,23 @@
 package com.android.systemui.volume.dialog.ui.binder
 
 import android.app.Dialog
-import android.graphics.Rect
-import android.graphics.Region
+import android.content.res.Resources
 import android.view.View
-import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import android.view.ViewTreeObserver.InternalInsetsInfo
+import android.view.WindowInsets
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.core.view.updatePadding
 import com.android.internal.view.RotationPolicy
+import com.android.systemui.common.ui.view.onApplyWindowInsets
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
-import com.android.systemui.util.children
+import com.android.systemui.util.kotlin.awaitCancellationThenDispose
 import com.android.systemui.volume.SystemUIInterpolators
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
 import com.android.systemui.volume.dialog.ringer.ui.binder.VolumeDialogRingerViewBinder
 import com.android.systemui.volume.dialog.settings.ui.binder.VolumeDialogSettingsButtonViewBinder
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel
 import com.android.systemui.volume.dialog.sliders.ui.VolumeDialogSlidersViewBinder
-import com.android.systemui.volume.dialog.ui.VolumeDialogResources
 import com.android.systemui.volume.dialog.ui.utils.JankListenerFactory
 import com.android.systemui.volume.dialog.ui.utils.suspendAnimate
 import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogViewModel
@@ -42,7 +42,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
@@ -56,7 +56,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 class VolumeDialogViewBinder
 @Inject
 constructor(
-    private val volumeResources: VolumeDialogResources,
+    @Main resources: Resources,
     private val viewModel: VolumeDialogViewModel,
     private val jankListenerFactory: JankListenerFactory,
     private val tracer: VolumeTracer,
@@ -65,10 +65,16 @@ constructor(
     private val settingsButtonViewBinder: VolumeDialogSettingsButtonViewBinder,
 ) {
 
+    private val dialogShowAnimationDurationMs =
+        resources.getInteger(R.integer.config_dialogShowAnimationDurationMs).toLong()
+    private val dialogHideAnimationDurationMs =
+        resources.getInteger(R.integer.config_dialogHideAnimationDurationMs).toLong()
+
     fun CoroutineScope.bind(dialog: Dialog) {
+        val insets: MutableStateFlow<WindowInsets> =
+            MutableStateFlow(WindowInsets.Builder().build())
         // Root view of the Volume Dialog.
         val root: MotionLayout = dialog.requireViewById(R.id.volume_dialog_root)
-        root.alpha = 0f
 
         animateVisibility(root, dialog, viewModel.dialogVisibilityModel)
 
@@ -81,7 +87,23 @@ constructor(
             }
             .launchIn(this)
 
-        launch { root.viewTreeObserver.computeInternalInsetsListener(root) }
+        launch { root.viewTreeObserver.listenToComputeInternalInsets() }
+
+        launch {
+            root
+                .onApplyWindowInsets { v, newInsets ->
+                    val insetsValues = newInsets.getInsets(WindowInsets.Type.displayCutout())
+                    v.updatePadding(
+                        left = insetsValues.left,
+                        top = insetsValues.top,
+                        right = insetsValues.right,
+                        bottom = insetsValues.bottom,
+                    )
+                    insets.value = newInsets
+                    WindowInsets.CONSUMED
+                }
+                .awaitCancellationThenDispose()
+        }
 
         with(volumeDialogRingerViewBinder) { bind(root) }
         with(slidersViewBinder) { bind(root) }
@@ -98,13 +120,15 @@ constructor(
                 when (it) {
                     is VolumeDialogVisibilityModel.Visible -> {
                         tracer.traceVisibilityEnd(it)
-                        calculateTranslationX(view)?.let(view::setTranslationX)
-                        view.animateShow(volumeResources.dialogShowDurationMillis.first())
+                        view.animateShow(
+                            duration = dialogShowAnimationDurationMs,
+                            translationX = calculateTranslationX(view),
+                        )
                     }
                     is VolumeDialogVisibilityModel.Dismissed -> {
                         tracer.traceVisibilityEnd(it)
                         view.animateHide(
-                            duration = volumeResources.dialogHideDurationMillis.first(),
+                            duration = dialogHideAnimationDurationMs,
                             translationX = calculateTranslationX(view),
                         )
                         dialog.dismiss()
@@ -129,24 +153,15 @@ constructor(
         }
     }
 
-    private suspend fun View.animateShow(duration: Long) {
+    private suspend fun View.animateShow(duration: Long, translationX: Float?) {
+        translationX?.let { setTranslationX(translationX) }
+        alpha = 0f
         animate()
             .alpha(1f)
             .translationX(0f)
             .setDuration(duration)
             .setInterpolator(SystemUIInterpolators.LogDecelerateInterpolator())
             .suspendAnimate(jankListenerFactory.show(this, duration))
-        /* TODO(b/369993851)
-        .withEndAction(Runnable {
-            if (!Prefs.getBoolean(mContext, Prefs.Key.TOUCHED_RINGER_TOGGLE, false)) {
-                if (mRingerIcon != null) {
-                    mRingerIcon.postOnAnimationDelayed(
-                        getSinglePressFor(mRingerIcon), 1500
-                    )
-                }
-            }
-        })
-         */
     }
 
     private suspend fun View.animateHide(duration: Long, translationX: Float?) {
@@ -155,46 +170,19 @@ constructor(
                 .alpha(0f)
                 .setDuration(duration)
                 .setInterpolator(SystemUIInterpolators.LogAccelerateInterpolator())
-        /*  TODO(b/369993851)
-        .withEndAction(
-            Runnable {
-                mHandler.postDelayed(
-                    Runnable {
-                        hideRingerDrawer()
-
-                    },
-                    50
-                )
-            }
-        )
-         */
-        if (translationX != null) {
-            animator.translationX(translationX)
-        }
+        translationX?.let { animator.translationX(it) }
         animator.suspendAnimate(jankListenerFactory.dismiss(this, duration))
     }
 
-    private suspend fun ViewTreeObserver.computeInternalInsetsListener(viewGroup: ViewGroup) =
+    private suspend fun ViewTreeObserver.listenToComputeInternalInsets() =
         suspendCancellableCoroutine<Unit> { continuation ->
             val listener =
                 ViewTreeObserver.OnComputeInternalInsetsListener { inoutInfo ->
-                    viewGroup.fillTouchableBounds(inoutInfo)
+                    viewModel.fillTouchableBounds(inoutInfo)
                 }
             addOnComputeInternalInsetsListener(listener)
             continuation.invokeOnCancellation { removeOnComputeInternalInsetsListener(listener) }
         }
-
-    private fun ViewGroup.fillTouchableBounds(internalInsetsInfo: InternalInsetsInfo) {
-        for (child in children) {
-            val boundsRect = Rect()
-            internalInsetsInfo.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_REGION)
-
-            child.getBoundsInWindow(boundsRect, false)
-            internalInsetsInfo.touchableRegion.op(boundsRect, Region.Op.UNION)
-        }
-        val boundsRect = Rect()
-        getBoundsInWindow(boundsRect, false)
-    }
 
     private fun MotionLayout.transitionToState(newState: Int, animate: Boolean) {
         if (animate) {

@@ -18,49 +18,42 @@ package com.android.systemui.statusbar.phone.ongoingcall
 
 import android.app.ActivityManager
 import android.app.IActivityManager
-import android.app.Notification
-import android.app.Notification.CallStyle.CALL_TYPE_ONGOING
 import android.app.PendingIntent
 import android.app.UidObserver
 import android.content.Context
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.android.app.tracing.coroutines.launchTraced as launch
-import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.CoreStartable
 import com.android.systemui.Dumpable
-import com.android.systemui.Flags
-import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
-import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.chips.ui.view.ChipChronometer
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore
 import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler
-import com.android.systemui.statusbar.notification.collection.NotificationEntry
-import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
-import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.systemui.statusbar.notification.shared.CallType
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
-import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 
-/** A controller to handle the ongoing call chip in the collapsed status bar.
+/**
+ * A controller to handle the ongoing call chip in the collapsed status bar.
+ *
  * @deprecated Use [OngoingCallInteractor] instead, which follows recommended architecture patterns
  */
 @Deprecated("Use OngoingCallInteractor instead")
@@ -71,10 +64,7 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val context: Context,
     private val ongoingCallRepository: OngoingCallRepository,
-    private val notifCollection: CommonNotifCollection,
     private val activeNotificationsInteractor: ActiveNotificationsInteractor,
-    private val systemClock: SystemClock,
-    private val activityStarter: ActivityStarter,
     @Main private val mainExecutor: Executor,
     private val iActivityManager: IActivityManager,
     private val dumpManager: DumpManager,
@@ -90,111 +80,29 @@ constructor(
 
     private val mListeners: MutableList<OngoingCallListener> = mutableListOf()
     private val uidObserver = CallAppUidObserver()
-    private val notifListener =
-        object : NotifCollectionListener {
-            // Temporary workaround for b/178406514 for testing purposes.
-            //
-            // b/178406514 means that posting an incoming call notif then updating it to an ongoing
-            // call notif does not work (SysUI never receives the update). This workaround allows us
-            // to trigger the ongoing call chip when an ongoing call notif is *added* rather than
-            // *updated*, allowing us to test the chip.
-            //
-            // TODO(b/183229367): Remove this function override when b/178406514 is fixed.
-            override fun onEntryAdded(entry: NotificationEntry) {
-                onEntryUpdated(entry, true)
-            }
-
-            override fun onEntryUpdated(entry: NotificationEntry) {
-                StatusBarUseReposForCallChip.assertInLegacyMode()
-                // We have a new call notification or our existing call notification has been
-                // updated.
-                // TODO(b/183229367): This likely won't work if you take a call from one app then
-                //  switch to a call from another app.
-                if (
-                    callNotificationInfo == null && isCallNotification(entry) ||
-                        (entry.sbn.key == callNotificationInfo?.key)
-                ) {
-                    val newOngoingCallInfo =
-                        CallNotificationInfo(
-                            entry.sbn.key,
-                            entry.sbn.notification.getWhen(),
-                            // In this old listener pattern, we don't have access to the
-                            // notification icon.
-                            notificationIconView = null,
-                            entry.sbn.notification.contentIntent,
-                            entry.sbn.uid,
-                            entry.sbn.notification.extras.getInt(
-                                Notification.EXTRA_CALL_TYPE,
-                                -1,
-                            ) == CALL_TYPE_ONGOING,
-                            statusBarSwipedAway = callNotificationInfo?.statusBarSwipedAway ?: false,
-                        )
-                    if (newOngoingCallInfo == callNotificationInfo) {
-                        return
-                    }
-
-                    callNotificationInfo = newOngoingCallInfo
-                    if (newOngoingCallInfo.isOngoing) {
-                        logger.log(
-                            TAG,
-                            LogLevel.DEBUG,
-                            { str1 = newOngoingCallInfo.key },
-                            { "Call notif *is* ongoing -> showing chip. key=$str1" },
-                        )
-                        updateChip()
-                    } else {
-                        logger.log(
-                            TAG,
-                            LogLevel.DEBUG,
-                            { str1 = newOngoingCallInfo.key },
-                            { "Call notif not ongoing -> hiding chip. key=$str1" },
-                        )
-                        removeChip()
-                    }
-                }
-            }
-
-            override fun onEntryRemoved(entry: NotificationEntry, reason: Int) {
-                if (entry.sbn.key == callNotificationInfo?.key) {
-                    logger.log(
-                        TAG,
-                        LogLevel.DEBUG,
-                        { str1 = entry.sbn.key },
-                        { "Call notif removed -> hiding chip. key=$str1" },
-                    )
-                    removeChip()
-                }
-            }
-        }
 
     override fun start() {
-        if (StatusBarChipsModernization.isEnabled)
-            return
+        if (StatusBarChipsModernization.isEnabled) return
 
         dumpManager.registerDumpable(this)
 
-        if (Flags.statusBarUseReposForCallChip()) {
-            scope.launch {
-                // Listening to [ActiveNotificationsInteractor] instead of using
-                // [NotifCollectionListener#onEntryUpdated] is better for two reasons:
-                // 1. ActiveNotificationsInteractor automatically filters the notification list to
-                // just notifications for the current user, which ensures we don't show a call chip
-                // for User 1's call while User 2 is active (see b/328584859).
-                // 2. ActiveNotificationsInteractor only emits notifications that are currently
-                // present in the shade, which means we know we've already inflated the icon that we
-                // might use for the call chip (see b/354930838).
-                activeNotificationsInteractor.ongoingCallNotification.collect {
-                    updateInfoFromNotifModel(it)
-                }
+        scope.launch {
+            // Listening to [ActiveNotificationsInteractor] instead of using
+            // [NotifCollectionListener#onEntryUpdated] is better for two reasons:
+            // 1. ActiveNotificationsInteractor automatically filters the notification list to
+            // just notifications for the current user, which ensures we don't show a call chip
+            // for User 1's call while User 2 is active (see b/328584859).
+            // 2. ActiveNotificationsInteractor only emits notifications that are currently
+            // present in the shade, which means we know we've already inflated the icon that we
+            // might use for the call chip (see b/354930838).
+            activeNotificationsInteractor.ongoingCallNotification.collect {
+                updateInfoFromNotifModel(it)
             }
-        } else {
-            notifCollection.addCollectionListener(notifListener)
         }
 
         scope.launch {
             statusBarModeRepository.defaultDisplay.isInFullscreenMode.collect {
                 isFullscreen = it
-                updateChipClickListener()
                 updateGestureListening()
             }
         }
@@ -244,23 +152,16 @@ constructor(
             logger.log(
                 TAG,
                 LogLevel.DEBUG,
-                {
-                    bool1 = Flags.statusBarCallChipNotificationIcon()
-                    bool2 = currentInfo.notificationIconView != null
-                },
-                { "Creating OngoingCallModel.InCall. notifIconFlag=$bool1 hasIcon=$bool2" },
+                { bool1 = currentInfo.notificationIconView != null },
+                { "Creating OngoingCallModel.InCall. hasIcon=$bool1" },
             )
-            val icon =
-                if (Flags.statusBarCallChipNotificationIcon()) {
-                    currentInfo.notificationIconView
-                } else {
-                    null
-                }
             return OngoingCallModel.InCall(
                 startTimeMs = currentInfo.callStartTime,
-                notificationIconView = icon,
+                notificationIconView = currentInfo.notificationIconView,
                 intent = currentInfo.intent,
                 notificationKey = currentInfo.key,
+                appName = currentInfo.appName,
+                promotedContent = currentInfo.promotedContent,
             )
         } else {
             return OngoingCallModel.NoCall
@@ -288,7 +189,7 @@ constructor(
 
         if (notifModel == null) {
             logger.log(TAG, LogLevel.DEBUG, {}, { "NotifInteractorCallModel: null" })
-            removeChip()
+            removeChipInfo()
         } else if (notifModel.callType != CallType.Ongoing) {
             logger.log(
                 TAG,
@@ -296,7 +197,7 @@ constructor(
                 { str1 = notifModel.callType.name },
                 { "Notification Interactor sent ActiveNotificationModel with callType=$str1" },
             )
-            removeChip()
+            removeChipInfo()
         } else {
             logger.log(
                 TAG,
@@ -317,6 +218,8 @@ constructor(
                     notifModel.statusBarChipIconView,
                     notifModel.contentIntent,
                     notifModel.uid,
+                    notifModel.appName,
+                    notifModel.promotedContent,
                     isOngoing = true,
                     statusBarSwipedAway = callNotificationInfo?.statusBarSwipedAway ?: false,
                 )
@@ -337,29 +240,10 @@ constructor(
         val timeView = currentChipView?.getTimeView()
 
         if (currentChipView != null && timeView != null) {
-            if (!Flags.statusBarScreenSharingChips()) {
-                // If the new status bar screen sharing chips are enabled, then the display logic
-                // for *all* status bar chips (both the call chip and the screen sharing chips) are
-                // handled by CollapsedStatusBarViewBinder, *not* this class. We need to disable
-                // this class from making any display changes because the new chips use the same
-                // view as the old call chip.
-                // TODO(b/332662551): We should move this whole controller class to recommended
-                // architecture so that we don't need to awkwardly disable only some parts of this
-                // class.
-                if (currentCallNotificationInfo.hasValidStartTime()) {
-                    timeView.setShouldHideText(false)
-                    timeView.base =
-                        currentCallNotificationInfo.callStartTime -
-                            systemClock.currentTimeMillis() + systemClock.elapsedRealtime()
-                    timeView.start()
-                } else {
-                    timeView.setShouldHideText(true)
-                    timeView.stop()
-                }
-                updateChipClickListener()
-            }
-
-            // But, this class still needs to do the non-display logic regardless of the flag.
+            // Current behavior: Displaying the call chip is handled by HomeStatusBarViewBinder, but
+            // this class is still responsible for the non-display logic.
+            // Future behavior: if StatusBarChipsModernization flag is enabled, this class is
+            // completely deprecated and does nothing.
             uidObserver.registerWithUid(currentCallNotificationInfo.uid)
             if (!currentCallNotificationInfo.statusBarSwipedAway) {
                 statusBarWindowControllerStore.defaultDisplay
@@ -377,33 +261,6 @@ constructor(
                 {},
                 { "Ongoing call chip view could not be found; Not displaying chip in status bar" },
             )
-        }
-    }
-
-    private fun updateChipClickListener() {
-        StatusBarChipsModernization.assertInLegacyMode()
-
-        if (Flags.statusBarScreenSharingChips()) {
-            return
-        }
-
-        if (callNotificationInfo == null) {
-            return
-        }
-        val currentChipView = chipView
-        val backgroundView =
-            currentChipView?.findViewById<View>(R.id.ongoing_activity_chip_background)
-        val intent = callNotificationInfo?.intent
-        if (currentChipView != null && backgroundView != null && intent != null) {
-            currentChipView.setOnClickListener {
-                activityStarter.postStartActivityDismissingKeyguard(
-                    intent,
-                    ActivityTransitionAnimator.Controller.fromView(
-                        backgroundView,
-                        InteractionJankMonitor.CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
-                    ),
-                )
-            }
         }
     }
 
@@ -430,13 +287,10 @@ constructor(
         }
     }
 
-    private fun removeChip() {
+    private fun removeChipInfo() {
         StatusBarChipsModernization.assertInLegacyMode()
 
         callNotificationInfo = null
-        if (!Flags.statusBarScreenSharingChips()) {
-            tearDownChipView()
-        }
         statusBarWindowControllerStore.defaultDisplay.setOngoingProcessRequiresStatusBarVisible(
             false
         )
@@ -485,17 +339,17 @@ constructor(
         val notificationIconView: StatusBarIconView?,
         val intent: PendingIntent?,
         val uid: Int,
+        val appName: String,
+        /**
+         * If the call notification also meets promoted notification criteria, this field is filled
+         * in with the content related to promotion. Otherwise null.
+         */
+        val promotedContent: PromotedNotificationContentModel?,
         /** True if the call is currently ongoing (as opposed to incoming, screening, etc.). */
         val isOngoing: Boolean,
         /** True if the user has swiped away the status bar while in this phone call. */
         val statusBarSwipedAway: Boolean,
-    ) {
-        /**
-         * Returns true if the notification information has a valid call start time. See
-         * b/192379214.
-         */
-        fun hasValidStartTime(): Boolean = callStartTime > 0
-    }
+    )
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("Active call notification: $callNotificationInfo")
@@ -595,10 +449,6 @@ constructor(
             }
         }
     }
-}
-
-private fun isCallNotification(entry: NotificationEntry): Boolean {
-    return entry.sbn.notification.isStyle(Notification.CallStyle::class.java)
 }
 
 private const val TAG = OngoingCallRepository.TAG

@@ -34,7 +34,6 @@ import android.app.ActivityManager;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.platform.test.flag.junit.FlagsParameterization;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.TestableLooper;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
@@ -44,11 +43,12 @@ import android.window.WindowContainerTransaction;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.Flags;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -56,6 +56,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
 import platform.test.runner.parameterized.Parameters;
@@ -71,9 +72,6 @@ public class TaskViewTransitionsTest extends ShellTestCase {
                 Flags.FLAG_ENABLE_TASK_VIEW_CONTROLLER_CLEANUP);
     }
 
-    @Rule
-    public final SetFlagsRule mSetFlagsRule;
-
     @Mock
     Transitions mTransitions;
     @Mock
@@ -82,13 +80,17 @@ public class TaskViewTransitionsTest extends ShellTestCase {
     ActivityManager.RunningTaskInfo mTaskInfo;
     @Mock
     WindowContainerToken mToken;
+    @Mock
+    ShellTaskOrganizer mOrganizer;
+    @Mock
+    SyncTransactionQueue mSyncQueue;
+
+    Executor mExecutor = command -> command.run();
 
     TaskViewRepository mTaskViewRepository;
     TaskViewTransitions mTaskViewTransitions;
 
-    public TaskViewTransitionsTest(FlagsParameterization flags) {
-        mSetFlagsRule = new SetFlagsRule(flags);
-    }
+    public TaskViewTransitionsTest(FlagsParameterization flags) {}
 
     @Before
     public void setUp() {
@@ -104,9 +106,12 @@ public class TaskViewTransitionsTest extends ShellTestCase {
         mTaskInfo.taskDescription = mock(ActivityManager.TaskDescription.class);
 
         mTaskViewRepository = new TaskViewRepository();
-        mTaskViewTransitions = spy(new TaskViewTransitions(mTransitions, mTaskViewRepository));
-        mTaskViewTransitions.addTaskView(mTaskViewTaskController);
+        when(mOrganizer.getExecutor()).thenReturn(mExecutor);
+        mTaskViewTransitions = spy(new TaskViewTransitions(mTransitions, mTaskViewRepository,
+                mOrganizer, mSyncQueue));
+        mTaskViewTransitions.registerTaskView(mTaskViewTaskController);
         when(mTaskViewTaskController.getTaskInfo()).thenReturn(mTaskInfo);
+        when(mTaskViewTaskController.getTaskToken()).thenReturn(mToken);
     }
 
     @Test
@@ -212,7 +217,7 @@ public class TaskViewTransitionsTest extends ShellTestCase {
 
     @Test
     public void testSetTaskVisibility_taskRemoved_noNPE() {
-        mTaskViewTransitions.removeTaskView(mTaskViewTaskController);
+        mTaskViewTransitions.unregisterTaskView(mTaskViewTaskController);
 
         assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
 
@@ -221,7 +226,7 @@ public class TaskViewTransitionsTest extends ShellTestCase {
 
     @Test
     public void testSetTaskBounds_taskRemoved_noNPE() {
-        mTaskViewTransitions.removeTaskView(mTaskViewTaskController);
+        mTaskViewTransitions.unregisterTaskView(mTaskViewTaskController);
 
         assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
 

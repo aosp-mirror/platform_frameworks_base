@@ -1616,7 +1616,13 @@ public class CameraDeviceImpl extends CameraDevice
             // request if no repeating request is active. A default capture request is created here
             // for initial use. The capture callback will provide capture results that include the
             // actual capture parameters used for the streaming.
-            CaptureRequest.Builder builder = createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            CameraMetadataNative templatedRequest = mRemoteDevice.createDefaultRequest(
+                    CameraDevice.TEMPLATE_PREVIEW);
+
+            CaptureRequest.Builder builder = new CaptureRequest.Builder(
+                    templatedRequest, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE,
+                    getId(), /*physicalCameraIdSet*/ null);
+
             for (Surface surface : surfaces) {
                 builder.addTarget(surface);
             }

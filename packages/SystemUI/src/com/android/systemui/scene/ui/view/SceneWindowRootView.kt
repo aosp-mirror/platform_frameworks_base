@@ -14,11 +14,9 @@ import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.shade.TouchLogger
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import javax.inject.Provider
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /** A root view of the main SysUI window that supports scenes. */
-@ExperimentalCoroutinesApi
 class SceneWindowRootView(context: Context, attrs: AttributeSet?) : WindowRootView(context, attrs) {
 
     private var motionEventHandler: SceneContainerViewModel.MotionEventHandler? = null
@@ -34,6 +32,7 @@ class SceneWindowRootView(context: Context, attrs: AttributeSet?) : WindowRootVi
         layoutInsetController: LayoutInsetsController,
         sceneDataSourceDelegator: SceneDataSourceDelegator,
         qsSceneAdapter: Provider<QSSceneAdapter>,
+        sceneJankMonitorFactory: SceneJankMonitor.Factory,
     ) {
         setLayoutInsetsController(layoutInsetController)
         SceneWindowRootViewBinder.bind(
@@ -52,6 +51,7 @@ class SceneWindowRootView(context: Context, attrs: AttributeSet?) : WindowRootVi
             },
             dataSourceDelegator = sceneDataSourceDelegator,
             qsSceneAdapter = qsSceneAdapter,
+            sceneJankMonitorFactory = sceneJankMonitorFactory,
         )
     }
 

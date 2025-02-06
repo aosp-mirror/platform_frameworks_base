@@ -19,7 +19,6 @@
 package com.android.wm.shell.apptoweb
 
 import android.app.assist.AssistContent
-import android.app.assist.AssistContent.EXTRA_SESSION_TRANSFER_WEB_URI
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.ACTION_VIEW
@@ -113,5 +112,5 @@ fun getDomainVerificationUserState(
  * Returns the web uri from the given [AssistContent].
  */
 fun AssistContent.getSessionWebUri(): Uri? {
-    return extras.getParcelable(EXTRA_SESSION_TRANSFER_WEB_URI) ?: webUri
+    return sessionTransferUri ?: webUri
 }

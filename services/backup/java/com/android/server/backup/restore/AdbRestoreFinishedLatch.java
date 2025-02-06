@@ -17,7 +17,6 @@
 package com.android.server.backup.restore;
 
 import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 
 import android.util.Slog;
 
@@ -72,7 +71,7 @@ public class AdbRestoreFinishedLatch implements BackupRestoreTask {
 
     @Override
     public void operationComplete(long result) {
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.w(TAG, "adb onRestoreFinished() complete");
         }
         mLatch.countDown();
@@ -81,9 +80,7 @@ public class AdbRestoreFinishedLatch implements BackupRestoreTask {
 
     @Override
     public void handleCancel(boolean cancelAll) {
-        if (DEBUG) {
-            Slog.w(TAG, "adb onRestoreFinished() timed out");
-        }
+        Slog.w(TAG, "adb onRestoreFinished() timed out");
         mLatch.countDown();
         mOperationStorage.removeOperation(mCurrentOpToken);
     }

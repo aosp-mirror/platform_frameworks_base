@@ -15,11 +15,18 @@
  */
 package com.android.systemui.shade.data.repository
 
+import android.annotation.SuppressLint
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 /** Data for the shade, mostly related to expansion of the shade and quick settings. */
 interface ShadeRepository {
@@ -36,7 +43,7 @@ interface ShadeRepository {
      * Information about the currently running fling animation, or null if no fling animation is
      * running.
      */
-    val currentFling: StateFlow<FlingInfo?>
+    val currentFling: SharedFlow<FlingInfo?>
 
     /**
      * The amount the lockscreen shade has dragged down by the user, [0-1]. 0 means fully collapsed,
@@ -180,7 +187,8 @@ interface ShadeRepository {
 
 /** Business logic for shade interactions */
 @SysUISingleton
-class ShadeRepositoryImpl @Inject constructor() : ShadeRepository {
+class ShadeRepositoryImpl @Inject constructor(@Background val backgroundScope: CoroutineScope) :
+    ShadeRepository {
     private val _qsExpansion = MutableStateFlow(0f)
     @Deprecated("Use ShadeInteractor.qsExpansion instead")
     override val qsExpansion: StateFlow<Float> = _qsExpansion.asStateFlow()
@@ -193,8 +201,13 @@ class ShadeRepositoryImpl @Inject constructor() : ShadeRepository {
     override val udfpsTransitionToFullShadeProgress: StateFlow<Float> =
         _udfpsTransitionToFullShadeProgress.asStateFlow()
 
-    private val _currentFling: MutableStateFlow<FlingInfo?> = MutableStateFlow(null)
-    override val currentFling: StateFlow<FlingInfo?> = _currentFling.asStateFlow()
+    /**
+     * Must be a SharedFlow, since the fling is by definition an event and dropping it has extreme
+     * consequences in some cases (for example, keyguard uses this to decide when to unlock).
+     */
+    @SuppressLint("SharedFlowCreation")
+    override val currentFling: MutableSharedFlow<FlingInfo?> =
+        MutableSharedFlow(replay = 2, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     private val _legacyShadeExpansion = MutableStateFlow(0f)
     @Deprecated("Use ShadeInteractor.shadeExpansion instead")
@@ -294,7 +307,7 @@ class ShadeRepositoryImpl @Inject constructor() : ShadeRepository {
     }
 
     override fun setCurrentFling(info: FlingInfo?) {
-        _currentFling.value = info
+        backgroundScope.launch { currentFling.emit(info) }
     }
 
     @Deprecated("Should only be called by NPVC and tests")

@@ -16,75 +16,115 @@
 
 package com.android.systemui.volume.dialog.sliders.domain.interactor
 
+import android.media.AudioManager
+import android.service.notification.ZenPolicy
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.settingslib.notification.modes.TestModeBuilder
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runTest
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.plugins.VolumeDialogController
 import com.android.systemui.plugins.fakeVolumeDialogController
+import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
 import com.android.systemui.testKosmos
+import com.android.systemui.volume.dialog.sliders.domain.model.VolumeDialogSliderType
 import com.android.systemui.volume.dialog.sliders.domain.model.volumeDialogSliderType
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class VolumeDialogSliderInteractorTest : SysuiTestCase() {
 
-    private val kosmos = testKosmos()
+    private val kosmos =
+        testKosmos().apply {
+            useUnconfinedTestDispatcher()
+            zenModeRepository.addMode(
+                TestModeBuilder()
+                    .setName("Blocks media, Active")
+                    .setZenPolicy(ZenPolicy.Builder().allowMedia(false).build())
+                    .setActive(true)
+                    .build()
+            )
+        }
 
-    private lateinit var underTest: VolumeDialogSliderInteractor
-
-    @Before
-    fun setUp() {
-        underTest = kosmos.volumeDialogSliderInteractor
+    private val underTest: VolumeDialogSliderInteractor by lazy {
+        kosmos.volumeDialogSliderInteractor
     }
 
     @Test
     fun settingStreamVolume_setsActiveStream() =
-        with(kosmos) {
-            testScope.runTest {
-                runCurrent()
-                // initialize the stream model
-                fakeVolumeDialogController.setStreamVolume(volumeDialogSliderType.audioStream, 0)
+        kosmos.runTest {
+            // initialize the stream model
+            fakeVolumeDialogController.setStreamVolume(volumeDialogSliderType.audioStream, 0)
 
-                val sliderModel by collectLastValue(underTest.slider)
-                underTest.setStreamVolume(1)
-                runCurrent()
+            val sliderModel by collectLastValue(underTest.slider)
+            underTest.setStreamVolume(1)
 
-                assertThat(sliderModel!!.isActive).isTrue()
-            }
+            assertThat(sliderModel!!.isActive).isTrue()
         }
 
     @Test
     fun streamVolumeIs_minMaxAreEnforced() =
-        with(kosmos) {
-            testScope.runTest {
-                runCurrent()
-                fakeVolumeDialogController.updateState {
-                    states.put(
-                        volumeDialogSliderType.audioStream,
-                        VolumeDialogController.StreamState().apply {
-                            levelMin = 0
-                            level = 2
-                            levelMax = 1
-                        },
-                    )
-                }
-
-                val sliderModel by collectLastValue(underTest.slider)
-                runCurrent()
-
-                assertThat(sliderModel!!.level).isEqualTo(1)
+        kosmos.runTest {
+            fakeVolumeDialogController.updateState {
+                states.put(
+                    volumeDialogSliderType.audioStream,
+                    VolumeDialogController.StreamState().apply {
+                        levelMin = 0
+                        level = 2
+                        levelMax = 1
+                    },
+                )
             }
+
+            val sliderModel by collectLastValue(underTest.slider)
+
+            assertThat(sliderModel!!.level).isEqualTo(1)
+        }
+
+    @Test
+    fun streamCantBeBlockedByZenMode_isDisabledByZenMode_false() =
+        kosmos.runTest {
+            volumeDialogSliderType = VolumeDialogSliderType.Stream(AudioManager.STREAM_VOICE_CALL)
+
+            val isDisabledByZenMode by collectLastValue(underTest.isDisabledByZenMode)
+
+            assertThat(isDisabledByZenMode).isFalse()
+        }
+
+    @Test
+    fun remoteMediaStream_zenModeRestrictive_IsNotDisabledByZenMode() =
+        kosmos.runTest {
+            volumeDialogSliderType = VolumeDialogSliderType.RemoteMediaStream(0)
+
+            val isDisabledByZenMode by collectLastValue(underTest.isDisabledByZenMode)
+
+            assertThat(isDisabledByZenMode).isFalse()
+        }
+
+    @Test
+    fun audioSharingStream_zenModeRestrictive_IsNotDisabledByZenMode() =
+        kosmos.runTest {
+            volumeDialogSliderType = VolumeDialogSliderType.AudioSharingStream(0)
+
+            val isDisabledByZenMode by collectLastValue(underTest.isDisabledByZenMode)
+
+            assertThat(isDisabledByZenMode).isFalse()
+        }
+
+    @Test
+    fun streamBlockedByZenMode_isDisabledByZenMode_true() =
+        kosmos.runTest {
+            volumeDialogSliderType = VolumeDialogSliderType.Stream(AudioManager.STREAM_MUSIC)
+
+            val isDisabledByZenMode by collectLastValue(underTest.isDisabledByZenMode)
+
+            assertThat(isDisabledByZenMode).isTrue()
         }
 }

@@ -30,7 +30,9 @@ import dalvik.system.PathClassLoader;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Responsible for loading Plugins. Plugins and PluginSupplier are loaded from
@@ -43,7 +45,6 @@ public class PluginManager {
             "com.android.server.display.plugin.PluginsProviderImpl";
     private static final String TAG = "PluginManager";
 
-    private final DisplayManagerFlags mFlags;
     private final PluginStorage mPluginStorage;
     private final List<Plugin> mPlugins;
 
@@ -53,10 +54,11 @@ public class PluginManager {
 
     @VisibleForTesting
     PluginManager(Context context, DisplayManagerFlags flags, Injector injector) {
-        mFlags = flags;
-        mPluginStorage = injector.getPluginStorage();
-        if (mFlags.isPluginManagerEnabled()) {
-            mPlugins = Collections.unmodifiableList(injector.loadPlugins(context, mPluginStorage));
+        Set<PluginType<?>> enabledTypes = injector.getEnabledPluginTypes(flags);
+        mPluginStorage = injector.getPluginStorage(enabledTypes);
+        if (flags.isPluginManagerEnabled()) {
+            mPlugins = Collections.unmodifiableList(injector.loadPlugins(
+                    context, mPluginStorage, enabledTypes));
             Slog.d(TAG, "loaded Plugins:" + mPlugins);
         } else {
             mPlugins = List.of();
@@ -74,15 +76,17 @@ public class PluginManager {
     /**
      * Adds change listener for particular plugin type
      */
-    public <T> void subscribe(PluginType<T> type, PluginChangeListener<T> listener) {
-        mPluginStorage.addListener(type, listener);
+    public <T> void subscribe(PluginType<T> type, String uniqueDisplayId,
+            PluginChangeListener<T> listener) {
+        mPluginStorage.addListener(type, uniqueDisplayId, listener);
     }
 
     /**
      * Removes change listener
      */
-    public <T> void unsubscribe(PluginType<T> type, PluginChangeListener<T> listener) {
-        mPluginStorage.removeListener(type, listener);
+    public <T> void unsubscribe(PluginType<T> type, String uniqueDisplayId,
+            PluginChangeListener<T> listener) {
+        mPluginStorage.removeListener(type, uniqueDisplayId, listener);
     }
 
     /**
@@ -108,11 +112,21 @@ public class PluginManager {
     }
 
     static class Injector {
-        PluginStorage getPluginStorage() {
-            return new PluginStorage();
+
+        Set<PluginType<?>> getEnabledPluginTypes(DisplayManagerFlags flags) {
+            Set<PluginType<?>> enabledTypes = new HashSet<>();
+            if (flags.isHdrOverrideEnabled()) {
+                enabledTypes.add(PluginType.HDR_BOOST_OVERRIDE);
+            }
+            return enabledTypes;
         }
 
-        List<Plugin> loadPlugins(Context context, PluginStorage storage) {
+        PluginStorage getPluginStorage(Set<PluginType<?>> enabledTypes) {
+            return new PluginStorage(enabledTypes);
+        }
+
+        List<Plugin> loadPlugins(Context context, PluginStorage storage,
+                Set<PluginType<?>> enabledTypes) {
             String providerJarPath = context
                     .getString(com.android.internal.R.string.config_pluginsProviderJarPath);
             Slog.d(TAG, "loading plugins from:" + providerJarPath);
@@ -127,7 +141,7 @@ public class PluginManager {
                 Class<? extends PluginsProvider> cp = pathClassLoader.loadClass(PROVIDER_IMPL_CLASS)
                         .asSubclass(PluginsProvider.class);
                 PluginsProvider provider = cp.getDeclaredConstructor().newInstance();
-                return provider.getPlugins(context, storage);
+                return provider.getPlugins(context, storage, enabledTypes);
             } catch (ClassNotFoundException e) {
                 Slog.e(TAG, "loading failed: " + PROVIDER_IMPL_CLASS + " is not found in"
                         + providerJarPath, e);

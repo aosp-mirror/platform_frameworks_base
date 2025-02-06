@@ -250,11 +250,14 @@ public final class Choreographer {
 
     /**
      * Set flag to indicate that client is blocked waiting for buffer release and
-     * buffer stuffing recovery should soon begin.
+     * buffer stuffing recovery should soon begin. This is provided with the
+     * duration of time in nanoseconds that the client was blocked for.
      * @hide
      */
-    public void onWaitForBufferRelease() {
-        mBufferStuffingState.isStuffed.set(true);
+    public void onWaitForBufferRelease(long durationNanos) {
+        if (durationNanos > mLastFrameIntervalNanos / 2) {
+            mBufferStuffingState.isStuffed.set(true);
+        }
     }
 
     /**
@@ -369,8 +372,10 @@ public final class Choreographer {
 
     /**
      * @hide
+     * @deprecated Use vsync IDs with the regular Choreographer instead.
      */
     @UnsupportedAppUsage
+    @Deprecated
     public static Choreographer getSfInstance() {
         return sSfThreadInstance.get();
     }

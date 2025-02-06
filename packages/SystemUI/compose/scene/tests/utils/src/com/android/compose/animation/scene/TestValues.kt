@@ -27,18 +27,22 @@ object TestScenes {
     val SceneB = SceneKey("SceneB")
     val SceneC = SceneKey("SceneC")
     val SceneD = SceneKey("SceneD")
+    val SceneE = SceneKey("SceneE")
 }
 
 /** Overlay keys that can be reused by tests. */
 object TestOverlays {
     val OverlayA = OverlayKey("OverlayA")
     val OverlayB = OverlayKey("OverlayB")
+    val OverlayC = OverlayKey("OverlayC")
+    val OverlayD = OverlayKey("OverlayD")
 }
 
 /** Element keys that can be reused by tests. */
 object TestElements {
     val Foo = ElementKey("Foo")
     val Bar = ElementKey("Bar")
+    val LowZIndex = ElementKey("LowZIndex", contentPicker = LowestZIndexContentPicker)
 }
 
 /** Value keys that can be reused by tests. */

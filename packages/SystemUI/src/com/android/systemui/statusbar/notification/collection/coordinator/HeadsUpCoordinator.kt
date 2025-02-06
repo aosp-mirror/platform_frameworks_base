@@ -112,20 +112,20 @@ constructor(
         if (StatusBarNotifChips.isEnabled) {
             applicationScope.launch {
                 statusBarNotificationChipsInteractor.promotedNotificationChipTapEvent.collect {
-                    showPromotedNotificationHeadsUp(it)
+                    onPromotedNotificationChipTapEvent(it)
                 }
             }
         }
     }
 
     /**
-     * Shows the promoted notification with the given [key] as heads-up.
+     * Updates the heads-up state based on which promoted notification with the given [key] was
+     * tapped.
      *
      * Must be run on the main thread.
      */
-    private fun showPromotedNotificationHeadsUp(key: String) {
+    private fun onPromotedNotificationChipTapEvent(key: String) {
         StatusBarNotifChips.assertInNewMode()
-        mLogger.logShowPromotedNotificationHeadsUp(key)
 
         val entry = notifCollection.getEntry(key)
         if (entry == null) {
@@ -135,22 +135,29 @@ constructor(
         // TODO(b/364653005): Validate that the given key indeed matches a promoted notification,
         // not just any notification.
 
+        val isCurrentlyHeadsUp = mHeadsUpManager.isHeadsUpEntry(entry.key)
         val posted =
             PostedEntry(
                 entry,
                 wasAdded = false,
                 wasUpdated = false,
-                // Force-set this notification to show heads-up.
-                shouldHeadsUpEver = true,
-                shouldHeadsUpAgain = true,
+                // We want the chip to act as a toggle, so if the chip's notification is currently
+                // showing as heads up, then we should stop showing it.
+                shouldHeadsUpEver = !isCurrentlyHeadsUp,
+                shouldHeadsUpAgain = !isCurrentlyHeadsUp,
                 isPinnedByUser = true,
-                isHeadsUpEntry = mHeadsUpManager.isHeadsUpEntry(entry.key),
+                isHeadsUpEntry = isCurrentlyHeadsUp,
                 isBinding = isEntryBinding(entry),
             )
+        if (isCurrentlyHeadsUp) {
+            mLogger.logHidePromotedNotificationHeadsUp(key)
+        } else {
+            mLogger.logShowPromotedNotificationHeadsUp(key)
+        }
 
         mExecutor.execute {
             mPostedEntries[entry.key] = posted
-            mNotifPromoter.invalidateList("showPromotedNotificationHeadsUp: ${entry.logKey}")
+            mNotifPromoter.invalidateList("onPromotedNotificationChipTapEvent: ${entry.logKey}")
         }
     }
 

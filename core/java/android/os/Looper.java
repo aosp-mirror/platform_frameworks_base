@@ -70,6 +70,13 @@ public final class Looper {
 
     private static final String TAG = "Looper";
 
+    private static class NoImagePreloadHolder {
+        // Enable/Disable verbose logging with a system prop. e.g.
+        // adb shell 'setprop log.looper.slow.verbose false && stop && start'
+        private static final boolean sVerboseLogging =
+                SystemProperties.getBoolean("log.looper.slow.verbose", false);
+    }
+
     // sThreadLocal.get() will return null unless you've called prepare().
     @UnsupportedAppUsage
     static final ThreadLocal<Looper> sThreadLocal = new ThreadLocal<Looper>();
@@ -192,7 +199,12 @@ public final class Looper {
             return false;
         }
 
-        // This must be in a local variable, in case a UI event sets the logger
+        PerfettoTrace.begin(PerfettoTrace.MQ_CATEGORY, "message_queue_receive")
+                .addArg("sending_thread", msg.mSendingThreadName)
+                .addTerminatingFlow(msg.mEventId.get())
+                .emit();
+
+        // This must be in a local variabe, in case a UI event sets the logger
         final Printer logging = me.mLogging;
         if (logging != null) {
             logging.println(">>>>> Dispatching to " + msg.target + " "
@@ -246,17 +258,21 @@ public final class Looper {
             }
         }
         if (logSlowDelivery) {
+            boolean slow = false;
+
+            if (!me.mSlowDeliveryDetected || NoImagePreloadHolder.sVerboseLogging) {
+                slow = showSlowLog(slowDeliveryThresholdMs, msg.when, dispatchStart,
+                        "delivery", msg);
+            }
             if (me.mSlowDeliveryDetected) {
-                if ((dispatchStart - msg.when) <= 10) {
+                if (!slow && (dispatchStart - msg.when) <= 10) {
                     Slog.w(TAG, "Drained");
                     me.mSlowDeliveryDetected = false;
                 }
-            } else {
-                if (showSlowLog(slowDeliveryThresholdMs, msg.when, dispatchStart, "delivery",
-                        msg)) {
-                    // Once we write a slow delivery log, suppress until the queue drains.
-                    me.mSlowDeliveryDetected = true;
-                }
+            } else if (slow) {
+                // A slow delivery is detected, suppressing further logs unless verbose logging
+                // is enabled.
+                me.mSlowDeliveryDetected = true;
             }
         }
         if (logSlowDispatch) {
@@ -278,6 +294,7 @@ public final class Looper {
                     + msg.callback + " what=" + msg.what);
         }
 
+        PerfettoTrace.end(PerfettoTrace.MQ_CATEGORY).emit();
         msg.recycleUnchecked();
 
         return true;
@@ -322,6 +339,23 @@ public final class Looper {
 
     @android.ravenwood.annotation.RavenwoodReplace
     private static int getThresholdOverride() {
+        // Allow overriding the threshold for all processes' main looper with a system prop.
+        // e.g. adb shell 'setprop log.looper.any.main.slow 1 && stop && start'
+        if (myLooper() == getMainLooper()) {
+            final int globalOverride = SystemProperties.getInt("log.looper.any.main.slow", -1);
+            if (globalOverride >= 0) {
+                return globalOverride;
+            }
+        }
+
+        // Allow overriding the threshold for all threads within a process with a system prop.
+        // e.g. adb shell 'setprop log.looper.1000.any.slow 1 && stop && start'
+        final int processOverride = SystemProperties.getInt("log.looper."
+                + Process.myUid() + ".any.slow", -1);
+        if (processOverride >= 0) {
+            return processOverride;
+        }
+
         return SystemProperties.getInt("log.looper."
                 + Process.myUid() + "."
                 + Thread.currentThread().getName()

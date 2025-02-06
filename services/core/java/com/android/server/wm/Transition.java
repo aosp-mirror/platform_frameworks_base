@@ -70,6 +70,8 @@ import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_RECENTS_ANIM;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_SPLASH_SCREEN;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_WINDOWS_DRAWN;
+import static com.android.server.wm.StartingData.AFTER_TRANSACTION_IDLE;
+import static com.android.server.wm.StartingData.AFTER_TRANSITION_FINISH;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_PREDICT_BACK;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
@@ -503,7 +505,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 final WindowContainer<?> sibling = rootParent.getChildAt(j);
                 if (sibling == transientRoot) break;
                 if (!sibling.getWindowConfiguration().isAlwaysOnTop() && mController.mAtm
-                        .mTaskSupervisor.mOpaqueActivityHelper.getOpaqueActivity(sibling) != null) {
+                        .mTaskSupervisor.mOpaqueContainerHelper.isOpaque(sibling)) {
                     occludedCount++;
                     break;
                 }
@@ -1374,6 +1376,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         enterAutoPip = true;
                     }
                 }
+
+                if (ar.mStartingData != null && ar.mStartingData.mRemoveAfterTransaction
+                        == AFTER_TRANSITION_FINISH
+                        && (!ar.isVisible() || !ar.mTransitionController.inTransition(ar))) {
+                    ar.mStartingData.mRemoveAfterTransaction = AFTER_TRANSACTION_IDLE;
+                    ar.removeStartingWindow();
+                }
                 final ChangeInfo changeInfo = mChanges.get(ar);
                 // Due to transient-hide, there may be some activities here which weren't in the
                 // transition.
@@ -1412,6 +1421,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         if (!tr.isAttached() || !tr.isVisibleRequested()
                                 || !tr.inPinnedWindowingMode()) return;
                         final ActivityRecord currTop = tr.getTopNonFinishingActivity();
+                        if (currTop == null) return;
                         if (currTop.inPinnedWindowingMode()) return;
                         Slog.e(TAG, "Enter-PIP was started but not completed, this is a Shell/SysUI"
                                 + " bug. This state breaks gesture-nav, so attempting clean-up.");
@@ -1494,16 +1504,15 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
 
         // Update the input-sink (touch-blocking) state now that the animation is finished.
-        SurfaceControl.Transaction inputSinkTransaction = null;
+        boolean scheduleAnimation = false;
         for (int i = 0; i < mParticipants.size(); ++i) {
             final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
             if (ar == null || !ar.isVisible() || ar.getParent() == null) continue;
-            if (inputSinkTransaction == null) {
-                inputSinkTransaction = ar.mWmService.mTransactionFactory.get();
-            }
-            ar.mActivityRecordInputSink.applyChangesToSurfaceIfChanged(inputSinkTransaction);
+            scheduleAnimation = true;
+            ar.mActivityRecordInputSink.applyChangesToSurfaceIfChanged(ar.getPendingTransaction());
         }
-        if (inputSinkTransaction != null) inputSinkTransaction.apply();
+        // To apply pending transactions.
+        if (scheduleAnimation) mController.mAtm.mWindowManager.scheduleAnimationLocked();
 
         // Always schedule stop processing when transition finishes because activities don't
         // stop while they are in a transition thus their stop could still be pending.
@@ -1616,6 +1625,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         for (int i = 0; i < mConfigAtEndActivities.size(); ++i) {
             final ActivityRecord target = mConfigAtEndActivities.get(i);
             final SurfaceControl targetLeash = target.getSurfaceControl();
+            if (targetLeash == null) {
+                // activity may have been removed. In this case, no need to sync, just update state.
+                target.resumeConfigurationDispatch();
+                continue;
+            }
             if (target.getSyncGroup() == null || target.getSyncGroup().isIgnoring(target)) {
                 if (syncId < 0) {
                     final BLASTSyncEngine.SyncGroup sg = mSyncEngine.prepareSyncSet(
@@ -2879,6 +2893,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 while (leashReference.getParent() != ancestor) {
                     leashReference = leashReference.getParent();
                 }
+            }
+            if (wc == leashReference
+                    && sortedTargets.get(i).mWindowingMode == WINDOWING_MODE_PINNED) {
+                // If a PiP task is the only target, we wanna make sure the transition root leash
+                // is at the top in case PiP is sent to back. This is done because a pinned task is
+                // meant to be always-on-top throughout a transition.
+                leashReference = ancestor.getTopChild();
             }
             final SurfaceControl rootLeash = leashReference.makeAnimationLeash().setName(
                     "Transition Root: " + leashReference.getName())

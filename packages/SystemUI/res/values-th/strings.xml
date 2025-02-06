@@ -250,6 +250,8 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ไม่ทราบเปอร์เซ็นต์แบตเตอรี่"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"เชื่อมต่อกับ <xliff:g id="BLUETOOTH">%s</xliff:g> แล้ว"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"เชื่อมต่อกับ <xliff:g id="CAST">%s</xliff:g>"</string>
+    <string name="accessibility_expand_group" msgid="521237935987978624">"ขยายกลุ่ม"</string>
+    <string name="accessibility_open_application" msgid="1749126077501259712">"เปิดแอปพลิเคชัน"</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"ไม่ได้เชื่อมต่อ"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"โรมมิ่ง"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"ปิด"</string>
@@ -535,10 +537,11 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"วิดเจ็ตในหน้าจอล็อก"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"หากต้องการเปิดแอปโดยใช้วิดเจ็ต คุณจะต้องยืนยันตัวตนของคุณ นอกจากนี้ โปรดทราบว่าผู้อื่นจะดูวิดเจ็ตเหล่านี้ได้แม้ว่าแท็บเล็ตจะล็อกอยู่ก็ตาม วิดเจ็ตบางอย่างอาจไม่ได้มีไว้สำหรับหน้าจอล็อกของคุณ และอาจไม่ปลอดภัยที่จะเพิ่มที่นี่"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"รับทราบ"</string>
-    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"วิดเจ็ต"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"หากต้องการเพิ่มทางลัด \"วิดเจ็ต\" โปรดตรวจสอบว่าได้เปิดใช้ \"แสดงวิดเจ็ตในหน้าจอล็อก\" แล้วในการตั้งค่า"</string>
-    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"การตั้งค่า"</string>
     <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"ปุ่มแสดงภาพพักหน้าจอ"</string>
+    <string name="hub_onboarding_bottom_sheet_title" msgid="162092881395529947">"สำรวจโหมดฮับ"</string>
+    <string name="hub_onboarding_bottom_sheet_text" msgid="8589816797970240544">"เข้าถึงวิดเจ็ตและภาพพักหน้าจอโปรดขณะชาร์จ"</string>
+    <string name="hub_onboarding_bottom_sheet_action_button" msgid="6161983690157872829">"มาเริ่มกันเลย"</string>
+    <string name="glanceable_hub_to_dream_button_tooltip" msgid="9018287673822335829">"แสดงภาพพักหน้าจอโปรดขณะชาร์จ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"สลับผู้ใช้"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"เมนูแบบเลื่อนลง"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ระบบจะลบแอปและข้อมูลทั้งหมดในเซสชันนี้"</string>
@@ -750,6 +753,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"กำลังอัปเดต"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"โปรไฟล์งาน"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"โหมดบนเครื่องบิน"</string>
+    <string name="status_bar_supervision" msgid="6735015942701134125">"การควบคุมโดยผู้ปกครอง"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"คุณจะไม่ได้ยินเสียงปลุกครั้งถัดไปในเวลา <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"เวลา <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"ในวันที่ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -759,7 +763,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"ดาวเทียม, การเชื่อมต่อดี"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ดาวเทียม, การเชื่อมต่อที่พร้อมใช้งาน"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS ดาวเทียม"</string>
-    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"การโทรฉุกเฉินหรือ SOS"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="9103913890116841786">"โทรฉุกเฉินหรือ SOS เท่านั้น"</string>
     <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="accessibility_no_signal" msgid="7052827511409250167">"ไม่มีสัญญาณ"</string>
     <string name="accessibility_one_bar" msgid="5342012847647834506">"1 ขีด"</string>
@@ -800,6 +804,10 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"แสดงที่ด้านบนของการแจ้งเตือนการสนทนาและเป็นรูปโปรไฟล์บนหน้าจอล็อก ปรากฏเป็นบับเบิล แสดงในโหมดห้ามรบกวน"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"สำคัญ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ไม่รองรับฟีเจอร์การสนทนา"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (7581587973879656500) -->
+    <skip />
+    <string name="notification_inline_dismiss" msgid="88423586921134258">"ปิด"</string>
+    <string name="notification_inline_disable_promotion" msgid="6880961831026048166">"ไม่ต้องแสดงอีก"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"แก้ไขการแจ้งเตือนเหล่านี้ไม่ได้"</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"แก้ไขการแจ้งเตือนสายเรียกเข้าไม่ได้"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"การแจ้งเตือนกลุ่มนี้กำหนดค่าที่นี่ไม่ได้"</string>
@@ -856,7 +864,6 @@
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"กลับ"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"การแจ้งเตือน"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"แป้นพิมพ์ลัด"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"สลับรูปแบบแป้นพิมพ์"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"หรือ"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"ล้างคำค้นหา"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"แป้นพิมพ์ลัด"</string>
@@ -911,6 +918,14 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"ปฏิทิน"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"เครื่องคิดเลข"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"แผนที่"</string>
+    <string name="group_accessibility_toggle_bounce_keys" msgid="4183584952493519179">"เปิด/ปิดคีย์ตีกลับ"</string>
+    <string name="group_accessibility_toggle_mouse_keys" msgid="534757719357514361">"เปิด/ปิดแป้นเมาส์"</string>
+    <string name="group_accessibility_toggle_sticky_keys" msgid="7722214637652104184">"เปิด/ปิดคีย์ติดหนึบ"</string>
+    <string name="group_accessibility_toggle_slow_keys" msgid="8569881436531795062">"เปิด/ปิดการเพิ่มระยะเวลาในการกดปุ่ม"</string>
+    <string name="group_accessibility_toggle_voice_access" msgid="5436708239015479017">"เปิด/ปิดการเข้าถึงด้วยเสียง"</string>
+    <string name="group_accessibility_toggle_talkback" msgid="5017967056006325713">"เปิด/ปิด TalkBack"</string>
+    <string name="group_accessibility_toggle_magnification" msgid="3892267763383743128">"เปิด/ปิดการขยาย"</string>
+    <string name="group_accessibility_activate_select_to_speak" msgid="9157775915495428592">"เปิดใช้งานการเลือกเพื่อให้อ่าน"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ห้ามรบกวน"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ทางลัดปุ่มปรับระดับเสียง"</string>
     <string name="battery" msgid="769686279459897127">"แบตเตอรี่"</string>
@@ -1289,8 +1304,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"เข้าถึงอุปกรณ์"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ใช้ลายนิ้วมือเพื่อเปิด"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"ต้องมีการตรวจสอบสิทธิ์ แตะเซ็นเซอร์ลายนิ้วมือเพื่อตรวจสอบสิทธิ์"</string>
-    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
-    <skip />
+    <string name="ongoing_call_content_description" msgid="6394763878322348560">"สายที่สนทนาอยู่"</string>
+    <string name="ongoing_notification_extra_content_description" msgid="2098752668861351265">"ดำเนินอยู่"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"อินเทอร์เน็ตมือถือ"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"เชื่อมต่อแล้ว"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"เชื่อมต่อแล้วชั่วคราว"</string>
@@ -1432,15 +1447,16 @@
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"แอประบบ"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"การทํางานหลายอย่างพร้อมกัน"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"แยกหน้าจอ"</string>
+    <string name="shortcutHelper_category_accessibility" msgid="8068337792277570938">"การช่วยเหลือพิเศษ"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"อินพุต"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"แป้นพิมพ์ลัดของแอป"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"แอปปัจจุบัน"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"การช่วยเหลือพิเศษ"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"แป้นพิมพ์ลัด"</string>
-    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"ปรับแต่งแป้นพิมพ์ลัด"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"ปรับแต่งแป้นพิมพ์ลัด"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"นำแป้นพิมพ์ลัดออกใช่ไหม"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"รีเซ็ตกลับเป็นค่าเริ่มต้นไหม"</string>
-    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"กดแป้นเพื่อกำหนดแป้นพิมพ์ลัด"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="7636040209946696120">"หากต้องการสร้างแป้นพิมพ์ลัดนี้ ให้กดปุ่มดำเนินการและปุ่มอื่นๆ อย่างน้อย 1 ปุ่มพร้อมกัน"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"การดำเนินการนี้จะลบแป้นพิมพ์ลัดที่กำหนดเองอย่างถาวร"</string>
     <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"การดำเนินการนี้จะลบแป้นพิมพ์ลัดที่กำหนดเองทั้งหมดอย่างถาวร"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ค้นหาแป้นพิมพ์ลัด"</string>
@@ -1462,9 +1478,11 @@
     <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"ใช่ รีเซ็ต"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"ยกเลิก"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"กดแป้น"</string>
-    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"มีการใช้แป้นที่กดร่วมกันนี้แล้ว โปรดลองใช้แป้นอื่น"</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="3325858369539848162">"มีการใช้แป้นที่กดร่วมกันนี้แล้ว โปรดลองใช้ชุดค่าผสมอื่น"</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"ตั้งค่าแป้นพิมพ์ลัดไม่ได้"</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
+    <string name="shortcut_helper_add_shortcut_button_label" msgid="7655779534665954910">"เพิ่มทางลัด"</string>
+    <string name="shortcut_helper_delete_shortcut_button_label" msgid="3148773472696137052">"ลบทางลัด"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"ไปยังส่วนต่างๆ โดยใช้แป้นพิมพ์"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"ดูข้อมูลเกี่ยวกับแป้นพิมพ์ลัด"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"ไปยังส่วนต่างๆ โดยใช้ทัชแพด"</string>
@@ -1474,6 +1492,7 @@
     <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"ย้อนกลับ"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"ไปที่หน้าแรก"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"ดูแอปล่าสุด"</string>
+    <string name="touchpad_tutorial_switch_apps_gesture_button" msgid="7768255095423767779">"เปลี่ยนแอป"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"เสร็จสิ้น"</string>
     <string name="gesture_error_title" msgid="469064941635578511">"ลองอีกครั้งนะ"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ย้อนกลับ"</string>
@@ -1491,6 +1510,11 @@
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"เยี่ยมมาก"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"คุณทำท่าทางสัมผัสเพื่อดูแอปล่าสุดสำเร็จแล้ว"</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"หากต้องการดูแอปล่าสุด ให้ใช้ 3 นิ้วปัดขึ้นแล้วค้างไว้บนทัชแพด"</string>
+    <string name="touchpad_switch_apps_gesture_action_title" msgid="6835222344612924512">"เปลี่ยนแอป"</string>
+    <string name="touchpad_switch_apps_gesture_guidance" msgid="2554844933805502538">"ใช้ 4 นิ้วปัดไปทางขวาบนทัชแพด"</string>
+    <string name="touchpad_switch_apps_gesture_success_title" msgid="4894947244328032458">"เก่งมาก"</string>
+    <string name="touchpad_switch_apps_gesture_success_body" msgid="8151089866035126312">"คุณทำท่าทางสัมผัสเพื่อสลับแอปเสร็จแล้ว"</string>
+    <string name="touchpad_switch_gesture_error_body" msgid="5895231916964677918">"ใช้ 4 นิ้วปัดไปทางขวาบนทัชแพดเพื่อเปลี่ยนแอป"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"ดูแอปทั้งหมด"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"กดปุ่มดำเนินการบนแป้นพิมพ์"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"ยอดเยี่ยม"</string>

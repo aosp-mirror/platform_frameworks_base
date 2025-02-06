@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.app.Notification
@@ -56,7 +54,6 @@ import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

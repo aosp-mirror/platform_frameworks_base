@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row.icon
 
+import android.app.Flags.notificationsRedesignThemedAppIcons
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
@@ -74,6 +75,7 @@ constructor(
                     sbn.packageName,
                     context,
                     withWorkProfileBadge,
+                    themed = notificationsRedesignThemedAppIcons(),
                 )
             }
         }

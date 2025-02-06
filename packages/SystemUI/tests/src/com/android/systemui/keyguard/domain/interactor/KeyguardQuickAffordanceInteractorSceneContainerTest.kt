@@ -30,7 +30,6 @@ import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.FakeFeatureFlags
@@ -60,7 +59,6 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -79,7 +77,6 @@ import platform.test.runner.parameterized.Parameter
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @FlakyTest(
     bugId = 292574995,
     detail = "on certain architectures all permutations with startActivity=true is causing failures",
@@ -274,7 +271,6 @@ class KeyguardQuickAffordanceInteractorSceneContainerTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
-                communalSettingsInteractor = kosmos.communalSettingsInteractor,
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
         val remoteUserSelectionManager =
@@ -325,7 +321,7 @@ class KeyguardQuickAffordanceInteractorSceneContainerTest : SysuiTestCase() {
                 biometricSettingsRepository = biometricSettingsRepository,
                 backgroundDispatcher = testDispatcher,
                 appContext = mContext,
-                communalSettingsInteractor = kosmos.communalSettingsInteractor,
+                accessibilityManager = mock(),
                 sceneInteractor = { kosmos.sceneInteractor },
             )
     }

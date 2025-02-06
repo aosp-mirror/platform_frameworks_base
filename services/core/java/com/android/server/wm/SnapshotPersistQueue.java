@@ -231,8 +231,13 @@ class SnapshotPersistQueue {
                             if (next.isReady(mUserManagerInternal)) {
                                 isReadyToWrite = true;
                                 next.onDequeuedLocked();
-                            } else {
+                            } else if (!mShutdown) {
                                 mWriteQueue.addLast(next);
+                            } else {
+                                // User manager is locked and device is shutting down, skip writing
+                                // this item.
+                                next.onDequeuedLocked();
+                                next = null;
                             }
                         }
                     }
@@ -314,7 +319,13 @@ class SnapshotPersistQueue {
         @Override
         void onQueuedLocked() {
             // Remove duplicate request.
-            mStoreQueueItems.remove(this);
+            mStoreQueueItems.removeIf(item -> {
+                if (item.equals(this) && item.mSnapshot != mSnapshot) {
+                    item.mSnapshot.removeReference(TaskSnapshot.REFERENCE_PERSIST);
+                    return true;
+                }
+                return false;
+            });
             mStoreQueueItems.offer(this);
         }
 
@@ -407,10 +418,8 @@ class SnapshotPersistQueue {
             bitmap.recycle();
 
             final File file = mPersistInfoProvider.getHighResolutionBitmapFile(mId, mUserId);
-            try {
-                FileOutputStream fos = new FileOutputStream(file);
+            try (FileOutputStream fos = new FileOutputStream(file)) {
                 swBitmap.compress(JPEG, COMPRESS_QUALITY, fos);
-                fos.close();
             } catch (IOException e) {
                 Slog.e(TAG, "Unable to open " + file + " for persisting.", e);
                 return false;
@@ -428,10 +437,8 @@ class SnapshotPersistQueue {
             swBitmap.recycle();
 
             final File lowResFile = mPersistInfoProvider.getLowResolutionBitmapFile(mId, mUserId);
-            try {
-                FileOutputStream lowResFos = new FileOutputStream(lowResFile);
+            try (FileOutputStream lowResFos = new FileOutputStream(lowResFile)) {
                 lowResBitmap.compress(JPEG, COMPRESS_QUALITY, lowResFos);
-                lowResFos.close();
             } catch (IOException e) {
                 Slog.e(TAG, "Unable to open " + lowResFile + " for persisting.", e);
                 return false;

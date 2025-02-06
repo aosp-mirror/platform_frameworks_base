@@ -20,7 +20,6 @@ import com.android.systemui.Flags
 import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.shade.shared.flag.DualShade
 
 /** Helper for reading or using the QS Detailed View flag state. */
 @Suppress("NOTHING_TO_INLINE")
@@ -37,7 +36,6 @@ object QsDetailedView {
     inline val isEnabled
         get() =
             Flags.qsTileDetailedView() && // mainAconfigFlag
-                DualShade.isEnabled &&
                 SceneContainerFlag.isEnabled
 
     // NOTE: Changes should also be made in getSecondaryFlags
@@ -47,10 +45,8 @@ object QsDetailedView {
 
     /** The set of secondary flags which must be enabled for qs detailed view to work properly */
     inline fun getSecondaryFlags(): Sequence<FlagToken> =
-        sequenceOf(
-            DualShade.token
-            // NOTE: Changes should also be made in isEnabled
-        ) + SceneContainerFlag.getAllRequirements()
+        // NOTE: Changes should also be made in isEnabled
+        SceneContainerFlag.getAllRequirements()
 
     /** The full set of requirements for QsDetailedView */
     inline fun getAllRequirements(): Sequence<FlagToken> {

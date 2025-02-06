@@ -61,6 +61,7 @@ import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shared.regionsampling.RegionSampler
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DATE_SMARTSPACE_DATA_PLUGIN
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.WEATHER_SMARTSPACE_DATA_PLUGIN
@@ -88,7 +89,7 @@ import javax.inject.Named
 class LockscreenSmartspaceController
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val featureFlags: FeatureFlags,
     private val activityStarter: ActivityStarter,
     private val falsingManager: FalsingManager,

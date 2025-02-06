@@ -95,5 +95,6 @@
         <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND" />
         <permission name="android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW"/>
         <permission name="android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE" />
+        <permission name="android.permission.SET_UNRESTRICTED_GESTURE_EXCLUSION" />
     </privapp-permissions>
 </permissions>

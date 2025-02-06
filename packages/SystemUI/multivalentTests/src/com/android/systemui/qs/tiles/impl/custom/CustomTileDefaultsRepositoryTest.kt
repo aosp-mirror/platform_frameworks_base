@@ -32,7 +32,6 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
@@ -50,7 +49,6 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class CustomTileDefaultsRepositoryTest : SysuiTestCase() {
 
     @Mock private lateinit var sysuiContext: Context

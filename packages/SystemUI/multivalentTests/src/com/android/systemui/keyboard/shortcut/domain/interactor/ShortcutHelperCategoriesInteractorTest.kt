@@ -38,6 +38,7 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.InputMethodEditor
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MultiTasking
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.System
+import com.android.systemui.keyboard.shortcut.shortcutHelperAccessibilityShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperAppCategoriesShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperCategoriesInteractor
 import com.android.systemui.keyboard.shortcut.shortcutHelperCurrentAppShortcutsSource
@@ -50,7 +51,6 @@ import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.userTracker
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -68,7 +68,6 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
     private val systemShortcutsSource = FakeKeyboardShortcutGroupsSource()
     private val multitaskingShortcutsSource = FakeKeyboardShortcutGroupsSource()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val kosmos =
         testKosmos().also {
             it.testDispatcher = UnconfinedTestDispatcher()
@@ -76,6 +75,7 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
             it.shortcutHelperMultiTaskingShortcutsSource = multitaskingShortcutsSource
             it.shortcutHelperAppCategoriesShortcutsSource = FakeKeyboardShortcutGroupsSource()
             it.shortcutHelperCurrentAppShortcutsSource = FakeKeyboardShortcutGroupsSource()
+            it.shortcutHelperAccessibilityShortcutsSource = FakeKeyboardShortcutGroupsSource()
             it.userTracker = FakeUserTracker(onCreateCurrentUserContext = { mockUserContext })
         }
 

@@ -34,7 +34,6 @@ import com.android.systemui.statusbar.pipeline.satellite.ui.model.SatelliteIconM
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -62,7 +61,6 @@ interface DeviceBasedSatelliteViewModel {
     val carrierText: StateFlow<String?>
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class DeviceBasedSatelliteViewModelImpl
 @Inject

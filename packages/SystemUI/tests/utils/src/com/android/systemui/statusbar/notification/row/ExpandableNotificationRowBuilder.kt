@@ -78,6 +78,7 @@ import com.android.systemui.statusbar.notification.row.icon.AppIconProviderImpl
 import com.android.systemui.statusbar.notification.row.icon.NotificationIconStyleProviderImpl
 import com.android.systemui.statusbar.notification.row.icon.NotificationRowIconViewInflaterFactory
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor
+import com.android.systemui.statusbar.notification.row.shared.SkeletonImageTransform
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
@@ -218,12 +219,14 @@ class ExpandableNotificationRowBuilder(
             }
         val conversationProcessor =
             ConversationNotificationProcessor(
+                context,
                 Mockito.mock(LauncherApps::class.java, STUB_ONLY),
                 Mockito.mock(ConversationNotificationManager::class.java, STUB_ONLY),
             )
         val promotedNotificationContentExtractor =
             PromotedNotificationContentExtractorImpl(
                 context,
+                SkeletonImageTransform(context),
                 PromotedNotificationLogger(logcatLogBuffer("PromotedNotifLog")),
             )
 
@@ -380,6 +383,7 @@ class ExpandableNotificationRowBuilder(
             mSmartReplyController,
             Mockito.mock(IStatusBarService::class.java, STUB_ONLY),
             Mockito.mock(UiEventLogger::class.java, STUB_ONLY),
+            Mockito.mock(NotificationRebindingTracker::class.java, STUB_ONLY),
         )
         row.setAboveShelfChangedListener {}
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags)

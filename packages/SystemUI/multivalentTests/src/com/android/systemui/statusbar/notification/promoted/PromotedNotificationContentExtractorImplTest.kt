@@ -27,6 +27,7 @@ import android.app.Notification.ProgressStyle.Segment
 import android.app.PendingIntent
 import android.app.Person
 import android.content.Intent
+import android.graphics.drawable.Icon
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -38,6 +39,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.promoted.AutomaticPromotionCoordinator.Companion.EXTRA_WAS_AUTOMATICALLY_PROMOTED
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.Style
+import com.android.systemui.statusbar.notification.row.RowImageInflater
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -49,6 +51,8 @@ class PromotedNotificationContentExtractorImplTest : SysuiTestCase() {
     private val kosmos = testKosmos()
 
     private val underTest = kosmos.promotedNotificationContentExtractor
+    private val rowImageInflater = RowImageInflater.newInstance(previousIndex = null)
+    private val imageModelProvider by lazy { rowImageInflater.useForContentModel() }
 
     @Test
     @DisableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
@@ -173,6 +177,17 @@ class PromotedNotificationContentExtractorImplTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
+    fun extractsContent_fromBaseStyle() {
+        val entry = createEntry { setStyle(null) }
+
+        val content = extractContent(entry)
+
+        assertThat(content).isNotNull()
+        assertThat(content?.style).isEqualTo(Style.Base)
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
     fun extractsContent_fromBigPictureStyle() {
         val entry = createEntry { setStyle(BigPictureStyle()) }
 
@@ -212,7 +227,11 @@ class PromotedNotificationContentExtractorImplTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
+    @EnableFlags(
+        PromotedNotificationUi.FLAG_NAME,
+        StatusBarNotifChips.FLAG_NAME,
+        android.app.Flags.FLAG_API_RICH_ONGOING,
+    )
     fun extractContent_fromProgressStyle() {
         val entry = createEntry {
             setStyle(ProgressStyle().addProgressSegment(Segment(100)).setProgress(75))
@@ -222,9 +241,9 @@ class PromotedNotificationContentExtractorImplTest : SysuiTestCase() {
 
         assertThat(content).isNotNull()
         assertThat(content?.style).isEqualTo(Style.Progress)
-        assertThat(content?.progress).isNotNull()
-        assertThat(content?.progress?.progress).isEqualTo(75)
-        assertThat(content?.progress?.progressMax).isEqualTo(100)
+        assertThat(content?.newProgress).isNotNull()
+        assertThat(content?.newProgress?.progress).isEqualTo(75)
+        assertThat(content?.newProgress?.progressMax).isEqualTo(100)
     }
 
     @Test
@@ -240,16 +259,57 @@ class PromotedNotificationContentExtractorImplTest : SysuiTestCase() {
         assertThat(content?.style).isEqualTo(Style.Ineligible)
     }
 
+    @Test
+    @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
+    fun extractsContent_fromOldProgressDeterminate() {
+        val entry = createEntry {
+            setProgress(TEST_PROGRESS_MAX, TEST_PROGRESS, /* indeterminate= */ false)
+        }
+
+        val content = extractContent(entry)
+
+        assertThat(content).isNotNull()
+
+        val oldProgress = content?.oldProgress
+        assertThat(oldProgress).isNotNull()
+
+        assertThat(content).isNotNull()
+        assertThat(content?.oldProgress).isNotNull()
+        assertThat(content?.oldProgress?.progress).isEqualTo(TEST_PROGRESS)
+        assertThat(content?.oldProgress?.max).isEqualTo(TEST_PROGRESS_MAX)
+        assertThat(content?.oldProgress?.isIndeterminate).isFalse()
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
+    fun extractsContent_fromOldProgressIndeterminate() {
+        val entry = createEntry {
+            setProgress(TEST_PROGRESS_MAX, TEST_PROGRESS, /* indeterminate= */ true)
+        }
+
+        val content = extractContent(entry)
+
+        assertThat(content).isNotNull()
+        assertThat(content?.oldProgress).isNotNull()
+        assertThat(content?.oldProgress?.progress).isEqualTo(TEST_PROGRESS)
+        assertThat(content?.oldProgress?.max).isEqualTo(TEST_PROGRESS_MAX)
+        assertThat(content?.oldProgress?.isIndeterminate).isTrue()
+    }
+
     private fun extractContent(entry: NotificationEntry): PromotedNotificationContentModel? {
         val recoveredBuilder = Notification.Builder(context, entry.sbn.notification)
-        return underTest.extractContent(entry, recoveredBuilder)
+        return underTest.extractContent(entry, recoveredBuilder, imageModelProvider)
     }
 
     private fun createEntry(
         promoted: Boolean = true,
         builderBlock: Notification.Builder.() -> Unit = {},
     ): NotificationEntry {
-        val notif = Notification.Builder(context, "channel").also(builderBlock).build()
+        val notif =
+            Notification.Builder(context, "channel")
+                .setSmallIcon(Icon.createWithContentUri("content://foo/bar"))
+                .also(builderBlock)
+                .build()
         if (promoted) {
             notif.flags = FLAG_PROMOTED_ONGOING
         }
@@ -261,6 +321,9 @@ class PromotedNotificationContentExtractorImplTest : SysuiTestCase() {
         private const val TEST_CONTENT_TITLE = "content title"
         private const val TEST_CONTENT_TEXT = "content text"
         private const val TEST_SHORT_CRITICAL_TEXT = "short"
+
+        private const val TEST_PROGRESS = 50
+        private const val TEST_PROGRESS_MAX = 100
 
         private const val TEST_PERSON_NAME = "person name"
         private const val TEST_PERSON_KEY = "person key"

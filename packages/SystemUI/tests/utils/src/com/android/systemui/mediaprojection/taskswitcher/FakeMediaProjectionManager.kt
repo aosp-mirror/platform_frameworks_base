@@ -16,6 +16,7 @@
 
 package com.android.systemui.mediaprojection.taskswitcher
 
+import android.media.projection.MediaProjectionEvent
 import android.media.projection.MediaProjectionInfo
 import android.media.projection.MediaProjectionManager
 import android.os.Binder
@@ -61,14 +62,22 @@ class FakeMediaProjectionManager {
 
     fun dispatchOnSessionSet(
         info: MediaProjectionInfo = DEFAULT_INFO,
-        session: ContentRecordingSession?
+        session: ContentRecordingSession?,
     ) {
         callbacks.forEach { it.onRecordingSessionSet(info, session) }
     }
 
+    fun dispatchEvent(
+        event: MediaProjectionEvent,
+        info: MediaProjectionInfo? = DEFAULT_INFO,
+        session: ContentRecordingSession? = null,
+    ) {
+        callbacks.forEach { it.onMediaProjectionEvent(event, info, session) }
+    }
+
     companion object {
         fun createDisplaySession(): ContentRecordingSession =
-            ContentRecordingSession.createDisplaySession(/* displayToMirror = */ 123)
+            ContentRecordingSession.createDisplaySession(/* displayToMirror= */ 123)
 
         fun createSingleTaskSession(token: IBinder = Binder()): ContentRecordingSession =
             ContentRecordingSession.createTaskSession(token)
@@ -76,10 +85,6 @@ class FakeMediaProjectionManager {
         private const val DEFAULT_PACKAGE_NAME = "com.media.projection.test"
         private val DEFAULT_USER_HANDLE = UserHandle.getUserHandleForUid(UserHandle.myUserId())
         private val DEFAULT_INFO =
-            MediaProjectionInfo(
-                DEFAULT_PACKAGE_NAME,
-                DEFAULT_USER_HANDLE,
-                /* launchCookie = */ null
-            )
+            MediaProjectionInfo(DEFAULT_PACKAGE_NAME, DEFAULT_USER_HANDLE, /* launchCookie= */ null)
     }
 }

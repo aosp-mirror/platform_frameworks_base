@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.scene.domain.resolver
 
 import com.android.compose.animation.scene.SceneKey
@@ -25,7 +23,6 @@ import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.scene.shared.model.SceneFamilies
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.sceneFamilyResolvers: Map<SceneKey, SceneResolver>
     get() = mapOf(SceneFamilies.Home to homeSceneFamilyResolver)

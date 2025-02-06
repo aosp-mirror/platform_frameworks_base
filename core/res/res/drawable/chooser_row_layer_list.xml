@@ -19,7 +19,7 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="?android:attr/colorAccentSecondary"/>
+            <solid android:color="@color/materialColorSecondary"/>
             <size android:width="128dp" android:height="2dp"/>
             <corners android:radius="2dp" />
         </shape>

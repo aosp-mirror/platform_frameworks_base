@@ -323,6 +323,7 @@ void RenderThread::initGrContextOptions(GrContextOptions& options) {
 }
 
 void RenderThread::destroyRenderingContext() {
+    ATRACE_CALL();
     mFunctorManager.onContextDestroyed();
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
         if (mEglManager->hasEglContext()) {
@@ -520,16 +521,16 @@ void RenderThread::preload() {
     // EGL driver is always preloaded only if HWUI renders with GL.
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
         if (Properties::earlyPreloadGlContext()) {
-            queue().post([this]() { requireGlContext(); });
+            queue().post([this]() {
+                ATRACE_NAME("earlyPreloadGlContext");
+                requireGlContext();
+            });
         } else {
             std::thread eglInitThread([]() { eglGetDisplay(EGL_DEFAULT_DISPLAY); });
             eglInitThread.detach();
         }
     } else {
         requireVkContext();
-    }
-    if (Properties::earlyPreloadGlContext()) {
-        queue().post([]() { GraphicBufferAllocator::getInstance(); });
     }
     HardwareBitmapUploader::initialize();
 }

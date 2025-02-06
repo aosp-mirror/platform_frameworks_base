@@ -41,7 +41,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
@@ -90,7 +89,6 @@ class LegacyMediaDataFilterImplTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
         MediaPlayerData.clear()
-        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
         mediaDataFilter =
             LegacyMediaDataFilterImpl(
                 context,
@@ -100,7 +98,7 @@ class LegacyMediaDataFilterImplTest : SysuiTestCase() {
                 executor,
                 clock,
                 logger,
-                mediaFlags
+                mediaFlags,
             )
         mediaDataFilter.mediaDataManager = mediaDataManager
         mediaDataFilter.addListener(listener)
@@ -114,7 +112,7 @@ class LegacyMediaDataFilterImplTest : SysuiTestCase() {
                 userId = USER_MAIN,
                 packageName = PACKAGE,
                 instanceId = INSTANCE_ID,
-                appUid = APP_UID
+                appUid = APP_UID,
             )
         dataGuest = dataMain.copy(userId = USER_GUEST)
         dataPrivateProfile = dataMain.copy(userId = PRIVATE_PROFILE)
@@ -476,7 +474,7 @@ class LegacyMediaDataFilterImplTest : SysuiTestCase() {
                 eq(dataCurrentAndActive),
                 eq(true),
                 eq(100),
-                eq(true)
+                eq(true),
             )
         assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isTrue()
         // Smartspace update shouldn't be propagated for the empty rec list.
@@ -505,7 +503,7 @@ class LegacyMediaDataFilterImplTest : SysuiTestCase() {
                 eq(dataCurrentAndActive),
                 eq(true),
                 eq(100),
-                eq(true)
+                eq(true),
             )
         assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isTrue()
         // Smartspace update should also be propagated but not prioritized.
@@ -542,7 +540,7 @@ class LegacyMediaDataFilterImplTest : SysuiTestCase() {
                 eq(dataCurrentAndActive),
                 eq(true),
                 eq(100),
-                eq(true)
+                eq(true),
             )
 
         mediaDataFilter.onSmartspaceMediaDataRemoved(SMARTSPACE_KEY)
@@ -550,61 +548,6 @@ class LegacyMediaDataFilterImplTest : SysuiTestCase() {
         verify(listener).onSmartspaceMediaDataRemoved(SMARTSPACE_KEY)
         assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isFalse()
         assertThat(mediaDataFilter.hasActiveMedia()).isFalse()
-    }
-
-    @Test
-    fun testOnSmartspaceLoaded_persistentEnabled_isInactive_notifiesListeners() {
-        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
-        whenever(smartspaceData.isActive).thenReturn(false)
-
-        mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
-
-        verify(listener)
-            .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(false))
-        assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isFalse()
-        assertThat(mediaDataFilter.hasAnyMediaOrRecommendation()).isTrue()
-    }
-
-    @Test
-    fun testOnSmartspaceLoaded_persistentEnabled_inactive_hasRecentMedia_staysInactive() {
-        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
-        whenever(smartspaceData.isActive).thenReturn(false)
-
-        // If there is media that was recently played but inactive
-        val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
-        mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
-        verify(listener)
-            .onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent), eq(true), eq(0), eq(false))
-
-        // And an inactive recommendation is loaded
-        mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
-
-        // Smartspace is loaded but the media stays inactive
-        verify(listener)
-            .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(false))
-        verify(listener, never())
-            .onMediaDataLoaded(any(), any(), any(), anyBoolean(), anyInt(), anyBoolean())
-        assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isFalse()
-        assertThat(mediaDataFilter.hasAnyMediaOrRecommendation()).isTrue()
-    }
-
-    @Test
-    fun testOnSwipeToDismiss_persistentEnabled_recommendationSetInactive() {
-        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
-
-        val data =
-            EMPTY_SMARTSPACE_MEDIA_DATA.copy(
-                targetId = SMARTSPACE_KEY,
-                isActive = true,
-                packageName = SMARTSPACE_PACKAGE,
-                recommendations = listOf(smartspaceMediaRecommendationItem),
-            )
-        mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, data)
-        mediaDataFilter.onSwipeToDismiss()
-
-        verify(mediaDataManager).setRecommendationInactive(eq(SMARTSPACE_KEY))
-        verify(mediaDataManager, never())
-            .dismissSmartspaceRecommendation(eq(SMARTSPACE_KEY), anyLong())
     }
 
     @Test
@@ -629,7 +572,7 @@ class LegacyMediaDataFilterImplTest : SysuiTestCase() {
                 eq(dataCurrentAndActive),
                 eq(true),
                 eq(100),
-                eq(true)
+                eq(true),
             )
         assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isTrue()
         // And send the smartspace data, but not prioritized

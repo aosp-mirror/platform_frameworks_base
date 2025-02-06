@@ -16,6 +16,9 @@
 
 package android.inputmethodservice;
 
+import static android.app.StatusBarManager.NAVBAR_BACK_DISMISS_IME;
+import static android.app.StatusBarManager.NAVBAR_IME_SWITCHER_BUTTON_VISIBLE;
+import static android.app.StatusBarManager.NAVBAR_IME_VISIBLE;
 import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 
@@ -23,7 +26,6 @@ import android.animation.ValueAnimator;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.StatusBarManager;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -240,12 +242,11 @@ final class NavigationBarController {
                         NavigationBarView.class::isInstance);
                 if (navigationBarView != null) {
                     // TODO(b/213337792): Support InputMethodService#setBackDisposition().
-                    // TODO(b/213337792): Set NAVIGATION_HINT_IME_SHOWN only when necessary.
-                    final int hints = StatusBarManager.NAVIGATION_HINT_BACK_ALT
+                    // TODO(b/213337792): Set NAVBAR_IME_VISIBLE only when necessary.
+                    final int flags = NAVBAR_BACK_DISMISS_IME | NAVBAR_IME_VISIBLE
                             | (mShouldShowImeSwitcherWhenImeIsShown
-                                    ? StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN
-                                    : 0);
-                    navigationBarView.setNavigationIconHints(hints);
+                                    ? NAVBAR_IME_SWITCHER_BUTTON_VISIBLE : 0);
+                    navigationBarView.setNavbarFlags(flags);
                     navigationBarView.prepareNavButtons(this);
                 }
             } else {
@@ -512,13 +513,14 @@ final class NavigationBarController {
                 }
                 final NavigationBarView navigationBarView = mNavigationBarFrame.findViewByPredicate(
                         NavigationBarView.class::isInstance);
-                if (navigationBarView == null) {
-                    return;
+                if (navigationBarView != null) {
+                    // TODO(b/213337792): Support InputMethodService#setBackDisposition().
+                    // TODO(b/213337792): Set NAVBAR_IME_VISIBLE only when necessary.
+                    final int flags = NAVBAR_BACK_DISMISS_IME | NAVBAR_IME_VISIBLE
+                            | (mShouldShowImeSwitcherWhenImeIsShown
+                                    ? NAVBAR_IME_SWITCHER_BUTTON_VISIBLE : 0);
+                    navigationBarView.setNavbarFlags(flags);
                 }
-                final int hints = StatusBarManager.NAVIGATION_HINT_BACK_ALT
-                        | (shouldShowImeSwitcherWhenImeIsShown
-                                ? StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN : 0);
-                navigationBarView.setNavigationIconHints(hints);
             } else {
                 uninstallNavigationBarFrameIfNecessary();
             }

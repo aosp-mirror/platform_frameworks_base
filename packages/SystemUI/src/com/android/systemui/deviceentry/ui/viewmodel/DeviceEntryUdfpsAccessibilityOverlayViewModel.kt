@@ -22,12 +22,10 @@ import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
 /** Models the UI state for the non-alternate bouncer UDFPS accessibility overlay */
-@ExperimentalCoroutinesApi
 class DeviceEntryUdfpsAccessibilityOverlayViewModel
 @Inject
 constructor(

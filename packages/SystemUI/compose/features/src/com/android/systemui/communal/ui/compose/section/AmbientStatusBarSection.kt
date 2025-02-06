@@ -22,7 +22,7 @@ import android.widget.FrameLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.systemui.ambient.statusbar.dagger.AmbientStatusBarComponent
 import com.android.systemui.ambient.statusbar.ui.AmbientStatusBarView
 import com.android.systemui.communal.ui.compose.Communal
@@ -31,11 +31,9 @@ import javax.inject.Inject
 
 class AmbientStatusBarSection
 @Inject
-constructor(
-    private val factory: AmbientStatusBarComponent.Factory,
-) {
+constructor(private val factory: AmbientStatusBarComponent.Factory) {
     @Composable
-    fun SceneScope.AmbientStatusBar(modifier: Modifier = Modifier) {
+    fun ContentScope.AmbientStatusBar(modifier: Modifier = Modifier) {
         AndroidView(
             factory = { context ->
                 (LayoutInflater.from(context)
@@ -49,7 +47,7 @@ constructor(
                         factory.create(this).getController().apply { init() }
                     }
             },
-            modifier = modifier.element(Communal.Elements.StatusBar)
+            modifier = modifier.element(Communal.Elements.StatusBar),
         )
     }
 }

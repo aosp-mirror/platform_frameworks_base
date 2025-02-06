@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.bouncer.ui.viewmodel
 
 import android.content.applicationContext
@@ -30,7 +28,6 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.user.ui.viewmodel.userSwitcherViewModel
 import com.android.systemui.util.time.systemClock
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.bouncerMessageViewModel by Fixture {
     BouncerMessageViewModel(

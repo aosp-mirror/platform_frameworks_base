@@ -918,6 +918,11 @@ public class TextureView extends View {
         mLastFrameTimeMillis = now;
     }
 
+    @Override
+    public CharSequence getAccessibilityClassName() {
+        return TextureView.class.getName();
+    }
+
     @UnsupportedAppUsage
     private final SurfaceTexture.OnFrameAvailableListener mUpdateListener =
             surfaceTexture -> {

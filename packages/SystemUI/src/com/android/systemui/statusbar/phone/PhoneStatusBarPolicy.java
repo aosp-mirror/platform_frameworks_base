@@ -40,12 +40,10 @@ import android.service.notification.ZenModeConfig;
 import android.telecom.TelecomManager;
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.View;
 
 import androidx.lifecycle.Observer;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.systemui.Flags;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -60,13 +58,10 @@ import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.res.R;
 import com.android.systemui.screenrecord.RecordingController;
-import com.android.systemui.screenrecord.data.model.ScreenRecordModel;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BluetoothController;
-import com.android.systemui.statusbar.policy.CastController;
-import com.android.systemui.statusbar.policy.CastDevice;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DataSaverController.Listener;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -139,7 +134,6 @@ public class PhoneStatusBarPolicy
     private final TelecomManager mTelecomManager;
 
     private final Handler mHandler;
-    private final CastController mCast;
     private final HotspotController mHotspot;
     private final NextAlarmController mNextAlarmController;
     private final AlarmManager mAlarmManager;
@@ -161,7 +155,6 @@ public class PhoneStatusBarPolicy
     private final Executor mMainExecutor;
     private final Executor mUiBgExecutor;
     private final SensorPrivacyController mSensorPrivacyController;
-    private final RecordingController mRecordingController;
     private final RingerModeTracker mRingerModeTracker;
     private final PrivacyLogger mPrivacyLogger;
     private final ZenModeInteractor mZenModeInteractor;
@@ -180,7 +173,7 @@ public class PhoneStatusBarPolicy
     public PhoneStatusBarPolicy(StatusBarIconController iconController,
             CommandQueue commandQueue, BroadcastDispatcher broadcastDispatcher,
             @Main Executor mainExecutor, @UiBackground Executor uiBgExecutor, @Main Looper looper,
-            @Main Resources resources, CastController castController,
+            @Main Resources resources,
             HotspotController hotspotController, BluetoothController bluetoothController,
             NextAlarmController nextAlarmController, UserInfoController userInfoController,
             RotationLockController rotationLockController, DataSaverController dataSaverController,
@@ -190,7 +183,7 @@ public class PhoneStatusBarPolicy
             LocationController locationController,
             SensorPrivacyController sensorPrivacyController, AlarmManager alarmManager,
             UserManager userManager, UserTracker userTracker,
-            DevicePolicyManager devicePolicyManager, RecordingController recordingController,
+            DevicePolicyManager devicePolicyManager,
             @Nullable TelecomManager telecomManager, @DisplayId int displayId,
             @Main SharedPreferences sharedPreferences, DateFormatUtil dateFormatUtil,
             RingerModeTracker ringerModeTracker,
@@ -206,7 +199,6 @@ public class PhoneStatusBarPolicy
         mBroadcastDispatcher = broadcastDispatcher;
         mHandler = new Handler(looper);
         mResources = resources;
-        mCast = castController;
         mHotspot = hotspotController;
         mBluetooth = bluetoothController;
         mNextAlarmController = nextAlarmController;
@@ -223,7 +215,6 @@ public class PhoneStatusBarPolicy
         mLocationController = locationController;
         mPrivacyItemController = privacyItemController;
         mSensorPrivacyController = sensorPrivacyController;
-        mRecordingController = recordingController;
         mMainExecutor = mainExecutor;
         mUiBgExecutor = uiBgExecutor;
         mTelecomManager = telecomManager;
@@ -368,11 +359,6 @@ public class PhoneStatusBarPolicy
                     this::onMainActiveModeChanged);
         }
         mZenController.addCallback(mZenControllerCallback);
-        if (!Flags.statusBarScreenSharingChips()) {
-            // If the flag is enabled, the cast icon is handled in the new screen sharing chips
-            // instead of here so we don't need to listen for events here.
-            mCast.addCallback(mCastCallback);
-        }
         mHotspot.addCallback(mHotspotCallback);
         mNextAlarmController.addCallback(mNextAlarmCallback);
         mDataSaver.addCallback(this);
@@ -380,11 +366,6 @@ public class PhoneStatusBarPolicy
         mPrivacyItemController.addCallback(this);
         mSensorPrivacyController.addCallback(mSensorPrivacyListener);
         mLocationController.addCallback(this);
-        if (!Flags.statusBarScreenSharingChips()) {
-            // If the flag is enabled, the screen record icon is handled in the new screen sharing
-            // chips instead of here so we don't need to listen for events here.
-            mRecordingController.addCallback(this);
-        }
         mJavaAdapter.alwaysCollectFlow(mConnectedDisplayInteractor.getConnectedDisplayState(),
                 this::onConnectedDisplayAvailabilityChanged);
 
@@ -583,33 +564,6 @@ public class PhoneStatusBarPolicy
         }
     }
 
-    private void updateCast() {
-        if (Flags.statusBarScreenSharingChips()) {
-            // The cast icon is handled in the new screen sharing chips instead of here.
-            return;
-        }
-
-        boolean isCasting = false;
-        for (CastDevice device : mCast.getCastDevices()) {
-            if (device.isCasting()) {
-                isCasting = true;
-                break;
-            }
-        }
-        if (DEBUG) Log.v(TAG, "updateCast: isCasting: " + isCasting);
-        mHandler.removeCallbacks(mRemoveCastIconRunnable);
-        if (isCasting && !mRecordingController.isRecording()) { // screen record has its own icon
-            mIconController.setIcon(mSlotCast, R.drawable.stat_sys_cast,
-                    mResources.getString(R.string.accessibility_casting));
-            mIconController.setIconVisibility(mSlotCast, true);
-        } else {
-            // don't turn off the screen-record icon for a few seconds, just to make sure the user
-            // has seen it
-            if (DEBUG) Log.v(TAG, "updateCast: hiding icon in 3 sec...");
-            mHandler.postDelayed(mRemoveCastIconRunnable, 3000);
-        }
-    }
-
     private void updateProfileIcon() {
         // getLastResumedActivityUserId needs to acquire the AM lock, which may be contended in
         // some cases. Since it doesn't really matter here whether it's updated in this frame
@@ -675,13 +629,6 @@ public class PhoneStatusBarPolicy
         @Override
         public void onHotspotChanged(boolean enabled, int numDevices) {
             mIconController.setIconVisibility(mSlotHotspot, enabled);
-        }
-    };
-
-    private final CastController.Callback mCastCallback = new CastController.Callback() {
-        @Override
-        public void onCastDevicesChanged() {
-            updateCast();
         }
     };
 
@@ -855,85 +802,6 @@ public class PhoneStatusBarPolicy
             }
         }
     };
-
-    private Runnable mRemoveCastIconRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (Flags.statusBarScreenSharingChips()) {
-                // The cast icon is handled in the new screen sharing chips instead of here.
-                return;
-            }
-            if (DEBUG) Log.v(TAG, "updateCast: hiding icon NOW");
-            mIconController.setIconVisibility(mSlotCast, false);
-        }
-    };
-
-    // Screen Recording
-    @Override
-    public void onCountdown(long millisUntilFinished) {
-        if (Flags.statusBarScreenSharingChips()) {
-            // The screen record icon is handled in the new screen sharing chips instead of here.
-            return;
-        }
-        if (DEBUG) Log.d(TAG, "screenrecord: countdown " + millisUntilFinished);
-        int countdown =
-                (int) ScreenRecordModel.Starting.Companion.toCountdownSeconds(millisUntilFinished);
-        int resourceId = R.drawable.stat_sys_screen_record;
-        String description = Integer.toString(countdown);
-        switch (countdown) {
-            case 1:
-                resourceId = R.drawable.stat_sys_screen_record_1;
-                break;
-            case 2:
-                resourceId = R.drawable.stat_sys_screen_record_2;
-                break;
-            case 3:
-                resourceId = R.drawable.stat_sys_screen_record_3;
-                break;
-        }
-        mIconController.setIcon(mSlotScreenRecord, resourceId, description);
-        mIconController.setIconVisibility(mSlotScreenRecord, true);
-        // Set as assertive so talkback will announce the countdown
-        mIconController.setIconAccessibilityLiveRegion(mSlotScreenRecord,
-                View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE);
-    }
-
-    @Override
-    public void onCountdownEnd() {
-        if (Flags.statusBarScreenSharingChips()) {
-            // The screen record icon is handled in the new screen sharing chips instead of here.
-            return;
-        }
-        if (DEBUG) Log.d(TAG, "screenrecord: hiding icon during countdown");
-        mHandler.post(() -> mIconController.setIconVisibility(mSlotScreenRecord, false));
-        // Reset talkback priority
-        mHandler.post(() -> mIconController.setIconAccessibilityLiveRegion(mSlotScreenRecord,
-                View.ACCESSIBILITY_LIVE_REGION_NONE));
-    }
-
-    @Override
-    public void onRecordingStart() {
-        if (Flags.statusBarScreenSharingChips()) {
-            // The screen record icon is handled in the new screen sharing chips instead of here.
-            return;
-        }
-        if (DEBUG) Log.d(TAG, "screenrecord: showing icon");
-        mIconController.setIcon(mSlotScreenRecord,
-                R.drawable.stat_sys_screen_record,
-                mResources.getString(R.string.screenrecord_ongoing_screen_only));
-        mHandler.post(() -> mIconController.setIconVisibility(mSlotScreenRecord, true));
-    }
-
-    @Override
-    public void onRecordingEnd() {
-        if (Flags.statusBarScreenSharingChips()) {
-            // The screen record icon is handled in the new screen sharing chips instead of here.
-            return;
-        }
-        // Ensure this is on the main thread
-        if (DEBUG) Log.d(TAG, "screenrecord: hiding icon");
-        mHandler.post(() -> mIconController.setIconVisibility(mSlotScreenRecord, false));
-    }
 
     private void onConnectedDisplayAvailabilityChanged(ConnectedDisplayInteractor.State state) {
         boolean visible = state != ConnectedDisplayInteractor.State.DISCONNECTED;

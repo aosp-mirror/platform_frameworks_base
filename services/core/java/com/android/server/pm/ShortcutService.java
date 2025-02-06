@@ -1008,7 +1008,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 out.endDocument();
 
                 // Close.
-                file.finishWrite(outs);
+                injectFinishWrite(file, outs);
             } catch (IOException e) {
                 Slog.w(TAG, "Failed to write to file " + file.getBaseFile(), e);
                 file.failWrite(outs);
@@ -1096,7 +1096,7 @@ public class ShortcutService extends IShortcutService.Stub {
                     saveUserInternalLocked(userId, os, /* forBackup= */ false);
                 }
 
-                file.finishWrite(os);
+                injectFinishWrite(file, os);
 
                 // Remove all dangling bitmap files.
                 cleanupDanglingBitmapDirectoriesLocked(userId);
@@ -5065,6 +5065,12 @@ public class ShortcutService extends IShortcutService.Stub {
     // Injection point.
     String injectBuildFingerprint() {
         return Build.FINGERPRINT;
+    }
+
+    // Injection point.
+    void injectFinishWrite(@NonNull final ResilientAtomicFile file,
+            @NonNull final FileOutputStream os) throws IOException {
+        file.finishWrite(os);
     }
 
     final void wtf(String message) {

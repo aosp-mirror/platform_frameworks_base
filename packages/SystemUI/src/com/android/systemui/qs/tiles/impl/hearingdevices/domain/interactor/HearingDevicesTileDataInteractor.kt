@@ -17,7 +17,6 @@
 package com.android.systemui.qs.tiles.impl.hearingdevices.domain.interactor
 
 import android.os.UserHandle
-import com.android.systemui.Flags
 import com.android.systemui.accessibility.hearingaid.HearingDevicesChecker
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
@@ -62,8 +61,7 @@ constructor(
             .flowOn(backgroundContext)
             .distinctUntilChanged()
 
-    override fun availability(user: UserHandle): Flow<Boolean> =
-        flowOf(Flags.hearingAidsQsTileDialog())
+    override fun availability(user: UserHandle): Flow<Boolean> = flowOf(true)
 
     private fun getModel() =
         HearingDevicesTileModel(

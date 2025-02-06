@@ -24,7 +24,6 @@ import android.view.SurfaceControl
 import android.view.View
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-import android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
 import android.view.WindowManager.LayoutParams.TYPE_APPLICATION
 import android.widget.FrameLayout
 import androidx.tracing.Trace
@@ -72,7 +71,7 @@ class ReusableWindowDecorViewHost(
                     0 /* width*/,
                     0 /* height */,
                     TYPE_APPLICATION,
-                    FLAG_NOT_FOCUSABLE or FLAG_SPLIT_TOUCH,
+                    FLAG_NOT_FOCUSABLE,
                     PixelFormat.TRANSPARENT,
                 )
                 .apply {

@@ -22,7 +22,6 @@ import com.android.systemui.common.shared.model.PackageChangeModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
@@ -31,7 +30,6 @@ import kotlinx.coroutines.flow.flatMapLatest
  * Allows listening to package updates. This is recommended over registering broadcasts directly as
  * it avoids the delay imposed by broadcasts, and provides more structured updates.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class PackageChangeInteractor
 @Inject

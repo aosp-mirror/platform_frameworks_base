@@ -76,8 +76,8 @@ constructor(
             }
         }
 
-    /** Calls the [Bubbles.showOrHideAppBubble] API as [UserHandle.USER_SYSTEM]. */
-    open suspend fun showOrHideAppBubble(
+    /** Calls the [Bubbles.showOrHideNoteBubble] API as [UserHandle.USER_SYSTEM]. */
+    open suspend fun showOrHideNoteBubble(
         intent: Intent,
         userHandle: UserHandle,
         icon: Icon,
@@ -85,7 +85,7 @@ constructor(
     ) {
         withContext(bgDispatcher) {
             serviceConnector
-                .post { it.showOrHideAppBubble(intent, userHandle, icon, bubbleExpandBehavior) }
+                .post { it.showOrHideNoteBubble(intent, userHandle, icon, bubbleExpandBehavior) }
                 .whenComplete { _, error ->
                     if (error != null) {
                         debugLog(error = error) {
@@ -119,7 +119,7 @@ constructor(
             return object : INoteTaskBubblesService.Stub() {
                 override fun areBubblesAvailable() = mOptionalBubbles.isPresent
 
-                override fun showOrHideAppBubble(
+                override fun showOrHideNoteBubble(
                     intent: Intent,
                     userHandle: UserHandle,
                     icon: Icon,
@@ -131,12 +131,12 @@ constructor(
                                 bubbleExpandBehavior ==
                                     NoteTaskBubbleExpandBehavior.KEEP_IF_EXPANDED &&
                                     bubbles.isBubbleExpanded(
-                                        Bubble.getAppBubbleKeyForApp(intent.`package`, userHandle)
+                                        Bubble.getNoteBubbleKeyForApp(intent.`package`, userHandle)
                                     )
                             ) {
                                 return@ifPresentOrElse
                             }
-                            bubbles.showOrHideAppBubble(intent, userHandle, icon)
+                            bubbles.showOrHideNoteBubble(intent, userHandle, icon)
                         },
                         {
                             debugLog {

@@ -169,6 +169,7 @@
     <!-- Internal permissions granted to the shell. -->
     <uses-permission android:name="android.permission.FORCE_BACK" />
     <uses-permission android:name="android.permission.BATTERY_STATS" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_POWER_MONITORS" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
     <uses-permission android:name="android.permission.REPORT_USAGE_STATS" />
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
@@ -951,7 +952,6 @@
     <uses-permission android:name="android.permission.SETUP_FSVERITY" />
 
     <!-- Permissions required for CTS test - AppFunctionManagerTest -->
-    <uses-permission android:name="android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED" />
     <uses-permission android:name="android.permission.EXECUTE_APP_FUNCTIONS" />
 
     <!-- Permission required for CTS test - CtsNfcTestCases -->
@@ -968,6 +968,13 @@
     <uses-permission android:name="android.permission.MANAGE_INTRUSION_DETECTION_STATE"
         android:featureFlag="android.security.afl_api"/>
 
+    <!-- Permissions required for CTS test - CtsVirtualDevicesTestCases -->
+    <uses-permission android:name="android.permission.ASSOCIATE_COMPANION_DEVICES" />
+    <uses-permission android:name="android.permission.CREATE_VIRTUAL_DEVICE" />
+    <uses-permission android:name="android.permission.ADD_TRUSTED_DISPLAY" />
+    <uses-permission android:name="android.permission.ADD_ALWAYS_UNLOCKED_DISPLAY" />
+    <uses-permission android:name="android.permission.ADD_MIRROR_DISPLAY"
+        android:featureFlag="android.companion.virtualdevice.flags.enable_limited_vdm_role"/>
 
     <!-- Permission required for CTS test - CtsAppTestCases -->
     <uses-permission android:name="android.permission.KILL_UID" />
@@ -990,12 +997,26 @@
     <uses-permission android:name="android.permission.health.READ_SKIN_TEMPERATURE"
         android:featureFlag="android.permission.flags.replace_body_sensor_permission_enabled"/>
 
+    <!-- Permissions required for CTS test - CtsHealthFitnessDeviceTestCases-->
+    <uses-permission android:name="android.permission.BACKUP_HEALTH_CONNECT_DATA_AND_SETTINGS"
+        android:featureFlag="android.permission.flags.health_connect_backup_restore_permission_enabled"/>
+    <uses-permission android:name="android.permission.RESTORE_HEALTH_CONNECT_DATA_AND_SETTINGS"
+        android:featureFlag="android.permission.flags.health_connect_backup_restore_permission_enabled"/>
+
     <!-- Permission for TestClassifier tests to get access to classifier by type -->
     <uses-permission android:name="android.permission.ACCESS_TEXT_CLASSIFIER_BY_TYPE"
         android:featureFlag="android.permission.flags.text_classifier_choice_api_enabled"/>
 
     <!-- Permission required for CTS test - CtsContentProviderMultiUserTest -->
     <uses-permission android:name="android.permission.RESOLVE_COMPONENT_FOR_UID" />
+
+    <!-- Permissions required for CTS test - MediaQualityTest -->
+    <uses-permission android:name="android.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE" />
+    <uses-permission android:name="android.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE" />
+    <uses-permission android:name="android.permission.READ_COLOR_ZONES" />
+
+    <!-- Permission required for trade-in mode testing -->
+    <uses-permission android:name="android.permission.ENTER_TRADE_IN_MODE" />
 
     <application
         android:label="@string/app_label"

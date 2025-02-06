@@ -23,14 +23,12 @@ import com.android.systemui.accessibility.domain.interactor.AccessibilityInterac
 import com.android.systemui.biometrics.UdfpsUtils
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 
 /** Models the UI state for the UDFPS accessibility overlay */
-@ExperimentalCoroutinesApi
 abstract class UdfpsAccessibilityOverlayViewModel(
     udfpsOverlayInteractor: UdfpsOverlayInteractor,
     accessibilityInteractor: AccessibilityInteractor,

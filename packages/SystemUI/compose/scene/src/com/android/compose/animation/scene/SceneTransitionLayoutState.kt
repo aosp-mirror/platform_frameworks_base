@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package com.android.compose.animation.scene
 
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MotionScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
@@ -226,33 +234,86 @@ sealed interface MutableSceneTransitionLayoutState : SceneTransitionLayoutState 
  */
 fun MutableSceneTransitionLayoutState(
     initialScene: SceneKey,
+    motionScheme: MotionScheme,
     transitions: SceneTransitions = SceneTransitions.Empty,
     initialOverlays: Set<OverlayKey> = emptySet(),
     canChangeScene: (SceneKey) -> Boolean = { true },
     canShowOverlay: (OverlayKey) -> Boolean = { true },
     canHideOverlay: (OverlayKey) -> Boolean = { true },
     canReplaceOverlay: (from: OverlayKey, to: OverlayKey) -> Boolean = { _, _ -> true },
+    onTransitionStart: (TransitionState.Transition) -> Unit = {},
+    onTransitionEnd: (TransitionState.Transition) -> Unit = {},
 ): MutableSceneTransitionLayoutState {
     return MutableSceneTransitionLayoutStateImpl(
         initialScene,
+        motionScheme,
         transitions,
         initialOverlays,
         canChangeScene,
         canShowOverlay,
         canHideOverlay,
         canReplaceOverlay,
+        onTransitionStart,
+        onTransitionEnd,
     )
 }
 
+@Composable
+fun rememberMutableSceneTransitionLayoutState(
+    initialScene: SceneKey,
+    transitions: SceneTransitions = SceneTransitions.Empty,
+    initialOverlays: Set<OverlayKey> = emptySet(),
+    canChangeScene: (SceneKey) -> Boolean = { true },
+    canShowOverlay: (OverlayKey) -> Boolean = { true },
+    canHideOverlay: (OverlayKey) -> Boolean = { true },
+    canReplaceOverlay: (from: OverlayKey, to: OverlayKey) -> Boolean = { _, _ -> true },
+    onTransitionStart: (TransitionState.Transition) -> Unit = {},
+    onTransitionEnd: (TransitionState.Transition) -> Unit = {},
+): MutableSceneTransitionLayoutState {
+    val motionScheme = MaterialTheme.motionScheme
+    val layoutState = remember {
+        MutableSceneTransitionLayoutStateImpl(
+            initialScene = initialScene,
+            motionScheme = motionScheme,
+            transitions = transitions,
+            initialOverlays = initialOverlays,
+            canChangeScene = canChangeScene,
+            canShowOverlay = canShowOverlay,
+            canHideOverlay = canHideOverlay,
+            canReplaceOverlay = canReplaceOverlay,
+            onTransitionStart = onTransitionStart,
+            onTransitionEnd = onTransitionEnd,
+        )
+    }
+
+    SideEffect {
+        layoutState.transitions = transitions
+        layoutState.motionScheme = motionScheme
+        layoutState.canChangeScene = canChangeScene
+        layoutState.canShowOverlay = canShowOverlay
+        layoutState.canHideOverlay = canHideOverlay
+        layoutState.canReplaceOverlay = canReplaceOverlay
+        layoutState.onTransitionStart = onTransitionStart
+        layoutState.onTransitionEnd = onTransitionEnd
+    }
+    return layoutState
+}
+
 /** A [MutableSceneTransitionLayoutState] that holds the value for the current scene. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 internal class MutableSceneTransitionLayoutStateImpl(
     initialScene: SceneKey,
+    internal var motionScheme: MotionScheme,
     override var transitions: SceneTransitions = transitions {},
     initialOverlays: Set<OverlayKey> = emptySet(),
-    internal val canChangeScene: (SceneKey) -> Boolean = { true },
-    internal val canShowOverlay: (OverlayKey) -> Boolean = { true },
-    internal val canHideOverlay: (OverlayKey) -> Boolean = { true },
-    internal val canReplaceOverlay: (from: OverlayKey, to: OverlayKey) -> Boolean = { _, _ -> true },
+    internal var canChangeScene: (SceneKey) -> Boolean = { true },
+    internal var canShowOverlay: (OverlayKey) -> Boolean = { true },
+    internal var canHideOverlay: (OverlayKey) -> Boolean = { true },
+    internal var canReplaceOverlay: (from: OverlayKey, to: OverlayKey) -> Boolean = { _, _ ->
+        true
+    },
+    internal var onTransitionStart: (TransitionState.Transition) -> Unit = {},
+    internal var onTransitionEnd: (TransitionState.Transition) -> Unit = {},
 ) : MutableSceneTransitionLayoutState {
     private val creationThread: Thread = Thread.currentThread()
 
@@ -367,9 +428,11 @@ internal class MutableSceneTransitionLayoutStateImpl(
             startTransitionInternal(transition, chain)
 
             // Run the transition until it is finished.
+            onTransitionStart(transition)
             transition.runInternal()
         } finally {
             finishTransition(transition)
+            onTransitionEnd(transition)
         }
     }
 
@@ -384,14 +447,10 @@ internal class MutableSceneTransitionLayoutStateImpl(
         val toContent = transition.toContent
 
         // Update the transition specs.
-        transition.transformationSpec =
-            transitions
-                .transitionSpec(fromContent, toContent, key = transition.key)
-                .transformationSpec(transition)
-        transition.previewTransformationSpec =
-            transitions
-                .transitionSpec(fromContent, toContent, key = transition.key)
-                .previewTransformationSpec(transition)
+        val spec = transitions.transitionSpec(fromContent, toContent, key = transition.key)
+        transition._cuj = spec.cuj
+        transition.transformationSpec = spec.transformationSpec(transition)
+        transition.previewTransformationSpec = spec.previewTransformationSpec(transition)
     }
 
     private fun startTransitionInternal(transition: TransitionState.Transition, chain: Boolean) {
@@ -411,9 +470,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
                     if (tooManyTransitions) logTooManyTransitions()
 
                     // Force finish all transitions.
-                    while (currentTransitions.isNotEmpty()) {
-                        finishTransition(transitionStates[0] as TransitionState.Transition)
-                    }
+                    currentTransitions.fastForEach { finishTransition(it) }
 
                     // We finished all transitions, so we are now idle. We remove this state so that
                     // we end up only with the new transition after appending it.
@@ -475,46 +532,36 @@ internal class MutableSceneTransitionLayoutStateImpl(
         // Mark this transition as finished.
         finishedTransitions.add(transition)
 
-        // Keep a reference to the last transition, in case we remove all transitions and should
-        // settle to Idle.
+        if (finishedTransitions.size != transitionStates.size) {
+            // Some transitions were not finished, so we won't settle to idle.
+            return
+        }
+
+        // Keep a reference to the last transition, in case all transitions are finished and we
+        // should settle to Idle.
         val lastTransition = transitionStates.last()
 
-        // Remove all first n finished transitions.
-        var i = 0
-        val nStates = transitionStates.size
-        while (i < nStates) {
-            val t = transitionStates[i]
-            if (!finishedTransitions.contains(t)) {
-                // Stop here.
-                break
+        transitionStates.fastForEach { state ->
+            if (!finishedTransitions.contains(state)) {
+                // Some transitions were not finished, so we won't settle to idle.
+                return
             }
-
-            // Remove the transition from the set of finished transitions.
-            finishedTransitions.remove(t)
-            i++
         }
 
-        // If all transitions are finished, we are idle.
-        if (i == nStates) {
-            check(finishedTransitions.isEmpty())
-            val idle =
-                TransitionState.Idle(lastTransition.currentScene, lastTransition.currentOverlays)
-            Log.i(TAG, "all transitions finished. idle=$idle")
-            this.transitionStates = listOf(idle)
-        } else if (i > 0) {
-            this.transitionStates = transitionStates.subList(fromIndex = i, toIndex = nStates)
-        }
+        val idle = TransitionState.Idle(lastTransition.currentScene, lastTransition.currentOverlays)
+        Log.i(TAG, "all transitions finished. idle=$idle")
+        finishedTransitions.clear()
+        this.transitionStates = listOf(idle)
     }
 
     override fun snapToScene(scene: SceneKey, currentOverlays: Set<OverlayKey>) {
         checkThread()
 
         // Force finish all transitions.
-        while (currentTransitions.isNotEmpty()) {
-            finishTransition(transitionStates[0] as TransitionState.Transition)
-        }
+        currentTransitions.fastForEach { finishTransition(it) }
 
         check(transitionStates.size == 1)
+        check(currentTransitions.isEmpty())
         transitionStates = listOf(TransitionState.Idle(scene, currentOverlays))
     }
 

@@ -334,7 +334,7 @@ public class ContextHubService extends IContextHubService.Stub {
         if (Flags.offloadApi() && Flags.offloadImplementation()) {
             HubInfoRegistry registry;
             try {
-                registry = new HubInfoRegistry(mContextHubWrapper);
+                registry = new HubInfoRegistry(mContext, mContextHubWrapper);
                 mEndpointManager =
                         new ContextHubEndpointManager(
                                 mContext, mContextHubWrapper, registry, mTransactionManager);
@@ -756,9 +756,7 @@ public class ContextHubService extends IContextHubService.Stub {
     @Override
     public List<HubInfo> getHubs() throws RemoteException {
         super.getHubs_enforcePermission();
-        if (mHubInfoRegistry == null) {
-            return Collections.emptyList();
-        }
+        checkHubDiscoveryPreconditions();
         return mHubInfoRegistry.getHubs();
     }
 
@@ -766,9 +764,7 @@ public class ContextHubService extends IContextHubService.Stub {
     @Override
     public List<HubEndpointInfo> findEndpoints(long endpointId) {
         super.findEndpoints_enforcePermission();
-        if (mHubInfoRegistry == null) {
-            return Collections.emptyList();
-        }
+        checkEndpointDiscoveryPreconditions();
         return mHubInfoRegistry.findEndpoints(endpointId);
     }
 
@@ -776,9 +772,7 @@ public class ContextHubService extends IContextHubService.Stub {
     @Override
     public List<HubEndpointInfo> findEndpointsWithService(String serviceDescriptor) {
         super.findEndpointsWithService_enforcePermission();
-        if (mHubInfoRegistry == null) {
-            return Collections.emptyList();
-        }
+        checkEndpointDiscoveryPreconditions();
         return mHubInfoRegistry.findEndpointsWithService(serviceDescriptor);
     }
 
@@ -827,10 +821,24 @@ public class ContextHubService extends IContextHubService.Stub {
         mHubInfoRegistry.unregisterEndpointDiscoveryCallback(callback);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @Override
+    public void onDiscoveryCallbackFinished() throws RemoteException {
+        super.onDiscoveryCallbackFinished_enforcePermission();
+        mHubInfoRegistry.onDiscoveryCallbackFinished();
+    }
+
     private void checkEndpointDiscoveryPreconditions() {
         if (mHubInfoRegistry == null) {
             Log.e(TAG, "Hub endpoint registry failed to initialize");
             throw new UnsupportedOperationException("Endpoint discovery is not supported");
+        }
+    }
+
+    private void checkHubDiscoveryPreconditions() {
+        if (mHubInfoRegistry == null) {
+            Log.e(TAG, "Hub registry failed to initialize");
+            throw new UnsupportedOperationException("Hub discovery is not supported");
         }
     }
 

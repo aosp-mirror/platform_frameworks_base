@@ -28,7 +28,6 @@ import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.ArraySet;
-import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -60,6 +59,8 @@ import perfetto.protos.TrackEventOuterClass.TrackEvent;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class is used to test the native tracing support. Run this test
@@ -78,25 +79,17 @@ public class PerfettoTraceTest {
     private static final String BAR = "bar";
 
     private static final Category FOO_CATEGORY = new Category(FOO);
+    private static final int MESSAGE = 1234567;
+    private static final int MESSAGE_COUNT = 3;
 
     private final Set<String> mCategoryNames = new ArraySet<>();
     private final Set<String> mEventNames = new ArraySet<>();
     private final Set<String> mDebugAnnotationNames = new ArraySet<>();
     private final Set<String> mTrackNames = new ArraySet<>();
 
-    static {
-        try {
-            System.loadLibrary("perfetto_trace_test_jni");
-            Log.i(TAG, "Successfully loaded trace_test native library");
-        } catch (UnsatisfiedLinkError ule) {
-            Log.w(TAG, "Could not load trace_test native library");
-        }
-    }
-
     @Before
     public void setUp() {
-        PerfettoTrace.register();
-        nativeRegisterPerfetto();
+        PerfettoTrace.register(true);
         FOO_CATEGORY.register();
 
         mCategoryNames.clear();
@@ -110,19 +103,18 @@ public class PerfettoTraceTest {
     public void testDebugAnnotations() throws Exception {
         TraceConfig traceConfig = getTraceConfig(FOO);
 
-        long ptr = nativeStartTracing(traceConfig.toByteArray());
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
 
-        PerfettoTrackEventExtra extra = PerfettoTrackEventExtra.builder()
+        PerfettoTrace.instant(FOO_CATEGORY, "event")
                 .addFlow(2)
                 .addTerminatingFlow(3)
                 .addArg("long_val", 10000000000L)
                 .addArg("bool_val", true)
                 .addArg("double_val", 3.14)
                 .addArg("string_val", FOO)
-                .build();
-        PerfettoTrace.instant(FOO_CATEGORY, "event", extra);
+                .emit();
 
-        byte[] traceBytes = nativeStopTracing(ptr);
+        byte[] traceBytes = session.close();
 
         Trace trace = Trace.parseFrom(traceBytes);
 
@@ -163,14 +155,14 @@ public class PerfettoTraceTest {
 
     @Test
     @RequiresFlagsEnabled(android.os.Flags.FLAG_PERFETTO_SDK_TRACING_V2)
-    public void testDebugAnnotationsWithLamda() throws Exception {
+    public void testDebugAnnotationsWithLambda() throws Exception {
         TraceConfig traceConfig = getTraceConfig(FOO);
 
-        long ptr = nativeStartTracing(traceConfig.toByteArray());
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
 
-        PerfettoTrace.instant(FOO_CATEGORY, "event", e -> e.addArg("long_val", 123L));
+        PerfettoTrace.instant(FOO_CATEGORY, "event").addArg("long_val", 123L).emit();
 
-        byte[] traceBytes = nativeStopTracing(ptr);
+        byte[] traceBytes = session.close();
 
         Trace trace = Trace.parseFrom(traceBytes);
 
@@ -201,19 +193,18 @@ public class PerfettoTraceTest {
     public void testNamedTrack() throws Exception {
         TraceConfig traceConfig = getTraceConfig(FOO);
 
-        long ptr = nativeStartTracing(traceConfig.toByteArray());
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
 
-        PerfettoTrackEventExtra beginExtra = PerfettoTrackEventExtra.builder()
-                .usingNamedTrack(FOO, PerfettoTrace.getProcessTrackUuid())
-                .build();
-        PerfettoTrace.begin(FOO_CATEGORY, "event", beginExtra);
+        PerfettoTrace.begin(FOO_CATEGORY, "event")
+                .usingNamedTrack(PerfettoTrace.getProcessTrackUuid(), FOO)
+                .emit();
 
-        PerfettoTrackEventExtra endExtra = PerfettoTrackEventExtra.builder()
-                .usingNamedTrack("bar", PerfettoTrace.getThreadTrackUuid(Process.myTid()))
-                .build();
-        PerfettoTrace.end(FOO_CATEGORY, endExtra);
 
-        Trace trace = Trace.parseFrom(nativeStopTracing(ptr));
+        PerfettoTrace.end(FOO_CATEGORY)
+                .usingNamedTrack(PerfettoTrace.getThreadTrackUuid(Process.myTid()), "bar")
+                .emit();
+
+        Trace trace = Trace.parseFrom(session.close());
 
         boolean hasTrackEvent = false;
         boolean hasTrackUuid = false;
@@ -242,28 +233,69 @@ public class PerfettoTraceTest {
         assertThat(hasTrackUuid).isTrue();
         assertThat(mCategoryNames).contains(FOO);
         assertThat(mTrackNames).contains(FOO);
+        assertThat(mTrackNames).contains("bar");
     }
 
     @Test
     @RequiresFlagsEnabled(android.os.Flags.FLAG_PERFETTO_SDK_TRACING_V2)
-    public void testCounter() throws Exception {
+    public void testProcessThreadNamedTrack() throws Exception {
         TraceConfig traceConfig = getTraceConfig(FOO);
 
-        long ptr = nativeStartTracing(traceConfig.toByteArray());
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
 
-        PerfettoTrackEventExtra intExtra = PerfettoTrackEventExtra.builder()
-                .usingCounterTrack(FOO, PerfettoTrace.getProcessTrackUuid())
-                .setCounter(16)
-                .build();
-        PerfettoTrace.counter(FOO_CATEGORY, intExtra);
+        PerfettoTrace.begin(FOO_CATEGORY, "event")
+                .usingProcessNamedTrack(FOO)
+                .emit();
 
-        PerfettoTrackEventExtra doubleExtra = PerfettoTrackEventExtra.builder()
-                .usingCounterTrack("bar", PerfettoTrace.getProcessTrackUuid())
-                .setCounter(3.14)
-                .build();
-        PerfettoTrace.counter(FOO_CATEGORY, doubleExtra);
 
-        Trace trace = Trace.parseFrom(nativeStopTracing(ptr));
+        PerfettoTrace.end(FOO_CATEGORY)
+                .usingThreadNamedTrack(Process.myTid(), "bar")
+                .emit();
+
+        Trace trace = Trace.parseFrom(session.close());
+
+        boolean hasTrackEvent = false;
+        boolean hasTrackUuid = false;
+        for (TracePacket packet: trace.getPacketList()) {
+            TrackEvent event;
+            if (packet.hasTrackEvent()) {
+                hasTrackEvent = true;
+                event = packet.getTrackEvent();
+
+                if (TrackEvent.Type.TYPE_SLICE_BEGIN.equals(event.getType())
+                        && event.hasTrackUuid()) {
+                    hasTrackUuid = true;
+                }
+
+                if (TrackEvent.Type.TYPE_SLICE_END.equals(event.getType())
+                        && event.hasTrackUuid()) {
+                    hasTrackUuid &= true;
+                }
+            }
+
+            collectInternedData(packet);
+            collectTrackNames(packet);
+        }
+
+        assertThat(hasTrackEvent).isTrue();
+        assertThat(hasTrackUuid).isTrue();
+        assertThat(mCategoryNames).contains(FOO);
+        assertThat(mTrackNames).contains(FOO);
+        assertThat(mTrackNames).contains("bar");
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.os.Flags.FLAG_PERFETTO_SDK_TRACING_V2)
+    public void testCounterSimple() throws Exception {
+        TraceConfig traceConfig = getTraceConfig(FOO);
+
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
+
+        PerfettoTrace.counter(FOO_CATEGORY, 16, FOO).emit();
+
+        PerfettoTrace.counter(FOO_CATEGORY, 3.14, "bar").emit();
+
+        Trace trace = Trace.parseFrom(session.close());
 
         boolean hasTrackEvent = false;
         boolean hasCounterValue = false;
@@ -297,12 +329,102 @@ public class PerfettoTraceTest {
 
     @Test
     @RequiresFlagsEnabled(android.os.Flags.FLAG_PERFETTO_SDK_TRACING_V2)
+    public void testCounter() throws Exception {
+        TraceConfig traceConfig = getTraceConfig(FOO);
+
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
+
+        PerfettoTrace.counter(FOO_CATEGORY, 16)
+                .usingCounterTrack(PerfettoTrace.getProcessTrackUuid(), FOO).emit();
+
+        PerfettoTrace.counter(FOO_CATEGORY, 3.14)
+                .usingCounterTrack(PerfettoTrace.getThreadTrackUuid(Process.myTid()),
+                                   "bar").emit();
+
+        Trace trace = Trace.parseFrom(session.close());
+
+        boolean hasTrackEvent = false;
+        boolean hasCounterValue = false;
+        boolean hasDoubleCounterValue = false;
+        for (TracePacket packet: trace.getPacketList()) {
+            TrackEvent event;
+            if (packet.hasTrackEvent()) {
+                hasTrackEvent = true;
+                event = packet.getTrackEvent();
+
+                if (TrackEvent.Type.TYPE_COUNTER.equals(event.getType())
+                        && event.getCounterValue() == 16) {
+                    hasCounterValue = true;
+                }
+
+                if (TrackEvent.Type.TYPE_COUNTER.equals(event.getType())
+                        && event.getDoubleCounterValue() == 3.14) {
+                    hasDoubleCounterValue = true;
+                }
+            }
+
+            collectTrackNames(packet);
+        }
+
+        assertThat(hasTrackEvent).isTrue();
+        assertThat(hasCounterValue).isTrue();
+        assertThat(hasDoubleCounterValue).isTrue();
+        assertThat(mTrackNames).contains(FOO);
+        assertThat(mTrackNames).contains("bar");
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.os.Flags.FLAG_PERFETTO_SDK_TRACING_V2)
+    public void testProcessThreadCounter() throws Exception {
+        TraceConfig traceConfig = getTraceConfig(FOO);
+
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
+
+        PerfettoTrace.counter(FOO_CATEGORY, 16).usingProcessCounterTrack(FOO).emit();
+
+        PerfettoTrace.counter(FOO_CATEGORY, 3.14)
+                .usingThreadCounterTrack(Process.myTid(), "bar").emit();
+
+        Trace trace = Trace.parseFrom(session.close());
+
+        boolean hasTrackEvent = false;
+        boolean hasCounterValue = false;
+        boolean hasDoubleCounterValue = false;
+        for (TracePacket packet: trace.getPacketList()) {
+            TrackEvent event;
+            if (packet.hasTrackEvent()) {
+                hasTrackEvent = true;
+                event = packet.getTrackEvent();
+
+                if (TrackEvent.Type.TYPE_COUNTER.equals(event.getType())
+                        && event.getCounterValue() == 16) {
+                    hasCounterValue = true;
+                }
+
+                if (TrackEvent.Type.TYPE_COUNTER.equals(event.getType())
+                        && event.getDoubleCounterValue() == 3.14) {
+                    hasDoubleCounterValue = true;
+                }
+            }
+
+            collectTrackNames(packet);
+        }
+
+        assertThat(hasTrackEvent).isTrue();
+        assertThat(hasCounterValue).isTrue();
+        assertThat(hasDoubleCounterValue).isTrue();
+        assertThat(mTrackNames).contains(FOO);
+        assertThat(mTrackNames).contains("bar");
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.os.Flags.FLAG_PERFETTO_SDK_TRACING_V2)
     public void testProto() throws Exception {
         TraceConfig traceConfig = getTraceConfig(FOO);
 
-        long ptr = nativeStartTracing(traceConfig.toByteArray());
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
 
-        PerfettoTrackEventExtra extra5 = PerfettoTrackEventExtra.builder()
+        PerfettoTrace.instant(FOO_CATEGORY, "event_proto")
                 .beginProto()
                 .beginNested(33L)
                 .addField(4L, 2L)
@@ -310,10 +432,9 @@ public class PerfettoTraceTest {
                 .endNested()
                 .addField(2001, "AIDL::IActivityManager")
                 .endProto()
-                .build();
-        PerfettoTrace.instant(FOO_CATEGORY, "event_proto", extra5);
+                .emit();
 
-        byte[] traceBytes = nativeStopTracing(ptr);
+        byte[] traceBytes = session.close();
 
         Trace trace = Trace.parseFrom(traceBytes);
 
@@ -349,9 +470,9 @@ public class PerfettoTraceTest {
     public void testProtoNested() throws Exception {
         TraceConfig traceConfig = getTraceConfig(FOO);
 
-        long ptr = nativeStartTracing(traceConfig.toByteArray());
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
 
-        PerfettoTrackEventExtra extra6 = PerfettoTrackEventExtra.builder()
+        PerfettoTrace.instant(FOO_CATEGORY, "event_proto_nested")
                 .beginProto()
                 .beginNested(29L)
                 .beginNested(4L)
@@ -364,10 +485,9 @@ public class PerfettoTraceTest {
                 .endNested()
                 .endNested()
                 .endProto()
-                .build();
-        PerfettoTrace.instant(FOO_CATEGORY, "event_proto_nested", extra6);
+                .emit();
 
-        byte[] traceBytes = nativeStopTracing(ptr);
+        byte[] traceBytes = session.close();
 
         Trace trace = Trace.parseFrom(traceBytes);
 
@@ -411,14 +531,13 @@ public class PerfettoTraceTest {
     public void testActivateTrigger() throws Exception {
         TraceConfig traceConfig = getTriggerTraceConfig(FOO, FOO);
 
-        long ptr = nativeStartTracing(traceConfig.toByteArray());
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
 
-        PerfettoTrackEventExtra extra = PerfettoTrackEventExtra.builder().build();
-        PerfettoTrace.instant(FOO_CATEGORY, "event_trigger", extra);
+        PerfettoTrace.instant(FOO_CATEGORY, "event_trigger").emit();
 
         PerfettoTrace.activateTrigger(FOO, 1000);
 
-        byte[] traceBytes = nativeStopTracing(ptr);
+        byte[] traceBytes = session.close();
 
         Trace trace = Trace.parseFrom(traceBytes);
 
@@ -439,51 +558,23 @@ public class PerfettoTraceTest {
 
     @Test
     @RequiresFlagsEnabled(android.os.Flags.FLAG_PERFETTO_SDK_TRACING_V2)
-    public void testMultipleExtras() throws Exception {
-        boolean hasException = false;
-        try {
-            PerfettoTrackEventExtra.builder();
-
-            // Unclosed extra will throw an exception here
-            PerfettoTrackEventExtra.builder();
-        } catch (Exception e) {
-            hasException = true;
-        }
-
-        try {
-            PerfettoTrackEventExtra.builder().build();
-
-            // Closed extra but unused (reset hasn't been called internally) will throw an exception
-            // here.
-            PerfettoTrackEventExtra.builder();
-        } catch (Exception e) {
-            hasException &= true;
-        }
-
-        assertThat(hasException).isTrue();
-    }
-
-    @Test
-    @RequiresFlagsEnabled(android.os.Flags.FLAG_PERFETTO_SDK_TRACING_V2)
     public void testRegister() throws Exception {
         TraceConfig traceConfig = getTraceConfig(BAR);
 
         Category barCategory = new Category(BAR);
-        long ptr = nativeStartTracing(traceConfig.toByteArray());
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
 
-        PerfettoTrackEventExtra beforeExtra = PerfettoTrackEventExtra.builder()
+        PerfettoTrace.instant(barCategory, "event")
                 .addArg("before", 1)
-                .build();
-        PerfettoTrace.instant(barCategory, "event", beforeExtra);
+                .emit();
 
         barCategory.register();
 
-        PerfettoTrackEventExtra afterExtra = PerfettoTrackEventExtra.builder()
+        PerfettoTrace.instant(barCategory, "event")
                 .addArg("after", 1)
-                .build();
-        PerfettoTrace.instant(barCategory, "event", afterExtra);
+                .emit();
 
-        byte[] traceBytes = nativeStopTracing(ptr);
+        byte[] traceBytes = session.close();
 
         Trace trace = Trace.parseFrom(traceBytes);
 
@@ -505,9 +596,88 @@ public class PerfettoTraceTest {
         assertThat(mDebugAnnotationNames).doesNotContain("before");
     }
 
-    private static native long nativeStartTracing(byte[] config);
-    private static native void nativeRegisterPerfetto();
-    private static native byte[] nativeStopTracing(long ptr);
+    @Test
+    @RequiresFlagsEnabled(android.os.Flags.FLAG_PERFETTO_SDK_TRACING_V2)
+    public void testMessageQueue() throws Exception {
+        TraceConfig traceConfig = getTraceConfig("mq");
+
+        PerfettoTrace.MQ_CATEGORY.register();
+        final HandlerThread thread = new HandlerThread("test");
+        thread.start();
+        final Handler handler = thread.getThreadHandler();
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true,
+                getTraceConfig("mq").toByteArray());
+
+        handler.sendEmptyMessage(MESSAGE);
+        handler.sendEmptyMessageDelayed(MESSAGE, 10);
+        handler.sendEmptyMessage(MESSAGE);
+        handler.postDelayed(() -> {
+            latch.countDown();
+        }, 10);
+        assertThat(latch.await(100, TimeUnit.MILLISECONDS)).isTrue();
+
+        byte[] traceBytes = session.close();
+
+        Trace trace = Trace.parseFrom(traceBytes);
+
+        boolean hasTrackEvent = false;
+        int instantCount = 0;
+        int counterCount = 0;
+        int beginCount = 0;
+        int endCount = 0;
+
+        Set<Long> flowIds = new ArraySet<>();
+        for (TracePacket packet: trace.getPacketList()) {
+            TrackEvent event;
+            if (packet.hasTrackEvent()) {
+                hasTrackEvent = true;
+                event = packet.getTrackEvent();
+            } else {
+                continue;
+            }
+
+            List<DebugAnnotation> annotations = event.getDebugAnnotationsList();
+            switch (event.getType()) {
+                case TrackEvent.Type.TYPE_INSTANT:
+                    if (annotations.get(2).getIntValue() == MESSAGE) {
+                        instantCount++;
+                        assertThat(annotations.get(0).getStringValue()).isEqualTo("test");
+                        assertThat(event.getFlowIdsCount()).isEqualTo(1);
+                        flowIds.addAll(event.getFlowIdsList());
+                    }
+                    break;
+                case TrackEvent.Type.TYPE_COUNTER:
+                    counterCount++;
+                    break;
+                case TrackEvent.Type.TYPE_SLICE_BEGIN:
+                    annotations = event.getDebugAnnotationsList();
+                    if (flowIds.containsAll(event.getTerminatingFlowIdsList())) {
+                        beginCount++;
+                        assertThat(event.getTerminatingFlowIdsCount()).isEqualTo(1);
+                    }
+                    break;
+                case TrackEvent.Type.TYPE_SLICE_END:
+                    endCount++;
+                    break;
+                default:
+                    break;
+            }
+            collectInternedData(packet);
+        }
+
+        assertThat(hasTrackEvent).isTrue();
+        assertThat(mCategoryNames).contains("mq");
+        assertThat(mEventNames).contains("message_queue_send");
+        assertThat(mEventNames).contains("message_queue_receive");
+        assertThat(mDebugAnnotationNames).contains("what");
+        assertThat(mDebugAnnotationNames).contains("delay");
+        assertThat(instantCount).isEqualTo(MESSAGE_COUNT);
+        assertThat(beginCount).isEqualTo(MESSAGE_COUNT);
+        assertThat(endCount).isAtLeast(MESSAGE_COUNT);
+        assertThat(counterCount).isAtLeast(MESSAGE_COUNT);
+    }
 
     private TrackEvent getTrackEvent(Trace trace, int idx) {
         int curIdx = 0;

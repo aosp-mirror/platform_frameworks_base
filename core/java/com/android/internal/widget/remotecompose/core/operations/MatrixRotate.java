@@ -23,6 +23,7 @@ import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
 
 import java.util.List;
 
@@ -109,5 +110,10 @@ public class MatrixRotate extends DrawBase3 {
         buffer.writeFloat(x1);
         buffer.writeFloat(y1);
         buffer.writeFloat(x2);
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serialize(serializer, "rotate", "pivotX", "pivotY").add("type", CLASS_NAME);
     }
 }

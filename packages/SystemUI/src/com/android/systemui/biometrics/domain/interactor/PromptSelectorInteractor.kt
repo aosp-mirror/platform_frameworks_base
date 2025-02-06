@@ -126,7 +126,12 @@ constructor(
                 is PromptKind.Biometric ->
                     BiometricPromptRequest.Biometric(
                         info = promptInfo,
-                        userInfo = BiometricUserInfo(userId = userId),
+                        userInfo =
+                            BiometricUserInfo(
+                                userId = userId,
+                                deviceCredentialOwnerId =
+                                    credentialInteractor.getCredentialOwnerOrSelfId(userId),
+                            ),
                         operationInfo = BiometricOperationInfo(gatekeeperChallenge = challenge),
                         modalities = kind.activeModalities,
                         opPackageName = opPackageName,

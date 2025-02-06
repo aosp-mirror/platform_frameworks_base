@@ -16,8 +16,8 @@
 
 package com.android.systemui.volume.dialog.sliders.data.repository
 
-import android.view.MotionEvent
 import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
+import com.android.systemui.volume.dialog.sliders.shared.model.SliderInputEvent
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,10 +26,11 @@ import kotlinx.coroutines.flow.filterNotNull
 @VolumeDialogSliderScope
 class VolumeDialogSliderTouchEventsRepository @Inject constructor() {
 
-    private val mutableSliderTouchEvents: MutableStateFlow<MotionEvent?> = MutableStateFlow(null)
-    val sliderTouchEvent: Flow<MotionEvent> = mutableSliderTouchEvents.filterNotNull()
+    private val mutableSliderTouchEvents: MutableStateFlow<SliderInputEvent.Touch?> =
+        MutableStateFlow(null)
+    val sliderTouchEvent: Flow<SliderInputEvent.Touch> = mutableSliderTouchEvents.filterNotNull()
 
-    fun update(event: MotionEvent) {
-        mutableSliderTouchEvents.tryEmit(MotionEvent.obtain(event))
+    fun update(touch: SliderInputEvent.Touch) {
+        mutableSliderTouchEvents.value = touch
     }
 }

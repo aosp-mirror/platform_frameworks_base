@@ -87,8 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"เชื่อมต่อเครือข่ายมือถือไม่ได้"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ลองเปลี่ยนเครือข่ายที่ต้องการ แตะเพื่อเปลี่ยน"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"โทรหาหมายเลขฉุกเฉินไม่ได้"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"ไม่ต้องแสดงอีก"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"การโทรหาหมายเลขฉุกเฉินต้องใช้เครือข่ายมือถือ"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"การแจ้งเตือน"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"การโอนสาย"</string>
@@ -303,6 +302,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"การแจ้งเตือนเครือข่าย"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"มีเครือข่ายพร้อมใช้งาน"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"สถานะ VPN"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"เวลาและเขตเวลา"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"การแจ้งเตือนจากผู้ดูแลระบบไอทีของคุณ"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"การแจ้งเตือน"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"การสาธิตสำหรับผู้ค้าปลีก"</string>
@@ -310,6 +310,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"แอปที่ทำงานอยู่"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"แอปหลายแอปกำลังใช้แบตเตอรี่"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"การขยาย"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"เครื่องช่วยฟัง"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"การใช้งานการช่วยเหลือพิเศษ"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"จอแสดงผล"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> กำลังใช้แบตเตอรี่"</string>
@@ -1407,6 +1408,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"ดาวน์โหลดแอป"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"ใส่ซิมใหม่แล้ว"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"แตะเพื่อตั้งค่า"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"เขตเวลามีการเปลี่ยนแปลง"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"ตอนนี้คุณอยู่ในเขตเวลา <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>)"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"ตั้งเวลา"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"ตั้งวันที่"</string>
     <string name="date_time_set" msgid="4603445265164486816">"ตั้งค่า"</string>
@@ -1780,14 +1783,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"โหมดมือเดียว"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"หรี่แสงเพิ่มเติม"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"เครื่องช่วยฟัง"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"เลิกเชื่อมต่อแล้ว"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"เชื่อมต่อแล้ว"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"ใช้งานอยู่"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"กำลังโหลด"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"กดปุ่มปรับระดับเสียงค้างไว้แล้ว เปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"กดปุ่มปรับระดับเสียงค้างไว้แล้ว ปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ปล่อยปุ่มปรับระดับเสียง หากต้องการเปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ให้กดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มค้างไว้อีกครั้งเป็นเวลา 3 วินาที"</string>
@@ -1798,6 +1797,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"ฟีเจอร์นี้จะเปิดขึ้นในครั้งถัดไปที่คุณใช้ทางลัดนี้ ใช้ 2 นิ้วปัดขึ้นจากด้านล่างของหน้าจอและปล่อยอย่างรวดเร็ว"</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"ฟีเจอร์นี้จะเปิดขึ้นในครั้งถัดไปที่คุณใช้ทางลัดนี้ ใช้ 3 นิ้วปัดขึ้นจากด้านล่างของหน้าจอและปล่อยอย่างรวดเร็ว"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"การขยาย"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"เปลี่ยนไปใช้ไมโครโฟนของโทรศัพท์ไหม"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"เปลี่ยนไปใช้ไมโครโฟนของเครื่องช่วยฟังไหม"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"เพื่อให้เสียงดีขึ้นหรือในกรณีที่แบตเตอรี่ของเครื่องช่วยฟังใกล้หมด การดำเนินการนี้เพียงแค่เปลี่ยนไมโครโฟนระหว่างการโทรเท่านั้น"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"คุณใช้ไมโครโฟนของเครื่องช่วยฟังเพื่อโทรแบบแฮนด์ฟรีได้ การดำเนินการนี้เพียงแค่เปลี่ยนไมโครโฟนระหว่างการโทรเท่านั้น"</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"เปลี่ยน"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"การตั้งค่า"</string>
     <string name="user_switched" msgid="7249833311585228097">"ผู้ใช้ปัจจุบัน <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"กำลังเปลี่ยนเป็น<xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"กำลังออกจากระบบ <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -2083,6 +2088,12 @@
     <string name="unpin_target" msgid="3963318576590204447">"เลิกปักหมุด"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"เลิกปักหมุด <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"ข้อมูลแอป"</string>
+    <!-- no translation found for shortcut_group_a11y_title (2992150163811583865) -->
+    <skip />
+    <!-- no translation found for suggested_apps_group_a11y_title (2804876567839501831) -->
+    <skip />
+    <!-- no translation found for all_apps_group_a11y_title (7020352520224108745) -->
+    <skip />
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"กำลังเริ่มการสาธิต…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"กำลังรีเซ็ตอุปกรณ์…"</string>
@@ -2237,6 +2248,10 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad ซ้าย"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad ขวา"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad กึ่งกลาง"</string>
+    <string name="accessibility_autoclick_type_settings_panel_title" msgid="7354373370578758696">"แผงการตั้งค่าประเภทการคลิกอัตโนมัติ"</string>
+    <string name="accessibility_autoclick_left_click" msgid="2301793352260551080">"คลิกซ้าย"</string>
+    <string name="accessibility_autoclick_pause" msgid="3272200156172573568">"หยุดชั่วคราว"</string>
+    <string name="accessibility_autoclick_position" msgid="2933660969907663545">"วางตำแหน่ง"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"ใส่ <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ในที่เก็บข้อมูลที่ถูกจำกัดแล้ว"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"ส่งรูปภาพ"</string>
@@ -2454,6 +2469,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ซ่อนเนื้อหาแอปจากการแชร์หน้าจอแล้วเพื่อความปลอดภัย"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"เชื่อมต่อกับดาวเทียมโดยอัตโนมัติ"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"คุณรับส่งข้อความผ่านดาวเทียมได้โดยไม่ต้องใช้เครือข่ายมือถือหรือ Wi-Fi"</string>
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"คุณจะรับส่งข้อความและใช้อินเทอร์เน็ตแบบจำกัดผ่านดาวเทียมได้"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"ใช้การรับส่งข้อความผ่านดาวเทียมไหม"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"รับและส่งข้อความโดยไม่ต้องใช้เครือข่ายมือถือหรือ Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"เปิด Messages"</string>
@@ -2510,4 +2526,12 @@
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"แผนที่"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"แอปพลิเคชัน"</string>
     <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"ระบบจะไม่จดจำลายนิ้วมือของคุณอีกต่อไป ตั้งค่าการปลดล็อกด้วยลายนิ้วมืออีกครั้ง"</string>
+    <!-- no translation found for usb_apm_usb_plugged_in_when_locked_notification_title (468577168569874967) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_plugged_in_when_locked_notification_text (6695268246267993166) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_suspicious_activity_notification_title (3461195995882871461) -->
+    <skip />
+    <!-- no translation found for usb_apm_usb_suspicious_activity_notification_text (6537085605929303187) -->
+    <skip />
 </resources>

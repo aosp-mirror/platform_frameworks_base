@@ -38,6 +38,7 @@ import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.transition.TransitionInfoBuilder;
 
 import org.junit.Before;
@@ -49,7 +50,7 @@ import org.mockito.MockitoAnnotations;
  * Tests of {@link BubblesTransitionObserver}.
  */
 @SmallTest
-public class BubblesTransitionObserverTest {
+public class BubblesTransitionObserverTest extends ShellTestCase {
 
     @Mock
     private BubbleController mBubbleController;

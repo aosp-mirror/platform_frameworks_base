@@ -30,7 +30,6 @@ import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.util.settings.FakeGlobalSettings
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -44,7 +43,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class LogcatEchoTrackerDebugTest : SysuiTestCase() {

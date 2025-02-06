@@ -84,8 +84,12 @@ class RollbackStore {
      */
     private static List<Rollback> loadRollbacks(File rollbackDataDir) {
         List<Rollback> rollbacks = new ArrayList<>();
-        rollbackDataDir.mkdirs();
-        for (File rollbackDir : rollbackDataDir.listFiles()) {
+        File[] rollbackDirs = rollbackDataDir.listFiles();
+        if (rollbackDirs == null) {
+            Slog.e(TAG, "Folder doesn't exist: " + rollbackDataDir);
+            return rollbacks;
+        }
+        for (File rollbackDir : rollbackDirs) {
             if (rollbackDir.isDirectory()) {
                 try {
                     rollbacks.add(loadRollback(rollbackDir));

@@ -161,6 +161,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
     private final List<UserBatteryConsumer> mUserBatteryConsumers;
     private final AggregateBatteryConsumer[] mAggregateBatteryConsumers;
     private final BatteryStatsHistory mBatteryStatsHistory;
+    private final long mPreferredHistoryDurationMs;
     private final BatteryConsumer.BatteryConsumerDataLayout mBatteryConsumerDataLayout;
     private CursorWindow mBatteryConsumersCursorWindow;
 
@@ -174,6 +175,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         mDischargedPowerUpperBound = builder.mDischargedPowerUpperBoundMah;
         mDischargeDurationMs = builder.mDischargeDurationMs;
         mBatteryStatsHistory = builder.mBatteryStatsHistory;
+        mPreferredHistoryDurationMs = builder.mPreferredHistoryDurationMs;
         mBatteryTimeRemainingMs = builder.mBatteryTimeRemainingMs;
         mChargeTimeRemainingMs = builder.mChargeTimeRemainingMs;
         mCustomPowerComponentNames = builder.mCustomPowerComponentNames;
@@ -402,8 +404,10 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
 
         if (source.readBoolean()) {
             mBatteryStatsHistory = BatteryStatsHistory.createFromBatteryUsageStatsParcel(source);
+            mPreferredHistoryDurationMs = source.readLong();
         } else {
             mBatteryStatsHistory = null;
+            mPreferredHistoryDurationMs = 0;
         }
     }
 
@@ -428,7 +432,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
 
         if (mBatteryStatsHistory != null) {
             dest.writeBoolean(true);
-            mBatteryStatsHistory.writeToBatteryUsageStatsParcel(dest);
+            mBatteryStatsHistory.writeToBatteryUsageStatsParcel(dest, mPreferredHistoryDurationMs);
         } else {
             dest.writeBoolean(false);
         }
@@ -919,6 +923,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         private final SparseArray<UserBatteryConsumer.Builder> mUserBatteryConsumerBuilders =
                 new SparseArray<>();
         private BatteryStatsHistory mBatteryStatsHistory;
+        private long mPreferredHistoryDurationMs;
 
         public Builder(@NonNull String[] customPowerComponentNames) {
             this(customPowerComponentNames, false, false, false, 0);
@@ -1092,8 +1097,10 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
          * Sets the parceled recent history.
          */
         @NonNull
-        public Builder setBatteryHistory(BatteryStatsHistory batteryStatsHistory) {
+        public Builder setBatteryHistory(BatteryStatsHistory batteryStatsHistory,
+                long preferredHistoryDurationMs) {
             mBatteryStatsHistory = batteryStatsHistory;
+            mPreferredHistoryDurationMs = preferredHistoryDurationMs;
             return this;
         }
 

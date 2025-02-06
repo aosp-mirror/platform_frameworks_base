@@ -31,6 +31,7 @@ import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.CameraProtectionModule;
 import com.android.systemui.CoreStartable;
+import com.android.systemui.KairosCoreStartableModule;
 import com.android.systemui.SystemUISecondaryUserService;
 import com.android.systemui.activity.ActivityManagerModule;
 import com.android.systemui.ambient.dagger.AmbientModule;
@@ -80,6 +81,7 @@ import com.android.systemui.keyguard.ui.composable.LockscreenContent;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.log.dagger.MonitorLog;
 import com.android.systemui.log.table.TableLogBuffer;
+import com.android.systemui.lowlightclock.dagger.LowLightModule;
 import com.android.systemui.mediaprojection.MediaProjectionModule;
 import com.android.systemui.mediaprojection.appselector.MediaProjectionActivitiesModule;
 import com.android.systemui.mediaprojection.taskswitcher.MediaProjectionTaskSwitcherModule;
@@ -232,6 +234,7 @@ import javax.inject.Named;
         FlagsModule.class,
         FlagDependenciesModule.class,
         FooterActionsModule.class,
+        KairosCoreStartableModule.class,
         GestureModule.class,
         InputMethodModule.class,
         KeyEventRepositoryModule.class,
@@ -283,7 +286,8 @@ import javax.inject.Named;
         UserModule.class,
         UtilModule.class,
         NoteTaskModule.class,
-        WalletModule.class
+        WalletModule.class,
+        LowLightModule.class
 },
         subcomponents = {
                 ComplicationComponent.class,

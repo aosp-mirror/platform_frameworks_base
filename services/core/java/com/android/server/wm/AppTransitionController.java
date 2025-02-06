@@ -80,7 +80,6 @@ import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
-import android.view.Display;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
@@ -252,7 +251,6 @@ public class AppTransitionController {
         // Check if there is any override
         if (!overrideWithTaskFragmentRemoteAnimation(transit, activityTypes)) {
             // Unfreeze the windows that were previously frozen for TaskFragment animation.
-            unfreezeEmbeddedChangingWindows();
             overrideWithRemoteAnimationIfSet(animLpActivity, transit, activityTypes);
         }
 
@@ -543,16 +541,6 @@ public class AppTransitionController {
         return mRemoteAnimationDefinition != null
                 ? mRemoteAnimationDefinition.getAdapter(transit, activityTypes)
                 : null;
-    }
-
-    private void unfreezeEmbeddedChangingWindows() {
-        final ArraySet<WindowContainer> changingContainers = mDisplayContent.mChangingContainers;
-        for (int i = changingContainers.size() - 1; i >= 0; i--) {
-            final WindowContainer wc = changingContainers.valueAt(i);
-            if (wc.isEmbedded()) {
-                wc.mSurfaceFreezer.unfreeze(wc.getSyncTransaction());
-            }
-        }
     }
 
     private boolean transitionMayContainNonAppWindows(@TransitionOldType int transit) {
@@ -1195,27 +1183,12 @@ public class AppTransitionController {
     private boolean transitionGoodToGo(ArraySet<? extends WindowContainer> apps,
             ArrayMap<WindowContainer, Integer> outReasons) {
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                "Checking %d opening apps (frozen=%b timeout=%b)...", apps.size(),
-                mService.mDisplayFrozen, mDisplayContent.mAppTransition.isTimeout());
+                "Checking %d opening apps (timeout=%b)...", apps.size(),
+                mDisplayContent.mAppTransition.isTimeout());
         if (mDisplayContent.mAppTransition.isTimeout()) {
             return true;
         }
-        final ScreenRotationAnimation screenRotationAnimation = mService.mRoot.getDisplayContent(
-                Display.DEFAULT_DISPLAY).getRotationAnimation();
 
-        // Imagine the case where we are changing orientation due to an app transition, but a
-        // previous orientation change is still in progress. We won't process the orientation
-        // change for our transition because we need to wait for the rotation animation to
-        // finish.
-        // If we start the app transition at this point, we will interrupt it halfway with a
-        // new rotation animation after the old one finally finishes. It's better to defer the
-        // app transition.
-        if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()
-                && mDisplayContent.getDisplayRotation().needsUpdate()) {
-            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                    "Delaying app transition for screen rotation animation to finish");
-            return false;
-        }
         for (int i = 0; i < apps.size(); i++) {
             WindowContainer wc = apps.valueAt(i);
             final ActivityRecord activity = getAppFromContainer(wc);

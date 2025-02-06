@@ -5,6 +5,8 @@
 # Keep all classes / methods / fields, but make the methods throw.
 --default-throw
 
+--delete-finals
+
 # Uncomment below lines to enable each feature.
 
 #--default-method-call-hook
@@ -28,6 +30,9 @@
 
 --remove-annotation
     android.ravenwood.annotation.RavenwoodRemove
+
+--ignore-annotation
+    android.ravenwood.annotation.RavenwoodIgnore
 
 --substitute-annotation
     android.ravenwood.annotation.RavenwoodReplace

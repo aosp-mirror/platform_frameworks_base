@@ -20,6 +20,7 @@ import android.graphics.drawable.Drawable
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.statusbar.policy.SecurityController
+import com.android.systemui.supervision.shared.DeprecateDpmSupervisionApis
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
@@ -59,12 +60,18 @@ data class SecurityModel(
         @JvmStatic
         @VisibleForTesting
         fun create(securityController: SecurityController): SecurityModel {
-            val deviceAdminInfo =
-                if (securityController.isParentalControlsEnabled) {
-                    securityController.deviceAdminInfo
-                } else {
-                    null
-                }
+            val icon: Drawable?
+            if (DeprecateDpmSupervisionApis.isEnabled) {
+                icon = securityController.getIcon()
+            } else {
+                val deviceAdminInfo =
+                    if (securityController.isParentalControlsEnabled) {
+                        securityController.deviceAdminInfo
+                    } else {
+                        null
+                    }
+                icon = securityController.getIcon(deviceAdminInfo)
+            }
 
             return SecurityModel(
                 isDeviceManaged = securityController.isDeviceManaged,
@@ -83,7 +90,7 @@ data class SecurityModel(
                 hasCACertInCurrentUser = securityController.hasCACertInCurrentUser(),
                 hasCACertInWorkProfile = securityController.hasCACertInWorkProfile(),
                 isParentalControlsEnabled = securityController.isParentalControlsEnabled,
-                deviceAdminIcon = securityController.getIcon(deviceAdminInfo),
+                deviceAdminIcon = icon,
             )
         }
     }

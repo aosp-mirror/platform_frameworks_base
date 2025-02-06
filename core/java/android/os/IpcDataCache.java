@@ -658,4 +658,74 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
             }
         });
     }
+
+    /**
+     * The following APIs are exposed to support testing.  They only forward the superclass but
+     * that means the superclass does not have to expose the APIs itself.
+     */
+
+    /**
+     * Stop disabling local caches with the same name as <this>.  Any caches that are currently
+     * disabled remain disabled (the "disabled" setting is sticky).  However, new caches with this
+     * name will not be disabled.  It is not an error if the cache name is not found in the list
+     * of disabled caches.
+     * @hide
+     */
+    @TestApi
+    @Override
+    public final void forgetDisableLocal() {
+        super.forgetDisableLocal();
+    }
+
+    /**
+     * Return whether a cache instance is disabled.
+     * @hide
+     */
+    @TestApi
+    @Override
+    public final boolean isDisabled() {
+        return super.isDisabled();
+    }
+
+    /**
+     * This is an obsolete synonym for {@link #isDisabled()}.
+     * @hide
+     */
+    @TestApi
+    public boolean getDisabledState() {
+        return isDisabled();
+    }
+
+    /**
+     * Disable the use of this cache in this process.  This method is used internally and during
+     * testing.  To disable a cache in normal code, use disableProcessLocal().
+     * @hide
+     */
+    @TestApi
+    @Override
+    public final void disableInstance() {
+        super.disableInstance();
+    }
+
+    /**
+     * Disable all caches that use the property as the current cache.
+     * @hide
+     */
+    @TestApi
+    @Override
+    public final void disableSystemWide() {
+        super.disableSystemWide();
+    }
+
+    /**
+     * Enable or disable testing.  The protocol requires that the mode toggle: for instance, it is
+     * illegal to clear the test mode if the test mode is already off.  The purpose is solely to
+     * ensure that test clients do not forget to use the test mode properly, even though the
+     * current logic does not care.
+     * @hide
+     */
+    @TestApi
+    public static void setTestMode(boolean mode) {
+        PropertyInvalidatedCache.setTestMode(mode);
+    }
 }

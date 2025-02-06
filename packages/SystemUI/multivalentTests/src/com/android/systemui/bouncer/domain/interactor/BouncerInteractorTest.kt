@@ -46,7 +46,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.settings.fakeGlobalSettings
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -55,7 +54,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @EnableSceneContainer

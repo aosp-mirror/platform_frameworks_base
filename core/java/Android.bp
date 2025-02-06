@@ -87,7 +87,7 @@ release_package_messagequeue_implementation_srcs {
         release_package_messagequeue_implementation: {
             srcs: ["android/os/%s"],
             conditions_default: {
-                srcs: ["android/os/LegacyMessageQueue/MessageQueue.java"],
+                srcs: ["android/os/CombinedMessageQueue/MessageQueue.java"],
             },
         },
     },

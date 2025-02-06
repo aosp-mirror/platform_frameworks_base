@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UiThread;
 import android.app.ActivityManager;
 import android.app.INotificationManager;
@@ -56,6 +57,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -1824,6 +1826,7 @@ public abstract class NotificationListenerService extends Service {
         private int mProposedImportance;
         // Sensitive info detected by the notification assistant
         private boolean mSensitiveContent;
+        private String mSummarization;
 
         private static final int PARCEL_VERSION = 2;
 
@@ -1864,6 +1867,7 @@ public abstract class NotificationListenerService extends Service {
             out.writeBoolean(mIsBubble);
             out.writeInt(mProposedImportance);
             out.writeBoolean(mSensitiveContent);
+            out.writeString(mSummarization);
         }
 
         /** @hide */
@@ -1904,6 +1908,7 @@ public abstract class NotificationListenerService extends Service {
             mIsBubble = in.readBoolean();
             mProposedImportance = in.readInt();
             mSensitiveContent = in.readBoolean();
+            mSummarization = in.readString();
         }
 
 
@@ -2180,6 +2185,16 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
+         * Returns a summary of the content in the notification, or potentially of the current
+         * notification and related notifications (for example, if this is provided for a group
+         * summary notification it may be summarizing all the child notifications).
+         */
+        @FlaggedApi(android.app.Flags.FLAG_NM_SUMMARIZATION)
+        public @Nullable String getSummarization() {
+            return mSummarization;
+        }
+
+        /**
          * Returns the intended transition to ranking passed by {@link NotificationAssistantService}
          * @hide
          */
@@ -2201,7 +2216,7 @@ public abstract class NotificationListenerService extends Service {
                 ArrayList<CharSequence> smartReplies, boolean canBubble,
                 boolean isTextChanged, boolean isConversation, ShortcutInfo shortcutInfo,
                 int rankingAdjustment, boolean isBubble, int proposedImportance,
-                boolean sensitiveContent) {
+                boolean sensitiveContent, String summarization) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
@@ -2229,6 +2244,7 @@ public abstract class NotificationListenerService extends Service {
             mIsBubble = isBubble;
             mProposedImportance = proposedImportance;
             mSensitiveContent = sensitiveContent;
+            mSummarization = TextUtils.nullIfEmpty(summarization);
         }
 
         /**
@@ -2271,7 +2287,8 @@ public abstract class NotificationListenerService extends Service {
                     other.mRankingAdjustment,
                     other.mIsBubble,
                     other.mProposedImportance,
-                    other.mSensitiveContent);
+                    other.mSensitiveContent,
+                    other.mSummarization);
         }
 
         /**
@@ -2332,7 +2349,8 @@ public abstract class NotificationListenerService extends Service {
                     && Objects.equals(mRankingAdjustment, other.mRankingAdjustment)
                     && Objects.equals(mIsBubble, other.mIsBubble)
                     && Objects.equals(mProposedImportance, other.mProposedImportance)
-                    && Objects.equals(mSensitiveContent, other.mSensitiveContent);
+                    && Objects.equals(mSensitiveContent, other.mSensitiveContent)
+                    && Objects.equals(mSummarization, other.mSummarization);
         }
     }
 

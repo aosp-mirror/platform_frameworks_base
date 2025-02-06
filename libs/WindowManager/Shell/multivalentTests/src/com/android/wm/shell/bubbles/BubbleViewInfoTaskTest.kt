@@ -35,8 +35,6 @@ import com.android.internal.protolog.ProtoLog
 import com.android.internal.statusbar.IStatusBarService
 import com.android.launcher3.icons.BubbleIconFactory
 import com.android.wm.shell.ShellTaskOrganizer
-import com.android.wm.shell.TestShellExecutor
-import com.android.wm.shell.bubbles.properties.BubbleProperties
 import com.android.wm.shell.bubbles.storage.BubblePersistentRepository
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayImeController
@@ -44,11 +42,13 @@ import com.android.wm.shell.common.DisplayInsetsController
 import com.android.wm.shell.common.FloatingContentCoordinator
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.common.TaskStackListenerImpl
+import com.android.wm.shell.common.TestShellExecutor
 import com.android.wm.shell.shared.TransactionPool
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.taskview.TaskView
+import com.android.wm.shell.taskview.TaskViewRepository
 import com.android.wm.shell.taskview.TaskViewTransitions
 import com.android.wm.shell.transition.Transitions
 import com.google.common.truth.Truth.assertThat
@@ -155,11 +155,12 @@ class BubbleViewInfoTaskTest {
                 mainExecutor,
                 mock<Handler>(),
                 bgExecutor,
+                mock<TaskViewRepository>(),
                 mock<TaskViewTransitions>(),
                 mock<Transitions>(),
                 SyncTransactionQueue(TransactionPool(), mainExecutor),
                 mock<IWindowManager>(),
-                mock<BubbleProperties>()
+                BubbleResizabilityChecker()
             )
 
         // TODO: (b/371829099) - when optional overflow is no longer flagged we can enable this
@@ -326,7 +327,6 @@ class BubbleViewInfoTaskTest {
             expandedViewManager,
             bubbleTaskViewFactory,
             bubblePositioner,
-            bubbleLogger,
             bubbleStackView,
             null /* layerView */,
             iconFactory,

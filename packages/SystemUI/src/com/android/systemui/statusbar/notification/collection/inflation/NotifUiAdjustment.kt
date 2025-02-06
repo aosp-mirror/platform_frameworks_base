@@ -40,6 +40,7 @@ internal constructor(
     @RedactionType val redactionType: Int,
     val isChildInGroup: Boolean,
     val isGroupSummary: Boolean,
+    val summarization: String?,
 ) {
     companion object {
         @JvmStatic
@@ -61,6 +62,7 @@ internal constructor(
                 AsyncGroupHeaderViewInflation.isEnabled &&
                     !oldAdjustment.isGroupSummary &&
                     newAdjustment.isGroupSummary -> true
+                oldAdjustment.summarization != newAdjustment.summarization -> true
                 else -> false
             }
 

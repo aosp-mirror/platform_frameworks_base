@@ -16,25 +16,32 @@
 
 package com.android.systemui.volume.dialog.sliders.ui.viewmodel
 
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.PointerEvent
+import androidx.compose.ui.input.pointer.PointerEventType
 import com.android.systemui.util.time.SystemClock
 import com.android.systemui.volume.Events
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
+import com.android.systemui.volume.dialog.shared.VolumeDialogLogger
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStreamModel
 import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
+import com.android.systemui.volume.dialog.sliders.domain.interactor.VolumeDialogSliderInputEventsInteractor
 import com.android.systemui.volume.dialog.sliders.domain.interactor.VolumeDialogSliderInteractor
+import com.android.systemui.volume.dialog.sliders.domain.model.VolumeDialogSliderType
+import com.android.systemui.volume.dialog.sliders.shared.model.SliderInputEvent
 import javax.inject.Inject
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
@@ -50,42 +57,59 @@ import kotlinx.coroutines.flow.stateIn
 // TODO(b/375355785) remove this
 private const val VOLUME_UPDATE_GRACE_PERIOD = 1000
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @VolumeDialogSliderScope
 class VolumeDialogSliderViewModel
 @Inject
 constructor(
+    private val sliderType: VolumeDialogSliderType,
     private val interactor: VolumeDialogSliderInteractor,
     private val visibilityInteractor: VolumeDialogVisibilityInteractor,
     @VolumeDialog private val coroutineScope: CoroutineScope,
     private val volumeDialogSliderIconProvider: VolumeDialogSliderIconProvider,
+    private val inputEventsInteractor: VolumeDialogSliderInputEventsInteractor,
     private val systemClock: SystemClock,
+    private val logger: VolumeDialogLogger,
 ) {
 
     private val userVolumeUpdates = MutableStateFlow<VolumeUpdate?>(null)
     private val model: Flow<VolumeDialogStreamModel> =
         interactor.slider
             .filter {
-                val lastVolumeUpdateTime = userVolumeUpdates.value?.timestampMillis ?: 0
+                val currentVolumeUpdate = userVolumeUpdates.value ?: return@filter true
+                val lastVolumeUpdateTime = currentVolumeUpdate.timestampMillis
                 getTimestampMillis() - lastVolumeUpdateTime > VOLUME_UPDATE_GRACE_PERIOD
             }
             .stateIn(coroutineScope, SharingStarted.Eagerly, null)
             .filterNotNull()
 
     val state: Flow<VolumeDialogSliderStateModel> =
-        model
-            .flatMapLatest { streamModel ->
-                with(streamModel) {
-                        volumeDialogSliderIconProvider.getStreamIcon(
-                            stream = stream,
-                            level = level,
-                            levelMin = levelMin,
-                            levelMax = levelMax,
-                            isMuted = muted,
-                            isRoutedToBluetooth = routedToBluetooth,
-                        )
+        combine(
+                interactor.isDisabledByZenMode,
+                model,
+                model.flatMapLatest { streamModel ->
+                    with(streamModel) {
+                        val isMuted = muteSupported && muted
+                        when (sliderType) {
+                            is VolumeDialogSliderType.Stream ->
+                                volumeDialogSliderIconProvider.getStreamIcon(
+                                    stream = sliderType.audioStream,
+                                    level = level,
+                                    levelMin = levelMin,
+                                    levelMax = levelMax,
+                                    isMuted = isMuted,
+                                    isRoutedToBluetooth = routedToBluetooth,
+                                )
+                            is VolumeDialogSliderType.RemoteMediaStream -> {
+                                volumeDialogSliderIconProvider.getCastIcon(isMuted)
+                            }
+                            is VolumeDialogSliderType.AudioSharingStream -> {
+                                volumeDialogSliderIconProvider.getAudioSharingIcon(isMuted)
+                            }
+                        }
                     }
-                    .map { icon -> streamModel.toStateModel(icon) }
+                },
+            ) { isDisabledByZenMode, model, icon ->
+                model.toStateModel(icon = icon, isDisabled = isDisabledByZenMode)
             }
             .stateIn(coroutineScope, SharingStarted.Eagerly, null)
             .filterNotNull()
@@ -100,11 +124,40 @@ constructor(
             .launchIn(coroutineScope)
     }
 
-    fun setStreamVolume(volume: Int, fromUser: Boolean) {
+    fun setStreamVolume(volume: Float, fromUser: Boolean) {
         if (fromUser) {
             visibilityInteractor.resetDismissTimeout()
             userVolumeUpdates.value =
-                VolumeUpdate(newVolumeLevel = volume, timestampMillis = getTimestampMillis())
+                VolumeUpdate(
+                    newVolumeLevel = volume.roundToInt(),
+                    timestampMillis = getTimestampMillis(),
+                )
+        }
+    }
+
+    fun onStreamChangeFinished(volume: Int) {
+        logger.onVolumeSliderAdjustmentFinished(volume = volume, stream = sliderType.audioStream)
+    }
+
+    fun onTouchEvent(pointerEvent: PointerEvent) {
+        val position: Offset = pointerEvent.changes.first().position
+        when (pointerEvent.type) {
+            PointerEventType.Press ->
+                inputEventsInteractor.onTouchEvent(
+                    SliderInputEvent.Touch.Start(position.x, position.y)
+                )
+            PointerEventType.Move ->
+                inputEventsInteractor.onTouchEvent(
+                    SliderInputEvent.Touch.Move(position.x, position.y)
+                )
+            PointerEventType.Scroll ->
+                inputEventsInteractor.onTouchEvent(
+                    SliderInputEvent.Touch.Move(position.x, position.y)
+                )
+            PointerEventType.Release ->
+                inputEventsInteractor.onTouchEvent(
+                    SliderInputEvent.Touch.End(position.x, position.y)
+                )
         }
     }
 

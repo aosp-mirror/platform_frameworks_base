@@ -386,7 +386,7 @@ class AnimatedSharedAsStateTest {
     @Test
     fun animatedValueIsUsingLastTransition() = runTest {
         val state =
-            rule.runOnUiThread { MutableSceneTransitionLayoutStateImpl(SceneA, transitions {}) }
+            rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA, transitions {}) }
 
         val foo = ValueKey("foo")
         val bar = ValueKey("bar")

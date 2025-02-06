@@ -27,10 +27,12 @@ import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.Serializable;
 
 import java.util.List;
 
-public class ComponentValue extends Operation implements SerializableToString {
+public class ComponentValue extends Operation implements SerializableToString, Serializable {
     private static final int OP_CODE = Operations.COMPONENT_VALUE;
     private static final String CLASS_NAME = "ComponentValue";
 
@@ -164,5 +166,20 @@ public class ComponentValue extends Operation implements SerializableToString {
                         + type
                         + " of Component "
                         + mComponentID);
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .add("type", CLASS_NAME)
+                .add("valueId", mValueId)
+                .add("componentValueType", typeToString(mType))
+                .add("componentId", mComponentID);
+    }
+
+    private String typeToString(int type) {
+        if (type == WIDTH) return "WIDTH";
+        if (type == HEIGHT) return "HEIGHT";
+        return "INVALID_TYPE";
     }
 }

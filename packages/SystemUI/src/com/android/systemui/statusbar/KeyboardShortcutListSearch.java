@@ -573,13 +573,13 @@ public final class KeyboardShortcutListSearch {
                                 Pair.create(KeyEvent.KEYCODE_ESCAPE, KeyEvent.META_META_ON),
                                 Pair.create(KeyEvent.KEYCODE_DEL, KeyEvent.META_META_ON),
                                 Pair.create(KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.META_META_ON))),
-                /* Take a full screenshot: Meta + Ctrl + S */
+                /* Take a full screenshot: Meta + S */
                 new ShortcutKeyGroupMultiMappingInfo(
                         context.getString(R.string.group_system_full_screenshot),
                         Arrays.asList(
                                 Pair.create(
                                         KeyEvent.KEYCODE_S,
-                                        KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON))),
+                                        KeyEvent.META_META_ON))),
                 /* Access list of system / apps shortcuts: Meta + / */
                 new ShortcutKeyGroupMultiMappingInfo(
                         context.getString(R.string.group_system_access_system_app_shortcuts),

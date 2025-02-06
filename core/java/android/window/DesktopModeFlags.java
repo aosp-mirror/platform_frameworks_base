@@ -20,12 +20,13 @@ import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.content.ContentResolver;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Log;
 
 import com.android.window.flags.Flags;
 
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 
 /**
  * Checks desktop mode flag state.
@@ -41,58 +42,109 @@ import java.util.function.Supplier;
  */
 public enum DesktopModeFlags {
     // All desktop mode related flags to be overridden by developer option toggle will be added here
-    ENABLE_DESKTOP_WINDOWING_MODE(
-            Flags::enableDesktopWindowingMode, /* shouldOverrideByDevOption= */ true),
-    ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS(Flags::enableWindowingDynamicInitialBounds, true),
-    ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION(
-            Flags::enableCaptionCompatInsetForceConsumption, true),
+    // go/keep-sorted start
+    DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE(Flags::disableNonResizableAppSnapResizing, true),
+    ENABLE_ACCESSIBLE_CUSTOM_HEADERS(Flags::enableAccessibleCustomHeaders, true),
+    ENABLE_APP_HEADER_WITH_TASK_DENSITY(Flags::enableAppHeaderWithTaskDensity, true),
+    ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION(Flags::enableCaptionCompatInsetForceConsumption,
+            true),
     ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS(
             Flags::enableCaptionCompatInsetForceConsumptionAlways, true),
     ENABLE_CASCADING_WINDOWS(Flags::enableCascadingWindows, true),
-    ENABLE_TILE_RESIZING(Flags::enableTileResizing, true),
-    ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY(
-            Flags::enableDesktopWindowingWallpaperActivity, true),
-    ENABLE_DESKTOP_WINDOWING_MODALS_POLICY(Flags::enableDesktopWindowingModalsPolicy, true),
-    ENABLE_THEMED_APP_HEADERS(Flags::enableThemedAppHeaders, true),
-    ENABLE_HOLD_TO_DRAG_APP_HANDLE(Flags::enableHoldToDragAppHandle, true),
-    ENABLE_DESKTOP_WINDOWING_QUICK_SWITCH(Flags::enableDesktopWindowingQuickSwitch, true),
-    ENABLE_APP_HEADER_WITH_TASK_DENSITY(Flags::enableAppHeaderWithTaskDensity, true),
-    ENABLE_TASK_STACK_OBSERVER_IN_SHELL(Flags::enableTaskStackObserverInShell, true),
-    ENABLE_DESKTOP_WINDOWING_SIZE_CONSTRAINTS(Flags::enableDesktopWindowingSizeConstraints, true),
-    DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE(Flags::disableNonResizableAppSnapResizing, true),
-    ENABLE_WINDOWING_SCALED_RESIZING(Flags::enableWindowingScaledResizing, true),
-    ENABLE_DESKTOP_WINDOWING_TASK_LIMIT(Flags::enableDesktopWindowingTaskLimit, true),
+    ENABLE_DESKTOP_APP_LAUNCH_ALTTAB_TRANSITIONS_BUGFIX(
+            Flags::enableDesktopAppLaunchAlttabTransitionsBugfix, true),
+    ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX(Flags::enableDesktopAppLaunchTransitionsBugfix,
+            true),
+    ENABLE_DESKTOP_COMPAT_UI_VISIBILITY_STATUS(Flags::enableCompatUiVisibilityStatus, true),
+    ENABLE_DESKTOP_RECENTS_TRANSITIONS_CORNERS_BUGFIX(
+            Flags::enableDesktopRecentsTransitionsCornersBugfix, false),
+    ENABLE_DESKTOP_SKIP_COMPAT_UI_EDUCATION_IN_DESKTOP_MODE_BUGFIX(
+            Flags::skipCompatUiEducationInDesktopMode, true),
+    ENABLE_DESKTOP_SYSTEM_DIALOGS_TRANSITIONS(Flags::enableDesktopSystemDialogsTransitions, true),
+    ENABLE_DESKTOP_TAB_TEARING_MINIMIZE_ANIMATION_BUGFIX(
+            Flags::enableDesktopTabTearingMinimizeAnimationBugfix, false),
+    ENABLE_DESKTOP_TRAMPOLINE_CLOSE_ANIMATION_BUGFIX(
+            Flags::enableDesktopTrampolineCloseAnimationBugfix, false),
+    ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER(
+            Flags::enableDesktopWallpaperActivityForSystemUser, true),
+    ENABLE_DESKTOP_WINDOWING_APP_TO_WEB(Flags::enableDesktopWindowingAppToWeb, true),
+    ENABLE_DESKTOP_WINDOWING_APP_TO_WEB_EDUCATION(Flags::enableDesktopWindowingAppToWebEducation,
+            true),
     ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION(Flags::enableDesktopWindowingBackNavigation, true),
+    ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS_BUGFIX(
+            Flags::enableDesktopWindowingEnterTransitionBugfix, true),
+    ENABLE_DESKTOP_WINDOWING_EXIT_BY_MINIMIZE_TRANSITION_BUGFIX(
+            Flags::enableDesktopWindowingExitByMinimizeTransitionBugfix, false),
+    ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS_BUGFIX(
+            Flags::enableDesktopWindowingExitTransitionsBugfix, true),
+    ENABLE_DESKTOP_WINDOWING_HSUM(Flags::enableDesktopWindowingHsum, true),
+    ENABLE_DESKTOP_WINDOWING_IMMERSIVE_HANDLE_HIDING(
+            Flags::enableDesktopWindowingImmersiveHandleHiding, true),
+    ENABLE_DESKTOP_WINDOWING_MODALS_POLICY(Flags::enableDesktopWindowingModalsPolicy, true),
+    ENABLE_DESKTOP_WINDOWING_MODE(Flags::enableDesktopWindowingMode, true),
+    ENABLE_DESKTOP_WINDOWING_MULTI_INSTANCE_FEATURES(
+            Flags::enableDesktopWindowingMultiInstanceFeatures, true),
+    ENABLE_DESKTOP_WINDOWING_PERSISTENCE(Flags::enableDesktopWindowingPersistence, true),
+    ENABLE_DESKTOP_WINDOWING_QUICK_SWITCH(Flags::enableDesktopWindowingQuickSwitch, true),
+    ENABLE_DESKTOP_WINDOWING_SCVH_CACHE(Flags::enableDesktopWindowingScvhCacheBugFix, true),
+    ENABLE_DESKTOP_WINDOWING_SIZE_CONSTRAINTS(Flags::enableDesktopWindowingSizeConstraints, true),
+    ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS(Flags::enableDesktopWindowingTaskbarRunningApps,
+            true),
+    ENABLE_DESKTOP_WINDOWING_TASK_LIMIT(Flags::enableDesktopWindowingTaskLimit, true),
+    ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY(Flags::enableDesktopWindowingWallpaperActivity,
+            true),
+    ENABLE_FULLY_IMMERSIVE_IN_DESKTOP(Flags::enableFullyImmersiveInDesktop, true),
+    ENABLE_HANDLE_INPUT_FIX(Flags::enableHandleInputFix, true),
+    ENABLE_HOLD_TO_DRAG_APP_HANDLE(Flags::enableHoldToDragAppHandle, true),
+    ENABLE_MINIMIZE_BUTTON(Flags::enableMinimizeButton, true),
+    ENABLE_RESIZING_METRICS(Flags::enableResizingMetrics, true),
+    ENABLE_RESTORE_TO_PREVIOUS_SIZE_FROM_DESKTOP_IMMERSIVE(
+            Flags::enableRestoreToPreviousSizeFromDesktopImmersive, true),
+    ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS(Flags::enableTaskResizingKeyboardShortcuts, true),
+    ENABLE_TASK_STACK_OBSERVER_IN_SHELL(Flags::enableTaskStackObserverInShell, true),
+    ENABLE_THEMED_APP_HEADERS(Flags::enableThemedAppHeaders, true),
+    ENABLE_TILE_RESIZING(Flags::enableTileResizing, true),
+    ENABLE_TOP_VISIBLE_ROOT_TASK_PER_USER_TRACKING(Flags::enableTopVisibleRootTaskPerUserTracking,
+            true),
+    ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS(Flags::enableWindowingDynamicInitialBounds, true),
     ENABLE_WINDOWING_EDGE_DRAG_RESIZE(Flags::enableWindowingEdgeDragResize, true),
-    ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS(
-            Flags::enableDesktopWindowingTaskbarRunningApps, true),
-    // TODO: b/369763947 - remove this once ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS is ramped up
-    ENABLE_DESKTOP_WINDOWING_TRANSITIONS(Flags::enableDesktopWindowingTransitions, false),
-    ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS(
-            Flags::enableDesktopWindowingEnterTransitions, false),
-    ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS(Flags::enableDesktopWindowingExitTransitions, false),
+    ENABLE_WINDOWING_SCALED_RESIZING(Flags::enableWindowingScaledResizing, true),
     ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS(
             Flags::enableWindowingTransitionHandlersObservers, false),
-    ENABLE_DESKTOP_APP_LAUNCH_ALTTAB_TRANSITIONS(
-            Flags::enableDesktopAppLaunchAlttabTransitions, false),
-    ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS(
-            Flags::enableDesktopAppLaunchTransitions, false),
-    ENABLE_DESKTOP_WINDOWING_PERSISTENCE(Flags::enableDesktopWindowingPersistence, false),
-    ENABLE_HANDLE_INPUT_FIX(Flags::enableHandleInputFix, true),
-    ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS_BUGFIX(
-            Flags::enableDesktopWindowingEnterTransitionBugfix, false),
-    ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS_BUGFIX(
-            Flags::enableDesktopWindowingExitTransitionsBugfix, false),
-    ENABLE_DESKTOP_APP_LAUNCH_ALTTAB_TRANSITIONS_BUGFIX(
-            Flags::enableDesktopAppLaunchAlttabTransitionsBugfix, false),
-    ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX(
-            Flags::enableDesktopAppLaunchTransitionsBugfix, false),
     INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC(
-            Flags::includeTopTransparentFullscreenTaskInDesktopHeuristic, true);
+            Flags::includeTopTransparentFullscreenTaskInDesktopHeuristic, true)
+    // go/keep-sorted end
+    ;
 
-    private static final String TAG = "DesktopModeFlagsUtil";
+    /**
+     * Flag class, to be used in case the enum cannot be used because the flag is not accessible.
+     *
+     * <p> This class will still use the process-wide cache.
+     */
+    public static class DesktopModeFlag {
+        // Function called to obtain aconfig flag value.
+        private final BooleanSupplier mFlagFunction;
+        // Whether the flag state should be affected by developer option.
+        private final boolean mShouldOverrideByDevOption;
+
+        public DesktopModeFlag(BooleanSupplier flagFunction, boolean shouldOverrideByDevOption) {
+            this.mFlagFunction = flagFunction;
+            this.mShouldOverrideByDevOption = shouldOverrideByDevOption;
+        }
+
+        /**
+         * Determines state of flag based on the actual flag and desktop mode developer option
+         * overrides.
+         */
+        public boolean isTrue() {
+            return isFlagTrue(mFlagFunction, mShouldOverrideByDevOption);
+        }
+
+    }
+
+    private static final String TAG = "DesktopModeFlags";
     // Function called to obtain aconfig flag value.
-    private final Supplier<Boolean> mFlagFunction;
+    private final BooleanSupplier mFlagFunction;
     // Whether the flag state should be affected by developer option.
     private final boolean mShouldOverrideByDevOption;
 
@@ -100,7 +152,9 @@ public enum DesktopModeFlags {
     // be refreshed only on reboots as overridden state is expected to take effect on reboots.
     private static ToggleOverride sCachedToggleOverride;
 
-    DesktopModeFlags(Supplier<Boolean> flagFunction, boolean shouldOverrideByDevOption) {
+    public static final String SYSTEM_PROPERTY_NAME = "persist.wm.debug.desktop_experience_devopts";
+
+    DesktopModeFlags(BooleanSupplier flagFunction, boolean shouldOverrideByDevOption) {
         this.mFlagFunction = flagFunction;
         this.mShouldOverrideByDevOption = shouldOverrideByDevOption;
     }
@@ -110,31 +164,42 @@ public enum DesktopModeFlags {
      * overrides.
      */
     public boolean isTrue() {
-        Application application = ActivityThread.currentApplication();
-        if (!Flags.showDesktopWindowingDevOption()
-                || !mShouldOverrideByDevOption
-                || application == null) {
-            return mFlagFunction.get();
-        } else {
-            boolean shouldToggleBeEnabledByDefault = Flags.enableDesktopWindowingMode();
-            return switch (getToggleOverride(application.getContentResolver())) {
-                case OVERRIDE_UNSET -> mFlagFunction.get();
-                // When toggle override matches its default state, don't override flags. This
-                // helps users reset their feature overrides.
-                case OVERRIDE_OFF -> !shouldToggleBeEnabledByDefault && mFlagFunction.get();
-                case OVERRIDE_ON -> shouldToggleBeEnabledByDefault ? mFlagFunction.get() : true;
-            };
-        }
+        return isFlagTrue(mFlagFunction, mShouldOverrideByDevOption);
     }
 
-    private ToggleOverride getToggleOverride(ContentResolver contentResolver) {
+    public static boolean isDesktopModeForcedEnabled() {
+        return getToggleOverride() == ToggleOverride.OVERRIDE_ON;
+    }
+
+    private static boolean isFlagTrue(BooleanSupplier flagFunction,
+            boolean shouldOverrideByDevOption) {
+        if (!shouldOverrideByDevOption) return flagFunction.getAsBoolean();
+        if (Flags.showDesktopExperienceDevOption()) {
+            return switch (getToggleOverride()) {
+                case OVERRIDE_UNSET, OVERRIDE_OFF -> flagFunction.getAsBoolean();
+                case OVERRIDE_ON -> true;
+            };
+        }
+        if (Flags.showDesktopWindowingDevOption()) {
+            boolean shouldToggleBeEnabledByDefault = Flags.enableDesktopWindowingMode();
+            return switch (getToggleOverride()) {
+                case OVERRIDE_UNSET -> flagFunction.getAsBoolean();
+                // When toggle override matches its default state, don't override flags. This
+                // helps users reset their feature overrides.
+                case OVERRIDE_OFF -> !shouldToggleBeEnabledByDefault && flagFunction.getAsBoolean();
+                case OVERRIDE_ON -> !shouldToggleBeEnabledByDefault || flagFunction.getAsBoolean();
+            };
+        }
+        return flagFunction.getAsBoolean();
+    }
+
+    private static ToggleOverride getToggleOverride() {
         // If cached, return it
         if (sCachedToggleOverride != null) {
             return sCachedToggleOverride;
         }
-
         // Otherwise, fetch and cache it
-        ToggleOverride override = getToggleOverrideFromSystem(contentResolver);
+        ToggleOverride override = getToggleOverrideFromSystem();
         sCachedToggleOverride = override;
         Log.d(TAG, "Toggle override initialized to: " + override);
         return override;
@@ -143,12 +208,30 @@ public enum DesktopModeFlags {
     /**
      *  Returns {@link ToggleOverride} from Settings.Global set by toggle.
      */
-    private ToggleOverride getToggleOverrideFromSystem(ContentResolver contentResolver) {
-        int settingValue = Settings.Global.getInt(
-                contentResolver,
-                Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES,
-                ToggleOverride.OVERRIDE_UNSET.getSetting()
-        );
+    private static ToggleOverride getToggleOverrideFromSystem() {
+        int settingValue;
+        if (Flags.showDesktopExperienceDevOption()) {
+            settingValue = SystemProperties.getInt(
+                    SYSTEM_PROPERTY_NAME,
+                    ToggleOverride.OVERRIDE_UNSET.getSetting()
+            );
+        } else {
+            final Application application = ActivityThread.currentApplication();
+            if (application == null) {
+                Log.w(TAG, "Could not get the current application.");
+                return ToggleOverride.OVERRIDE_UNSET;
+            }
+            final ContentResolver contentResolver = application.getContentResolver();
+            if (contentResolver == null) {
+                Log.w(TAG, "Could not get the content resolver for the application.");
+                return ToggleOverride.OVERRIDE_UNSET;
+            }
+            settingValue = Settings.Global.getInt(
+                    contentResolver,
+                    Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES,
+                    ToggleOverride.OVERRIDE_UNSET.getSetting()
+            );
+        }
         return ToggleOverride.fromSetting(settingValue, ToggleOverride.OVERRIDE_UNSET);
     }
 

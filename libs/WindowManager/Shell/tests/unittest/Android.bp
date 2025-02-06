@@ -64,6 +64,7 @@ android_test {
         "platform-test-annotations",
         "flag-junit",
         "platform-parametric-runner-lib",
+        "platform-compat-test-rules",
     ],
 
     libs: [

@@ -41,7 +41,6 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -50,7 +49,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnit
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class LogContextInteractorImplTest : SysuiTestCase() {

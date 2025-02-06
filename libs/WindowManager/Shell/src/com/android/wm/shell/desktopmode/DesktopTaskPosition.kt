@@ -41,49 +41,35 @@ sealed class DesktopTaskPosition {
             return Point(x, y.toInt())
         }
 
-        override fun next(): DesktopTaskPosition {
-            return BottomRight
-        }
+        override fun next(): DesktopTaskPosition = BottomRight
     }
 
     data object BottomRight : DesktopTaskPosition() {
-        override fun getTopLeftCoordinates(frame: Rect, window: Rect): Point {
-            return Point(frame.right - window.width(), frame.bottom - window.height())
-        }
+        override fun getTopLeftCoordinates(frame: Rect, window: Rect): Point =
+            Point(frame.right - window.width(), frame.bottom - window.height())
 
-        override fun next(): DesktopTaskPosition {
-            return TopLeft
-        }
+        override fun next(): DesktopTaskPosition = TopLeft
     }
 
     data object TopLeft : DesktopTaskPosition() {
-        override fun getTopLeftCoordinates(frame: Rect, window: Rect): Point {
-            return Point(frame.left, frame.top)
-        }
+        override fun getTopLeftCoordinates(frame: Rect, window: Rect): Point =
+            Point(frame.left, frame.top)
 
-        override fun next(): DesktopTaskPosition {
-            return BottomLeft
-        }
+        override fun next(): DesktopTaskPosition = BottomLeft
     }
 
     data object BottomLeft : DesktopTaskPosition() {
-        override fun getTopLeftCoordinates(frame: Rect, window: Rect): Point {
-            return Point(frame.left, frame.bottom - window.height())
-        }
+        override fun getTopLeftCoordinates(frame: Rect, window: Rect): Point =
+            Point(frame.left, frame.bottom - window.height())
 
-        override fun next(): DesktopTaskPosition {
-            return TopRight
-        }
+        override fun next(): DesktopTaskPosition = TopRight
     }
 
     data object TopRight : DesktopTaskPosition() {
-        override fun getTopLeftCoordinates(frame: Rect, window: Rect): Point {
-            return Point(frame.right - window.width(), frame.top)
-        }
+        override fun getTopLeftCoordinates(frame: Rect, window: Rect): Point =
+            Point(frame.right - window.width(), frame.top)
 
-        override fun next(): DesktopTaskPosition {
-            return Center
-        }
+        override fun next(): DesktopTaskPosition = Center
     }
 
     /**

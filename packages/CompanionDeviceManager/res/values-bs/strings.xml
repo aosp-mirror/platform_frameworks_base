@@ -18,9 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Prateći upravitelj uređaja"</string>
     <string name="confirmation_title" msgid="2244241995958340998">"Dozvoliti aplikaciji &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; da pristupa uređaju &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="message_discovery_soft_timeout" msgid="473346859407859161">"Provjerite ima li <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> uključen <xliff:g id="DISCOVERY_METHOD">%2$s</xliff:g> i približite <xliff:g id="PROFILE_NAME">%3$s</xliff:g>."</string>
+    <string name="message_discovery_hard_timeout" msgid="677514663495711424">"Nije pronađen nijedan uređaj. Pokušajte ponovo kasnije."</string>
+    <string name="discovery_bluetooth" msgid="5693557668470016164">"Bluetooth"</string>
+    <string name="discovery_wifi" msgid="1551782459721758773">"WiFi"</string>
+    <string name="discovery_mixed" msgid="7071466134150760127">"Bluetooth i WiFi"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"sat"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"Odaberite uređaj kojim će upravljati aplikacija &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="chooser_title" msgid="2235819929238267637">"Odaberite <xliff:g id="PROFILE_NAME">%1$s</xliff:g> da postavite"</string>
+    <string name="single_device_title" msgid="4199861437545438606">"Traži se <xliff:g id="PROFILE_NAME">%1$s</xliff:g>"</string>
     <string name="summary_watch" msgid="8134580124808507407">"Aplikaciji će biti dozvoljeno da sinhronizira informacije, kao što je ime osobe koja upućuje poziv, i pristupa ovim odobrenjima koje sadržava vaš <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Dozvoliti aplikaciji &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; da upravlja uređajem &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"uređaj"</string>

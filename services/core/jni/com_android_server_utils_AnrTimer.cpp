@@ -101,6 +101,9 @@ nsecs_t now() {
     return systemTime(SYSTEM_TIME_MONOTONIC);
 }
 
+// The current process.  This is cached here on startup.
+const pid_t sThisProcess = getpid();
+
 // Return true if the process exists and false if we cannot know.
 bool processExists(pid_t pid) {
     char path[PATH_MAX];
@@ -726,7 +729,7 @@ class AnrTimerService::Timer {
             uid(uid),
             timeout(timeout),
             extend(extend),
-            freeze(pid != 0 && freeze),
+            freeze(freeze),
             split(trace.earlyTimeout),
             action(trace.action),
             status(Running),
@@ -1188,8 +1191,11 @@ const char* AnrTimerService::statusString(Status s) {
 }
 
 AnrTimerService::timer_id_t AnrTimerService::start(int pid, int uid, nsecs_t timeout) {
+    // Use the freezer only if the pid is not 0 (a nonsense value) and the pid is not self.
+    // Freezing the current process is a fatal error.
+    bool useFreezer = freeze_ && (pid != 0) && (pid != sThisProcess);
     AutoMutex _l(lock_);
-    Timer t(pid, uid, timeout, extend_, freeze_, tracer_.getConfig(pid));
+    Timer t(pid, uid, timeout, extend_, useFreezer, tracer_.getConfig(pid));
     insertLocked(t);
     t.start();
     counters_.started++;

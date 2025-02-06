@@ -25,7 +25,7 @@ import com.android.systemui.display.data.repository.displayRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.shade.ShadePrimaryDisplayCommand
-import com.android.systemui.shade.display.ShadeDisplayPolicy
+import com.android.systemui.shade.display.FakeShadeDisplayPolicy
 import com.android.systemui.statusbar.commandline.commandRegistry
 import com.android.systemui.testKosmos
 import com.android.systemui.util.settings.fakeGlobalSettings
@@ -33,8 +33,6 @@ import com.google.common.truth.StringSubject
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -118,23 +116,12 @@ class ShadePrimaryDisplayCommandTest : SysuiTestCase() {
     @Test
     fun policies_setsNewPolicy() =
         testScope.runTest {
-            val policy by collectLastValue(shadeDisplaysRepository.policy)
-            val newPolicy = policies.last().name
+            val newPolicy = FakeShadeDisplayPolicy.name
 
             commandRegistry.onShellCommand(pw, arrayOf("shade_display_override", newPolicy))
 
-            assertThat(policy!!.name).isEqualTo(newPolicy)
+            assertThat(shadeDisplaysRepository.currentPolicy.name).isEqualTo(newPolicy)
         }
-
-    private fun makePolicy(policyName: String): ShadeDisplayPolicy {
-        return object : ShadeDisplayPolicy {
-            override val name: String
-                get() = policyName
-
-            override val displayId: StateFlow<Int>
-                get() = MutableStateFlow(0)
-        }
-    }
 }
 
 private fun StringSubject.containsAllIn(strings: List<String>) {

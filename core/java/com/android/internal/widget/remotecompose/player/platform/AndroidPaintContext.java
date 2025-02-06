@@ -17,7 +17,9 @@ package com.android.internal.widget.remotecompose.player.platform;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.LinearGradient;
@@ -34,12 +36,18 @@ import android.graphics.RuntimeShader;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
 import android.graphics.Typeface;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
+import android.text.TextUtils;
 
 import com.android.internal.widget.remotecompose.core.PaintContext;
+import com.android.internal.widget.remotecompose.core.Platform;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.operations.ClipPath;
 import com.android.internal.widget.remotecompose.core.operations.ShaderData;
 import com.android.internal.widget.remotecompose.core.operations.Utils;
+import com.android.internal.widget.remotecompose.core.operations.layout.managers.TextLayout;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintChanges;
 
@@ -262,22 +270,78 @@ public class AndroidPaintContext extends PaintContext {
         }
         mPaint.getFontMetrics(mCachedFontMetrics);
         mPaint.getTextBounds(str, start, end, mTmpRect);
-
-        bounds[0] = mTmpRect.left;
-
-        if ((flags & PaintContext.TEXT_MEASURE_MONOSPACE_WIDTH) != 0) {
-            bounds[2] = mPaint.measureText(str, start, end) - mTmpRect.left;
+        if ((flags & PaintContext.TEXT_MEASURE_SPACES) != 0
+                && (str.startsWith(" ") || str.endsWith(" "))) {
+            bounds[0] = 0f;
+            bounds[2] = mPaint.measureText(str, start, end);
         } else {
-            bounds[2] = mTmpRect.right;
+            bounds[0] = mTmpRect.left;
+            if ((flags & PaintContext.TEXT_MEASURE_MONOSPACE_WIDTH) != 0) {
+                bounds[2] = mPaint.measureText(str, start, end) - mTmpRect.left;
+            } else {
+                bounds[2] = mTmpRect.right;
+            }
         }
 
         if ((flags & PaintContext.TEXT_MEASURE_FONT_HEIGHT) != 0) {
-            bounds[1] = Math.round(mCachedFontMetrics.ascent);
+            bounds[1] = Math.round(mCachedFontMetrics.top);
             bounds[3] = Math.round(mCachedFontMetrics.bottom);
         } else {
             bounds[1] = mTmpRect.top;
             bounds[3] = mTmpRect.bottom;
         }
+    }
+
+    @Override
+    public Platform.ComputedTextLayout layoutComplexText(
+            int textId,
+            int start,
+            int end,
+            int alignment,
+            int overflow,
+            int maxLines,
+            float maxWidth,
+            int flags) {
+        String str = getText(textId);
+        if (str == null) {
+            return null;
+        }
+        if (end == -1 || end > str.length()) {
+            end = str.length();
+        }
+
+        TextPaint textPaint = new TextPaint();
+        textPaint.set(mPaint);
+        StaticLayout.Builder staticLayoutBuilder =
+                StaticLayout.Builder.obtain(str, start, end, textPaint, (int) maxWidth);
+        switch (alignment) {
+            case TextLayout.TEXT_ALIGN_RIGHT:
+            case TextLayout.TEXT_ALIGN_END:
+                staticLayoutBuilder.setAlignment(Layout.Alignment.ALIGN_OPPOSITE);
+                break;
+            case TextLayout.TEXT_ALIGN_CENTER:
+                staticLayoutBuilder.setAlignment(Layout.Alignment.ALIGN_CENTER);
+                break;
+            default:
+                staticLayoutBuilder.setAlignment(Layout.Alignment.ALIGN_NORMAL);
+        }
+        switch (overflow) {
+            case TextLayout.OVERFLOW_ELLIPSIS:
+                staticLayoutBuilder.setEllipsize(TextUtils.TruncateAt.END);
+                break;
+            case TextLayout.OVERFLOW_MIDDLE_ELLIPSIS:
+                staticLayoutBuilder.setEllipsize(TextUtils.TruncateAt.MIDDLE);
+                break;
+            case TextLayout.OVERFLOW_START_ELLIPSIS:
+                staticLayoutBuilder.setEllipsize(TextUtils.TruncateAt.START);
+                break;
+            default:
+        }
+        staticLayoutBuilder.setMaxLines(maxLines);
+
+        StaticLayout staticLayout = staticLayoutBuilder.build();
+        return new AndroidComputedTextLayout(
+                staticLayout, staticLayout.getWidth(), staticLayout.getHeight());
     }
 
     @Override
@@ -306,6 +370,15 @@ public class AndroidPaintContext extends PaintContext {
         }
 
         mCanvas.drawText(textToPaint, x, y, mPaint);
+    }
+
+    @Override
+    public void drawComplexText(Platform.ComputedTextLayout computedTextLayout) {
+        if (computedTextLayout == null) {
+            return;
+        }
+        StaticLayout staticLayout = ((AndroidComputedTextLayout) computedTextLayout).get();
+        staticLayout.draw(mCanvas);
     }
 
     @Override
@@ -494,6 +567,7 @@ public class AndroidPaintContext extends PaintContext {
                     mPaint.setStyle(Paint.Style.values()[style]);
                 }
 
+                @SuppressLint("NewApi")
                 @Override
                 public void setShader(int shaderId) {
                     // TODO this stuff should check the shader creation
@@ -522,6 +596,12 @@ public class AndroidPaintContext extends PaintContext {
                     for (int i = 0; i < names.length; i++) {
                         String name = names[i];
                         int val = data.getUniformBitmapId(name);
+                        AndroidRemoteContext androidContext = (AndroidRemoteContext) mContext;
+                        Bitmap bitmap = (Bitmap) androidContext.mRemoteComposeState.getFromId(val);
+                        BitmapShader bitmapShader =
+                                new BitmapShader(
+                                        bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+                        shader.setInputShader(name, bitmapShader);
                     }
                     mPaint.setShader(shader);
                 }

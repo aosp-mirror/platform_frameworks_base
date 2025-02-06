@@ -20,8 +20,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.layout.layout
 import com.android.compose.modifiers.thenIf
 import kotlin.math.PI
@@ -39,6 +43,9 @@ import kotlin.math.tan
  * The background color of the strip can be modified by passing a value to the [backgroundColor] or
  * `null` to remove the strip background.
  *
+ * The [colorSaturation] is a function that returns that amount of color saturation to apply to the
+ * entire ribbon. If it's `1`, the full color will be used, if it's `0` it will be greyscale.
+ *
  * Note: this function assumes that it's been placed at the bottom right of its parent by its
  * caller. It's the caller's responsibility to meet that assumption by actually placing this
  * composable element at the bottom right.
@@ -49,6 +56,7 @@ fun BottomRightCornerRibbon(
     modifier: Modifier = Modifier,
     degrees: Int = 45,
     alpha: Float = 0.6f,
+    colorSaturation: () -> Float = { 1f },
     backgroundColor: Color? = Color.Red,
 ) {
     check(degrees in 1..89)
@@ -73,6 +81,22 @@ fun BottomRightCornerRibbon(
                     translationY = (h - w * sine + h * cosine) / 2f
                     rotationZ = 360f - degrees
                 }
+                .drawWithCache {
+                    val layer =
+                        obtainGraphicsLayer().apply {
+                            record {
+                                colorFilter =
+                                    ColorFilter.colorMatrix(
+                                        colorMatrix =
+                                            ColorMatrix().apply {
+                                                setToSaturation(colorSaturation())
+                                            }
+                                    )
+                                drawContent()
+                            }
+                        }
+                    onDrawWithContent { drawLayer(layer) }
+                }
                 .thenIf(backgroundColor != null) { Modifier.background(backgroundColor!!) }
                 .layout { measurable, constraints ->
                     val placeable = measurable.measure(constraints)
@@ -87,6 +111,6 @@ fun BottomRightCornerRibbon(
                     ) {
                         placeable.place(leftPadding, 0)
                     }
-                }
+                },
     )
 }

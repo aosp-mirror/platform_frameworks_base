@@ -57,9 +57,7 @@ import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToLockscreenTran
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoSet
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 @Module
 abstract class DeviceEntryIconTransitionModule {
     @Binds

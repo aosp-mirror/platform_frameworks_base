@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume;
 
+import java.util.List;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
@@ -93,7 +94,6 @@ import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
 import com.google.android.msdl.domain.MSDLPlayer;
-import com.google.common.collect.ImmutableList;
 
 import dagger.Lazy;
 
@@ -163,7 +163,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
             new CsdWarningDialog.Factory() {
                 @Override
                 public CsdWarningDialog create(int warningType, Runnable onCleanup,
-                        Optional<ImmutableList<CsdWarningAction>> actionIntents) {
+                        Optional<List<CsdWarningAction>> actionIntents) {
                     return mCsdWarningDialog;
                 }
             };

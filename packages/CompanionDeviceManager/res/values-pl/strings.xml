@@ -18,9 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Menedżer urządzeń towarzyszących"</string>
     <string name="confirmation_title" msgid="2244241995958340998">"Zezwolić aplikacji &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; na dostęp do urządzenia &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="message_discovery_soft_timeout" msgid="473346859407859161">"Upewnij się, że <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> ma włączoną funkcję <xliff:g id="DISCOVERY_METHOD">%2$s</xliff:g>, i trzymaj urządzenie <xliff:g id="PROFILE_NAME">%3$s</xliff:g> w pobliżu."</string>
+    <string name="message_discovery_hard_timeout" msgid="677514663495711424">"Nie znaleziono urządzeń. Spróbuj ponownie później."</string>
+    <string name="discovery_bluetooth" msgid="5693557668470016164">"Bluetooth"</string>
+    <string name="discovery_wifi" msgid="1551782459721758773">"Wi-Fi"</string>
+    <string name="discovery_mixed" msgid="7071466134150760127">"Bluetooth i Wi-Fi"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"zegarek"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"Wybierz urządzenie, którym ma zarządzać aplikacja &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="chooser_title" msgid="2235819929238267637">"Wybierz profil <xliff:g id="PROFILE_NAME">%1$s</xliff:g>, aby go skonfigurować"</string>
+    <string name="single_device_title" msgid="4199861437545438606">"Szukam: <xliff:g id="PROFILE_NAME">%1$s</xliff:g>"</string>
     <string name="summary_watch" msgid="8134580124808507407">"Aplikacja będzie mogła synchronizować informacje takie jak nazwa dzwoniącego oraz korzystać z tych uprawnień na Twoim urządzeniu (<xliff:g id="DEVICE_TYPE">%1$s</xliff:g>)"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Zezwolić na dostęp aplikacji &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; do urządzenia &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"urządzenie"</string>

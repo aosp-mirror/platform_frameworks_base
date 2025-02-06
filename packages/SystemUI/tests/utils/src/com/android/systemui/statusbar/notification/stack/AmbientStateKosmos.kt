@@ -23,9 +23,7 @@ import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.shade.transition.largeScreenShadeInterpolator
 import com.android.systemui.statusbar.notification.headsup.mockAvalancheController
 import com.android.systemui.statusbar.phone.statusBarKeyguardViewManager
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@OptIn(ExperimentalCoroutinesApi::class)
 val Kosmos.ambientState by Fixture {
     AmbientState(
         /*context=*/ applicationContext,

@@ -27,13 +27,12 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class CommunalPrefsInteractor
 @Inject
@@ -50,7 +49,6 @@ constructor(
             .flatMapLatest { user -> repository.isCtaDismissed(user) }
             .logDiffsForTable(
                 tableLogBuffer = tableLogBuffer,
-                columnPrefix = "",
                 columnName = "isCtaDismissed",
                 initialValue = false,
             )
@@ -62,6 +60,41 @@ constructor(
 
     suspend fun setCtaDismissed(user: UserInfo = userTracker.userInfo) =
         repository.setCtaDismissed(user)
+
+    val isHubOnboardingDismissed: Flow<Boolean> =
+        userInteractor.selectedUserInfo
+            .flatMapLatest { user -> repository.isHubOnboardingDismissed(user) }
+            .logDiffsForTable(
+                tableLogBuffer = tableLogBuffer,
+                columnName = "isHubOnboardingDismissed",
+                initialValue = false,
+            )
+            .stateIn(
+                scope = bgScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
+
+    fun setHubOnboardingDismissed(user: UserInfo = userTracker.userInfo) =
+        bgScope.launch { repository.setHubOnboardingDismissed(user) }
+
+    val isDreamButtonTooltipDismissed: Flow<Boolean> =
+        userInteractor.selectedUserInfo
+            .flatMapLatest { user -> repository.isDreamButtonTooltipDismissed(user) }
+            .logDiffsForTable(
+                tableLogBuffer = tableLogBuffer,
+                columnPrefix = "",
+                columnName = "isDreamButtonTooltipDismissed",
+                initialValue = false,
+            )
+            .stateIn(
+                scope = bgScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
+
+    fun setDreamButtonTooltipDismissed(user: UserInfo = userTracker.userInfo) =
+        bgScope.launch { repository.setDreamButtonTooltipDismissed(user) }
 
     private companion object {
         const val TAG = "CommunalPrefsInteractor"

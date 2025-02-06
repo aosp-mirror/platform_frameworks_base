@@ -16,27 +16,30 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
+import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.ui.transitions.blurConfig
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class DozingToPrimaryBouncerTransitionViewModelTest : SysuiTestCase() {
@@ -76,13 +79,28 @@ class DozingToPrimaryBouncerTransitionViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val values by collectValues(underTest.windowBlurRadius)
 
-            kosmos.bouncerWindowBlurTestUtil.assertTransitionToBlurRadius(
+            kosmos.keyguardWindowBlurTestUtil.assertTransitionToBlurRadius(
                 transitionProgress = listOf(0.0f, 0.2f, 0.3f, 0.65f, 0.7f, 1.0f),
                 startValue = kosmos.blurConfig.minBlurRadiusPx,
                 endValue = kosmos.blurConfig.maxBlurRadiusPx,
                 actualValuesProvider = { values },
                 transitionFactory = ::step,
             )
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_BOUNCER_UI_REVAMP)
+    fun dozingToPrimaryBouncerHidesLockscreen() =
+        testScope.runTest {
+            val lockscreenAlpha by collectValues(underTest.lockscreenAlpha)
+            val notificationAlpha by collectValues(underTest.notificationAlpha)
+
+            val transitionSteps = listOf(step(0.0f, STARTED), step(0.5f), step(1.0f, FINISHED))
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(transitionSteps, testScope)
+            runCurrent()
+
+            lockscreenAlpha.forEach { assertThat(it).isEqualTo(0.0f) }
+            notificationAlpha.forEach { assertThat(it).isEqualTo(0.0f) }
         }
 
     private fun step(value: Float, state: TransitionState = RUNNING): TransitionStep {

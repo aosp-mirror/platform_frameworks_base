@@ -18,6 +18,7 @@ package com.android.systemui.communal.ui.viewmodel
 
 import android.service.dream.dreamManager
 import com.android.internal.logging.uiEventLogger
+import com.android.systemui.communal.domain.interactor.communalPrefsInteractor
 import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
@@ -29,6 +30,7 @@ val Kosmos.communalToDreamButtonViewModel by
         CommunalToDreamButtonViewModel(
             backgroundContext = testDispatcher,
             batteryController = batteryController,
+            prefsInteractor = communalPrefsInteractor,
             settingsInteractor = communalSettingsInteractor,
             activityStarter = activityStarter,
             dreamManager = dreamManager,

@@ -17,7 +17,7 @@
 package com.android.systemui.qs.pipeline.domain.interactor
 
 import android.content.Context
-import android.view.accessibility.Flags
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.accessibility.data.repository.AccessibilityQsShortcutsRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -30,7 +30,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Observe the tiles in the QS Panel and perform accessibility related actions */
 @SysUISingleton
@@ -48,10 +47,7 @@ constructor(
         if (!initialized.compareAndSet(/* expectedValue= */ false, /* newValue= */ true)) {
             return
         }
-
-        if (Flags.a11yQsShortcut()) {
-            startObservingTiles(currentTilesInteractor)
-        }
+        startObservingTiles(currentTilesInteractor)
     }
 
     private fun startObservingTiles(currentTilesInteractor: CurrentTilesInteractor) {
@@ -63,14 +59,11 @@ constructor(
                 .collectLatest {
                     a11yQsShortcutsRepository.notifyAccessibilityManagerTilesChanged(
                         it.userContext,
-                        it.currentTileSpecs
+                        it.currentTileSpecs,
                     )
                 }
         }
     }
 
-    private data class Data(
-        val currentTileSpecs: List<TileSpec>,
-        val userContext: Context,
-    )
+    private data class Data(val currentTileSpecs: List<TileSpec>, val userContext: Context)
 }

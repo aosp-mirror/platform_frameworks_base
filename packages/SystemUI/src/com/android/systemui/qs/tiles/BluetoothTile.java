@@ -133,7 +133,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                 callback.accept(new BluetoothDetailsViewModel(() -> {
                     longClick(null);
                     return null;
-                }))
+                }, mDialogViewModel))
         );
         return true;
     }
@@ -158,7 +158,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
 
     private void handleClickEvent(@Nullable Expandable expandable) {
         if (mFeatureFlags.isEnabled(Flags.BLUETOOTH_QS_TILE_DIALOG)) {
-            mDialogViewModel.showDialog(expandable);
+            mDialogViewModel.showDetailsContent(expandable, /* view= */ null);
         } else {
             // Secondary clicks are header clicks, just toggle.
             toggleBluetooth();

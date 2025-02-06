@@ -19,9 +19,7 @@ package com.android.systemui.deviceentry.domain.interactor
 import com.android.systemui.biometrics.domain.faceHelpMessageDeferralFactory
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 val Kosmos.faceHelpMessageDeferralInteractor by
     Kosmos.Fixture {
         FaceHelpMessageDeferralInteractor(

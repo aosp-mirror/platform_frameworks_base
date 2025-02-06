@@ -41,6 +41,7 @@ import static android.os.storage.OnObbStateChangeListener.ERROR_NOT_MOUNTED;
 import static android.os.storage.OnObbStateChangeListener.ERROR_PERMISSION_DENIED;
 import static android.os.storage.OnObbStateChangeListener.MOUNTED;
 import static android.os.storage.OnObbStateChangeListener.UNMOUNTED;
+import static android.mmd.flags.Flags.mmdEnabled;
 
 import static com.android.internal.util.XmlUtils.readStringAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
@@ -126,6 +127,7 @@ import android.provider.Downloads;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.service.storage.ExternalStorageService;
+import android.sysprop.MmdProperties;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
@@ -155,6 +157,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.memory.ZramMaintenance;
 import com.android.server.pm.Installer;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.storage.AppFuseBridge;
@@ -933,24 +936,28 @@ class StorageManagerService extends IStorageManager.Stub
         // Start scheduling nominally-daily fstrim operations
         MountServiceIdler.scheduleIdlePass(mContext);
 
-        // Toggle zram-enable system property in response to settings
-        mContext.getContentResolver().registerContentObserver(
-            Settings.Global.getUriFor(Settings.Global.ZRAM_ENABLED),
-            false /*notifyForDescendants*/,
-            new ContentObserver(null /* current thread */) {
-                @Override
-                public void onChange(boolean selfChange) {
-                    refreshZramSettings();
-                }
-            });
-        refreshZramSettings();
+        if (mmdEnabled() && MmdProperties.mmd_zram_enabled().orElse(false)) {
+            ZramMaintenance.startZramMaintenance(mContext);
+        } else {
+            // Toggle zram-enable system property in response to settings
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.ZRAM_ENABLED),
+                    false /*notifyForDescendants*/,
+                    new ContentObserver(null /* current thread */) {
+                        @Override
+                        public void onChange(boolean selfChange) {
+                            refreshZramSettings();
+                        }
+                    });
+            refreshZramSettings();
 
-        // Schedule zram writeback unless zram is disabled by persist.sys.zram_enabled
-        String zramPropValue = SystemProperties.get(ZRAM_ENABLED_PROPERTY);
-        if (!zramPropValue.equals("0")
-                && mContext.getResources().getBoolean(
+            // Schedule zram writeback unless zram is disabled by persist.sys.zram_enabled
+            String zramPropValue = SystemProperties.get(ZRAM_ENABLED_PROPERTY);
+            if (!zramPropValue.equals("0")
+                    && mContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_zramWriteback)) {
-            ZramWriteback.scheduleZramWriteback(mContext);
+                ZramWriteback.scheduleZramWriteback(mContext);
+            }
         }
 
         configureTranscoding();

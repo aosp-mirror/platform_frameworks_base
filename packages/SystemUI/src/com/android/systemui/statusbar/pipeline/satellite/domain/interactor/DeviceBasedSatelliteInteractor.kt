@@ -32,7 +32,6 @@ import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiIntera
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -64,12 +63,7 @@ constructor(
                 flowOf(false)
             }
             .distinctUntilChanged()
-            .logDiffsForTable(
-                tableLog,
-                columnPrefix = "",
-                columnName = COL_ALLOWED,
-                initialValue = false,
-            )
+            .logDiffsForTable(tableLog, columnName = COL_ALLOWED, initialValue = false)
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     /** See [SatelliteConnectionState] for relevant states */
@@ -81,11 +75,7 @@ constructor(
                 flowOf(SatelliteConnectionState.Off)
             }
             .distinctUntilChanged()
-            .logDiffsForTable(
-                tableLog,
-                columnPrefix = "",
-                initialValue = SatelliteConnectionState.Off,
-            )
+            .logDiffsForTable(tableLog, initialValue = SatelliteConnectionState.Off)
             .stateIn(scope, SharingStarted.WhileSubscribed(), SatelliteConnectionState.Off)
 
     /** 0-4 description of the connection strength */
@@ -96,7 +86,7 @@ constructor(
                 flowOf(0)
             }
             .distinctUntilChanged()
-            .logDiffsForTable(tableLog, columnPrefix = "", columnName = COL_LEVEL, initialValue = 0)
+            .logDiffsForTable(tableLog, columnName = COL_LEVEL, initialValue = 0)
             .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
 
     val isSatelliteProvisioned = repo.isSatelliteProvisioned
@@ -120,12 +110,7 @@ constructor(
                 isOosAndNotEmergencyAndNotSatellite.all { it }
             }
             .distinctUntilChanged()
-            .logDiffsForTable(
-                tableLog,
-                columnPrefix = "",
-                columnName = COL_ALL_OOS,
-                initialValue = true,
-            )
+            .logDiffsForTable(tableLog, columnName = COL_ALL_OOS, initialValue = true)
 
     /** When all connections are considered OOS, satellite connectivity is potentially valid */
     val areAllConnectionsOutOfService =
@@ -153,12 +138,7 @@ constructor(
                 flowOf(false)
             }
             .distinctUntilChanged()
-            .logDiffsForTable(
-                tableLog,
-                columnPrefix = "",
-                columnName = COL_FULL_OOS,
-                initialValue = true,
-            )
+            .logDiffsForTable(tableLog, columnName = COL_FULL_OOS, initialValue = true)
             .stateIn(scope, SharingStarted.WhileSubscribed(), true)
 
     /** True if any known mobile network is currently using a non terrestrial network */
@@ -190,7 +170,6 @@ constructor(
  * [defaultValue] allows for a default value to be used if there are no leaf nodes after applying
  * [selector]. E.g., if there are no mobile connections, assume that there is no service.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 private inline fun <R, reified S, T> Flow<List<R>>.aggregateOver(
     crossinline selector: (R) -> Flow<S>,
     defaultValue: T,

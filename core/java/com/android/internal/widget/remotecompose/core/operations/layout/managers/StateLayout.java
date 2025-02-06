@@ -30,6 +30,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.LayoutCo
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.ComponentMeasure;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.MeasurePass;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.Size;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,6 +82,7 @@ public class StateLayout extends LayoutManager {
         hideLayoutsOtherThan(currentLayoutIndex);
     }
 
+    /** Traverse the list of children and identify animated components across states */
     public void findAnimatedComponents() {
         for (int i = 0; i < mChildrenComponents.size(); i++) {
             Component cs = mChildrenComponents.get(i);
@@ -105,6 +107,10 @@ public class StateLayout extends LayoutManager {
         collapsePaintedComponents();
     }
 
+    /**
+     * Traverse the list of components in different states, and if they are similar pick the first
+     * component for painting in all states.
+     */
     public void collapsePaintedComponents() {
         int numStates = mChildrenComponents.size();
         for (Integer id : statePaintedComponents.keySet()) {
@@ -346,6 +352,11 @@ public class StateLayout extends LayoutManager {
         measuredLayoutIndex = currentLayoutIndex;
     }
 
+    /**
+     * Hides all layouts that are not the one with the given id
+     *
+     * @param idx the layout id
+     */
     public void hideLayoutsOtherThan(int idx) {
         int index = 0;
         for (Component pane : mChildrenComponents) {
@@ -360,6 +371,12 @@ public class StateLayout extends LayoutManager {
         }
     }
 
+    /**
+     * Returns the layout with the given id
+     *
+     * @param idx the component id
+     * @return the LayoutManager with the given id, or the first child of StateLayout if not found
+     */
     public @NonNull LayoutManager getLayout(int idx) {
         int index = 0;
         for (Component pane : mChildrenComponents) {
@@ -485,6 +502,7 @@ public class StateLayout extends LayoutManager {
         }
     }
 
+    /** Check if we are at the end of the transition, and if so handles it. */
     public void checkEndOfTransition() {
         LayoutManager currentLayout = getLayout(measuredLayoutIndex);
         LayoutManager previousLayout = getLayout(previousLayoutIndex);
@@ -536,10 +554,16 @@ public class StateLayout extends LayoutManager {
         return "STATE_LAYOUT";
     }
 
-    //    companion object {
-    //        fun documentation(doc: OrigamiDocumentation) {}
-    //    }
-
+    /**
+     * write the operation to the buffer
+     *
+     * @param buffer the current buffer
+     * @param componentId the component id
+     * @param animationId the animation id if there's one, -1 otherwise.
+     * @param horizontalPositioning the horizontal positioning rule
+     * @param verticalPositioning the vertical positioning rule
+     * @param indexId the current index
+     */
     public static void apply(
             @NonNull WireBuffer buffer,
             int componentId,
@@ -569,5 +593,11 @@ public class StateLayout extends LayoutManager {
         int indexId = buffer.readInt();
         operations.add(
                 new StateLayout(null, componentId, animationId, 0f, 0f, 100f, 100f, indexId));
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        super.serialize(serializer);
+        serializer.add("indexId", mIndexId);
     }
 }

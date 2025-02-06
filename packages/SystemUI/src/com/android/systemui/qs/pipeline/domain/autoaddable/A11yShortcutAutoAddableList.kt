@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.pipeline.domain.autoaddable
 
-import android.view.accessibility.Flags
 import com.android.internal.accessibility.AccessibilityShortcutController
 import com.android.systemui.qs.pipeline.domain.model.AutoAddable
 import com.android.systemui.qs.pipeline.shared.TileSpec
@@ -33,31 +32,27 @@ object A11yShortcutAutoAddableList {
      * accessibility features with shortcut options
      */
     fun getA11yShortcutAutoAddables(factory: A11yShortcutAutoAddable.Factory): Set<AutoAddable> {
-        return if (Flags.a11yQsShortcut()) {
-            setOf(
-                factory.create(
-                    TileSpec.create(ColorCorrectionTile.TILE_SPEC),
-                    AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME
-                ),
-                factory.create(
-                    TileSpec.create(ColorInversionTile.TILE_SPEC),
-                    AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME
-                ),
-                factory.create(
-                    TileSpec.create(OneHandedModeTile.TILE_SPEC),
-                    AccessibilityShortcutController.ONE_HANDED_COMPONENT_NAME
-                ),
-                factory.create(
-                    TileSpec.create(ReduceBrightColorsTile.TILE_SPEC),
-                    AccessibilityShortcutController.REDUCE_BRIGHT_COLORS_COMPONENT_NAME
-                ),
-                factory.create(
-                    TileSpec.create(HearingDevicesTile.TILE_SPEC),
-                    AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME
-                )
-            )
-        } else {
-            emptySet()
-        }
+        return setOf(
+            factory.create(
+                TileSpec.create(ColorCorrectionTile.TILE_SPEC),
+                AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME,
+            ),
+            factory.create(
+                TileSpec.create(ColorInversionTile.TILE_SPEC),
+                AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME,
+            ),
+            factory.create(
+                TileSpec.create(OneHandedModeTile.TILE_SPEC),
+                AccessibilityShortcutController.ONE_HANDED_COMPONENT_NAME,
+            ),
+            factory.create(
+                TileSpec.create(ReduceBrightColorsTile.TILE_SPEC),
+                AccessibilityShortcutController.REDUCE_BRIGHT_COLORS_COMPONENT_NAME,
+            ),
+            factory.create(
+                TileSpec.create(HearingDevicesTile.TILE_SPEC),
+                AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME,
+            ),
+        )
     }
 }

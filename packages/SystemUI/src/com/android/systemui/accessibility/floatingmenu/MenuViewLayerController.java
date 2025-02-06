@@ -17,6 +17,8 @@
 package com.android.systemui.accessibility.floatingmenu;
 
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION;
+import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
@@ -89,8 +91,11 @@ class MenuViewLayerController implements IAccessibilityFloatingMenu {
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
+        params.setTitle("FloatingMenu");
         params.receiveInsetsIgnoringZOrder = true;
-        params.privateFlags |= PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
+        params.privateFlags |=
+                PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION | SYSTEM_FLAG_SHOW_FOR_ALL_USERS
+                        | PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION;
         params.windowAnimations = android.R.style.Animation_Translucent;
         // Insets are configured to allow the menu to display over navigation and system bars.
         params.setFitInsetsTypes(0);

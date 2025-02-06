@@ -25,9 +25,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 val Kosmos.keyguardDismissActionInteractor by
     Kosmos.Fixture {
         KeyguardDismissActionInteractor(

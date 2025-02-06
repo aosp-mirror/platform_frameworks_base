@@ -240,7 +240,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
         try {
             if (!mExisting.contains(ANCESTRAL_RECORD_KEY)) {
                 // The old state does not store info on ancestral record
-                Slog.v(
+                Slog.d(
                         TAG,
                         "No ancestral record version in the old state. Storing "
                                 + "ancestral record version key");
@@ -249,7 +249,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
                 upgradingAncestralRecordVersion = true;
             } else if (mStoredAncestralRecordVersion != ANCESTRAL_RECORD_VERSION) {
                 // The current ancestral record version has changed from the old state
-                Slog.v(
+                Slog.d(
                         TAG,
                         "Ancestral record version has changed from old state. Storing"
                                 + "ancestral record version key");

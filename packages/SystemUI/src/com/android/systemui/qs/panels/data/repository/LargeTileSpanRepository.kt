@@ -25,14 +25,12 @@ import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class LargeTileSpanRepository
 @Inject

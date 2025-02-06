@@ -1271,7 +1271,7 @@ public class Build {
          * Baklava.
          */
         @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
-        public static final int BAKLAVA = CUR_DEVELOPMENT;
+        public static final int BAKLAVA = 36;
     }
 
     /** @hide */

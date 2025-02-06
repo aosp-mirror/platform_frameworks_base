@@ -20,6 +20,8 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.FrameworkStatsLog;
 
+import javax.inject.Inject;
+
 /**
  * Implementation of UiEventLogger for logging bubble UI events.
  *
@@ -145,8 +147,14 @@ public class BubbleLogger {
         @UiEvent(doc = "bubble promoted from overflow back to bubble bar")
         BUBBLE_BAR_OVERFLOW_REMOVE_BACK_TO_BAR(1949),
 
+        @UiEvent(doc = "application icon is dropped in the BubbleBar left drop zone")
+        BUBBLE_BAR_MOVED_LEFT_APP_ICON_DROP(2082),
+
+        @UiEvent(doc = "application icon is dropped in the BubbleBar right drop zone")
+        BUBBLE_BAR_MOVED_RIGHT_APP_ICON_DROP(2083),
+
         @UiEvent(doc = "while bubble bar is expanded, switch to another/existing bubble")
-        BUBBLE_BAR_BUBBLE_SWITCHED(1977)
+        BUBBLE_BAR_BUBBLE_SWITCHED(1977),
 
         // endregion
         ;
@@ -163,6 +171,7 @@ public class BubbleLogger {
         }
     }
 
+    @Inject
     public BubbleLogger(UiEventLogger uiEventLogger) {
         mUiEventLogger = uiEventLogger;
     }

@@ -121,6 +121,7 @@ TEST(TypeVariantIteratorTest, shouldIterateOverTypeWithoutErrors) {
     values.push_back(std::nullopt);
     values.push_back(std::nullopt);
     values.push_back(Res_value{ sizeof(Res_value), 0, Res_value::TYPE_STRING, 0x87654321});
+    values.push_back(std::nullopt);
 
     // test for combinations of compact_entry and short_offsets
     for (size_t i = 0; i < 8; i++) {
@@ -188,6 +189,17 @@ TEST(TypeVariantIteratorTest, shouldIterateOverTypeWithoutErrors) {
         ASSERT_EQ(uint32_t(8), iter->key());
         ASSERT_EQ(uint32_t(0x87654321), iter->value().data);
         ASSERT_EQ(Res_value::TYPE_STRING, iter->value().dataType);
+
+        ++iter;
+
+        ASSERT_EQ(uint32_t(9), iter.index());
+        ASSERT_TRUE(NULL == *iter);
+        if (sparse) {
+          // Sparse iterator doesn't know anything beyond the last entry.
+          ASSERT_EQ(v.endEntries(), iter);
+        } else {
+          ASSERT_NE(v.endEntries(), iter);
+        }
 
         ++iter;
 

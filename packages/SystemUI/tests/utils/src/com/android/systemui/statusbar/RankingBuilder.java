@@ -61,6 +61,7 @@ public class RankingBuilder {
     private boolean mIsBubble = false;
     private int mProposedImportance = IMPORTANCE_UNSPECIFIED;
     private boolean mSensitiveContent = false;
+    private String mSummarization = null;
 
     public RankingBuilder() {
     }
@@ -92,6 +93,7 @@ public class RankingBuilder {
         mIsBubble = ranking.isBubble();
         mProposedImportance = ranking.getProposedImportance();
         mSensitiveContent = ranking.hasSensitiveContent();
+        mSummarization = ranking.getSummarization();
     }
 
     public Ranking build() {
@@ -122,7 +124,8 @@ public class RankingBuilder {
                 mRankingAdjustment,
                 mIsBubble,
                 mProposedImportance,
-                mSensitiveContent);
+                mSensitiveContent,
+                mSummarization);
         return ranking;
     }
 
@@ -259,6 +262,11 @@ public class RankingBuilder {
 
     public RankingBuilder setSmartReplies(CharSequence... smartReplies) {
         mSmartReplies = new ArrayList<>(Arrays.asList(smartReplies));
+        return this;
+    }
+
+    public RankingBuilder setSummarization(String summary) {
+        mSummarization = summary;
         return this;
     }
 

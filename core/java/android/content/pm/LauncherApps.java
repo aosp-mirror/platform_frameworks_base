@@ -77,7 +77,6 @@ import android.util.Pair;
 import android.window.IDumpCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.IOException;
@@ -92,7 +91,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
 /**
@@ -793,18 +791,8 @@ public class LauncherApps {
     public List<LauncherActivityInfo> getActivityList(String packageName, UserHandle user) {
         logErrorForInvalidProfileAccess(user);
         try {
-            final List<LauncherActivityInfo> activityList = convertToActivityList(
-                    mService.getLauncherActivities(
-                            mContext.getPackageName(),
-                            packageName,
-                            user
-                    ), user);
-            if (activityList.isEmpty()) {
-                // b/350144057
-                Log.d(TAG, "getActivityList: No launchable activities found for"
-                        + "packageName=" + packageName + ", user=" + user);
-            }
-            return activityList;
+            return convertToActivityList(mService.getLauncherActivities(mContext.getPackageName(),
+                    packageName, user), user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -1932,6 +1920,9 @@ public class LauncherApps {
      * caller should have normal {@link android.Manifest.permission#ACCESS_HIDDEN_PROFILES}
      * permission and the {@link android.app.role.RoleManager#ROLE_HOME} role.
      *
+     * <p>This callback will also receive changes to the {@link LauncherUserInfo#getUserConfig()},
+     * allowing clients to monitor updates to the user-specific configuration.
+     *
      * @param callback The callback to register.
      */
     // Alternatively, a system app can access this api for private profile if they've been granted
@@ -1949,6 +1940,9 @@ public class LauncherApps {
      * <p>To receive callbacks for hidden profile {@link UserManager#USER_TYPE_PROFILE_PRIVATE},
      * caller should have normal {@link android.Manifest.permission#ACCESS_HIDDEN_PROFILES}
      * permission and the {@link android.app.role.RoleManager#ROLE_HOME} role.
+     *
+     * <p>This callback will also receive changes to the {@link LauncherUserInfo#getUserConfig()},
+     * allowing clients to monitor updates to the user-specific configuration.
      *
      * @param callback The callback to register.
      * @param handler that should be used to post callbacks on, may be null.

@@ -16,8 +16,11 @@
 
 package com.android.wm.shell.taskview;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -25,7 +28,14 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.LauncherApps;
+import android.content.pm.ShortcutInfo;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.os.IBinder;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -33,27 +43,32 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.VisibleForTesting;
 
 import com.android.wm.shell.Flags;
+import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.shared.TransitionUtil;
+import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
+import java.util.concurrent.Executor;
 
 /**
  * Handles Shell Transitions that involve TaskView tasks.
  */
-public class TaskViewTransitions implements Transitions.TransitionHandler {
+public class TaskViewTransitions implements Transitions.TransitionHandler, TaskViewController {
     static final String TAG = "TaskViewTransitions";
 
     /**
-     * Map of {@link TaskViewTaskController} to {@link TaskViewRequestedState}.
+     * Map of {@link TaskViewTaskController} to {@link TaskViewRepository.TaskViewState}.
      * <p>
      * {@link TaskView} keeps a reference to the {@link TaskViewTaskController} instance and
      * manages its lifecycle.
@@ -65,6 +80,12 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
     private final ArrayList<PendingTransition> mPending = new ArrayList<>();
     private final Transitions mTransitions;
     private final boolean[] mRegistered = new boolean[]{false};
+    private final ShellTaskOrganizer mTaskOrganizer;
+    private final Executor mShellExecutor;
+    private final SyncTransactionQueue mSyncQueue;
+
+    /** A temp transaction used for quick things. */
+    private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
 
     /**
      * TaskView makes heavy use of startTransition. Only one shell-initiated transition can be
@@ -76,6 +97,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         final @WindowManager.TransitionType int mType;
         final WindowContainerTransaction mWct;
         final @NonNull TaskViewTaskController mTaskView;
+        ExternalTransition mExternalTransition;
         IBinder mClaimed;
 
         /**
@@ -96,8 +118,12 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         }
     }
 
-    public TaskViewTransitions(Transitions transitions, TaskViewRepository repository) {
+    public TaskViewTransitions(Transitions transitions, TaskViewRepository repository,
+            ShellTaskOrganizer taskOrganizer, SyncTransactionQueue syncQueue) {
         mTransitions = transitions;
+        mTaskOrganizer = taskOrganizer;
+        mShellExecutor = taskOrganizer.getExecutor();
+        mSyncQueue = syncQueue;
         if (useRepo()) {
             mTaskViews = null;
         } else if (Flags.enableTaskViewControllerCleanup()) {
@@ -111,7 +137,8 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         // TODO(210041388): register here once we have an explicit ordering mechanism.
     }
 
-    static boolean useRepo() {
+    /** @return whether the shared taskview repository is being used. */
+    public static boolean useRepo() {
         return Flags.taskViewRepository() || Flags.enableBubbleAnything();
     }
 
@@ -119,7 +146,8 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         return mTaskViewRepo;
     }
 
-    void addTaskView(TaskViewTaskController tv) {
+    @Override
+    public void registerTaskView(TaskViewTaskController tv) {
         synchronized (mRegistered) {
             if (!mRegistered[0]) {
                 mRegistered[0] = true;
@@ -133,7 +161,8 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         }
     }
 
-    void removeTaskView(TaskViewTaskController tv) {
+    @Override
+    public void unregisterTaskView(TaskViewTaskController tv) {
         if (useRepo()) {
             mTaskViewRepo.remove(tv);
         } else {
@@ -142,24 +171,9 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         // Note: Don't unregister handler since this is a singleton with lifetime bound to Shell
     }
 
-    boolean isEnabled() {
+    @Override
+    public boolean isUsingShellTransitions() {
         return mTransitions.isRegistered();
-    }
-
-    /**
-     * Looks through the pending transitions for a closing transaction that matches the provided
-     * `taskView`.
-     *
-     * @param taskView the pending transition should be for this.
-     */
-    private PendingTransition findPendingCloseTransition(TaskViewTaskController taskView) {
-        for (int i = mPending.size() - 1; i >= 0; --i) {
-            if (mPending.get(i).mTaskView != taskView) continue;
-            if (TransitionUtil.isClosingType(mPending.get(i).mType)) {
-                return mPending.get(i);
-            }
-        }
-        return null;
     }
 
     /**
@@ -168,6 +182,32 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
     public void startInstantTransition(@WindowManager.TransitionType int type,
             WindowContainerTransaction wct) {
         mTransitions.startTransition(type, wct, null);
+    }
+
+    /**
+     * Starts or queues an "external" runnable into the pending queue. This means it will run
+     * in order relative to the local transitions.
+     *
+     * The external operation *must* call {@link #onExternalDone} once it has finished.
+     *
+     * In practice, the external is usually another transition on a different handler.
+     */
+    public void enqueueExternal(@NonNull TaskViewTaskController taskView, ExternalTransition ext) {
+        final PendingTransition pending = new PendingTransition(
+                TRANSIT_NONE, null /* wct */, taskView, null /* cookie */);
+        pending.mExternalTransition = ext;
+        mPending.add(pending);
+        startNextTransition();
+    }
+
+    /**
+     * An external transition run in this "queue" is required to call this once it becomes ready.
+     */
+    public void onExternalDone(IBinder key) {
+        final PendingTransition pending = findPending(key);
+        if (pending == null) return;
+        mPending.remove(pending);
+        startNextTransition();
     }
 
     /**
@@ -180,6 +220,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
     PendingTransition findPendingOpeningTransition(TaskViewTaskController taskView) {
         for (int i = mPending.size() - 1; i >= 0; --i) {
             if (mPending.get(i).mTaskView != taskView) continue;
+            if (mPending.get(i).mExternalTransition != null) continue;
             if (TransitionUtil.isOpeningType(mPending.get(i).mType)) {
                 return mPending.get(i);
             }
@@ -196,6 +237,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
     PendingTransition findPending(TaskViewTaskController taskView, int type) {
         for (int i = mPending.size() - 1; i >= 0; --i) {
             if (mPending.get(i).mTaskView != taskView) continue;
+            if (mPending.get(i).mExternalTransition != null) continue;
             if (mPending.get(i).mType == type) {
                 return mPending.get(i);
             }
@@ -264,6 +306,82 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         return findTaskView(taskInfo) != null;
     }
 
+    private void prepareActivityOptions(ActivityOptions options, Rect launchBounds,
+            @NonNull TaskViewTaskController destination) {
+        final Binder launchCookie = new Binder();
+        mShellExecutor.execute(() -> {
+            mTaskOrganizer.setPendingLaunchCookieListener(launchCookie, destination);
+        });
+        options.setLaunchBounds(launchBounds);
+        options.setLaunchCookie(launchCookie);
+        options.setLaunchWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        options.setRemoveWithTaskOrganizer(true);
+    }
+
+    @Override
+    public void startShortcutActivity(@NonNull TaskViewTaskController destination,
+            @NonNull ShortcutInfo shortcut, @NonNull ActivityOptions options,
+            @Nullable Rect launchBounds) {
+        prepareActivityOptions(options, launchBounds, destination);
+        final Context context = destination.getContext();
+        if (isUsingShellTransitions()) {
+            mShellExecutor.execute(() -> {
+                final WindowContainerTransaction wct = new WindowContainerTransaction();
+                wct.startShortcut(context.getPackageName(), shortcut, options.toBundle());
+                startTaskView(wct, destination, options.getLaunchCookie());
+            });
+            return;
+        }
+        try {
+            LauncherApps service = context.getSystemService(LauncherApps.class);
+            service.startShortcut(shortcut, null /* sourceBounds */, options.toBundle());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void startActivity(@NonNull TaskViewTaskController destination,
+            @NonNull PendingIntent pendingIntent, @Nullable Intent fillInIntent,
+            @NonNull ActivityOptions options, @Nullable Rect launchBounds) {
+        prepareActivityOptions(options, launchBounds, destination);
+        if (isUsingShellTransitions()) {
+            mShellExecutor.execute(() -> {
+                WindowContainerTransaction wct = new WindowContainerTransaction();
+                wct.sendPendingIntent(pendingIntent, fillInIntent, options.toBundle());
+                startTaskView(wct, destination, options.getLaunchCookie());
+            });
+            return;
+        }
+        try {
+            pendingIntent.send(destination.getContext(), 0 /* code */, fillInIntent,
+                    null /* onFinished */, null /* handler */, null /* requiredPermission */,
+                    options.toBundle());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void startRootTask(@NonNull TaskViewTaskController destination,
+            ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash,
+            @Nullable WindowContainerTransaction wct) {
+        if (wct == null) {
+            wct = new WindowContainerTransaction();
+        }
+        // This method skips the regular flow where an activity task is launched as part of a new
+        // transition in taskview and then transition is intercepted using the launchcookie.
+        // The task here is already created and running, it just needs to be reparented, resized
+        // and tracked correctly inside taskview. Which is done by calling
+        // prepareOpenAnimationInternal() and then manually enqueuing the resulting window container
+        // transaction.
+        prepareOpenAnimation(destination, true /* newTask */, mTransaction /* startTransaction */,
+                null /* finishTransaction */, taskInfo, leash, wct);
+        mTransaction.apply();
+        mTransitions.startTransition(TRANSIT_CHANGE, wct, null);
+    }
+
+    @VisibleForTesting
     void startTaskView(@NonNull WindowContainerTransaction wct,
             @NonNull TaskViewTaskController taskView, @NonNull IBinder launchCookie) {
         updateVisibilityState(taskView, true /* visible */);
@@ -271,30 +389,53 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         startNextTransition();
     }
 
-    void closeTaskView(@NonNull WindowContainerTransaction wct,
-            @NonNull TaskViewTaskController taskView) {
+    @Override
+    public void removeTaskView(@NonNull TaskViewTaskController taskView,
+            @Nullable WindowContainerToken taskToken) {
+        final WindowContainerToken token = taskToken != null ? taskToken : taskView.getTaskToken();
+        if (token == null) {
+            // We don't have a task yet, so just clean up records
+            if (!Flags.enableTaskViewControllerCleanup()) {
+                // Call to remove task before we have one, do nothing
+                Slog.w(TAG, "Trying to remove a task that was never added? (no taskToken)");
+                return;
+            }
+            unregisterTaskView(taskView);
+            return;
+        }
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.removeTask(token);
         updateVisibilityState(taskView, false /* visible */);
-        mPending.add(new PendingTransition(TRANSIT_CLOSE, wct, taskView, null /* cookie */));
-        startNextTransition();
+        mShellExecutor.execute(() -> {
+            mPending.add(new PendingTransition(TRANSIT_CLOSE, wct, taskView, null /* cookie */));
+            startNextTransition();
+        });
     }
 
-    void moveTaskViewToFullscreen(@NonNull WindowContainerTransaction wct,
-            @NonNull TaskViewTaskController taskView) {
-        mPending.add(new PendingTransition(TRANSIT_CHANGE, wct, taskView, null /* cookie */));
-        startNextTransition();
+    @Override
+    public void moveTaskViewToFullscreen(@NonNull TaskViewTaskController taskView) {
+        final WindowContainerToken taskToken = taskView.getTaskToken();
+        if (taskToken == null) return;
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setWindowingMode(taskToken, WINDOWING_MODE_UNDEFINED);
+        wct.setAlwaysOnTop(taskToken, false);
+        mShellExecutor.execute(() -> {
+            mTaskOrganizer.setInterceptBackPressedOnTaskRoot(taskToken, false);
+            mPending.add(new PendingTransition(TRANSIT_CHANGE, wct, taskView, null /* cookie */));
+            startNextTransition();
+            taskView.notifyTaskRemovalStarted(taskView.getTaskInfo());
+        });
     }
 
-    /** Starts a new transition to make the given {@code taskView} visible. */
+    @Override
     public void setTaskViewVisible(TaskViewTaskController taskView, boolean visible) {
         setTaskViewVisible(taskView, visible, false /* reorder */);
     }
 
     /**
-     * Starts a new transition to make the given {@code taskView} visible and optionally change
-     * the task order.
+     * Starts a new transition to make the given {@code taskView} visible and optionally
+     * reordering it.
      *
-     * @param taskView the task view which the visibility is being changed for
-     * @param visible  the new visibility of the task view
      * @param reorder  whether to reorder the task or not. If this is {@code true}, the task will
      *                 be reordered as per the given {@code visible}. For {@code visible = true},
      *                 task will be reordered to top. For {@code visible = false}, task will be
@@ -359,7 +500,26 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         state.mVisible = visible;
     }
 
-    void setTaskBounds(TaskViewTaskController taskView, Rect boundsOnScreen) {
+    @Override
+    public void setTaskBounds(TaskViewTaskController taskView, Rect boundsOnScreen) {
+        if (taskView.getTaskToken() == null) {
+            return;
+        }
+
+        if (isUsingShellTransitions()) {
+            mShellExecutor.execute(() -> {
+                // Sync Transactions can't operate simultaneously with shell transition collection.
+                setTaskBoundsInTransition(taskView, boundsOnScreen);
+            });
+            return;
+        }
+
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setBounds(taskView.getTaskToken(), boundsOnScreen);
+        mSyncQueue.queue(wct);
+    }
+
+    private void setTaskBoundsInTransition(TaskViewTaskController taskView, Rect boundsOnScreen) {
         final TaskViewRepository.TaskViewState state = useRepo()
                 ? mTaskViewRepo.byTaskView(taskView)
                 : mTaskViews.get(taskView);
@@ -389,7 +549,11 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
             // Wait for this to start animating.
             return;
         }
-        pending.mClaimed = mTransitions.startTransition(pending.mType, pending.mWct, this);
+        if (pending.mExternalTransition != null) {
+            pending.mClaimed = pending.mExternalTransition.start();
+        } else {
+            pending.mClaimed = mTransitions.startTransition(pending.mType, pending.mWct, this);
+        }
     }
 
     @Override
@@ -408,7 +572,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        PendingTransition pending = findPending(transition);
+        final PendingTransition pending = findPending(transition);
         if (pending != null) {
             mPending.remove(pending);
         }
@@ -423,10 +587,11 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         WindowContainerTransaction wct = null;
         for (int i = 0; i < info.getChanges().size(); ++i) {
             final TransitionInfo.Change chg = info.getChanges().get(i);
-            if (chg.getTaskInfo() == null) continue;
+            final ActivityManager.RunningTaskInfo taskInfo = chg.getTaskInfo();
+            if (taskInfo == null) continue;
             if (TransitionUtil.isClosingType(chg.getMode())) {
                 final boolean isHide = chg.getMode() == TRANSIT_TO_BACK;
-                TaskViewTaskController tv = findTaskView(chg.getTaskInfo());
+                TaskViewTaskController tv = findTaskView(taskInfo);
                 if (tv == null && !isHide) {
                     // TaskView can be null when closing
                     changesHandled++;
@@ -436,7 +601,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
                     if (pending != null) {
                         Slog.w(TAG, "Found a non-TaskView task in a TaskView Transition. This "
                                 + "shouldn't happen, so there may be a visual artifact: "
-                                + chg.getTaskInfo().taskId);
+                                + taskInfo.taskId);
                     }
                     continue;
                 }
@@ -452,46 +617,64 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
                 }
                 changesHandled++;
             } else if (TransitionUtil.isOpeningType(chg.getMode())) {
-                final boolean taskIsNew = chg.getMode() == TRANSIT_OPEN;
-                final TaskViewTaskController tv;
-                if (taskIsNew) {
-                    if (pending == null
-                            || !chg.getTaskInfo().containsLaunchCookie(pending.mLaunchCookie)) {
+                boolean isNewInTaskView = false;
+                TaskViewTaskController tv;
+                if (chg.getMode() == TRANSIT_OPEN) {
+                    isNewInTaskView = true;
+                    if (pending == null || !taskInfo.containsLaunchCookie(pending.mLaunchCookie)) {
                         Slog.e(TAG, "Found a launching TaskView in the wrong transition. All "
                                 + "TaskView launches should be initiated by shell and in their "
-                                + "own transition: " + chg.getTaskInfo().taskId);
+                                + "own transition: " + taskInfo.taskId);
                         continue;
                     }
                     stillNeedsMatchingLaunch = false;
                     tv = pending.mTaskView;
                 } else {
-                    tv = findTaskView(chg.getTaskInfo());
-                    if (tv == null) {
-                        if (pending != null) {
-                            Slog.w(TAG, "Found a non-TaskView task in a TaskView Transition. This "
-                                    + "shouldn't happen, so there may be a visual artifact: "
-                                    + chg.getTaskInfo().taskId);
+                    tv = findTaskView(taskInfo);
+                    if (tv == null && pending != null) {
+                        if (BubbleAnythingFlagHelper.enableCreateAnyBubble()
+                                && chg.getMode() == TRANSIT_TO_FRONT
+                                && pending.mTaskView.getPendingInfo() != null
+                                && pending.mTaskView.getPendingInfo().taskId == taskInfo.taskId) {
+                            // In this case an existing task, not currently in TaskView, is
+                            // brought to the front to be moved into TaskView. This is still
+                            // "new" from TaskView's perspective. (e.g. task being moved into a
+                            // bubble)
+                            isNewInTaskView = true;
+                            stillNeedsMatchingLaunch = false;
+                            tv = pending.mTaskView;
+                        } else {
+                            Slog.w(TAG, "Found a non-TaskView task in a TaskView Transition. "
+                                    + "This shouldn't happen, so there may be a visual "
+                                    + "artifact: " + taskInfo.taskId);
                         }
-                        continue;
                     }
+                    if (tv == null) continue;
                 }
                 if (wct == null) wct = new WindowContainerTransaction();
-                tv.prepareOpenAnimation(taskIsNew, startTransaction, finishTransaction,
-                        chg.getTaskInfo(), chg.getLeash(), wct);
+                prepareOpenAnimation(tv, isNewInTaskView, startTransaction, finishTransaction,
+                        taskInfo, chg.getLeash(), wct);
                 changesHandled++;
             } else if (chg.getMode() == TRANSIT_CHANGE) {
-                TaskViewTaskController tv = findTaskView(chg.getTaskInfo());
+                TaskViewTaskController tv = findTaskView(taskInfo);
                 if (tv == null) {
                     if (pending != null) {
                         Slog.w(TAG, "Found a non-TaskView task in a TaskView Transition. This "
                                 + "shouldn't happen, so there may be a visual artifact: "
-                                + chg.getTaskInfo().taskId);
+                                + taskInfo.taskId);
                     }
                     continue;
                 }
-                startTransaction.reparent(chg.getLeash(), tv.getSurfaceControl());
-                finishTransaction.reparent(chg.getLeash(), tv.getSurfaceControl())
-                        .setPosition(chg.getLeash(), 0, 0);
+                final Rect boundsOnScreen = tv.prepareOpen(chg.getTaskInfo(), chg.getLeash());
+                if (boundsOnScreen != null) {
+                    if (wct == null) wct = new WindowContainerTransaction();
+                    updateBounds(tv, boundsOnScreen, startTransaction, finishTransaction,
+                            chg.getTaskInfo(), chg.getLeash(), wct);
+                } else {
+                    startTransaction.reparent(chg.getLeash(), tv.getSurfaceControl());
+                    finishTransaction.reparent(chg.getLeash(), tv.getSurfaceControl())
+                            .setPosition(chg.getLeash(), 0, 0);
+                }
                 changesHandled++;
             }
         }
@@ -509,5 +692,75 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         finishCallback.onTransitionFinished(wct);
         startNextTransition();
         return true;
+    }
+
+    @VisibleForTesting
+    public void prepareOpenAnimation(TaskViewTaskController taskView,
+            final boolean newTask,
+            SurfaceControl.Transaction startTransaction,
+            SurfaceControl.Transaction finishTransaction,
+            ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash,
+            WindowContainerTransaction wct) {
+        final Rect boundsOnScreen = taskView.prepareOpen(taskInfo, leash);
+        if (boundsOnScreen != null) {
+            updateBounds(taskView, boundsOnScreen, startTransaction, finishTransaction, taskInfo,
+                    leash, wct);
+        } else {
+            // The surface has already been destroyed before the task has appeared,
+            // so go ahead and hide the task entirely
+            wct.setHidden(taskInfo.token, true /* hidden */);
+            updateVisibilityState(taskView, false /* visible */);
+            // listener callback is below
+        }
+        if (newTask) {
+            mTaskOrganizer.setInterceptBackPressedOnTaskRoot(taskInfo.token, true /* intercept */);
+        }
+
+        if (taskInfo.taskDescription != null) {
+            int backgroundColor = taskInfo.taskDescription.getBackgroundColor();
+            taskView.setResizeBgColor(startTransaction, backgroundColor);
+        }
+
+        // After the embedded task has appeared, set it to non-trimmable. This is important
+        // to prevent recents from trimming and removing the embedded task.
+        wct.setTaskTrimmableFromRecents(taskInfo.token, false /* isTrimmableFromRecents */);
+
+        taskView.notifyAppeared(newTask);
+    }
+
+    private void updateBounds(TaskViewTaskController taskView, Rect boundsOnScreen,
+            SurfaceControl.Transaction startTransaction,
+            SurfaceControl.Transaction finishTransaction,
+            ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash,
+            WindowContainerTransaction wct) {
+        final SurfaceControl tvSurface = taskView.getSurfaceControl();
+        // Surface is ready, so just reparent the task to this surface control
+        startTransaction.reparent(leash, tvSurface)
+                .show(leash);
+        // Also reparent on finishTransaction since the finishTransaction will reparent back
+        // to its "original" parent by default.
+        if (finishTransaction != null) {
+            finishTransaction.reparent(leash, tvSurface)
+                    .setPosition(leash, 0, 0)
+                    .setWindowCrop(leash, boundsOnScreen.width(), boundsOnScreen.height());
+        }
+        if (useRepo()) {
+            final TaskViewRepository.TaskViewState state = mTaskViewRepo.byTaskView(taskView);
+            if (state != null) {
+                state.mBounds.set(boundsOnScreen);
+                state.mVisible = true;
+            }
+        } else {
+            updateBoundsState(taskView, boundsOnScreen);
+            updateVisibilityState(taskView, true /* visible */);
+        }
+        wct.setBounds(taskInfo.token, boundsOnScreen);
+        taskView.applyCaptionInsetsIfNeeded();
+    }
+
+    /** Interface for running an external transition in this object's pending queue. */
+    public interface ExternalTransition {
+        /** Starts a transition and returns an identifying key for lookup. */
+        IBinder start();
     }
 }

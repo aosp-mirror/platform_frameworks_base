@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.keyguard.data.repository
 
 import android.content.Context
@@ -37,7 +35,6 @@ import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.PowerButtonReveal
 import javax.inject.Inject
 import kotlin.math.max
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

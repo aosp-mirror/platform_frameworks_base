@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License
  */
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.common.ui.domain.interactor
 
 import android.content.res.Configuration
 import android.graphics.Rect
 import android.view.Surface
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -60,7 +58,7 @@ interface ConfigurationInteractor {
     val configurationValues: Flow<Configuration>
 
     /** Emits the current resolution scaling factor */
-    val scaleForResolution: Flow<Float>
+    val scaleForResolution: StateFlow<Float>
 
     /** Given [resourceId], emit the dimension pixel size on config change */
     fun dimensionPixelSize(resourceId: Int): Flow<Int>
@@ -121,5 +119,5 @@ class ConfigurationInteractorImpl(private val repository: ConfigurationRepositor
 
     override val configurationValues: Flow<Configuration> = repository.configurationValues
 
-    override val scaleForResolution: Flow<Float> = repository.scaleForResolution
+    override val scaleForResolution: StateFlow<Float> = repository.scaleForResolution
 }

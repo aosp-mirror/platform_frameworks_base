@@ -35,7 +35,6 @@ import com.android.systemui.scene.initialSceneKey
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceTimeBy
@@ -126,7 +125,6 @@ class CommunalSceneInteractorTest(flags: FlagsParameterization) : SysuiTestCase(
             assertThat(currentScene).isEqualTo(CommunalScenes.Communal)
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @DisableFlags(FLAG_SCENE_CONTAINER)
     @Test
     fun snapToSceneWithDelay() =

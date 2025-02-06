@@ -33,7 +33,6 @@ class AvalancheProvider
 @Inject
 constructor(
     private val broadcastDispatcher: BroadcastDispatcher,
-    private val logger: VisualInterruptionDecisionLogger,
     private val uiEventLogger: UiEventLogger,
 ) {
     val TAG = "AvalancheProvider"

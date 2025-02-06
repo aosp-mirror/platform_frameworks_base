@@ -33,11 +33,13 @@ import com.android.wm.shell.transition.Transitions;
  */
 public class BubblesTransitionObserver implements Transitions.TransitionObserver {
 
-    private BubbleController mBubbleController;
-    private BubbleData mBubbleData;
+    @NonNull
+    private final BubbleController mBubbleController;
+    @NonNull
+    private final BubbleData mBubbleData;
 
-    public BubblesTransitionObserver(BubbleController controller,
-            BubbleData bubbleData) {
+    public BubblesTransitionObserver(@NonNull BubbleController controller,
+            @NonNull BubbleData bubbleData) {
         mBubbleController = controller;
         mBubbleData = bubbleData;
     }
@@ -57,7 +59,7 @@ public class BubblesTransitionObserver implements Transitions.TransitionObserver
                     || mBubbleData.getSelectedBubble() == null) {
                 continue;
             }
-            int expandedId = mBubbleData.getSelectedBubble().getTaskId();
+            final int expandedId = mBubbleData.getSelectedBubble().getTaskId();
             // If the task id that's opening is the same as the expanded bubble, skip collapsing
             // because it is our bubble that is opening.
             if (expandedId != INVALID_TASK_ID && expandedId != taskInfo.taskId) {

@@ -222,13 +222,13 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
         RecentsMixedHandler mixer = null;
         Consumer<IBinder> setTransitionForMixer = null;
         for (int i = 0; i < mMixers.size(); ++i) {
-            setTransitionForMixer = mMixers.get(i).handleRecentsRequest(wct);
+            setTransitionForMixer = mMixers.get(i).handleRecentsRequest();
             if (setTransitionForMixer != null) {
                 mixer = mMixers.get(i);
                 break;
             }
         }
-        final int transitionType = Flags.enableShellTopTaskTracking()
+        final int transitionType = Flags.enableRecentsBookendTransition()
                 ? TRANSIT_START_RECENTS_TRANSITION
                 : TRANSIT_TO_FRONT;
         final IBinder transition = mTransitions.startTransition(transitionType,
@@ -307,7 +307,9 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
 
     @Override
     public void mergeAnimation(IBinder transition, TransitionInfo info,
-            SurfaceControl.Transaction t, IBinder mergeTarget,
+            @NonNull SurfaceControl.Transaction startT,
+            @NonNull SurfaceControl.Transaction finishT,
+            IBinder mergeTarget,
             Transitions.TransitionFinishCallback finishCallback) {
         final RecentsController controller = findController(mergeTarget);
         if (controller == null) {
@@ -315,7 +317,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                     "RecentsTransitionHandler.mergeAnimation: no controller found");
             return;
         }
-        controller.merge(info, t, mergeTarget, finishCallback);
+        controller.merge(info, startT, mergeTarget, finishCallback);
     }
 
     @Override
@@ -411,10 +413,12 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
             mInstanceId = System.identityHashCode(this);
             mListener = listener;
             mDeathHandler = () -> {
-                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                        "[%d] RecentsController.DeathRecipient: binder died", mInstanceId);
-                finishInner(mWillFinishToHome, false /* leaveHint */, null /* finishCb */,
-                        "deathRecipient");
+                mExecutor.execute(() -> {
+                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                            "[%d] RecentsController.DeathRecipient: binder died", mInstanceId);
+                    finishInner(mWillFinishToHome, false /* leaveHint */, null /* finishCb */,
+                            "deathRecipient");
+                });
             };
             try {
                 mListener.asBinder().linkToDeath(mDeathHandler, 0 /* flags */);
@@ -585,7 +589,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                 mListener.onAnimationStart(this,
                         apps.toArray(new RemoteAnimationTarget[apps.size()]),
                         new RemoteAnimationTarget[0],
-                        new Rect(0, 0, 0, 0), new Rect(), new Bundle());
+                        new Rect(0, 0, 0, 0), new Rect(), new Bundle(),
+                        null);
                 for (int i = 0; i < mStateListeners.size(); i++) {
                     mStateListeners.get(i).onTransitionStateChanged(TRANSITION_STATE_ANIMATING);
                 }
@@ -816,7 +821,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                 mListener.onAnimationStart(this,
                         apps.toArray(new RemoteAnimationTarget[apps.size()]),
                         wallpapers.toArray(new RemoteAnimationTarget[wallpapers.size()]),
-                        new Rect(0, 0, 0, 0), new Rect(), b);
+                        new Rect(0, 0, 0, 0), new Rect(), b, info);
                 for (int i = 0; i < mStateListeners.size(); i++) {
                     mStateListeners.get(i).onTransitionStateChanged(TRANSITION_STATE_ANIMATING);
                 }
@@ -917,7 +922,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                 return;
             }
 
-            if (Flags.enableShellTopTaskTracking()
+            if (Flags.enableRecentsBookendTransition()
                     && info.getType() == TRANSIT_END_RECENTS_TRANSITION
                     && mergeTarget == mTransition) {
                 // This is a pending finish, so merge the end transition to trigger completing the
@@ -1145,9 +1150,12 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                                 change, layer, info, t, mLeashMap);
                         appearedTargets[nextTargetIdx++] = target;
                         // reparent into the original `mInfo` since that's where we are animating.
-                        final int rootIdx = TransitionUtil.rootIndexFor(change, mInfo);
+                        final TransitionInfo.Root root = TransitionUtil.getRootFor(change, mInfo);
                         final boolean wasClosing = closingIdx >= 0;
-                        t.reparent(target.leash, mInfo.getRoot(rootIdx).getLeash());
+                        t.reparent(target.leash, root.getLeash());
+                        t.setPosition(target.leash,
+                                change.getStartAbsBounds().left - root.getOffset().x,
+                                change.getStartAbsBounds().top - root.getOffset().y);
                         t.setLayer(target.leash, layer);
                         if (wasClosing) {
                             // App was previously visible and is closing
@@ -1227,19 +1235,6 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
         }
 
         @Override
-        public TaskSnapshot screenshotTask(int taskId) {
-            try {
-                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                        "[%d] RecentsController.screenshotTask: taskId=%d", mInstanceId, taskId);
-                return ActivityTaskManager.getService().takeTaskSnapshot(taskId,
-                        true /* updateCache */);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to screenshot task", e);
-            }
-            return null;
-        }
-
-        @Override
         public void setInputConsumerEnabled(boolean enabled) {
             mExecutor.execute(() -> {
                 if (mFinishCB == null || !enabled) {
@@ -1286,14 +1281,19 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                     "requested"));
         }
 
+        /**
+         * @param runnerFinishCb The remote finish callback to run after finish is complete, this is
+         *                       not the same as mFinishCb which reports the transition is finished
+         *                       to WM.
+         */
         private void finishInner(boolean toHome, boolean sendUserLeaveHint,
                 IResultReceiver runnerFinishCb, String reason) {
             if (finishSyntheticTransition(runnerFinishCb, reason)) {
                 return;
             }
 
-            if (mFinishCB == null
-                    || (Flags.enableShellTopTaskTracking() && mPendingFinishTransition != null)) {
+            if (mFinishCB == null || (Flags.enableRecentsBookendTransition()
+                    && mPendingFinishTransition != null)) {
                 Slog.e(TAG, "Duplicate call to finish");
                 if (runnerFinishCb != null) {
                     try {
@@ -1312,7 +1312,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                     && !mWillFinishToHome
                     && mPausingTasks != null
                     && mState == STATE_NORMAL;
-            if (!Flags.enableShellTopTaskTracking()) {
+            if (!Flags.enableRecentsBookendTransition()) {
                 // This is only necessary when the recents transition is finished using a finishWCT,
                 // otherwise a new transition will notify the relevant observers
                 if (returningToApp && allAppsAreTranslucent(mPausingTasks)) {
@@ -1445,7 +1445,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                             // We need to clear the WCT to send finishWCT=null for Recents.
                             wct.clear();
 
-                            if (Flags.enableShellTopTaskTracking()) {
+                            if (Flags.enableRecentsBookendTransition()) {
                                 // In this case, we've already started the PIP transition, so we can
                                 // clean up immediately
                                 mPendingRunnerFinishCb = runnerFinishCb;
@@ -1457,7 +1457,12 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                 }
             }
 
-            if (Flags.enableShellTopTaskTracking()) {
+            // Notify the mixers of the pending finish
+            for (int i = 0; i < mMixers.size(); ++i) {
+                mMixers.get(i).handleFinishRecents(returningToApp, wct, t);
+            }
+
+            if (Flags.enableRecentsBookendTransition()) {
                 if (!wct.isEmpty()) {
                     ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                             "[%d] RecentsController.finishInner: "
@@ -1576,7 +1581,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
         /**
          * A temporary transition handler used with the pending finish transition, which runs the
          * cleanup/finish logic once the pending transition is merged/handled.
-         * This is only initialized if Flags.enableShellTopTaskTracking() is enabled.
+         * This is only initialized if Flags.enableRecentsBookendTransition() is enabled.
          */
         private class PendingFinishTransitionHandler implements Transitions.TransitionHandler {
             @Override
@@ -1655,15 +1660,22 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
      */
     public interface RecentsMixedHandler extends Transitions.TransitionHandler {
         /**
-         * Called when a recents request comes in. The handler can add operations to outWCT. If
-         * the handler wants to "accept" the transition, it should return a Consumer accepting the
-         * IBinder for the transition. If not, it should return `null`.
+         * Called when a recents request comes in. If the handler wants to "accept" the transition,
+         * it should return a Consumer accepting the IBinder for the transition. If not, it should
+         * return `null`.
          *
          * If a mixed-handler accepts this recents, it will be the de-facto handler for this
          * transition and is required to call the associated {@link #startAnimation},
          * {@link #mergeAnimation}, and {@link #onTransitionConsumed} methods.
          */
         @Nullable
-        Consumer<IBinder> handleRecentsRequest(WindowContainerTransaction outWCT);
+        Consumer<IBinder> handleRecentsRequest();
+
+        /**
+         * Called when a recents transition has finished, with a WCT and SurfaceControl Transaction
+         * that can be used to add to any changes needed to restore the state.
+         */
+        void handleFinishRecents(boolean returnToApp, @NonNull WindowContainerTransaction finishWct,
+                @NonNull SurfaceControl.Transaction finishT);
     }
 }

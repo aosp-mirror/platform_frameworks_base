@@ -29,7 +29,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -194,7 +193,6 @@ class UserSettingsProxyTest : SysuiTestCase() {
                 )
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun registerContentObserverForUserAsync_callbackAfterRegister() =
         testScope.runTest {

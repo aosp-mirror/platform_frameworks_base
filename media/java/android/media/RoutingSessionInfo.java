@@ -85,8 +85,7 @@ public final class RoutingSessionInfo implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface TransferReason {}
 
-    @NonNull
-    final String mId;
+    @NonNull final String mOriginalId;
     @Nullable
     final CharSequence mName;
     @Nullable
@@ -120,7 +119,7 @@ public final class RoutingSessionInfo implements Parcelable {
     RoutingSessionInfo(@NonNull Builder builder) {
         Objects.requireNonNull(builder, "builder must not be null.");
 
-        mId = builder.mId;
+        mOriginalId = builder.mOriginalId;
         mName = builder.mName;
         mOwnerPackageName = builder.mOwnerPackageName;
         mClientPackageName = builder.mClientPackageName;
@@ -148,8 +147,8 @@ public final class RoutingSessionInfo implements Parcelable {
     }
 
     RoutingSessionInfo(@NonNull Parcel src) {
-        mId = src.readString();
-        Preconditions.checkArgument(!TextUtils.isEmpty(mId));
+        mOriginalId = src.readString();
+        Preconditions.checkArgument(!TextUtils.isEmpty(mOriginalId));
 
         mName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(src);
         mOwnerPackageName = src.readString();
@@ -221,9 +220,9 @@ public final class RoutingSessionInfo implements Parcelable {
     @NonNull
     public String getId() {
         if (!TextUtils.isEmpty(mProviderId)) {
-            return MediaRouter2Utils.toUniqueId(mProviderId, mId);
+            return MediaRouter2Utils.toUniqueId(mProviderId, mOriginalId);
         } else {
-            return mId;
+            return mOriginalId;
         }
     }
 
@@ -236,12 +235,16 @@ public final class RoutingSessionInfo implements Parcelable {
     }
 
     /**
-     * Gets the original id set by {@link Builder#Builder(String, String)}.
+     * Gets the original id as assigned by the {@link MediaRoute2ProviderService route provider}.
+     *
+     * <p>This may be different from {@link #getId()}, which may convert this original id into a
+     * unique one by adding information about the provider that created this session info.
+     *
      * @hide
      */
     @NonNull
     public String getOriginalId() {
-        return mId;
+        return mOriginalId;
     }
 
     /**
@@ -423,7 +426,7 @@ public final class RoutingSessionInfo implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeString(mId);
+        dest.writeString(mOriginalId);
         dest.writeCharSequence(mName);
         dest.writeString(mOwnerPackageName);
         dest.writeString(mClientPackageName);
@@ -454,7 +457,7 @@ public final class RoutingSessionInfo implements Parcelable {
 
         String indent = prefix + "  ";
 
-        pw.println(indent + "mId=" + mId);
+        pw.println(indent + "mOriginalId=" + mOriginalId);
         pw.println(indent + "mName=" + mName);
         pw.println(indent + "mOwnerPackageName=" + mOwnerPackageName);
         pw.println(indent + "mClientPackageName=" + mClientPackageName);
@@ -485,7 +488,7 @@ public final class RoutingSessionInfo implements Parcelable {
         }
 
         RoutingSessionInfo other = (RoutingSessionInfo) obj;
-        return Objects.equals(mId, other.mId)
+        return Objects.equals(mOriginalId, other.mOriginalId)
                 && Objects.equals(mName, other.mName)
                 && Objects.equals(mOwnerPackageName, other.mOwnerPackageName)
                 && Objects.equals(mClientPackageName, other.mClientPackageName)
@@ -500,13 +503,13 @@ public final class RoutingSessionInfo implements Parcelable {
                 && (mTransferReason == other.mTransferReason)
                 && Objects.equals(mTransferInitiatorUserHandle, other.mTransferInitiatorUserHandle)
                 && Objects.equals(
-                mTransferInitiatorPackageName, other.mTransferInitiatorPackageName);
+                        mTransferInitiatorPackageName, other.mTransferInitiatorPackageName);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(
-                mId,
+                mOriginalId,
                 mName,
                 mOwnerPackageName,
                 mClientPackageName,
@@ -585,8 +588,7 @@ public final class RoutingSessionInfo implements Parcelable {
      * Builder class for {@link RoutingSessionInfo}.
      */
     public static final class Builder {
-        @NonNull
-        private final String mId;
+        @NonNull private final String mOriginalId;
         @Nullable
         private CharSequence mName;
         @Nullable
@@ -616,23 +618,22 @@ public final class RoutingSessionInfo implements Parcelable {
 
         /**
          * Constructor for builder to create {@link RoutingSessionInfo}.
-         * <p>
-         * In order to ensure ID uniqueness in {@link MediaRouter2} side, the value of
-         * {@link RoutingSessionInfo#getId()} can be different from what was set in
-         * {@link MediaRoute2ProviderService}.
-         * </p>
          *
-         * @param id ID of the session. Must not be empty.
-         * @param clientPackageName package name of the client app which uses this session.
-         *                          If is is unknown, then just use an empty string.
+         * <p>In order to ensure ID uniqueness in {@link MediaRouter2} side, the value of {@link
+         * RoutingSessionInfo#getId()} can be different from what was set in {@link
+         * MediaRoute2ProviderService}.
+         *
+         * @param originalId ID of the session. Must not be empty.
+         * @param clientPackageName package name of the client app which uses this session. If is is
+         *     unknown, then just use an empty string.
          * @see MediaRoute2Info#getId()
          */
-        public Builder(@NonNull String id, @NonNull String clientPackageName) {
-            if (TextUtils.isEmpty(id)) {
+        public Builder(@NonNull String originalId, @NonNull String clientPackageName) {
+            if (TextUtils.isEmpty(originalId)) {
                 throw new IllegalArgumentException("id must not be empty");
             }
 
-            mId = id;
+            mOriginalId = originalId;
             mClientPackageName =
                     Objects.requireNonNull(clientPackageName, "clientPackageName must not be null");
             mSelectedRoutes = new ArrayList<>();
@@ -648,9 +649,19 @@ public final class RoutingSessionInfo implements Parcelable {
          * @param sessionInfo the existing instance to copy data from.
          */
         public Builder(@NonNull RoutingSessionInfo sessionInfo) {
+            this(sessionInfo, sessionInfo.getOriginalId());
+        }
+
+        /**
+         * Builds upon the given {@code sessionInfo}, using the given {@link #getOriginalId()} for
+         * the id.
+         *
+         * @hide
+         */
+        public Builder(@NonNull RoutingSessionInfo sessionInfo, String originalId) {
             Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
 
-            mId = sessionInfo.mId;
+            mOriginalId = originalId;
             mName = sessionInfo.mName;
             mClientPackageName = sessionInfo.mClientPackageName;
             mProviderId = sessionInfo.mProviderId;

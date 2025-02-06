@@ -69,6 +69,7 @@ import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.headsup.PinnedStatus;
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUiForceExpanded;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.shared.NotificationContentAlphaOptimization;
@@ -369,7 +370,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
         row.onDensityOrFontScaleChanged();
 
-        verify(mockContainer).reInflateViews(any(), any());
+        verify(mockContainer).reInflateViews(any());
     }
 
     @Test
@@ -878,6 +879,85 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(PromotedNotificationUiForceExpanded.FLAG_NAME)
+    public void isExpanded_sensitivePromotedNotification_notExpanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setPromotedOngoing(true);
+        row.setSensitive(/* sensitive= */true, /* hideSensitive= */false);
+        row.setHideSensitiveForIntrinsicHeight(/* hideSensitive= */true);
+
+        // THEN
+        assertThat(row.isExpanded()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUiForceExpanded.FLAG_NAME)
+    public void isExpanded_promotedNotificationNotOnKeyguard_expanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setPromotedOngoing(true);
+        row.setOnKeyguard(false);
+
+        // THEN
+        assertThat(row.isExpanded()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUiForceExpanded.FLAG_NAME)
+    public void isExpanded_promotedNotificationAllowOnKeyguard_expanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setPromotedOngoing(true);
+        row.setOnKeyguard(true);
+
+        // THEN
+        assertThat(row.isExpanded(/* allowOnKeyguard = */ true)).isTrue();
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUiForceExpanded.FLAG_NAME)
+    public void isExpanded_promotedNotificationIgnoreLockscreenConstraints_expanded()
+            throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setPromotedOngoing(true);
+        row.setOnKeyguard(true);
+        row.setIgnoreLockscreenConstraints(true);
+
+        // THEN
+        assertThat(row.isExpanded()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUiForceExpanded.FLAG_NAME)
+    public void isExpanded_promotedNotificationSaveSpaceOnLockScreen_notExpanded()
+            throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setPromotedOngoing(true);
+        row.setOnKeyguard(true);
+        row.setSaveSpaceOnLockscreen(true);
+
+        // THEN
+        assertThat(row.isExpanded()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUiForceExpanded.FLAG_NAME)
+    public void isExpanded_promotedNotificationNotSaveSpaceOnLockScreen_expanded()
+            throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setPromotedOngoing(true);
+        row.setOnKeyguard(true);
+        row.setSaveSpaceOnLockscreen(false);
+
+        // THEN
+        assertThat(row.isExpanded()).isTrue();
+    }
+
+    @Test
     public void onDisappearAnimationFinished_shouldSetFalse_headsUpAnimatingAway()
             throws Exception {
         final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
@@ -939,6 +1019,57 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
                 user.getUid(1234), user);
 
         assertThat(row.getImageResolver().getContext()).isSameInstanceAs(userContext);
+    }
+
+    @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_NOTIFICATIONS_PINNED_HUN_IN_SHADE)
+    public void mustStayOnScreen_false() throws Exception {
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        assertThat(row.mustStayOnScreen()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_NOTIFICATIONS_PINNED_HUN_IN_SHADE)
+    public void mustStayOnScreen_isHeadsUp_markedAsSeen() throws Exception {
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        // When the row is a HUN
+        row.setHeadsUp(true);
+        //Then it must stay on screen
+        assertThat(row.mustStayOnScreen()).isTrue();
+        // And when the user has seen it
+        row.markHeadsUpSeen();
+        // Then it should NOT stay on screen anymore
+        assertThat(row.mustStayOnScreen()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_NOTIFICATIONS_PINNED_HUN_IN_SHADE)
+    public void mustStayOnScreen_isPinned_markedAsSeen() throws Exception {
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        // When a HUN is pinned
+        row.setHeadsUp(true);
+        row.setPinnedStatus(PinnedStatus.PinnedBySystem);
+        //Then it must stay on screen
+        assertThat(row.mustStayOnScreen()).isTrue();
+        // And when the user has seen it
+        row.markHeadsUpSeen();
+        // Then it should still stay on screen
+        assertThat(row.mustStayOnScreen()).isTrue();
+    }
+
+    @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_NOTIFICATIONS_PINNED_HUN_IN_SHADE)
+    public void mustStayOnScreen_isPinned_markedAsSeen_false() throws Exception {
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        // When a HUN is pinned
+        row.setHeadsUp(true);
+        row.setPinnedStatus(PinnedStatus.PinnedBySystem);
+        //Then it must stay on screen
+        assertThat(row.mustStayOnScreen()).isTrue();
+        // And when the user has seen it
+        row.markHeadsUpSeen();
+        // Then it should NOT stay on screen anymore
+        assertThat(row.mustStayOnScreen()).isFalse();
     }
 
     private void setDrawableIconsInImageView(CachingIconView icon, Drawable iconDrawable,

@@ -28,6 +28,8 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.MapSerializer;
+import com.android.internal.widget.remotecompose.core.serialize.SerializeTags;
 
 import java.util.List;
 
@@ -130,6 +132,20 @@ public class BackgroundModifierOperation extends DecoratorModifierOperation {
         return OP_CODE;
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer the WireBuffer
+     * @param x x coordinate of the background rect
+     * @param y y coordinate of the background rect
+     * @param width width of the background rect
+     * @param height height of the background rect
+     * @param r red component of the background color
+     * @param g green component of the background color
+     * @param b blue component of the background color
+     * @param a alpha component of the background color
+     * @param shapeType the shape of the background (RECTANGLE=0, CIRCLE=1)
+     */
     public static void apply(
             @NonNull WireBuffer buffer,
             float x,
@@ -205,6 +221,19 @@ public class BackgroundModifierOperation extends DecoratorModifierOperation {
                 .field(FLOAT, "g", "")
                 .field(FLOAT, "b", "")
                 .field(FLOAT, "a", "")
-                .field(FLOAT, "shapeType", "");
+                .field(FLOAT, "shapeType", "0 for RECTANGLE, 1 for CIRCLE");
+    }
+
+    @Override
+    public void serialize(MapSerializer serializer) {
+        serializer
+                .addTags(SerializeTags.MODIFIER)
+                .add("type", "BackgroundModifierOperation")
+                .add("x", mX)
+                .add("y", mY)
+                .add("width", mWidth)
+                .add("height", mHeight)
+                .add("color", mA, mR, mG, mB)
+                .add("shapeType", ShapeType.getString(mShapeType));
     }
 }

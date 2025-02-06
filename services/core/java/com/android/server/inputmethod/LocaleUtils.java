@@ -40,11 +40,10 @@ final class LocaleUtils {
     /**
      * Calculates a matching score for the single desired locale.
      *
+     * @param supported the locale supported by IME subtype
+     * @param desired   the locale preferred by user
+     * @return the score based on the locale matching for the default subtype enabling
      * @see LocaleUtils#filterByLanguage(List, LocaleExtractor, LocaleList, ArrayList)
-     *
-     * @param supported The locale supported by IME subtype.
-     * @param desired The locale preferred by user.
-     * @return A score based on the locale matching for the default subtype enabling.
      */
     @IntRange(from = 1, to = 4)
     private static byte calculateMatchingSubScore(@NonNull final ULocale supported,
@@ -88,7 +87,8 @@ final class LocaleUtils {
 
     private static final class ScoreEntry implements Comparable<ScoreEntry> {
         public int mIndex = -1;
-        @NonNull public final byte[] mScore;  // matching score of the i-th system languages.
+        @NonNull
+        public final byte[] mScore;  // matching score of the i-th system languages.
 
         ScoreEntry(@NonNull byte[] score, int index) {
             mScore = new byte[score.length];
@@ -121,10 +121,10 @@ final class LocaleUtils {
          * {@code right} is equal, do the same comparison to the next value. Finally if all values
          * in {@code left} and {@code right} are equal, {@code left} and {@code right} is equal.</p>
          *
-         * @param left The length must be equal to {@code right}.
-         * @param right The length must be equal to {@code left}.
+         * @param left  the length must be equal to {@code right}
+         * @param right the length must be equal to {@code left}
          * @return 1 if {@code left} is larger than {@code right}. -1 if {@code left} is less than
-         * {@code right}. 0 if {@code left} and {@code right} is equal.
+         * {@code right}. 0 if {@code left} and {@code right} is equal
          */
         @IntRange(from = -1, to = 1)
         private static int compare(@NonNull byte[] left, @NonNull byte[] right) {
@@ -155,12 +155,12 @@ final class LocaleUtils {
      * will be searched from {@code source} based on matching score. For the score design, see
      * {@link LocaleUtils#calculateMatchingSubScore(ULocale, ULocale)}</p>
      *
-     * @param sources Source items to be filtered.
-     * @param extractor Type converter from the source items to {@link Locale} object.
-     * @param preferredLocales Ordered list of locales with which the input items will be
-     * filtered.
-     * @param dest Destination into which the filtered items will be added.
-     * @param <T> Type of the data items.
+     * @param sources          source items to be filtered
+     * @param extractor        type converter from the source items to {@link Locale} object
+     * @param preferredLocales ordered list of locales with which the input items will be
+     *                         filtered
+     * @param dest             destination into which the filtered items will be added
+     * @param <T>              type of the data items
      */
     public static <T> void filterByLanguage(
             @NonNull List<T> sources,

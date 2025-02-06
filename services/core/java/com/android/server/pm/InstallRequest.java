@@ -1016,6 +1016,18 @@ final class InstallRequest {
         }
     }
 
+    public void onRestoreStarted() {
+        if (mPackageMetrics != null) {
+            mPackageMetrics.onStepStarted(PackageMetrics.STEP_RESTORE);
+        }
+    }
+
+    public void onRestoreFinished() {
+        if (mPackageMetrics != null) {
+            mPackageMetrics.onStepFinished(PackageMetrics.STEP_RESTORE);
+        }
+    }
+
     public void onDexoptFinished(DexoptResult dexoptResult) {
         // Only report external profile warnings when installing from adb. The goal is to warn app
         // developers if they have provided bad external profiles, so it's not beneficial to report

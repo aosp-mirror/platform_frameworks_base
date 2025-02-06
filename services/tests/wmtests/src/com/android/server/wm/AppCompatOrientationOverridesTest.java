@@ -275,7 +275,7 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
         @Override
         void onPostActivityCreation(@NonNull ActivityRecord activity) {
             super.onPostActivityCreation(activity);
-            spyOn(activity.mAppCompatController.getAppCompatAspectRatioPolicy());
+            spyOn(activity.mAppCompatController.getAspectRatioPolicy());
         }
 
         // Useful to reduce timeout during tests
@@ -335,7 +335,7 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
         }
 
         private AppCompatOrientationOverrides getTopOrientationOverrides() {
-            return activity().top().mAppCompatController.getAppCompatOrientationOverrides();
+            return activity().top().mAppCompatController.getOrientationOverrides();
         }
     }
 }

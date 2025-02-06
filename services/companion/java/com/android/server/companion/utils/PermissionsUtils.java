@@ -30,6 +30,7 @@ import static android.companion.AssociationRequest.DEVICE_PROFILE_GLASSES;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_NEARBY_DEVICE_STREAMING;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_SENSOR_DEVICE_STREAMING;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_WEARABLE_SENSING;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Binder.getCallingPid;
 import static android.os.Binder.getCallingUid;
@@ -39,6 +40,7 @@ import static android.os.UserHandle.getCallingUserId;
 import static com.android.server.companion.utils.RolesUtils.isRoleHolder;
 
 import static java.util.Collections.unmodifiableMap;
+import static java.util.Collections.unmodifiableSet;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -51,10 +53,12 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 
 import com.android.internal.app.IAppOpsService;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Utility methods for checking permissions required for accessing {@link CompanionDeviceManager}
@@ -63,6 +67,13 @@ import java.util.Map;
  * {@link Manifest.permission#REQUEST_COMPANION_SELF_MANAGED} etc.)
  */
 public final class PermissionsUtils {
+
+    private static final Set<String> SYSTEM_ONLY_DEVICE_PROFILES;
+    static {
+        final Set<String> set = new ArraySet<>();
+        set.add(DEVICE_PROFILE_WEARABLE_SENSING);
+        SYSTEM_ONLY_DEVICE_PROFILES = unmodifiableSet(set);
+    }
 
     private static final Map<String, String> DEVICE_PROFILE_TO_PERMISSION;
     static {
@@ -102,12 +113,18 @@ public final class PermissionsUtils {
         // Device profile can be null.
         if (deviceProfile == null) return;
 
-        if (!DEVICE_PROFILE_TO_PERMISSION.containsKey(deviceProfile)) {
+        if (!DEVICE_PROFILE_TO_PERMISSION.containsKey(deviceProfile)
+                && !SYSTEM_ONLY_DEVICE_PROFILES.contains(deviceProfile)) {
             throw new IllegalArgumentException("Unsupported device profile: " + deviceProfile);
         }
 
-        final String permission = DEVICE_PROFILE_TO_PERMISSION.get(deviceProfile);
-        if (context.checkPermission(permission, getCallingPid(), packageUid)
+        if (SYSTEM_ONLY_DEVICE_PROFILES.contains(deviceProfile) && getCallingUid() != SYSTEM_UID) {
+            throw new SecurityException("Caller must be system to associate with a device with "
+                    + deviceProfile + " profile.");
+        }
+
+        final String permission = DEVICE_PROFILE_TO_PERMISSION.getOrDefault(deviceProfile, null);
+        if (permission != null && context.checkPermission(permission, getCallingPid(), packageUid)
                 != PERMISSION_GRANTED) {
             throw new SecurityException("Application must hold " + permission + " to associate "
                     + "with a device with " + deviceProfile + " profile.");

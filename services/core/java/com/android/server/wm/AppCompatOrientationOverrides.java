@@ -113,7 +113,7 @@ class AppCompatOrientationOverrides {
         // Task to ensure that Activity Embedding is excluded.
         return mActivityRecord.isVisibleRequested() && mActivityRecord.getTaskFragment() != null
                 && mActivityRecord.getTaskFragment().getWindowingMode() == WINDOWING_MODE_FULLSCREEN
-                && mActivityRecord.mAppCompatController.getAppCompatOrientationOverrides()
+                && mActivityRecord.mAppCompatController.getOrientationOverrides()
                     .isOverrideRespectRequestedOrientationEnabled();
     }
 
@@ -144,7 +144,7 @@ class AppCompatOrientationOverrides {
         mOrientationOverridesState.updateOrientationRequestLoopState();
 
         return mOrientationOverridesState.shouldIgnoreRequestInLoop()
-                && !mActivityRecord.mAppCompatController.getAppCompatAspectRatioPolicy()
+                && !mActivityRecord.mAppCompatController.getAspectRatioPolicy()
                     .isLetterboxedForFixedOrientationAndAspectRatio();
     }
 

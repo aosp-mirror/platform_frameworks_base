@@ -117,6 +117,12 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
 
     @Override
     @NonNull
+    protected List<MediaRoute2Info> getTransferableRoutes(@NonNull RoutingSessionInfo info) {
+        return mRouterManager.getTransferableRoutes(info);
+    }
+
+    @Override
+    @NonNull
     protected List<MediaRoute2Info> getDeselectableRoutes(@NonNull RoutingSessionInfo info) {
         return mRouterManager.getDeselectableRoutes(info);
     }

@@ -167,14 +167,11 @@ constructor(
     ): MediaCommonViewModel.MediaRecommendations {
         return mediaRecs?.copy(
             key = commonModel.recsLoadingModel.key,
-            loadingEnabled =
-                interactor.isRecommendationActive() || mediaFlags.isPersistentSsCardEnabled(),
+            loadingEnabled = interactor.isRecommendationActive(),
         )
             ?: MediaCommonViewModel.MediaRecommendations(
                     key = commonModel.recsLoadingModel.key,
-                    loadingEnabled =
-                        interactor.isRecommendationActive() ||
-                            mediaFlags.isPersistentSsCardEnabled(),
+                    loadingEnabled = interactor.isRecommendationActive(),
                     recsViewModel = recommendationsViewModel,
                     onAdded = { commonViewModel ->
                         mediaLogger.logMediaRecommendationCardAdded(
@@ -217,9 +214,7 @@ constructor(
         commonViewModel: MediaCommonViewModel.MediaRecommendations
     ) {
         if (!interactor.isRecommendationActive()) {
-            if (!mediaFlags.isPersistentSsCardEnabled()) {
-                commonViewModel.onRemoved(true)
-            }
+            commonViewModel.onRemoved(true)
         }
     }
 

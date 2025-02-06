@@ -50,6 +50,7 @@ android_test {
         "junit-params",
         "core-tests-support",
         "guava",
+        "perfetto_trace_java_protos",
     ],
 
     libs: ["android.test.base.stubs.system"],

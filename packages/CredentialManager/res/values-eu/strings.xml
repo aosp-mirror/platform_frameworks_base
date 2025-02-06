@@ -72,7 +72,7 @@
     <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Erabili <xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gordetako pasahitza"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Erabili zure kontua <xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako"</string>
     <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Erabili pantailaren blokeoa <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioan <xliff:g id="USERNAME">%2$s</xliff:g> kontuarekin saioa hasteko"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Desblokeatu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioan saioa hasteko aukerak"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Desblokeatu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioan saioa hasteko moduak"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Aukeratu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gordetako sarbide-gakoa"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Aukeratu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gordetako pasahitza"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Aukeratu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gordetako saioa hasteko moduak"</string>
@@ -82,7 +82,7 @@
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Hasi saioa beste modu batean"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Ikusi aukerak"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Egin aurrera"</string>
-    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Saioa hasteko aukerak"</string>
+    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Saioa hasteko moduak"</string>
     <string name="button_label_view_more" msgid="3429098227286495651">"Ikusi gehiago"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> erabiltzailearenak"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Blokeatutako pasahitz-kudeatzaileak"</string>

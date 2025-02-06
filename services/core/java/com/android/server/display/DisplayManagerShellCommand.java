@@ -112,6 +112,8 @@ class DisplayManagerShellCommand extends ShellCommand {
                 return requestDisplayPower(Display.STATE_UNKNOWN);
             case "power-off":
                 return requestDisplayPower(Display.STATE_OFF);
+            case "override-max-importance-rr-callbacks":
+                return overrideMaxImportanceForRRCallbacks();
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -179,12 +181,10 @@ class DisplayManagerShellCommand extends ShellCommand {
         pw.println("    Sets brightness to docked + idle screen brightness mode");
         pw.println("  undock");
         pw.println("    Sets brightness to active (normal) screen brightness mode");
-        if (mFlags.isConnectedDisplayManagementEnabled()) {
-            pw.println("  enable-display DISPLAY_ID");
-            pw.println("    Enable the DISPLAY_ID. Only possible if this is a connected display.");
-            pw.println("  disable-display DISPLAY_ID");
-            pw.println("    Disable the DISPLAY_ID. Only possible if this is a connected display.");
-        }
+        pw.println("  enable-display DISPLAY_ID");
+        pw.println("    Enable the DISPLAY_ID. Only possible if this is a connected display.");
+        pw.println("  disable-display DISPLAY_ID");
+        pw.println("    Disable the DISPLAY_ID. Only possible if this is a connected display.");
         pw.println("  power-reset DISPLAY_ID");
         pw.println("    Turn the DISPLAY_ID power to a state the display supposed to have.");
         pw.println("  power-off DISPLAY_ID");
@@ -601,11 +601,6 @@ class DisplayManagerShellCommand extends ShellCommand {
     }
 
     private int setDisplayEnabled(boolean enable) {
-        if (!mFlags.isConnectedDisplayManagementEnabled()) {
-            getErrPrintWriter()
-                    .println("Error: external display management is not available on this device.");
-            return 1;
-        }
         final String displayIdText = getNextArg();
         if (displayIdText == null) {
             getErrPrintWriter().println("Error: no displayId specified");
@@ -636,6 +631,23 @@ class DisplayManagerShellCommand extends ShellCommand {
             return 1;
         }
         mService.requestDisplayPower(displayId, state);
+        return 0;
+    }
+
+    private int overrideMaxImportanceForRRCallbacks() {
+        final String importanceString = getNextArg();
+        if (importanceString == null) {
+            getErrPrintWriter().println("Error: no importance specified");
+            return 1;
+        }
+        final int importance;
+        try {
+            importance = Integer.parseInt(importanceString);
+        } catch (NumberFormatException e) {
+            getErrPrintWriter().println("Error: invalid importance: '" + importanceString + "'");
+            return 1;
+        }
+        mService.overrideMaxImportanceForRRCallbacks(importance);
         return 0;
     }
 }

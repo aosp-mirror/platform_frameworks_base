@@ -19,6 +19,8 @@ package com.android.wm.shell.pip2.animation;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -33,6 +35,7 @@ import android.view.SurfaceControl;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.wm.shell.R;
 import com.android.wm.shell.pip2.PipSurfaceTransactionHelper;
 
 import org.junit.Before;
@@ -48,6 +51,8 @@ import org.mockito.MockitoAnnotations;
 @TestableLooper.RunWithLooper
 @RunWith(AndroidTestingRunner.class)
 public class PipAlphaAnimatorTest {
+    private static final float TEST_CORNER_RADIUS = 1f;
+    private static final float TEST_SHADOW_RADIUS = 2f;
 
     @Mock private Context mMockContext;
 
@@ -55,7 +60,9 @@ public class PipAlphaAnimatorTest {
 
     @Mock private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory mMockFactory;
 
-    @Mock private SurfaceControl.Transaction mMockTransaction;
+    @Mock private SurfaceControl.Transaction mMockAnimateTransaction;
+    @Mock private SurfaceControl.Transaction mMockStartTransaction;
+    @Mock private SurfaceControl.Transaction mMockFinishTransaction;
 
     @Mock private Runnable mMockStartCallback;
 
@@ -69,9 +76,15 @@ public class PipAlphaAnimatorTest {
         MockitoAnnotations.initMocks(this);
         when(mMockContext.getResources()).thenReturn(mMockResources);
         when(mMockResources.getInteger(anyInt())).thenReturn(0);
-        when(mMockFactory.getTransaction()).thenReturn(mMockTransaction);
-        when(mMockTransaction.setAlpha(any(SurfaceControl.class), anyFloat()))
-                .thenReturn(mMockTransaction);
+        when(mMockFactory.getTransaction()).thenReturn(mMockAnimateTransaction);
+        when(mMockResources.getDimensionPixelSize(R.dimen.pip_corner_radius))
+                .thenReturn((int) TEST_CORNER_RADIUS);
+        when(mMockResources.getDimensionPixelSize(R.dimen.pip_shadow_radius))
+                .thenReturn((int) TEST_SHADOW_RADIUS);
+
+        prepareTransaction(mMockAnimateTransaction);
+        prepareTransaction(mMockStartTransaction);
+        prepareTransaction(mMockFinishTransaction);
 
         mTestLeash = new SurfaceControl.Builder()
                 .setContainerLayer()
@@ -82,8 +95,8 @@ public class PipAlphaAnimatorTest {
 
     @Test
     public void setAnimationStartCallback_fadeInAnimator_callbackStartCallback() {
-        mPipAlphaAnimator = new PipAlphaAnimator(mMockContext, mTestLeash, mMockTransaction,
-                PipAlphaAnimator.FADE_IN);
+        mPipAlphaAnimator = new PipAlphaAnimator(mMockContext, mTestLeash, mMockStartTransaction,
+                mMockFinishTransaction, PipAlphaAnimator.FADE_IN);
 
         mPipAlphaAnimator.setAnimationStartCallback(mMockStartCallback);
         mPipAlphaAnimator.setAnimationEndCallback(mMockEndCallback);
@@ -98,8 +111,8 @@ public class PipAlphaAnimatorTest {
 
     @Test
     public void setAnimationEndCallback_fadeInAnimator_callbackStartAndEndCallback() {
-        mPipAlphaAnimator = new PipAlphaAnimator(mMockContext, mTestLeash, mMockTransaction,
-                PipAlphaAnimator.FADE_IN);
+        mPipAlphaAnimator = new PipAlphaAnimator(mMockContext, mTestLeash, mMockStartTransaction,
+                mMockFinishTransaction, PipAlphaAnimator.FADE_IN);
 
         mPipAlphaAnimator.setAnimationStartCallback(mMockStartCallback);
         mPipAlphaAnimator.setAnimationEndCallback(mMockEndCallback);
@@ -109,36 +122,98 @@ public class PipAlphaAnimatorTest {
         });
 
         verify(mMockStartCallback).run();
-        verify(mMockStartCallback).run();
+        verify(mMockEndCallback).run();
+    }
+
+    @Test
+    public void onAnimationStart_setCornerAndShadowRadii() {
+        mPipAlphaAnimator = new PipAlphaAnimator(mMockContext, mTestLeash, mMockStartTransaction,
+                mMockFinishTransaction, PipAlphaAnimator.FADE_IN);
+        mPipAlphaAnimator.setSurfaceControlTransactionFactory(mMockFactory);
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            mPipAlphaAnimator.start();
+            mPipAlphaAnimator.pause();
+        });
+
+        verify(mMockStartTransaction, atLeastOnce())
+                .setCornerRadius(eq(mTestLeash), eq(TEST_CORNER_RADIUS));
+        verify(mMockStartTransaction, atLeastOnce())
+                .setShadowRadius(eq(mTestLeash), eq(TEST_SHADOW_RADIUS));
+    }
+
+    @Test
+    public void onAnimationUpdate_setCornerAndShadowRadii() {
+        mPipAlphaAnimator = new PipAlphaAnimator(mMockContext, mTestLeash, mMockStartTransaction,
+                mMockFinishTransaction, PipAlphaAnimator.FADE_IN);
+        mPipAlphaAnimator.setSurfaceControlTransactionFactory(mMockFactory);
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            mPipAlphaAnimator.start();
+            mPipAlphaAnimator.pause();
+        });
+
+        verify(mMockAnimateTransaction, atLeastOnce())
+                .setCornerRadius(eq(mTestLeash), eq(TEST_CORNER_RADIUS));
+        verify(mMockAnimateTransaction, atLeastOnce())
+                .setShadowRadius(eq(mTestLeash), eq(TEST_SHADOW_RADIUS));
+    }
+
+    @Test
+    public void onAnimationEnd_setCornerAndShadowRadii() {
+        mPipAlphaAnimator = new PipAlphaAnimator(mMockContext, mTestLeash, mMockStartTransaction,
+                mMockFinishTransaction, PipAlphaAnimator.FADE_IN);
+        mPipAlphaAnimator.setSurfaceControlTransactionFactory(mMockFactory);
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            mPipAlphaAnimator.start();
+            mPipAlphaAnimator.end();
+        });
+
+        verify(mMockFinishTransaction, atLeastOnce())
+                .setCornerRadius(eq(mTestLeash), eq(TEST_CORNER_RADIUS));
+        verify(mMockFinishTransaction, atLeastOnce())
+                .setShadowRadius(eq(mTestLeash), eq(TEST_SHADOW_RADIUS));
     }
 
     @Test
     public void onAnimationEnd_fadeInAnimator_leashVisibleAtEnd() {
-        mPipAlphaAnimator = new PipAlphaAnimator(mMockContext, mTestLeash, mMockTransaction,
-                PipAlphaAnimator.FADE_IN);
+        mPipAlphaAnimator = new PipAlphaAnimator(mMockContext, mTestLeash, mMockStartTransaction,
+                mMockFinishTransaction, PipAlphaAnimator.FADE_IN);
         mPipAlphaAnimator.setSurfaceControlTransactionFactory(mMockFactory);
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mPipAlphaAnimator.start();
-            clearInvocations(mMockTransaction);
+            clearInvocations(mMockAnimateTransaction);
             mPipAlphaAnimator.end();
         });
 
-        verify(mMockTransaction).setAlpha(mTestLeash, 1.0f);
+        verify(mMockAnimateTransaction).setAlpha(mTestLeash, 1.0f);
     }
 
     @Test
     public void onAnimationEnd_fadeOutAnimator_leashInvisibleAtEnd() {
-        mPipAlphaAnimator = new PipAlphaAnimator(mMockContext, mTestLeash, mMockTransaction,
-                PipAlphaAnimator.FADE_OUT);
+        mPipAlphaAnimator = new PipAlphaAnimator(mMockContext, mTestLeash, mMockStartTransaction,
+                mMockFinishTransaction, PipAlphaAnimator.FADE_OUT);
         mPipAlphaAnimator.setSurfaceControlTransactionFactory(mMockFactory);
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mPipAlphaAnimator.start();
-            clearInvocations(mMockTransaction);
+            clearInvocations(mMockAnimateTransaction);
             mPipAlphaAnimator.end();
         });
 
-        verify(mMockTransaction).setAlpha(mTestLeash, 0f);
+        verify(mMockAnimateTransaction).setAlpha(mTestLeash, 0f);
+    }
+
+
+    // set up transaction chaining
+    private void prepareTransaction(SurfaceControl.Transaction tx) {
+        when(tx.setAlpha(any(SurfaceControl.class), anyFloat()))
+                .thenReturn(tx);
+        when(tx.setCornerRadius(any(SurfaceControl.class), anyFloat()))
+                .thenReturn(tx);
+        when(tx.setShadowRadius(any(SurfaceControl.class), anyFloat()))
+                .thenReturn(tx);
     }
 }

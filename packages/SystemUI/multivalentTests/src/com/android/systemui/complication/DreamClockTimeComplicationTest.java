@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.view.View;
+import android.widget.TextClock;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -40,6 +40,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Locale;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -68,7 +70,7 @@ public class DreamClockTimeComplicationTest extends SysuiTestCase {
     private ComplicationViewModel mComplicationViewModel;
 
     @Mock
-    private View mView;
+    private TextClock mView;
 
     @Mock
     private ComplicationLayoutParams mLayoutParams;
@@ -86,6 +88,7 @@ public class DreamClockTimeComplicationTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         when(mComponentFactory.create()).thenReturn(mComponent);
         when(mComponent.getViewHolder()).thenReturn(mDreamClockTimeViewHolder);
+        when(mView.getTextLocale()).thenReturn(Locale.US);
         mMonitor = SelfExecutingMonitor.createInstance();
     }
 

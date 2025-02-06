@@ -361,7 +361,11 @@ public class ParcelTest {
 
         p.setClassCookie(ParcelTest.class, "to_be_discarded_cookie");
         p.recycle();
-        assertThat(p.getClassCookie(ParcelTest.class)).isNull();
+
+        // cannot access Parcel after it's recycled!
+        // this test is equivalent to checking hasClassCookie false
+        // after obtaining above
+        // assertThat(p.getClassCookie(ParcelTest.class)).isNull();
     }
 
     @Test

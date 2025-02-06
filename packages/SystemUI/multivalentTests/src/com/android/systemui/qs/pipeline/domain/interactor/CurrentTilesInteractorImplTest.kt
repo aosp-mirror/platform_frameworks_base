@@ -57,7 +57,6 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import com.google.protobuf.nano.MessageNano
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -74,7 +73,6 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class CurrentTilesInteractorImplTest : SysuiTestCase() {
 
     private val tileSpecRepository: TileSpecRepository = FakeTileSpecRepository()

@@ -550,10 +550,11 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
 
     @Test
     @UseTestDisplay
-    public void testRemove_reparentToDefault() {
+    public void testPrepareForRemoval_reparentToDefault() {
         final Task task = createTask(mDisplayContent);
         final TaskDisplayArea displayArea = task.getDisplayArea();
-        displayArea.remove();
+        displayArea.prepareForRemoval();
+        assertTrue(displayArea.shouldKeepNoTask());
         assertTrue(displayArea.isRemoved());
         assertFalse(displayArea.hasChild());
 
@@ -565,11 +566,12 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
 
     @Test
     @UseTestDisplay
-    public void testRemove_rootTaskCreatedByOrganizer() {
+    public void testPrepareForRemoval_rootTaskCreatedByOrganizer() {
         final Task task = createTask(mDisplayContent);
         task.mCreatedByOrganizer = true;
         final TaskDisplayArea displayArea = task.getDisplayArea();
-        displayArea.remove();
+        displayArea.prepareForRemoval();
+        assertTrue(displayArea.shouldKeepNoTask());
         assertTrue(displayArea.isRemoved());
         assertFalse(displayArea.hasChild());
 

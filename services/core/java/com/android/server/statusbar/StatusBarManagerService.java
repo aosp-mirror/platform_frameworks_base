@@ -95,7 +95,6 @@ import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
-import android.view.accessibility.Flags;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -358,11 +357,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     public void onDisplayChanged(int displayId) {}
 
     /**
-     * Private API used by NotificationManagerService.
+     * Private API used by NotificationManagerService and other system services.
      */
     private final StatusBarManagerInternal mInternalService = new StatusBarManagerInternal() {
-        private boolean mNotificationLightOn;
-
         @Override
         public void setNotificationDelegate(NotificationDelegate delegate) {
             mNotificationDelegate = delegate;
@@ -773,10 +770,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void onDisplayReady(int displayId) {
+        public void onDisplayAddSystemDecorations(int displayId) {
             if (isVisibleBackgroundUserOnDisplay(displayId)) {
                 if (SPEW) {
-                    Slog.d(TAG, "Skipping onDisplayReady for visible background user "
+                    Slog.d(TAG, "Skipping onDisplayAddSystemDecorations for visible background "
+                            + "user "
                             + mUserManagerInternal.getUserAssignedToDisplay(displayId));
                 }
                 return;
@@ -784,7 +782,27 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             IStatusBar bar = mBar;
             if (bar != null) {
                 try {
-                    bar.onDisplayReady(displayId);
+                    bar.onDisplayAddSystemDecorations(displayId);
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
+        public void onDisplayRemoveSystemDecorations(int displayId) {
+            if (isVisibleBackgroundUserOnDisplay(displayId)) {
+                if (SPEW) {
+                    Slog.d(TAG,
+                            "Skipping onDisplayRemoveSystemDecorations for visible background "
+                                    + "user "
+                                    + mUserManagerInternal.getUserAssignedToDisplay(displayId));
+                }
+                return;
+            }
+
+            IStatusBar bar = mBar;
+            if (bar != null) {
+                try {
+                    bar.onDisplayRemoveSystemDecorations(displayId);
                 } catch (RemoteException ex) {}
             }
         }
@@ -981,16 +999,17 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         @Override
         public void addQsTileToFrontOrEnd(ComponentName tile, boolean end) {
-            if (Flags.a11yQsShortcut()) {
-                StatusBarManagerService.this.addQsTileToFrontOrEnd(tile, end);
-            }
+            StatusBarManagerService.this.addQsTileToFrontOrEnd(tile, end);
         }
 
         @Override
         public void removeQsTile(ComponentName tile) {
-            if (Flags.a11yQsShortcut()) {
-                StatusBarManagerService.this.remTile(tile);
-            }
+            StatusBarManagerService.this.remTile(tile);
+        }
+
+        @Override
+        public void passThroughShellCommand(String[] args, FileDescriptor fd) {
+            StatusBarManagerService.this.passThroughShellCommand(args, fd);
         }
     };
 
@@ -1098,19 +1117,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     public void addTile(ComponentName component) {
-        if (Flags.a11yQsShortcut()) {
-            addQsTileToFrontOrEnd(component, false);
-        } else {
-            enforceStatusBarOrShell();
-            enforceValidCallingUser();
-
-            if (mBar != null) {
-                try {
-                    mBar.addQsTile(component);
-                } catch (RemoteException ex) {
-                }
-            }
-        }
+        addQsTileToFrontOrEnd(component, false);
     }
 
     private void addQsTileToFrontOrEnd(ComponentName tile, boolean end) {
@@ -1528,10 +1535,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             getUiState(displayId).setImeWindowState(vis, backDisposition, showImeSwitcher);
 
             mHandler.post(() -> {
-                if (mBar == null) return;
-                try {
-                    mBar.setImeWindowStatus(displayId, vis, backDisposition, showImeSwitcher);
-                } catch (RemoteException ex) { }
+                IStatusBar bar = mBar;
+                if (bar != null) {
+                    try {
+                        bar.setImeWindowStatus(displayId, vis, backDisposition, showImeSwitcher);
+                    } catch (RemoteException ex) {
+                    }
+                }
             });
         }
     }
@@ -2185,20 +2195,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             Binder.restoreCallingIdentity(identity);
         }
     }
-
-    /**
-     *  Called when the notification should be unbundled.
-     * @param key the notification key
-     */
-    @Override
-    public void unbundleNotification(@Nullable String key) {
-        enforceStatusBarService();
-        enforceValidCallingUser();
-        Binder.withCleanCallingIdentity(() -> {
-            mNotificationDelegate.unbundleNotification(key);
-        });
-    }
-
 
     @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,

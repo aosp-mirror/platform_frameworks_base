@@ -24,7 +24,6 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
-import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -35,7 +34,17 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class QSColumnsRepositoryTest : SysuiTestCase() {
-    private val kosmos = testKosmos()
+    private val kosmos =
+        testKosmos().apply {
+            testCase.context.orCreateTestableResources.addOverride(
+                R.integer.quick_settings_dual_shade_num_columns,
+                2,
+            )
+            testCase.context.orCreateTestableResources.addOverride(
+                R.integer.quick_settings_split_shade_num_columns,
+                3,
+            )
+        }
     private lateinit var underTest: QSColumnsRepository
 
     @Before
@@ -63,7 +72,7 @@ class QSColumnsRepositoryTest : SysuiTestCase() {
             testScope.runTest {
                 val latest by collectLastValue(underTest.dualShadeColumns)
 
-                assertThat(latest).isEqualTo(4)
+                assertThat(latest).isEqualTo(2)
             }
         }
 
@@ -72,9 +81,8 @@ class QSColumnsRepositoryTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 val latest by collectLastValue(underTest.splitShadeColumns)
-                fakeShadeRepository.setShadeLayoutWide(true)
 
-                assertThat(latest).isEqualTo(4)
+                assertThat(latest).isEqualTo(3)
             }
         }
 

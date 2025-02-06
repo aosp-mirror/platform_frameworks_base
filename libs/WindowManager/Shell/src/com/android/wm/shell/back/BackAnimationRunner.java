@@ -106,11 +106,12 @@ public class BackAnimationRunner {
 
     private Runnable mFinishedCallback;
     private RemoteAnimationTarget[] mApps;
-    private IRemoteAnimationFinishedCallback mRemoteCallback;
+    private RemoteAnimationFinishedStub mRemoteCallback;
 
     private static class RemoteAnimationFinishedStub extends IRemoteAnimationFinishedCallback.Stub {
         //the binder callback should not hold strong reference to it to avoid memory leak.
-        private WeakReference<BackAnimationRunner> mRunnerRef;
+        private final WeakReference<BackAnimationRunner> mRunnerRef;
+        private boolean mAbandoned;
 
         private RemoteAnimationFinishedStub(BackAnimationRunner runner) {
             mRunnerRef = new WeakReference<>(runner);
@@ -118,23 +119,29 @@ public class BackAnimationRunner {
 
         @Override
         public void onAnimationFinished() {
-            BackAnimationRunner runner = mRunnerRef.get();
+            synchronized (this) {
+                if (mAbandoned) {
+                    return;
+                }
+            }
+            final BackAnimationRunner runner = mRunnerRef.get();
             if (runner == null) {
                 return;
             }
-            if (runner.shouldMonitorCUJ(runner.mApps)) {
-                InteractionJankMonitor.getInstance().end(runner.mCujType);
-            }
+            runner.onAnimationFinish(this);
+        }
 
-            runner.mFinishedCallback.run();
-            for (int i = runner.mApps.length - 1; i >= 0; --i) {
-                 SurfaceControl sc = runner.mApps[i].leash;
-                 if (sc != null && sc.isValid()) {
-                     sc.release();
-                 }
+        void abandon() {
+            synchronized (this) {
+                mAbandoned = true;
+                final BackAnimationRunner runner = mRunnerRef.get();
+                if (runner == null) {
+                    return;
+                }
+                if (runner.shouldMonitorCUJ(runner.mApps)) {
+                    InteractionJankMonitor.getInstance().end(runner.mCujType);
+                }
             }
-            runner.mApps = null;
-            runner.mFinishedCallback = null;
         }
     }
 
@@ -144,13 +151,16 @@ public class BackAnimationRunner {
      */
     void startAnimation(RemoteAnimationTarget[] apps, RemoteAnimationTarget[] wallpapers,
             RemoteAnimationTarget[] nonApps, Runnable finishedCallback) {
-        InteractionJankMonitor interactionJankMonitor = InteractionJankMonitor.getInstance();
+        if (mRemoteCallback != null) {
+            mRemoteCallback.abandon();
+            mRemoteCallback = null;
+        }
+        mRemoteCallback = new RemoteAnimationFinishedStub(this);
         mFinishedCallback = finishedCallback;
         mApps = apps;
-        if (mRemoteCallback == null) mRemoteCallback = new RemoteAnimationFinishedStub(this);
         mWaitingAnimation = false;
         if (shouldMonitorCUJ(apps)) {
-            interactionJankMonitor.begin(
+            InteractionJankMonitor.getInstance().begin(
                     apps[0].leash, mContext, mHandler, mCujType);
         }
         try {
@@ -159,6 +169,28 @@ public class BackAnimationRunner {
         } catch (RemoteException e) {
             Log.w(TAG, "Failed call onAnimationStart", e);
         }
+    }
+
+    void onAnimationFinish(RemoteAnimationFinishedStub finished) {
+        mHandler.post(() -> {
+            if (mRemoteCallback != null && finished != mRemoteCallback) {
+                return;
+            }
+            if (shouldMonitorCUJ(mApps)) {
+                InteractionJankMonitor.getInstance().end(mCujType);
+            }
+
+            mFinishedCallback.run();
+            for (int i = mApps.length - 1; i >= 0; --i) {
+                final SurfaceControl sc = mApps[i].leash;
+                if (sc != null && sc.isValid()) {
+                    sc.release();
+                }
+            }
+            mApps = null;
+            mFinishedCallback = null;
+            mRemoteCallback = null;
+        });
     }
 
     @VisibleForTesting

@@ -38,7 +38,6 @@ import com.android.systemui.volume.localMediaRepository
 import com.android.systemui.volume.mediaControllerRepository
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.TestMediaDevicesFactory
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -51,7 +50,6 @@ import org.mockito.kotlin.whenever
 
 private const val builtInDeviceName = "This phone"
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)

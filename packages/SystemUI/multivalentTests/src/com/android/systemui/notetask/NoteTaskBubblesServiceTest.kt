@@ -64,41 +64,41 @@ internal class NoteTaskBubblesServiceTest : SysuiTestCase() {
     }
 
     @Test
-    fun showOrHideAppBubble_defaultExpandBehavior_shouldCallBubblesApi() {
+    fun showOrHideNoteBubble_defaultExpandBehavior_shouldCallBubblesApi() {
         val intent = Intent()
         val user = UserHandle.SYSTEM
         val icon = Icon.createWithResource(context, R.drawable.ic_note_task_shortcut_widget)
         val bubbleExpandBehavior = NoteTaskBubbleExpandBehavior.DEFAULT
         whenever(bubbles.isBubbleExpanded(any())).thenReturn(false)
 
-        createServiceBinder().showOrHideAppBubble(intent, user, icon, bubbleExpandBehavior)
+        createServiceBinder().showOrHideNoteBubble(intent, user, icon, bubbleExpandBehavior)
 
-        verify(bubbles).showOrHideAppBubble(intent, user, icon)
+        verify(bubbles).showOrHideNoteBubble(intent, user, icon)
     }
 
     @Test
-    fun showOrHideAppBubble_keepIfExpanded_bubbleShown_shouldNotCallBubblesApi() {
+    fun showOrHideNoteBubble_keepIfExpanded_bubbleShown_shouldNotCallBubblesApi() {
         val intent = Intent().apply { setPackage("test") }
         val user = UserHandle.SYSTEM
         val icon = Icon.createWithResource(context, R.drawable.ic_note_task_shortcut_widget)
         val bubbleExpandBehavior = NoteTaskBubbleExpandBehavior.KEEP_IF_EXPANDED
         whenever(bubbles.isBubbleExpanded(any())).thenReturn(true)
 
-        createServiceBinder().showOrHideAppBubble(intent, user, icon, bubbleExpandBehavior)
+        createServiceBinder().showOrHideNoteBubble(intent, user, icon, bubbleExpandBehavior)
 
-        verify(bubbles, never()).showOrHideAppBubble(intent, user, icon)
+        verify(bubbles, never()).showOrHideNoteBubble(intent, user, icon)
     }
 
     @Test
-    fun showOrHideAppBubble_keepIfExpanded_bubbleNotShown_shouldCallBubblesApi() {
+    fun showOrHideNoteBubble_keepIfExpanded_bubbleNotShown_shouldCallBubblesApi() {
         val intent = Intent().apply { setPackage("test") }
         val user = UserHandle.SYSTEM
         val icon = Icon.createWithResource(context, R.drawable.ic_note_task_shortcut_widget)
         val bubbleExpandBehavior = NoteTaskBubbleExpandBehavior.KEEP_IF_EXPANDED
         whenever(bubbles.isBubbleExpanded(any())).thenReturn(false)
 
-        createServiceBinder().showOrHideAppBubble(intent, user, icon, bubbleExpandBehavior)
+        createServiceBinder().showOrHideNoteBubble(intent, user, icon, bubbleExpandBehavior)
 
-        verify(bubbles).showOrHideAppBubble(intent, user, icon)
+        verify(bubbles).showOrHideNoteBubble(intent, user, icon)
     }
 }

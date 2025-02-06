@@ -16,13 +16,11 @@
 
 package com.android.systemui.bouncer.ui.composable
 
+import androidx.annotation.VisibleForTesting
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
-import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout
-import com.android.systemui.bouncer.ui.helper.SizeClass
-import com.android.systemui.bouncer.ui.helper.calculateLayoutInternal
 
 /**
  * Returns the [BouncerSceneLayout] that should be used by the bouncer scene. If
@@ -56,4 +54,51 @@ private fun WindowHeightSizeClass.toEnum(): SizeClass {
         WindowHeightSizeClass.Expanded -> SizeClass.EXPANDED
         else -> error("Unsupported WindowHeightSizeClass \"$this\"")
     }
+}
+
+/** Enumerates all known adaptive layout configurations. */
+enum class BouncerSceneLayout {
+    /** The default UI with the bouncer laid out normally. */
+    STANDARD_BOUNCER,
+    /** The bouncer is displayed vertically stacked with the user switcher. */
+    BELOW_USER_SWITCHER,
+    /** The bouncer is displayed side-by-side with the user switcher or an empty space. */
+    BESIDE_USER_SWITCHER,
+    /** The bouncer is split in two with both sides shown side-by-side. */
+    SPLIT_BOUNCER,
+}
+
+/** Enumerates the supported window size classes. */
+enum class SizeClass {
+    COMPACT,
+    MEDIUM,
+    EXPANDED,
+}
+
+/**
+ * Internal version of `calculateLayout` in the System UI Compose library, extracted here to allow
+ * for testing that's not dependent on Compose.
+ */
+@VisibleForTesting
+fun calculateLayoutInternal(
+    width: SizeClass,
+    height: SizeClass,
+    isOneHandedModeSupported: Boolean,
+): BouncerSceneLayout {
+    return when (height) {
+        SizeClass.COMPACT -> BouncerSceneLayout.SPLIT_BOUNCER
+        SizeClass.MEDIUM ->
+            when (width) {
+                SizeClass.COMPACT -> BouncerSceneLayout.STANDARD_BOUNCER
+                SizeClass.MEDIUM -> BouncerSceneLayout.STANDARD_BOUNCER
+                SizeClass.EXPANDED -> BouncerSceneLayout.BESIDE_USER_SWITCHER
+            }
+        SizeClass.EXPANDED ->
+            when (width) {
+                SizeClass.COMPACT -> BouncerSceneLayout.STANDARD_BOUNCER
+                SizeClass.MEDIUM -> BouncerSceneLayout.BELOW_USER_SWITCHER
+                SizeClass.EXPANDED -> BouncerSceneLayout.BESIDE_USER_SWITCHER
+            }
+    }.takeIf { it != BouncerSceneLayout.BESIDE_USER_SWITCHER || isOneHandedModeSupported }
+        ?: BouncerSceneLayout.STANDARD_BOUNCER
 }

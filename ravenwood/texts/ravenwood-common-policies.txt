@@ -1,5 +1,8 @@
 # Ravenwood "policy" that should apply to all code.
 
+# The "no-pta" marker is used to exclude the lines from "ravenhelper pta",
+# which tries to convert policies to annotations.
+
 # Keep all AIDL interfaces
 class :aidl keepclass
 
@@ -13,8 +16,8 @@ class :sysprops keepclass
 class :r keepclass
 
 # Support APIs not available in standard JRE
-class java.io.FileDescriptor keep
+class java.io.FileDescriptor  # no-pta
     method getInt$ @com.android.ravenwood.RavenwoodJdkPatch.getInt$
     method setInt$ @com.android.ravenwood.RavenwoodJdkPatch.setInt$
-class java.util.LinkedHashMap keep
+class java.util.LinkedHashMap  # no-pta
     method eldest @com.android.ravenwood.RavenwoodJdkPatch.eldest

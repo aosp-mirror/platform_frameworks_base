@@ -68,6 +68,7 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.printspooler.R;
+import com.android.printspooler.flags.Flags;
 import com.android.printspooler.util.ApprovedPrintServices;
 
 import libcore.io.IoUtils;
@@ -493,7 +494,7 @@ public final class PrintSpoolerService extends Service {
             keepAwakeLocked();
         }
 
-        if (DEBUG_PRINT_JOB_LIFECYCLE) {
+        if (Flags.logPrintJobs() || DEBUG_PRINT_JOB_LIFECYCLE) {
             Slog.i(LOG_TAG, "[ADD] " + printJob);
         }
     }
@@ -506,7 +507,7 @@ public final class PrintSpoolerService extends Service {
                 PrintJobInfo printJob = mPrintJobs.get(i);
                 if (isObsoleteState(printJob.getState())) {
                     mPrintJobs.remove(i);
-                    if (DEBUG_PRINT_JOB_LIFECYCLE) {
+                    if (Flags.logPrintJobs() || DEBUG_PRINT_JOB_LIFECYCLE) {
                         Slog.i(LOG_TAG, "[REMOVE] " + printJob.getId().flattenToString());
                     }
                     removePrintJobFileLocked(printJob.getId());
@@ -568,7 +569,7 @@ public final class PrintSpoolerService extends Service {
                     checkIfStillKeepAwakeLocked();
                 }
 
-                if (DEBUG_PRINT_JOB_LIFECYCLE) {
+                if (Flags.logPrintJobs() || DEBUG_PRINT_JOB_LIFECYCLE) {
                     Slog.i(LOG_TAG, "[STATE CHANGED] " + printJob);
                 }
 

@@ -19,6 +19,7 @@ package com.android.systemui;
 import static androidx.dynamicanimation.animation.DynamicAnimation.TRANSLATION_X;
 import static androidx.dynamicanimation.animation.FloatPropertyCompat.createFloatPropertyCompat;
 
+import static com.android.systemui.Flags.magneticNotificationSwipes;
 import static com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS;
 import static com.android.systemui.statusbar.notification.NotificationUtils.logKey;
 
@@ -76,8 +77,7 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
 
     protected final Handler mHandler;
 
-    private final SpringConfig mSnapBackSpringConfig =
-            new SpringConfig(SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
+    private final SpringConfig mSnapBackSpringConfig;
 
     private final FlingAnimationUtils mFlingAnimationUtils;
     private float mPagingTouchSlop;
@@ -153,6 +153,12 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
                 R.bool.config_fadeDependingOnAmountSwiped);
         mFalsingManager = falsingManager;
         mFeatureFlags = featureFlags;
+        if (magneticNotificationSwipes()) {
+            mSnapBackSpringConfig = new SpringConfig(550f /*stiffness*/, 0.52f /*dampingRatio*/);
+        } else {
+            mSnapBackSpringConfig = new SpringConfig(
+                    SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
+        }
         mFlingAnimationUtils = new FlingAnimationUtils(resources.getDisplayMetrics(),
                 getMaxEscapeAnimDuration() / 1000f);
     }
@@ -718,7 +724,7 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
                         dismissChild(mTouchedView, velocity,
                                 !swipedFastEnough() /* useAccelerateInterpolator */);
                     } else {
-                        mCallback.onDragCancelled(mTouchedView);
+                        mCallback.onDragCancelledWithVelocity(mTouchedView, velocity);
                         snapChild(mTouchedView, 0 /* leftTarget */, velocity);
                     }
                     mTouchedView = null;
@@ -923,6 +929,15 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
         void onChildDismissed(View v);
 
         void onDragCancelled(View v);
+
+        /**
+         * A drag operation has been cancelled on a view with a final velocity.
+         * @param v View that was dragged.
+         * @param finalVelocity Final velocity of the drag.
+         */
+        default void onDragCancelledWithVelocity(View v, float finalVelocity) {
+            onDragCancelled(v);
+        }
 
         /**
          * Called when the child is long pressed and available to start drag and drop.

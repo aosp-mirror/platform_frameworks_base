@@ -15,10 +15,8 @@
 package com.android.systemui.utils.leaks;
 
 import android.app.NotificationManager;
-import android.content.ComponentName;
 import android.net.Uri;
 import android.service.notification.ZenModeConfig;
-import android.service.notification.ZenModeConfig.ZenRule;
 import android.testing.LeakCheck;
 
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -37,11 +35,6 @@ public class FakeZenModeController extends BaseLeakChecker<Callback> implements 
     @Override
     public int getZen() {
         return 0;
-    }
-
-    @Override
-    public ZenRule getManualRule() {
-        return null;
     }
 
     @Override
@@ -65,27 +58,7 @@ public class FakeZenModeController extends BaseLeakChecker<Callback> implements 
     }
 
     @Override
-    public ComponentName getEffectsSuppressor() {
-        return null;
-    }
-
-    @Override
-    public boolean isCountdownConditionSupported() {
-        return false;
-    }
-
-    @Override
     public int getCurrentUser() {
         return 0;
-    }
-
-    @Override
-    public boolean isVolumeRestricted() {
-        return false;
-    }
-
-    @Override
-    public boolean areNotificationsHiddenInShade() {
-        return false;
     }
 }

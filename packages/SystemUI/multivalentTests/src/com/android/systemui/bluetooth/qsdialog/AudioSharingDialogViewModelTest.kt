@@ -30,7 +30,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -50,7 +49,6 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-@OptIn(ExperimentalCoroutinesApi::class)
 class AudioSharingDialogViewModelTest : SysuiTestCase() {
     @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
     private val kosmos = testKosmos().apply { testDispatcher = UnconfinedTestDispatcher() }

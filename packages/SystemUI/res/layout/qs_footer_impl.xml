@@ -34,13 +34,14 @@
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical">
 
-            <TextView
+            <com.android.systemui.qs.BuildTextView
                 android:id="@+id/build"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:paddingEnd="4dp"
                 android:layout_weight="1"
-                android:clickable="true"
+                android:marqueeRepeatLimit="1"
+                android:clickable="false"
                 android:ellipsize="marquee"
                 android:focusable="true"
                 android:gravity="center_vertical"
