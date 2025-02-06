@@ -459,7 +459,7 @@ public class AmbientVolumeUiController implements
     }
 
     /** Checks if any device in the same set has valid ambient control points */
-    private boolean isAmbientControlAvailable() {
+    public boolean isAmbientControlAvailable() {
         for (BluetoothDevice device : mSideToDeviceMap.values()) {
             if (mShowUiWhenLocalDataExist) {
                 // Found local ambient data
