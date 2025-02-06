@@ -366,10 +366,10 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
         taskDisplayArea.setOrganizer(null);
         mService.mRootWindowContainer.mTaskSupervisor.beginDeferResume();
 
-        // TaskDisplayArea#remove() move the stacks to the default TaskDisplayArea.
+        // TaskDisplayArea#remove() moves the stacks to the default TaskDisplayArea.
         Task lastReparentedRootTask;
         try {
-            lastReparentedRootTask = taskDisplayArea.remove();
+            lastReparentedRootTask = taskDisplayArea.prepareForRemoval();
         } finally {
             mService.mRootWindowContainer.mTaskSupervisor.endDeferResume();
         }

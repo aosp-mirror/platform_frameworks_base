@@ -1407,8 +1407,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // When display content mode management flag is enabled, the task display area is marked as
         // removed when switching from extended display to mirroring display. We need to restart the
         // task display area before starting the home.
-        if (enableDisplayContentModeManagement() && taskDisplayArea.isRemoved()) {
-            taskDisplayArea.restart();
+        if (enableDisplayContentModeManagement() && taskDisplayArea.shouldKeepNoTask()) {
+            taskDisplayArea.setShouldKeepNoTask(false);
         }
 
         Intent homeIntent = null;
