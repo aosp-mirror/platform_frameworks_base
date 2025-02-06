@@ -27,7 +27,7 @@ import androidx.core.view.isInvisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.tracing.coroutines.launchTraced as launch
-import com.android.systemui.common.ui.view.LongPressHandlingView
+import com.android.systemui.common.ui.view.TouchHandlingView
 import com.android.systemui.communal.ui.viewmodel.CommunalLockIconViewModel
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -57,11 +57,11 @@ object CommunalLockIconViewBinder {
         vibratorHelper: VibratorHelper,
     ): DisposableHandle {
         val disposables = DisposableHandles()
-        val longPressHandlingView = view.longPressHandlingView
+        val touchHandlingView = view.touchHandlingView
         val fgIconView = view.iconView
         val bgView = view.bgView
-        longPressHandlingView.listener =
-            object : LongPressHandlingView.Listener {
+        touchHandlingView.listener =
+            object : TouchHandlingView.Listener {
                 override fun onLongPressDetected(
                     view: View,
                     x: Int,
@@ -87,9 +87,9 @@ object CommunalLockIconViewBinder {
                 }
             }
 
-        longPressHandlingView.isInvisible = false
+        touchHandlingView.isInvisible = false
         view.isClickable = true
-        longPressHandlingView.longPressDuration = {
+        touchHandlingView.longPressDuration = {
             view.resources.getInteger(R.integer.config_lockIconLongPress).toLong()
         }
         bgView.visibility = View.GONE
@@ -99,7 +99,7 @@ object CommunalLockIconViewBinder {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
                     launch("$TAG#viewModel.isLongPressEnabled") {
                         viewModel.isLongPressEnabled.collect { isEnabled ->
-                            longPressHandlingView.setLongPressHandlingEnabled(isEnabled)
+                            touchHandlingView.setLongPressHandlingEnabled(isEnabled)
                         }
                     }
                     launch("$TAG#viewModel.accessibilityDelegateHint") {

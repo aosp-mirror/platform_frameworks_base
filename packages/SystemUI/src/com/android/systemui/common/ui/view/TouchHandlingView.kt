@@ -27,7 +27,7 @@ import android.view.ViewConfiguration
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
-import com.android.systemui.log.LongPressHandlingViewLogger
+import com.android.systemui.log.TouchHandlingViewLogger
 import com.android.systemui.shade.TouchLogger
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -39,12 +39,12 @@ import kotlinx.coroutines.DisposableHandle
  * The view will not handle any long pressed by default. To set it up, set up a listener and, when
  * ready to start consuming long-presses, set [setLongPressHandlingEnabled] to `true`.
  */
-class LongPressHandlingView(
+class TouchHandlingView(
     context: Context,
     attrs: AttributeSet?,
     longPressDuration: () -> Long,
     allowedTouchSlop: Int = ViewConfiguration.getTouchSlop(),
-    logger: LongPressHandlingViewLogger? = null,
+    logger: TouchHandlingViewLogger? = null,
 ) : View(context, attrs) {
 
     init {
@@ -68,8 +68,8 @@ class LongPressHandlingView(
 
     var accessibilityHintLongPressAction: AccessibilityAction? = null
 
-    private val interactionHandler: LongPressHandlingViewInteractionHandler by lazy {
-        LongPressHandlingViewInteractionHandler(
+    private val interactionHandler: TouchHandlingViewInteractionHandler by lazy {
+        TouchHandlingViewInteractionHandler(
             postDelayed = { block, timeoutMs ->
                 val dispatchToken = Any()
 
@@ -82,7 +82,7 @@ class LongPressHandlingView(
                 listener?.onLongPressDetected(view = this, x = x, y = y)
             },
             onSingleTapDetected = { x, y ->
-                listener?.onSingleTapDetected(this@LongPressHandlingView, x = x, y = y)
+                listener?.onSingleTapDetected(this@TouchHandlingView, x = x, y = y)
             },
             longPressDuration = longPressDuration,
             allowedTouchSlop = allowedTouchSlop,
@@ -134,11 +134,11 @@ class LongPressHandlingView(
                         interactionHandler.isLongPressHandlingEnabled &&
                             action == AccessibilityNodeInfoCompat.ACTION_LONG_CLICK
                     ) {
-                        val longPressHandlingView = host as? LongPressHandlingView
-                        if (longPressHandlingView != null) {
+                        val touchHandlingView = host as? TouchHandlingView
+                        if (touchHandlingView != null) {
                             // the coordinates are not available as it is an a11y long press
                             listener?.onLongPressDetected(
-                                view = longPressHandlingView,
+                                view = touchHandlingView,
                                 x = 0,
                                 y = 0,
                                 isA11yAction = true,
@@ -155,24 +155,21 @@ class LongPressHandlingView(
     }
 }
 
-private fun MotionEvent.toModel(): LongPressHandlingViewInteractionHandler.MotionEventModel {
+private fun MotionEvent.toModel(): TouchHandlingViewInteractionHandler.MotionEventModel {
     return when (actionMasked) {
         MotionEvent.ACTION_DOWN ->
-            LongPressHandlingViewInteractionHandler.MotionEventModel.Down(
-                x = x.toInt(),
-                y = y.toInt(),
-            )
+            TouchHandlingViewInteractionHandler.MotionEventModel.Down(x = x.toInt(), y = y.toInt())
         MotionEvent.ACTION_MOVE ->
-            LongPressHandlingViewInteractionHandler.MotionEventModel.Move(
+            TouchHandlingViewInteractionHandler.MotionEventModel.Move(
                 distanceMoved = distanceMoved()
             )
         MotionEvent.ACTION_UP ->
-            LongPressHandlingViewInteractionHandler.MotionEventModel.Up(
+            TouchHandlingViewInteractionHandler.MotionEventModel.Up(
                 distanceMoved = distanceMoved(),
                 gestureDuration = gestureDuration(),
             )
-        MotionEvent.ACTION_CANCEL -> LongPressHandlingViewInteractionHandler.MotionEventModel.Cancel
-        else -> LongPressHandlingViewInteractionHandler.MotionEventModel.Other
+        MotionEvent.ACTION_CANCEL -> TouchHandlingViewInteractionHandler.MotionEventModel.Cancel
+        else -> TouchHandlingViewInteractionHandler.MotionEventModel.Other
     }
 }
 

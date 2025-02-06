@@ -18,11 +18,11 @@
 package com.android.systemui.common.ui.view
 
 import android.graphics.Point
-import com.android.systemui.log.LongPressHandlingViewLogger
+import com.android.systemui.log.TouchHandlingViewLogger
 import kotlinx.coroutines.DisposableHandle
 
-/** Encapsulates logic to handle complex touch interactions with a [LongPressHandlingView]. */
-class LongPressHandlingViewInteractionHandler(
+/** Encapsulates logic to handle complex touch interactions with a [TouchHandlingView]. */
+class TouchHandlingViewInteractionHandler(
     /**
      * Callback to run the given [Runnable] with the given delay, returning a [DisposableHandle]
      * allowing the delayed runnable to be canceled before it is run.
@@ -43,7 +43,7 @@ class LongPressHandlingViewInteractionHandler(
      */
     val allowedTouchSlop: Int,
     /** Optional logger that can be passed in to log touch events */
-    val logger: LongPressHandlingViewLogger? = null,
+    val logger: TouchHandlingViewLogger? = null,
 ) {
     sealed class MotionEventModel {
         object Other : MotionEventModel()

@@ -70,7 +70,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
-import com.android.systemui.common.ui.view.LongPressHandlingView;
+import com.android.systemui.common.ui.view.TouchHandlingView;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
 import com.android.systemui.doze.DozeLog;
@@ -518,12 +518,12 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
 
         mMainHandler = new Handler(Looper.getMainLooper());
 
-        LongPressHandlingView longPressHandlingView = mock(LongPressHandlingView.class);
+        TouchHandlingView touchHandlingView = mock(TouchHandlingView.class);
         when(mView.requireViewById(R.id.keyguard_long_press))
-                .thenReturn(longPressHandlingView);
+                .thenReturn(touchHandlingView);
 
         Resources longPressHandlingViewRes = mock(Resources.class);
-        when(longPressHandlingView.getResources()).thenReturn(longPressHandlingViewRes);
+        when(touchHandlingView.getResources()).thenReturn(longPressHandlingViewRes);
         when(longPressHandlingViewRes.getString(anyInt())).thenReturn("");
 
         mNotificationPanelViewController = new NotificationPanelViewController(

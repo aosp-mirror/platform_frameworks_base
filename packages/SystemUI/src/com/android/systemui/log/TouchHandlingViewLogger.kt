@@ -19,17 +19,17 @@ package com.android.systemui.log
 import com.android.systemui.log.core.LogLevel.DEBUG
 import com.google.errorprone.annotations.CompileTimeConstant
 
-data class LongPressHandlingViewLogger
+data class TouchHandlingViewLogger
 constructor(
     private val logBuffer: LogBuffer,
-    @CompileTimeConstant private val tag: String = "LongPressHandlingViewLogger"
+    @CompileTimeConstant private val tag: String = "TouchHandlingViewLogger",
 ) {
     fun schedulingLongPress(delay: Long) {
         logBuffer.log(
             tag,
             DEBUG,
             { long1 = delay },
-            { "on MotionEvent.Down: scheduling long press activation after $long1 ms" }
+            { "on MotionEvent.Down: scheduling long press activation after $long1 ms" },
         )
     }
 
@@ -58,7 +58,7 @@ constructor(
                 "on MotionEvent.Up: distanceMoved: $double1, " +
                     "allowedTouchSlop: $int1, " +
                     "eventDuration: $long1"
-            }
+            },
         )
     }
 
@@ -74,7 +74,7 @@ constructor(
                 "on MotionEvent.Motion: May cancel long press due to movement: " +
                     "distanceMoved: $double1, " +
                     "allowedTouchSlop: $int1 "
-            }
+            },
         )
     }
 }

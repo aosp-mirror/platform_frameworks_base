@@ -37,7 +37,7 @@ import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryBackgroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LongPressHandlingViewLogger
+import com.android.systemui.log.TouchHandlingViewLogger
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.KeyguardBlueprintLog
 import com.android.systemui.log.dagger.LongPressTouchLog
@@ -78,7 +78,7 @@ constructor(
             DeviceEntryIconView(
                     context,
                     null,
-                    logger = LongPressHandlingViewLogger(logBuffer = logBuffer, TAG),
+                    logger = TouchHandlingViewLogger(logBuffer = logBuffer, TAG),
                 )
                 .apply { id = deviceEntryIconViewId }
 

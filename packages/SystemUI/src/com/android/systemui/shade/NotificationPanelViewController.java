@@ -108,7 +108,7 @@ import com.android.systemui.keyguard.shared.model.ClockSize;
 import com.android.systemui.keyguard.shared.model.Edge;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
-import com.android.systemui.keyguard.ui.binder.KeyguardLongPressViewBinder;
+import com.android.systemui.keyguard.ui.binder.KeyguardTouchViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardTouchHandlingViewModel;
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
@@ -751,8 +751,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
         mKeyguardClockInteractor = keyguardClockInteractor;
         mWallpaperFocalAreaViewModel = wallpaperFocalAreaViewModel;
-
-        KeyguardLongPressViewBinder.bind(
+        KeyguardTouchViewBinder.bind(
                 mView.requireViewById(R.id.keyguard_long_press),
                 keyguardTouchHandlingViewModel,
                 (x, y) -> {
