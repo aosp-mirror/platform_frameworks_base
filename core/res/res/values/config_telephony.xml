@@ -512,4 +512,9 @@
     </integer-array>
     <java-symbol type="array" name="config_verizon_satellite_enabled_tagids" />
 
+    <!-- Telephony config for un-supported network capabilities in string array
+         format. Refer to getNetworkCapabilityFromString() in DataUtils.java for available
+         capabilities. -->
+    <string-array name="config_unsupported_network_capabilities" translatable="false"></string-array>
+    <java-symbol type="array" name="config_unsupported_network_capabilities" />
 </resources>
