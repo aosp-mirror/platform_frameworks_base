@@ -101,6 +101,7 @@ import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -796,7 +797,8 @@ constructor(
     }
 
     /**
-     * Wallpaper needs the absolute bottom of notification stack to avoid occlusion
+     * Wallpaper focal area needs the absolute bottom of notification stack to avoid occlusion. It
+     * should not change with notifications in shade.
      *
      * @param calculateMaxNotifications is required by getMaxNotifications as calculateSpace by
      *   calling computeMaxKeyguardNotifications in NotificationStackSizeCalculator
@@ -811,18 +813,24 @@ constructor(
         SceneContainerFlag.assertInLegacyMode()
 
         return combine(
-            getLockscreenDisplayConfig(calculateMaxNotifications).map { (_, maxNotifications) ->
-                val height = calculateHeight(maxNotifications)
-                if (maxNotifications == 0) {
-                    height - shelfHeight
+                getLockscreenDisplayConfig(calculateMaxNotifications).map { (_, maxNotifications) ->
+                    val height = calculateHeight(maxNotifications)
+                    if (maxNotifications == 0) {
+                        height - shelfHeight
+                    } else {
+                        height
+                    }
+                },
+                bounds.map { it.top },
+                isOnLockscreenWithoutShade,
+            ) { height, top, isOnLockscreenWithoutShade ->
+                if (isOnLockscreenWithoutShade) {
+                    top + height
                 } else {
-                    height
+                    null
                 }
-            },
-            bounds.map { it.top },
-        ) { height, top ->
-            top + height
-        }
+            }
+            .filterNotNull()
     }
 
     fun notificationStackChanged() {
