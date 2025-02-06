@@ -53,6 +53,8 @@ import com.android.wm.shell.taskview.TaskView;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
+import javax.inject.Inject;
+
 /** Expanded view of a bubble when it's part of the bubble bar. */
 public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskViewHelper.Listener {
     /**
@@ -107,7 +109,6 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     private Bubble mBubble;
     private BubbleExpandedViewManager mManager;
     private BubblePositioner mPositioner;
-    private BubbleLogger mBubbleLogger;
     private boolean mIsOverflow;
     private BubbleTaskViewHelper mBubbleTaskViewHelper;
     private BubbleBarMenuViewController mMenuViewController;
@@ -177,6 +178,11 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         VISIBLE
     }
 
+    // Ideally this would be package private, but we have to set this in a fake for test and we
+    // don't yet have dagger set up for tests, so have to set manually
+    @Inject
+    public BubbleLogger bubbleLogger;
+
     public BubbleBarExpandedView(Context context) {
         this(context, null);
     }
@@ -218,7 +224,6 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     /** Initializes the view, must be called before doing anything else. */
     public void initialize(BubbleExpandedViewManager expandedViewManager,
             BubblePositioner positioner,
-            BubbleLogger bubbleLogger,
             boolean isOverflow,
             @Nullable BubbleTaskView bubbleTaskView,
             @Nullable Executor mainExecutor,
@@ -226,7 +231,6 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
             @Nullable RegionSamplingProvider regionSamplingProvider) {
         mManager = expandedViewManager;
         mPositioner = positioner;
-        mBubbleLogger = bubbleLogger;
         mIsOverflow = isOverflow;
         mMainExecutor = mainExecutor;
         mBackgroundExecutor = backgroundExecutor;
@@ -290,20 +294,20 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
                 if (mListener != null) {
                     mListener.onUnBubbleConversation(bubble.getKey());
                 }
-                mBubbleLogger.log(bubble, BubbleLogger.Event.BUBBLE_BAR_APP_MENU_OPT_OUT);
+                bubbleLogger.log(bubble, BubbleLogger.Event.BUBBLE_BAR_APP_MENU_OPT_OUT);
             }
 
             @Override
             public void onOpenAppSettings(Bubble bubble) {
                 mManager.collapseStack();
                 mContext.startActivityAsUser(bubble.getSettingsIntent(mContext), bubble.getUser());
-                mBubbleLogger.log(bubble, BubbleLogger.Event.BUBBLE_BAR_APP_MENU_GO_TO_SETTINGS);
+                bubbleLogger.log(bubble, BubbleLogger.Event.BUBBLE_BAR_APP_MENU_GO_TO_SETTINGS);
             }
 
             @Override
             public void onDismissBubble(Bubble bubble) {
                 mManager.dismissBubble(bubble, Bubbles.DISMISS_USER_GESTURE);
-                mBubbleLogger.log(bubble, BubbleLogger.Event.BUBBLE_BAR_BUBBLE_DISMISSED_APP_MENU);
+                bubbleLogger.log(bubble, BubbleLogger.Event.BUBBLE_BAR_BUBBLE_DISMISSED_APP_MENU);
             }
 
             @Override

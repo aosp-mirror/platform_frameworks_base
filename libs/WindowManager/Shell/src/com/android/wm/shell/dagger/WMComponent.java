@@ -23,6 +23,7 @@ import androidx.annotation.Nullable;
 import com.android.wm.shell.appzoomout.AppZoomOut;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
+import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
@@ -72,6 +73,8 @@ public interface WMComponent {
         getShell().onInit();
     }
 
+    // Interfaces provided to SysUI
+
     @WMSingleton
     ShellInterface getShell();
 
@@ -116,4 +119,9 @@ public interface WMComponent {
 
     @WMSingleton
     Optional<AppZoomOut> getAppZoomOut();
+
+    // Injector methods to support field injection
+
+    /** Injector method for {@link BubbleBarExpandedView}. */
+    void inject(BubbleBarExpandedView bubbleBarExpandedView);
 }

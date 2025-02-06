@@ -20,6 +20,8 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.FrameworkStatsLog;
 
+import javax.inject.Inject;
+
 /**
  * Implementation of UiEventLogger for logging bubble UI events.
  *
@@ -169,6 +171,7 @@ public class BubbleLogger {
         }
     }
 
+    @Inject
     public BubbleLogger(UiEventLogger uiEventLogger) {
         mUiEventLogger = uiEventLogger;
     }

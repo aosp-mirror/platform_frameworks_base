@@ -358,7 +358,7 @@ class BubbleBarAnimationHelperTest {
 
     private fun createOverflow(): BubbleOverflow {
         val overflow = BubbleOverflow(context, bubblePositioner)
-        overflow.initializeForBubbleBar(expandedViewManager, bubblePositioner, bubbleLogger)
+        overflow.initializeForBubbleBar(expandedViewManager, bubblePositioner)
         return overflow
     }
 

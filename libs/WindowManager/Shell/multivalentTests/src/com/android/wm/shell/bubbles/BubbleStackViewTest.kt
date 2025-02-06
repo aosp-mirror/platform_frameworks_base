@@ -685,7 +685,6 @@ class BubbleStackViewTest {
             expandedViewManager,
             bubbleTaskViewFactory,
             positioner,
-            bubbleLogger,
             bubbleStackView,
             null,
             iconFactory,

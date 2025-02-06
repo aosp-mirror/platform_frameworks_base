@@ -78,8 +78,6 @@ public class BubbleTransitionsTest extends ShellTestCase {
     @Mock
     private BubblePositioner mBubblePositioner;
     @Mock
-    private BubbleLogger mBubbleLogger;
-    @Mock
     private BubbleStackView mStackView;
     @Mock
     private BubbleBarLayerView mLayerView;
@@ -139,7 +137,7 @@ public class BubbleTransitionsTest extends ShellTestCase {
         ActivityManager.RunningTaskInfo taskInfo = setupBubble();
         final BubbleTransitions.BubbleTransition bt = mBubbleTransitions.startConvertToBubble(
                 mBubble, taskInfo, mExpandedViewManager, mTaskViewFactory, mBubblePositioner,
-                mBubbleLogger, mStackView, mLayerView, mIconFactory, false);
+                mStackView, mLayerView, mIconFactory, false);
         final BubbleTransitions.ConvertToBubble ctb = (BubbleTransitions.ConvertToBubble) bt;
         ctb.onInflated(mBubble);
         when(mLayerView.canExpandView(any())).thenReturn(true);

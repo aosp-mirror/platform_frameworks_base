@@ -90,13 +90,12 @@ public class BubbleTransitions {
      */
     public BubbleTransition startConvertToBubble(Bubble bubble, TaskInfo taskInfo,
             BubbleExpandedViewManager expandedViewManager, BubbleTaskViewFactory factory,
-            BubblePositioner positioner, BubbleLogger logger, BubbleStackView stackView,
+            BubblePositioner positioner, BubbleStackView stackView,
             BubbleBarLayerView layerView, BubbleIconFactory iconFactory,
             boolean inflateSync) {
-        ConvertToBubble convert = new ConvertToBubble(bubble, taskInfo, mContext,
-                expandedViewManager, factory, positioner, logger, stackView, layerView, iconFactory,
+        return new ConvertToBubble(bubble, taskInfo, mContext,
+                expandedViewManager, factory, positioner, stackView, layerView, iconFactory,
                 inflateSync);
-        return convert;
     }
 
     /**
@@ -182,7 +181,7 @@ public class BubbleTransitions {
 
         ConvertToBubble(Bubble bubble, TaskInfo taskInfo, Context context,
                 BubbleExpandedViewManager expandedViewManager, BubbleTaskViewFactory factory,
-                BubblePositioner positioner, BubbleLogger logger, BubbleStackView stackView,
+                BubblePositioner positioner, BubbleStackView stackView,
                 BubbleBarLayerView layerView, BubbleIconFactory iconFactory, boolean inflateSync) {
             mBubble = bubble;
             mTaskInfo = taskInfo;
@@ -195,7 +194,6 @@ public class BubbleTransitions {
                     expandedViewManager,
                     factory,
                     positioner,
-                    logger,
                     stackView,
                     layerView,
                     iconFactory,
