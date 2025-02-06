@@ -77,6 +77,7 @@ import com.android.internal.protolog.ProtoLog;
 import com.android.server.UiThread;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -108,6 +109,8 @@ public class DisplayRotation {
     private final Object mLock;
     @Nullable
     private final DisplayRotationImmersiveAppCompatPolicy mCompatPolicyForImmersiveApps;
+    @Nullable
+    private DeviceStateAutoRotateSettingController mDeviceStateAutoRotateSettingController;
 
     public final boolean isDefaultDisplay;
     private final boolean mSupportAutoRotation;
@@ -297,6 +300,14 @@ public class DisplayRotation {
             }
         } else {
             mFoldController = null;
+        }
+
+        if (mFoldController != null && (Flags.enableDeviceStateAutoRotateSettingLogging()
+                || Flags.enableDeviceStateAutoRotateSettingRefactor())) {
+            mDeviceStateAutoRotateSettingController =
+                    new DeviceStateAutoRotateSettingController(mContext,
+                            new DeviceStateAutoRotateSettingIssueLogger(
+                                    SystemClock::elapsedRealtime), mService.mH);
         }
     }
 
@@ -1667,6 +1678,9 @@ public class DisplayRotation {
         if (mFoldController != null) {
             synchronized (mLock) {
                 mFoldController.foldStateChanged(deviceState);
+                if (mDeviceStateAutoRotateSettingController != null) {
+                    mDeviceStateAutoRotateSettingController.onDeviceStateChange(deviceState);
+                }
             }
         }
     }
