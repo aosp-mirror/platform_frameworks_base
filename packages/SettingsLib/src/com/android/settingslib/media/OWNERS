@@ -3,5 +3,8 @@ ethibodeau@google.com
 michaelmikhil@google.com
 apotapov@google.com
 
+# Output Switcher OWNERS
+file:/packages/SystemUI/src/com/android/systemui/media/dialog/OWNERS
+
 #Android Media - For minor changes and renames only.
 aquilescanta@google.com #{LAST_RESORT_SUGGESTION}
