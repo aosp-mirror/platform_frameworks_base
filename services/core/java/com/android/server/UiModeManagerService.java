@@ -1410,10 +1410,10 @@ final class UiModeManagerService extends SystemService {
     @GuardedBy("mLock")
     @ForceInvertType
     private int getForceInvertStateLocked() {
-        if (mForceInvertStates.indexOfKey(mCurrentUser) < 0) {
+        if (mForceInvertStates.indexOfKey(mCurrentUser) < 0 && mSystemReady) {
             updateForceInvertStateLocked();
         }
-        return mForceInvertStates.get(mCurrentUser);
+        return mForceInvertStates.get(mCurrentUser, FORCE_INVERT_TYPE_OFF);
     }
 
     /**
@@ -1423,7 +1423,7 @@ final class UiModeManagerService extends SystemService {
     @GuardedBy("mLock")
     private boolean updateForceInvertStateLocked() {
         int forceInvertState = getForceInvertStateInternal();
-        if (mForceInvertStates.get(mCurrentUser) != forceInvertState) {
+        if (mForceInvertStates.get(mCurrentUser, Integer.MIN_VALUE) != forceInvertState) {
             mForceInvertStates.put(mCurrentUser, forceInvertState);
             return true;
         }
