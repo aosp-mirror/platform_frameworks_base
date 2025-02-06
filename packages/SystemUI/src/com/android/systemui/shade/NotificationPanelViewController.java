@@ -2096,7 +2096,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                         mLockscreenGestureLogger
                                 .log(LockscreenUiEvent.LOCKSCREEN_LOCK_SHOW_HINT);
                         mKeyguardIndicationController.showActionToUnlock();
-                        mWallpaperFocalAreaViewModel.setTapPosition(x, y);
+                        mKeyguardClockInteractor.handleFidgetTap(x, y);
                     }
                 }
                 break;

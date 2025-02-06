@@ -137,6 +137,10 @@ class ComposedDigitalLayerController(private val clockCtx: ClockContext) :
             override fun onPositionUpdated(distance: Float, fraction: Float) {}
 
             override fun onPickerCarouselSwiping(swipingFraction: Float) {}
+
+            override fun onFidgetTap(x: Float, y: Float) {
+                view.animateFidget(x, y)
+            }
         }
 
     override val faceEvents =

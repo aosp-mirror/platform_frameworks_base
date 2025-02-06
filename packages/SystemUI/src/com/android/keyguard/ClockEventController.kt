@@ -564,6 +564,13 @@ constructor(
         }
     }
 
+    fun handleFidgetTap(x: Float, y: Float) {
+        clock?.run {
+            smallClock.animations.onFidgetTap(x, y)
+            largeClock.animations.onFidgetTap(x, y)
+        }
+    }
+
     private fun handleDoze(doze: Float) {
         dozeAmount = doze
         clock?.run {

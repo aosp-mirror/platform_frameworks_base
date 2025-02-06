@@ -281,6 +281,10 @@ class FlexClockView(clockCtx: ClockContext) : FrameLayout(clockCtx.context) {
         }
     }
 
+    fun animateFidget(x: Float, y: Float) {
+        digitalClockTextViewMap.forEach { _, view -> view.animateFidget(x, y) }
+    }
+
     private fun updateLocale(locale: Locale) {
         isMonoVerticalNumericLineSpacing =
             !NON_MONO_VERTICAL_NUMERIC_LINE_SPACING_LANGUAGES.any {

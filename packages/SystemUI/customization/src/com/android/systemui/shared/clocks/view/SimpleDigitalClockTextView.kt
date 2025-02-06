@@ -304,6 +304,11 @@ open class SimpleDigitalClockTextView(
         updateTextBoundsForTextAnimator()
     }
 
+    fun animateFidget(x: Float, y: Float) {
+        // TODO(b/374306512): Implement Fidget Animation
+        logger.animateFidget(x, y)
+    }
+
     fun refreshText() {
         lockScreenPaint.getTextBounds(text, 0, text.length, textBounds)
         if (this::textAnimator.isInitialized) {

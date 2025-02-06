@@ -90,6 +90,13 @@ class ClockLogger(private val view: View?, buffer: MessageBuffer, tag: String) :
         }
     }
 
+    fun animateFidget(x: Float, y: Float) {
+        d({ "animateFidget($str1, $str2)" }) {
+            str1 = x.toString()
+            str2 = y.toString()
+        }
+    }
+
     companion object {
         // Used when MessageBuffers are not provided by the host application
         val DEFAULT_MESSAGE_BUFFER = LogcatOnlyMessageBuffer(LogLevel.INFO)
