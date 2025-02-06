@@ -34,6 +34,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 
+import static com.android.window.flags.Flags.enableFullScreenWindowOnRemovingSplitScreenStageBugfix;
 import static com.android.window.flags.Flags.enableNonDefaultDisplaySplit;
 import static com.android.wm.shell.Flags.enableFlexibleSplit;
 import static com.android.wm.shell.Flags.enableFlexibleTwoAppSplit;
@@ -908,6 +909,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
         options = options != null ? options : new Bundle();
         addActivityOptions(options, null);
+        ActivityManager.RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(taskId);
+        if (enableFullScreenWindowOnRemovingSplitScreenStageBugfix() && taskInfo != null
+                && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+            prepareTasksForSplitScreen(new int[] {taskId}, wct);
+        }
         wct.startTask(taskId, options);
         mSplitTransitions.startFullscreenTransition(wct, remoteTransition);
     }
