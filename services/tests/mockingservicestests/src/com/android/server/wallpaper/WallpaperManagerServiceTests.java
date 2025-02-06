@@ -64,6 +64,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
@@ -147,6 +148,8 @@ public class WallpaperManagerServiceTests {
     private static ComponentName sFallbackWallpaperComponentName;
 
     private IPackageManager mIpm = AppGlobals.getPackageManager();
+
+    private Resources mResources = sContext.getResources();
 
     @Mock
     private DisplayManager mDisplayManager;
@@ -245,6 +248,8 @@ public class WallpaperManagerServiceTests {
         doReturn(displays).when(mDisplayManager).getDisplays();
 
         spyOn(mIpm);
+        spyOn(mResources);
+        doReturn(true).when(mResources).getBoolean(eq(R.bool.config_isDesktopModeSupported));
         mService = new TestWallpaperManagerService(sContext);
         spyOn(mService);
         mService.systemReady();
