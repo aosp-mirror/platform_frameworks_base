@@ -24,6 +24,7 @@ import androidx.annotation.Px
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import dagger.assisted.Assisted
@@ -35,7 +36,7 @@ import kotlin.math.max
 class LockscreenShadeQsTransitionController
 @AssistedInject
 constructor(
-    context: Context,
+    @ShadeDisplayAware context: Context,
     configurationController: ConfigurationController,
     dumpManager: DumpManager,
     @Assisted private val qsProvider: () -> QS?,

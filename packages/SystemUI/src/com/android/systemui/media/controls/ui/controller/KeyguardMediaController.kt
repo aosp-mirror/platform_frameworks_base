@@ -29,6 +29,7 @@ import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.dagger.MediaModule.KEYGUARD
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.MediaContainerView
@@ -53,7 +54,7 @@ constructor(
     @param:Named(KEYGUARD) private val mediaHost: MediaHost,
     private val bypassController: KeyguardBypassController,
     private val statusBarStateController: SysuiStatusBarStateController,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     configurationController: ConfigurationController,
     private val splitShadeStateController: SplitShadeStateController,
     private val logger: KeyguardMediaControllerLogger,

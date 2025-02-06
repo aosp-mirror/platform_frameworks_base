@@ -38,6 +38,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.shade.ShadeSurface;
 import com.android.systemui.shade.ShadeSurfaceImpl;
 import com.android.systemui.shade.carrier.ShadeCarrierGroupController;
@@ -92,7 +93,7 @@ public interface CentralSurfacesDependenciesModule {
     @SysUISingleton
     @Provides
     static NotificationMediaManager provideNotificationMediaManager(
-            Context context,
+            @ShadeDisplayAware Context context,
             NotificationVisibilityProvider visibilityProvider,
             NotifPipeline notifPipeline,
             NotifCollection notifCollection,

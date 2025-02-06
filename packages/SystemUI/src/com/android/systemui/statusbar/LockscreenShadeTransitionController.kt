@@ -29,6 +29,7 @@ import com.android.systemui.plugins.qs.QS
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
@@ -67,7 +68,7 @@ constructor(
     private val keyguardTransitionControllerFactory:
         LockscreenShadeKeyguardTransitionController.Factory,
     private val depthController: NotificationShadeDepthController,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val splitShadeOverScrollerFactory: SplitShadeLockScreenOverScroller.Factory,
     private val singleShadeOverScrollerFactory: SingleShadeLockScreenOverScroller.Factory,
     private val activityStarter: ActivityStarter,

@@ -49,8 +49,8 @@ val Kosmos.qsFragmentComposeViewModelFactory by
             ): QSFragmentComposeViewModel {
                 return QSFragmentComposeViewModel(
                     quickSettingsContainerViewModelFactory,
-                    quickQuickSettingsViewModelFactory,
                     mainResources,
+                    quickQuickSettingsViewModelFactory,
                     footerActionsViewModelFactory,
                     footerActionsController,
                     sysuiStatusBarStateController,

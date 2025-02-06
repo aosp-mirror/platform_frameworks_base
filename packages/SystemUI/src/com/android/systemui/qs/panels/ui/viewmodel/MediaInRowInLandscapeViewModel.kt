@@ -20,13 +20,13 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import androidx.compose.runtime.getValue
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.media.controls.ui.controller.MediaHostStatesManager
 import com.android.systemui.media.controls.ui.controller.MediaLocation
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.qs.composefragment.dagger.QSFragmentComposeModule
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
@@ -46,7 +46,7 @@ import kotlinx.coroutines.flow.onStart
 class MediaInRowInLandscapeViewModel
 @AssistedInject
 constructor(
-    @Main resources: Resources,
+    @ShadeDisplayAware resources: Resources,
     configurationInteractor: ConfigurationInteractor,
     shadeModeInteractor: ShadeModeInteractor,
     private val mediaHostStatesManager: MediaHostStatesManager,

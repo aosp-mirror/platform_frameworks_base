@@ -53,6 +53,7 @@ import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.CrossFadeHelper
 import com.android.systemui.statusbar.StatusBarState
@@ -102,7 +103,7 @@ val View.isShownNotFaded: Boolean
 class MediaHierarchyManager
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val statusBarStateController: SysuiStatusBarStateController,
     private val keyguardStateController: KeyguardStateController,
     private val bypassController: KeyguardBypassController,

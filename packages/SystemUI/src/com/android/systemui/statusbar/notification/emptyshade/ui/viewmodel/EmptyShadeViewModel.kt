@@ -23,6 +23,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.modes.shared.ModesUi
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor
 import com.android.systemui.statusbar.notification.NotificationActivityStarter.SettingsIntent
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
@@ -50,7 +51,7 @@ import kotlinx.coroutines.flow.onStart
 class EmptyShadeViewModel
 @AssistedInject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     zenModeInteractor: ZenModeInteractor,
     seenNotificationsInteractor: SeenNotificationsInteractor,
     notificationSettingsInteractor: NotificationSettingsInteractor,

@@ -95,8 +95,8 @@ class QSFragmentComposeViewModel
 @AssistedInject
 constructor(
     containerViewModelFactory: QuickSettingsContainerViewModel.Factory,
+    @ShadeDisplayAware private val resources: Resources,
     quickQuickSettingsViewModelFactory: QuickQuickSettingsViewModel.Factory,
-    @Main private val resources: Resources,
     footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
     private val sysuiStatusBarStateController: SysuiStatusBarStateController,

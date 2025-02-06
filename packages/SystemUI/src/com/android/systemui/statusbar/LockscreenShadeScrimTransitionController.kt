@@ -5,6 +5,7 @@ import android.util.IndentingPrintWriter
 import android.util.MathUtils
 import com.android.systemui.res.R
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
@@ -15,7 +16,7 @@ class LockscreenShadeScrimTransitionController
 @Inject
 constructor(
     private val scrimController: ScrimController,
-    context: Context,
+    @ShadeDisplayAware context: Context,
     configurationController: ConfigurationController,
     dumpManager: DumpManager,
     splitShadeStateController: SplitShadeStateController
