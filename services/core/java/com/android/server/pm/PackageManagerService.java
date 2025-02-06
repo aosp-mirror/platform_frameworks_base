@@ -1477,7 +1477,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         ArchiveState archiveState;
         synchronized (mLock) {
             PackageSetting ps = mSettings.getPackageLPr(packageName);
-            if (ps == null) {
+            if (ps == null || snapshot.shouldFilterApplication(ps, binderUid, userId)) {
                 return null;
             }
             var psi = ps.getUserStateOrDefault(userId);
