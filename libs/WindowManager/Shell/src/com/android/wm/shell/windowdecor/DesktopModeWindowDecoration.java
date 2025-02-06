@@ -1098,8 +1098,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final float menuRight = menuLeft + menuWidth;
         final float menuBottom = menuTop + menuHeight;
 
-        // If the menu is out of screen bounds, shift it up/left as needed
-        if (menuRight > displayWidth) {
+        // If the menu is out of screen bounds, shift it as needed
+        if (menuLeft < 0) {
+            menuLeft = 0;
+        } else if (menuRight > displayWidth) {
             menuLeft = (displayWidth - menuWidth);
         }
         if (menuBottom > displayHeight) {

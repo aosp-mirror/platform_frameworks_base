@@ -291,12 +291,23 @@ class MaximizeMenu(
             requireViewById(R.id.maximize_menu_snap_container) as View
         private val snapWindowText =
             requireViewById(R.id.maximize_menu_snap_window_text) as TextView
-        private val snapRightButton =
-            requireViewById(R.id.maximize_menu_snap_right_button) as Button
-        private val snapLeftButton =
-            requireViewById(R.id.maximize_menu_snap_left_button) as Button
         private val snapButtonsLayout =
             requireViewById(R.id.maximize_menu_snap_menu_layout)
+
+        // If layout direction is RTL, maximize menu will be mirrored, switching the order of the
+        // snap right/left buttons.
+        val isRtl: Boolean =
+            (context.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL)
+        private val snapRightButton = if (isRtl) {
+            requireViewById(R.id.maximize_menu_snap_left_button) as Button
+        } else {
+            requireViewById(R.id.maximize_menu_snap_right_button) as Button
+        }
+        private val snapLeftButton = if (isRtl) {
+            requireViewById(R.id.maximize_menu_snap_right_button) as Button
+        } else {
+            requireViewById(R.id.maximize_menu_snap_left_button) as Button
+        }
 
         private val decorThemeUtil = DecorThemeUtil(context)
 
