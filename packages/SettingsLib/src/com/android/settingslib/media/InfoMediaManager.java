@@ -618,6 +618,7 @@ public abstract class InfoMediaManager {
         return getActiveRoutingSession().getVolume();
     }
 
+    @Nullable
     CharSequence getSessionName() {
         return getActiveRoutingSession().getName();
     }
