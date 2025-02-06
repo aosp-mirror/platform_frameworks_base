@@ -403,22 +403,23 @@ final class DevicePolicyEngine {
      */
     private <V> void applyToInheritableProfiles(PolicyDefinition<V> policyDefinition,
             EnforcingAdmin enforcingAdmin, @Nullable PolicyValue<V> value, int userId) {
-        if (policyDefinition.isInheritable()) {
-            Binder.withCleanCallingIdentity(() -> {
-                List<UserInfo> userInfos = mUserManager.getProfiles(userId);
-                for (UserInfo childUserInfo : userInfos) {
-                    int childUserId = childUserInfo.getUserHandle().getIdentifier();
-                    if (isProfileOfUser(childUserId, userId)
-                            && isInheritDevicePolicyFromParent(childUserInfo)) {
-                        if (value != null) {
-                            setLocalPolicy(policyDefinition, enforcingAdmin, value, childUserId);
-                        } else {
-                            removeLocalPolicy(policyDefinition, enforcingAdmin, childUserId);
-                        }
+        if (!policyDefinition.isInheritable()) {
+            return;
+        }
+        Binder.withCleanCallingIdentity(() -> {
+            List<UserInfo> userInfos = mUserManager.getProfiles(userId);
+            for (UserInfo childUserInfo : userInfos) {
+                int childUserId = childUserInfo.getUserHandle().getIdentifier();
+                if (isProfileOfUser(childUserId, userId)
+                        && isInheritDevicePolicyFromParent(childUserInfo)) {
+                    if (value != null) {
+                        setLocalPolicy(policyDefinition, enforcingAdmin, value, childUserId);
+                    } else {
+                        removeLocalPolicy(policyDefinition, enforcingAdmin, childUserId);
                     }
                 }
-            });
-        }
+            }
+        });
     }
 
     /**
@@ -1868,7 +1869,7 @@ final class DevicePolicyEngine {
      * of the resolved policy. This method controls which policies should use this special logic.
      */
     private <V> boolean shouldApplyPackageSetUnionPolicyHack(PolicyDefinition<V> policy) {
-        String policyKey =  policy.getPolicyKey().getIdentifier();
+        String policyKey = policy.getPolicyKey().getIdentifier();
         return policyKey.equals(USER_CONTROL_DISABLED_PACKAGES_POLICY)
                 || policyKey.equals(PACKAGES_SUSPENDED_POLICY);
     }
@@ -1894,6 +1895,7 @@ final class DevicePolicyEngine {
         private static File getFileName() {
             return new File(Environment.getDataSystemDirectory(), DEVICE_POLICIES_XML);
         }
+
         private DevicePoliciesReaderWriter() {
             mFile = getFileName();
         }
