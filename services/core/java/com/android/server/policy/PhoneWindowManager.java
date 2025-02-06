@@ -231,6 +231,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.os.RoSystemProperties;
 import com.android.internal.policy.IKeyguardDismissCallback;
+import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.policy.LogDecelerateInterpolator;
@@ -309,6 +310,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int SHORT_PRESS_POWER_CLOSE_IME_OR_GO_HOME = 5;
     static final int SHORT_PRESS_POWER_LOCK_OR_SLEEP = 6;
     static final int SHORT_PRESS_POWER_DREAM_OR_SLEEP = 7;
+    static final int SHORT_PRESS_POWER_HUB_OR_DREAM_OR_SLEEP = 8;
 
     // must match: config_LongPressOnPowerBehavior in config.xml
     // The config value can be overridden using Settings.Global.POWER_BUTTON_LONG_PRESS
@@ -402,6 +404,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static public final String SYSTEM_DIALOG_REASON_GESTURE_NAV = "gestureNav";
 
     public static final String TRACE_WAIT_FOR_ALL_WINDOWS_DRAWN_METHOD = "waitForAllWindowsDrawn";
+
+    /**
+     * String extra key passed in the bundle of {@link IKeyguardService#doKeyguardTimeout(Bundle)}
+     * if the value is {@code true}, indicates to keyguard that the device should show the
+     * glanceable hub upon locking. If the hub is already visible, the device should go to sleep.
+     */
+    public static final String EXTRA_TRIGGER_HUB = "extra_trigger_hub";
 
     private static final int POWER_BUTTON_SUPPRESSION_DELAY_DEFAULT_MILLIS = 800;
 
@@ -1154,7 +1163,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void powerPress(long eventTime, int count, int displayId) {
+    @VisibleForTesting
+    void powerPress(long eventTime, int count, int displayId) {
         // SideFPS still needs to know about suppressed power buttons, in case it needs to block
         // an auth attempt.
         if (count == 1) {
@@ -1229,6 +1239,43 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             () -> sleepDefaultDisplayFromPowerButton(eventTime, 0));
                     break;
                 }
+                case SHORT_PRESS_POWER_HUB_OR_DREAM_OR_SLEEP: {
+                    // With this power button behavior, the following behavior is expected from each
+                    // system space on a power button short press:
+                    // - Unlocked: go to hub if available, dream if not, screen off if neither
+                    // - Lock screen, hub, or dream: go to screen off
+                    // - Screen off: go to hub if available, dream if not, lock screen if enabled,
+                    //               unlocked if lockscreen is disabled
+                    // TODO(b/394657933): consolidate policy into SysUI
+                    final boolean hubEnabled = Settings.Secure.getIntForUser(
+                            mContext.getContentResolver(), Settings.Secure.GLANCEABLE_HUB_ENABLED,
+                            1, mCurrentUserId) == 1;
+
+                    if (mDreamManagerInternal.isDreaming() || isKeyguardShowing()) {
+                        // If the device is already dreaming or on keyguard, go to sleep.
+                        sleepDefaultDisplayFromPowerButton(eventTime, 0);
+                        break;
+                    }
+
+                    // Check isLockScreenDisabled to exclude NONE lock screen option, which cannot
+                    // show hub.
+                    boolean keyguardAvailable = !mLockPatternUtils.isLockScreenDisabled(
+                            mCurrentUserId);
+                    if (mUserManagerInternal.isUserUnlocked(mCurrentUserId) && hubEnabled
+                            && keyguardAvailable && mDreamManagerInternal.dreamConditionActive()) {
+                        // If the hub can be launched, send a message to keyguard.
+                        Bundle options = new Bundle();
+                        options.putBoolean(EXTRA_TRIGGER_HUB, true);
+                        lockNow(options);
+                    } else {
+                        // If the hub cannot be run, attempt to dream instead.
+                        attemptToDreamFromShortPowerButtonPress(
+                                /* isScreenOn */ true,
+                                /* noDreamAction */
+                                () -> sleepDefaultDisplayFromPowerButton(eventTime, 0));
+                    }
+                    break;
+                }
             }
         }
     }
@@ -1279,7 +1326,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     private void attemptToDreamFromShortPowerButtonPress(
             boolean isScreenOn, Runnable noDreamAction) {
-        if (mShortPressOnPowerBehavior != SHORT_PRESS_POWER_DREAM_OR_SLEEP) {
+        if (mShortPressOnPowerBehavior != SHORT_PRESS_POWER_DREAM_OR_SLEEP
+                && mShortPressOnPowerBehavior != SHORT_PRESS_POWER_HUB_OR_DREAM_OR_SLEEP) {
+            // If the power button behavior isn't one that should be able to trigger the dream, give
+            // up.
             noDreamAction.run();
             return;
         }
@@ -5132,8 +5182,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /**
-     * Updates the occluded state of the Keyguard immediately via
-     * {@link com.android.internal.policy.IKeyguardService}.
+     * Updates the occluded state of the Keyguard immediately via {@link IKeyguardService}.
      *
      * @param isOccluded Whether the Keyguard is occluded by another window.
      * @return Whether the flags have changed and we have to redo the layout.

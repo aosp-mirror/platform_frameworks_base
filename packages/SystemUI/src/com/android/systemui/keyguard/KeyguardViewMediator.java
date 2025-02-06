@@ -118,6 +118,7 @@ import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
+import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardStateCallback;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.statusbar.IStatusBarService;
@@ -139,6 +140,7 @@ import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.TransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor;
 import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModel;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
@@ -256,6 +258,15 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private static final String DELAYED_LOCK_PROFILE_ACTION =
             "com.android.internal.policy.impl.PhoneWindowManager.DELAYED_LOCK";
 
+    /**
+     * String extra key passed in the bundle of {@link IKeyguardService#doKeyguardTimeout(Bundle)}
+     * if the value is {@code true}, indicates to keyguard that the device should show the
+     * glanceable hub upon locking. If the hub is already visible, the device should go to sleep.
+     *
+     * Mirrored from PhoneWindowManager which sends the extra.
+     */
+    public static final String EXTRA_TRIGGER_HUB = "extra_trigger_hub";
+
     private static final String SYSTEMUI_PERMISSION = "com.android.systemui.permission.SELF";
 
     // used for handler messages
@@ -354,6 +365,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private final Lazy<NotificationShadeDepthController> mNotificationShadeDepthController;
     private final Lazy<ShadeController> mShadeController;
+    private final Lazy<CommunalSceneInteractor> mCommunalSceneInteractor;
     /*
      * Records the user id on request to go away, for validation when WM calls back to start the
      * exit animation.
@@ -1556,6 +1568,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             SelectedUserInteractor selectedUserInteractor,
             KeyguardInteractor keyguardInteractor,
             KeyguardTransitionBootInteractor transitionBootInteractor,
+            Lazy<CommunalSceneInteractor> communalSceneInteractor,
             WindowManagerOcclusionManager wmOcclusionManager) {
         mContext = context;
         mUserTracker = userTracker;
@@ -1597,6 +1610,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mSelectedUserInteractor = selectedUserInteractor;
         mKeyguardInteractor = keyguardInteractor;
         mTransitionBootInteractor = transitionBootInteractor;
+        mCommunalSceneInteractor = communalSceneInteractor;
 
         mStatusBarStateController = statusBarStateController;
         statusBarStateController.addCallback(this);
@@ -2411,6 +2425,13 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
      * Enable the keyguard if the settings are appropriate.
      */
     private void doKeyguardLocked(Bundle options) {
+        // If the power button behavior requests to open the glanceable hub.
+        if (options != null && options.getBoolean(EXTRA_TRIGGER_HUB)) {
+            // Set the hub to show immediately when the SysUI window shows, then continue to lock
+            // the device.
+            mCommunalSceneInteractor.get().showHubFromPowerButton();
+        }
+
         int currentUserId = mSelectedUserInteractor.getSelectedUserId();
         if (options != null && options.getBinder(LOCK_ON_USER_SWITCH_CALLBACK) != null) {
             LockNowCallback callback = new LockNowCallback(currentUserId,

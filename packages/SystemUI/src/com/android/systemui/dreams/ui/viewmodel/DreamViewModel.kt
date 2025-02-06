@@ -47,7 +47,7 @@ class DreamViewModel
 constructor(
     configurationInteractor: ConfigurationInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
-    fromGlanceableHubTransitionInteractor: GlanceableHubToDreamingTransitionViewModel,
+    fromGlanceableHubTransitionViewModel: GlanceableHubToDreamingTransitionViewModel,
     toGlanceableHubTransitionViewModel: DreamingToGlanceableHubTransitionViewModel,
     private val toLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
     private val fromDreamingTransitionInteractor: FromDreamingTransitionInteractor,
@@ -74,7 +74,7 @@ constructor(
     val dreamOverlayTranslationX: Flow<Float> =
         merge(
                 toGlanceableHubTransitionViewModel.dreamOverlayTranslationX,
-                fromGlanceableHubTransitionInteractor.dreamOverlayTranslationX,
+                fromGlanceableHubTransitionViewModel.dreamOverlayTranslationX,
             )
             .distinctUntilChanged()
 
@@ -97,7 +97,7 @@ constructor(
         merge(
                 toLockscreenTransitionViewModel.dreamOverlayAlpha,
                 toGlanceableHubTransitionViewModel.dreamOverlayAlpha,
-                fromGlanceableHubTransitionInteractor.dreamOverlayAlpha,
+                fromGlanceableHubTransitionViewModel.dreamOverlayAlpha,
             )
             .distinctUntilChanged()
 

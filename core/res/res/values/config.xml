@@ -1214,6 +1214,9 @@
             3 - Really go to sleep and go home (don't doze)
             4 - Go to home
             5 - Dismiss IME if shown. Otherwise go to home
+            6 - Lock if keyguard enabled or go to sleep (doze)
+            7 - Dream if possible or go to sleep (doze)
+            8 - Go to glanceable hub or dream if possible, or sleep if neither is available (doze)
     -->
     <integer name="config_shortPressOnPowerBehavior">1</integer>
 
