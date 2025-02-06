@@ -16,12 +16,12 @@
 
 <resources>
     <!-- TextAppearance for Wear Material3 Button - Filled  -->
-    <style name="TextAppearance.Widget.Button.Material.Filled">
+    <style name="TextAppearance.Widget.Material3.Button.Filled">
         <item name="textColor">@color/btn_material_filled_content_color_watch</item>
     </style>
 
     <!-- TextAppearance for Wear Material3 Button - Filled Tonal  -->
-    <style name="TextAppearance.Widget.Button.Material" parent="TextAppearance.DeviceDefault">
+    <style name="TextAppearance.Widget.Material3.Button" parent="TextAppearance.DeviceDefault">
         <item name="android:fontFamily">font-family-flex-device-default</item>
         <item name="android:fontVariationSettings">"'wdth' 90, 'wght' 500, 'ROND' 100, 'opsz' 15, 'GRAD' 0"</item>
         <item name="textSize">@dimen/btn_textSize</item>
@@ -29,6 +29,8 @@
         <item name="lineHeight">@dimen/btn_lineHeight</item>
     </style>
 
+    <!--  TODO(b/383898608): remove following 3 styles once UX design is settled.  -->
+    <!--  Following 3 button styles are used in layout that uses icon button.  -->
     <style name="Widget.DeviceDefault.Button.ButtonBar.AlertDialog.WearMaterial3" parent="Widget.DeviceDefault.Button">
         <item name="android:textSize">0sp</item>
         <item name="android:gravity">center</item>

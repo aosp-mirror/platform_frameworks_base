@@ -223,7 +223,7 @@ public class Button extends TextView {
 
     private static int getButtonDefaultStyleRes() {
         if (sUseWearMaterial3Style != null && sUseWearMaterial3Style) {
-            return com.android.internal.R.style.Widget_DeviceDefault_Button_WearMaterial3;
+            return com.android.internal.R.style.Widget_Material3_Button;
         }
         return 0;
     }
