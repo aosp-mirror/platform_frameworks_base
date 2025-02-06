@@ -213,6 +213,14 @@ public class LauncherActivityInfo {
     }
 
     /**
+     * Returns whether this activity supports (and can be launched in) multiple instances.
+     * @hide
+     */
+    public boolean supportsMultiInstance() {
+        return mInternal.supportsMultiInstance();
+    }
+
+    /**
      * Check whether the {@code sequence} is visible to the user or not.
      * <p>
      * Return {@code false} when one of these conditions are satisfied:
