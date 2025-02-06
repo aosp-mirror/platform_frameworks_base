@@ -73,16 +73,16 @@ constructor(
         interactor.screenRecordState
             .map { state ->
                 when (state) {
-                    is ScreenRecordChipModel.DoingNothing -> OngoingActivityChipModel.Hidden()
+                    is ScreenRecordChipModel.DoingNothing -> OngoingActivityChipModel.Inactive()
                     is ScreenRecordChipModel.Starting -> {
-                        OngoingActivityChipModel.Shown.Countdown(
+                        OngoingActivityChipModel.Active.Countdown(
                             key = KEY,
                             colors = ColorsModel.Red,
                             secondsUntilStarted = state.millisUntilStarted.toCountdownSeconds(),
                         )
                     }
                     is ScreenRecordChipModel.Recording -> {
-                        OngoingActivityChipModel.Shown.Timer(
+                        OngoingActivityChipModel.Active.Timer(
                             key = KEY,
                             icon =
                                 OngoingActivityChipModel.ChipIcon.SingleColorIcon(
@@ -118,7 +118,7 @@ constructor(
                 }
             }
             // See b/347726238 for [SharingStarted.Lazily] reasoning.
-            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden())
+            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Inactive())
 
     /**
      * The screen record chip to show that also ensures that the start time doesn't change once we
@@ -127,11 +127,11 @@ constructor(
      */
     private val chipWithConsistentTimer: StateFlow<OngoingActivityChipModel> =
         simpleChip
-            .pairwise(initialValue = OngoingActivityChipModel.Hidden())
+            .pairwise(initialValue = OngoingActivityChipModel.Inactive())
             .map { (old, new) ->
                 if (
-                    old is OngoingActivityChipModel.Shown.Timer &&
-                        new is OngoingActivityChipModel.Shown.Timer
+                    old is OngoingActivityChipModel.Active.Timer &&
+                        new is OngoingActivityChipModel.Active.Timer
                 ) {
                     new.copy(startTimeMs = old.startTimeMs)
                 } else {
@@ -139,7 +139,7 @@ constructor(
                 }
             }
             // See b/347726238 for [SharingStarted.Lazily] reasoning.
-            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden())
+            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Inactive())
 
     private val chipTransitionHelper = ChipTransitionHelper(scope)
 

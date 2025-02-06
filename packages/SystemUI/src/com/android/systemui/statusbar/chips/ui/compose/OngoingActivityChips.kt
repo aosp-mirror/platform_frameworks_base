@@ -38,11 +38,11 @@ fun OngoingActivityChips(chips: MultipleOngoingActivityChipsModel, modifier: Mod
     ) {
         // TODO(b/372657935): Make sure chips are only shown when there is enough horizontal
         // space.
-        if (chips.primary is OngoingActivityChipModel.Shown) {
+        if (chips.primary is OngoingActivityChipModel.Active) {
             val chip = chips.primary
             key(chip.key) { OngoingActivityChip(model = chip) }
         }
-        if (chips.secondary is OngoingActivityChipModel.Shown) {
+        if (chips.secondary is OngoingActivityChipModel.Active) {
             val chip = chips.secondary
             key(chip.key) { OngoingActivityChip(model = chip) }
         }

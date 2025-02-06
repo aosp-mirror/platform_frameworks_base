@@ -331,9 +331,9 @@ constructor(
 
     private val isAnyChipVisible =
         if (StatusBarNotifChips.isEnabled) {
-            ongoingActivityChips.map { it.primary is OngoingActivityChipModel.Shown }
+            ongoingActivityChips.map { it.primary is OngoingActivityChipModel.Active }
         } else {
-            primaryOngoingActivityChip.map { it is OngoingActivityChipModel.Shown }
+            primaryOngoingActivityChip.map { it is OngoingActivityChipModel.Active }
         }
 
     /**

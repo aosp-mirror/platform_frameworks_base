@@ -41,7 +41,7 @@ class FakeHomeStatusBarViewModel(
     override val transitionFromLockscreenToDreamStartedEvent = MutableSharedFlow<Unit>()
 
     override val primaryOngoingActivityChip: MutableStateFlow<OngoingActivityChipModel> =
-        MutableStateFlow(OngoingActivityChipModel.Hidden())
+        MutableStateFlow(OngoingActivityChipModel.Inactive())
 
     override val ongoingActivityChips = MutableStateFlow(MultipleOngoingActivityChipsModel())
 

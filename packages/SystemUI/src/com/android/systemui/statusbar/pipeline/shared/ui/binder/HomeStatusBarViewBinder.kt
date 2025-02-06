@@ -157,12 +157,12 @@ constructor(
                             )
                             if (StatusBarRootModernization.isEnabled) {
                                 when (primaryChipModel) {
-                                    is OngoingActivityChipModel.Shown ->
+                                    is OngoingActivityChipModel.Active ->
                                         primaryChipViewBinding.rootView.show(
                                             shouldAnimateChange = true
                                         )
 
-                                    is OngoingActivityChipModel.Hidden ->
+                                    is OngoingActivityChipModel.Inactive ->
                                         primaryChipViewBinding.rootView.hide(
                                             state = View.GONE,
                                             shouldAnimateChange = primaryChipModel.shouldAnimate,
@@ -170,14 +170,14 @@ constructor(
                                 }
                             } else {
                                 when (primaryChipModel) {
-                                    is OngoingActivityChipModel.Shown ->
+                                    is OngoingActivityChipModel.Active ->
                                         listener?.onOngoingActivityStatusChanged(
                                             hasPrimaryOngoingActivity = true,
                                             hasSecondaryOngoingActivity = false,
                                             shouldAnimate = true,
                                         )
 
-                                    is OngoingActivityChipModel.Hidden ->
+                                    is OngoingActivityChipModel.Inactive ->
                                         listener?.onOngoingActivityStatusChanged(
                                             hasPrimaryOngoingActivity = false,
                                             hasSecondaryOngoingActivity = false,
@@ -221,9 +221,9 @@ constructor(
                             } else {
                                 listener?.onOngoingActivityStatusChanged(
                                     hasPrimaryOngoingActivity =
-                                        chips.primary is OngoingActivityChipModel.Shown,
+                                        chips.primary is OngoingActivityChipModel.Active,
                                     hasSecondaryOngoingActivity =
-                                        chips.secondary is OngoingActivityChipModel.Shown,
+                                        chips.secondary is OngoingActivityChipModel.Active,
                                     // TODO(b/364653005): Figure out the animation story here.
                                     shouldAnimate = true,
                                 )
@@ -321,7 +321,7 @@ constructor(
 
     private fun OngoingActivityChipModel.toVisibilityModel(): VisibilityModel {
         return VisibilityModel(
-            visibility = if (this is OngoingActivityChipModel.Shown) View.VISIBLE else View.GONE,
+            visibility = if (this is OngoingActivityChipModel.Active) View.VISIBLE else View.GONE,
             // TODO(b/364653005): Figure out the animation story here.
             shouldAnimateChange = true,
         )

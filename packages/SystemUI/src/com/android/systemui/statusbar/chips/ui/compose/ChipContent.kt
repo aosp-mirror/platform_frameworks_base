@@ -48,7 +48,7 @@ import com.android.systemui.statusbar.chips.ui.viewmodel.rememberChronometerStat
 import kotlin.math.min
 
 @Composable
-fun ChipContent(viewModel: OngoingActivityChipModel.Shown, modifier: Modifier = Modifier) {
+fun ChipContent(viewModel: OngoingActivityChipModel.Active, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val isTextOnly = viewModel.icon == null
     val hasEmbeddedIcon =
@@ -73,7 +73,7 @@ fun ChipContent(viewModel: OngoingActivityChipModel.Shown, modifier: Modifier = 
         }
     val textMeasurer = rememberTextMeasurer()
     when (viewModel) {
-        is OngoingActivityChipModel.Shown.Timer -> {
+        is OngoingActivityChipModel.Active.Timer -> {
             val timerState = rememberChronometerState(startTimeMillis = viewModel.startTimeMs)
             val text = timerState.currentTimeText
             Text(
@@ -96,7 +96,7 @@ fun ChipContent(viewModel: OngoingActivityChipModel.Shown, modifier: Modifier = 
             )
         }
 
-        is OngoingActivityChipModel.Shown.Countdown -> {
+        is OngoingActivityChipModel.Active.Countdown -> {
             val text = viewModel.secondsUntilStarted.toString()
             Text(
                 text = text,
@@ -107,7 +107,7 @@ fun ChipContent(viewModel: OngoingActivityChipModel.Shown, modifier: Modifier = 
             )
         }
 
-        is OngoingActivityChipModel.Shown.Text -> {
+        is OngoingActivityChipModel.Active.Text -> {
             var hasOverflow by remember { mutableStateOf(false) }
             val text = viewModel.text
             Text(
@@ -137,11 +137,11 @@ fun ChipContent(viewModel: OngoingActivityChipModel.Shown, modifier: Modifier = 
             )
         }
 
-        is OngoingActivityChipModel.Shown.ShortTimeDelta -> {
+        is OngoingActivityChipModel.Active.ShortTimeDelta -> {
             // TODO(b/372657935): Implement ShortTimeDelta content in compose.
         }
 
-        is OngoingActivityChipModel.Shown.IconOnly -> {
+        is OngoingActivityChipModel.Active.IconOnly -> {
             throw IllegalStateException("ChipContent should only be used if the chip shows text")
         }
     }
@@ -149,10 +149,10 @@ fun ChipContent(viewModel: OngoingActivityChipModel.Shown, modifier: Modifier = 
 
 /** A modifier that ensures the width of the content only increases and never decreases. */
 private fun Modifier.neverDecreaseWidth(): Modifier {
-    return this.then(neverDecreaseWidthElement)
+    return this.then(NeverDecreaseWidthElement)
 }
 
-private data object neverDecreaseWidthElement : ModifierNodeElement<NeverDecreaseWidthNode>() {
+private data object NeverDecreaseWidthElement : ModifierNodeElement<NeverDecreaseWidthNode>() {
     override fun create(): NeverDecreaseWidthNode {
         return NeverDecreaseWidthNode()
     }

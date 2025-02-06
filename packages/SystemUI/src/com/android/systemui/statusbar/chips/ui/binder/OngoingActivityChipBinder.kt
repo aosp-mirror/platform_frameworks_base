@@ -54,7 +54,7 @@ object OngoingActivityChipBinder {
         val chipBackgroundView = viewBinding.backgroundView
 
         when (chipModel) {
-            is OngoingActivityChipModel.Shown -> {
+            is OngoingActivityChipModel.Active -> {
                 // Data
                 setChipIcon(chipModel, chipBackgroundView, chipDefaultIconView, iconViewStore)
                 setChipMainContent(chipModel, chipTextView, chipTimeView, chipShortTimeDeltaView)
@@ -79,7 +79,7 @@ object OngoingActivityChipBinder {
                 (chipBackgroundView.background as GradientDrawable).color =
                     chipModel.colors.background(chipContext)
             }
-            is OngoingActivityChipModel.Hidden -> {
+            is OngoingActivityChipModel.Inactive -> {
                 // The Chronometer should be stopped to prevent leaks -- see b/192243808 and
                 // [Chronometer.start].
                 chipTimeView.stop()
@@ -110,12 +110,12 @@ object OngoingActivityChipBinder {
         primaryChipViewBinding: OngoingActivityChipViewBinding,
         currentPrimaryChipViewModel: OngoingActivityChipModel,
     ) {
-        if (currentPrimaryChipViewModel is OngoingActivityChipModel.Hidden) {
+        if (currentPrimaryChipViewModel is OngoingActivityChipModel.Inactive) {
             return
         }
         resetChipMainContentWidthRestrictions(
             primaryChipViewBinding,
-            currentPrimaryChipViewModel as OngoingActivityChipModel.Shown,
+            currentPrimaryChipViewModel as OngoingActivityChipModel.Active,
         )
     }
 
@@ -129,27 +129,27 @@ object OngoingActivityChipBinder {
         secondaryChipViewBinding: OngoingActivityChipViewBinding,
         currentSecondaryChipModel: OngoingActivityChipModel,
     ) {
-        if (currentSecondaryChipModel is OngoingActivityChipModel.Hidden) {
+        if (currentSecondaryChipModel is OngoingActivityChipModel.Inactive) {
             return
         }
         secondaryChipViewBinding.rootView.resetWidthRestriction()
         resetChipMainContentWidthRestrictions(
             secondaryChipViewBinding,
-            currentSecondaryChipModel as OngoingActivityChipModel.Shown,
+            currentSecondaryChipModel as OngoingActivityChipModel.Active,
         )
     }
 
     private fun resetChipMainContentWidthRestrictions(
         viewBinding: OngoingActivityChipViewBinding,
-        model: OngoingActivityChipModel.Shown,
+        model: OngoingActivityChipModel.Active,
     ) {
         when (model) {
-            is OngoingActivityChipModel.Shown.Text -> viewBinding.textView.resetWidthRestriction()
-            is OngoingActivityChipModel.Shown.Timer -> viewBinding.timeView.resetWidthRestriction()
-            is OngoingActivityChipModel.Shown.ShortTimeDelta ->
+            is OngoingActivityChipModel.Active.Text -> viewBinding.textView.resetWidthRestriction()
+            is OngoingActivityChipModel.Active.Timer -> viewBinding.timeView.resetWidthRestriction()
+            is OngoingActivityChipModel.Active.ShortTimeDelta ->
                 viewBinding.shortTimeDeltaView.resetWidthRestriction()
-            is OngoingActivityChipModel.Shown.IconOnly,
-            is OngoingActivityChipModel.Shown.Countdown -> {}
+            is OngoingActivityChipModel.Active.IconOnly,
+            is OngoingActivityChipModel.Active.Countdown -> {}
         }
     }
 
@@ -167,7 +167,7 @@ object OngoingActivityChipBinder {
     }
 
     private fun setChipIcon(
-        chipModel: OngoingActivityChipModel.Shown,
+        chipModel: OngoingActivityChipModel.Active,
         backgroundView: ChipBackgroundContainer,
         defaultIconView: ImageView,
         iconViewStore: IconViewStore?,
@@ -278,34 +278,34 @@ object OngoingActivityChipBinder {
     }
 
     private fun setChipMainContent(
-        chipModel: OngoingActivityChipModel.Shown,
+        chipModel: OngoingActivityChipModel.Active,
         chipTextView: TextView,
         chipTimeView: ChipChronometer,
         chipShortTimeDeltaView: DateTimeView,
     ) {
         when (chipModel) {
-            is OngoingActivityChipModel.Shown.Countdown -> {
+            is OngoingActivityChipModel.Active.Countdown -> {
                 chipTextView.text = chipModel.secondsUntilStarted.toString()
                 chipTextView.visibility = View.VISIBLE
 
                 chipTimeView.hide()
                 chipShortTimeDeltaView.visibility = View.GONE
             }
-            is OngoingActivityChipModel.Shown.Text -> {
+            is OngoingActivityChipModel.Active.Text -> {
                 chipTextView.text = chipModel.text
                 chipTextView.visibility = View.VISIBLE
 
                 chipTimeView.hide()
                 chipShortTimeDeltaView.visibility = View.GONE
             }
-            is OngoingActivityChipModel.Shown.Timer -> {
+            is OngoingActivityChipModel.Active.Timer -> {
                 ChipChronometerBinder.bind(chipModel.startTimeMs, chipTimeView)
                 chipTimeView.visibility = View.VISIBLE
 
                 chipTextView.visibility = View.GONE
                 chipShortTimeDeltaView.visibility = View.GONE
             }
-            is OngoingActivityChipModel.Shown.ShortTimeDelta -> {
+            is OngoingActivityChipModel.Active.ShortTimeDelta -> {
                 chipShortTimeDeltaView.setTime(chipModel.time)
                 chipShortTimeDeltaView.visibility = View.VISIBLE
                 chipShortTimeDeltaView.isShowRelativeTime = true
@@ -319,7 +319,7 @@ object OngoingActivityChipBinder {
                 chipTextView.visibility = View.GONE
                 chipTimeView.hide()
             }
-            is OngoingActivityChipModel.Shown.IconOnly -> {
+            is OngoingActivityChipModel.Active.IconOnly -> {
                 chipTextView.visibility = View.GONE
                 chipShortTimeDeltaView.visibility = View.GONE
                 chipTimeView.hide()
@@ -335,7 +335,7 @@ object OngoingActivityChipBinder {
     }
 
     private fun updateChipPadding(
-        chipModel: OngoingActivityChipModel.Shown,
+        chipModel: OngoingActivityChipModel.Active,
         backgroundView: View,
         chipTextView: TextView,
         chipTimeView: ChipChronometer,
@@ -425,19 +425,19 @@ object OngoingActivityChipBinder {
     }
 
     private fun setChipAccessibility(
-        chipModel: OngoingActivityChipModel.Shown,
+        chipModel: OngoingActivityChipModel.Active,
         chipView: View,
         chipBackgroundView: View,
     ) {
         when (chipModel) {
-            is OngoingActivityChipModel.Shown.Countdown -> {
+            is OngoingActivityChipModel.Active.Countdown -> {
                 // Set as assertive so talkback will announce the countdown
                 chipView.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE
             }
-            is OngoingActivityChipModel.Shown.Timer,
-            is OngoingActivityChipModel.Shown.Text,
-            is OngoingActivityChipModel.Shown.ShortTimeDelta,
-            is OngoingActivityChipModel.Shown.IconOnly -> {
+            is OngoingActivityChipModel.Active.Timer,
+            is OngoingActivityChipModel.Active.Text,
+            is OngoingActivityChipModel.Active.ShortTimeDelta,
+            is OngoingActivityChipModel.Active.IconOnly -> {
                 chipView.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_NONE
             }
         }

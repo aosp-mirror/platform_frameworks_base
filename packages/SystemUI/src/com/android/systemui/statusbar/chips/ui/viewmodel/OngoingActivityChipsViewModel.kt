@@ -100,28 +100,28 @@ constructor(
          * Represents that we've internally decided to show the chip with type [type] with the given
          * [model] information.
          */
-        data class Shown(val type: ChipType, val model: OngoingActivityChipModel.Shown) :
+        data class Active(val type: ChipType, val model: OngoingActivityChipModel.Active) :
             InternalChipModel
 
         /**
          * Represents that all chip types would like to be hidden. Each value specifies *how* that
          * chip type should get hidden.
          */
-        data class Hidden(
-            val screenRecord: OngoingActivityChipModel.Hidden,
-            val shareToApp: OngoingActivityChipModel.Hidden,
-            val castToOtherDevice: OngoingActivityChipModel.Hidden,
-            val call: OngoingActivityChipModel.Hidden,
-            val notifs: OngoingActivityChipModel.Hidden,
+        data class Inactive(
+            val screenRecord: OngoingActivityChipModel.Inactive,
+            val shareToApp: OngoingActivityChipModel.Inactive,
+            val castToOtherDevice: OngoingActivityChipModel.Inactive,
+            val call: OngoingActivityChipModel.Inactive,
+            val notifs: OngoingActivityChipModel.Inactive,
         ) : InternalChipModel
     }
 
     private data class ChipBundle(
-        val screenRecord: OngoingActivityChipModel = OngoingActivityChipModel.Hidden(),
-        val shareToApp: OngoingActivityChipModel = OngoingActivityChipModel.Hidden(),
-        val castToOtherDevice: OngoingActivityChipModel = OngoingActivityChipModel.Hidden(),
-        val call: OngoingActivityChipModel = OngoingActivityChipModel.Hidden(),
-        val notifs: List<OngoingActivityChipModel.Shown> = emptyList(),
+        val screenRecord: OngoingActivityChipModel = OngoingActivityChipModel.Inactive(),
+        val shareToApp: OngoingActivityChipModel = OngoingActivityChipModel.Inactive(),
+        val castToOtherDevice: OngoingActivityChipModel = OngoingActivityChipModel.Inactive(),
+        val call: OngoingActivityChipModel = OngoingActivityChipModel.Inactive(),
+        val notifs: List<OngoingActivityChipModel.Active> = emptyList(),
     )
 
     /** Bundles all the incoming chips into one object to easily pass to various flows. */
@@ -179,9 +179,9 @@ constructor(
      */
     val primaryChip: StateFlow<OngoingActivityChipModel> =
         internalChip
-            .pairwise(initialValue = DEFAULT_INTERNAL_HIDDEN_MODEL)
+            .pairwise(initialValue = DEFAULT_INTERNAL_INACTIVE_MODEL)
             .map { (old, new) -> createOutputModel(old, new) }
-            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden())
+            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Inactive())
 
     /**
      * Equivalent to [MultipleOngoingActivityChipsModel] but using the internal models to do some
@@ -197,17 +197,17 @@ constructor(
             // First: Find the most important chip.
             val primaryChipResult = pickMostImportantChip(bundle)
             when (val primaryChip = primaryChipResult.mostImportantChip) {
-                is InternalChipModel.Hidden -> {
+                is InternalChipModel.Inactive -> {
                     // If the primary chip is hidden, the secondary chip will also be hidden, so
                     // just pass the same Hidden model for both.
                     InternalMultipleOngoingActivityChipsModel(primaryChip, primaryChip)
                 }
-                is InternalChipModel.Shown -> {
+                is InternalChipModel.Active -> {
                     // Otherwise: Find the next most important chip.
                     val secondaryChip =
                         pickMostImportantChip(primaryChipResult.remainingChips).mostImportantChip
                     if (
-                        secondaryChip is InternalChipModel.Shown &&
+                        secondaryChip is InternalChipModel.Active &&
                             StatusBarNotifChips.isEnabled &&
                             !StatusBarChipsModernization.isEnabled &&
                             !isScreenReasonablyLarge
@@ -231,27 +231,27 @@ constructor(
         }
 
     /** Squishes the chip down to the smallest content possible. */
-    private fun InternalChipModel.Shown.squish(): InternalChipModel.Shown {
+    private fun InternalChipModel.Active.squish(): InternalChipModel.Active {
         return when (model) {
             // Icon-only is already maximum squished
-            is OngoingActivityChipModel.Shown.IconOnly -> this
+            is OngoingActivityChipModel.Active.IconOnly -> this
             // Countdown shows just a single digit, so already maximum squished
-            is OngoingActivityChipModel.Shown.Countdown -> this
+            is OngoingActivityChipModel.Active.Countdown -> this
             // The other chips have icon+text, so we should hide the text
-            is OngoingActivityChipModel.Shown.Timer,
-            is OngoingActivityChipModel.Shown.ShortTimeDelta,
-            is OngoingActivityChipModel.Shown.Text ->
-                InternalChipModel.Shown(this.type, this.model.toIconOnly())
+            is OngoingActivityChipModel.Active.Timer,
+            is OngoingActivityChipModel.Active.ShortTimeDelta,
+            is OngoingActivityChipModel.Active.Text ->
+                InternalChipModel.Active(this.type, this.model.toIconOnly())
         }
     }
 
-    private fun OngoingActivityChipModel.Shown.toIconOnly(): OngoingActivityChipModel.Shown {
+    private fun OngoingActivityChipModel.Active.toIconOnly(): OngoingActivityChipModel.Active {
         // If this chip doesn't have an icon, then it only has text and we should continue showing
         // its text. (This is theoretically impossible because
-        // [OngoingActivityChipModel.Shown.Countdown] is the only chip without an icon, but protect
+        // [OngoingActivityChipModel.Active.Countdown] is the only chip without an icon, but protect
         // against it just in case.)
         val currentIcon = icon ?: return this
-        return OngoingActivityChipModel.Shown.IconOnly(
+        return OngoingActivityChipModel.Active.IconOnly(
             key,
             currentIcon,
             colors,
@@ -275,13 +275,13 @@ constructor(
                 .map {
                     MultipleOngoingActivityChipsModel(
                         primary = it,
-                        secondary = OngoingActivityChipModel.Hidden(),
+                        secondary = OngoingActivityChipModel.Inactive(),
                     )
                 }
                 .stateIn(scope, SharingStarted.Lazily, MultipleOngoingActivityChipsModel())
         } else {
             internalChips
-                .pairwise(initialValue = DEFAULT_MULTIPLE_INTERNAL_HIDDEN_MODEL)
+                .pairwise(initialValue = DEFAULT_MULTIPLE_INTERNAL_INACTIVE_MODEL)
                 .map { (old, new) ->
                     val correctPrimary = createOutputModel(old.primary, new.primary)
                     val correctSecondary = createOutputModel(old.secondary, new.secondary)
@@ -305,13 +305,13 @@ constructor(
     private fun pickMostImportantChip(bundle: ChipBundle): MostImportantChipResult {
         // This `when` statement shows the priority order of the chips.
         return when {
-            bundle.screenRecord is OngoingActivityChipModel.Shown ->
+            bundle.screenRecord is OngoingActivityChipModel.Active ->
                 MostImportantChipResult(
                     mostImportantChip =
-                        InternalChipModel.Shown(ChipType.ScreenRecord, bundle.screenRecord),
+                        InternalChipModel.Active(ChipType.ScreenRecord, bundle.screenRecord),
                     remainingChips =
                         bundle.copy(
-                            screenRecord = OngoingActivityChipModel.Hidden(),
+                            screenRecord = OngoingActivityChipModel.Inactive(),
                             // Screen recording also activates the media projection APIs, which
                             // means that whenever the screen recording chip is active, the
                             // share-to-app chip would also be active. (Screen recording is a
@@ -321,52 +321,52 @@ constructor(
                             // case. If we did have screen recording as the primary chip, we need to
                             // suppress the share-to-app chip to make sure they don't both show.
                             // See b/296461748.
-                            shareToApp = OngoingActivityChipModel.Hidden(),
+                            shareToApp = OngoingActivityChipModel.Inactive(),
                         ),
                 )
-            bundle.shareToApp is OngoingActivityChipModel.Shown ->
+            bundle.shareToApp is OngoingActivityChipModel.Active ->
                 MostImportantChipResult(
                     mostImportantChip =
-                        InternalChipModel.Shown(ChipType.ShareToApp, bundle.shareToApp),
-                    remainingChips = bundle.copy(shareToApp = OngoingActivityChipModel.Hidden()),
+                        InternalChipModel.Active(ChipType.ShareToApp, bundle.shareToApp),
+                    remainingChips = bundle.copy(shareToApp = OngoingActivityChipModel.Inactive()),
                 )
-            bundle.castToOtherDevice is OngoingActivityChipModel.Shown ->
+            bundle.castToOtherDevice is OngoingActivityChipModel.Active ->
                 MostImportantChipResult(
                     mostImportantChip =
-                        InternalChipModel.Shown(
+                        InternalChipModel.Active(
                             ChipType.CastToOtherDevice,
                             bundle.castToOtherDevice,
                         ),
                     remainingChips =
-                        bundle.copy(castToOtherDevice = OngoingActivityChipModel.Hidden()),
+                        bundle.copy(castToOtherDevice = OngoingActivityChipModel.Inactive()),
                 )
-            bundle.call is OngoingActivityChipModel.Shown ->
+            bundle.call is OngoingActivityChipModel.Active ->
                 MostImportantChipResult(
-                    mostImportantChip = InternalChipModel.Shown(ChipType.Call, bundle.call),
-                    remainingChips = bundle.copy(call = OngoingActivityChipModel.Hidden()),
+                    mostImportantChip = InternalChipModel.Active(ChipType.Call, bundle.call),
+                    remainingChips = bundle.copy(call = OngoingActivityChipModel.Inactive()),
                 )
             bundle.notifs.isNotEmpty() ->
                 MostImportantChipResult(
                     mostImportantChip =
-                        InternalChipModel.Shown(ChipType.Notification, bundle.notifs.first()),
+                        InternalChipModel.Active(ChipType.Notification, bundle.notifs.first()),
                     remainingChips =
                         bundle.copy(notifs = bundle.notifs.subList(1, bundle.notifs.size)),
                 )
             else -> {
                 // We should only get here if all chip types are hidden
-                check(bundle.screenRecord is OngoingActivityChipModel.Hidden)
-                check(bundle.shareToApp is OngoingActivityChipModel.Hidden)
-                check(bundle.castToOtherDevice is OngoingActivityChipModel.Hidden)
-                check(bundle.call is OngoingActivityChipModel.Hidden)
+                check(bundle.screenRecord is OngoingActivityChipModel.Inactive)
+                check(bundle.shareToApp is OngoingActivityChipModel.Inactive)
+                check(bundle.castToOtherDevice is OngoingActivityChipModel.Inactive)
+                check(bundle.call is OngoingActivityChipModel.Inactive)
                 check(bundle.notifs.isEmpty())
                 MostImportantChipResult(
                     mostImportantChip =
-                        InternalChipModel.Hidden(
+                        InternalChipModel.Inactive(
                             screenRecord = bundle.screenRecord,
                             shareToApp = bundle.shareToApp,
                             castToOtherDevice = bundle.castToOtherDevice,
                             call = bundle.call,
-                            notifs = OngoingActivityChipModel.Hidden(),
+                            notifs = OngoingActivityChipModel.Inactive(),
                         ),
                     // All the chips are already hidden, so no need to filter anything out of the
                     // bundle.
@@ -380,14 +380,14 @@ constructor(
         old: InternalChipModel,
         new: InternalChipModel,
     ): OngoingActivityChipModel {
-        return if (old is InternalChipModel.Shown && new is InternalChipModel.Hidden) {
+        return if (old is InternalChipModel.Active && new is InternalChipModel.Inactive) {
             // If we're transitioning from showing the chip to hiding the chip, different
             // chips require different animation behaviors. For example, the screen share
             // chips shouldn't animate if the user stopped the screen share from the dialog
             // (see b/353249803#comment4), but the call chip should always animate.
             //
-            // This `when` block makes sure that when we're transitioning from Shown to
-            // Hidden, we check what chip type was previously showing and we use that chip
+            // This `when` block makes sure that when we're transitioning from Active to
+            // Inactive, we check what chip type was previously showing and we use that chip
             // type's hide animation behavior.
             return when (old.type) {
                 ChipType.ScreenRecord -> new.screenRecord
@@ -396,13 +396,13 @@ constructor(
                 ChipType.Call -> new.call
                 ChipType.Notification -> new.notifs
             }
-        } else if (new is InternalChipModel.Shown) {
+        } else if (new is InternalChipModel.Active) {
             // If we have a chip to show, always show it.
             new.model
         } else {
             // In the Hidden -> Hidden transition, it shouldn't matter which hidden model we
             // choose because no animation should happen regardless.
-            OngoingActivityChipModel.Hidden()
+            OngoingActivityChipModel.Inactive()
         }
     }
 
@@ -412,19 +412,19 @@ constructor(
     companion object {
         private val TAG = "ChipsViewModel".pad()
 
-        private val DEFAULT_INTERNAL_HIDDEN_MODEL =
-            InternalChipModel.Hidden(
-                screenRecord = OngoingActivityChipModel.Hidden(),
-                shareToApp = OngoingActivityChipModel.Hidden(),
-                castToOtherDevice = OngoingActivityChipModel.Hidden(),
-                call = OngoingActivityChipModel.Hidden(),
-                notifs = OngoingActivityChipModel.Hidden(),
+        private val DEFAULT_INTERNAL_INACTIVE_MODEL =
+            InternalChipModel.Inactive(
+                screenRecord = OngoingActivityChipModel.Inactive(),
+                shareToApp = OngoingActivityChipModel.Inactive(),
+                castToOtherDevice = OngoingActivityChipModel.Inactive(),
+                call = OngoingActivityChipModel.Inactive(),
+                notifs = OngoingActivityChipModel.Inactive(),
             )
 
-        private val DEFAULT_MULTIPLE_INTERNAL_HIDDEN_MODEL =
+        private val DEFAULT_MULTIPLE_INTERNAL_INACTIVE_MODEL =
             InternalMultipleOngoingActivityChipsModel(
-                primary = DEFAULT_INTERNAL_HIDDEN_MODEL,
-                secondary = DEFAULT_INTERNAL_HIDDEN_MODEL,
+                primary = DEFAULT_INTERNAL_INACTIVE_MODEL,
+                secondary = DEFAULT_INTERNAL_INACTIVE_MODEL,
             )
     }
 }

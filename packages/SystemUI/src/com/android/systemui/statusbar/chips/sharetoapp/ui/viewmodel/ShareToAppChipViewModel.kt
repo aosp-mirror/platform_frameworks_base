@@ -129,7 +129,7 @@ constructor(
         mediaProjectionChipInteractor.projection
             .map { projectionModel ->
                 when (projectionModel) {
-                    is ProjectionChipModel.NotProjecting -> OngoingActivityChipModel.Hidden()
+                    is ProjectionChipModel.NotProjecting -> OngoingActivityChipModel.Inactive()
                     is ProjectionChipModel.Projecting -> {
                         when (projectionModel.receiver) {
                             ProjectionChipModel.Receiver.ShareToApp -> {
@@ -141,13 +141,13 @@ constructor(
                                 }
                             }
                             ProjectionChipModel.Receiver.CastToOtherDevice ->
-                                OngoingActivityChipModel.Hidden()
+                                OngoingActivityChipModel.Inactive()
                         }
                     }
                 }
             }
             // See b/347726238 for [SharingStarted.Lazily] reasoning.
-            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden())
+            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Inactive())
 
     private val chipTransitionHelper = ChipTransitionHelper(scope)
 
@@ -165,12 +165,12 @@ constructor(
                         {},
                         { "Hiding the chip as stop dialog is being shown" },
                     )
-                    OngoingActivityChipModel.Hidden()
+                    OngoingActivityChipModel.Inactive()
                 } else {
                     currentChip
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden())
+            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Inactive())
 
     /**
      * Notifies this class that the user just stopped a screen recording from the dialog that's
@@ -219,8 +219,8 @@ constructor(
 
     private fun createShareScreenToAppChip(
         state: ProjectionChipModel.Projecting
-    ): OngoingActivityChipModel.Shown {
-        return OngoingActivityChipModel.Shown.Timer(
+    ): OngoingActivityChipModel.Active {
+        return OngoingActivityChipModel.Active.Timer(
             key = KEY,
             icon =
                 OngoingActivityChipModel.ChipIcon.SingleColorIcon(
@@ -254,8 +254,8 @@ constructor(
         )
     }
 
-    private fun createIconOnlyShareToAppChip(): OngoingActivityChipModel.Shown {
-        return OngoingActivityChipModel.Shown.IconOnly(
+    private fun createIconOnlyShareToAppChip(): OngoingActivityChipModel.Active {
+        return OngoingActivityChipModel.Active.IconOnly(
             key = KEY,
             icon =
                 OngoingActivityChipModel.ChipIcon.SingleColorIcon(

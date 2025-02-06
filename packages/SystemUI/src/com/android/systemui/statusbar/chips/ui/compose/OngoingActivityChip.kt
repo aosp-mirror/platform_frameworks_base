@@ -52,7 +52,7 @@ import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 
 @Composable
-fun OngoingActivityChip(model: OngoingActivityChipModel.Shown, modifier: Modifier = Modifier) {
+fun OngoingActivityChip(model: OngoingActivityChipModel.Active, modifier: Modifier = Modifier) {
     when (val clickBehavior = model.clickBehavior) {
         is OngoingActivityChipModel.ClickBehavior.ExpandAction -> {
             // Wrap the chip in an Expandable so we can animate the expand transition.
@@ -79,7 +79,7 @@ fun OngoingActivityChip(model: OngoingActivityChipModel.Shown, modifier: Modifie
 
 @Composable
 private fun ChipBody(
-    model: OngoingActivityChipModel.Shown,
+    model: OngoingActivityChipModel.Active,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
 ) {
@@ -148,7 +148,7 @@ private fun ChipBody(
         ) {
             model.icon?.let { ChipIcon(viewModel = it, colors = model.colors) }
 
-            val isIconOnly = model is OngoingActivityChipModel.Shown.IconOnly
+            val isIconOnly = model is OngoingActivityChipModel.Active.IconOnly
             if (!isIconOnly) {
                 ChipContent(viewModel = model)
             }
