@@ -15276,12 +15276,9 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @GuardedBy("this")
     public void setBatteryStateLocked(final int status, final int health, final int plugType,
-            final int level, /* not final */ int temp, final int voltageMv, final int chargeUah,
+            final int level, final int temp, final int voltageMv, final int chargeUah,
             final int chargeFullUah, final long chargeTimeToFullSeconds,
             final long elapsedRealtimeMs, final long uptimeMs, final long currentTimeMs) {
-
-        // Temperature is encoded without the signed bit, so clamp any negative temperatures to 0.
-        temp = Math.max(0, temp);
 
         reportChangesToStatsLog(status, plugType, level);
 
