@@ -1122,14 +1122,6 @@ static void nativeSetClientDrawnCornerRadius(JNIEnv* env, jclass clazz, jlong tr
     transaction->setClientDrawnCornerRadius(ctrl, clientDrawnCornerRadius);
 }
 
-static void nativeSetClientDrawnShadows(JNIEnv* env, jclass clazz, jlong transactionObj,
-                                        jlong nativeObject, jfloat clientDrawnShadowRadius) {
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-
-    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
-    transaction->setClientDrawnShadowRadius(ctrl, clientDrawnShadowRadius);
-}
-
 static void nativeSetBackgroundBlurRadius(JNIEnv* env, jclass clazz, jlong transactionObj,
          jlong nativeObject, jint blurRadius) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -2566,8 +2558,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetCornerRadius },
     {"nativeSetClientDrawnCornerRadius", "(JJF)V",
             (void*) nativeSetClientDrawnCornerRadius },
-    {"nativeSetClientDrawnShadows", "(JJF)V",
-            (void*) nativeSetClientDrawnShadows },
     {"nativeSetBackgroundBlurRadius", "(JJI)V",
             (void*)nativeSetBackgroundBlurRadius },
     {"nativeSetLayerStack", "(JJI)V",
