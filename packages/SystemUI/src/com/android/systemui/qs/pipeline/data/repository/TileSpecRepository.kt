@@ -19,7 +19,9 @@ package com.android.systemui.qs.pipeline.data.repository
 import android.annotation.UserIdInt
 import android.content.res.Resources
 import android.util.SparseArray
+import com.android.app.tracing.coroutines.launchTraced
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.qs.pipeline.data.model.RestoreData
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
@@ -27,6 +29,9 @@ import com.android.systemui.res.R
 import com.android.systemui.retail.data.repository.RetailModeRepository
 import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -73,6 +78,8 @@ interface TileSpecRepository {
     /** Reset the current set of tiles to the default list of tiles */
     suspend fun resetToDefault(userId: Int)
 
+    val tilesReadFromSetting: ReceiveChannel<Pair<Set<TileSpec>, Int>>
+
     companion object {
         /** Position to indicate the end of the list */
         const val POSITION_AT_END = -1
@@ -94,6 +101,7 @@ constructor(
     private val logger: QSPipelineLogger,
     private val retailModeRepository: RetailModeRepository,
     private val userTileSpecRepositoryFactory: UserTileSpecRepository.Factory,
+    @Background private val applicationScope: CoroutineScope,
 ) : TileSpecRepository {
 
     private val retailModeTiles by lazy {
@@ -104,12 +112,20 @@ constructor(
             .filter { it !is TileSpec.Invalid }
     }
 
+    private val _tilesReadFromSetting = Channel<Pair<Set<TileSpec>, Int>>(capacity = 5)
+    override val tilesReadFromSetting = _tilesReadFromSetting
+
     private val userTileRepositories = SparseArray<UserTileSpecRepository>()
 
     override suspend fun tilesSpecs(userId: Int): Flow<List<TileSpec>> {
         if (userId !in userTileRepositories) {
             val userTileRepository = userTileSpecRepositoryFactory.create(userId)
             userTileRepositories.put(userId, userTileRepository)
+            applicationScope.launchTraced("TileSpecRepository.aggregateTilesPerUser") {
+                for (tilesFromSettings in userTileRepository.tilesReadFromSettings) {
+                    _tilesReadFromSetting.send(tilesFromSettings to userId)
+                }
+            }
         }
         val realTiles = userTileRepositories.get(userId).tiles()
 

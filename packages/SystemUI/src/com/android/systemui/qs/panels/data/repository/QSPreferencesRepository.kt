@@ -84,8 +84,30 @@ constructor(
 
     /** Sets for the current user the set of [TileSpec] to display as large tiles. */
     fun setLargeTilesSpecs(specs: Set<TileSpec>) {
-        with(getSharedPrefs(userRepository.getSelectedUserInfo().id)) {
+        setLargeTilesSpecsForUser(specs, userRepository.getSelectedUserInfo().id)
+    }
+
+    private fun setLargeTilesSpecsForUser(specs: Set<TileSpec>, userId: Int) {
+        with(getSharedPrefs(userId)) {
             edit().putStringSet(LARGE_TILES_SPECS_KEY, specs.map { it.spec }.toSet()).apply()
+        }
+    }
+
+    /**
+     * Sets the initial tiles as large, if there is no set in SharedPrefs for the [userId]. This is
+     * to be used when upgrading to a build that supports large/small tiles.
+     *
+     * Even if largeTilesSpec is read Eagerly before we know if we are in an initial state, because
+     * we are not writing the default values to the SharedPreferences, the file will not contain the
+     * key and this call will succeed, as long as there hasn't been any calls to setLargeTilesSpecs
+     * for that user before.
+     */
+    fun setInitialLargeTilesSpecs(specs: Set<TileSpec>, userId: Int) {
+        with(getSharedPrefs(userId)) {
+            if (!contains(LARGE_TILES_SPECS_KEY)) {
+                logger.i("Setting upgraded large tiles for user $userId: $specs")
+                setLargeTilesSpecsForUser(specs, userId)
+            }
         }
     }
 
