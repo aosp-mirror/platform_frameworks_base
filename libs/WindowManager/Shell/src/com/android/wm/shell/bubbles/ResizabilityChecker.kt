@@ -22,7 +22,7 @@ import android.content.pm.PackageManager
 /**
  * Interface to check whether the activity backed by a specific intent is resizable.
  */
-interface ResizabilityChecker {
+fun interface ResizabilityChecker {
 
     /**
      * Returns whether the provided intent represents a resizable activity.
