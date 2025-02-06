@@ -30,6 +30,8 @@ import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.policy.BatteryController
+import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
+import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.isDevicePluggedIn
 import com.android.systemui.util.kotlin.sample
 import dagger.assisted.AssistedFactory
@@ -40,7 +42,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -68,12 +69,16 @@ constructor(
             source = batteryController.isDevicePluggedIn().distinctUntilChanged(),
         )
 
-    /** Return whether the dream button tooltip has been dismissed. */
+    /** Return whether to show the dream button tooltip. */
     val shouldShowTooltip: Boolean by
         hydrator.hydratedStateOf(
             traceName = "shouldShowTooltip",
             initialValue = false,
-            source = prefsInteractor.isDreamButtonTooltipDismissed.map { !it },
+            source =
+                allOf(
+                    not(prefsInteractor.isDreamButtonTooltipDismissed),
+                    prefsInteractor.isHubOnboardingDismissed,
+                ),
         )
 
     /** Set the dream button tooltip to be dismissed. */

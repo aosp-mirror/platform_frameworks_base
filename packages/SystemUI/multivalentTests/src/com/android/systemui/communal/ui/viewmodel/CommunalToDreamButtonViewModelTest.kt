@@ -126,10 +126,20 @@ class CommunalToDreamButtonViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun shouldShowDreamButtonTooltip_trueWhenNotDismissed() =
+    fun shouldShowDreamButtonTooltip_trueWhenNotDismissedAndHubOnboardingDismissed() =
+        kosmos.runTest {
+            setSelectedUser(MAIN_USER)
+            fakeCommunalPrefsRepository.setHubOnboardingDismissed(MAIN_USER)
+            runCurrent()
+
+            assertThat(underTest.shouldShowTooltip).isTrue()
+        }
+
+    @Test
+    fun shouldShowDreamButtonTooltip_falseWhenNotDismissedAndHubOnboardingNotDismissed() =
         kosmos.runTest {
             runCurrent()
-            assertThat(underTest.shouldShowTooltip).isTrue()
+            assertThat(underTest.shouldShowTooltip).isFalse()
         }
 
     @Test
