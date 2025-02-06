@@ -75,7 +75,7 @@ public final class TestActivity extends Activity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         final var rootView = new LinearLayout(this);
         mEditText = new EditText(this);
-        mEditText.setContentDescription("Input box");
+        mEditText.setHint("editText");
         rootView.addView(mEditText, new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
         rootView.setFitsSystemWindows(true);
         setContentView(rootView);
