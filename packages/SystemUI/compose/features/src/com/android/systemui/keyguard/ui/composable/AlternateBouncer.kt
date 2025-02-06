@@ -55,7 +55,7 @@ import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerMessageAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerUdfpsIconViewModel
-import com.android.systemui.log.LongPressHandlingViewLogger
+import com.android.systemui.log.TouchHandlingViewLogger
 import com.android.systemui.res.R
 
 @Composable
@@ -156,7 +156,7 @@ private fun StatusMessage(
 @Composable
 private fun DeviceEntryIcon(
     viewModel: AlternateBouncerUdfpsIconViewModel,
-    logger: LongPressHandlingViewLogger,
+    logger: TouchHandlingViewLogger,
     modifier: Modifier = Modifier,
 ) {
     AndroidView(

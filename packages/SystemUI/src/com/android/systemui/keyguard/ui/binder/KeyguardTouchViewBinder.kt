@@ -23,13 +23,13 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.tracing.coroutines.launchTraced as launch
-import com.android.systemui.common.ui.view.LongPressHandlingView
+import com.android.systemui.common.ui.view.TouchHandlingView
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardTouchHandlingViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 
-object KeyguardLongPressViewBinder {
+object KeyguardTouchViewBinder {
     /**
      * Drives UI for the lock screen long-press feature.
      *
@@ -41,7 +41,7 @@ object KeyguardLongPressViewBinder {
      */
     @JvmStatic
     fun bind(
-        view: LongPressHandlingView,
+        view: TouchHandlingView,
         viewModel: KeyguardTouchHandlingViewModel,
         onSingleTap: (x: Int, y: Int) -> Unit,
         falsingManager: FalsingManager,
@@ -52,7 +52,7 @@ object KeyguardLongPressViewBinder {
                 view.resources.getString(R.string.lock_screen_settings),
             )
         view.listener =
-            object : LongPressHandlingView.Listener {
+            object : TouchHandlingView.Listener {
                 override fun onLongPressDetected(
                     view: View,
                     x: Int,

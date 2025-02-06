@@ -21,10 +21,10 @@ import android.view.ViewConfiguration
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.ui.view.LongPressHandlingViewInteractionHandler.MotionEventModel
-import com.android.systemui.common.ui.view.LongPressHandlingViewInteractionHandler.MotionEventModel.Down
-import com.android.systemui.common.ui.view.LongPressHandlingViewInteractionHandler.MotionEventModel.Move
-import com.android.systemui.common.ui.view.LongPressHandlingViewInteractionHandler.MotionEventModel.Up
+import com.android.systemui.common.ui.view.TouchHandlingViewInteractionHandler.MotionEventModel
+import com.android.systemui.common.ui.view.TouchHandlingViewInteractionHandler.MotionEventModel.Down
+import com.android.systemui.common.ui.view.TouchHandlingViewInteractionHandler.MotionEventModel.Move
+import com.android.systemui.common.ui.view.TouchHandlingViewInteractionHandler.MotionEventModel.Up
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -40,13 +40,13 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class LongPressHandlingViewInteractionHandlerTest : SysuiTestCase() {
+class TouchHandlingViewInteractionHandlerTest : SysuiTestCase() {
 
     @Mock private lateinit var postDelayed: (Runnable, Long) -> DisposableHandle
     @Mock private lateinit var onLongPressDetected: (Int, Int) -> Unit
     @Mock private lateinit var onSingleTapDetected: (Int, Int) -> Unit
 
-    private lateinit var underTest: LongPressHandlingViewInteractionHandler
+    private lateinit var underTest: TouchHandlingViewInteractionHandler
 
     private var isAttachedToWindow: Boolean = true
     private var delayedRunnable: Runnable? = null
@@ -60,7 +60,7 @@ class LongPressHandlingViewInteractionHandlerTest : SysuiTestCase() {
         }
 
         underTest =
-            LongPressHandlingViewInteractionHandler(
+            TouchHandlingViewInteractionHandler(
                 postDelayed = postDelayed,
                 isAttachedToWindow = { isAttachedToWindow },
                 onLongPressDetected = onLongPressDetected,

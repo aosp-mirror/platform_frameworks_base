@@ -29,7 +29,7 @@ import androidx.core.view.isInvisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.tracing.coroutines.launchTraced as launch
-import com.android.systemui.common.ui.view.LongPressHandlingView
+import com.android.systemui.common.ui.view.TouchHandlingView
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryBackgroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
@@ -41,7 +41,6 @@ import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.util.kotlin.DisposableHandles
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DisposableHandle
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 object DeviceEntryIconViewBinder {
     private const val TAG = "DeviceEntryIconViewBinder"
@@ -66,11 +65,11 @@ object DeviceEntryIconViewBinder {
         overrideColor: Color? = null,
     ): DisposableHandle {
         val disposables = DisposableHandles()
-        val longPressHandlingView = view.longPressHandlingView
+        val touchHandlingView = view.touchHandlingView
         val fgIconView = view.iconView
         val bgView = view.bgView
-        longPressHandlingView.listener =
-            object : LongPressHandlingView.Listener {
+        touchHandlingView.listener =
+            object : TouchHandlingView.Listener {
                 override fun onLongPressDetected(
                     view: View,
                     x: Int,
@@ -104,18 +103,18 @@ object DeviceEntryIconViewBinder {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
                     launch("$TAG#viewModel.isVisible") {
                         viewModel.isVisible.collect { isVisible ->
-                            longPressHandlingView.isInvisible = !isVisible
+                            touchHandlingView.isInvisible = !isVisible
                             view.isClickable = isVisible
                         }
                     }
                     launch("$TAG#viewModel.isLongPressEnabled") {
                         viewModel.isLongPressEnabled.collect { isEnabled ->
-                            longPressHandlingView.setLongPressHandlingEnabled(isEnabled)
+                            touchHandlingView.setLongPressHandlingEnabled(isEnabled)
                         }
                     }
                     launch("$TAG#viewModel.isUdfpsSupported") {
                         viewModel.isUdfpsSupported.collect { udfpsSupported ->
-                            longPressHandlingView.longPressDuration =
+                            touchHandlingView.longPressDuration =
                                 if (udfpsSupported) {
                                     {
                                         view.resources
