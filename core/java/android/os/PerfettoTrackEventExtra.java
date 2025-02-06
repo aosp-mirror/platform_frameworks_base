@@ -442,6 +442,7 @@ public final class PerfettoTrackEventExtra {
             mFieldStringCache.reset();
             mFieldNestedCache.reset();
             mBuilderCache.reset();
+            mFlowCache.reset();
 
             mExtra.reset();
             // Reset after on init in case the thread created builders without calling emit
