@@ -44,6 +44,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 /**
@@ -78,9 +79,10 @@ public class MagnificationKeyHandlerTest {
 
         // No callbacks were called.
         verify(mCallback, times(0)).onPanMagnificationStart(anyInt(), anyInt());
-        verify(mCallback, times(0)).onPanMagnificationStop(anyInt(), anyInt());
+        verify(mCallback, times(0)).onPanMagnificationStop(anyInt());
         verify(mCallback, times(0)).onScaleMagnificationStart(anyInt(), anyInt());
-        verify(mCallback, times(0)).onScaleMagnificationStop(anyInt(), anyInt());
+        verify(mCallback, times(0)).onScaleMagnificationStop(anyInt());
+        verify(mCallback, times(0)).onKeyboardInteractionStop();
 
         // The event was passed on.
         verify(mNextHandler, times(1)).onKeyEvent(event, 0);
@@ -95,9 +97,10 @@ public class MagnificationKeyHandlerTest {
 
         // No callbacks were called.
         verify(mCallback, times(0)).onPanMagnificationStart(anyInt(), anyInt());
-        verify(mCallback, times(0)).onPanMagnificationStop(anyInt(), anyInt());
+        verify(mCallback, times(0)).onPanMagnificationStop(anyInt());
         verify(mCallback, times(0)).onScaleMagnificationStart(anyInt(), anyInt());
-        verify(mCallback, times(0)).onScaleMagnificationStop(anyInt(), anyInt());
+        verify(mCallback, times(0)).onScaleMagnificationStop(anyInt());
+        verify(mCallback, times(0)).onKeyboardInteractionStop();
 
         // The event was passed on.
         verify(mNextHandler, times(1)).onKeyEvent(event, 0);
@@ -112,9 +115,10 @@ public class MagnificationKeyHandlerTest {
 
         // No callbacks were called.
         verify(mCallback, times(0)).onPanMagnificationStart(anyInt(), anyInt());
-        verify(mCallback, times(0)).onPanMagnificationStop(anyInt(), anyInt());
+        verify(mCallback, times(0)).onPanMagnificationStop(anyInt());
         verify(mCallback, times(0)).onScaleMagnificationStart(anyInt(), anyInt());
-        verify(mCallback, times(0)).onScaleMagnificationStop(anyInt(), anyInt());
+        verify(mCallback, times(0)).onScaleMagnificationStop(anyInt());
+        verify(mCallback, times(0)).onKeyboardInteractionStop();
 
         // The event was passed on.
         verify(mNextHandler, times(1)).onKeyEvent(event, 0);
@@ -157,46 +161,77 @@ public class MagnificationKeyHandlerTest {
         mMkh.onKeyEvent(downLeftEvent, 0);
         verify(mCallback, times(1)).onPanMagnificationStart(Display.DEFAULT_DISPLAY,
                 PAN_DIRECTION_LEFT);
-        verify(mCallback, times(0)).onPanMagnificationStop(anyInt(), anyInt());
+        verify(mCallback, times(0)).onPanMagnificationStop(anyInt());
+
+        Mockito.clearInvocations(mCallback);
 
         // Also press the down arrow key.
         final KeyEvent downDownEvent = new KeyEvent(0, 0, KeyEvent.ACTION_DOWN,
                 KeyEvent.KEYCODE_DPAD_DOWN, 0, KeyEvent.META_META_ON | KeyEvent.META_ALT_ON);
         mMkh.onKeyEvent(downDownEvent, 0);
-        verify(mCallback, times(1)).onPanMagnificationStart(Display.DEFAULT_DISPLAY,
+        verify(mCallback, times(0)).onPanMagnificationStart(Display.DEFAULT_DISPLAY,
                 PAN_DIRECTION_LEFT);
         verify(mCallback, times(1)).onPanMagnificationStart(Display.DEFAULT_DISPLAY,
                 PAN_DIRECTION_DOWN);
-        verify(mCallback, times(0)).onPanMagnificationStop(anyInt(), anyInt());
+        verify(mCallback, times(0)).onPanMagnificationStop(anyInt());
+
+        Mockito.clearInvocations(mCallback);
 
         // Lift the left arrow key.
         final KeyEvent upLeftEvent = new KeyEvent(0, 0, KeyEvent.ACTION_UP,
                 KeyEvent.KEYCODE_DPAD_LEFT, 0, KeyEvent.META_META_ON | KeyEvent.META_ALT_ON);
         mMkh.onKeyEvent(upLeftEvent, 0);
-        verify(mCallback, times(1)).onPanMagnificationStart(Display.DEFAULT_DISPLAY,
+        verify(mCallback, times(0)).onPanMagnificationStart(Display.DEFAULT_DISPLAY,
                 PAN_DIRECTION_LEFT);
-        verify(mCallback, times(1)).onPanMagnificationStart(Display.DEFAULT_DISPLAY,
+        verify(mCallback, times(0)).onPanMagnificationStart(Display.DEFAULT_DISPLAY,
                 PAN_DIRECTION_DOWN);
-        verify(mCallback, times(1)).onPanMagnificationStop(Display.DEFAULT_DISPLAY,
-                PAN_DIRECTION_LEFT);
-        verify(mCallback, times(0)).onPanMagnificationStop(Display.DEFAULT_DISPLAY,
-                PAN_DIRECTION_DOWN);
+        verify(mCallback, times(1)).onPanMagnificationStop(PAN_DIRECTION_LEFT);
+        verify(mCallback, times(0)).onPanMagnificationStop(PAN_DIRECTION_DOWN);
+
+        Mockito.clearInvocations(mCallback);
 
         // Lift the down arrow key.
         final KeyEvent upDownEvent = new KeyEvent(0, 0, KeyEvent.ACTION_UP,
                 KeyEvent.KEYCODE_DPAD_DOWN, 0, KeyEvent.META_META_ON | KeyEvent.META_ALT_ON);
         mMkh.onKeyEvent(upDownEvent, 0);
-        verify(mCallback, times(1)).onPanMagnificationStart(Display.DEFAULT_DISPLAY,
+        verify(mCallback, times(0)).onPanMagnificationStart(Display.DEFAULT_DISPLAY,
                 PAN_DIRECTION_LEFT);
-        verify(mCallback, times(1)).onPanMagnificationStart(Display.DEFAULT_DISPLAY,
+        verify(mCallback, times(0)).onPanMagnificationStart(Display.DEFAULT_DISPLAY,
                 PAN_DIRECTION_DOWN);
-        verify(mCallback, times(1)).onPanMagnificationStop(Display.DEFAULT_DISPLAY,
-                PAN_DIRECTION_LEFT);
-        verify(mCallback, times(1)).onPanMagnificationStop(Display.DEFAULT_DISPLAY,
-                PAN_DIRECTION_DOWN);
+        verify(mCallback, times(0)).onPanMagnificationStop(PAN_DIRECTION_LEFT);
+        verify(mCallback, times(1)).onPanMagnificationStop(PAN_DIRECTION_DOWN);
 
         // The event was not passed on.
         verify(mNextHandler, times(0)).onKeyEvent(any(), anyInt());
+    }
+
+    @Test
+    public void testPanMagnification_modifiersReleasedBeforeArrows() {
+        final KeyEvent downEvent = new KeyEvent(0, 0, KeyEvent.ACTION_DOWN,
+                KeyEvent.KEYCODE_DPAD_DOWN, 0,
+                KeyEvent.META_META_ON | KeyEvent.META_ALT_ON);
+        mMkh.onKeyEvent(downEvent, 0);
+
+        // Pan started.
+        verify(mCallback, times(1)).onPanMagnificationStart(Display.DEFAULT_DISPLAY,
+                PAN_DIRECTION_DOWN);
+        verify(mCallback, times(0)).onPanMagnificationStop(anyInt());
+        verify(mCallback, times(0)).onKeyboardInteractionStop();
+
+        Mockito.clearInvocations(mCallback);
+
+        // Lift the "meta" key.
+        final KeyEvent upEvent = new KeyEvent(0, 0, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_META_LEFT,
+                0,
+                KeyEvent.META_ALT_ON);
+        mMkh.onKeyEvent(upEvent, 0);
+
+        // Pan ended.
+        verify(mCallback, times(0)).onPanMagnificationStart(Display.DEFAULT_DISPLAY,
+                PAN_DIRECTION_DOWN);
+        verify(mCallback, times(0)).onPanMagnificationStop(anyInt());
+        verify(mCallback, times(1)).onKeyboardInteractionStop();
+
     }
 
     private void testPanMagnification(int keyCode, int panDirection) {
@@ -206,19 +241,21 @@ public class MagnificationKeyHandlerTest {
 
         // Pan started.
         verify(mCallback, times(1)).onPanMagnificationStart(Display.DEFAULT_DISPLAY, panDirection);
-        verify(mCallback, times(0)).onPanMagnificationStop(anyInt(), anyInt());
+        verify(mCallback, times(0)).onPanMagnificationStop(anyInt());
+
+        Mockito.clearInvocations(mCallback);
 
         final KeyEvent upEvent = new KeyEvent(0, 0, KeyEvent.ACTION_UP, keyCode, 0,
                 KeyEvent.META_META_ON | KeyEvent.META_ALT_ON);
         mMkh.onKeyEvent(upEvent, 0);
 
         // Pan ended.
-        verify(mCallback, times(1)).onPanMagnificationStart(Display.DEFAULT_DISPLAY, panDirection);
-        verify(mCallback, times(1)).onPanMagnificationStop(Display.DEFAULT_DISPLAY, panDirection);
+        verify(mCallback, times(0)).onPanMagnificationStart(Display.DEFAULT_DISPLAY, panDirection);
+        verify(mCallback, times(1)).onPanMagnificationStop(panDirection);
 
         // Scale callbacks were not called.
         verify(mCallback, times(0)).onScaleMagnificationStart(anyInt(), anyInt());
-        verify(mCallback, times(0)).onScaleMagnificationStop(anyInt(), anyInt());
+        verify(mCallback, times(0)).onScaleMagnificationStop(anyInt());
 
         // The events were not passed on.
         verify(mNextHandler, times(0)).onKeyEvent(any(), anyInt());
@@ -232,25 +269,25 @@ public class MagnificationKeyHandlerTest {
         // Scale started.
         verify(mCallback, times(1)).onScaleMagnificationStart(Display.DEFAULT_DISPLAY,
                 zoomDirection);
-        verify(mCallback, times(0)).onScaleMagnificationStop(anyInt(), anyInt());
+        verify(mCallback, times(0)).onScaleMagnificationStop(anyInt());
+
+        Mockito.clearInvocations(mCallback);
 
         final KeyEvent upEvent = new KeyEvent(0, 0, KeyEvent.ACTION_UP, keyCode, 0,
                 KeyEvent.META_META_ON | KeyEvent.META_ALT_ON);
         mMkh.onKeyEvent(upEvent, 0);
 
         // Scale ended.
-        verify(mCallback, times(1)).onScaleMagnificationStart(Display.DEFAULT_DISPLAY,
+        verify(mCallback, times(0)).onScaleMagnificationStart(Display.DEFAULT_DISPLAY,
                 zoomDirection);
-        verify(mCallback, times(1)).onScaleMagnificationStop(Display.DEFAULT_DISPLAY,
-                zoomDirection);
+        verify(mCallback, times(1)).onScaleMagnificationStop(zoomDirection);
 
         // Pan callbacks were not called.
         verify(mCallback, times(0)).onPanMagnificationStart(anyInt(), anyInt());
-        verify(mCallback, times(0)).onPanMagnificationStop(anyInt(), anyInt());
+        verify(mCallback, times(0)).onPanMagnificationStop(anyInt());
 
         // The events were not passed on.
         verify(mNextHandler, times(0)).onKeyEvent(any(), anyInt());
-
     }
 
 }
