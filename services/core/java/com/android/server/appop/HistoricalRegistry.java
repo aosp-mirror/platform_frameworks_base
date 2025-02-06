@@ -206,7 +206,7 @@ final class HistoricalRegistry {
         if (Flags.enableSqliteAppopsAccesses()) {
             mDiscreteRegistry = new DiscreteOpsSqlRegistry(context);
         } else {
-            mDiscreteRegistry = new DiscreteOpsXmlRegistry(context);
+            mDiscreteRegistry = new DiscreteOpsXmlRegistry(lock);
         }
     }
 
