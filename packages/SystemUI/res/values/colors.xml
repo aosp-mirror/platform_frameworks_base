@@ -145,6 +145,9 @@
     <color name="smart_reply_button_background">#ffffffff</color>
     <color name="smart_reply_button_stroke">@*android:color/accent_device_default</color>
 
+    <!-- Magic Action colors -->
+    <color name="magic_action_button_text_color">@androidprv:color/materialColorOnSurfaceVariant</color>
+
     <!-- Biometric dialog colors -->
     <color name="biometric_dialog_gray">#ff757575</color>
     <color name="biometric_dialog_accent">@color/material_dynamic_primary40</color>

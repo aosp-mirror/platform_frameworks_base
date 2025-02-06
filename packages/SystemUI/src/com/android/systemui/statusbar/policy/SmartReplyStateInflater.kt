@@ -409,16 +409,6 @@ constructor(
                 as Button)
             .apply {
                 text = action.title
-                // TODO: Move the MagicActionBackgroundDrawable to MagicActionButton once
-                //  MagicActionButton is created.
-                if (isMagicAction) {
-                    background = MagicActionBackgroundDrawable(parent.context)
-                    val textColor =
-                        parent.context.getColor(
-                            com.android.internal.R.color.materialColorOnPrimaryContainer
-                        )
-                    setTextColor(textColor)
-                }
 
                 // We received the Icon from the application - so use the Context of the application
                 // to

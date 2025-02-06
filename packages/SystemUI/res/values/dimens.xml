@@ -1129,6 +1129,17 @@
     <dimen name="smart_action_button_icon_padding">8dp</dimen>
     <dimen name="smart_action_button_outline_stroke_width">2dp</dimen>
 
+    <!-- Magic Action params. -->
+    <!-- Corner radius = half of min_height to create rounded sides. -->
+    <dimen name="magic_action_button_corner_radius">16dp</dimen>
+    <dimen name="magic_action_button_icon_size">20dp</dimen>
+    <dimen name="magic_action_button_outline_stroke_width">1dp</dimen>
+    <dimen name="magic_action_button_padding_horizontal">12dp</dimen>
+    <dimen name="magic_action_button_inset_vertical">8dp</dimen>
+    <dimen name="magic_action_button_drawable_padding">8dp</dimen>
+    <dimen name="magic_action_button_touch_target_height">48dp</dimen>
+    <dimen name="magic_action_button_font_size">12sp</dimen>
+
     <!-- A reasonable upper bound for the height of the smart reply button. The measuring code
             needs to start with a guess for the maximum size. Currently two-line smart reply buttons
             add about 88dp of height to the notifications. -->
