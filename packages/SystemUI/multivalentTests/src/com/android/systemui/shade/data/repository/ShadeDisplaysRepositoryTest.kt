@@ -32,6 +32,7 @@ import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.shade.display.AnyExternalShadeDisplayPolicy
 import com.android.systemui.shade.display.DefaultDisplayShadePolicy
 import com.android.systemui.shade.display.FakeShadeDisplayPolicy
+import com.android.systemui.shade.display.FocusShadeDisplayPolicy
 import com.android.systemui.shade.display.StatusBarTouchShadeDisplayPolicy
 import com.android.systemui.testKosmos
 import com.android.systemui.util.settings.fakeGlobalSettings
@@ -108,13 +109,22 @@ class ShadeDisplaysRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun policy_updatesBasedOnSettingValue_focusBased() =
+    fun policy_updatesBasedOnSettingValue_lastStatusBarTouch() =
         testScope.runTest {
             val underTest = createUnderTest()
             globalSettings.putString(DEVELOPMENT_SHADE_DISPLAY_AWARENESS, "status_bar_latest_touch")
 
             assertThat(underTest.currentPolicy)
                 .isInstanceOf(StatusBarTouchShadeDisplayPolicy::class.java)
+        }
+
+    @Test
+    fun policy_updatesBasedOnSettingValue_focusBased() =
+        testScope.runTest {
+            val underTest = createUnderTest()
+            globalSettings.putString(DEVELOPMENT_SHADE_DISPLAY_AWARENESS, "focused_display")
+
+            assertThat(underTest.currentPolicy).isInstanceOf(FocusShadeDisplayPolicy::class.java)
         }
 
     @Test
