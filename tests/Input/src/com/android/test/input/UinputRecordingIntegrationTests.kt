@@ -15,21 +15,19 @@
  */
 package com.android.test.input
 
-import android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY
 import android.app.Instrumentation
 import android.cts.input.EventVerifier
 import android.graphics.PointF
-import android.hardware.input.InputManager
-import android.os.ParcelFileDescriptor
-import android.server.wm.CtsWindowInfoUtils.waitForWindowOnTop
 import android.util.Log
 import android.util.Size
+import android.view.InputDevice
 import android.view.InputEvent
 import android.view.MotionEvent
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.cts.input.BatchedEventSplitter
 import com.android.cts.input.CaptureEventActivity
 import com.android.cts.input.DebugInputRule
+import com.android.cts.input.EvemuDevice
 import com.android.cts.input.InputJsonParser
 import com.android.cts.input.VirtualDisplayActivityScenario
 import com.android.cts.input.inputeventmatchers.isResampled
@@ -69,9 +67,13 @@ class UinputRecordingIntegrationTests {
         fun data(): Iterable<Any> =
             listOf(
                 TestData(
-                    "GooglePixelTabletTouchscreen", R.raw.google_pixel_tablet_touchscreen,
-                    R.raw.google_pixel_tablet_touchscreen_events, Size(1600, 2560),
-                    vendorId = 0x0603, productId = 0x7806
+                    "GooglePixelTabletTouchscreen",
+                    R.raw.google_pixel_tablet_touchscreen,
+                    R.raw.google_pixel_tablet_touchscreen_events,
+                    Size(1600, 2560),
+                    vendorId = 0x0603,
+                    productId = 0x7806,
+                    deviceSources = InputDevice.SOURCE_TOUCHSCREEN,
                 ),
             )
 
@@ -91,13 +93,13 @@ class UinputRecordingIntegrationTests {
         val displaySize: Size,
         val vendorId: Int,
         val productId: Int,
+        val deviceSources: Int,
     ) {
         override fun toString(): String = name
     }
 
     private lateinit var instrumentation: Instrumentation
     private lateinit var parser: InputJsonParser
-
 
     @get:Rule
     val debugInputRule = DebugInputRule()
@@ -121,40 +123,29 @@ class UinputRecordingIntegrationTests {
             testName,
             size = testData.displaySize
         ).use { scenario ->
-            waitForWindowOnTop(scenario.activity.window)
             scenario.activity.window.decorView.requestUnbufferedDispatch(INPUT_DEVICE_SOURCE_ALL)
 
-            try {
-                instrumentation.uiAutomation.adoptShellPermissionIdentity(
-                    ASSOCIATE_INPUT_DEVICE_TO_DISPLAY,
-                )
+            EvemuDevice(
+                instrumentation,
+                testData.deviceSources,
+                testData.vendorId,
+                testData.productId,
+                testData.uinputRecordingResource,
+                scenario.virtualDisplay.display
+            ).use { evemuDevice ->
 
-                val inputPort = "uinput:1:${testData.vendorId}:${testData.productId}"
-                val inputManager =
-                    instrumentation.context.getSystemService(InputManager::class.java)!!
-                try {
-                    inputManager.addUniqueIdAssociationByPort(
-                        inputPort,
-                        scenario.virtualDisplay.display.uniqueId!!,
-                    )
+                evemuDevice.injectEvents()
 
-                    injectUinputEvents().use {
-                        if (DEBUG_RECEIVED_EVENTS) {
-                            printReceivedEventsToLogcat(scenario.activity)
-                            fail("Test cannot pass in debug mode!")
-                        }
-
-                        val verifier = EventVerifier(
-                            BatchedEventSplitter { scenario.activity.getInputEvent() }
-                        )
-                        verifyEvents(verifier)
-                        scenario.activity.assertNoEvents()
-                    }
-                } finally {
-                    inputManager.removeUniqueIdAssociationByPort(inputPort)
+                if (DEBUG_RECEIVED_EVENTS) {
+                    printReceivedEventsToLogcat(scenario.activity)
+                    fail("Test cannot pass in debug mode!")
                 }
-            } finally {
-                instrumentation.uiAutomation.dropShellPermissionIdentity()
+
+                val verifier = EventVerifier(
+                    BatchedEventSplitter { scenario.activity.getInputEvent() }
+                )
+                verifyEvents(verifier)
+                scenario.activity.assertNoEvents()
             }
         }
     }
@@ -168,35 +159,6 @@ class UinputRecordingIntegrationTests {
                     ?: "(Failed to encode received event)"
             )
             receivedEvent = getNextEvent()
-        }
-    }
-
-    /**
-     * Plays back the evemu recording associated with the current test case by injecting it via
-     * the `uinput` shell command in interactive mode. The recording playback will begin
-     * immediately, and the shell command (and the associated input device) will remain alive
-     * until the returned [AutoCloseable] is closed.
-     */
-    private fun injectUinputEvents(): AutoCloseable {
-        val fds = instrumentation.uiAutomation!!.executeShellCommandRw("uinput -")
-        // We do not need to use stdout in this test.
-        fds[0].close()
-
-        return ParcelFileDescriptor.AutoCloseOutputStream(fds[1]).also { stdin ->
-            instrumentation.context.resources.openRawResource(
-                testData.uinputRecordingResource,
-            ).use { inputStream ->
-                stdin.write(inputStream.readBytes())
-
-                // TODO(b/367419268): Remove extra event injection when uinput parsing is fixed.
-                // Inject an extra sync event with an arbitrarily large timestamp, because the
-                // uinput command will not process the last event until either the next event is
-                // parsed, or fd is closed. Injecting this sync allows us complete injection of
-                // the evemu recording and extend the lifetime of the input device by keeping this
-                // fd open.
-                stdin.write("\nE: 9999.99 0 0 0\n".toByteArray())
-                stdin.flush()
-            }
         }
     }
 
