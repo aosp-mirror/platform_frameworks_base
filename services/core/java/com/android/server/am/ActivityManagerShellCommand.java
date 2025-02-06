@@ -4344,6 +4344,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("    lru: raw LRU process list");
             pw.println("    binder-proxies: stats on binder objects and IPCs");
             pw.println("    settings: currently applied config settings");
+            pw.println("    cao: cached app optimizer state");
             pw.println("    timers: the current ANR timer state");
             pw.println("    service [COMP_SPEC]: service client-side state");
             pw.println("    package [PACKAGE_NAME]: all state related to given package");
