@@ -358,7 +358,7 @@ public class VirtualDeviceManagerServiceTest {
 
         mContext = Mockito.spy(new ContextWrapper(
                 InstrumentationRegistry.getInstrumentation().getTargetContext()));
-        doReturn(mContext).when(mContext).createContextAsUser(eq(Process.myUserHandle()), anyInt());
+        doReturn(mContext).when(mContext).createContextAsUser(any(), anyInt());
         doNothing().when(mContext).sendBroadcastAsUser(any(), any());
         when(mContext.getSystemService(Context.DEVICE_POLICY_SERVICE)).thenReturn(
                 mDevicePolicyManagerMock);
