@@ -20,7 +20,6 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.READ_WALLPAPER_INTERNAL;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
-import static android.app.Flags.enableConnectedDisplaysWallpaper;
 import static android.app.Flags.fixWallpaperChanged;
 import static android.app.Flags.liveWallpaperContentHandling;
 import static android.app.Flags.removeNextWallpaperComponent;
@@ -46,6 +45,7 @@ import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER_INFO;
 import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER_LOCK_ORIG;
 import static com.android.server.wallpaper.WallpaperUtils.getWallpaperDir;
 import static com.android.server.wallpaper.WallpaperUtils.makeWallpaperIdLocked;
+import static com.android.server.wm.DesktopModeHelper.isDeviceEligibleForDesktopExperienceWallpaper;
 import static com.android.window.flags.Flags.avoidRebindingIntentionallyDisconnectedWallpaper;
 import static com.android.window.flags.Flags.multiCrop;
 import static com.android.window.flags.Flags.offloadColorExtraction;
@@ -756,7 +756,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
 
         // Image wallpaper
-        if (enableConnectedDisplaysWallpaper()) {
+        if (isDeviceEligibleForDesktopExperienceWallpaper(mContext)) {
             // TODO(b/384519749): check display's resolution and image wallpaper cropped image
             //  aspect ratio.
             return displayId == DEFAULT_DISPLAY
@@ -792,7 +792,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             return;
         }
 
-        if (enableConnectedDisplaysWallpaper()) {
+        if (isDeviceEligibleForDesktopExperienceWallpaper(mContext)) {
             mWallpaperDisplayHelper.forEachDisplayData(displayData -> {
                 int displayId = displayData.mDisplayId;
                 // If the display is already connected to the desired wallpaper(s), either the
@@ -914,7 +914,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 return;
             }
             int which = wallpaper.mWhich;
-            if (enableConnectedDisplaysWallpaper()) {
+            if (isDeviceEligibleForDesktopExperienceWallpaper(mContext)) {
                 which = mWhich;
             }
             TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG);
@@ -1438,7 +1438,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             // changes to currentSystem.mWhich alone won't update the corresponding
                             // flag in currentSystem.connection.mWallpaper.mWhich. Let's point
                             // currentSystem.connection.mWallpaper back to currentSystem.
-                            if (enableConnectedDisplaysWallpaper()
+                            if (isDeviceEligibleForDesktopExperienceWallpaper(mContext)
                                     && currentSystem.connection != null) {
                                 currentSystem.connection.mWallpaper = currentSystem;
                             }
@@ -1464,7 +1464,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     WallpaperData currentSystem = mWallpaperMap.get(mNewWallpaper.userId);
                     if (currentSystem.wallpaperId == mOriginalSystem.wallpaperId) {
                         // Fixing the reference, see above for more details.
-                        if (enableConnectedDisplaysWallpaper()
+                        if (isDeviceEligibleForDesktopExperienceWallpaper(mContext)
                                 && currentSystem.connection != null) {
                             currentSystem.connection.mWallpaper = currentSystem;
                         }
@@ -1654,7 +1654,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         mShuttingDown = false;
         mImageWallpaper = ComponentName.unflattenFromString(
                 context.getResources().getString(R.string.image_wallpaper_component));
-        if (enableConnectedDisplaysWallpaper()) {
+        if (isDeviceEligibleForDesktopExperienceWallpaper(mContext)) {
             mFallbackWallpaperComponent = ComponentName.unflattenFromString(
                     context.getResources().getString(R.string.fallback_wallpaper_component));
         } else {
@@ -4034,7 +4034,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 return;
             }
             int useFallbackWallpaperWhich = 0;
-            if (enableConnectedDisplaysWallpaper()) {
+            if (isDeviceEligibleForDesktopExperienceWallpaper(mContext)) {
                 List<WallpaperData> wallpapers = new ArrayList<>();
                 wallpapers.add(mLastWallpaper);
                 // If the system and the lock wallpapers are not the same, we should also
@@ -4095,7 +4095,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     // removed to start mirroring.
     private void onDisplayRemovedInternal(int displayId) {
         synchronized (mLock) {
-            if (enableConnectedDisplaysWallpaper()) {
+            if (isDeviceEligibleForDesktopExperienceWallpaper(mContext)) {
                 // There could be at most 2 wallpaper connections per display:
                 // 1. system & lock are the same: mLastWallpaper
                 // 2. system, lock are different: mLastWallpaper, mLastLockWallpaper
