@@ -24,7 +24,6 @@ import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
-import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -58,7 +57,6 @@ constructor(
     keyguardInteractor: KeyguardInteractor,
     powerInteractor: PowerInteractor,
     private val communalInteractor: CommunalInteractor,
-    private val communalSettingsInteractor: CommunalSettingsInteractor,
     private val communalSceneInteractor: CommunalSceneInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
     val deviceEntryInteractor: DeviceEntryInteractor,
@@ -117,17 +115,6 @@ constructor(
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private fun shouldTransitionToCommunal(
-        shouldShowCommunal: Boolean,
-        isCommunalAvailable: Boolean,
-    ) =
-        if (communalSettingsInteractor.isV2FlagEnabled()) {
-            shouldShowCommunal
-        } else {
-            isCommunalAvailable && dreamManager.canStartDreaming(false)
-        }
-
     @OptIn(FlowPreview::class)
     @SuppressLint("MissingPermission")
     private fun listenForDozingToAny() {
@@ -141,10 +128,9 @@ constructor(
                 .filterRelevantKeyguardStateAnd { isAwake -> isAwake }
                 .sample(
                     communalInteractor.isCommunalAvailable,
-                    communalInteractor.shouldShowCommunal,
                     communalSceneInteractor.isIdleOnCommunal,
                 )
-                .collect { (_, isCommunalAvailable, shouldShowCommunal, isIdleOnCommunal) ->
+                .collect { (_, isCommunalAvailable, isIdleOnCommunal) ->
                     val isKeyguardOccludedLegacy = keyguardInteractor.isKeyguardOccluded.value
                     val primaryBouncerShowing = keyguardInteractor.primaryBouncerShowing.value
                     val isKeyguardGoingAway = keyguardInteractor.isKeyguardGoingAway.value
@@ -178,9 +164,11 @@ constructor(
                         if (!SceneContainerFlag.isEnabled) {
                             startTransitionTo(KeyguardState.GLANCEABLE_HUB)
                         }
-                    } else if (
-                        shouldTransitionToCommunal(shouldShowCommunal, isCommunalAvailable)
-                    ) {
+                    } else if (isCommunalAvailable && dreamManager.canStartDreaming(false)) {
+                        // Using false for isScreenOn as canStartDreaming returns false if any
+                        // dream, including doze, is active.
+                        // This case handles tapping the power button to transition through
+                        // dream -> off -> hub.
                         if (!SceneContainerFlag.isEnabled) {
                             transitionToGlanceableHub()
                         }
@@ -202,7 +190,6 @@ constructor(
             powerInteractor.detailedWakefulness
                 .filterRelevantKeyguardStateAnd { it.isAwake() }
                 .sample(
-                    communalInteractor.shouldShowCommunal,
                     communalInteractor.isCommunalAvailable,
                     communalSceneInteractor.isIdleOnCommunal,
                     keyguardInteractor.biometricUnlockState,
@@ -212,7 +199,6 @@ constructor(
                 .collect {
                     (
                         _,
-                        shouldShowCommunal,
                         isCommunalAvailable,
                         isIdleOnCommunal,
                         biometricUnlockState,
@@ -246,9 +232,7 @@ constructor(
                                     ownerReason = "waking from dozing",
                                 )
                             }
-                        } else if (
-                            shouldTransitionToCommunal(shouldShowCommunal, isCommunalAvailable)
-                        ) {
+                        } else if (isCommunalAvailable && dreamManager.canStartDreaming(true)) {
                             if (!SceneContainerFlag.isEnabled) {
                                 transitionToGlanceableHub()
                             }
