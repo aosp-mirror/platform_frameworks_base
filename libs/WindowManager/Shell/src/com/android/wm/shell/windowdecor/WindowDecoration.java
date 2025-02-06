@@ -474,8 +474,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
 
         final WindowDecorationInsets newInsets = new WindowDecorationInsets(
-                mTaskInfo.token, mOwner, captionInsetsRect, boundingRects,
-                params.mInsetSourceFlags, params.mIsInsetSource);
+                mTaskInfo.token, mOwner, captionInsetsRect, taskBounds, boundingRects,
+                params.mInsetSourceFlags, params.mIsInsetSource, params.mShouldSetAppBounds);
         if (!newInsets.equals(mWindowDecorationInsets)) {
             // Add or update this caption as an insets source.
             mWindowDecorationInsets = newInsets;
@@ -797,8 +797,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         final int captionHeight = loadDimensionPixelSize(mContext.getResources(), captionHeightId);
         final Rect captionInsets = new Rect(0, 0, 0, captionHeight);
         final WindowDecorationInsets newInsets = new WindowDecorationInsets(mTaskInfo.token,
-                mOwner, captionInsets, null /* boundingRets */, 0 /* flags */,
-                true /* shouldAddCaptionInset */);
+                mOwner, captionInsets, null  /* taskFrame */,  null /* boundingRects */,
+                0 /* flags */, true /* shouldAddCaptionInset */, false /* excludedFromAppBounds */);
         if (!newInsets.equals(mWindowDecorationInsets)) {
             mWindowDecorationInsets = newInsets;
             mWindowDecorationInsets.update(wct);
@@ -829,6 +829,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         boolean mApplyStartTransactionOnDraw;
         boolean mSetTaskVisibilityPositionAndCrop;
         boolean mHasGlobalFocus;
+        boolean mShouldSetAppBounds;
 
         void reset() {
             mLayoutResId = Resources.ID_NULL;
@@ -852,6 +853,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mWindowDecorConfig = null;
             mAsyncViewHost = false;
             mHasGlobalFocus = false;
+            mShouldSetAppBounds = false;
         }
 
         boolean hasInputFeatureSpy() {
@@ -925,19 +927,23 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         private final WindowContainerToken mToken;
         private final Binder mOwner;
         private final Rect mFrame;
+        private final Rect mTaskFrame;
         private final Rect[] mBoundingRects;
         private final @InsetsSource.Flags int mFlags;
         private final boolean mShouldAddCaptionInset;
+        private final boolean mExcludedFromAppBounds;
 
         private WindowDecorationInsets(WindowContainerToken token, Binder owner, Rect frame,
-                Rect[] boundingRects, @InsetsSource.Flags int flags,
-                boolean shouldAddCaptionInset) {
+                Rect taskFrame, Rect[] boundingRects, @InsetsSource.Flags int flags,
+                boolean shouldAddCaptionInset, boolean excludedFromAppBounds) {
             mToken = token;
             mOwner = owner;
             mFrame = frame;
+            mTaskFrame = taskFrame;
             mBoundingRects = boundingRects;
             mFlags = flags;
             mShouldAddCaptionInset = shouldAddCaptionInset;
+            mExcludedFromAppBounds = excludedFromAppBounds;
         }
 
         void update(WindowContainerTransaction wct) {
@@ -946,12 +952,20 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                         mFlags);
                 wct.addInsetsSource(mToken, mOwner, INDEX, mandatorySystemGestures(), mFrame,
                         mBoundingRects, 0 /* flags */);
+                if (mExcludedFromAppBounds) {
+                    final Rect appBounds = new Rect(mTaskFrame);
+                    appBounds.top += mFrame.height();
+                    wct.setAppBounds(mToken, appBounds);
+                }
             }
         }
 
         void remove(WindowContainerTransaction wct) {
             wct.removeInsetsSource(mToken, mOwner, INDEX, captionBar());
             wct.removeInsetsSource(mToken, mOwner, INDEX, mandatorySystemGestures());
+            if (mExcludedFromAppBounds) {
+                wct.setAppBounds(mToken, new Rect());
+            }
         }
 
         @Override
@@ -960,9 +974,11 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             if (!(o instanceof WindowDecoration.WindowDecorationInsets that)) return false;
             return Objects.equals(mToken, that.mToken) && Objects.equals(mOwner,
                     that.mOwner) && Objects.equals(mFrame, that.mFrame)
+                    && Objects.equals(mTaskFrame, that.mTaskFrame)
                     && Objects.deepEquals(mBoundingRects, that.mBoundingRects)
                     && mFlags == that.mFlags
-                    && mShouldAddCaptionInset == that.mShouldAddCaptionInset;
+                    && mShouldAddCaptionInset == that.mShouldAddCaptionInset
+                    && mExcludedFromAppBounds == that.mExcludedFromAppBounds;
         }
 
         @Override

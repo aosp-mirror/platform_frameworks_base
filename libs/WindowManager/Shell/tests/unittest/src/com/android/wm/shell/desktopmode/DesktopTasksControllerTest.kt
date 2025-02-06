@@ -35,6 +35,7 @@ import android.content.pm.ActivityInfo.CONFIG_DENSITY
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
@@ -315,7 +316,7 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
                 mContext,
                 mockHandler,
             )
-        desktopModeCompatPolicy = DesktopModeCompatPolicy(context)
+        desktopModeCompatPolicy = spy(DesktopModeCompatPolicy(context))
 
         whenever(shellTaskOrganizer.getRunningTasks(anyInt())).thenAnswer { runningTasks }
         whenever(transitions.startTransition(anyInt(), any(), isNull())).thenAnswer { Binder() }
@@ -1300,6 +1301,50 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
         val finalBounds = findBoundsChange(wct, task)
         assertThat(stableBounds.getDesktopTaskPosition(finalBounds!!))
             .isEqualTo(DesktopTaskPosition.Center)
+    }
+
+    @Test
+    fun addMoveToDesktopChanges_excludeCaptionFromAppBounds_nonResizableLandscape() {
+        setUpLandscapeDisplay()
+        val task =
+            setUpFullscreenTask(
+                isResizable = false,
+                screenOrientation = SCREEN_ORIENTATION_LANDSCAPE,
+            )
+        whenever(desktopModeCompatPolicy.shouldExcludeCaptionFromAppBounds(task)).thenReturn(true)
+        val initialAspectRatio = calculateAspectRatio(task)
+        val wct = WindowContainerTransaction()
+        controller.addMoveToDesktopChanges(wct, task)
+
+        val finalBounds = findBoundsChange(wct, task)
+        val captionInsets = getAppHeaderHeight(context)
+        finalBounds!!.top += captionInsets
+        val finalAspectRatio =
+            maxOf(finalBounds.height(), finalBounds.width()) /
+                minOf(finalBounds.height(), finalBounds.width()).toFloat()
+        assertThat(finalAspectRatio).isWithin(FLOAT_TOLERANCE).of(initialAspectRatio)
+    }
+
+    @Test
+    fun addMoveToDesktopChanges_excludeCaptionFromAppBounds_nonResizablePortrait() {
+        setUpLandscapeDisplay()
+        val task =
+            setUpFullscreenTask(
+                isResizable = false,
+                screenOrientation = SCREEN_ORIENTATION_PORTRAIT,
+            )
+        whenever(desktopModeCompatPolicy.shouldExcludeCaptionFromAppBounds(task)).thenReturn(true)
+        val initialAspectRatio = calculateAspectRatio(task)
+        val wct = WindowContainerTransaction()
+        controller.addMoveToDesktopChanges(wct, task)
+
+        val finalBounds = findBoundsChange(wct, task)
+        val captionInsets = getAppHeaderHeight(context)
+        finalBounds!!.top += captionInsets
+        val finalAspectRatio =
+            maxOf(finalBounds.height(), finalBounds.width()) /
+                minOf(finalBounds.height(), finalBounds.width()).toFloat()
+        assertThat(finalAspectRatio).isWithin(FLOAT_TOLERANCE).of(initialAspectRatio)
     }
 
     @Test
@@ -4124,7 +4169,6 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
                 shouldLetterbox = true,
             )
         setUpLandscapeDisplay()
-
         spyController.onDragPositioningEndThroughStatusBar(PointF(800f, 1280f), task, mockSurface)
         val wct = getLatestDragToDesktopWct()
         assertThat(findBoundsChange(wct, task)).isEqualTo(UNRESIZABLE_PORTRAIT_BOUNDS)
@@ -5158,11 +5202,10 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
         val bounds = Rect(0, 0, 200, 100)
         val task =
             setUpFreeformTask(DEFAULT_DISPLAY, bounds).apply {
-                topActivityInfo =
-                    ActivityInfo().apply {
-                        screenOrientation = SCREEN_ORIENTATION_LANDSCAPE
-                        configuration.windowConfiguration.appBounds = bounds
-                    }
+                topActivityInfo.apply {
+                    this?.screenOrientation = SCREEN_ORIENTATION_LANDSCAPE
+                    configuration.windowConfiguration.appBounds = bounds
+                }
                 appCompatTaskInfo.topActivityAppBounds.set(0, 0, bounds.width(), bounds.height())
                 isResizeable = false
             }
@@ -5860,6 +5903,7 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
     ): RunningTaskInfo {
         val task = createFreeformTask(displayId, bounds)
         val activityInfo = ActivityInfo()
+        activityInfo.applicationInfo = ApplicationInfo()
         task.topActivityInfo = activityInfo
         if (background) {
             whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(null)
@@ -5905,6 +5949,7 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
         val activityInfo = ActivityInfo()
         activityInfo.screenOrientation = screenOrientation
         activityInfo.windowLayout = ActivityInfo.WindowLayout(0, 0F, 0, 0F, gravity, 0, 0)
+        activityInfo.applicationInfo = ApplicationInfo()
         with(task) {
             topActivityInfo = activityInfo
             isResizeable = isResizable
@@ -6078,6 +6123,7 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
         val STABLE_BOUNDS = Rect(0, 0, 1000, 1000)
         const val MAX_TASK_LIMIT = 6
         private const val TASKBAR_FRAME_HEIGHT = 200
+        private const val FLOAT_TOLERANCE = 0.005f
 
         @JvmStatic
         @Parameters(name = "{0}")

@@ -41,7 +41,6 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.SystemProperties
 import android.os.UserHandle
-import android.util.Size
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.DragEvent
 import android.view.MotionEvent
@@ -1223,7 +1222,6 @@ class DesktopTasksController(
             // and toggle to the stable bounds.
             desktopTilingDecorViewModel.removeTaskIfTiled(taskInfo.displayId, taskInfo.taskId)
             taskRepository.saveBoundsBeforeMaximize(taskInfo.taskId, currentTaskBounds)
-
             destinationBounds.set(calculateMaximizeBounds(displayLayout, taskInfo))
         }
 
@@ -1286,23 +1284,6 @@ class DesktopTasksController(
                 animationStartBounds = currentDragBounds,
             ),
         )
-    }
-
-    private fun getMaximizeBounds(taskInfo: RunningTaskInfo, stableBounds: Rect): Rect {
-        if (taskInfo.isResizeable) {
-            // if resizable then expand to entire stable bounds (full display minus insets)
-            return Rect(stableBounds)
-        } else {
-            // if non-resizable then calculate max bounds according to aspect ratio
-            val activityAspectRatio = calculateAspectRatio(taskInfo)
-            val newSize =
-                maximizeSizeGivenAspectRatio(
-                    taskInfo,
-                    Size(stableBounds.width(), stableBounds.height()),
-                    activityAspectRatio,
-                )
-            return centerInArea(newSize, stableBounds, stableBounds.left, stableBounds.top)
-        }
     }
 
     private fun isMaximizedToStableBoundsEdges(
@@ -2385,7 +2366,16 @@ class DesktopTasksController(
     ): Rect {
         val bounds =
             if (ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue) {
-                calculateInitialBounds(displayLayout, taskInfo)
+                // If caption insets should be excluded from app bounds, ensure caption insets
+                // are excluded from the ideal initial bounds when scaling non-resizeable apps.
+                // Caption insets stay fixed and don't scale with bounds.
+                val captionInsets =
+                    if (desktopModeCompatPolicy.shouldExcludeCaptionFromAppBounds(taskInfo)) {
+                        getAppHeaderHeight(context)
+                    } else {
+                        0
+                    }
+                calculateInitialBounds(displayLayout, taskInfo, captionInsets = captionInsets)
             } else {
                 calculateDefaultDesktopTaskBounds(displayLayout)
             }

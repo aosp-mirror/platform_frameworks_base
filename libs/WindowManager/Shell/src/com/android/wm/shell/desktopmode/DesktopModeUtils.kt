@@ -18,8 +18,10 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.annotation.DimenRes
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.TaskInfo
+import android.content.Context
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 import android.content.pm.ActivityInfo.isFixedOrientationLandscape
 import android.content.pm.ActivityInfo.isFixedOrientationPortrait
@@ -28,6 +30,7 @@ import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.graphics.Rect
 import android.os.SystemProperties
 import android.util.Size
+import com.android.wm.shell.R
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
 
@@ -53,10 +56,12 @@ fun calculateDefaultDesktopTaskBounds(displayLayout: DisplayLayout): Rect {
  * aspect ratio, orientation and resizability to calculate an area this is compatible with the
  * applications previous configuration.
  */
+@JvmOverloads
 fun calculateInitialBounds(
     displayLayout: DisplayLayout,
     taskInfo: RunningTaskInfo,
     scale: Float = DESKTOP_MODE_INITIAL_BOUNDS_SCALE,
+    captionInsets: Int = 0,
 ): Rect {
     val screenBounds = Rect(0, 0, displayLayout.width(), displayLayout.height())
     val appAspectRatio = calculateAspectRatio(taskInfo)
@@ -92,7 +97,7 @@ fun calculateInitialBounds(
                 } else {
                     // If activity is unresizeable, regardless of orientation, calculate maximum
                     // size (within the ideal size) maintaining original aspect ratio.
-                    maximizeSizeGivenAspectRatio(taskInfo, idealSize, appAspectRatio)
+                    maximizeSizeGivenAspectRatio(taskInfo, idealSize, appAspectRatio, captionInsets)
                 }
             }
             ORIENTATION_PORTRAIT -> {
@@ -119,11 +124,17 @@ fun calculateInitialBounds(
                             taskInfo,
                             Size(customPortraitWidthForLandscapeApp, idealSize.height),
                             appAspectRatio,
+                            captionInsets,
                         )
                     } else {
                         // For portrait unresizeable activities, calculate maximum size (within the
                         // ideal size) maintaining original aspect ratio.
-                        maximizeSizeGivenAspectRatio(taskInfo, idealSize, appAspectRatio)
+                        maximizeSizeGivenAspectRatio(
+                            taskInfo,
+                            idealSize,
+                            appAspectRatio,
+                            captionInsets,
+                        )
                     }
                 }
             }
@@ -148,11 +159,16 @@ fun calculateMaximizeBounds(displayLayout: DisplayLayout, taskInfo: RunningTaskI
     } else {
         // if non-resizable then calculate max bounds according to aspect ratio
         val activityAspectRatio = calculateAspectRatio(taskInfo)
+        val captionInsets =
+            taskInfo.configuration.windowConfiguration.appBounds?.let {
+                it.top - taskInfo.configuration.windowConfiguration.bounds.top
+            } ?: 0
         val newSize =
             maximizeSizeGivenAspectRatio(
                 taskInfo,
                 Size(stableBounds.width(), stableBounds.height()),
                 activityAspectRatio,
+                captionInsets,
             )
         return centerInArea(newSize, stableBounds, stableBounds.left, stableBounds.top)
     }
@@ -166,8 +182,9 @@ fun maximizeSizeGivenAspectRatio(
     taskInfo: RunningTaskInfo,
     targetArea: Size,
     aspectRatio: Float,
+    captionInsets: Int = 0,
 ): Size {
-    val targetHeight = targetArea.height
+    val targetHeight = targetArea.height - captionInsets
     val targetWidth = targetArea.width
     val finalHeight: Int
     val finalWidth: Int
@@ -191,13 +208,18 @@ fun maximizeSizeGivenAspectRatio(
             finalHeight = (finalWidth / aspectRatio).toInt()
         }
     }
-    return Size(finalWidth, finalHeight)
+    return Size(finalWidth, finalHeight + captionInsets)
 }
 
 /** Calculates the aspect ratio of an activity from its fullscreen bounds. */
 fun calculateAspectRatio(taskInfo: RunningTaskInfo): Float {
-    if (taskInfo.appCompatTaskInfo.topActivityAppBounds.isEmpty) return 1f
-    val appBounds = taskInfo.appCompatTaskInfo.topActivityAppBounds
+    val appBounds =
+        if (taskInfo.appCompatTaskInfo.topActivityAppBounds.isEmpty) {
+            taskInfo.configuration.windowConfiguration.appBounds
+                ?: taskInfo.configuration.windowConfiguration.bounds
+        } else {
+            taskInfo.appCompatTaskInfo.topActivityAppBounds
+        }
     return maxOf(appBounds.height(), appBounds.width()) /
         minOf(appBounds.height(), appBounds.width()).toFloat()
 }
@@ -232,6 +254,13 @@ fun isTaskWidthOrHeightEqual(taskBounds: Rect, stableBounds: Rect): Boolean {
 fun isTaskBoundsEqual(taskBounds: Rect, stableBounds: Rect): Boolean {
     return taskBounds == stableBounds
 }
+
+/** Returns the app header height in desktop mode in pixels. */
+fun getAppHeaderHeight(context: Context): Int =
+    context.resources.getDimensionPixelSize(getAppHeaderHeightId())
+
+/** Returns the resource id of the app header height in desktop mode. */
+@DimenRes fun getAppHeaderHeightId(): Int = R.dimen.desktop_mode_freeform_decor_caption_height
 
 /**
  * Calculates the desired initial bounds for applications in desktop windowing. This is done as a

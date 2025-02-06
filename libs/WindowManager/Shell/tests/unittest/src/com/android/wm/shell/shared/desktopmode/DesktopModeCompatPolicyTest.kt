@@ -16,16 +16,26 @@
 
 package com.android.wm.shell.shared.desktopmode
 
+import android.app.TaskInfo
+import android.compat.testing.PlatformCompatChangeRule
 import android.content.ComponentName
+import android.content.pm.ActivityInfo
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.os.Process
+import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.internal.R
+import com.android.window.flags.Flags
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFreeformTask
+import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges
+import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -40,6 +50,7 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class DesktopModeCompatPolicyTest : ShellTestCase() {
+    @get:Rule val compatRule = PlatformCompatChangeRule()
     private lateinit var desktopModeCompatPolicy: DesktopModeCompatPolicy
 
     @Before
@@ -142,4 +153,47 @@ class DesktopModeCompatPolicyTest : ShellTestCase() {
                     isTopActivityNoDisplay = true
                 }))
     }
+
+    @Test
+    @EnableFlags(Flags.FLAG_EXCLUDE_CAPTION_FROM_APP_BOUNDS)
+    @DisableCompatChanges(ActivityInfo.INSETS_DECOUPLED_CONFIGURATION_ENFORCED)
+    fun testShouldExcludeCaptionFromAppBounds_resizeable_false() {
+        assertFalse(desktopModeCompatPolicy.shouldExcludeCaptionFromAppBounds(
+            setUpFreeformTask().apply { isResizeable = true })
+        )
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_EXCLUDE_CAPTION_FROM_APP_BOUNDS)
+    @DisableCompatChanges(ActivityInfo.INSETS_DECOUPLED_CONFIGURATION_ENFORCED)
+    fun testShouldExcludeCaptionFromAppBounds_nonResizeable_true() {
+        assertTrue(desktopModeCompatPolicy.shouldExcludeCaptionFromAppBounds(
+            setUpFreeformTask().apply { isResizeable = false })
+        )
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_EXCLUDE_CAPTION_FROM_APP_BOUNDS)
+    @EnableCompatChanges(ActivityInfo.INSETS_DECOUPLED_CONFIGURATION_ENFORCED)
+    fun testShouldExcludeCaptionFromAppBounds_nonResizeable_sdk35_false() {
+        assertFalse(desktopModeCompatPolicy.shouldExcludeCaptionFromAppBounds(
+            setUpFreeformTask().apply { isResizeable = false })
+        )
+    }
+
+    fun setUpFreeformTask(): TaskInfo =
+        createFreeformTask().apply {
+            val componentName =
+                ComponentName.createRelative(
+                    mContext,
+                    DesktopModeCompatPolicyTest::class.java.simpleName
+                )
+            baseActivity = componentName
+            topActivityInfo = ActivityInfo().apply {
+                applicationInfo = ApplicationInfo().apply {
+                    packageName = componentName.packageName
+                    uid = Process.myUid()
+                }
+            }
+        }
 }

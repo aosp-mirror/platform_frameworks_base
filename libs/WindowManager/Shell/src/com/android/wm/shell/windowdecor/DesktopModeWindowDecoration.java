@@ -94,6 +94,7 @@ import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.desktopmode.DesktopModeCompatPolicy;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.shared.multiinstance.ManageWindowsViewContainer;
@@ -191,6 +192,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final HandleMenuFactory mHandleMenuFactory;
     private final AppToWebGenericLinksParser mGenericLinksParser;
     private final AssistContentRequester mAssistContentRequester;
+    private final DesktopModeCompatPolicy mDesktopModeCompatPolicy;
 
     // Hover state for the maximize menu and button. The menu will remain open as long as either of
     // these is true. See {@link #onMaximizeHoverStateChanged()}.
@@ -232,7 +234,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             @NonNull WindowDecorViewHostSupplier<WindowDecorViewHost> windowDecorViewHostSupplier,
             MultiInstanceHelper multiInstanceHelper,
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
-            DesktopModeEventLogger desktopModeEventLogger) {
+            DesktopModeEventLogger desktopModeEventLogger,
+            DesktopModeCompatPolicy desktopModeCompatPolicy) {
         this (context, userContext, displayController, taskResourceLoader, splitScreenController,
                 desktopUserRepositories, taskOrganizer, taskInfo, taskSurface, handler,
                 mainExecutor, mainDispatcher, bgScope, bgExecutor, choreographer, syncQueue,
@@ -245,7 +248,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 windowDecorViewHostSupplier,
                 DefaultMaximizeMenuFactory.INSTANCE,
                 DefaultHandleMenuFactory.INSTANCE, multiInstanceHelper,
-                windowDecorCaptionHandleRepository, desktopModeEventLogger);
+                windowDecorCaptionHandleRepository, desktopModeEventLogger,
+                desktopModeCompatPolicy);
     }
 
     DesktopModeWindowDecoration(
@@ -280,7 +284,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             HandleMenuFactory handleMenuFactory,
             MultiInstanceHelper multiInstanceHelper,
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
-            DesktopModeEventLogger desktopModeEventLogger) {
+            DesktopModeEventLogger desktopModeEventLogger,
+            DesktopModeCompatPolicy desktopModeCompatPolicy) {
         super(context, userContext, displayController, taskOrganizer, taskInfo,
                 taskSurface, surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
                 windowContainerTransactionSupplier, surfaceControlSupplier,
@@ -305,6 +310,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mDesktopUserRepositories = desktopUserRepositories;
         mTaskResourceLoader = taskResourceLoader;
         mTaskResourceLoader.onWindowDecorCreated(taskInfo);
+        mDesktopModeCompatPolicy = desktopModeCompatPolicy;
     }
 
     /**
@@ -507,7 +513,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 applyStartTransactionOnDraw, shouldSetTaskVisibilityPositionAndCrop,
                 mIsStatusBarVisible, mIsKeyguardVisibleAndOccluded, inFullImmersive,
                 mDisplayController.getInsetsState(taskInfo.displayId), hasGlobalFocus,
-                displayExclusionRegion, mIsRecentsTransitionRunning);
+                displayExclusionRegion, mIsRecentsTransitionRunning,
+                mDesktopModeCompatPolicy.shouldExcludeCaptionFromAppBounds(taskInfo));
 
         final WindowDecorLinearLayout oldRootView = mResult.mRootView;
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
@@ -891,7 +898,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             @NonNull InsetsState displayInsetsState,
             boolean hasGlobalFocus,
             @NonNull Region displayExclusionRegion,
-            boolean shouldIgnoreCornerRadius) {
+            boolean shouldIgnoreCornerRadius,
+            boolean shouldExcludeCaptionFromAppBounds) {
         final int captionLayoutId = getDesktopModeWindowDecorLayoutId(taskInfo.getWindowingMode());
         final boolean isAppHeader =
                 captionLayoutId == R.layout.desktop_mode_app_header;
@@ -951,15 +959,23 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 }
             } else {
                 if (ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION.isTrue()) {
-                    // Force-consume the caption bar insets when the app tries to hide the caption.
-                    // This improves app compatibility of immersive apps.
-                    relayoutParams.mInsetSourceFlags |= FLAG_FORCE_CONSUMING;
+                    if (shouldExcludeCaptionFromAppBounds) {
+                        relayoutParams.mShouldSetAppBounds = true;
+                    } else {
+                        // Force-consume the caption bar insets when the app tries to hide the
+                        // caption. This improves app compatibility of immersive apps.
+                        relayoutParams.mInsetSourceFlags |= FLAG_FORCE_CONSUMING;
+                    }
                 }
             }
             if (ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS.isTrue()) {
-                // Always force-consume the caption bar insets for maximum app compatibility,
-                // including non-immersive apps that just don't handle caption insets properly.
-                relayoutParams.mInsetSourceFlags |= FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR;
+                if (shouldExcludeCaptionFromAppBounds) {
+                    relayoutParams.mShouldSetAppBounds = true;
+                } else {
+                    // Always force-consume the caption bar insets for maximum app compatibility,
+                    // including non-immersive apps that just don't handle caption insets properly.
+                    relayoutParams.mInsetSourceFlags |= FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR;
+                }
             }
             if (DesktopModeFlags.ENABLE_FULLY_IMMERSIVE_IN_DESKTOP.isTrue()
                     && inFullImmersiveMode) {
@@ -1747,7 +1763,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private static int getCaptionHeightIdStatic(@WindowingMode int windowingMode) {
         return windowingMode == WINDOWING_MODE_FULLSCREEN
                 ? com.android.internal.R.dimen.status_bar_height_default
-                : R.dimen.desktop_mode_freeform_decor_caption_height;
+                : DesktopModeUtils.getAppHeaderHeightId();
     }
 
     private int getCaptionHeight(@WindowingMode int windowingMode) {
@@ -1845,7 +1861,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                         windowDecorViewHostSupplier,
                 MultiInstanceHelper multiInstanceHelper,
                 WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
-                DesktopModeEventLogger desktopModeEventLogger) {
+                DesktopModeEventLogger desktopModeEventLogger,
+                DesktopModeCompatPolicy desktopModeCompatPolicy) {
             return new DesktopModeWindowDecoration(
                     context,
                     userContext,
@@ -1870,7 +1887,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     windowDecorViewHostSupplier,
                     multiInstanceHelper,
                     windowDecorCaptionHandleRepository,
-                    desktopModeEventLogger);
+                    desktopModeEventLogger,
+                    desktopModeCompatPolicy);
         }
     }
 

@@ -18,9 +18,12 @@ package com.android.wm.shell.shared.desktopmode
 
 import android.app.TaskInfo
 import android.content.Context
+import android.content.pm.ActivityInfo
+import android.content.pm.ActivityInfo.INSETS_DECOUPLED_CONFIGURATION_ENFORCED
+import android.content.pm.ActivityInfo.OVERRIDE_ENABLE_INSETS_DECOUPLED_CONFIGURATION
 import android.window.DesktopModeFlags
 import com.android.internal.R
-import java.util.ArrayList
+import com.android.window.flags.Flags
 
 /**
  * Class to decide whether to apply app compat policies in desktop mode.
@@ -51,6 +54,21 @@ class DesktopModeCompatPolicy(private val context: Context) {
                 && !isTopActivityNoDisplay)
 
     /**
+     * Whether the caption insets should be excluded from configuration for system to handle.
+     *
+     * The treatment is enabled when all the of the following is true:
+     * * Any flags to forcibly consume caption insets are enabled.
+     * * Top activity have configuration coupled with insets.
+     * * Task is not resizeable.
+     */
+    fun shouldExcludeCaptionFromAppBounds(taskInfo: TaskInfo): Boolean =
+        Flags.excludeCaptionFromAppBounds()
+                && isAnyForceConsumptionFlagsEnabled()
+                && taskInfo.topActivityInfo?.let {
+            isInsetsCoupledWithConfiguration(it) && !taskInfo.isResizeable
+        } ?: false
+
+    /**
      * Returns true if all activities in a tasks stack are transparent. If there are no activities
      * will return false.
      */
@@ -67,4 +85,12 @@ class DesktopModeCompatPolicy(private val context: Context) {
      */
     private fun isPartOfDefaultHomePackage(packageName: String?) =
         packageName != null && packageName == defaultHomePackage
+
+    private fun isAnyForceConsumptionFlagsEnabled(): Boolean =
+        DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS.isTrue
+            || DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION.isTrue
+
+    private fun isInsetsCoupledWithConfiguration(info: ActivityInfo): Boolean =
+        !(info.isChangeEnabled(OVERRIDE_ENABLE_INSETS_DECOUPLED_CONFIGURATION)
+                || info.isChangeEnabled(INSETS_DECOUPLED_CONFIGURATION_ENFORCED))
 }
