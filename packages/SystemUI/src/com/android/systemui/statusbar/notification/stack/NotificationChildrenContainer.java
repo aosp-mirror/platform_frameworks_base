@@ -43,6 +43,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.NotificationGroupingUtil;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
@@ -1712,5 +1713,12 @@ public class NotificationChildrenContainer extends ViewGroup
                 + ", translationY: " + getTranslationY()
                 + ", clipBounds: " + getClipBounds()
                 + ", roundableState: " + getRoundableState().debugString() + "}";
+    }
+
+    public void setOnKeyguard(boolean onKeyguard) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        for (ExpandableNotificationRow child : mAttachedChildren) {
+            child.setOnKeyguard(onKeyguard);
+        }
     }
 }

@@ -2971,6 +2971,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             if (isAboveShelf() != wasAboveShelf) {
                 mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
             }
+            if (SceneContainerFlag.isEnabled()) {
+                if (mIsSummaryWithChildren) {
+                    mChildrenContainer.setOnKeyguard(onKeyguard);
+                }
+            }
         }
     }
 
@@ -4115,7 +4120,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             pw.print(", alpha: " + getAlpha());
             pw.print(", translation: " + getTranslation());
             pw.print(", entry dismissable: " + canEntryBeDismissed());
-            pw.print(", mOnUserInteractionCallback null: " + (mOnUserInteractionCallback == null));
+            pw.print(", mOnUserInteractionCallback==null: " + (mOnUserInteractionCallback == null));
             pw.print(", removed: " + isRemoved());
             pw.print(", expandAnimationRunning: " + mExpandAnimationRunning);
             pw.print(", mShowingPublic: " + mShowingPublic);
@@ -4128,9 +4133,17 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             pw.print(", clipBounds: " + getClipBounds());
             if (PromotedNotificationUiForceExpanded.isEnabled()) {
                 pw.print(", isPromotedOngoing: " + isPromotedOngoing());
-                pw.print(", isExpandable: " + isExpandable());
-                pw.print(", mExpandable: " + mExpandable);
             }
+            pw.print(", isExpandable: " + isExpandable());
+            pw.print(", mExpandable: " + mExpandable);
+            pw.print(", isUserExpanded: " + isUserExpanded());
+            pw.print(", hasUserChangedExpansion: " + mHasUserChangedExpansion);
+            pw.print(", isOnKeyguard: " + isOnKeyguard());
+            pw.print(", isSummaryWithChildren: " + mIsSummaryWithChildren);
+            pw.print(", enableNonGroupedExpand: " + mEnableNonGroupedNotificationExpand);
+            pw.print(", isPinned: " + isPinned());
+            pw.print(", expandedWhenPinned: " + mExpandedWhenPinned);
+            pw.print(", isMinimized: " + mIsMinimized);
 
             pw.println();
             if (NotificationContentView.INCLUDE_HEIGHTS_TO_DUMP) {
@@ -4159,28 +4172,36 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 pw.println("Children Container Intrinsic Height: "
                         + mChildrenContainer.getIntrinsicHeight());
                 pw.println();
-                List<ExpandableNotificationRow> notificationChildren = getAttachedChildren();
-                pw.print("Children: " + notificationChildren.size() + " {");
-                pw.increaseIndent();
-                for (ExpandableNotificationRow child : notificationChildren) {
-                    pw.println();
-                    child.dump(pw, args);
-                }
-                pw.decreaseIndent();
-                pw.println("}");
-                pw.print("Transient Views: " + transientViewCount + " {");
-                pw.increaseIndent();
-                for (int i = 0; i < transientViewCount; i++) {
-                    pw.println();
-                    ExpandableView child = (ExpandableView) mChildrenContainer.getTransientView(i);
-                    child.dump(pw, args);
-                }
-                pw.decreaseIndent();
-                pw.println("}");
+                dumpChildren(pw, args);
+                dumpTransientViews(transientViewCount, pw, args);
             } else if (mPrivateLayout != null) {
                 mPrivateLayout.dumpSmartReplies(pw);
             }
         });
+    }
+
+    private void dumpChildren(IndentingPrintWriter pw, String[] args) {
+        List<ExpandableNotificationRow> notificationChildren = getAttachedChildren();
+        pw.print("Children: " + notificationChildren.size() + " {");
+        DumpUtilsKt.withIncreasedIndent(pw, () -> {
+            for (ExpandableNotificationRow child : notificationChildren) {
+                pw.println();
+                child.dump(pw, args);
+            }
+        });
+        pw.println("}");
+    }
+
+    private void dumpTransientViews(int transientCount, IndentingPrintWriter pw, String[] args) {
+        pw.print("Transient Views: " + transientCount + " {");
+        DumpUtilsKt.withIncreasedIndent(pw, () -> {
+            for (int i = 0; i < transientCount; i++) {
+                pw.println();
+                ExpandableView child = (ExpandableView) mChildrenContainer.getTransientView(i);
+                child.dump(pw, args);
+            }
+        });
+        pw.println("}");
     }
 
     private void dumpHeights(IndentingPrintWriter pw) {
