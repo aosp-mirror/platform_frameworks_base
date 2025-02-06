@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.chips.mediaprojection.domain.model.MediaPr
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.ShareToAppChipViewModel
 import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
+import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModelLegacy
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModel
 import com.android.systemui.statusbar.events.domain.interactor.SystemStatusEventAnimationInteractor
@@ -55,6 +56,7 @@ import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.phone.domain.interactor.DarkIconInteractor
 import com.android.systemui.statusbar.phone.domain.interactor.LightsOutInteractor
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import com.android.systemui.statusbar.pipeline.shared.domain.interactor.HomeStatusBarIconBlockListInteractor
 import com.android.systemui.statusbar.pipeline.shared.domain.interactor.HomeStatusBarInteractor
 import com.android.systemui.statusbar.pipeline.shared.ui.model.SystemInfoCombinedVisibilityModel
@@ -109,11 +111,15 @@ interface HomeStatusBarViewModel {
      */
     val primaryOngoingActivityChip: StateFlow<OngoingActivityChipModel>
 
+    /** All supported activity chips, whether they are currently active or not. */
+    val ongoingActivityChips: StateFlow<MultipleOngoingActivityChipsModel>
+
     /**
      * The multiple ongoing activity chips that should be shown on the left-hand side of the status
      * bar.
      */
-    val ongoingActivityChips: StateFlow<MultipleOngoingActivityChipsModel>
+    @Deprecated("Since StatusBarChipsModernization, use the new ongoingActivityChips")
+    val ongoingActivityChipsLegacy: StateFlow<MultipleOngoingActivityChipsModelLegacy>
 
     /** View model for the carrier name that may show in the status bar based on carrier config */
     val operatorNameViewModel: StatusBarOperatorNameViewModel
@@ -224,6 +230,8 @@ constructor(
 
     override val ongoingActivityChips = ongoingActivityChipsViewModel.chips
 
+    override val ongoingActivityChipsLegacy = ongoingActivityChipsViewModel.chipsLegacy
+
     override val statusBarPopupChips = statusBarPopupChipsViewModel.shownPopupChips
 
     override val isHomeStatusBarAllowedByScene: StateFlow<Boolean> =
@@ -330,8 +338,10 @@ constructor(
             .flowOn(bgDispatcher)
 
     private val isAnyChipVisible =
-        if (StatusBarNotifChips.isEnabled) {
-            ongoingActivityChips.map { it.primary is OngoingActivityChipModel.Active }
+        if (StatusBarChipsModernization.isEnabled) {
+            ongoingActivityChips.map { it.active.any { chip -> !chip.isHidden } }
+        } else if (StatusBarNotifChips.isEnabled) {
+            ongoingActivityChipsLegacy.map { it.primary is OngoingActivityChipModel.Active }
         } else {
             primaryOngoingActivityChip.map { it is OngoingActivityChipModel.Active }
         }

@@ -66,6 +66,7 @@ import com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.shareToAppCh
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsScreenRecordChip
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsShareToAppChip
+import com.android.systemui.statusbar.core.StatusBarRootModernization
 import com.android.systemui.statusbar.data.model.StatusBarMode
 import com.android.systemui.statusbar.data.repository.fakeStatusBarModeRepository
 import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
@@ -85,6 +86,7 @@ import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataS
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher
 import com.android.systemui.statusbar.phone.data.repository.fakeDarkIconRepository
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import com.android.systemui.statusbar.pipeline.shared.domain.interactor.setHomeStatusBarIconBlockList
 import com.android.systemui.statusbar.pipeline.shared.domain.interactor.setHomeStatusBarInteractorShowOperatorName
 import com.android.systemui.statusbar.pipeline.shared.ui.model.VisibilityModel
@@ -833,6 +835,23 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME)
+    fun isNotificationIconContainerVisible_anyChipShowing_ChipsModernizationOn() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.isNotificationIconContainerVisible)
+            transitionKeyguardToGone()
+
+            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.Recording
+
+            assertThat(latest!!.visibility).isEqualTo(View.GONE)
+
+            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.DoingNothing
+
+            assertThat(latest!!.visibility).isEqualTo(View.VISIBLE)
+        }
+
+    @Test
+    @DisableFlags(StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME)
     @EnableFlags(StatusBarNotifChips.FLAG_NAME)
     fun isNotificationIconContainerVisible_anyChipShowing_PromotedNotifsOn() =
         kosmos.runTest {
@@ -849,8 +868,12 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(StatusBarNotifChips.FLAG_NAME)
-    fun isNotificationIconContainerVisible_anyChipShowing_PromotedNotifsOff() =
+    @DisableFlags(
+        StatusBarNotifChips.FLAG_NAME,
+        StatusBarRootModernization.FLAG_NAME,
+        StatusBarChipsModernization.FLAG_NAME,
+    )
+    fun isNotificationIconContainerVisible_anyChipShowing_ChipsModernizationAndPromotedNotifsOff() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.isNotificationIconContainerVisible)
             transitionKeyguardToGone()

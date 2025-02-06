@@ -26,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
-import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 
 @Composable
 fun OngoingActivityChips(chips: MultipleOngoingActivityChipsModel, modifier: Modifier = Modifier) {
@@ -36,15 +35,9 @@ fun OngoingActivityChips(chips: MultipleOngoingActivityChipsModel, modifier: Mod
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        // TODO(b/372657935): Make sure chips are only shown when there is enough horizontal
-        // space.
-        if (chips.primary is OngoingActivityChipModel.Active) {
-            val chip = chips.primary
-            key(chip.key) { OngoingActivityChip(model = chip) }
-        }
-        if (chips.secondary is OngoingActivityChipModel.Active) {
-            val chip = chips.secondary
-            key(chip.key) { OngoingActivityChip(model = chip) }
-        }
+        // TODO(b/372657935): Make sure chips are only shown when there is enough horizontal space.
+        chips.active
+            .filter { !it.isHidden }
+            .forEach { key(it.key) { OngoingActivityChip(model = it) } }
     }
 }

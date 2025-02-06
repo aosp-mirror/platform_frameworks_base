@@ -180,15 +180,6 @@ private fun ChipIcon(
                         layoutParams = ViewGroup.LayoutParams(iconSizePx, iconSizePx)
                         imageTintList = ColorStateList.valueOf(colors.text(context))
                     }
-
-                    // If needed, remove the icon from its old parent (views can only be attached
-                    // to 1 parent at a time)
-                    (originalIcon.parent as? ViewGroup)?.apply {
-                        this.removeView(originalIcon)
-                        this.removeTransientView(originalIcon)
-                    }
-
-                    originalIcon
                 },
             )
         }

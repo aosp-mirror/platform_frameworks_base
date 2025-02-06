@@ -199,7 +199,7 @@ constructor(
                             view.requireViewById(R.id.ongoing_activity_chip_secondary)
                         )
                     launch {
-                        viewModel.ongoingActivityChips.collectLatest { chips ->
+                        viewModel.ongoingActivityChipsLegacy.collectLatest { chips ->
                             OngoingActivityChipBinder.bind(
                                 chips.primary,
                                 primaryChipViewBinding,
@@ -232,11 +232,11 @@ constructor(
                             viewModel.contentArea.collect { _ ->
                                 OngoingActivityChipBinder.resetPrimaryChipWidthRestrictions(
                                     primaryChipViewBinding,
-                                    viewModel.ongoingActivityChips.value.primary,
+                                    viewModel.ongoingActivityChipsLegacy.value.primary,
                                 )
                                 OngoingActivityChipBinder.resetSecondaryChipWidthRestrictions(
                                     secondaryChipViewBinding,
-                                    viewModel.ongoingActivityChips.value.secondary,
+                                    viewModel.ongoingActivityChipsLegacy.value.secondary,
                                 )
                                 view.requestLayout()
                             }
