@@ -3003,7 +3003,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_I:
-                if (down && event.isMetaPressed()) {
+                if (down && event.isMetaPressed() && isUserSetupComplete() && !keyguardOn) {
                     showSystemSettings();
                     return key_consumed;
                 }
