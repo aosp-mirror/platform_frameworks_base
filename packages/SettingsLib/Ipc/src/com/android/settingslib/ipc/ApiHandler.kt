@@ -17,6 +17,7 @@
 package com.android.settingslib.ipc
 
 import android.app.Application
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
 
 /**
@@ -77,8 +78,20 @@ fun interface ApiPermissionChecker<R> {
     companion object {
         private val ALWAYS_ALLOW = ApiPermissionChecker<Any> { _, _, _, _ -> true }
 
+        /** Returns [ApiPermissionChecker] that allows all the request. */
         @Suppress("UNCHECKED_CAST")
         fun <T> alwaysAllow(): ApiPermissionChecker<T> = ALWAYS_ALLOW as ApiPermissionChecker<T>
+
+        /**
+         * Returns [ApiPermissionChecker] that checks if calling app has given [permission].
+         *
+         * Use [AppOpApiPermissionChecker] if the [permission] is app-op.
+         */
+        fun <T> of(permission: String) =
+            ApiPermissionChecker<T> { application, callingPid, callingUid, _ ->
+                application.checkPermission(permission, callingPid, callingUid) ==
+                    PERMISSION_GRANTED
+            }
     }
 }
 
