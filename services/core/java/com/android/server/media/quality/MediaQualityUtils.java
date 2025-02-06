@@ -1025,6 +1025,7 @@ public final class MediaQualityUtils {
          * - PICTURE_QUALITY_EVENT_TYPE
          * - PANEL_INIT_MAX_LUMINCE_NITS
          */
+        if (names == null) return null;
 
         HashSet<String> nameMap = new HashSet<>(names);
 
