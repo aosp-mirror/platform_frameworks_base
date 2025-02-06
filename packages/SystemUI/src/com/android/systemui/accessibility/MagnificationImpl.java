@@ -453,7 +453,9 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
 
         final MagnificationSettingsController magnificationSettingsController =
                 mMagnificationSettingsSupplier.get(displayId);
-        magnificationSettingsController.setMagnificationScale(scale);
+        if (magnificationSettingsController != null) {
+            magnificationSettingsController.setMagnificationScale(scale);
+        }
     }
 
     @VisibleForTesting
