@@ -27,7 +27,6 @@ import android.graphics.drawable.RippleDrawable
 import com.android.internal.R
 import com.android.internal.annotations.VisibleForTesting
 import com.android.settingslib.Utils
-import com.android.systemui.Flags
 import com.android.systemui.media.controls.ui.view.MediaViewHolder
 import com.android.systemui.monet.ColorScheme
 import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect
@@ -52,7 +51,7 @@ interface ColorTransition {
 open class AnimatingColorTransition(
     private val defaultColor: Int,
     private val extractColor: (ColorScheme) -> Int,
-    private val applyColor: (Int) -> Unit,
+    private val applyColor: (Int) -> Unit
 ) : AnimatorUpdateListener, ColorTransition {
 
     private val argbEvaluator = ArgbEvaluator()
@@ -106,52 +105,35 @@ internal constructor(
     private val mediaViewHolder: MediaViewHolder,
     private val multiRippleController: MultiRippleController,
     private val turbulenceNoiseController: TurbulenceNoiseController,
-    animatingColorTransitionFactory: AnimatingColorTransitionFactory,
+    animatingColorTransitionFactory: AnimatingColorTransitionFactory
 ) {
     constructor(
         context: Context,
         mediaViewHolder: MediaViewHolder,
         multiRippleController: MultiRippleController,
-        turbulenceNoiseController: TurbulenceNoiseController,
+        turbulenceNoiseController: TurbulenceNoiseController
     ) : this(
         context,
         mediaViewHolder,
         multiRippleController,
         turbulenceNoiseController,
-        ::AnimatingColorTransition,
+        ::AnimatingColorTransition
     )
-
     var loadingEffect: LoadingEffect? = null
 
-    val bgColor =
-        if (Flags.mediaControlsUiUpdate()) {
-            context.getColor(R.color.materialColorOnSurface)
-        } else {
-            context.getColor(com.google.android.material.R.color.material_dynamic_neutral20)
-        }
-
-    val textColor = context.getColor(R.color.materialColorInverseOnSurface)
-    val buttonBgColor = context.getColor(R.color.materialColorPrimary)
-    val insideButtonColor = context.getColor(R.color.materialColorOnPrimary)
-
+    val bgColor = context.getColor(com.google.android.material.R.color.material_dynamic_neutral20)
     val surfaceColor =
         animatingColorTransitionFactory(bgColor, ::surfaceFromScheme) { surfaceColor ->
             val colorList = ColorStateList.valueOf(surfaceColor)
-            mediaViewHolder.albumView.backgroundTintList = colorList
-            mediaViewHolder.gutsViewHolder.setSurfaceColor(surfaceColor)
-
-            if (Flags.mediaControlsUiUpdate()) return@animatingColorTransitionFactory
             mediaViewHolder.seamlessIcon.imageTintList = colorList
             mediaViewHolder.seamlessText.setTextColor(surfaceColor)
+            mediaViewHolder.albumView.backgroundTintList = colorList
+            mediaViewHolder.gutsViewHolder.setSurfaceColor(surfaceColor)
         }
     val accentPrimary =
         animatingColorTransitionFactory(
-            if (Flags.mediaControlsUiUpdate()) {
-                buttonBgColor
-            } else {
-                loadDefaultColor(R.attr.textColorPrimary)
-            },
-            ::accentPrimaryFromScheme,
+            loadDefaultColor(R.attr.textColorPrimary),
+            ::accentPrimaryFromScheme
         ) { accentPrimary ->
             val accentColorList = ColorStateList.valueOf(accentPrimary)
             mediaViewHolder.actionPlayPause.backgroundTintList = accentColorList
@@ -163,12 +145,8 @@ internal constructor(
 
     val accentSecondary =
         animatingColorTransitionFactory(
-            if (Flags.mediaControlsUiUpdate()) {
-                buttonBgColor
-            } else {
-                loadDefaultColor(R.attr.textColorPrimary)
-            },
-            ::accentSecondaryFromScheme,
+            loadDefaultColor(R.attr.textColorPrimary),
+            ::accentSecondaryFromScheme
         ) { accentSecondary ->
             val colorList = ColorStateList.valueOf(accentSecondary)
             (mediaViewHolder.seamlessButton.background as? RippleDrawable)?.let {
@@ -179,11 +157,7 @@ internal constructor(
 
     val colorSeamless =
         animatingColorTransitionFactory(
-            if (Flags.mediaControlsUiUpdate()) {
-                buttonBgColor
-            } else {
-                loadDefaultColor(R.attr.textColorPrimary)
-            },
+            loadDefaultColor(R.attr.textColorPrimary),
             { colorScheme: ColorScheme ->
                 // A1-100 dark in dark theme, A1-200 in light theme
                 if (
@@ -196,17 +170,13 @@ internal constructor(
             { seamlessColor: Int ->
                 val accentColorList = ColorStateList.valueOf(seamlessColor)
                 mediaViewHolder.seamlessButton.backgroundTintList = accentColorList
-            },
+            }
         )
 
     val textPrimary =
         animatingColorTransitionFactory(
-            if (Flags.mediaControlsUiUpdate()) {
-                textColor
-            } else {
-                loadDefaultColor(R.attr.textColorPrimary)
-            },
-            ::textPrimaryFromScheme,
+            loadDefaultColor(R.attr.textColorPrimary),
+            ::textPrimaryFromScheme
         ) { textPrimary ->
             mediaViewHolder.titleText.setTextColor(textPrimary)
             val textColorList = ColorStateList.valueOf(textPrimary)
@@ -222,41 +192,25 @@ internal constructor(
 
     val textPrimaryInverse =
         animatingColorTransitionFactory(
-            if (Flags.mediaControlsUiUpdate()) {
-                insideButtonColor
-            } else {
-                loadDefaultColor(R.attr.textColorPrimaryInverse)
-            },
-            ::textPrimaryInverseFromScheme,
+            loadDefaultColor(R.attr.textColorPrimaryInverse),
+            ::textPrimaryInverseFromScheme
         ) { textPrimaryInverse ->
-            val colorList = ColorStateList.valueOf(textPrimaryInverse)
-            mediaViewHolder.actionPlayPause.imageTintList = colorList
-
-            if (!Flags.mediaControlsUiUpdate()) return@animatingColorTransitionFactory
-            mediaViewHolder.seamlessIcon.imageTintList = colorList
-            mediaViewHolder.seamlessText.setTextColor(textPrimaryInverse)
+            mediaViewHolder.actionPlayPause.imageTintList =
+                ColorStateList.valueOf(textPrimaryInverse)
         }
 
     val textSecondary =
         animatingColorTransitionFactory(
-            if (Flags.mediaControlsUiUpdate()) {
-                textColor
-            } else {
-                loadDefaultColor(R.attr.textColorSecondary)
-            },
-            ::textSecondaryFromScheme,
+            loadDefaultColor(R.attr.textColorSecondary),
+            ::textSecondaryFromScheme
         ) { textSecondary ->
             mediaViewHolder.artistText.setTextColor(textSecondary)
         }
 
     val textTertiary =
         animatingColorTransitionFactory(
-            if (Flags.mediaControlsUiUpdate()) {
-                textColor
-            } else {
-                loadDefaultColor(R.attr.textColorTertiary)
-            },
-            ::textTertiaryFromScheme,
+            loadDefaultColor(R.attr.textColorTertiary),
+            ::textTertiaryFromScheme
         ) { textTertiary ->
             mediaViewHolder.seekBar.progressBackgroundTintList =
                 ColorStateList.valueOf(textTertiary)
