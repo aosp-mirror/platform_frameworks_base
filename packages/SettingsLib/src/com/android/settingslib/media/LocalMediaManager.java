@@ -444,6 +444,7 @@ public class LocalMediaManager implements BluetoothCallback {
      *
      * @return current name of the session, and return {@code null} if not found.
      */
+    @Nullable
     public CharSequence getSessionName() {
         return mInfoMediaManager.getSessionName();
     }

@@ -313,7 +313,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             }
 
             if (isDeviceGroup) {
-                String sessionName = mController.getSessionName().toString();
+                String sessionName = mController.getSessionName() == null ? ""
+                        : mController.getSessionName().toString();
                 updateTitle(sessionName);
                 updateUnmutedVolumeIcon(null /* device */);
                 updateGroupSeekBar(getGroupItemContentDescription(sessionName));

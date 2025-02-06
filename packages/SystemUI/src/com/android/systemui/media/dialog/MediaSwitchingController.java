@@ -948,6 +948,7 @@ public class MediaSwitchingController
         return mLocalMediaManager.getSessionVolume();
     }
 
+    @Nullable
     CharSequence getSessionName() {
         return mLocalMediaManager.getSessionName();
     }
