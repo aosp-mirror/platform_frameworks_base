@@ -17,6 +17,7 @@
 package com.android.systemui.qs.ui.composable
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -35,7 +36,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.layout.onPlaced
@@ -105,16 +106,19 @@ constructor(
             }
         val quickSettingsContainerViewModel =
             rememberViewModel("QuickSettingsShadeOverlayContainer") {
-                // TODO(b/393054014): Add support for brightness mirroring.
-                quickSettingsContainerViewModelFactory.create(supportsBrightnessMirroring = false)
+                quickSettingsContainerViewModelFactory.create(supportsBrightnessMirroring = true)
             }
         val panelCornerRadius =
             with(LocalDensity.current) { OverlayShade.Dimensions.PanelCornerRadius.toPx().toInt() }
+        val showBrightnessMirror =
+            quickSettingsContainerViewModel.brightnessSliderViewModel.showMirror
+        val contentAlphaFromBrightnessMirror by
+            animateFloatAsState(if (showBrightnessMirror) 0f else 1f)
 
         // Set the bounds to null when the QuickSettings overlay disappears.
         DisposableEffect(Unit) { onDispose { contentViewModel.onPanelShapeChanged(null) } }
 
-        Box(modifier = modifier) {
+        Box(modifier = modifier.graphicsLayer { alpha = contentAlphaFromBrightnessMirror }) {
             SnoozeableHeadsUpNotificationSpace(
                 stackScrollView = notificationStackScrollView.get(),
                 viewModel =
@@ -252,7 +256,7 @@ fun ContentScope.QuickSettingsLayout(
         ) {
             BrightnessSliderContainer(
                 viewModel = viewModel.brightnessSliderViewModel,
-                containerColor = Color.Transparent,
+                containerColor = OverlayShade.Colors.PanelBackground,
                 modifier =
                     Modifier.fillMaxWidth()
                         .height(QuickSettingsShade.Dimensions.BrightnessSliderHeight),
