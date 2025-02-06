@@ -2013,3 +2013,10 @@ flag {
     description: "Decouple view and controller in AnimLib."
     bug: "393241010"
 }
+
+flag {
+    name: "clock_fidget_animation"
+    namespace: "systemui"
+    description: "Enables the clock fidget animation"
+    bug: "364664389"
+}

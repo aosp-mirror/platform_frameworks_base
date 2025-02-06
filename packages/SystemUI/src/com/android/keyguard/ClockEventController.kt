@@ -565,6 +565,10 @@ constructor(
     }
 
     fun handleFidgetTap(x: Float, y: Float) {
+        if (!com.android.systemui.Flags.clockFidgetAnimation()) {
+            return
+        }
+
         clock?.run {
             smallClock.animations.onFidgetTap(x, y)
             largeClock.animations.onFidgetTap(x, y)
