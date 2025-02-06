@@ -35,20 +35,13 @@ import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.EXTRA_ARCHIVAL;
 import static android.content.Intent.EXTRA_REPLACING;
-import static android.media.AudioDeviceInfo.TYPE_BLE_HEADSET;
-import static android.media.AudioDeviceInfo.TYPE_BLE_SPEAKER;
 import static android.media.AudioDeviceInfo.TYPE_BLUETOOTH_A2DP;
 import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES;
-import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_UNKNOWN;
-import static android.media.AudioManager.DEVICE_OUT_BLE_HEADSET;
-import static android.media.AudioManager.DEVICE_OUT_BLE_SPEAKER;
-import static android.media.AudioManager.DEVICE_OUT_BLUETOOTH_A2DP;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 import static android.media.AudioManager.STREAM_SYSTEM;
 import static android.media.audio.Flags.autoPublicVolumeApiHardening;
-import static android.media.audio.Flags.automaticBtDeviceType;
 import static android.media.audio.Flags.cacheGetStreamMinMaxVolume;
 import static android.media.audio.Flags.cacheGetStreamVolume;
 import static android.media.audio.Flags.concurrentAudioRecordBypassPermission;
@@ -4970,8 +4963,7 @@ public class AudioService extends IAudioService.Stub
                 + asDeviceConnectionFailure());
         pw.println("\tandroid.media.audio.autoPublicVolumeApiHardening:"
                 + autoPublicVolumeApiHardening());
-        pw.println("\tandroid.media.audio.automaticBtDeviceType:"
-                + automaticBtDeviceType());
+        pw.println("\tandroid.media.audio.automaticBtDeviceType - EOL");
         pw.println("\tandroid.media.audio.featureSpatialAudioHeadtrackingLowLatency:"
                 + featureSpatialAudioHeadtrackingLowLatency());
         pw.println("\tandroid.media.audio.focusFreezeTestApi:"
@@ -12357,70 +12349,9 @@ public class AudioService extends IAudioService.Stub
 
     @Override
     @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
-    public void setBluetoothAudioDeviceCategory_legacy(@NonNull String address, boolean isBle,
-            @AudioDeviceCategory int btAudioDeviceCategory) {
-        super.setBluetoothAudioDeviceCategory_legacy_enforcePermission();
-        if (automaticBtDeviceType()) {
-            // do nothing
-            return;
-        }
-
-        final String addr = Objects.requireNonNull(address);
-
-        AdiDeviceState deviceState = mDeviceBroker.findBtDeviceStateForAddress(addr,
-                (isBle ? AudioSystem.DEVICE_OUT_BLE_HEADSET
-                        : AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP));
-
-        int internalType = !isBle ? DEVICE_OUT_BLUETOOTH_A2DP
-                : ((btAudioDeviceCategory == AUDIO_DEVICE_CATEGORY_HEADPHONES)
-                        ? DEVICE_OUT_BLE_HEADSET : DEVICE_OUT_BLE_SPEAKER);
-        int deviceType = !isBle ? TYPE_BLUETOOTH_A2DP
-                : ((btAudioDeviceCategory == AUDIO_DEVICE_CATEGORY_HEADPHONES) ? TYPE_BLE_HEADSET
-                        : TYPE_BLE_SPEAKER);
-
-        if (deviceState == null) {
-            deviceState = new AdiDeviceState(deviceType, internalType, addr);
-        }
-
-        deviceState.setAudioDeviceCategory(btAudioDeviceCategory);
-
-        mDeviceBroker.addOrUpdateBtAudioDeviceCategoryInInventory(
-                deviceState, true /*syncInventory*/);
-        mDeviceBroker.postPersistAudioDeviceSettings();
-
-        mSpatializerHelper.refreshDevice(deviceState.getAudioDeviceAttributes(),
-                false /* initState */);
-        mSoundDoseHelper.setAudioDeviceCategory(addr, internalType,
-                btAudioDeviceCategory == AUDIO_DEVICE_CATEGORY_HEADPHONES);
-    }
-
-    @Override
-    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
-    @AudioDeviceCategory
-    public int getBluetoothAudioDeviceCategory_legacy(@NonNull String address, boolean isBle) {
-        super.getBluetoothAudioDeviceCategory_legacy_enforcePermission();
-        if (automaticBtDeviceType()) {
-            return AUDIO_DEVICE_CATEGORY_UNKNOWN;
-        }
-
-        final AdiDeviceState deviceState = mDeviceBroker.findBtDeviceStateForAddress(
-                Objects.requireNonNull(address), (isBle ? AudioSystem.DEVICE_OUT_BLE_HEADSET
-                        : AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP));
-        if (deviceState == null) {
-            return AUDIO_DEVICE_CATEGORY_UNKNOWN;
-        }
-
-        return deviceState.getAudioDeviceCategory();
-    }
-
-    @Override
-    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public boolean setBluetoothAudioDeviceCategory(@NonNull String address,
             @AudioDeviceCategory int btAudioDeviceCategory) {
         super.setBluetoothAudioDeviceCategory_enforcePermission();
-        if (!automaticBtDeviceType()) {
-            return false;
-        }
 
         final String addr = Objects.requireNonNull(address);
         if (isBluetoothAudioDeviceCategoryFixed(addr)) {
@@ -12439,9 +12370,6 @@ public class AudioService extends IAudioService.Stub
     @AudioDeviceCategory
     public int getBluetoothAudioDeviceCategory(@NonNull String address) {
         super.getBluetoothAudioDeviceCategory_enforcePermission();
-        if (!automaticBtDeviceType()) {
-            return AUDIO_DEVICE_CATEGORY_UNKNOWN;
-        }
 
         return mDeviceBroker.getAndUpdateBtAdiDeviceStateCategoryForAddress(address);
     }
@@ -12450,9 +12378,6 @@ public class AudioService extends IAudioService.Stub
     @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public boolean isBluetoothAudioDeviceCategoryFixed(@NonNull String address) {
         super.isBluetoothAudioDeviceCategoryFixed_enforcePermission();
-        if (!automaticBtDeviceType()) {
-            return false;
-        }
 
         return mDeviceBroker.isBluetoothAudioDeviceCategoryFixed(address);
     }

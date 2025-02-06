@@ -365,13 +365,6 @@ interface IAudioService {
     oneway void setCsdAsAFeatureEnabled(boolean csdToggleValue);
 
     @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
-    oneway void setBluetoothAudioDeviceCategory_legacy(in String address, boolean isBle,
-            int deviceCategory);
-
-    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
-    int getBluetoothAudioDeviceCategory_legacy(in String address, boolean isBle);
-
-    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     boolean setBluetoothAudioDeviceCategory(in String address, int deviceCategory);
 
     @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
