@@ -20,7 +20,7 @@ import com.android.systemui.brightness.ui.viewmodel.brightnessSliderViewModelFac
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.qs.panels.ui.viewmodel.detailsViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.editModeViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.tileGridViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.tileGridViewModelFactory
 import com.android.systemui.qs.panels.ui.viewmodel.toolbar.toolbarViewModelFactory
 import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 import com.android.systemui.shade.ui.viewmodel.shadeHeaderViewModelFactory
@@ -34,8 +34,8 @@ val Kosmos.quickSettingsContainerViewModelFactory by
                 return QuickSettingsContainerViewModel(
                     brightnessSliderViewModelFactory,
                     shadeHeaderViewModelFactory,
+                    tileGridViewModelFactory,
                     supportsBrightnessMirroring,
-                    tileGridViewModel,
                     editModeViewModel,
                     detailsViewModel,
                     toolbarViewModelFactory,

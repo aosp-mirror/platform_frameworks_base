@@ -23,7 +23,6 @@ import com.android.systemui.development.ui.viewmodel.BuildNumberViewModel
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager.Companion.LOCATION_QS
-import com.android.systemui.qs.panels.domain.interactor.PaginatedGridInteractor
 import com.android.systemui.qs.panels.ui.viewmodel.toolbar.EditModeButtonViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -36,7 +35,6 @@ class PaginatedGridViewModel
 constructor(
     iconTilesViewModel: IconTilesViewModel,
     columnsWithMediaViewModelFactory: QSColumnsViewModel.Factory,
-    paginatedGridInteractor: PaginatedGridInteractor,
     inFirstPageViewModel: InFirstPageViewModel,
     val buildNumberViewModelFactory: BuildNumberViewModel.Factory,
     val editModeButtonViewModelFactory: EditModeButtonViewModel.Factory,
@@ -45,13 +43,6 @@ constructor(
 
     private val hydrator = Hydrator("PaginatedGridViewModel")
     private val columnsWithMediaViewModel = columnsWithMediaViewModelFactory.create(LOCATION_QS)
-
-    val rows by
-        hydrator.hydratedStateOf(
-            traceName = "rows",
-            initialValue = paginatedGridInteractor.defaultRows,
-            source = paginatedGridInteractor.rows,
-        )
 
     var inFirstPage by inFirstPageViewModel::inFirstPage
 

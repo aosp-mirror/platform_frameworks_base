@@ -39,6 +39,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ContentScope
 import com.android.compose.modifiers.padding
@@ -54,6 +55,7 @@ import com.android.systemui.qs.panels.ui.viewmodel.PaginatedGridViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.toolbar.EditModeButtonViewModel
 import com.android.systemui.qs.ui.compose.borderOnFocus
+import com.android.systemui.res.R
 import javax.inject.Inject
 
 class PaginatedGridLayout
@@ -75,7 +77,7 @@ constructor(
             onDispose { tiles.forEach { it.stopListening(token) } }
         }
         val columns = viewModel.columns
-        val rows = viewModel.rows
+        val rows = integerResource(R.integer.quick_settings_paginated_grid_num_rows)
 
         val pages =
             remember(tiles, columns, rows) {

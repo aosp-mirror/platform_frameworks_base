@@ -39,8 +39,8 @@ class QuickSettingsContainerViewModel
 constructor(
     brightnessSliderViewModelFactory: BrightnessSliderViewModel.Factory,
     shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
+    tileGridViewModelFactory: TileGridViewModel.Factory,
     @Assisted supportsBrightnessMirroring: Boolean,
-    val tileGridViewModel: TileGridViewModel,
     val editModeViewModel: EditModeViewModel,
     val detailsViewModel: DetailsViewModel,
     val toolbarViewModelFactory: ToolbarViewModel.Factory,
@@ -54,6 +54,8 @@ constructor(
 
     val shadeHeaderViewModel = shadeHeaderViewModelFactory.create()
 
+    val tileGridViewModel = tileGridViewModelFactory.create()
+
     val showHeader: Boolean by
         hydrator.hydratedStateOf(
             traceName = "showHeader",
@@ -66,6 +68,7 @@ constructor(
             launch { hydrator.activate() }
             launch { brightnessSliderViewModel.activate() }
             launch { shadeHeaderViewModel.activate() }
+            launch { tileGridViewModel.activate() }
             awaitCancellation()
         }
     }

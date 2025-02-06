@@ -17,16 +17,14 @@
 package com.android.systemui.qs.panels.ui.compose
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ContentScope
 import com.android.systemui.qs.panels.ui.viewmodel.TileGridViewModel
 
 @Composable
 fun ContentScope.TileGrid(viewModel: TileGridViewModel, modifier: Modifier = Modifier) {
-    val gridLayout by viewModel.gridLayout.collectAsStateWithLifecycle()
-    val tiles by viewModel.tileViewModels.collectAsStateWithLifecycle(emptyList())
+    val gridLayout = viewModel.gridLayout
+    val tiles = viewModel.tileViewModels
 
     with(gridLayout) { TileGrid(tiles, modifier) }
 }
