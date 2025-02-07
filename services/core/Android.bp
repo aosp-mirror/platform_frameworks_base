@@ -275,9 +275,18 @@ java_genrule {
     out: ["services.core.priorityboosted.jar"],
 }
 
+java_genrule_combiner {
+    name: "services.core.combined",
+    static_libs: ["services.core.priorityboosted"],
+    headers: ["services.core.unboosted"],
+}
+
 java_library {
     name: "services.core",
-    static_libs: ["services.core.priorityboosted"],
+    static_libs: select(release_flag("RELEASE_SERVICES_JAVA_GENRULE_COMBINER"), {
+        true: ["services.core.combined"],
+        default: ["services.core.priorityboosted"],
+    }),
 }
 
 java_library_host {
