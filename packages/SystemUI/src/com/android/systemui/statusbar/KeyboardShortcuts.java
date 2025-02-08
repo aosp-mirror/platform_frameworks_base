@@ -20,8 +20,6 @@ import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 
-import static com.android.systemui.Flags.validateKeyboardShortcutHelperIconUri;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlertDialog;
@@ -407,10 +405,7 @@ public final class KeyboardShortcuts {
         mReceivedAppShortcutGroups =
                 result == null ? Collections.emptyList() : result;
 
-        if (validateKeyboardShortcutHelperIconUri()) {
-            sanitiseShortcuts(mReceivedAppShortcutGroups);
-        }
-
+        sanitiseShortcuts(mReceivedAppShortcutGroups);
         maybeMergeAndShowKeyboardShortcuts();
     }
 
@@ -418,10 +413,7 @@ public final class KeyboardShortcuts {
         mReceivedImeShortcutGroups =
                 result == null ? Collections.emptyList() : result;
 
-        if (validateKeyboardShortcutHelperIconUri()) {
-            sanitiseShortcuts(mReceivedImeShortcutGroups);
-        }
-
+        sanitiseShortcuts(mReceivedImeShortcutGroups);
         maybeMergeAndShowKeyboardShortcuts();
     }
 

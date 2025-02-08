@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -40,6 +41,7 @@ public final class StatusHints implements Parcelable {
     private final CharSequence mLabel;
     private Icon mIcon;
     private final Bundle mExtras;
+    private static final String TAG = StatusHints.class.getSimpleName();
 
     /**
      * @hide
@@ -150,15 +152,35 @@ public final class StatusHints implements Parcelable {
         // incompatible types.
         if (icon != null && (icon.getType() == Icon.TYPE_URI
                 || icon.getType() == Icon.TYPE_URI_ADAPTIVE_BITMAP)) {
-            String encodedUser = icon.getUri().getEncodedUserInfo();
-            // If there is no encoded user, the URI is calling into the calling user space
-            if (encodedUser != null) {
-                int userId = Integer.parseInt(encodedUser);
-                // Do not try to save the icon if the user id isn't in the calling user space.
-                if (userId != callingUserHandle.getIdentifier()) return null;
+            int callingUserId = callingUserHandle.getIdentifier();
+            int requestingUserId = getUserIdFromAuthority(
+                    icon.getUri().getAuthority(), callingUserId);
+            if (callingUserId != requestingUserId) {
+                return null;
             }
+
         }
         return icon;
+    }
+
+    /**
+     * Derives the user id from the authority or the default user id if none could be found.
+     * @param auth
+     * @param defaultUserId
+     * @return The user id from the given authority.
+     * @hide
+     */
+    public static int getUserIdFromAuthority(String auth, int defaultUserId) {
+        if (auth == null) return defaultUserId;
+        int end = auth.lastIndexOf('@');
+        if (end == -1) return defaultUserId;
+        String userIdString = auth.substring(0, end);
+        try {
+            return Integer.parseInt(userIdString);
+        } catch (NumberFormatException e) {
+            Log.w(TAG, "Error parsing userId." + e);
+            return UserHandle.USER_NULL;
+        }
     }
 
     @Override
