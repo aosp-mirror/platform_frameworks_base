@@ -180,7 +180,14 @@ def pack_script_to_uint32(script):
 
 def dump_representative_locales(representative_locales):
     """Dump the set of representative locales."""
-    print()
+    print('''
+/*
+ * TODO: Consider turning the below switch statement into binary search
+ *      to save the disk space when the table is larger in the future.
+ *      Disassembled code shows that the jump table emitted by clang can be
+ *      4x larger than the data in disk size, but it depends on the optimization option.
+ *      However, a switch statement will benefit from the future of compiler improvement.
+ */''')
     print('bool isLocaleRepresentative(uint32_t language_and_region, const char* script) {')
     print('    const uint64_t packed_locale =')
     print('            ((static_cast<uint64_t>(language_and_region)) << 32u) |')

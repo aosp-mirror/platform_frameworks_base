@@ -243,6 +243,7 @@ java_library_static {
         "aconfig_new_storage_flags_lib",
         "powerstats_flags_lib",
         "locksettings_flags_lib",
+        "MmdProperties",
         "mmd_flags_lib",
     ],
     javac_shard_size: 50,

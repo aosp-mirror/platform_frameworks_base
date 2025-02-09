@@ -350,17 +350,23 @@ public final class ShutdownCheckPoints {
 
         private final ShutdownCheckPoints mInstance;
         private final File mBaseFile;
+        private final File mBaseDir;
         private final int mFileCountLimit;
 
         FileDumperThread(ShutdownCheckPoints instance, File baseFile, int fileCountLimit) {
             mInstance = instance;
             mBaseFile = baseFile;
+            mBaseDir = baseFile.getParentFile();
             mFileCountLimit = fileCountLimit;
         }
 
         @Override
         public void run() {
-            mBaseFile.getParentFile().mkdirs();
+            if (!mBaseDir.exists()) {
+                mBaseDir.mkdirs();
+                mBaseDir.setExecutable(true, false);
+                mBaseDir.setReadable(true, false);
+            }
             File[] checkPointFiles = listCheckPointsFiles();
 
             int filesToDelete = checkPointFiles.length - mFileCountLimit + 1;
@@ -375,7 +381,7 @@ public final class ShutdownCheckPoints {
 
         private File[] listCheckPointsFiles() {
             String filePrefix = mBaseFile.getName() + "-";
-            File[] files = mBaseFile.getParentFile().listFiles(new FilenameFilter() {
+            File[] files = mBaseDir.listFiles(new FilenameFilter() {
                 @Override
                 public boolean accept(File dir, String name) {
                     if (!name.startsWith(filePrefix)) {
@@ -412,6 +418,7 @@ public final class ShutdownCheckPoints {
                 }
             }
             mBaseFile.renameTo(file);
+            file.setReadable(true, false);
         }
     }
 }
