@@ -198,10 +198,6 @@ flag {
     bug: "380892385"
 }
 
-flag {
-    name: "nfc_hce_latency_events"
-    is_exported: true
-    namespace: "wallet_integration"
-    description: "Enables tracking latency for HCE"
-    bug: "379849603"
-}
+# Unless you are adding a flag for a file under nfc-non-updatable, you should
+# not add a flag here for Android 16+ targeting features. Use the flags
+# in com.android.nfc.module.flags (packages/modules/Nfc/flags) instead.
