@@ -283,10 +283,7 @@ java_genrule_combiner {
 
 java_library {
     name: "services.core",
-    static_libs: select(release_flag("RELEASE_SERVICES_JAVA_GENRULE_COMBINER"), {
-        true: ["services.core.combined"],
-        default: ["services.core.priorityboosted"],
-    }),
+    static_libs: ["services.core.combined"],
 }
 
 java_library_host {
