@@ -61,15 +61,17 @@ import android.net.vcn.VcnGatewayConnectionConfigTest;
 import android.net.vcn.VcnManager;
 import android.net.vcn.VcnTransportInfo;
 import android.net.wifi.WifiInfo;
+import android.os.Build;
 import android.os.ParcelUuid;
 import android.os.Process;
 import android.telephony.SubscriptionInfo;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.routeselection.UnderlyingNetworkRecord;
+import com.android.testutils.DevSdkIgnoreRule;
+import com.android.testutils.DevSdkIgnoreRunner;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -87,8 +89,10 @@ import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
-/** Tests for TelephonySubscriptionTracker */
-@RunWith(AndroidJUnit4.class)
+// TODO: b/374174952 After B finalization, use Sdk36ModuleController to ensure VCN tests only run on
+// Android B/B+
+@RunWith(DevSdkIgnoreRunner.class)
+@DevSdkIgnoreRule.IgnoreUpTo(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @SmallTest
 public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
     private static final int TEST_UID = Process.myUid() + 1;
