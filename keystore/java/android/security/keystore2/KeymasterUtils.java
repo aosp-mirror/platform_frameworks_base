@@ -30,7 +30,7 @@ import java.security.spec.InvalidParameterSpecException;
 /**
  * @hide
  */
-public abstract class KeymasterUtils {
+public final class KeymasterUtils {
 
     private KeymasterUtils() {}
 
