@@ -12,8 +12,14 @@
 # Note that we restrict this to SysUISingleton classes, as other registering
 # classes should either *always* unregister or *never* register from their
 # constructor. We also keep callback class names for easier debugging.
--keepnames @com.android.systemui.util.annotations.WeaklyReferencedCallback class *
--keepnames class * extends @com.android.systemui.util.annotations.WeaklyReferencedCallback **
+# TODO(b/373579455): Evaluate if <init> needs to be kept.
+-keepnames @com.android.systemui.util.annotations.WeaklyReferencedCallback class * {
+  void <init>();
+}
+# TODO(b/373579455): Evaluate if <init> needs to be kept.
+-keepnames class * extends @com.android.systemui.util.annotations.WeaklyReferencedCallback ** {
+  void <init>();
+}
 -if @com.android.systemui.util.annotations.WeaklyReferencedCallback class *
 -keepclassmembers,allowaccessmodification @com.android.systemui.dagger.SysUISingleton class * {
   <1> *;
@@ -23,10 +29,16 @@
   <1> *;
 }
 
--keep class androidx.core.app.CoreComponentFactory
+# TODO(b/373579455): Evaluate if <init> needs to be kept.
+-keep class androidx.core.app.CoreComponentFactory {
+  void <init>();
+}
 
 # Keep the wm shell lib
--keep class com.android.wm.shell.*
+# TODO(b/373579455): Evaluate if <init> needs to be kept.
+-keep class com.android.wm.shell.* {
+  void <init>();
+}
 # Keep the protolog group methods that are called by the generated code
 -keepclassmembers class com.android.wm.shell.protolog.ShellProtoLogGroup {
     *;
