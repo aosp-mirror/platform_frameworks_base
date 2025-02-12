@@ -725,6 +725,11 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     if (isDisplayPrivate(physicalAddress)) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE;
                     }
+
+                    if (isDisplayStealTopFocusDisabled(physicalAddress)) {
+                        mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_FOCUS;
+                        mInfo.flags |= DisplayDeviceInfo.FLAG_STEAL_TOP_FOCUS_DISABLED;
+                    }
                 }
 
                 if (DisplayCutout.getMaskBuiltInDisplayCutout(res, mInfo.uniqueId)) {
@@ -1385,6 +1390,23 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             }
             final Resources res = getOverlayContext().getResources();
             int[] ports = res.getIntArray(R.array.config_localPrivateDisplayPorts);
+            if (ports != null) {
+                int port = physicalAddress.getPort();
+                for (int p : ports) {
+                    if (p == port) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private boolean isDisplayStealTopFocusDisabled(DisplayAddress.Physical physicalAddress) {
+            if (physicalAddress == null) {
+                return false;
+            }
+            final Resources res = getOverlayContext().getResources();
+            int[] ports = res.getIntArray(R.array.config_localNotStealTopFocusDisplayPorts);
             if (ports != null) {
                 int port = physicalAddress.getPort();
                 for (int p : ports) {

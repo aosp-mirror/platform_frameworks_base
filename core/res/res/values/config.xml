@@ -3183,6 +3183,14 @@
          as private. {@see android.view.Display#FLAG_PRIVATE} -->
     <integer-array translatable="false" name="config_localPrivateDisplayPorts"></integer-array>
 
+    <!-- Controls if local secondary displays should be able to steal focus and become top display.
+         Value specified in the array represents physical port address of each display and displays
+         in this list due to flag dependencies will be marked with the following flags:
+         {@see android.view.Display#FLAG_STEAL_TOP_FOCUS_DISABLED}
+         {@see android.view.Display#FLAG_OWN_FOCUS} -->
+    <integer-array translatable="false" name="config_localNotStealTopFocusDisplayPorts">
+    </integer-array>
+
     <!-- The default mode for the default display. One of the following values (See Display.java):
              0 - COLOR_MODE_DEFAULT
              7 - COLOR_MODE_SRGB

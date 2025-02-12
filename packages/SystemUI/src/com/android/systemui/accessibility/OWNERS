@@ -1,4 +1,7 @@
-# Bug component: 44215
+# Bug component: 1530954
+#
+# The above component is for automated test bugs. If you are a human looking to report
+# a bug in this codebase then please use component 44215.
 
 include /core/java/android/view/accessibility/OWNERS
 jonesriley@google.com
