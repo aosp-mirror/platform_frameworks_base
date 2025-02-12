@@ -70,6 +70,11 @@ import java.util.regex.Pattern;
 public final class ApduServiceInfo implements Parcelable {
     private static final String TAG = "ApduServiceInfo";
 
+    private static final Pattern PLPF_PATTERN =
+            Pattern.compile("[0-9A-Fa-f]{2,}[0-9A-Fa-f,\\?,\\*\\.]*");
+    private static final Pattern PLF_PATTERN =
+            Pattern.compile("[0-9A-Fa-f]{2,}");
+
     /**
      * Component level {@link android.content.pm.PackageManager.Property PackageManager
      * .Property} for a system application to change its icon and label
@@ -472,7 +477,12 @@ public final class ApduServiceInfo implements Parcelable {
                     boolean autoTransact = a.getBoolean(
                             com.android.internal.R.styleable.PollingLoopFilter_autoTransact,
                             false);
-                    if (!mOnHost && !autoTransact) {
+                    boolean isValidFilter = PLF_PATTERN.matcher(plf).matches()
+                            && plf.length() % 2 == 0;
+                    if (!isValidFilter) {
+                        Log.e(TAG, "Ignoring polling-loop-filter " + plf
+                                + " it is not a valid filter");
+                    } else if (!mOnHost && !autoTransact) {
                         Log.e(TAG, "Ignoring polling-loop-filter " + plf
                                 + " for offhost service that isn't autoTransact");
                     } else {
@@ -489,8 +499,12 @@ public final class ApduServiceInfo implements Parcelable {
                     boolean autoTransact = a.getBoolean(
                             com.android.internal.R.styleable.PollingLoopFilter_autoTransact,
                             false);
-                    if (!mOnHost && !autoTransact) {
-                        Log.e(TAG, "Ignoring polling-loop-filter " + plf
+                    boolean isValidFilter = PLPF_PATTERN.matcher(plf).matches();
+                    if (!isValidFilter) {
+                        Log.e(TAG, "Ignoring polling-loop-pattern-filter " + plf
+                                + " it is not a valid pattern filter");
+                    } else if (!mOnHost && !autoTransact) {
+                        Log.e(TAG, "Ignoring polling-loop-pattern-filter " + plf
                                 + " for offhost service that isn't autoTransact");
                     } else {
                         mAutoTransactPatterns.put(Pattern.compile(plf), autoTransact);
@@ -814,6 +828,12 @@ public final class ApduServiceInfo implements Parcelable {
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
     public void addPollingLoopFilter(@NonNull String pollingLoopFilter,
             boolean autoTransact) {
+        if (!PLF_PATTERN.matcher(pollingLoopFilter).matches()
+                || pollingLoopFilter.length() % 2 != 0) {
+            throw new IllegalArgumentException(
+                    "Polling loop filter must contain an even number of characters 0-9 or A-F"
+            );
+        }
         if (!mOnHost && !autoTransact) {
             return;
         }
@@ -842,6 +862,11 @@ public final class ApduServiceInfo implements Parcelable {
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
     public void addPollingLoopPatternFilter(@NonNull String pollingLoopPatternFilter,
             boolean autoTransact) {
+        if (!PLPF_PATTERN.matcher(pollingLoopPatternFilter).matches()) {
+            throw new IllegalArgumentException(
+                    "Polling loop pattern filter is invalid"
+            );
+        }
         if (!mOnHost && !autoTransact) {
             return;
         }
