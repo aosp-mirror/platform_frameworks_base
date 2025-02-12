@@ -10,6 +10,13 @@ flag {
 }
 
 flag {
+     namespace: "system_performance"
+     name: "early_system_config_init"
+     description: "Perform earlier initialization of SystemConfig in system server startup."
+     bug: "383869534"
+}
+
+flag {
      name: "remove_text_service"
      namespace: "wear_frameworks"
      description: "Remove TextServiceManagerService on Wear"

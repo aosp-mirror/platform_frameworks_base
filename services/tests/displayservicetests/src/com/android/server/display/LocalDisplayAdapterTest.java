@@ -250,6 +250,34 @@ public class LocalDisplayAdapterTest {
                 PORT_C, false);
     }
 
+    /**
+     * Confirm that display is marked as trusted, has own focus, disables steal top focus when it
+     * is listed in com.android.internal.R.array.config_localNotStealTopFocusDisplayPorts.
+     */
+    @Test
+    public void testStealTopFocusDisabledDisplay() throws Exception {
+        setUpDisplay(new FakeDisplay(PORT_A));
+        setUpDisplay(new FakeDisplay(PORT_B));
+        setUpDisplay(new FakeDisplay(PORT_C));
+        updateAvailableDisplays();
+
+        doReturn(new int[]{ PORT_B }).when(mMockedResources).getIntArray(
+                com.android.internal.R.array.config_localNotStealTopFocusDisplayPorts);
+        mAdapter.registerLocked();
+
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        // This should not have the flags
+        assertNotStealTopFocusFlag(mListener.addedDisplays.get(0).getDisplayDeviceInfoLocked(),
+                PORT_A, false);
+        // This should have the flags
+        assertNotStealTopFocusFlag(mListener.addedDisplays.get(1).getDisplayDeviceInfoLocked(),
+                PORT_B, true);
+        // This should not have the flags
+        assertNotStealTopFocusFlag(mListener.addedDisplays.get(2).getDisplayDeviceInfoLocked(),
+                PORT_C, false);
+    }
+
     @Test
     public void testSupportedDisplayModesGetOverriddenWhenDisplayIsUpdated()
             throws InterruptedException {
@@ -311,6 +339,42 @@ public class LocalDisplayAdapterTest {
         assertEquals(expectedPort, address.getPort());
         assertEquals(DISPLAY_MODEL, address.getModel());
         assertEquals(shouldBePrivate, (info.flags & DisplayDeviceInfo.FLAG_PRIVATE) != 0);
+    }
+
+    /**
+     * Confirm that all local displays are not trusted, do not have their own focus, and do not
+     * steal top focus when config_localNotStealTopFocusDisplayPorts is empty:
+     */
+    @Test
+    public void testDisplayFlagsForNoConfigLocalNotStealTopFocusDisplayPorts() throws Exception {
+        setUpDisplay(new FakeDisplay(PORT_A));
+        setUpDisplay(new FakeDisplay(PORT_C));
+        updateAvailableDisplays();
+
+        // config_localNotStealTopFocusDisplayPorts is null
+        mAdapter.registerLocked();
+
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        // This should not have the flags
+        assertNotStealTopFocusFlag(mListener.addedDisplays.get(0).getDisplayDeviceInfoLocked(),
+                PORT_A, false);
+        // This should not have the flags
+        assertNotStealTopFocusFlag(mListener.addedDisplays.get(1).getDisplayDeviceInfoLocked(),
+                PORT_C, false);
+    }
+
+    private static void assertNotStealTopFocusFlag(
+            DisplayDeviceInfo info, int expectedPort, boolean shouldHaveFlags) {
+        final DisplayAddress.Physical address = (DisplayAddress.Physical) info.address;
+        assertNotNull(address);
+        assertEquals(expectedPort, address.getPort());
+        assertEquals(DISPLAY_MODEL, address.getModel());
+        assertEquals(shouldHaveFlags,
+                (info.flags & DisplayDeviceInfo.FLAG_STEAL_TOP_FOCUS_DISABLED) != 0);
+        assertEquals(shouldHaveFlags, (info.flags & DisplayDeviceInfo.FLAG_OWN_FOCUS) != 0);
+        // display is always trusted since it is created by the system
+        assertEquals(true, (info.flags & DisplayDeviceInfo.FLAG_TRUSTED) != 0);
     }
 
     /**
