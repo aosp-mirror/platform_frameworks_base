@@ -20,3 +20,6 @@ per-file *VisualQuery* = file:/core/java/android/service/voice/OWNERS
 
 # System language settings
 per-file *Locale* = file:platform/packages/apps/Settings:/src/com/android/settings/localepicker/OWNERS
+
+# Media
+per-file *MediaRoute* = file:/packages/SystemUI/src/com/android/systemui/media/dialog/OWNERS
