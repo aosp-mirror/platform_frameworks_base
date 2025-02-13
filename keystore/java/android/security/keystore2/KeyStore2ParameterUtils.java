@@ -38,7 +38,9 @@ import java.util.function.Consumer;
 /**
  * @hide
  */
-public abstract class KeyStore2ParameterUtils {
+public final class KeyStore2ParameterUtils {
+
+    private KeyStore2ParameterUtils() {}
 
     /**
      * This function constructs a {@link KeyParameter} expressing a boolean value.

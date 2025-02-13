@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 /**
  * @hide
  */
-public abstract class ArrayUtils {
+public final class ArrayUtils {
     private ArrayUtils() {}
 
     public static String[] nullToEmpty(String[] array) {
