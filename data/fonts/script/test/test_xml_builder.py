@@ -328,16 +328,16 @@ class XmlBuilderTest(unittest.TestCase):
       self.expect_xml(xml)
 
   def expect_xml(self, xml):
-    self.assertEquals("sans-serif", xml.families[0].name)  # _SANS_SERIF
-    self.assertEquals("serif", xml.families[1].name)  # _SERIF
-    self.assertEquals("und-Arab", xml.families[2].lang)  # __ARABIC
-    self.assertEquals("elegant", xml.families[2].variant)
-    self.assertEquals("und-Arab", xml.families[3].lang)  # _ARABIC_UI
-    self.assertEquals("zh-Hans", xml.families[4].lang)  # _HANS (_HANS_SERIF)
-    self.assertEquals(2, len(xml.families[4].fonts))
-    self.assertEquals("serif", xml.families[4].fonts[1].fallback_for)
-    self.assertEquals("ja", xml.families[5].lang)  # _HANS (_HANS_SERIF)
-    self.assertEquals("serif", xml.families[5].fonts[1].fallback_for)
+    self.assertEqual("sans-serif", xml.families[0].name)  # _SANS_SERIF
+    self.assertEqual("serif", xml.families[1].name)  # _SERIF
+    self.assertEqual("und-Arab", xml.families[2].lang)  # __ARABIC
+    self.assertEqual("elegant", xml.families[2].variant)
+    self.assertEqual("und-Arab", xml.families[3].lang)  # _ARABIC_UI
+    self.assertEqual("zh-Hans", xml.families[4].lang)  # _HANS (_HANS_SERIF)
+    self.assertEqual(2, len(xml.families[4].fonts))
+    self.assertEqual("serif", xml.families[4].fonts[1].fallback_for)
+    self.assertEqual("ja", xml.families[5].lang)  # _HANS (_HANS_SERIF)
+    self.assertEqual("serif", xml.families[5].fonts[1].fallback_for)
 
 
 if __name__ == "__main__":

@@ -75,20 +75,20 @@ class CommandlineTest(unittest.TestCase):
         functools.partial(CommandlineTest.fileread, filemap),
     )
 
-    self.assertEquals("output.xml", args.outfile)
+    self.assertEqual("output.xml", args.outfile)
 
-    self.assertEquals(1, len(args.aliases))
-    self.assertEquals("sans-serif-thin", args.aliases[0].name)
-    self.assertEquals("sans-serif", args.aliases[0].to)
-    self.assertEquals(100, args.aliases[0].weight)
+    self.assertEqual(1, len(args.aliases))
+    self.assertEqual("sans-serif-thin", args.aliases[0].name)
+    self.assertEqual("sans-serif", args.aliases[0].to)
+    self.assertEqual(100, args.aliases[0].weight)
 
-    self.assertEquals(2, len(args.fallback))
+    self.assertEqual(2, len(args.fallback))
     # Order is not a part of expectation. Check the expected lang is included.
     langs = set(["und-Arab", "und-Ethi"])
     self.assertTrue(args.fallback[0].lang in langs)
     self.assertTrue(args.fallback[1].lang in langs)
 
-    self.assertEquals(3, len(args.families))
+    self.assertEqual(3, len(args.families))
     # Order is not a part of expectation. Check the expected name is included.
     names = set(["sans-serif", "sans-serif-condensed", "roboto-flex"])
     self.assertTrue(args.families[0].name in names)
