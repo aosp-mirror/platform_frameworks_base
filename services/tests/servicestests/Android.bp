@@ -32,9 +32,6 @@ android_test {
         "test-apps/SuspendTestApp/src/**/*.java",
     ],
 
-    kotlincflags: [
-        "-Werror",
-    ],
     static_libs: [
         "cts-input-lib",
         "frameworks-base-testutils",
