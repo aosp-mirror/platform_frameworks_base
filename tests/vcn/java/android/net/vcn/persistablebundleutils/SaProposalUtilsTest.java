@@ -21,15 +21,21 @@ import static org.junit.Assert.assertEquals;
 import android.net.ipsec.ike.ChildSaProposal;
 import android.net.ipsec.ike.IkeSaProposal;
 import android.net.ipsec.ike.SaProposal;
+import android.os.Build;
 import android.os.PersistableBundle;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
+
+import com.android.testutils.DevSdkIgnoreRule;
+import com.android.testutils.DevSdkIgnoreRunner;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@RunWith(AndroidJUnit4.class)
+// TODO: b/374174952 After B finalization, use Sdk36ModuleController to ensure VCN tests only run on
+// Android B/B+
+@RunWith(DevSdkIgnoreRunner.class)
+@DevSdkIgnoreRule.IgnoreUpTo(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @SmallTest
 public class SaProposalUtilsTest {
     /** Package private so that IkeSessionParamsUtilsTest can use it */

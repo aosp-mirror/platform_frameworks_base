@@ -44,16 +44,22 @@ import static org.mockito.Mockito.when;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.net.IpSecTransformState;
+import android.os.Build;
 import android.os.OutcomeReceiver;
 import android.os.PowerManager;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.server.vcn.routeselection.IpSecPacketLossDetector.PacketLossCalculationResult;
 import com.android.server.vcn.routeselection.IpSecPacketLossDetector.PacketLossCalculator;
 import com.android.server.vcn.routeselection.NetworkMetricMonitor.IpSecTransformWrapper;
 import com.android.server.vcn.routeselection.NetworkMetricMonitor.NetworkMetricMonitorCallback;
+import com.android.testutils.DevSdkIgnoreRule;
+import com.android.testutils.DevSdkIgnoreRunner;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -63,6 +69,11 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.concurrent.TimeUnit;
 
+// TODO: b/374174952 After B finalization, use Sdk36ModuleController to ensure VCN tests only run on
+// Android B/B+
+@RunWith(DevSdkIgnoreRunner.class)
+@DevSdkIgnoreRule.IgnoreUpTo(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@SmallTest
 public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
     private static final String TAG = IpSecPacketLossDetectorTest.class.getSimpleName();
 

@@ -38,16 +38,28 @@ import android.net.NetworkCapabilities;
 import android.net.vcn.VcnManager.VcnStatusCallback;
 import android.net.vcn.VcnManager.VcnStatusCallbackBinder;
 import android.net.vcn.VcnManager.VcnUnderlyingNetworkPolicyListener;
+import android.os.Build;
 import android.os.ParcelUuid;
+
+import androidx.test.filters.SmallTest;
+
+import com.android.testutils.DevSdkIgnoreRule;
+import com.android.testutils.DevSdkIgnoreRunner;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import java.net.UnknownHostException;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 
+// TODO: b/374174952 After B finalization, use Sdk36ModuleController to ensure VCN tests only run on
+// Android B/B+
+@RunWith(DevSdkIgnoreRunner.class)
+@DevSdkIgnoreRule.IgnoreUpTo(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@SmallTest
 public class VcnManagerTest {
     private static final ParcelUuid SUB_GROUP = new ParcelUuid(new UUID(0, 0));
     private static final String GATEWAY_CONNECTION_NAME = "gatewayConnectionName";
