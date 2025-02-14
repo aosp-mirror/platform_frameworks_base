@@ -23,7 +23,6 @@ import static android.platform.test.ravenwood.RavenwoodSystemServer.ANDROID_PACK
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_EMPTY_RESOURCES_APK;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_INST_RESOURCE_APK;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_RESOURCE_APK;
-import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERSION_JAVA_SYSPROP;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.parseNullableInt;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.withDefault;
@@ -102,6 +101,10 @@ public class RavenwoodRuntimeEnvironmentController {
 
     private RavenwoodRuntimeEnvironmentController() {
     }
+
+    private static final PrintStream sStdOut = System.out;
+    @SuppressWarnings("UnusedVariable")
+    private static final PrintStream sStdErr = System.err;
 
     private static final String MAIN_THREAD_NAME = "RavenwoodMain";
     private static final String LIBRAVENWOOD_INITIALIZER_NAME = "ravenwood_initializer";
@@ -212,9 +215,9 @@ public class RavenwoodRuntimeEnvironmentController {
     }
 
     private static void globalInitInner() throws IOException {
-        if (RAVENWOOD_VERBOSE_LOGGING) {
-            Log.v(TAG, "globalInit() called here...", new RuntimeException("NOT A CRASH"));
-        }
+        // We haven't initialized liblog yet, so directly write to System.out here.
+        RavenwoodCommonUtils.log(TAG, "globalInitInner()");
+
         if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
             Thread.setDefaultUncaughtExceptionHandler(sUncaughtExceptionHandler);
         }
@@ -233,9 +236,6 @@ public class RavenwoodRuntimeEnvironmentController {
         dumpEnvironment();
         dumpJavaProperties();
         dumpOtherInfo();
-
-        // We haven't initialized liblog yet, so directly write to System.out here.
-        RavenwoodCommonUtils.log(TAG, "globalInitInner()");
 
         // Make sure libravenwood_runtime is loaded.
         System.load(RavenwoodCommonUtils.getJniLibraryPath(RAVENWOOD_NATIVE_RUNTIME_NAME));
@@ -260,6 +260,9 @@ public class RavenwoodRuntimeEnvironmentController {
 
         // Make sure libandroid_runtime is loaded.
         RavenwoodNativeLoader.loadFrameworkNativeCode();
+
+        // Start method logging.
+        RavenwoodMethodCallLogger.enable(sStdOut);
 
         // Touch some references early to ensure they're <clinit>'ed
         Objects.requireNonNull(Build.TYPE);
