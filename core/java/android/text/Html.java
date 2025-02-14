@@ -614,7 +614,7 @@ public class Html {
                 if (style[j] instanceof TypefaceSpan) {
                     String s = ((TypefaceSpan) style[j]).getFamily();
 
-                    if (s.equals("monospace")) {
+                    if ("monospace".equals(s)) {
                         out.append("</tt>");
                     }
                 }
