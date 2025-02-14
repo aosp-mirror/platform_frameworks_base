@@ -14871,12 +14871,22 @@ static uint32_t findLatnParent(uint32_t packed_lang_region) {
         case 0x656E4154u: // en-AT -> en-150
         case 0x656E4245u: // en-BE -> en-150
         case 0x656E4348u: // en-CH -> en-150
+        case 0x656E435Au: // en-CZ -> en-150
         case 0x656E4445u: // en-DE -> en-150
         case 0x656E444Bu: // en-DK -> en-150
+        case 0x656E4553u: // en-ES -> en-150
         case 0x656E4649u: // en-FI -> en-150
+        case 0x656E4652u: // en-FR -> en-150
+        case 0x656E4855u: // en-HU -> en-150
+        case 0x656E4954u: // en-IT -> en-150
         case 0x656E4E4Cu: // en-NL -> en-150
+        case 0x656E4E4Fu: // en-NO -> en-150
+        case 0x656E504Cu: // en-PL -> en-150
+        case 0x656E5054u: // en-PT -> en-150
+        case 0x656E524Fu: // en-RO -> en-150
         case 0x656E5345u: // en-SE -> en-150
         case 0x656E5349u: // en-SI -> en-150
+        case 0x656E534Bu: // en-SK -> en-150
             return 0x656E80A1u;
         case 0x65734152u: // es-AR -> es-419
         case 0x6573424Fu: // es-BO -> es-419
