@@ -145,6 +145,7 @@ class HostStubGen(val options: HostStubGenOptions) {
 
         // Inject default hooks from options.
         filter = DefaultHookInjectingFilter(
+            allClasses,
             options.defaultClassLoadHook.get,
             options.defaultMethodCallHook.get,
             filter
