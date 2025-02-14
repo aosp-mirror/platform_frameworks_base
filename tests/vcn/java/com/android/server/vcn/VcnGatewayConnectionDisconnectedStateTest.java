@@ -30,16 +30,21 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.net.IpSecManager;
+import android.os.Build;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
+
+import com.android.testutils.DevSdkIgnoreRule;
+import com.android.testutils.DevSdkIgnoreRunner;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-/** Tests for VcnGatewayConnection.DisconnectedState */
-@RunWith(AndroidJUnit4.class)
+// TODO: b/374174952 After B finalization, use Sdk36ModuleController to ensure VCN tests only run on
+// Android B/B+
+@RunWith(DevSdkIgnoreRunner.class)
+@DevSdkIgnoreRule.IgnoreUpTo(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @SmallTest
 public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnectionTestBase {
     @Before
