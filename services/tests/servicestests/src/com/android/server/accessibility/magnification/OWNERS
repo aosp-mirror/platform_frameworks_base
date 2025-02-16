@@ -1,0 +1,6 @@
+# Bug component: 1530954
+#
+# The above component is for automated test bugs. If you are a human looking to report
+# a bug in this codebase then please use component 770744.
+
+include /services/accessibility/java/com/android/server/accessibility/magnification/OWNERS
