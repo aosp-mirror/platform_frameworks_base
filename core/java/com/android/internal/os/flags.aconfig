@@ -53,6 +53,13 @@ flag {
 }
 
 flag {
+    name: "enable_media_and_location_preload"
+    namespace: "system_performance"
+    description: "Enables zygote preload of non-BCP media and location libraries."
+    bug: "241474956"
+}
+
+flag {
     name: "use_transaction_codes_for_unknown_methods"
     namespace: "stability"
     description: "Use transaction codes when the method names is unknown"

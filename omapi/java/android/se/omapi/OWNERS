@@ -1,2 +1,2 @@
 # Bug component: 456592
-include platform/packages/apps/Nfc:/OWNERS
+include platform/packages/modules/Nfc:/OWNERS
