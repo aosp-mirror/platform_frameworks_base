@@ -206,7 +206,7 @@ void RenderProxy::buildLayer(RenderNode* node) {
 }
 
 bool RenderProxy::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap& bitmap) {
-    ATRACE_NAME("TextureView#getBitmap");
+    ATRACE_NAME("RenderProxy#copyLayerInto readback");
     auto& thread = RenderThread::getInstance();
     return thread.queue().runSync([&]() -> bool {
         return thread.readback().copyLayerInto(layer, &bitmap) == CopyResult::Success;
@@ -473,7 +473,7 @@ void RenderProxy::prepareToDraw(Bitmap& bitmap) {
 }
 
 int RenderProxy::copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap) {
-    ATRACE_NAME("HardwareBitmap readback");
+    ATRACE_NAME("RenderProxy#copyHWBitmapInto readback");
     RenderThread& thread = RenderThread::getInstance();
     if (RenderThread::isCurrent()) {
         // TODO: fix everything that hits this. We should never be triggering a readback ourselves.
@@ -485,6 +485,7 @@ int RenderProxy::copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap) {
 }
 
 int RenderProxy::copyImageInto(const sk_sp<SkImage>& image, SkBitmap* bitmap) {
+    ATRACE_NAME("RenderProxy#copyImageInto readback");
     RenderThread& thread = RenderThread::getInstance();
     if (RenderThread::isCurrent()) {
         // TODO: fix everything that hits this. We should never be triggering a readback ourselves.
