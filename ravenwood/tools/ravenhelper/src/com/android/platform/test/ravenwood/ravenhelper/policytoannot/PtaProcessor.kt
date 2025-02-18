@@ -24,7 +24,7 @@ import com.android.hoststubgen.filters.SpecialClass
 import com.android.hoststubgen.filters.TextFileFilterPolicyParser
 import com.android.hoststubgen.filters.TextFilePolicyMethodReplaceFilter
 import com.android.hoststubgen.log
-import com.android.hoststubgen.utils.ClassFilter
+import com.android.hoststubgen.utils.ClassPredicate
 import com.android.platform.test.ravenwood.ravenhelper.SubcommandHandler
 import com.android.platform.test.ravenwood.ravenhelper.psi.createUastEnvironment
 import com.android.platform.test.ravenwood.ravenhelper.sourcemap.AllClassInfo
@@ -66,11 +66,11 @@ private class TextPolicyToAnnotationConverter(
     val annotations: Annotations,
     val dumpOperations: Boolean,
 ) {
-    private val annotationAllowedClasses: ClassFilter = annotationAllowedClassesFile.let { file ->
+    private val annotationAllowedClasses: ClassPredicate = annotationAllowedClassesFile.let { file ->
         if (file == null) {
-            ClassFilter.newNullFilter(true) // Allow all classes
+            ClassPredicate.newConstantPredicate(true) // Allow all classes
         } else {
-            ClassFilter.loadFromFile(file, false)
+            ClassPredicate.loadFromFile(file, false)
         }
     }
 

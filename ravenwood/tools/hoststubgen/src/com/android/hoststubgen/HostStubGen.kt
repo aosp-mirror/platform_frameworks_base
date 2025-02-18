@@ -29,7 +29,7 @@ import com.android.hoststubgen.filters.OutputFilter
 import com.android.hoststubgen.filters.SanitizationFilter
 import com.android.hoststubgen.filters.TextFileFilterPolicyBuilder
 import com.android.hoststubgen.filters.printAsTextPolicy
-import com.android.hoststubgen.utils.ClassFilter
+import com.android.hoststubgen.utils.ClassPredicate
 import com.android.hoststubgen.visitors.BaseAdapter
 import com.android.hoststubgen.visitors.PackageRedirectRemapper
 import java.io.BufferedInputStream
@@ -153,9 +153,9 @@ class HostStubGen(val options: HostStubGenOptions) {
 
         val annotationAllowedClassesFilter = options.annotationAllowedClassesFile.get.let { file ->
             if (file == null) {
-                ClassFilter.newNullFilter(true) // Allow all classes
+                ClassPredicate.newConstantPredicate(true) // Allow all classes
             } else {
-                ClassFilter.loadFromFile(file, false)
+                ClassPredicate.loadFromFile(file, false)
             }
         }
 
