@@ -49,7 +49,9 @@ public class PasswordSlotManagerTests {
 
     @After
     public void tearDown() throws Exception {
-        mManager.cleanup();
+        if (mManager != null) {
+            mManager.cleanup();
+        }
     }
 
     @Test

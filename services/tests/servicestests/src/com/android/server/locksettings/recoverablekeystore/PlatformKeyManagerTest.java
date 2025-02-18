@@ -117,8 +117,12 @@ public class PlatformKeyManagerTest {
 
     @After
     public void tearDown() {
-        mRecoverableKeyStoreDb.close();
-        mDatabaseFile.delete();
+        if (mRecoverableKeyStoreDb != null) {
+            mRecoverableKeyStoreDb.close();
+        }
+        if (mDatabaseFile != null) {
+            mDatabaseFile.delete();
+        }
     }
 
     @Test
