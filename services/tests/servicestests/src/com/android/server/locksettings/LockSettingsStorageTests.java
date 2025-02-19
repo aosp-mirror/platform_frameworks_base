@@ -124,7 +124,9 @@ public class LockSettingsStorageTests {
 
     @After
     public void tearDown() throws Exception {
-        mStorage.closeDatabase();
+        if (mStorage != null) {
+            mStorage.closeDatabase();
+        }
     }
 
     @Test
