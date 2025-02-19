@@ -113,7 +113,7 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class ScreenDecorations implements
-        CoreStartable, ConfigurationController.ConfigurationListener, Dumpable {
+        CoreStartable, ConfigurationController.ConfigurationListener {
     private static final boolean DEBUG_LOGGING = false;
     private static final String TAG = "ScreenDecorations";
 

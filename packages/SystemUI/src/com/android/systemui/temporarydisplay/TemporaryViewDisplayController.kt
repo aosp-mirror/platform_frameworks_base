@@ -34,7 +34,6 @@ import androidx.annotation.CallSuper
 import androidx.annotation.VisibleForTesting
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.systemui.CoreStartable
-import com.android.systemui.Dumpable
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -81,7 +80,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
     private val wakeLockBuilder: WakeLock.Builder,
     private val systemClock: SystemClock,
     internal val tempViewUiEventLogger: TemporaryViewUiEventLogger,
-) : CoreStartable, Dumpable {
+) : CoreStartable {
     /**
      * Window layout params that will be used as a starting point for the [windowLayoutParams] of
      * all subclasses.
