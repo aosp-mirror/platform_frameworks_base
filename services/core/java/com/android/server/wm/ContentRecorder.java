@@ -474,7 +474,7 @@ final class ContentRecorder implements WindowContainerListener {
                     return null;
                 }
                 final Task taskToRecord = wc.asTask();
-                if (taskToRecord == null) {
+                if (taskToRecord == null || !taskToRecord.isAttached()) {
                     handleStartRecordingFailed();
                     ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
                             "Content Recording: Unable to retrieve task to start recording for "
