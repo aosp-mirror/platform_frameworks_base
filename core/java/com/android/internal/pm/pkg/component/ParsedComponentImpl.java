@@ -157,7 +157,7 @@ public abstract class ParsedComponentImpl implements ParsedComponent, Parcelable
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.name);
+        sForInternedString.parcel(this.name, dest, flags);
         dest.writeInt(this.getIcon());
         dest.writeInt(this.getLabelRes());
         dest.writeCharSequence(this.getNonLocalizedLabel());
@@ -175,7 +175,7 @@ public abstract class ParsedComponentImpl implements ParsedComponent, Parcelable
         // We use the boot classloader for all classes that we load.
         final ClassLoader boot = Object.class.getClassLoader();
         //noinspection ConstantConditions
-        this.name = in.readString();
+        this.name = sForInternedString.unparcel(in);
         this.icon = in.readInt();
         this.labelRes = in.readInt();
         this.nonLocalizedLabel = in.readCharSequence();
