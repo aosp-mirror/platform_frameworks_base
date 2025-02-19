@@ -16,13 +16,10 @@
 
 package android.security.keystore2;
 
-import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
-import android.security.keystore.KeyProperties;
 
 import java.security.AlgorithmParameters;
 import java.security.NoSuchAlgorithmException;
-import java.security.ProviderException;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
@@ -30,7 +27,7 @@ import java.security.spec.InvalidParameterSpecException;
 /**
  * @hide
  */
-public abstract class KeymasterUtils {
+public final class KeymasterUtils {
 
     private KeymasterUtils() {}
 
@@ -83,47 +80,6 @@ public abstract class KeymasterUtils {
             default:
                 throw new IllegalArgumentException(
                         "Unsupported asymmetric encryption padding scheme: " + keymasterPadding);
-        }
-    }
-
-    /**
-     * Adds {@code KM_TAG_MIN_MAC_LENGTH} tag, if necessary, to the keymaster arguments for
-     * generating or importing a key. This tag may only be needed for symmetric keys (e.g., HMAC,
-     * AES-GCM).
-     */
-    public static void addMinMacLengthAuthorizationIfNecessary(KeymasterArguments args,
-            int keymasterAlgorithm,
-            int[] keymasterBlockModes,
-            int[] keymasterDigests) {
-        switch (keymasterAlgorithm) {
-            case KeymasterDefs.KM_ALGORITHM_AES:
-                if (com.android.internal.util.ArrayUtils.contains(
-                        keymasterBlockModes, KeymasterDefs.KM_MODE_GCM)) {
-                    // AES GCM key needs the minimum length of AEAD tag specified.
-                    args.addUnsignedInt(KeymasterDefs.KM_TAG_MIN_MAC_LENGTH,
-                            AndroidKeyStoreAuthenticatedAESCipherSpi.GCM
-                                    .MIN_SUPPORTED_TAG_LENGTH_BITS);
-                }
-                break;
-            case KeymasterDefs.KM_ALGORITHM_HMAC:
-                // HMAC key needs the minimum length of MAC set to the output size of the associated
-                // digest. This is because we do not offer a way to generate shorter MACs and
-                // don't offer a way to verify MACs (other than by generating them).
-                if (keymasterDigests.length != 1) {
-                    throw new ProviderException(
-                            "Unsupported number of authorized digests for HMAC key: "
-                                    + keymasterDigests.length
-                                    + ". Exactly one digest must be authorized");
-                }
-                int keymasterDigest = keymasterDigests[0];
-                int digestOutputSizeBits = getDigestOutputSizeBits(keymasterDigest);
-                if (digestOutputSizeBits == -1) {
-                    throw new ProviderException(
-                            "HMAC key authorized for unsupported digest: "
-                                    + KeyProperties.Digest.fromKeymaster(keymasterDigest));
-                }
-                args.addUnsignedInt(KeymasterDefs.KM_TAG_MIN_MAC_LENGTH, digestOutputSizeBits);
-                break;
         }
     }
 

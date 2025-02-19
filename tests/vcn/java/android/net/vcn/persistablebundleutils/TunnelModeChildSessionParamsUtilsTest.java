@@ -25,10 +25,13 @@ import android.net.InetAddresses;
 import android.net.ipsec.ike.ChildSaProposal;
 import android.net.ipsec.ike.IkeTrafficSelector;
 import android.net.ipsec.ike.TunnelModeChildSessionParams;
+import android.os.Build;
 import android.os.PersistableBundle;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
+
+import com.android.testutils.DevSdkIgnoreRule;
+import com.android.testutils.DevSdkIgnoreRunner;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +40,10 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.util.concurrent.TimeUnit;
 
-@RunWith(AndroidJUnit4.class)
+// TODO: b/374174952 After B finalization, use Sdk36ModuleController to ensure VCN tests only run on
+// Android B/B+
+@RunWith(DevSdkIgnoreRunner.class)
+@DevSdkIgnoreRule.IgnoreUpTo(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @SmallTest
 public class TunnelModeChildSessionParamsUtilsTest {
     // Package private for use in EncryptedTunnelParamsUtilsTest

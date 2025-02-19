@@ -6,17 +6,9 @@ public interface android.hosttest.annotation.HostSideTestClassLoadHook extends j
   flags: (0x2601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT, ACC_ANNOTATION
   this_class: #x                          // android/hosttest/annotation/HostSideTestClassLoadHook
   super_class: #x                         // java/lang/Object
-  interfaces: 1, fields: 0, methods: 2, attributes: 2
-  private static {};
-    descriptor: ()V
-    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
-    Code:
-      stack=2, locals=0, args_size=0
-         x: ldc           #x                  // class android/hosttest/annotation/HostSideTestClassLoadHook
-         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
-         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
-         x: return
-
+  interfaces: 1, fields: 0, methods: 1, attributes: 2
+Constant pool:
+{
   public abstract java.lang.String value();
     descriptor: ()Ljava/lang/String;
     flags: (0x0401) ACC_PUBLIC, ACC_ABSTRACT
@@ -44,16 +36,9 @@ public interface android.hosttest.annotation.HostSideTestKeep extends java.lang.
   flags: (0x2601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT, ACC_ANNOTATION
   this_class: #x                          // android/hosttest/annotation/HostSideTestKeep
   super_class: #x                         // java/lang/Object
-  interfaces: 1, fields: 0, methods: 1, attributes: 2
-  private static {};
-    descriptor: ()V
-    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
-    Code:
-      stack=2, locals=0, args_size=0
-         x: ldc           #x                  // class android/hosttest/annotation/HostSideTestKeep
-         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
-         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
-         x: return
+  interfaces: 1, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "HostSideTestKeep.java"
 RuntimeVisibleAnnotations:
@@ -75,16 +60,9 @@ public interface android.hosttest.annotation.HostSideTestRedirect extends java.l
   flags: (0x2601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT, ACC_ANNOTATION
   this_class: #x                          // android/hosttest/annotation/HostSideTestRedirect
   super_class: #x                         // java/lang/Object
-  interfaces: 1, fields: 0, methods: 1, attributes: 2
-  private static {};
-    descriptor: ()V
-    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
-    Code:
-      stack=2, locals=0, args_size=0
-         x: ldc           #x                  // class android/hosttest/annotation/HostSideTestRedirect
-         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
-         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
-         x: return
+  interfaces: 1, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "HostSideTestRedirect.java"
 RuntimeVisibleAnnotations:
@@ -106,17 +84,9 @@ public interface android.hosttest.annotation.HostSideTestRedirectionClass extend
   flags: (0x2601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT, ACC_ANNOTATION
   this_class: #x                          // android/hosttest/annotation/HostSideTestRedirectionClass
   super_class: #x                         // java/lang/Object
-  interfaces: 1, fields: 0, methods: 2, attributes: 2
-  private static {};
-    descriptor: ()V
-    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
-    Code:
-      stack=2, locals=0, args_size=0
-         x: ldc           #x                  // class android/hosttest/annotation/HostSideTestRedirectionClass
-         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
-         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
-         x: return
-
+  interfaces: 1, fields: 0, methods: 1, attributes: 2
+Constant pool:
+{
   public abstract java.lang.String value();
     descriptor: ()Ljava/lang/String;
     flags: (0x0401) ACC_PUBLIC, ACC_ABSTRACT
@@ -144,16 +114,9 @@ public interface android.hosttest.annotation.HostSideTestRemove extends java.lan
   flags: (0x2601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT, ACC_ANNOTATION
   this_class: #x                          // android/hosttest/annotation/HostSideTestRemove
   super_class: #x                         // java/lang/Object
-  interfaces: 1, fields: 0, methods: 1, attributes: 2
-  private static {};
-    descriptor: ()V
-    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
-    Code:
-      stack=2, locals=0, args_size=0
-         x: ldc           #x                  // class android/hosttest/annotation/HostSideTestRemove
-         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
-         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
-         x: return
+  interfaces: 1, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "HostSideTestRemove.java"
 RuntimeVisibleAnnotations:
@@ -175,16 +138,9 @@ public interface android.hosttest.annotation.HostSideTestStaticInitializerKeep e
   flags: (0x2601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT, ACC_ANNOTATION
   this_class: #x                          // android/hosttest/annotation/HostSideTestStaticInitializerKeep
   super_class: #x                         // java/lang/Object
-  interfaces: 1, fields: 0, methods: 1, attributes: 2
-  private static {};
-    descriptor: ()V
-    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
-    Code:
-      stack=2, locals=0, args_size=0
-         x: ldc           #x                  // class android/hosttest/annotation/HostSideTestStaticInitializerKeep
-         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
-         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
-         x: return
+  interfaces: 1, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "HostSideTestStaticInitializerKeep.java"
 RuntimeVisibleAnnotations:
@@ -206,17 +162,9 @@ public interface android.hosttest.annotation.HostSideTestSubstitute extends java
   flags: (0x2601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT, ACC_ANNOTATION
   this_class: #x                          // android/hosttest/annotation/HostSideTestSubstitute
   super_class: #x                         // java/lang/Object
-  interfaces: 1, fields: 0, methods: 2, attributes: 2
-  private static {};
-    descriptor: ()V
-    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
-    Code:
-      stack=2, locals=0, args_size=0
-         x: ldc           #x                  // class android/hosttest/annotation/HostSideTestSubstitute
-         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
-         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
-         x: return
-
+  interfaces: 1, fields: 0, methods: 1, attributes: 2
+Constant pool:
+{
   public abstract java.lang.String suffix();
     descriptor: ()Ljava/lang/String;
     flags: (0x0401) ACC_PUBLIC, ACC_ABSTRACT
@@ -244,16 +192,9 @@ public interface android.hosttest.annotation.HostSideTestThrow extends java.lang
   flags: (0x2601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT, ACC_ANNOTATION
   this_class: #x                          // android/hosttest/annotation/HostSideTestThrow
   super_class: #x                         // java/lang/Object
-  interfaces: 1, fields: 0, methods: 1, attributes: 2
-  private static {};
-    descriptor: ()V
-    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
-    Code:
-      stack=2, locals=0, args_size=0
-         x: ldc           #x                  // class android/hosttest/annotation/HostSideTestThrow
-         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
-         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
-         x: return
+  interfaces: 1, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "HostSideTestThrow.java"
 RuntimeVisibleAnnotations:
@@ -275,16 +216,9 @@ public interface android.hosttest.annotation.HostSideTestWholeClassKeep extends 
   flags: (0x2601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT, ACC_ANNOTATION
   this_class: #x                          // android/hosttest/annotation/HostSideTestWholeClassKeep
   super_class: #x                         // java/lang/Object
-  interfaces: 1, fields: 0, methods: 1, attributes: 2
-  private static {};
-    descriptor: ()V
-    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
-    Code:
-      stack=2, locals=0, args_size=0
-         x: ldc           #x                  // class android/hosttest/annotation/HostSideTestWholeClassKeep
-         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
-         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
-         x: return
+  interfaces: 1, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "HostSideTestWholeClassKeep.java"
 RuntimeVisibleAnnotations:

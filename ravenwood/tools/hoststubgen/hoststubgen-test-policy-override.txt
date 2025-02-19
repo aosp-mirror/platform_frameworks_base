@@ -1,30 +1,7 @@
-# --------------------------------------------------------------------------------------------------
-# This file contains rules to process `framework-all.jar` to generate the host side test "stub" and
-# "impl" jars, without using Java annotations.
-#
-# Useful when:
-# - The class is auto-generated and annotations can't be added.
-#   (We need to figure out what to do on auto-generated classes.)
-# - Want to quickly change filter rules without having to rebuild framework.jar.
-#
-# Using this file, one can control the visibility of APIs on a per-class, per-field and per-method
-# basis, but in most cases, per-class directives would be sufficient. That is:
-#
-# - To put the entire class, including its members and nested classes, in the "stub" jar,
-#   so that the test / target code can use the API, use `stubclass`.
-#
-# class package.class	stubclass
-#
-# - To put the entire class, including its members and nested classes, in the "impl" jar,
-#   but not in the "stub" jar, use `keepclass`. Use this when you don't want to expose an API to
-#   tests/target directly, but it's still needed at runtime, because it's used by other "stub" APIs
-#   directly or indirectly.
-#
-# class package.class	keepclass
-#
-# All other classes will be removed from both the stub jar and impl jar.
-#
-# --------------------------------------------------------------------------------------------------
+# *************************************************************************************************
+# This file contains "policies" for HostStubGen used by its automated tests.
+# For the "real" Ravenwood policies, see the frameworks/base/ravenwood/texts/ directory.
+# *************************************************************************************************
 
 # --------------------------------------------------------------------------------------------------
 # Directions on auto-generated classes, where we can't use Java annotations (yet).

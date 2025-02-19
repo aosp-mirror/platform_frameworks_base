@@ -25,10 +25,13 @@ import android.net.ipsec.ike.IkeIpv4AddrIdentification;
 import android.net.ipsec.ike.IkeIpv6AddrIdentification;
 import android.net.ipsec.ike.IkeKeyIdIdentification;
 import android.net.ipsec.ike.IkeRfc822AddrIdentification;
+import android.os.Build;
 import android.os.PersistableBundle;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
+
+import com.android.testutils.DevSdkIgnoreRule;
+import com.android.testutils.DevSdkIgnoreRunner;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,7 +42,10 @@ import java.net.InetAddress;
 
 import javax.security.auth.x500.X500Principal;
 
-@RunWith(AndroidJUnit4.class)
+// TODO: b/374174952 After B finalization, use Sdk36ModuleController to ensure VCN tests only run on
+// Android B/B+
+@RunWith(DevSdkIgnoreRunner.class)
+@DevSdkIgnoreRule.IgnoreUpTo(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @SmallTest
 public class IkeIdentificationUtilsTest {
     private static void verifyPersistableBundleEncodeDecodeIsLossless(IkeIdentification id) {
