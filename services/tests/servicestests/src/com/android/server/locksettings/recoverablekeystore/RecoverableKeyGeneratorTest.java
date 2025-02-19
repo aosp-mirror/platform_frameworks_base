@@ -89,8 +89,12 @@ public class RecoverableKeyGeneratorTest {
         keyStore.load(/*param=*/ null);
         keyStore.deleteEntry(WRAPPING_KEY_ALIAS);
 
-        mRecoverableKeyStoreDb.close();
-        mDatabaseFile.delete();
+        if (mRecoverableKeyStoreDb != null) {
+            mRecoverableKeyStoreDb.close();
+        }
+        if (mDatabaseFile != null) {
+            mDatabaseFile.delete();
+        }
     }
 
     @Test
