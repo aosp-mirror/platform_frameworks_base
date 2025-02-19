@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,28 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.platform.test.ravenwood.ravenhelper
 
-package android.security.keystore;
+import com.android.platform.test.ravenwood.ravenhelper.psi.createUastEnvironment
+import org.junit.Test
 
-import java.util.Date;
-
-/**
- * Assorted utility methods.
- *
- * @hide
- */
-public final class Utils {
-    private Utils() {}
-
-    static Date cloneIfNotNull(Date value) {
-        return (value != null) ? (Date) value.clone() : null;
-    }
-
-    static byte[] cloneIfNotNull(byte[] value) {
-        return (value != null) ? value.clone() : null;
-    }
-
-    static int[] cloneIfNotNull(int[] value) {
-        return (value != null) ? value.clone() : null;
+class RavenhelperTest {
+    @Test
+    fun testPsiInitialization() {
+        val env = createUastEnvironment()
+        env.dispose()
     }
 }

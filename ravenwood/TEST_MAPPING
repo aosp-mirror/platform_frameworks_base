@@ -2,6 +2,7 @@
   "presubmit": [
     { "name": "tiny-framework-dump-test" },
     { "name": "hoststubgentest" },
+    { "name": "ravenhelpertest" },
     { "name": "hoststubgen-test-tiny-test" },
     { "name": "hoststubgen-invoke-test" },
     { "name": "RavenwoodMockitoTest_device" },

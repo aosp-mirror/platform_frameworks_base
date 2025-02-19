@@ -14,12 +14,20 @@
      limitations under the License.
 -->
 <configuration description="Runs VCN Tests.">
-    <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
+    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
+        <option name="cleanup-apks" value="true" />
         <option name="test-file-name" value="FrameworksVcnTests.apk" />
     </target_preparer>
 
     <option name="test-suite-tag" value="apct" />
     <option name="test-tag" value="FrameworksVcnTests" />
+
+    <!-- Run tests in MTS only if the Tethering Mainline module is installed. -->
+    <object type="module_controller"
+            class="com.android.tradefed.testtype.suite.module.MainlineTestModuleController">
+        <option name="mainline-module-package-name" value="com.google.android.tethering" />
+    </object>
+
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.frameworks.tests.vcn" />
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />

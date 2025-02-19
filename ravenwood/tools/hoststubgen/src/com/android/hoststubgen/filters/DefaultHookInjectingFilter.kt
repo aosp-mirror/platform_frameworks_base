@@ -16,8 +16,11 @@
 package com.android.hoststubgen.filters
 
 import com.android.hoststubgen.addLists
+import com.android.hoststubgen.asm.ClassNodes
+import com.android.hoststubgen.asm.isAnnotation
 
 class DefaultHookInjectingFilter(
+    val classes: ClassNodes,
     defaultClassLoadHook: String?,
     defaultMethodCallHook: String?,
     fallback: OutputFilter
@@ -36,8 +39,30 @@ class DefaultHookInjectingFilter(
     private val defaultClassLoadHookAsList: List<String> = toSingleList(defaultClassLoadHook)
     private val defaultMethodCallHookAsList: List<String> = toSingleList(defaultMethodCallHook)
 
+    private fun shouldInject(className: String): Boolean {
+        // Let's not inject default hooks to annotation classes or inner classes of an annotation
+        // class, because these methods could be called at the class load time, which
+        // is very confusing, and usually not useful.
+
+        val cn = classes.findClass(className) ?: return false
+        if (cn.isAnnotation()) {
+            return false
+        }
+        cn.nestHostClass?.let { nestHostClass ->
+            val nestHost = classes.findClass(nestHostClass) ?: return false
+            if (nestHost.isAnnotation()) {
+                return false
+            }
+        }
+        return true
+    }
+
     override fun getClassLoadHooks(className: String): List<String> {
-        return addLists(super.getClassLoadHooks(className), defaultClassLoadHookAsList)
+        val s = super.getClassLoadHooks(className)
+        if (!shouldInject(className)) {
+            return s
+        }
+        return addLists(s, defaultClassLoadHookAsList)
     }
 
     override fun getMethodCallHooks(
@@ -45,9 +70,23 @@ class DefaultHookInjectingFilter(
         methodName: String,
         descriptor: String
     ): List<String> {
-        return addLists(
-            super.getMethodCallHooks(className, methodName, descriptor),
-            defaultMethodCallHookAsList,
-            )
+        val s = super.getMethodCallHooks(className, methodName, descriptor)
+        if (!shouldInject(className)) {
+            return s
+        }
+        // Don't hook Object methods.
+        if (methodName == "finalize" && descriptor == "()V") {
+            return s
+        }
+        if (methodName == "toString" && descriptor == "()Ljava/lang/String;") {
+            return s
+        }
+        if (methodName == "equals" && descriptor == "(Ljava/lang/Object;)Z") {
+            return s
+        }
+        if (methodName == "hashCode" && descriptor == "()I") {
+            return s
+        }
+        return addLists(s, defaultMethodCallHookAsList)
     }
 }

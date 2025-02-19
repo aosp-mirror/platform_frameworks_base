@@ -42,6 +42,7 @@ java_sdk_library {
             "FlaggedApi",
         ],
     },
+    jarjar_prefix: "com.android.internal.hidden_from_bootclasspath",
 }
 
 platform_compat_config {

@@ -26,6 +26,10 @@
 #include <fcntl.h>
 
 #include <set>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <cstdlib>
 
 #include "jni_helper.h"
 
@@ -182,17 +186,82 @@ static jboolean removeSystemProperty(JNIEnv* env, jclass, jstring javaKey) {
     }
 }
 
+// Find the PPID of child_pid using /proc/N/stat. The 4th field is the PPID.
+// Also returns child_pid's process name (2nd field).
+static pid_t getppid_of(pid_t child_pid, std::string& out_process_name) {
+    if (child_pid < 0) {
+        return -1;
+    }
+    std::string stat_file = "/proc/" + std::to_string(child_pid) + "/stat";
+    std::ifstream stat_stream(stat_file);
+    if (!stat_stream.is_open()) {
+        ALOGW("Unable to open '%s': %s", stat_file.c_str(), strerror(errno));
+        return -1;
+    }
+
+    std::string field;
+    int field_count = 0;
+    while (std::getline(stat_stream, field, ' ')) {
+        if (++field_count == 4) {
+            return atoi(field.c_str());
+        }
+        if (field_count == 2) {
+            out_process_name = field;
+        }
+    }
+    ALOGW("Unexpected format in '%s'", stat_file.c_str());
+    return -1;
+}
+
+// Find atest's PID. Climb up the process tree, and find "atest-py3".
+static pid_t find_atest_pid() {
+    auto ret = getpid(); // self (isolation runner process)
+
+    while (ret != -1) {
+        std::string proc;
+        ret = getppid_of(ret, proc);
+        if (proc == "(atest-py3)") {
+            return ret;
+        }
+    }
+
+    return ret;
+}
+
+// If $RAVENWOOD_LOG_OUT is set, redirect stdout/err to this file.
+// Originally it was added to allow to monitor log in realtime, with
+// RAVENWOOD_LOG_OUT=$(tty) atest...
+//
+// As a special case, if $RAVENWOOD_LOG_OUT is set to "-", we try to find
+// atest's process and send the output to its stdout. It's sort of hacky, but
+// this allows shell redirection to work on Ravenwood output too,
+// so e.g. `atest ... |tee atest.log` would work on Ravenwood's output.
+// (which wouldn't work with `RAVENWOOD_LOG_OUT=$(tty)`).
+//
+// Otherwise -- if $RAVENWOOD_LOG_OUT isn't set -- atest/tradefed just writes
+// the test's output to its own log file.
 static void maybeRedirectLog() {
     auto ravenwoodLogOut = getenv("RAVENWOOD_LOG_OUT");
-    if (ravenwoodLogOut == NULL) {
+    if (ravenwoodLogOut == NULL || *ravenwoodLogOut == '\0') {
         return;
     }
-    ALOGI("RAVENWOOD_LOG_OUT set. Redirecting output to %s", ravenwoodLogOut);
+    std::string path;
+    if (strcmp("-", ravenwoodLogOut) == 0) {
+        pid_t ppid = find_atest_pid();
+        if (ppid < 0) {
+            ALOGI("RAVENWOOD_LOG_OUT set to '-', but unable to find atest's PID");
+            return;
+        }
+        path = std::format("/proc/{}/fd/1", ppid);
+    } else {
+        path = ravenwoodLogOut;
+    }
+    ALOGI("RAVENWOOD_LOG_OUT set. Redirecting output to '%s'", path.c_str());
 
     // Redirect stdin / stdout to /dev/tty.
-    int ttyFd = open(ravenwoodLogOut, O_WRONLY | O_APPEND);
+    int ttyFd = open(path.c_str(), O_WRONLY | O_APPEND);
     if (ttyFd == -1) {
-        ALOGW("$RAVENWOOD_LOG_OUT is set to %s, but failed to open: %s ", ravenwoodLogOut,
+        ALOGW("$RAVENWOOD_LOG_OUT is set, but failed to open '%s': %s ", path.c_str(),
                 strerror(errno));
         return;
     }

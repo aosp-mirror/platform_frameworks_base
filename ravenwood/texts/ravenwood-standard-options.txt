@@ -9,8 +9,10 @@
 
 # Uncomment below lines to enable each feature.
 
+# Enable method call hook.
 #--default-method-call-hook
-#    com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+#    android.platform.test.ravenwood.RavenwoodMethodCallLogger.logMethodCall
+
 #--default-class-load-hook
 #    com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
 
