@@ -220,7 +220,6 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     public class PerDisplay implements DisplayInsetsController.OnInsetsChangedListener {
         final int mDisplayId;
         final InsetsState mInsetsState = new InsetsState();
-        @InsetsType int mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
         boolean mImeRequestedVisible =
                 (WindowInsets.Type.defaultVisible() & WindowInsets.Type.ime()) != 0;
         InsetsSourceControl mImeSourceControl = null;
@@ -411,12 +410,10 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
          */
         private void setVisibleDirectly(boolean visible) {
             mInsetsState.setSourceVisible(InsetsSource.ID_IME, visible);
-            mRequestedVisibleTypes = visible
-                    ? mRequestedVisibleTypes | WindowInsets.Type.ime()
-                    : mRequestedVisibleTypes & ~WindowInsets.Type.ime();
+            int visibleTypes = visible ? WindowInsets.Type.ime() : 0;
             try {
-                mWmService.updateDisplayWindowRequestedVisibleTypes(mDisplayId,
-                        mRequestedVisibleTypes);
+                mWmService.updateDisplayWindowRequestedVisibleTypes(mDisplayId, visibleTypes,
+                        WindowInsets.Type.ime());
             } catch (RemoteException e) {
             }
         }

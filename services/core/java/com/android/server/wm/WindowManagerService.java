@@ -4667,7 +4667,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @EnforcePermission(android.Manifest.permission.MANAGE_APP_TOKENS)
     @Override
     public void updateDisplayWindowRequestedVisibleTypes(
-            int displayId, @InsetsType int requestedVisibleTypes) {
+            int displayId, @InsetsType int visibleTypes, @InsetsType int mask) {
         updateDisplayWindowRequestedVisibleTypes_enforcePermission();
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -4676,7 +4676,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (dc == null || dc.mRemoteInsetsControlTarget == null) {
                     return;
                 }
-                dc.mRemoteInsetsControlTarget.setRequestedVisibleTypes(requestedVisibleTypes);
+                dc.mRemoteInsetsControlTarget.updateRequestedVisibleTypes(visibleTypes, mask);
                 // TODO(b/353463205) the statsToken shouldn't be null as it is used later in the
                 //  IME provider. Check if we have to create a new request here
                 dc.getInsetsStateController().onRequestedVisibleTypesChanged(
