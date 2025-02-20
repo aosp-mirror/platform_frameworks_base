@@ -156,9 +156,12 @@ public class KeySyncTaskTest {
 
     @After
     public void tearDown() {
-        mRecoverableKeyStoreDb.close();
-        mDatabaseFile.delete();
-
+        if (mRecoverableKeyStoreDb != null) {
+            mRecoverableKeyStoreDb.close();
+        }
+        if (mDatabaseFile != null) {
+            mDatabaseFile.delete();
+        }
         File file = new File(InstrumentationRegistry.getTargetContext().getFilesDir(),
                 SNAPSHOT_TOP_LEVEL_DIRECTORY);
         FileUtils.deleteContentsAndDir(file);
