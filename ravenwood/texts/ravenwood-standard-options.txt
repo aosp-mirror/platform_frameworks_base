@@ -36,6 +36,9 @@
 --ignore-annotation
     android.ravenwood.annotation.RavenwoodIgnore
 
+--partially-allowed-annotation
+    android.ravenwood.annotation.RavenwoodPartiallyAllowlisted
+
 --substitute-annotation
     android.ravenwood.annotation.RavenwoodReplace
 

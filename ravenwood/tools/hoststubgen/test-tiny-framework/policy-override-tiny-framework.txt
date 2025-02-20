@@ -73,3 +73,9 @@ class java.lang.Thread keep
 # The leading / in the prefix is not needed (it'll be stripped), but it's added to make
 # sure the stripping works.
 rename ^.*/TinyFrameworkToBeRenamed$ /rename_prefix/
+
+class com.android.hoststubgen.test.tinyframework.TinyFrameworkPartiallyAllowlisted$PartiallyAllowlisted allow-annotation
+    method foo2 allow-annotation
+
+class com.android.hoststubgen.test.tinyframework.TinyFrameworkPartiallyAllowlisted$PartialWithWholeClass_bad remove
+class com.android.hoststubgen.test.tinyframework.TinyFrameworkPartiallyAllowlisted$PartiallyAllowlistedWithoutAnnot_bad remove

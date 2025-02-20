@@ -67,6 +67,28 @@ RuntimeVisibleAnnotations:
     java.lang.annotation.Retention(
       value=Ljava/lang/annotation/RetentionPolicy;.CLASS
     )
+## Class: android/hosttest/annotation/HostSideTestPartiallyAllowlisted.class
+  Compiled from "HostSideTestPartiallyAllowlisted.java"
+public interface android.hosttest.annotation.HostSideTestPartiallyAllowlisted extends java.lang.annotation.Annotation
+  minor version: 0
+  major version: 61
+  flags: (0x2601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT, ACC_ANNOTATION
+  this_class: #x                          // android/hosttest/annotation/HostSideTestPartiallyAllowlisted
+  super_class: #x                         // java/lang/Object
+  interfaces: 1, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
+}
+SourceFile: "HostSideTestPartiallyAllowlisted.java"
+RuntimeVisibleAnnotations:
+  x: #x(#x=[e#x.#x])
+    java.lang.annotation.Target(
+      value=[Ljava/lang/annotation/ElementType;.TYPE]
+    )
+  x: #x(#x=e#x.#x)
+    java.lang.annotation.Retention(
+      value=Ljava/lang/annotation/RetentionPolicy;.CLASS
+    )
 ## Class: android/hosttest/annotation/HostSideTestRedirect.class
   Compiled from "HostSideTestRedirect.java"
 public interface android.hosttest.annotation.HostSideTestRedirect extends java.lang.annotation.Annotation
@@ -2967,6 +2989,228 @@ SourceFile: "TinyFrameworkPackageRedirect.java"
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassKeep
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$NoAnnotations.class
+  Compiled from "TinyFrameworkPartiallyAllowlisted.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkPartiallyAllowlisted$NoAnnotations
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$NoAnnotations
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 3
+Constant pool:
+{
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkPartiallyAllowlisted$NoAnnotations();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$NoAnnotations;
+}
+SourceFile: "TinyFrameworkPartiallyAllowlisted.java"
+NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted
+InnerClasses:
+  public static #x= #x of #x;           // NoAnnotations=class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$NoAnnotations of class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartialWithWholeClass_bad.class
+  Compiled from "TinyFrameworkPartiallyAllowlisted.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkPartiallyAllowlisted$PartialWithWholeClass_bad
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartialWithWholeClass_bad
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 4
+Constant pool:
+{
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkPartiallyAllowlisted$PartialWithWholeClass_bad();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartialWithWholeClass_bad;
+}
+SourceFile: "TinyFrameworkPartiallyAllowlisted.java"
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestPartiallyAllowlisted
+  x: #x()
+    android.hosttest.annotation.HostSideTestWholeClassKeep
+NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted
+InnerClasses:
+  public static #x= #x of #x;           // PartialWithWholeClass_bad=class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartialWithWholeClass_bad of class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartiallyAllowlisted.class
+  Compiled from "TinyFrameworkPartiallyAllowlisted.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkPartiallyAllowlisted$PartiallyAllowlisted
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartiallyAllowlisted
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 3, attributes: 4
+Constant pool:
+{
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkPartiallyAllowlisted$PartiallyAllowlisted();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartiallyAllowlisted;
+
+  public static int foo1(int);
+    descriptor: (I)I
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=2, locals=1, args_size=1
+         x: iload_0
+         x: iconst_1
+         x: iadd
+         x: ireturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       4     0 value   I
+
+  public static int foo2(int);
+    descriptor: (I)I
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=2, locals=1, args_size=1
+         x: iload_0
+         x: iconst_2
+         x: iadd
+         x: ireturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       4     0 value   I
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestKeep
+}
+SourceFile: "TinyFrameworkPartiallyAllowlisted.java"
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestPartiallyAllowlisted
+  x: #x()
+    android.hosttest.annotation.HostSideTestKeep
+NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted
+InnerClasses:
+  public static #x= #x of #x;           // PartiallyAllowlisted=class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartiallyAllowlisted of class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartiallyAllowlistedWithoutAnnot_bad.class
+  Compiled from "TinyFrameworkPartiallyAllowlisted.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkPartiallyAllowlisted$PartiallyAllowlistedWithoutAnnot_bad
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartiallyAllowlistedWithoutAnnot_bad
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 3, attributes: 4
+Constant pool:
+{
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkPartiallyAllowlisted$PartiallyAllowlistedWithoutAnnot_bad();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartiallyAllowlistedWithoutAnnot_bad;
+
+  public static int foo1(int);
+    descriptor: (I)I
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=2, locals=1, args_size=1
+         x: iload_0
+         x: iconst_1
+         x: iadd
+         x: ireturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       4     0 value   I
+
+  public static int foo2(int);
+    descriptor: (I)I
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=2, locals=1, args_size=1
+         x: iload_0
+         x: iconst_2
+         x: iadd
+         x: ireturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       4     0 value   I
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestKeep
+}
+SourceFile: "TinyFrameworkPartiallyAllowlisted.java"
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestKeep
+NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted
+InnerClasses:
+  public static #x= #x of #x;           // PartiallyAllowlistedWithoutAnnot_bad=class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartiallyAllowlistedWithoutAnnot_bad of class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted.class
+  Compiled from "TinyFrameworkPartiallyAllowlisted.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkPartiallyAllowlisted
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 3
+Constant pool:
+{
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkPartiallyAllowlisted();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted;
+}
+SourceFile: "TinyFrameworkPartiallyAllowlisted.java"
+NestMembers:
+  com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$NoAnnotations
+  com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartiallyAllowlistedWithoutAnnot_bad
+  com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartialWithWholeClass_bad
+  com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartiallyAllowlisted
+InnerClasses:
+  public static #x= #x of #x;           // NoAnnotations=class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$NoAnnotations of class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted
+  public static #x= #x of #x;           // PartiallyAllowlistedWithoutAnnot_bad=class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartiallyAllowlistedWithoutAnnot_bad of class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted
+  public static #x= #x of #x;           // PartialWithWholeClass_bad=class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartialWithWholeClass_bad of class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted
+  public static #x= #x of #x;           // PartiallyAllowlisted=class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartiallyAllowlisted of class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkRenamedClassCaller.class
   Compiled from "TinyFrameworkRenamedClassCaller.java"
 public class com.android.hoststubgen.test.tinyframework.TinyFrameworkRenamedClassCaller

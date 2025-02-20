@@ -50,8 +50,10 @@ class android.net.UriCodec keepclass  # no-pta
 class android.telephony.PinResult keepclass  # no-pta
 
 # Just enough to support mocking, no further functionality
-class android.content.BroadcastReceiver keep  # no-pta
-    method <init> ()V keep
+class android.content.BroadcastReceiver allow-annotation
+    method <init> ()V allow-annotation
+
+# TODO: Convert the following policies to "allow-annotation".
 class android.content.Context keep  # no-pta
     method <init> ()V keep
     method getSystemService (Ljava/lang/Class;)Ljava/lang/Object; keep  # no-pta
