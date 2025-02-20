@@ -354,14 +354,20 @@ public abstract class BaseLockSettingsServiceTests {
 
     @After
     public void tearDown_baseServices() throws Exception {
-        mStorage.closeDatabase();
+        if (mStorage != null) {
+            mStorage.closeDatabase();
+        }
         File db = InstrumentationRegistry.getContext().getDatabasePath("locksettings.db");
         assertTrue(!db.exists() || db.delete());
 
-        File storageDir = mStorage.mStorageDir;
-        assertTrue(FileUtils.deleteContents(storageDir));
+        if (mStorage != null) {
+            File storageDir = mStorage.mStorageDir;
+            assertTrue(FileUtils.deleteContents(storageDir));
+        }
 
-        mPasswordSlotManager.cleanup();
+        if (mPasswordSlotManager != null) {
+            mPasswordSlotManager.cleanup();
+        }
     }
 
     protected void flushHandlerTasks() {
