@@ -16,6 +16,7 @@
 package com.android.hoststubgen.filters
 
 import com.android.hoststubgen.HostStubGenErrors
+import com.android.hoststubgen.HostStubGenInternalException
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.toHumanReadableClassName
 import com.android.hoststubgen.log
@@ -28,12 +29,30 @@ class SanitizationFilter(
     private val classes: ClassNodes,
     fallback: OutputFilter
 ) : DelegatingFilter(fallback) {
+    private fun validate(policy: FilterPolicyWithReason): FilterPolicyWithReason {
+        // "Internal" policies shouldn't be used in the "main" filter chain.
+        // They're for filter chains for other purposes.
+        if (policy.policy.isInternalPolicy) {
+            throw HostStubGenInternalException(
+                "Policy $policy must not be used in the \"real\" filter chain.")
+        }
+        return policy
+    }
+
+    override fun getPolicyForClass(className: String): FilterPolicyWithReason {
+        return validate(super.getPolicyForClass(className))
+    }
+
+    override fun getPolicyForField(className: String, fieldName: String): FilterPolicyWithReason {
+        return validate(super.getPolicyForField(className, fieldName))
+    }
+
     override fun getPolicyForMethod(
         className: String,
         methodName: String,
         descriptor: String
     ): FilterPolicyWithReason {
-        val policy = super.getPolicyForMethod(className, methodName, descriptor)
+        val policy = validate(super.getPolicyForMethod(className, methodName, descriptor))
         if (policy.policy == FilterPolicy.Redirect) {
             // Check whether the hosting class has a redirection class
             if (getRedirectionClass(className) == null) {

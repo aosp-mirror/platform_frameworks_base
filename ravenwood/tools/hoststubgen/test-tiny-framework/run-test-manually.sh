@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-source "${0%/*}"/../../common.sh
+set -e
+source "${0%/*}"/../common.sh
 
 # This scripts run the "tiny-framework" test, but does most stuff from the command line, using
 # the native java and javac commands.
@@ -49,7 +49,7 @@ tiny_test_classes=$out/tiny-test/classes/
 tiny_test_jar=$out/tiny-test.jar
 
 framework_compile_classpaths=(
-  $SOONG_INT/frameworks/base/tools/hoststubgen/hoststubgen/hoststubgen-annotations/android_common/javac/hoststubgen-annotations.jar
+  $SOONG_INT/frameworks/base/ravenwood/tools/hoststubgen/hoststubgen-annotations/android_common/javac/hoststubgen-annotations.jar
 )
 
 test_compile_classpaths=(
@@ -58,7 +58,7 @@ test_compile_classpaths=(
 )
 
 test_runtime_classpaths=(
-  $SOONG_INT/frameworks/base/tools/hoststubgen/hoststubgen/hoststubgen-helper-runtime/linux_glibc_common/javac/hoststubgen-helper-runtime.jar
+  $SOONG_INT/frameworks/base/ravenwood/tools/hoststubgen/hoststubgen-helper-runtime/linux_glibc_common/javac/hoststubgen-helper-runtime.jar
 )
 
 # This suite runs all tests in the JAR.
@@ -73,7 +73,7 @@ echo "# Building tiny-framework..."
 run $JAVAC \
     -cp $( \
         join : \
-        ${framework_compile_classpaths[@]} \
+        "${framework_compile_classpaths[@]}" \
         ) \
     -d $tiny_framework_classes \
     tiny-framework/src/**/*.java
@@ -83,7 +83,9 @@ run $JAR cvf $tiny_framework_jar \
 
 # Build stub/impl jars
 echo "# Generating the stub and impl jars..."
+# Run with HOSTSTUBGEN_OPTS="-Jagentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8700" to enable the debugger
 run $HOSTSTUBGEN \
+    $HOSTSTUBGEN_OPTS \
     @../hoststubgen-standard-options.txt \
     --in-jar $tiny_framework_jar \
     --out-jar $tiny_framework_host_jar \
@@ -91,8 +93,7 @@ run $HOSTSTUBGEN \
     --gen-keep-all-file out/tiny-framework_keep_all.txt \
     --gen-input-dump-file out/tiny-framework_dump.txt \
     --package-redirect com.unsupported:com.supported \
-    --annotation-allowed-classes-file annotation-allowed-classes-tiny-framework.txt \
-    $HOSTSTUBGEN_OPTS
+    --annotation-allowed-classes-file annotation-allowed-classes-tiny-framework.txt
 
 # Extract the jar files, so we can look into them.
 extract $tiny_framework_host_jar
@@ -127,4 +128,4 @@ run $JAVA \
         "${test_runtime_classpaths[@]}" \
         ) \
     org.junit.runner.JUnitCore \
-    ${test_classes[@]}
+    "${test_classes[@]}"
