@@ -57,4 +57,12 @@ public class VMRuntime {
     public int getTargetSdkVersion() {
         return RavenwoodRuntimeState.sTargetSdkLevel;
     }
+
+    /** Ignored on ravenwood. */
+    public void registerNativeAllocation(long bytes) {
+    }
+
+    /** Ignored on ravenwood. */
+    public void registerNativeFree(long bytes) {
+    }
 }

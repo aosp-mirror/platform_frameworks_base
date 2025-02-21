@@ -56,6 +56,9 @@ public class NativeAllocationRegistry {
         if (referent == null) {
             throw new IllegalArgumentException("referent is null");
         }
+        if (mFreeFunction == 0) {
+            return () -> {}; // do nothing
+        }
         if (nativePtr == 0) {
             throw new IllegalArgumentException("nativePtr is null");
         }
