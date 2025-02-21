@@ -17,8 +17,9 @@ android_test {
     // For access hidden connectivity methods in tests
     defaults: ["framework-connectivity-test-defaults"],
 
-    // TODO: b/374174952 Use 36 after Android B finalization
-    min_sdk_version: "35",
+    // Tethering module is released in R so this test needs to be installable
+    // on R
+    min_sdk_version: "30",
 
     srcs: [
         "java/**/*.java",
