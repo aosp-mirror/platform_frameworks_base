@@ -22,7 +22,9 @@ import com.android.hoststubgen.normalizeTextLine
 import java.io.File
 
 /**
- * General purpose filter for class names.
+ * General purpose class "selector", which returns a boolean for a given class name.
+ *
+ * (It's used to check if a class is in the "annotations allowed classes" allowlist.)
  */
 class ClassPredicate private constructor(
     private val defaultResult: Boolean,

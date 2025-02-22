@@ -7,6 +7,8 @@ public interface android.hosttest.annotation.HostSideTestClassLoadHook extends j
   this_class: #x                          // android/hosttest/annotation/HostSideTestClassLoadHook
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 1, attributes: 2
+Constant pool:
+{
   public abstract java.lang.String value();
     descriptor: ()Ljava/lang/String;
     flags: (0x0401) ACC_PUBLIC, ACC_ABSTRACT
@@ -35,6 +37,8 @@ public interface android.hosttest.annotation.HostSideTestKeep extends java.lang.
   this_class: #x                          // android/hosttest/annotation/HostSideTestKeep
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "HostSideTestKeep.java"
 RuntimeVisibleAnnotations:
@@ -43,6 +47,30 @@ RuntimeVisibleAnnotations:
   x: #x(#x=[e#x.#x,e#x.#x,e#x.#x,e#x.#x])
     java.lang.annotation.Target(
       value=[Ljava/lang/annotation/ElementType;.TYPE,Ljava/lang/annotation/ElementType;.FIELD,Ljava/lang/annotation/ElementType;.METHOD,Ljava/lang/annotation/ElementType;.CONSTRUCTOR]
+    )
+  x: #x(#x=e#x.#x)
+    java.lang.annotation.Retention(
+      value=Ljava/lang/annotation/RetentionPolicy;.CLASS
+    )
+## Class: android/hosttest/annotation/HostSideTestPartiallyAllowlisted.class
+  Compiled from "HostSideTestPartiallyAllowlisted.java"
+public interface android.hosttest.annotation.HostSideTestPartiallyAllowlisted extends java.lang.annotation.Annotation
+  minor version: 0
+  major version: 65
+  flags: (0x2601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT, ACC_ANNOTATION
+  this_class: #x                          // android/hosttest/annotation/HostSideTestPartiallyAllowlisted
+  super_class: #x                         // java/lang/Object
+  interfaces: 1, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
+}
+SourceFile: "HostSideTestPartiallyAllowlisted.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
+  x: #x(#x=[e#x.#x])
+    java.lang.annotation.Target(
+      value=[Ljava/lang/annotation/ElementType;.TYPE]
     )
   x: #x(#x=e#x.#x)
     java.lang.annotation.Retention(
@@ -57,6 +85,8 @@ public interface android.hosttest.annotation.HostSideTestRedirect extends java.l
   this_class: #x                          // android/hosttest/annotation/HostSideTestRedirect
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "HostSideTestRedirect.java"
 RuntimeVisibleAnnotations:
@@ -79,6 +109,8 @@ public interface android.hosttest.annotation.HostSideTestRedirectionClass extend
   this_class: #x                          // android/hosttest/annotation/HostSideTestRedirectionClass
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 1, attributes: 2
+Constant pool:
+{
   public abstract java.lang.String value();
     descriptor: ()Ljava/lang/String;
     flags: (0x0401) ACC_PUBLIC, ACC_ABSTRACT
@@ -107,6 +139,8 @@ public interface android.hosttest.annotation.HostSideTestRemove extends java.lan
   this_class: #x                          // android/hosttest/annotation/HostSideTestRemove
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "HostSideTestRemove.java"
 RuntimeVisibleAnnotations:
@@ -129,6 +163,8 @@ public interface android.hosttest.annotation.HostSideTestStaticInitializerKeep e
   this_class: #x                          // android/hosttest/annotation/HostSideTestStaticInitializerKeep
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "HostSideTestStaticInitializerKeep.java"
 RuntimeVisibleAnnotations:
@@ -151,6 +187,8 @@ public interface android.hosttest.annotation.HostSideTestSubstitute extends java
   this_class: #x                          // android/hosttest/annotation/HostSideTestSubstitute
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 1, attributes: 2
+Constant pool:
+{
   public abstract java.lang.String suffix();
     descriptor: ()Ljava/lang/String;
     flags: (0x0401) ACC_PUBLIC, ACC_ABSTRACT
@@ -179,6 +217,8 @@ public interface android.hosttest.annotation.HostSideTestThrow extends java.lang
   this_class: #x                          // android/hosttest/annotation/HostSideTestThrow
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "HostSideTestThrow.java"
 RuntimeVisibleAnnotations:
@@ -201,6 +241,8 @@ public interface android.hosttest.annotation.HostSideTestWholeClassKeep extends 
   this_class: #x                          // android/hosttest/annotation/HostSideTestWholeClassKeep
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "HostSideTestWholeClassKeep.java"
 RuntimeVisibleAnnotations:
@@ -223,6 +265,8 @@ public class com.android.hoststubgen.test.tinyframework.IPretendingAidl$Stub$Pro
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 2, attributes: 4
+Constant pool:
+{
   public com.android.hoststubgen.test.tinyframework.IPretendingAidl$Stub$Proxy();
     descriptor: ()V
     flags: (0x0001) ACC_PUBLIC
@@ -273,6 +317,8 @@ public class com.android.hoststubgen.test.tinyframework.IPretendingAidl$Stub
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 2, attributes: 4
+Constant pool:
+{
   public com.android.hoststubgen.test.tinyframework.IPretendingAidl$Stub();
     descriptor: ()V
     flags: (0x0001) ACC_PUBLIC
@@ -323,6 +369,8 @@ public interface com.android.hoststubgen.test.tinyframework.IPretendingAidl
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/IPretendingAidl
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 0, attributes: 4
+Constant pool:
+{
 }
 InnerClasses:
   public static #x= #x of #x;            // Stub=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub of class com/android/hoststubgen/test/tinyframework/IPretendingAidl
@@ -343,6 +391,8 @@ public class com.android.hoststubgen.test.tinyframework.R$Nested
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/R$Nested
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 1, methods: 2, attributes: 4
+Constant pool:
+{
   public static int[] ARRAY;
     descriptor: [I
     flags: (0x0009) ACC_PUBLIC, ACC_STATIC
@@ -400,6 +450,8 @@ public class com.android.hoststubgen.test.tinyframework.R
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/R
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 1, attributes: 4
+Constant pool:
+{
   public com.android.hoststubgen.test.tinyframework.R();
     descriptor: ()V
     flags: (0x0001) ACC_PUBLIC
@@ -433,6 +485,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkAnnotations
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkAnnotations
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 1, methods: 7, attributes: 3
+Constant pool:
+{
   public int keep;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
@@ -591,6 +645,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHo
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkClassLoadHook
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 1, methods: 3, attributes: 3
+Constant pool:
+{
   public static final java.util.Set<java.lang.Class<?>> sLoadedClasses;
     descriptor: Ljava/util/Set;
     flags: (0x0019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL
@@ -668,6 +724,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWideAn
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkClassWideAnnotations
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 1, methods: 4, attributes: 3
+Constant pool:
+{
   public int keep;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
@@ -768,6 +826,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithIn
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkClassWithInitializerDefault
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 2, methods: 0, attributes: 3
+Constant pool:
+{
   public static boolean sInitialized;
     descriptor: Z
     flags: (0x0009) ACC_PUBLIC, ACC_STATIC
@@ -805,6 +865,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithIn
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkClassWithInitializerStub
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 2, methods: 1, attributes: 3
+Constant pool:
+{
   public static boolean sInitialized;
     descriptor: Z
     flags: (0x0009) ACC_PUBLIC, ACC_STATIC
@@ -867,6 +929,8 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumC
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex
   super_class: #x                         // java/lang/Enum
   interfaces: 0, fields: 6, methods: 7, attributes: 4
+Constant pool:
+{
   public static final com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex RED;
     descriptor: Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;
     flags: (0x4019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL, ACC_ENUM
@@ -1112,6 +1176,8 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumS
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple
   super_class: #x                         // java/lang/Enum
   interfaces: 0, fields: 3, methods: 5, attributes: 4
+Constant pool:
+{
   public static final com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple CAT;
     descriptor: Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;
     flags: (0x4019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL, ACC_ENUM
@@ -1260,6 +1326,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkExceptionTe
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkExceptionTester
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 2, attributes: 3
+Constant pool:
+{
   public com.android.hoststubgen.test.tinyframework.TinyFrameworkExceptionTester();
     descriptor: ()V
     flags: (0x0001) ACC_PUBLIC
@@ -1323,6 +1391,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkForTextPoli
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 1, methods: 15, attributes: 2
+Constant pool:
+{
   public int stub;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
@@ -1562,6 +1632,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas$Nes
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 2, methods: 8, attributes: 6
+Constant pool:
+{
   public final java.util.function.Supplier<java.lang.Integer> mSupplier;
     descriptor: Ljava/util/function/Supplier;
     flags: (0x0011) ACC_PUBLIC, ACC_FINAL
@@ -1749,6 +1821,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 2, methods: 8, attributes: 6
+Constant pool:
+{
   public final java.util.function.Supplier<java.lang.Integer> mSupplier;
     descriptor: Ljava/util/function/Supplier;
     flags: (0x0011) ACC_PUBLIC, ACC_FINAL
@@ -1937,6 +2011,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallR
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ReplaceTo
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 3, attributes: 4
+Constant pool:
+{
   public com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace$ReplaceTo();
     descriptor: ()V
     flags: (0x0001) ACC_PUBLIC
@@ -2006,6 +2082,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallR
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 4, attributes: 6
+Constant pool:
+{
   public com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace();
     descriptor: ()V
     flags: (0x0001) ACC_PUBLIC
@@ -2115,6 +2193,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNative
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 1, methods: 14, attributes: 3
+Constant pool:
+{
   int value;
     descriptor: I
     flags: (0x0000)
@@ -2373,6 +2453,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative_host
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNative_host
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 7, attributes: 3
+Constant pool:
+{
   public com.android.hoststubgen.test.tinyframework.TinyFrameworkNative_host();
     descriptor: ()V
     flags: (0x0001) ACC_PUBLIC
@@ -2503,6 +2585,8 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$1 ex
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$1
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 3, attributes: 6
+Constant pool:
+{
   com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$1(com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses);
     descriptor: (Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses;)V
     flags: (0x0000)
@@ -2573,6 +2657,8 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$2 ex
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$2
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 3, attributes: 6
+Constant pool:
+{
   com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$2();
     descriptor: ()V
     flags: (0x0000)
@@ -2639,6 +2725,8 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$3 ex
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$3
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 3, attributes: 6
+Constant pool:
+{
   com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$3(com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses);
     descriptor: (Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses;)V
     flags: (0x0000)
@@ -2709,6 +2797,8 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$4 ex
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$4
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 3, attributes: 6
+Constant pool:
+{
   com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$4();
     descriptor: ()V
     flags: (0x0000)
@@ -2775,6 +2865,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$BaseClass
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 1, methods: 1, attributes: 4
+Constant pool:
+{
   public int value;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
@@ -2818,6 +2910,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$InnerClass
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 1, methods: 1, attributes: 4
+Constant pool:
+{
   public int value;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
@@ -2864,6 +2958,8 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$Stat
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass$1
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 3, attributes: 6
+Constant pool:
+{
   com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$StaticNestedClass$1();
     descriptor: ()V
     flags: (0x0000)
@@ -2931,6 +3027,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass$Double$NestedClass
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 1, methods: 1, attributes: 4
+Constant pool:
+{
   public int value;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
@@ -2974,6 +3072,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 1, methods: 2, attributes: 4
+Constant pool:
+{
   public int value;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
@@ -3033,6 +3133,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$SubClass
   super_class: #x                         // com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$BaseClass
   interfaces: 0, fields: 0, methods: 1, attributes: 4
+Constant pool:
+{
   public com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$SubClass(int);
     descriptor: (I)V
     flags: (0x0001) ACC_PUBLIC
@@ -3068,6 +3170,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 2, methods: 4, attributes: 5
+Constant pool:
+{
   public final java.util.function.Supplier<java.lang.Integer> mSupplier;
     descriptor: Ljava/util/function/Supplier;
     flags: (0x0011) ACC_PUBLIC, ACC_FINAL
@@ -3193,6 +3297,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkPackageRedi
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkPackageRedirect
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 2, attributes: 3
+Constant pool:
+{
   public com.android.hoststubgen.test.tinyframework.TinyFrameworkPackageRedirect();
     descriptor: ()V
     flags: (0x0001) ACC_PUBLIC
@@ -3235,6 +3341,49 @@ RuntimeVisibleAnnotations:
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassKeep
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartiallyAllowlisted.class
+  Compiled from "TinyFrameworkPartiallyAllowlisted.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkPartiallyAllowlisted$PartiallyAllowlisted
+  minor version: 0
+  major version: 65
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartiallyAllowlisted
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 5
+Constant pool:
+{
+  public static int foo2(int);
+    descriptor: (I)I
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=2, locals=1, args_size=1
+         x: iload_0
+         x: iconst_2
+         x: iadd
+         x: ireturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       4     0 value   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestKeep
+}
+InnerClasses:
+  public static #x= #x of #x;            // PartiallyAllowlisted=class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted$PartiallyAllowlisted of class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted
+SourceFile: "TinyFrameworkPartiallyAllowlisted.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestPartiallyAllowlisted
+  x: #x()
+    android.hosttest.annotation.HostSideTestKeep
+NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkPartiallyAllowlisted
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkRenamedClassCaller.class
   Compiled from "TinyFrameworkRenamedClassCaller.java"
 public class com.android.hoststubgen.test.tinyframework.TinyFrameworkRenamedClassCaller
@@ -3244,6 +3393,8 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkRenamedClas
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkRenamedClassCaller
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 2, attributes: 3
+Constant pool:
+{
   public com.android.hoststubgen.test.tinyframework.TinyFrameworkRenamedClassCaller();
     descriptor: ()V
     flags: (0x0001) ACC_PUBLIC
@@ -3295,6 +3446,8 @@ public class com.android.hoststubgen.test.tinyframework.packagetest.A
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/packagetest/A
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "A.java"
 RuntimeVisibleAnnotations:
@@ -3309,6 +3462,8 @@ public class com.android.hoststubgen.test.tinyframework.packagetest.sub.A
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/packagetest/sub/A
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "A.java"
 RuntimeVisibleAnnotations:
@@ -3323,6 +3478,8 @@ public class com.android.hoststubgen.test.tinyframework.subclasstest.C1
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/C1
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "C1.java"
 RuntimeVisibleAnnotations:
@@ -3337,6 +3494,8 @@ public class com.android.hoststubgen.test.tinyframework.subclasstest.C2 extends 
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/C2
   super_class: #x                         // com/android/hoststubgen/test/tinyframework/subclasstest/C1
   interfaces: 0, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "C2.java"
 RuntimeVisibleAnnotations:
@@ -3351,6 +3510,8 @@ public class com.android.hoststubgen.test.tinyframework.subclasstest.C3 extends 
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/C3
   super_class: #x                         // com/android/hoststubgen/test/tinyframework/subclasstest/C2
   interfaces: 0, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "C3.java"
 RuntimeVisibleAnnotations:
@@ -3365,6 +3526,8 @@ public class com.android.hoststubgen.test.tinyframework.subclasstest.CA
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/CA
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "CA.java"
 RuntimeVisibleAnnotations:
@@ -3379,6 +3542,8 @@ public class com.android.hoststubgen.test.tinyframework.subclasstest.CB
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/CB
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "CB.java"
 RuntimeVisibleAnnotations:
@@ -3393,6 +3558,8 @@ public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_C1 ex
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_C1
   super_class: #x                         // com/android/hoststubgen/test/tinyframework/subclasstest/C1
   interfaces: 0, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "Class_C1.java"
 RuntimeVisibleAnnotations:
@@ -3407,6 +3574,8 @@ public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_C2 ex
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_C2
   super_class: #x                         // com/android/hoststubgen/test/tinyframework/subclasstest/C2
   interfaces: 0, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "Class_C2.java"
 RuntimeVisibleAnnotations:
@@ -3421,6 +3590,8 @@ public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_C3 ex
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_C3
   super_class: #x                         // com/android/hoststubgen/test/tinyframework/subclasstest/C3
   interfaces: 0, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "Class_C3.java"
 RuntimeVisibleAnnotations:
@@ -3435,6 +3606,8 @@ public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_I1 im
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_I1
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "Class_I1.java"
 RuntimeVisibleAnnotations:
@@ -3449,6 +3622,8 @@ public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_I1_IA
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_I1_IA
   super_class: #x                         // java/lang/Object
   interfaces: 2, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "Class_I1_IA.java"
 RuntimeVisibleAnnotations:
@@ -3463,6 +3638,8 @@ public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_I2 im
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_I2
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "Class_I2.java"
 RuntimeVisibleAnnotations:
@@ -3477,6 +3654,8 @@ public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_I3 im
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_I3
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "Class_I3.java"
 RuntimeVisibleAnnotations:
@@ -3491,6 +3670,8 @@ public interface com.android.hoststubgen.test.tinyframework.subclasstest.I1
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/I1
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "I1.java"
 RuntimeVisibleAnnotations:
@@ -3505,6 +3686,8 @@ public interface com.android.hoststubgen.test.tinyframework.subclasstest.I2 exte
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/I2
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "I2.java"
 RuntimeVisibleAnnotations:
@@ -3519,6 +3702,8 @@ public interface com.android.hoststubgen.test.tinyframework.subclasstest.I3 exte
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/I3
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "I3.java"
 RuntimeVisibleAnnotations:
@@ -3533,6 +3718,8 @@ public interface com.android.hoststubgen.test.tinyframework.subclasstest.IA
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/IA
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "IA.java"
 RuntimeVisibleAnnotations:
@@ -3547,6 +3734,8 @@ public interface com.android.hoststubgen.test.tinyframework.subclasstest.IB
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/IB
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 0, attributes: 2
+Constant pool:
+{
 }
 SourceFile: "IB.java"
 RuntimeVisibleAnnotations:
@@ -3561,6 +3750,8 @@ public class com.supported.UnsupportedClass
   this_class: #x                          // com/supported/UnsupportedClass
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 1, methods: 2, attributes: 3
+Constant pool:
+{
   private final int mValue;
     descriptor: I
     flags: (0x0012) ACC_PRIVATE, ACC_FINAL
@@ -3620,6 +3811,8 @@ public class com.unsupported.UnsupportedClass
   this_class: #x                          // com/unsupported/UnsupportedClass
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 2, attributes: 3
+Constant pool:
+{
   public com.unsupported.UnsupportedClass(int);
     descriptor: (I)V
     flags: (0x0001) ACC_PUBLIC
@@ -3675,6 +3868,8 @@ public class rename_prefix.com.android.hoststubgen.test.tinyframework.TinyFramew
   this_class: #x                          // rename_prefix/com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 1, methods: 2, attributes: 3
+Constant pool:
+{
   private final int mValue;
     descriptor: I
     flags: (0x0012) ACC_PRIVATE, ACC_FINAL
