@@ -230,9 +230,15 @@ public class RecoverableKeyStoreManagerTest {
 
     @After
     public void tearDown() {
-        mRemoteLockscreenValidationSessionStorage.finishSession(mUserId);
-        mRecoverableKeyStoreDb.close();
-        mDatabaseFile.delete();
+        if (mRemoteLockscreenValidationSessionStorage != null) {
+            mRemoteLockscreenValidationSessionStorage.finishSession(mUserId);
+        }
+        if (mRecoverableKeyStoreDb != null) {
+            mRecoverableKeyStoreDb.close();
+        }
+        if (mDatabaseFile != null) {
+            mDatabaseFile.delete();
+        }
     }
 
     @Test

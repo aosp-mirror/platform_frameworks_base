@@ -24,3 +24,14 @@ java_binary_host {
     ],
     visibility: ["//visibility:public"],
 }
+
+java_test_host {
+    name: "ravenhelpertest",
+    srcs: ["test/**/*.kt"],
+    static_libs: [
+        "ravenhelper",
+        "truth",
+    ],
+    test_suites: ["general-tests"],
+    visibility: ["//visibility:private"],
+}

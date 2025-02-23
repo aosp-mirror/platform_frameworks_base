@@ -42,16 +42,28 @@ import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnManager;
 import android.net.vcn.VcnUnderlyingNetworkTemplate;
 import android.net.vcn.VcnWifiUnderlyingNetworkTemplate;
+import android.os.Build;
 import android.os.PersistableBundle;
 import android.util.ArraySet;
 
+import androidx.test.filters.SmallTest;
+
+import com.android.testutils.DevSdkIgnoreRule;
+import com.android.testutils.DevSdkIgnoreRunner;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+// TODO: b/374174952 After B finalization, use Sdk36ModuleController to ensure VCN tests only run on
+// Android B/B+
+@RunWith(DevSdkIgnoreRunner.class)
+@DevSdkIgnoreRule.IgnoreUpTo(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@SmallTest
 public class NetworkPriorityClassifierTest extends NetworkEvaluationTestBase {
     private UnderlyingNetworkRecord mWifiNetworkRecord;
     private UnderlyingNetworkRecord mCellNetworkRecord;

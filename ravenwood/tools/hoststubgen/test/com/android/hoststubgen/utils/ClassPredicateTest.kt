@@ -20,22 +20,22 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.fail
 import org.junit.Test
 
-class ClassFilterTest {
+class ClassPredicateTest {
     @Test
     fun testDefaultTrue() {
-        val f = ClassFilter.newNullFilter(true)
+        val f = ClassPredicate.newConstantPredicate(true)
         assertThat(f.matches("a/b/c")).isEqualTo(true)
     }
 
     @Test
     fun testDefaultFalse() {
-        val f = ClassFilter.newNullFilter(false)
+        val f = ClassPredicate.newConstantPredicate(false)
         assertThat(f.matches("a/b/c")).isEqualTo(false)
     }
 
     @Test
     fun testComplex1() {
-        val f = ClassFilter.buildFromString("""
+        val f = ClassPredicate.buildFromString("""
             # ** this is a comment **
             a.b.c       # allow
             !a.b.d      # disallow
@@ -57,7 +57,7 @@ class ClassFilterTest {
 
     @Test
     fun testComplex2() {
-        val f = ClassFilter.buildFromString("""
+        val f = ClassPredicate.buildFromString("""
             a.b.c       # allow
             !a.*        # disallow everything else in package "a".
             !d.e.f      # disallow d.e.f.
@@ -75,7 +75,7 @@ class ClassFilterTest {
 
     @Test
     fun testNestedClass() {
-        val f = ClassFilter.buildFromString("a.b.c\nm.n.o\$p\n", false, "X")
+        val f = ClassPredicate.buildFromString("a.b.c\nm.n.o\$p\n", false, "X")
         assertThat(f.matches("a/b/c")).isEqualTo(true)
         assertThat(f.matches("a/b/c\$d")).isEqualTo(true)
         assertThat(f.matches("a/b/c\$d\$e")).isEqualTo(true)
@@ -88,7 +88,7 @@ class ClassFilterTest {
     @Test
     fun testBadFilter1() {
         try {
-            ClassFilter.buildFromString("""
+            ClassPredicate.buildFromString("""
                 a*
                 """.trimIndent(), true, "FILENAME")
             fail("ParseException didn't happen")
@@ -101,7 +101,7 @@ class ClassFilterTest {
 
     @Test
     fun testSuffix() {
-        val f = ClassFilter.buildFromString("""
+        val f = ClassPredicate.buildFromString("""
             *.Abc       # allow
             !*          # Disallow by default
             """.trimIndent(), true, "X")

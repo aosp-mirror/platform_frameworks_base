@@ -31,7 +31,7 @@ import com.android.hoststubgen.asm.toHumanReadableClassName
 import com.android.hoststubgen.asm.toHumanReadableMethodName
 import com.android.hoststubgen.asm.toJvmClassName
 import com.android.hoststubgen.log
-import com.android.hoststubgen.utils.ClassFilter
+import com.android.hoststubgen.utils.ClassPredicate
 import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.ClassNode
 
@@ -54,7 +54,7 @@ class AnnotationBasedFilter(
     redirectionClassAnnotations_: Set<String>,
     classLoadHookAnnotations_: Set<String>,
     keepStaticInitializerAnnotations_: Set<String>,
-    private val annotationAllowedClassesFilter: ClassFilter,
+    private val annotationAllowedClassesFilter: ClassPredicate,
     fallback: OutputFilter,
 ) : DelegatingFilter(fallback) {
     private val keepAnnotations = convertToInternalNames(keepAnnotations_)

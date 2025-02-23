@@ -18,6 +18,7 @@ package com.android.hoststubgen.hosthelper;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 
 /**
  * Utilities used in the host side test environment.
@@ -36,9 +37,14 @@ public class HostTestUtils {
 
     public static final String CLASS_INTERNAL_NAME = getInternalName(HostTestUtils.class);
 
+    /** If true, we skip all method call hooks */
+    private static final boolean SKIP_METHOD_CALL_HOOK = "1".equals(System.getenv(
+            "HOSTTEST_SKIP_METHOD_CALL_HOOK"));
+
     /** If true, we won't print method call log. */
-    private static final boolean SKIP_METHOD_LOG = "1".equals(System.getenv(
-            "HOSTTEST_SKIP_METHOD_LOG"));
+    private static final boolean SKIP_METHOD_LOG =
+            "1".equals(System.getenv("HOSTTEST_SKIP_METHOD_LOG"))
+            || "1".equals(System.getenv("RAVENWOOD_NO_METHOD_LOG"));
 
     /** If true, we won't print class load log. */
     private static final boolean SKIP_CLASS_LOG = "1".equals(System.getenv(
@@ -65,6 +71,9 @@ public class HostTestUtils {
                         + "consider using Mockito; more details at go/ravenwood-docs");
     }
 
+    private static final Class<?>[] sMethodHookArgTypes =
+            { Class.class, String.class, String.class};
+
     /**
      * Trampoline method for method-call-hook.
      */
@@ -74,16 +83,22 @@ public class HostTestUtils {
             String methodDescriptor,
             String callbackMethod
     ) {
-        callStaticMethodByName(callbackMethod, "method call hook", methodClass,
-                methodName, methodDescriptor);
+        if (SKIP_METHOD_CALL_HOOK) {
+            return;
+        }
+        callStaticMethodByName(callbackMethod, "method call hook", sMethodHookArgTypes,
+                methodClass, methodName, methodDescriptor);
     }
 
     /**
+     * Simple implementation of method call hook, which just prints the information of the
+     * method. This is just for basic testing. We don't use it in Ravenwood, because this would
+     * be way too noisy as it prints every single method, even trivial ones. (iterator methods,
+     * etc..)
+     *
      * I can be used as
      * {@code --default-method-call-hook
      * com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall}.
-     *
-     * It logs every single methods called.
      */
     public static void logMethodCall(
             Class<?> methodClass,
@@ -96,6 +111,8 @@ public class HostTestUtils {
         logPrintStream.println("# method called: " + methodClass.getCanonicalName() + "."
                 + methodName + methodDescriptor);
     }
+
+    private static final Class<?>[] sClassLoadHookArgTypes = { Class.class };
 
     /**
      * Called when any top level class (not nested classes) in the impl jar is loaded.
@@ -111,11 +128,12 @@ public class HostTestUtils {
         logPrintStream.println("! Class loaded: " + loadedClass.getCanonicalName()
                 + " calling hook " + callbackMethod);
 
-        callStaticMethodByName(callbackMethod, "class load hook", loadedClass);
+        callStaticMethodByName(
+                callbackMethod, "class load hook", sClassLoadHookArgTypes, loadedClass);
     }
 
     private static void callStaticMethodByName(String classAndMethodName,
-            String description, Object... args) {
+            String description, Class<?>[] argTypes, Object... args) {
         // Forward the call to callbackMethod.
         final int lastPeriod = classAndMethodName.lastIndexOf(".");
 
@@ -145,19 +163,14 @@ public class HostTestUtils {
                     className));
         }
 
-        Class<?>[] argTypes = new Class[args.length];
-        for (int i = 0; i < args.length; i++) {
-            argTypes[i] = args[i].getClass();
-        }
-
         Method method = null;
         try {
             method = clazz.getMethod(methodName, argTypes);
         } catch (Exception e) {
             throw new HostTestException(String.format(
                     "Unable to find %s: class %s doesn't have method %s"
-                            + " (method must take exactly one parameter of type Class,"
-                            + " and public static)",
+                    + " Method must be public static, and arg types must be: "
+                    + Arrays.toString(argTypes),
                     description, className, methodName), e);
         }
         if (!(Modifier.isPublic(method.getModifiers())
