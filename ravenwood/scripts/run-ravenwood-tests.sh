@@ -66,7 +66,7 @@ esac
 done
 shift $(($OPTIND - 1))
 
-all_tests=(hoststubgentest tiny-framework-dump-test hoststubgen-invoke-test ravenwood-stats-checker)
+all_tests=(hoststubgentest tiny-framework-dump-test hoststubgen-invoke-test ravenwood-stats-checker ravenhelpertest)
 all_tests+=( $(${0%/*}/list-ravenwood-tests.sh) )
 
 filter() {

@@ -3866,7 +3866,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (mTmpWindow == null) {
             ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "findFocusedWindow: No focusable windows, display=%d",
                     getDisplayId());
-            return null;
         }
         return mTmpWindow;
     }

@@ -266,16 +266,24 @@ class NativeCommandBuffer {
   }
   // Picky version of atoi(). No sign or unexpected characters allowed. Return -1 on failure.
   static int digitsVal(char* start, char* end) {
+    constexpr int vmax = std::numeric_limits<int>::max();
     int result = 0;
-    if (end - start > 6) {
-      return -1;
-    }
     for (char* dp = start; dp < end; ++dp) {
       if (*dp < '0' || *dp > '9') {
-        ALOGW("Argument failed integer format check");
+        ALOGW("Argument contains non-integer characters");
         return -1;
       }
-      result = 10 * result + (*dp - '0');
+      int digit = *dp - '0';
+      if (result > vmax / 10) {
+        ALOGW("Argument exceeds int limit");
+        return -1;
+      }
+      result *= 10;
+      if (result > vmax - digit) {
+        ALOGW("Argument exceeds int limit");
+        return -1;
+      }
+      result += digit;
     }
     return result;
   }

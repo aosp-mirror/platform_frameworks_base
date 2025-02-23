@@ -58,12 +58,15 @@ import android.net.vcn.VcnCellUnderlyingNetworkTemplate;
 import android.net.vcn.VcnCellUnderlyingNetworkTemplateTest;
 import android.net.vcn.VcnGatewayConnectionConfigTest;
 import android.net.vcn.VcnUnderlyingNetworkTemplate;
+import android.os.Build;
 import android.os.ParcelUuid;
 import android.os.test.TestLooper;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyManager;
 import android.util.ArraySet;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.VcnContext;
@@ -73,9 +76,12 @@ import com.android.server.vcn.routeselection.UnderlyingNetworkController.Network
 import com.android.server.vcn.routeselection.UnderlyingNetworkController.UnderlyingNetworkControllerCallback;
 import com.android.server.vcn.routeselection.UnderlyingNetworkController.UnderlyingNetworkListener;
 import com.android.server.vcn.routeselection.UnderlyingNetworkEvaluator.NetworkEvaluatorCallback;
+import com.android.testutils.DevSdkIgnoreRule;
+import com.android.testutils.DevSdkIgnoreRunner;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -89,6 +95,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+// TODO: b/374174952 After B finalization, use Sdk36ModuleController to ensure VCN tests only run on
+// Android B/B+
+@RunWith(DevSdkIgnoreRunner.class)
+@DevSdkIgnoreRule.IgnoreUpTo(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@SmallTest
 public class UnderlyingNetworkControllerTest {
     private static final ParcelUuid SUB_GROUP = new ParcelUuid(new UUID(0, 0));
     private static final int INITIAL_SUB_ID_1 = 1;
