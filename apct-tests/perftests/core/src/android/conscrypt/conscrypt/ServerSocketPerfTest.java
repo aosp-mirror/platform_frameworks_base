@@ -102,15 +102,12 @@ public final class ServerSocketPerfTest {
         final List<Object[]> params = new ArrayList<>();
         for (EndpointFactory endpointFactory : EndpointFactory.values()) {
             for (ChannelType channelType : ChannelType.values()) {
-                params.add(new Object[] {new Config(endpointFactory,
-                    endpointFactory, 64,
-                    "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", channelType)});
-                params.add(new Object[] {new Config(endpointFactory,
-                    endpointFactory, 512,
-                    "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", channelType)});
-                params.add(new Object[] {new Config(endpointFactory,
-                    endpointFactory, 4096,
-                    "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", channelType)});
+                for (int messageSize : ConscryptParams.messageSizes) {
+                    for (String cipher : ConscryptParams.ciphers) {
+                        params.add(new Object[] {new Config(endpointFactory,
+                            endpointFactory, messageSize, cipher, channelType)});
+                    }
+                }
             }
         }
         return params;
