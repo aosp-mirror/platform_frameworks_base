@@ -24,7 +24,6 @@ import com.android.internal.logging.InstanceId
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.CoreStartable
-import com.android.systemui.Dumpable
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
@@ -55,7 +54,7 @@ constructor(
     private val logger: MediaTttSenderLogger,
     private val mediaTttFlags: MediaTttFlags,
     private val uiEventLogger: MediaTttSenderUiEventLogger,
-) : CoreStartable, Dumpable {
+) : CoreStartable {
 
     // Since the media transfer display is similar to a heads-up notification, use the same timeout.
     private val defaultTimeout = context.resources.getInteger(R.integer.heads_up_notification_decay)
