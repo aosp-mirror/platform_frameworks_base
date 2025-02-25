@@ -986,7 +986,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
                     void handleHdrSdrNitsChanged(float displayNits, float sdrNits) {
                         final float newHdrSdrRatio;
-                        if (displayNits != INVALID_NITS && sdrNits != INVALID_NITS) {
+                        if (displayNits != INVALID_NITS && sdrNits != INVALID_NITS
+                            && (mBacklightAdapter.mUseSurfaceControlBrightness ||
+                                mBacklightAdapter.mForceSurfaceControl)) {
                             // Ensure the ratio stays >= 1.0f as values below that are nonsensical
                             newHdrSdrRatio = Math.max(1.f, displayNits / sdrNits);
                         } else {
