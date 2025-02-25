@@ -374,7 +374,7 @@ public class AnimationSet extends Animation {
             final Animation a = mAnimations.get(i);
 
             temp.clear();
-            a.getTransformationAt(interpolatedTime, t);
+            a.getTransformationAt(interpolatedTime, temp);
             t.compose(temp);
         }
     }
