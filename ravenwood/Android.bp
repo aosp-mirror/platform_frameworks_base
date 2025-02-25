@@ -121,6 +121,7 @@ java_library {
     name: "ravenwood-helper-framework-runtime",
     srcs: [
         "runtime-helper-src/framework/**/*.java",
+        ":framework-graphics-srcs",
     ],
     static_libs: [
         "ravenwood-runtime-common",
@@ -278,6 +279,7 @@ cc_library_host_shared {
 cc_library_host_shared {
     name: "libravenwood_runtime",
     defaults: ["ravenwood_jni_defaults"],
+    header_libs: ["libicuuc_headers"],
     srcs: [
         "runtime-jni/ravenwood_runtime.cpp",
         "runtime-jni/ravenwood_os_constants.cpp",
@@ -369,6 +371,13 @@ platform_compat_config {
     name: "ravenwood-services.core-platform-compat-config",
     src: ":services.core-for-host",
     include_in_merged_xml: false,
+    visibility: ["//visibility:private"],
+}
+
+java_library {
+    name: "ext-ravenwood",
+    installable: false,
+    static_libs: ["ext"],
     visibility: ["//visibility:private"],
 }
 
@@ -637,6 +646,7 @@ android_ravenwood_libgroup {
     libs: [
         "100-framework-minus-apex.ravenwood",
         "200-kxml2-android",
+        "ext-ravenwood",
 
         "ravenwood-runtime-common-ravenwood",
 
@@ -660,6 +670,9 @@ android_ravenwood_libgroup {
 
         // StatsD
         "framework-statsd.ravenwood",
+
+        // Graphics
+        "framework-graphics.ravenwood",
 
         // Provide runtime versions of utils linked in below
         "junit",
