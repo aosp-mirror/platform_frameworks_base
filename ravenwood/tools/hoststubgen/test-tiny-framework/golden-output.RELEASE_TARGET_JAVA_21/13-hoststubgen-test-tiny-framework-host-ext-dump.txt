@@ -4241,7 +4241,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkRenamedClas
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkRenamedClassCaller
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 0, methods: 3, attributes: 3
+  interfaces: 0, fields: 0, methods: 4, attributes: 3
 Constant pool:
 {
   private static {};
@@ -4295,6 +4295,30 @@ Constant pool:
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11      12     0 value   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
+
+  public static int bar(int);
+    descriptor: (I)I
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=4, locals=1, args_size=1
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkRenamedClassCaller
+         x: ldc           #x                 // String bar
+         x: ldc           #x                 // String (I)I
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: iload_0
+        x: invokestatic  #x                 // Method rename_prefix/com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed.getArray:(I)[Lrename_prefix/com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed;
+        x: iconst_0
+        x: aaload
+        x: invokevirtual #x                 // Method rename_prefix/com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed.getValue:()I
+        x: ireturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+           11      10     0 value   I
     RuntimeVisibleAnnotations:
       x: #x()
         com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
@@ -4947,7 +4971,7 @@ public class rename_prefix.com.android.hoststubgen.test.tinyframework.TinyFramew
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                          // rename_prefix/com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 1, methods: 3, attributes: 3
+  interfaces: 0, fields: 1, methods: 4, attributes: 3
 Constant pool:
 {
   private final int mValue;
@@ -4962,8 +4986,8 @@ Constant pool:
     flags: (0x000a) ACC_PRIVATE, ACC_STATIC
     Code:
       stack=2, locals=0, args_size=0
-         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed
-         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+         x: ldc           #x                  // class rename_prefix/com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed
+         x: ldc           #x                  // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
          x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
          x: return
 
@@ -4972,7 +4996,7 @@ Constant pool:
     flags: (0x0001) ACC_PUBLIC
     Code:
       stack=4, locals=2, args_size=2
-         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed
+         x: ldc           #x                  // class rename_prefix/com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed
          x: ldc           #x                 // String <init>
          x: ldc           #x                 // String (I)V
          x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
@@ -4986,7 +5010,7 @@ Constant pool:
       LineNumberTable:
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
-           11      10     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed;
+           11      10     0  this   Lrename_prefix/com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed;
            11      10     1 value   I
     RuntimeVisibleAnnotations:
       x: #x()
@@ -4997,7 +5021,7 @@ Constant pool:
     flags: (0x0001) ACC_PUBLIC
     Code:
       stack=4, locals=1, args_size=1
-         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed
+         x: ldc           #x                  // class rename_prefix/com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed
          x: ldc           #x                 // String getValue
          x: ldc           #x                 // String ()I
          x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
@@ -5008,7 +5032,35 @@ Constant pool:
       LineNumberTable:
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
-           11       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed;
+           11       5     0  this   Lrename_prefix/com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
+
+  public static rename_prefix.com.android.hoststubgen.test.tinyframework.TinyFrameworkToBeRenamed[] getArray(int);
+    descriptor: (I)[Lrename_prefix/com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed;
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=6, locals=1, args_size=1
+         x: ldc           #x                  // class rename_prefix/com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed
+         x: ldc           #x                 // String getArray
+         x: ldc           #x                 // String (I)[Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed;
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: iconst_1
+        x: anewarray     #x                  // class rename_prefix/com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed
+        x: dup
+        x: iconst_0
+        x: new           #x                  // class rename_prefix/com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed
+        x: dup
+        x: iload_0
+        x: invokespecial #x                 // Method "<init>":(I)V
+        x: aastore
+        x: areturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+           11      16     0 value   I
     RuntimeVisibleAnnotations:
       x: #x()
         com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
