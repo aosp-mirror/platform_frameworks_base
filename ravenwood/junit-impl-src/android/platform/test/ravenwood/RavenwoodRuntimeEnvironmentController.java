@@ -43,6 +43,7 @@ import android.app.UiAutomation;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.icu.util.ULocale;
 import android.os.Binder;
 import android.os.Build;
@@ -279,6 +280,13 @@ public class RavenwoodRuntimeEnvironmentController {
         // Do the basic set up for the android sysprops.
         RavenwoodSystemProperties.initialize();
 
+        // Set ICU data file
+        String icuData = RavenwoodCommonUtils.getRavenwoodRuntimePath()
+                + "ravenwood-data/"
+                + RavenwoodRuntimeNative.getIcuDataName()
+                + ".dat";
+        RavenwoodRuntimeNative.setSystemProperty("ro.icu.data.path", icuData);
+
         // Enable all log levels for native logging, until we'll have a way to change the native
         // side log level at runtime.
         // Do this after loading RAVENWOOD_NATIVE_RUNTIME_NAME (which backs Os.setenv()),
@@ -300,6 +308,12 @@ public class RavenwoodRuntimeEnvironmentController {
         // Touch some references early to ensure they're <clinit>'ed
         Objects.requireNonNull(Build.TYPE);
         Objects.requireNonNull(Build.VERSION.SDK);
+
+        // Fonts can only be initialized once
+        // AOSP only: typeface is not supported on AOSP.
+        // Typeface.init();
+        // Typeface.loadPreinstalledSystemFontMap();
+        // Typeface.loadNativeSystemFonts();
 
         System.setProperty(RAVENWOOD_VERSION_JAVA_SYSPROP, "1");
         // This will let AndroidJUnit4 use the original runner.
@@ -579,7 +593,7 @@ public class RavenwoodRuntimeEnvironmentController {
      * Prints the stack trace from all threads.
      */
     private static void onTestTimedOut() {
-        sStdErr.println("********* TEST TIMED OUT ********");
+        sStdErr.println("********* SLOW TEST DETECTED ********");
         dumpStacks(null, null);
     }
 
@@ -611,7 +625,7 @@ public class RavenwoodRuntimeEnvironmentController {
                 threads.add(0, testThread);
             }
             // Put the exception thread at the top.
-            // Also inject the stacktrace from the exceptoin.
+            // Also inject the stacktrace from the exception.
             if (exceptionThread != null) {
                 threads.remove(exceptionThread);
                 threads.add(0, exceptionThread);

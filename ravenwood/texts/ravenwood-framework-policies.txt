@@ -65,3 +65,22 @@ class android.text.ClipboardManager keep  # no-pta
 # Just enough to allow ResourcesManager to run
 class android.hardware.display.DisplayManagerGlobal keep # no-pta
     method getInstance ()Landroid/hardware/display/DisplayManagerGlobal; ignore # no-pta
+
+# Bare minimum to support running ImageDecoderTest
+class android.graphics.drawable.Drawable$ConstantState keepclass # no-pta
+class android.graphics.drawable.BitmapDrawable$BitmapState keepclass # no-pta
+class android.graphics.drawable.BitmapDrawable keep # no-pta
+    method <init> (Landroid/content/res/Resources;Landroid/graphics/Bitmap;)V keep
+    method init * keep
+    method updateLocalState * keep
+    method computeBitmapSize * keep
+    method getIntrinsicWidth * keep
+    method getIntrinsicHeight * keep
+    method getBitmap * keep
+class android.graphics.drawable.Drawable keep # no-pta
+    method <init> ()V keep
+    method resolveDensity * keep
+    method updateBlendModeFilter * ignore
+
+class android.os.StrictMode keep # no-pta
+    method noteSlowCall (Ljava/lang/String;)V ignore

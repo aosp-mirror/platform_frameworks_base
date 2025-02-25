@@ -8,6 +8,11 @@ ro.soc.manufacturer=Android
 ro.soc.model=Ravenwood
 ro.debuggable=1
 
+persist.sys.locale=en-US
+ro.product.locale=en-US
+
+ro.hwui.max_texture_allocation_size=104857600
+
 # Allowlist control:
 # This set is carefully curated to help identify situations where a test may
 # accidentally depend on a default value of an obscure property whose owner hasn't
@@ -39,7 +44,7 @@ debug.=$$$w
 # For PropertyInvalidatedCache
 cache_key.=$$$w
 
-# The ones starting with "ro.product" or "ro.bild" will be copied to all "partitions" too.
+# The ones starting with "ro.product" or "ro.build" will be copied to all "partitions" too.
 # See RavenwoodSystemProperties.
 ro.product.brand=Android
 ro.product.device=Ravenwood
