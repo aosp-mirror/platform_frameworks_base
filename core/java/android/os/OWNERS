@@ -78,7 +78,7 @@ per-file Trace.java = file:/TRACE_OWNERS
 per-file PatternMatcher* = file:/PACKAGE_MANAGER_OWNERS
 
 # PermissionEnforcer
-per-file PermissionEnforcer.java = tweek@google.com, brufino@google.com
+per-file PermissionEnforcer.java = tweek@google.com
 
 # RemoteCallbackList
 per-file RemoteCallbackList.java = shayba@google.com
