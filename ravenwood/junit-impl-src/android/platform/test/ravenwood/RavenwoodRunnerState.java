@@ -81,12 +81,15 @@ public final class RavenwoodRunnerState {
         RavenwoodRuntimeEnvironmentController.exitTestClass();
     }
 
+    /** Called when a test method is about to start */
     public void enterTestMethod(Description description) {
         mMethodDescription = description;
-        RavenwoodRuntimeEnvironmentController.initForMethod();
+        RavenwoodRuntimeEnvironmentController.enterTestMethod(description);
     }
 
-    public void exitTestMethod() {
+    /** Called when a test method finishes */
+    public void exitTestMethod(Description description) {
+        RavenwoodRuntimeEnvironmentController.exitTestMethod(description);
         mMethodDescription = null;
     }
 
