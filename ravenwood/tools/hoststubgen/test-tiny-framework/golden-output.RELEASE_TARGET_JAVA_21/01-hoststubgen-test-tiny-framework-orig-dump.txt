@@ -3198,7 +3198,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkRenamedClas
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                         // com/android/hoststubgen/test/tinyframework/TinyFrameworkRenamedClassCaller
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 0, methods: 2, attributes: 2
+  interfaces: 0, fields: 0, methods: 3, attributes: 2
 Constant pool:
 {
   public com.android.hoststubgen.test.tinyframework.TinyFrameworkRenamedClassCaller();
@@ -3229,6 +3229,22 @@ Constant pool:
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
             0      12     0 value   I
+
+  public static int bar(int);
+    descriptor: (I)I
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=2, locals=1, args_size=1
+         x: iload_0
+         x: invokestatic  #x                 // Method com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed.getArray:(I)[Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed;
+         x: iconst_0
+         x: aaload
+         x: invokevirtual #x                 // Method com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed.getValue:()I
+         x: ireturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0      10     0 value   I
 }
 SourceFile: "TinyFrameworkRenamedClassCaller.java"
 RuntimeInvisibleAnnotations:
@@ -3242,7 +3258,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkToBeRenamed
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 1, methods: 2, attributes: 2
+  interfaces: 0, fields: 1, methods: 3, attributes: 2
 Constant pool:
 {
   private final int mValue;
@@ -3278,6 +3294,26 @@ Constant pool:
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
             0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed;
+
+  public static com.android.hoststubgen.test.tinyframework.TinyFrameworkToBeRenamed[] getArray(int);
+    descriptor: (I)[Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed;
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=6, locals=1, args_size=1
+         x: iconst_1
+         x: anewarray     #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed
+         x: dup
+         x: iconst_0
+         x: new           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed
+         x: dup
+        x: iload_0
+        x: invokespecial #x                 // Method "<init>":(I)V
+        x: aastore
+        x: areturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0      16     0 value   I
 }
 SourceFile: "TinyFrameworkToBeRenamed.java"
 RuntimeInvisibleAnnotations:

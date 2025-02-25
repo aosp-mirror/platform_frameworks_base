@@ -31,4 +31,8 @@ public class TinyFrameworkToBeRenamed {
     public int getValue() {
         return mValue;
     }
+
+    public static TinyFrameworkToBeRenamed[] getArray(int value) {
+        return new TinyFrameworkToBeRenamed[] { new TinyFrameworkToBeRenamed(value) };
+    }
 }
