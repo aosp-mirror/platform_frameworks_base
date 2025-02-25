@@ -20,6 +20,7 @@ import com.android.ravenwood.common.JvmWorkaround;
 import java.io.FileDescriptor;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Class to host APIs that exist in libcore, but not in standard JRE.
@@ -45,5 +46,23 @@ public class RavenwoodJdkPatch {
     public static <K, V> Map.Entry<K, V> eldest(LinkedHashMap<K, V> map) {
         final var it = map.entrySet().iterator();
         return it.hasNext() ? it.next() : null;
+    }
+
+    /**
+     * Implements Pattern.compile(String)
+     *
+     * ART always assumes UNICODE_CHARACTER_CLASS is set.
+     */
+    public static Pattern compilePattern(String regex) {
+        return Pattern.compile(regex, Pattern.UNICODE_CHARACTER_CLASS);
+    }
+
+    /**
+     * Implements Pattern.compile(String, int)
+     *
+     * ART always assumes UNICODE_CHARACTER_CLASS is set.
+     */
+    public static Pattern compilePattern(String regex, int flag) {
+        return Pattern.compile(regex, flag | Pattern.UNICODE_CHARACTER_CLASS);
     }
 }

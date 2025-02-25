@@ -230,6 +230,16 @@ public class RavenwoodContext extends RavenwoodBaseContext {
         return mAppContext;
     }
 
+    @Override
+    public boolean isRestricted() {
+        return false;
+    }
+
+    @Override
+    public boolean canLoadUnsafeResources() {
+        return true;
+    }
+
     /**
      * Wrap the given {@link Supplier} to become memoized.
      *

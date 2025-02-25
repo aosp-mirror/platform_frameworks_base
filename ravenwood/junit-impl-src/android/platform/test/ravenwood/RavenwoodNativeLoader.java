@@ -48,6 +48,7 @@ public final class RavenwoodNativeLoader {
             android.content.res.AssetManager.class,
             android.content.res.StringBlock.class,
             android.content.res.XmlBlock.class,
+            android.text.AndroidCharacter.class,
     };
 
     /**
@@ -61,15 +62,49 @@ public final class RavenwoodNativeLoader {
             android.graphics.Path.class,
             android.graphics.Color.class,
             android.graphics.ColorSpace.class,
+            android.graphics.Bitmap.class,
+            android.graphics.BitmapFactory.class,
+            android.graphics.BitmapRegionDecoder.class,
+            android.graphics.Camera.class,
+            android.graphics.Canvas.class,
+            android.graphics.CanvasProperty.class,
+            android.graphics.ColorFilter.class,
+            android.graphics.DrawFilter.class,
+            android.graphics.FontFamily.class,
+            android.graphics.Gainmap.class,
+            android.graphics.ImageDecoder.class,
+            android.graphics.MaskFilter.class,
+            android.graphics.NinePatch.class,
+            android.graphics.Paint.class,
+            android.graphics.PathEffect.class,
+            android.graphics.PathIterator.class,
+            android.graphics.PathMeasure.class,
+            android.graphics.Picture.class,
+            android.graphics.RecordingCanvas.class,
+            android.graphics.Region.class,
+            android.graphics.RenderNode.class,
+            android.graphics.Shader.class,
+            android.graphics.RenderEffect.class,
+            android.graphics.Typeface.class,
+            android.graphics.YuvImage.class,
+            android.graphics.fonts.Font.class,
+            android.graphics.fonts.FontFamily.class,
+            android.graphics.text.LineBreaker.class,
+            android.graphics.text.MeasuredText.class,
+            android.graphics.text.TextRunShaper.class,
+            android.graphics.text.GraphemeBreak.class,
+            android.util.PathParser.class,
     };
 
     /**
      * Extra strings needed to pass to register_android_graphics_classes().
      *
-     * `android.graphics.Graphics` is not actually a class, so we just hardcode it here.
+     * Several entries are not actually a class, so we just hardcode them here.
      */
     public final static String[] GRAPHICS_EXTRA_INIT_PARAMS = new String[] {
-            "android.graphics.Graphics"
+            "android.graphics.Graphics",
+            "android.graphics.ByteBufferStreamAdaptor",
+            "android.graphics.CreateJavaOutputStreamAdaptor"
     };
 
     private RavenwoodNativeLoader() {

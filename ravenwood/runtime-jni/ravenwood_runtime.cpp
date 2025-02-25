@@ -20,6 +20,7 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 #include <utils/misc.h>
+#include <unicode/utypes.h>
 
 #include <string>
 
@@ -183,6 +184,10 @@ static jint Linux_gettid(JNIEnv* env, jobject) {
     return syscall(__NR_gettid);
 }
 
+static jstring getIcuDataName(JNIEnv* env, jclass clazz) {
+    return env->NewStringUTF(U_ICUDATA_NAME);
+}
+
 // ---- Registration ----
 
 extern void register_android_system_OsConstants(JNIEnv* env);
@@ -201,6 +206,7 @@ static const JNINativeMethod sMethods[] =
     { "setenv", "(Ljava/lang/String;Ljava/lang/String;Z)V", (void*)Linux_setenv },
     { "getpid", "()I", (void*)Linux_getpid },
     { "gettid", "()I", (void*)Linux_gettid },
+    { "getIcuDataName", "()Ljava/lang/String;", (void*)getIcuDataName },
 };
 
 extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */) {
