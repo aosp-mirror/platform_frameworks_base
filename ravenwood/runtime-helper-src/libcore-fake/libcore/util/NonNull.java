@@ -35,14 +35,4 @@ import java.lang.annotation.Target;
 @Retention(SOURCE)
 @Target({FIELD, METHOD, PARAMETER, TYPE_USE})
 @libcore.api.IntraCoreApi
-public @interface NonNull {
-   /**
-    * Min Android API level (inclusive) to which this annotation is applied.
-    */
-   int from() default Integer.MIN_VALUE;
-
-   /**
-    * Max Android API level to which this annotation is applied.
-    */
-   int to() default Integer.MAX_VALUE;
-}
+public @interface NonNull {}
