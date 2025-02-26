@@ -156,8 +156,6 @@ public class AdbDebuggingManager {
     @Nullable private final File mUserKeyFile;
     @Nullable private final File mTempKeysFile;
 
-    private static final String WIFI_PERSISTENT_CONFIG_PROPERTY =
-            "persist.adb.tls_server.enable";
     private static final String WIFI_PERSISTENT_GUID =
             "persist.adb.wifi.guid";
     private static final int PAIRING_CODE_LENGTH = 6;
@@ -1093,7 +1091,7 @@ public class AdbDebuggingManager {
                     intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
                     mContext.registerReceiver(mBroadcastReceiver, intentFilter);
 
-                    SystemProperties.set(WIFI_PERSISTENT_CONFIG_PROPERTY, "1");
+                    SystemProperties.set(AdbService.WIFI_PERSISTENT_CONFIG_PROPERTY, "1");
                     mConnectionPortPoller =
                             new AdbDebuggingManager.AdbConnectionPortPoller(mPortListener);
                     mConnectionPortPoller.start();
@@ -1143,7 +1141,7 @@ public class AdbDebuggingManager {
                     intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
                     mContext.registerReceiver(mBroadcastReceiver, intentFilter);
 
-                    SystemProperties.set(WIFI_PERSISTENT_CONFIG_PROPERTY, "1");
+                    SystemProperties.set(AdbService.WIFI_PERSISTENT_CONFIG_PROPERTY, "1");
                     mConnectionPortPoller =
                             new AdbDebuggingManager.AdbConnectionPortPoller(mPortListener);
                     mConnectionPortPoller.start();
