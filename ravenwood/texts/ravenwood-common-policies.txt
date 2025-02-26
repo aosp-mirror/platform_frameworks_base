@@ -21,3 +21,7 @@ class java.io.FileDescriptor  # no-pta
     method setInt$ @com.android.ravenwood.RavenwoodJdkPatch.setInt$
 class java.util.LinkedHashMap  # no-pta
     method eldest @com.android.ravenwood.RavenwoodJdkPatch.eldest
+
+# Always set flag UNICODE_CHARACTER_CLASS when compiling regex
+class java.util.regex.Pattern keep
+    method compile @com.android.ravenwood.RavenwoodJdkPatch.compilePattern

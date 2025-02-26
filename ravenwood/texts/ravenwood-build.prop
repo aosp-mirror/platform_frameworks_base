@@ -8,7 +8,43 @@ ro.soc.manufacturer=Android
 ro.soc.model=Ravenwood
 ro.debuggable=1
 
-# The ones starting with "ro.product" or "ro.bild" will be copied to all "partitions" too.
+persist.sys.locale=en-US
+ro.product.locale=en-US
+
+ro.hwui.max_texture_allocation_size=104857600
+
+# Allowlist control:
+# This set is carefully curated to help identify situations where a test may
+# accidentally depend on a default value of an obscure property whose owner hasn't
+# decided how Ravenwood should behave.
+
+boot.=$$$r
+build.=$$$r
+product.=$$$r
+soc.=$$$r
+system.=$$$r
+wm.debug.=$$$r
+wm.extensions.=$$$r
+
+gsm.version.baseband=$$$r
+no.such.thing=$$$r
+qemu.sf.lcd_density=$$$r
+ro.bootloader=$$$r
+ro.hardware=$$$r
+ro.hw_timeout_multiplier=$$$r
+ro.odm.build.media_performance_class=$$$r
+ro.sf.lcd_density=$$$r
+ro.treble.enabled=$$$r
+ro.vndk.version=$$$r
+ro.icu.data.path=$$$r
+
+# Writable keys
+debug.=$$$w
+
+# For PropertyInvalidatedCache
+cache_key.=$$$w
+
+# The ones starting with "ro.product" or "ro.build" will be copied to all "partitions" too.
 # See RavenwoodSystemProperties.
 ro.product.brand=Android
 ro.product.device=Ravenwood

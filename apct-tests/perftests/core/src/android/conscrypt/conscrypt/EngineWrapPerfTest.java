@@ -37,10 +37,10 @@ import static org.conscrypt.TestUtils.newTextMessage;
 import static org.junit.Assert.assertEquals;
 
 import java.nio.ByteBuffer;
-import java.util.Locale;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLException;
@@ -94,12 +94,11 @@ public final class EngineWrapPerfTest {
     public Collection getParams() {
         final List<Object[]> params = new ArrayList<>();
         for (BufferType bufferType : BufferType.values()) {
-            params.add(new Object[] {new Config(bufferType, 64,
-                                    "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256")});
-            params.add(new Object[] {new Config(bufferType, 512,
-                                    "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256")});
-            params.add(new Object[] {new Config(bufferType, 4096,
-                                    "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256")});
+            for (int messageSize : ConscryptParams.messageSizes) {
+                for (String cipher : ConscryptParams.ciphers) {
+                    params.add(new Object[] {new Config(bufferType, messageSize, cipher)});
+                }
+            }
         }
         return params;
     }

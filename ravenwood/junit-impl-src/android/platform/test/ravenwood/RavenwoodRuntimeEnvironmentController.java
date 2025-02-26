@@ -43,6 +43,7 @@ import android.app.UiAutomation;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.icu.util.ULocale;
 import android.os.Binder;
 import android.os.Build;
@@ -50,6 +51,7 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.Message;
 import android.os.Process_ravenwood;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
@@ -73,6 +75,7 @@ import com.android.ravenwood.common.SneakyThrow;
 import com.android.server.LocalServices;
 import com.android.server.compat.PlatformCompat;
 
+import org.junit.AssumptionViolatedException;
 import org.junit.internal.management.ManagementFactory;
 import org.junit.runner.Description;
 
@@ -80,6 +83,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -92,6 +96,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Responsible for initializing and the environment.
@@ -106,32 +111,60 @@ public class RavenwoodRuntimeEnvironmentController {
     @SuppressWarnings("UnusedVariable")
     private static final PrintStream sStdErr = System.err;
 
-    private static final String MAIN_THREAD_NAME = "RavenwoodMain";
+    private static final String MAIN_THREAD_NAME = "Ravenwood:Main";
+    private static final String TESTS_THREAD_NAME = "Ravenwood:Test";
+
     private static final String LIBRAVENWOOD_INITIALIZER_NAME = "ravenwood_initializer";
     private static final String RAVENWOOD_NATIVE_RUNTIME_NAME = "ravenwood_runtime";
 
     private static final String ANDROID_LOG_TAGS = "ANDROID_LOG_TAGS";
     private static final String RAVENWOOD_ANDROID_LOG_TAGS = "RAVENWOOD_" + ANDROID_LOG_TAGS;
 
+    static volatile Thread sTestThread;
+    static volatile Thread sMainThread;
+
     /**
      * When enabled, attempt to dump all thread stacks just before we hit the
      * overall Tradefed timeout, to aid in debugging deadlocks.
+     *
+     * Note, this timeout will _not_ stop the test, as there isn't really a clean way to do it.
+     * It'll merely print stacktraces.
      */
     private static final boolean ENABLE_TIMEOUT_STACKS =
-            "1".equals(System.getenv("RAVENWOOD_ENABLE_TIMEOUT_STACKS"));
+            !"0".equals(System.getenv("RAVENWOOD_ENABLE_TIMEOUT_STACKS"));
 
-    private static final int TIMEOUT_MILLIS = 9_000;
+    private static final boolean TOLERATE_LOOPER_ASSERTS =
+            !"0".equals(System.getenv("RAVENWOOD_TOLERATE_LOOPER_ASSERTS"));
+
+    static final int DEFAULT_TIMEOUT_SECONDS = 10;
+    private static final int TIMEOUT_MILLIS = getTimeoutSeconds() * 1000;
+
+    static int getTimeoutSeconds() {
+        var e = System.getenv("RAVENWOOD_TIMEOUT_SECONDS");
+        if (e == null || e.isEmpty()) {
+            return DEFAULT_TIMEOUT_SECONDS;
+        }
+        return Integer.parseInt(e);
+    }
+
 
     private static final ScheduledExecutorService sTimeoutExecutor =
-            Executors.newScheduledThreadPool(1);
+            Executors.newScheduledThreadPool(1, (Runnable r) -> {
+                Thread t = Executors.defaultThreadFactory().newThread(r);
+                t.setName("Ravenwood:TimeoutMonitor");
+                t.setDaemon(true);
+                return t;
+            });
 
-    private static ScheduledFuture<?> sPendingTimeout;
+    private static volatile ScheduledFuture<?> sPendingTimeout;
 
     /**
      * When enabled, attempt to detect uncaught exceptions from background threads.
      */
     private static final boolean ENABLE_UNCAUGHT_EXCEPTION_DETECTION =
-            "1".equals(System.getenv("RAVENWOOD_ENABLE_UNCAUGHT_EXCEPTION_DETECTION"));
+            !"0".equals(System.getenv("RAVENWOOD_ENABLE_UNCAUGHT_EXCEPTION_DETECTION"));
+
+    private static final boolean DIE_ON_UNCAUGHT_EXCEPTION = true;
 
     /**
      * When set, an unhandled exception was discovered (typically on a background thread), and we
@@ -139,12 +172,6 @@ public class RavenwoodRuntimeEnvironmentController {
      */
     private static final AtomicReference<Throwable> sPendingUncaughtException =
             new AtomicReference<>();
-
-    private static final Thread.UncaughtExceptionHandler sUncaughtExceptionHandler =
-            (thread, throwable) -> {
-                // Remember the first exception we discover
-                sPendingUncaughtException.compareAndSet(null, throwable);
-            };
 
     // TODO: expose packCallingIdentity function in libbinder and use it directly
     // See: packCallingIdentity in frameworks/native/libs/binder/IPCThreadState.cpp
@@ -186,6 +213,8 @@ public class RavenwoodRuntimeEnvironmentController {
      * Initialize the global environment.
      */
     public static void globalInitOnce() {
+        sTestThread = Thread.currentThread();
+        Thread.currentThread().setName(TESTS_THREAD_NAME);
         synchronized (sInitializationLock) {
             if (!sInitialized) {
                 // globalInitOnce() is called from class initializer, which cause
@@ -193,6 +222,7 @@ public class RavenwoodRuntimeEnvironmentController {
                 sInitialized = true;
 
                 // This is the first call.
+                final long start = System.currentTimeMillis();
                 try {
                     globalInitInner();
                 } catch (Throwable th) {
@@ -201,6 +231,9 @@ public class RavenwoodRuntimeEnvironmentController {
                     sExceptionFromGlobalInit = th;
                     SneakyThrow.sneakyThrow(th);
                 }
+                final long end = System.currentTimeMillis();
+                // TODO Show user/system time too
+                Log.e(TAG, "globalInit() took " + (end - start) + "ms");
             } else {
                 // Subsequent calls. If the first call threw, just throw the same error, to prevent
                 // the test from running.
@@ -219,7 +252,8 @@ public class RavenwoodRuntimeEnvironmentController {
         RavenwoodCommonUtils.log(TAG, "globalInitInner()");
 
         if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
-            Thread.setDefaultUncaughtExceptionHandler(sUncaughtExceptionHandler);
+            Thread.setDefaultUncaughtExceptionHandler(
+                    RavenwoodRuntimeEnvironmentController::reportUncaughtExceptions);
         }
 
         // Some process-wide initialization:
@@ -246,6 +280,13 @@ public class RavenwoodRuntimeEnvironmentController {
         // Do the basic set up for the android sysprops.
         RavenwoodSystemProperties.initialize();
 
+        // Set ICU data file
+        String icuData = RavenwoodCommonUtils.getRavenwoodRuntimePath()
+                + "ravenwood-data/"
+                + RavenwoodRuntimeNative.getIcuDataName()
+                + ".dat";
+        RavenwoodRuntimeNative.setSystemProperty("ro.icu.data.path", icuData);
+
         // Enable all log levels for native logging, until we'll have a way to change the native
         // side log level at runtime.
         // Do this after loading RAVENWOOD_NATIVE_RUNTIME_NAME (which backs Os.setenv()),
@@ -267,6 +308,12 @@ public class RavenwoodRuntimeEnvironmentController {
         // Touch some references early to ensure they're <clinit>'ed
         Objects.requireNonNull(Build.TYPE);
         Objects.requireNonNull(Build.VERSION.SDK);
+
+        // Fonts can only be initialized once
+        // AOSP only: typeface is not supported on AOSP.
+        // Typeface.init();
+        // Typeface.loadPreinstalledSystemFontMap();
+        // Typeface.loadNativeSystemFonts();
 
         System.setProperty(RAVENWOOD_VERSION_JAVA_SYSPROP, "1");
         // This will let AndroidJUnit4 use the original runner.
@@ -291,6 +338,7 @@ public class RavenwoodRuntimeEnvironmentController {
         ActivityManager.init$ravenwood(SYSTEM.getIdentifier());
 
         final var main = new HandlerThread(MAIN_THREAD_NAME);
+        sMainThread = main;
         main.start();
         Looper.setMainLooperForTest(main.getLooper());
 
@@ -337,9 +385,20 @@ public class RavenwoodRuntimeEnvironmentController {
         var systemServerContext =
                 new RavenwoodContext(ANDROID_PACKAGE_NAME, main, systemResourcesLoader);
 
-        sInstrumentation = new Instrumentation();
-        sInstrumentation.basicInit(instContext, targetContext, null);
-        InstrumentationRegistry.registerInstance(sInstrumentation, Bundle.EMPTY);
+        var instArgs = Bundle.EMPTY;
+        RavenwoodUtils.runOnMainThreadSync(() -> {
+            try {
+                // TODO We should get the instrumentation class name from the build file or
+                // somewhere.
+                var InstClass = Class.forName("android.app.Instrumentation");
+                sInstrumentation = (Instrumentation) InstClass.getConstructor().newInstance();
+                sInstrumentation.basicInit(instContext, targetContext, null);
+                sInstrumentation.onCreate(instArgs);
+            } catch (Exception e) {
+                SneakyThrow.sneakyThrow(e);
+            }
+        });
+        InstrumentationRegistry.registerInstance(sInstrumentation, instArgs);
 
         RavenwoodSystemServer.init(systemServerContext);
 
@@ -386,22 +445,46 @@ public class RavenwoodRuntimeEnvironmentController {
 
         SystemProperties.clearChangeCallbacksForTest();
 
-        if (ENABLE_TIMEOUT_STACKS) {
-            sPendingTimeout = sTimeoutExecutor.schedule(
-                    RavenwoodRuntimeEnvironmentController::dumpStacks,
-                    TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-        }
-        if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
-            maybeThrowPendingUncaughtException(false);
-        }
+        maybeThrowPendingUncaughtException();
     }
 
     /**
-     * Partially reset and initialize before each test method invocation
+     * Called when a test method is about to be started.
      */
-    public static void initForMethod() {
+    public static void enterTestMethod(Description description) {
         // TODO(b/375272444): this is a hacky workaround to ensure binder identity
         Binder.restoreCallingIdentity(sCallingIdentity);
+
+        scheduleTimeout();
+    }
+
+    /**
+     * Called when a test method finished.
+     */
+    public static void exitTestMethod(Description description) {
+        cancelTimeout();
+        maybeThrowPendingUncaughtException();
+    }
+
+    private static void scheduleTimeout() {
+        if (!ENABLE_TIMEOUT_STACKS) {
+            return;
+        }
+        cancelTimeout();
+
+        sPendingTimeout = sTimeoutExecutor.schedule(
+                RavenwoodRuntimeEnvironmentController::onTestTimedOut,
+                TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+    }
+
+    private static void cancelTimeout() {
+        if (!ENABLE_TIMEOUT_STACKS) {
+            return;
+        }
+        var pt = sPendingTimeout;
+        if (pt != null) {
+            pt.cancel(false);
+        }
     }
 
     private static void initializeCompatIds() {
@@ -460,15 +543,36 @@ public class RavenwoodRuntimeEnvironmentController {
     }
 
     /**
+     * Return if an exception is benign and okay to continue running the main looper even
+     * if we detect it.
+     */
+    private static boolean isThrowableBenign(Throwable th) {
+        return th instanceof AssertionError || th instanceof AssumptionViolatedException;
+    }
+
+    static void dispatchMessage(Message msg) {
+        try {
+            msg.getTarget().dispatchMessage(msg);
+        } catch (Throwable th) {
+            var desc = String.format("Detected %s on looper thread %s", th.getClass().getName(),
+                    Thread.currentThread());
+            sStdErr.println(desc);
+            if (TOLERATE_LOOPER_ASSERTS && isThrowableBenign(th)) {
+                sStdErr.printf("*** Continuing the test because it's %s ***\n",
+                        th.getClass().getSimpleName());
+                var e = new Exception(desc, th);
+                sPendingUncaughtException.compareAndSet(null, e);
+                return;
+            }
+            throw th;
+        }
+    }
+
+    /**
      * A callback when a test class finishes its execution, mostly only for debugging.
      */
     public static void exitTestClass() {
-        if (ENABLE_TIMEOUT_STACKS) {
-            sPendingTimeout.cancel(false);
-        }
-        if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
-            maybeThrowPendingUncaughtException(true);
-        }
+        maybeThrowPendingUncaughtException();
     }
 
     public static void logTestRunner(String label, Description description) {
@@ -478,35 +582,70 @@ public class RavenwoodRuntimeEnvironmentController {
                 + "(" + description.getTestClass().getName() + ")");
     }
 
-    private static void dumpStacks() {
-        final PrintStream out = System.err;
-        out.println("-----BEGIN ALL THREAD STACKS-----");
-        final Map<Thread, StackTraceElement[]> stacks = Thread.getAllStackTraces();
-        for (Map.Entry<Thread, StackTraceElement[]> stack : stacks.entrySet()) {
-            out.println();
-            Thread t = stack.getKey();
-            out.println(t.toString() + " ID=" + t.getId());
-            for (StackTraceElement e : stack.getValue()) {
-                out.println("\tat " + e);
-            }
+    private static void maybeThrowPendingUncaughtException() {
+        final Throwable pending = sPendingUncaughtException.getAndSet(null);
+        if (pending != null) {
+            throw new IllegalStateException("Found an uncaught exception", pending);
         }
-        out.println("-----END ALL THREAD STACKS-----");
     }
 
     /**
-     * If there's a pending uncaught exception, consume and throw it now. Typically used to
-     * report an exception on a background thread as a failure for the currently running test.
+     * Prints the stack trace from all threads.
      */
-    private static void maybeThrowPendingUncaughtException(boolean duringReset) {
-        final Throwable pending = sPendingUncaughtException.getAndSet(null);
-        if (pending != null) {
-            if (duringReset) {
-                throw new IllegalStateException(
-                        "Found an uncaught exception during this test", pending);
-            } else {
-                throw new IllegalStateException(
-                        "Found an uncaught exception before this test started", pending);
+    private static void onTestTimedOut() {
+        sStdErr.println("********* SLOW TEST DETECTED ********");
+        dumpStacks(null, null);
+    }
+
+    private static final Object sDumpStackLock = new Object();
+
+    /**
+     * Prints the stack trace from all threads.
+     */
+    private static void dumpStacks(
+            @Nullable Thread exceptionThread, @Nullable Throwable throwable) {
+        cancelTimeout();
+        synchronized (sDumpStackLock) {
+            final PrintStream out = sStdErr;
+            out.println("-----BEGIN ALL THREAD STACKS-----");
+
+            var stacks = Thread.getAllStackTraces();
+            var threads = stacks.keySet().stream().sorted(
+                    Comparator.comparingLong(Thread::getId)).collect(Collectors.toList());
+
+            // Put the test and the main thread at the top.
+            var testThread = sTestThread;
+            var mainThread = sMainThread;
+            if (mainThread != null) {
+                threads.remove(mainThread);
+                threads.add(0, mainThread);
             }
+            if (testThread != null) {
+                threads.remove(testThread);
+                threads.add(0, testThread);
+            }
+            // Put the exception thread at the top.
+            // Also inject the stacktrace from the exception.
+            if (exceptionThread != null) {
+                threads.remove(exceptionThread);
+                threads.add(0, exceptionThread);
+                stacks.put(exceptionThread, throwable.getStackTrace());
+            }
+            for (var th : threads) {
+                out.println();
+
+                out.print("Thread");
+                if (th == exceptionThread) {
+                    out.print(" [** EXCEPTION THREAD **]");
+                }
+                out.print(": " + th.getName() + " / " + th);
+                out.println();
+
+                for (StackTraceElement e :  stacks.get(th)) {
+                    out.println("\tat " + e);
+                }
+            }
+            out.println("-----END ALL THREAD STACKS-----");
         }
     }
 
@@ -532,13 +671,17 @@ public class RavenwoodRuntimeEnvironmentController {
                 () -> Class.forName("org.mockito.Matchers"));
     }
 
-    // TODO: use the real UiAutomation class instead of a mock
-    private static UiAutomation createMockUiAutomation() {
-        sAdoptedPermissions = Collections.emptySet();
-        var mock = mock(UiAutomation.class, inv -> {
+    static <T> T makeDefaultThrowMock(Class<T> clazz) {
+        return mock(clazz, inv -> {
             HostTestUtils.onThrowMethodCalled();
             return null;
         });
+    }
+
+    // TODO: use the real UiAutomation class instead of a mock
+    private static UiAutomation createMockUiAutomation() {
+        sAdoptedPermissions = Collections.emptySet();
+        var mock = makeDefaultThrowMock(UiAutomation.class);
         doAnswer(inv -> {
             sAdoptedPermissions = UiAutomation.ALL_PERMISSIONS;
             return null;
@@ -573,6 +716,23 @@ public class RavenwoodRuntimeEnvironmentController {
         }
     }
 
+    private static void reportUncaughtExceptions(Thread th, Throwable e) {
+        sStdErr.printf("Uncaught exception detected: %s: %s\n",
+                th, RavenwoodCommonUtils.getStackTraceString(e));
+
+        doBugreport(th, e, DIE_ON_UNCAUGHT_EXCEPTION);
+    }
+
+    private static void doBugreport(
+            @Nullable Thread exceptionThread, @Nullable Throwable throwable,
+            boolean killSelf) {
+        // TODO: Print more information
+        dumpStacks(exceptionThread, throwable);
+        if (killSelf) {
+            System.exit(13);
+        }
+    }
+
     private static void dumpJavaProperties() {
         Log.v(TAG, "JVM properties:");
         dumpMap(System.getProperties());
@@ -588,7 +748,6 @@ public class RavenwoodRuntimeEnvironmentController {
             Log.v(TAG, "  " + key + "=" + map.get(key));
         }
     }
-
     private static void dumpOtherInfo() {
         Log.v(TAG, "Other key information:");
         var jloc = Locale.getDefault();
