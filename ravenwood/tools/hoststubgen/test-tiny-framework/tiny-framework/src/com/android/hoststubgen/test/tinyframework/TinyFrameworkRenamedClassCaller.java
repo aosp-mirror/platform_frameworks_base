@@ -25,4 +25,9 @@ public class TinyFrameworkRenamedClassCaller {
         // so this code should work as-is.
         return new TinyFrameworkToBeRenamed(value).getValue();
     }
+
+    /** Calls the class that'll be renamed. */
+    public static int bar(int value) {
+        return TinyFrameworkToBeRenamed.getArray(value)[0].getValue();
+    }
 }

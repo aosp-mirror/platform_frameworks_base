@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -44,6 +45,9 @@ public class RavenwoodSystemProperties {
 
     /** The default values. */
     static final Map<String, String> sDefaultValues = new HashMap<>();
+
+    static final Set<String> sReadableKeys = new HashSet<>();
+    static final Set<String> sWritableKeys = new HashSet<>();
 
     private static final String[] PARTITIONS = {
             "bootimage",
@@ -88,9 +92,24 @@ public class RavenwoodSystemProperties {
         ravenwoodProps.forEach((key, origValue) -> {
             final String value;
 
-            // If a value starts with "$$$", then this is a reference to the device-side value.
             if (origValue.startsWith("$$$")) {
+                // If a value starts with "$$$", then:
+                // - If it's "$$$r", the key is allowed to read.
+                // - If it's "$$$w", the key is allowed to write.
+                // - Otherwise, it's a reference to the device-side value.
+                // In case of $$$r and $$$w, if the key ends with a '.', then it'll be treaded
+                // as a prefix match.
                 var deviceKey = origValue.substring(3);
+                if ("r".equals(deviceKey)) {
+                    sReadableKeys.add(key);
+                    Log.v(TAG, key + " (readable)");
+                    return;
+                } else if ("w".equals(deviceKey)) {
+                    sWritableKeys.add(key);
+                    Log.v(TAG, key + " (writable)");
+                    return;
+                }
+
                 var deviceValue = deviceProps.get(deviceKey);
                 if (deviceValue == null) {
                     throw new RuntimeException("Failed to initialize system properties. Key '"
@@ -131,50 +150,38 @@ public class RavenwoodSystemProperties {
         sDefaultValues.forEach(RavenwoodRuntimeNative::setSystemProperty);
     }
 
+    private static boolean checkAllowedInner(String key, Set<String> allowed) {
+        if (allowed.contains(key)) {
+            return true;
+        }
+
+        // Also search for a prefix match.
+        for (var k : allowed) {
+            if (k.endsWith(".") && key.startsWith(k)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean checkAllowed(String key, Set<String> allowed) {
+        return checkAllowedInner(key, allowed) || checkAllowedInner(getKeyRoot(key), allowed);
+    }
+
     private static boolean isKeyReadable(String key) {
-        // All writable keys are also readable
-        if (isKeyWritable(key)) return true;
-
-        final String root = getKeyRoot(key);
-
-        // This set is carefully curated to help identify situations where a test may
-        // accidentally depend on a default value of an obscure property whose owner hasn't
-        // decided how Ravenwood should behave.
-        if (root.startsWith("boot.")) return true;
-        if (root.startsWith("build.")) return true;
-        if (root.startsWith("product.")) return true;
-        if (root.startsWith("soc.")) return true;
-        if (root.startsWith("system.")) return true;
-
         // All core values should be readable
-        if (sDefaultValues.containsKey(key)) return true;
-
-        // Hardcoded allowlist
-        return switch (key) {
-            case "gsm.version.baseband",
-                 "no.such.thing",
-                 "qemu.sf.lcd_density",
-                 "ro.bootloader",
-                 "ro.hardware",
-                 "ro.hw_timeout_multiplier",
-                 "ro.odm.build.media_performance_class",
-                 "ro.sf.lcd_density",
-                 "ro.treble.enabled",
-                 "ro.vndk.version",
-                 "ro.icu.data.path" -> true;
-            default -> false;
-        };
+        if (sDefaultValues.containsKey(key)) {
+            return true;
+        }
+        if (checkAllowed(key, sReadableKeys)) {
+            return true;
+        }
+        // All writable keys are also readable
+        return isKeyWritable(key);
     }
 
     private static boolean isKeyWritable(String key) {
-        final String root = getKeyRoot(key);
-
-        if (root.startsWith("debug.")) return true;
-
-        // For PropertyInvalidatedCache
-        if (root.startsWith("cache_key.")) return true;
-
-        return false;
+        return checkAllowed(key, sWritableKeys);
     }
 
     static boolean isKeyAccessible(String key, boolean write) {
