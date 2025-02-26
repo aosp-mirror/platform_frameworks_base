@@ -17,7 +17,10 @@ package com.android.hoststubgen.visitors
 
 import com.android.hoststubgen.asm.CLASS_INITIALIZER_DESC
 import com.android.hoststubgen.asm.CLASS_INITIALIZER_NAME
+import com.android.hoststubgen.asm.CTOR_NAME
 import com.android.hoststubgen.asm.ClassNodes
+import com.android.hoststubgen.asm.adjustStackForConstructorRedirection
+import com.android.hoststubgen.asm.changeMethodDescriptorReturnType
 import com.android.hoststubgen.asm.prependArgTypeToMethodDescriptor
 import com.android.hoststubgen.asm.writeByteCodeToPushArguments
 import com.android.hoststubgen.asm.writeByteCodeToReturn
@@ -33,6 +36,7 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Opcodes.INVOKEINTERFACE
+import org.objectweb.asm.Opcodes.INVOKESPECIAL
 import org.objectweb.asm.Opcodes.INVOKESTATIC
 import org.objectweb.asm.Opcodes.INVOKEVIRTUAL
 import org.objectweb.asm.Type
@@ -376,53 +380,90 @@ class ImplGeneratingAdapter(
         val callerMethodName: String,
         next: MethodVisitor?,
     ) : MethodVisitor(OPCODE_VERSION, next) {
-        override fun visitMethodInsn(
+
+        private fun doReplace(
             opcode: Int,
-            owner: String?,
-            name: String?,
-            descriptor: String?,
-            isInterface: Boolean,
-        ) {
+            owner: String,
+            name: String,
+            descriptor: String,
+        ): Boolean {
             when (opcode) {
                 INVOKESTATIC, INVOKEVIRTUAL, INVOKEINTERFACE -> {}
-                else -> {
-                    // Don't touch other opcodes.
-                    super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
-                    return
-                }
+                // We only support INVOKESPECIAL when replacing constructors.
+                INVOKESPECIAL -> if (name != CTOR_NAME) return false
+                // Don't touch other opcodes.
+                else -> return false
             }
+
             val to = filter.getMethodCallReplaceTo(
-                currentClassName, callerMethodName, owner!!, name!!, descriptor!!
+                currentClassName, callerMethodName, owner, name, descriptor
             )
 
             if (to == null
                 // Don't replace if the target is the callsite.
                 || (to.className == currentClassName && to.methodName == callerMethodName)
             ) {
-                super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
-                return
+                return false
             }
 
-            // Replace the method call with a (static) call to the target method.
-            // If it's a non-static call, the target method's first argument will receive "this".
-            // (Because of that, we don't need to manipulate the stack. Just replace the
-            // method call.)
+            if (opcode != INVOKESPECIAL) {
+                // It's either a static method call or virtual method call.
+                // Either way, we don't manipulate the stack and send the original arguments
+                // as is to the target method.
+                //
+                // If the call is a virtual call (INVOKEVIRTUAL or INVOKEINTERFACE), then
+                // the first argument in the stack is the "this" object, so the target
+                // method must have an extra argument as the first argument to receive it.
+                // We update the method descriptor with prependArgTypeToMethodDescriptor()
+                // to absorb this difference.
 
-            val toDesc = if (opcode == INVOKESTATIC) {
-                // Static call to static call, no need to change the desc.
-                descriptor
+                val toDesc = if (opcode == INVOKESTATIC) {
+                    descriptor
+                } else {
+                    prependArgTypeToMethodDescriptor(descriptor, owner)
+                }
+
+                mv.visitMethodInsn(
+                    INVOKESTATIC,
+                    to.className,
+                    to.methodName,
+                    toDesc,
+                    false
+                )
             } else {
-                // Need to prepend the "this" type to the descriptor.
-                prependArgTypeToMethodDescriptor(descriptor, owner)
+                // Because an object initializer does not return a value, the newly created
+                // but uninitialized object will be dup-ed at the bottom of the stack.
+                // We first call the target method to consume the constructor arguments at the top.
+
+                val toDesc = changeMethodDescriptorReturnType(descriptor, owner)
+
+                // Before stack: { uninitialized, uninitialized, args... }
+                mv.visitMethodInsn(
+                    INVOKESTATIC,
+                    to.className,
+                    to.methodName,
+                    toDesc,
+                    false
+                )
+                // After stack: { uninitialized, uninitialized, obj }
+
+                // Next we pop the 2 uninitialized instances out of the stack.
+                adjustStackForConstructorRedirection(mv)
             }
 
-            mv.visitMethodInsn(
-                INVOKESTATIC,
-                to.className,
-                to.methodName,
-                toDesc,
-                false
-            )
+            return true
+        }
+
+        override fun visitMethodInsn(
+            opcode: Int,
+            owner: String,
+            name: String,
+            descriptor: String,
+            isInterface: Boolean,
+        ) {
+            if (!doReplace(opcode, owner, name, descriptor)) {
+                super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
+            }
         }
     }
 }
