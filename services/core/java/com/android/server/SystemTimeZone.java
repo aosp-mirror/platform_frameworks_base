@@ -133,6 +133,7 @@ public final class SystemTimeZone {
         boolean timeZoneChanged = false;
         synchronized (SystemTimeZone.class) {
             String currentTimeZoneId = getTimeZoneId();
+            @TimeZoneConfidence int currentConfidence = getTimeZoneConfidence();
             if (currentTimeZoneId == null || !currentTimeZoneId.equals(timeZoneId)) {
                 SystemProperties.set(TIME_ZONE_SYSTEM_PROPERTY, timeZoneId);
                 if (DEBUG) {
@@ -145,6 +146,8 @@ public final class SystemTimeZone {
                 String logMsg = "Time zone or confidence set: "
                         + " (new) timeZoneId=" + timeZoneId
                         + ", (new) confidence=" + confidence
+                        + ", (old) timeZoneId=" + currentTimeZoneId
+                        + ", (old) confidence=" + currentConfidence
                         + ", logInfo=" + logInfo;
                 addDebugLogEntry(logMsg);
             }
