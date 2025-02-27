@@ -1,1 +1,2 @@
 file:platform/frameworks/base:main:/core/java/android/security/advancedprotection/OWNERS
+per-file features/UsbDataAdvancedProtectionHook.java = georgechan@google.com, maunik@google.com
