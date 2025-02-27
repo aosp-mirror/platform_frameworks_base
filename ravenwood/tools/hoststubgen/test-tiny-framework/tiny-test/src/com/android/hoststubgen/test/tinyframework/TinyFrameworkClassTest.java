@@ -323,4 +323,10 @@ public class TinyFrameworkClassTest {
         assertThat(TinyFrameworkMethodCallReplace.staticMethodCallReplaceTester())
                 .isEqualTo(3);
     }
+
+    @Test
+    public void testConstructorCallReplace() throws Exception {
+        assertThat(TinyFrameworkMethodCallReplace.constructorReplaceTester(5).i)
+                .isEqualTo(6);
+    }
 }
