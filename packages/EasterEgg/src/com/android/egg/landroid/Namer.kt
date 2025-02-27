@@ -121,6 +121,6 @@ class Namer(resources: Resources) {
                     else -> "unknown template tag: ${it.groupValues[0]}"
                 }
             }
-            .toUpperCase()
+            .uppercase()
     }
 }
