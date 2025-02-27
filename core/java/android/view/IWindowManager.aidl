@@ -765,7 +765,7 @@ interface IWindowManager
      * container.
      */
     @EnforcePermission("MANAGE_APP_TOKENS")
-    void updateDisplayWindowRequestedVisibleTypes(int displayId, int requestedVisibleTypes);
+    void updateDisplayWindowRequestedVisibleTypes(int displayId, int visibleTypes, int mask);
 
     /**
      * Called to get the expected window insets.
