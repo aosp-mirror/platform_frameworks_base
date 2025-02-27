@@ -68,6 +68,10 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace 
 class java.lang.Thread keep
   method start ()V @com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace$ReplaceTo.startThread
 
+# Used to test constructor replacement.
+class com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace$ConstructorTester keepclass
+  method <init> (I)V @com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace$ReplaceTo.newConstructorTester
+
 
 # "rename" takes a type internal name, so '/'s is used as a separator.
 # The leading / in the prefix is not needed (it'll be stripped), but it's added to make
