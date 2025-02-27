@@ -622,6 +622,12 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH = (1 << 14); // 0x4000
 
     /**
+     * Transition flag: Indicates that the task shouldn't move to front when launching the activity.
+     * @hide
+     */
+    int TRANSIT_FLAG_AVOID_MOVE_TO_FRONT = (1 << 16); // 0x10000
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = { "TRANSIT_FLAG_" }, value = {
@@ -640,6 +646,7 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_KEYGUARD_OCCLUDING,
             TRANSIT_FLAG_KEYGUARD_UNOCCLUDING,
             TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH,
+            TRANSIT_FLAG_AVOID_MOVE_TO_FRONT,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionFlags {}
