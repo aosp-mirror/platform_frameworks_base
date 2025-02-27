@@ -41,8 +41,21 @@ public class TinyFrameworkMethodCallReplace {
         return originalAdd(1, 2);
     }
 
+    public static ConstructorTester constructorReplaceTester(int i) {
+        // This object construction will be replaced with ReplaceTo.newConstructorTester().
+        return new ConstructorTester(i);
+    }
+
     private static int originalAdd(int a, int b) {
         return a + b - 1; // Original is broken.
+    }
+
+    public static class ConstructorTester {
+        public int i;
+
+        public ConstructorTester(int i) {
+            this.i = i;
+        }
     }
 
     public static class ReplaceTo {
@@ -53,6 +66,10 @@ public class TinyFrameworkMethodCallReplace {
 
         public static int add(int a, int b) {
             return a + b;
+        }
+
+        public static ConstructorTester newConstructorTester(int i) {
+            return new ConstructorTester(i + 1);
         }
     }
 }
